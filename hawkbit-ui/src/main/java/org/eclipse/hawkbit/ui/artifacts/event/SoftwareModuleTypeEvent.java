@@ -19,7 +19,7 @@ public class SoftwareModuleTypeEvent {
      * Software module type events in the Upload UI.
      */
     public enum SoftwareModuleTypeEnum {
-        ADD_SOFTWARE_MODULE_TYPE, DELETE_SOFTWARE_MODULE_TYPE, UPDATE_SOFTWARE_MODULE_TYPE
+        ADD_SOFTWARE_MODULE_TYPE, UPDATE_SOFTWARE_MODULE_TYPE
     }
 
     private SoftwareModuleType softwareModuleType;

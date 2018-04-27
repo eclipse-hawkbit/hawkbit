@@ -30,7 +30,6 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -79,11 +78,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
 
     private Label windowCaption;
 
-    private Button minimizeButton;
-
     private Button closeButton;
-
-    private Button resizeButton;
 
     UploadProgressInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final VaadinMessageSource i18n) {
@@ -194,7 +189,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         final HorizontalLayout captionLayout = new HorizontalLayout();
         captionLayout.setSizeFull();
         captionLayout.setHeight("36px");
-        captionLayout.addComponents(windowCaption, minimizeButton, resizeButton, closeButton);
+        captionLayout.addComponents(windowCaption, closeButton);
         captionLayout.setExpandRatio(windowCaption, 1.0F);
 
         captionLayout.addStyleName("v-window-header");
@@ -202,10 +197,8 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     private void createStatusPopupHeaderComponents() {
-        minimizeButton = getMinimizeButton();
         windowCaption = new Label("Upload status");
         closeButton = getCloseButton();
-        resizeButton = getResizeButton();
     }
 
     private void setColumnWidth() {
@@ -216,17 +209,9 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidth(200);
     }
 
-    private void resetColumnWidth() {
-        grid.getColumn(COLUMN_STATUS).setWidthUndefined();
-        grid.getColumn(COLUMN_PROGRESS).setWidthUndefined();
-        grid.getColumn(COLUMN_FILE_NAME).setWidthUndefined();
-        grid.getColumn(COLUMN_REASON).setWidthUndefined();
-        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidthUndefined();
-    }
-
     private static class StatusRenderer extends HtmlRenderer {
 
-        private static final long serialVersionUID = -5365795450234970943L;
+        private static final long serialVersionUID = 1L;
 
         @Override
         public JsonValue encode(final String value) {
@@ -308,44 +293,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         mainLayout.setHeight(510, Unit.PIXELS);
     }
 
-    private Button getMinimizeButton() {
-        final Button minimizeBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
-                SPUIButtonStyleSmallNoBorder.class);
-        minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        minimizeBtn.addClickListener(event -> minimizeWindow());
-        minimizeBtn.setEnabled(true);
-        return minimizeBtn;
-    }
-
-    private Button getResizeButton() {
-        final Button resizeBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID, "", "", "", true, FontAwesome.EXPAND,
-                SPUIButtonStyleSmallNoBorder.class);
-        resizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        resizeBtn.addClickListener(this::resizeWindow);
-        return resizeBtn;
-    }
-
-    private void resizeWindow(final ClickEvent event) {
-        if (FontAwesome.EXPAND.equals(event.getButton().getIcon())) {
-            event.getButton().setIcon(FontAwesome.COMPRESS);
-            setWindowMode(WindowMode.MAXIMIZED);
-            resetColumnWidth();
-            grid.getColumn(COLUMN_STATUS).setExpandRatio(0);
-            grid.getColumn(COLUMN_PROGRESS).setExpandRatio(1);
-            grid.getColumn(COLUMN_FILE_NAME).setExpandRatio(2);
-            grid.getColumn(COLUMN_REASON).setExpandRatio(3);
-            grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setExpandRatio(4);
-            mainLayout.setSizeFull();
-        } else {
-            event.getButton().setIcon(FontAwesome.EXPAND);
-            setWindowMode(WindowMode.NORMAL);
-            setColumnWidth();
-            setPopupSizeInMinMode();
-        }
-    }
-
     private Button getCloseButton() {
         final Button closeBtn = SPUIComponentProvider.getButton(
                 UIComponentIdProvider.UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID, "", "", "", true, FontAwesome.TIMES,
@@ -368,7 +315,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         setWindowMode(WindowMode.NORMAL);
         setColumnWidth();
         setPopupSizeInMinMode();
-        resizeButton.setIcon(FontAwesome.EXPAND);
         this.close();
     }
 

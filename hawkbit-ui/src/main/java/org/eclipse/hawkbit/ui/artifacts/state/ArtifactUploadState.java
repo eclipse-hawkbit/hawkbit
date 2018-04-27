@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FileUtils;
@@ -26,11 +25,12 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 
@@ -51,8 +51,6 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     private transient Optional<Long> selectedBaseSwModuleId = Optional.empty();
 
-    private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
-
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
     private boolean swTypeFilterClosed;
@@ -71,11 +69,11 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
      * Map that holds all files that were selected for upload. They remain in
      * the list even if upload fails, succeeds or is aborted by the user.
      */
-    private final Map<FileUploadId, FileUploadProgress> overallFilesInUploadProcess = new ConcurrentHashMap<>();
+    private final Map<FileUploadId, FileUploadProgress> overallFilesInUploadProcess = Maps.newHashMap();
 
-    private final Set<FileUploadId> succeededUploads = ConcurrentHashMap.newKeySet();
+    private final Set<FileUploadId> succeededUploads = Sets.newHashSet();
 
-    private final Set<FileUploadId> failedUploads = ConcurrentHashMap.newKeySet();
+    private final Set<FileUploadId> failedUploads = Sets.newHashSet();
 
     private final ReentrantReadWriteLock fileStateRWLock = new ReentrantReadWriteLock();
 
@@ -103,27 +101,6 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     public Optional<Long> getSelectedBaseSwModuleId() {
         return selectedBaseSwModuleId;
-    }
-
-    public void clearBaseSwModuleList() {
-        baseSwModuleList.clear();
-    }
-
-    public String getKeyForSoftwareModule(final SoftwareModule softwareModule) {
-        return HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion());
-    }
-
-
-    public void addBaseSoftwareModule(final SoftwareModule softwareModule) {
-        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-                softwareModule.getVersion());
-        if (!baseSwModuleList.keySet().contains(currentBaseSoftwareModuleKey)) {
-            baseSwModuleList.put(currentBaseSoftwareModuleKey, softwareModule);
-        }
-    }
-
-    public Map<String, SoftwareModule> getBaseSwModuleList() {
-        return baseSwModuleList;
     }
 
     public Set<Long> getSelectedSoftwareModules() {
@@ -305,7 +282,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return buffer.toString();
     }
 
-    public void clearFileStates() {
+    void clearFileStates() {
         fileStateRWLock.writeLock().lock();
         failedUploads.clear();
         succeededUploads.clear();
@@ -324,9 +301,16 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
                 FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
             }
         }
-        clearBaseSwModuleList();
-
         clearFileStates();
+    }
+
+    public boolean isUploadinProgressForSelectedSoftwareModul(final Long softwareModuleId) {
+        for (final FileUploadId fileUploadId : getAllFileUploadIdsFromOverallUploadProcessList()) {
+            if (fileUploadId.getSoftwareModule().getId().equals(softwareModuleId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

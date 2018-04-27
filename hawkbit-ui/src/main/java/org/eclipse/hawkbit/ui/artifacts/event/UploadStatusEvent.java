@@ -53,10 +53,6 @@ public class UploadStatusEvent {
 
     private FileUploadProgress fileUploadProgress;
 
-    public UploadStatusEvent(final UploadStatusEventType eventType) {
-        this.uploadStatusEventType = eventType;
-    }
-
     public UploadStatusEvent(final UploadStatusEventType eventType, final FileUploadProgress fileUploadProgress) {
         this.uploadStatusEventType = eventType;
         this.fileUploadProgress = fileUploadProgress;

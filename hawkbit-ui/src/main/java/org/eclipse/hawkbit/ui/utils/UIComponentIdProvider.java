@@ -939,19 +939,9 @@ public final class UIComponentIdProvider {
     public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
-     * Artifact upload status popup - minimize button id.
-     */
-    public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
-
-    /**
      * Artifact upload status popup - close button id.
      */
     public static final String UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID = "artifact.upload.close.button.id";
-
-    /**
-     * Artifact upload status popup - resize button id.
-     */
-    public static final String UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID = "artifact.upload.resize.button.id";
 
     /**
      * Artifact upload view - upload status button id.
