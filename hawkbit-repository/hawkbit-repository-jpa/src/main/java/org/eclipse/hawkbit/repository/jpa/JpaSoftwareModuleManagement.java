@@ -498,7 +498,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
                 // group by software module id to minimize database access
                 final Map<Long, List<JpaSoftwareModuleMetadataCreate>> groups = createJpaMetadataCreateStream(create)
-                        .collect(Collectors.groupingBy(c -> c.getSoftwareModuleId()));
+                        .collect(Collectors.groupingBy(JpaSoftwareModuleMetadataCreate::getSoftwareModuleId));
                 return groups.entrySet().stream().flatMap(e -> {
 
                     final Long id = e.getKey();

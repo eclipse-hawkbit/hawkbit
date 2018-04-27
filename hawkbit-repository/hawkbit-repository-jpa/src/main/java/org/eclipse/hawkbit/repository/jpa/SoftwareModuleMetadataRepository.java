@@ -73,7 +73,6 @@ public interface SoftwareModuleMetadataRepository
      * @return The number of meta data entries associated with the software
      *         module.
      */
-    @Query("SELECT COUNT (smd.key) from JpaSoftwareModuleMetadata smd WHERE smd.softwareModule.id = :moduleId")
     long countBySoftwareModuleId(@Param("moduleId") Long moduleId);
 
 }

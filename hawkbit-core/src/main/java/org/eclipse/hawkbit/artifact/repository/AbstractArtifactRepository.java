@@ -59,14 +59,10 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         try (final DigestOutputStream outputstream = openFileOutputStream(file, mdSHA1, mdMD5)) {
             ByteStreams.copy(content, outputstream);
             outputstream.flush();
-
-            checkFile(file);
-
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
 
-            LOG.info("Temporary file {} stored. File size: {} bytes. Calculated sha1: {} and md5: {} hashes", file,
-                    file != null ? file.length() : -1, sha1Hash16, md5Hash16);
+            LOG.debug("Temporary file {} stored. Calculated sha1: {} and md5: {} hashes", file, sha1Hash16, md5Hash16);
 
             checkHashes(sha1Hash16, md5Hash16, hash);
 
@@ -77,12 +73,6 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             if (file != null && file.exists() && !file.delete()) {
                 LOG.error("Could not delete temp file {}", file);
             }
-        }
-    }
-
-    private static void checkFile(final File file) {
-        if (file == null || file.isDirectory()) {
-            return;
         }
     }
 

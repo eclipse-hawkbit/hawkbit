@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ public interface DistributionSetMetadataRepository
      * 
      * @return The number of matching meta data entries.
      */
-    @Query("SELECT COUNT (dmd.key) from JpaDistributionSetMetadata dmd WHERE dmd.distributionSet.id = :id")
     long countByDistributionSetId(@Param("id") Long id);
 
 }

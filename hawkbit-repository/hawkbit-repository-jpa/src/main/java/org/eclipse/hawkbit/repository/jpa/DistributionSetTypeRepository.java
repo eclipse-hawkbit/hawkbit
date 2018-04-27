@@ -104,7 +104,7 @@ public interface DistributionSetTypeRepository
      * 
      * @return the number of associated software module types
      */
-    @Query("SELECT COUNT (DISTINCT e.smType) FROM JpaDistributionSetType d JOIN FETCH d.elements e WHERE d.id = :id")
+    @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")
     long countSmTypesById(@Param("id") Long id);
 
 }

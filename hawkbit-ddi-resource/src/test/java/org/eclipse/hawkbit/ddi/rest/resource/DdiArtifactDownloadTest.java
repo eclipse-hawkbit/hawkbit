@@ -60,8 +60,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @SpringApplicationConfiguration(classes = DownloadTestConfiguration.class)
 public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
-    private static final int ARTIFACT_SIZE = 5 * 1024 * 1024;
-
     private static volatile int downLoadProgress = 0;
     private static volatile long shippedBytes = 0;
 
@@ -171,9 +169,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final byte random[] = RandomUtils.nextBytes(ARTIFACT_SIZE);
+        final int artifactSize = 5 * 1024 * 1024;
+        final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false, ARTIFACT_SIZE);
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
@@ -181,11 +180,9 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // now assign and download successful
         assignDistributionSet(ds, targets);
-        final MvcResult result = mvc
-                .perform(
-                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
-                                artifact.getFilename()))
+        final MvcResult result = mvc.perform(get(
+                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
                 .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
@@ -197,7 +194,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(ARTIFACT_SIZE);
+        assertThat(shippedBytes).isEqualTo(artifactSize);
     }
 
     @Test
@@ -218,11 +215,9 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 false, artifactSize);
 
         // download
-        final MvcResult result = mvc
-                .perform(
-                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds),
-                                artifact.getFilename()))
+        final MvcResult result = mvc.perform(get(
+                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
+                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Disposition",
                         "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
                 .andReturn();
@@ -261,11 +256,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         for (int i = 0; i < resultLength / range; i++) {
             final String rangeString = "" + i * range + "-" + ((i + 1) * range - 1);
 
-            final MvcResult result = mvc
-                    .perform(
-                            get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                    tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
-                                            .header("Range", "bytes=" + rangeString))
+            final MvcResult result = mvc.perform(get(
+                    "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                    tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1").header("Range",
+                            "bytes=" + rangeString))
                     .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                     .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                     .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -280,11 +274,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         assertThat(outputStream.toByteArray()).isEqualTo(random);
 
         // return last 1000 Bytes
-        MvcResult result = mvc
-                .perform(
-                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
-                                        .header("Range", "bytes=-1000"))
+        MvcResult result = mvc.perform(
+                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                .header("Range", "bytes=-1000"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -298,11 +291,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .isEqualTo(Arrays.copyOfRange(random, resultLength - 1000, resultLength));
 
         // skip first 1000 Bytes and return the rest
-        result = mvc
-                .perform(
-                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
-                                        .header("Range", "bytes=1000-"))
+        result = mvc.perform(
+                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                .header("Range", "bytes=1000-"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
@@ -328,11 +320,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1"));
 
         // multipart download - first 20 bytes in 2 parts
-        result = mvc
-                .perform(
-                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
-                                        .header("Range", "bytes=0-9,10-19"))
+        result = mvc.perform(
+                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                                .header("Range", "bytes=0-9,10-19"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType("multipart/byteranges; boundary=THIS_STRING_SEPARATES_MULTIPART"))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
