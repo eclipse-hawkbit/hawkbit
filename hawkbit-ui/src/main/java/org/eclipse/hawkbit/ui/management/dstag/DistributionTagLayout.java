@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
@@ -69,10 +68,6 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagTableEvent(final DistributionSetTagTableEvent distributionSetTagTableEvent) {
-        if (BaseEntityEventType.ADD_ENTITY != distributionSetTagTableEvent.getEventType()
-                && BaseEntityEventType.REMOVE_ENTITY != distributionSetTagTableEvent.getEventType()) {
-            return;
-        }
         refreshContainer();
     }
 

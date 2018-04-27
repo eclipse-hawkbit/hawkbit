@@ -11,11 +11,9 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -25,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -33,9 +30,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -67,9 +62,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     private final UINotification uiNotification;
 
-    private final EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    private final TargetTagManagement targetTagManagement;
+    private final transient TargetTagManagement targetTagManagement;
 
     MultipleTargetFilter(final SpPermissionChecker permChecker, final ManagementUIState managementUIState,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -104,14 +99,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
         filterByButtons.addStyleName(SPUIStyleDefinitions.NO_TOP_BORDER);
         targetFilterQueryButtonsTab.init(customTargetTagFilterButtonClick);
-        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
-            menu = new ConfigMenuBar();
-            menu.getConfig().addItem("create", FontAwesome.PLUS, addButtonClicked());
-            menu.getConfig().addItem("update", FontAwesome.EDIT, updateButtonClicked());
-            if (permChecker.hasDeleteRepositoryPermission()) {
-                menu.getConfig().addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
-            }
-        }
+        menu = new ConfigMenuBar(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission(),
+                permChecker.hasDeleteRepositoryPermission(), getAddButtonCommand(), getUpdateButtonCommand(),
+                getDeleteButtonCommand());
         addStyleName(ValoTheme.ACCORDION_BORDERLESS);
         addTabs();
         setSizeFull();
@@ -183,54 +173,43 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         }
     }
 
-    protected Command addButtonClicked() {
+    protected Command getAddButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final CreateTargetTagLayoutWindow createTargetTagLayout = new CreateTargetTagLayoutWindow(i18n,
-                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                openConfigureWindow(createTargetTagLayout);
+                new CreateTargetTagLayoutw(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
+                        uiNotification);
             }
         };
     }
 
-    protected Command deleteButtonClicked() {
+    protected Command getDeleteButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final DeleteTargetTagLayoutWindow deleteTargetTagLayout = new DeleteTargetTagLayoutWindow(i18n,
-                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                deleteTargetTagLayout.setSelectedTags(managementUIState.getTargetTableFilters().getClickedTargetTags());
-                openConfigureWindow(deleteTargetTagLayout);
+                new DeleteTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
+                        uiNotification, managementUIState.getTargetTableFilters().getClickedTargetTags());
             }
         };
     }
 
-    protected Command updateButtonClicked() {
+    protected Command getUpdateButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final UpdateTargetTagLayoutWindow updateTargetTagLayout = new UpdateTargetTagLayoutWindow(i18n,
-                        targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                openConfigureWindow(updateTargetTagLayout);
+                new UpdateTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
+                        uiNotification);
             }
         };
-    }
-
-    private static void openConfigureWindow(final AbstractTagLayout<TargetTag> tagLayout) {
-        final Window window = tagLayout.getWindow();
-        UI.getCurrent().addWindow(window);
-        window.setModal(true);
-        window.setVisible(Boolean.TRUE);
     }
 
 }

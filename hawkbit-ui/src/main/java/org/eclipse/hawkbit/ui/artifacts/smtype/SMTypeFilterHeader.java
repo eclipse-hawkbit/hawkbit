@@ -20,29 +20,38 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
  * Software module type filter buttons header.
  */
 public class SMTypeFilterHeader extends AbstractFilterHeader {
 
-    private static final long serialVersionUID = -4855810338059032342L;
+    private static final long serialVersionUID = 1L;
 
     private final ArtifactUploadState artifactUploadState;
-    private final CreateUpdateSoftwareTypeLayout createUpdateSWTypeLayout;
+
+    EntityFactory entityFactory;
+
+    UINotification uiNotification;
+
+    SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     SMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final EntityFactory entityFactory,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuletypeManagement) {
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(permChecker, eventBus, i18n);
         this.artifactUploadState = artifactUploadState;
-        this.createUpdateSWTypeLayout = new CreateUpdateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker,
-                uiNotification, softwareModuletypeManagement);
+        this.entityFactory = entityFactory;
+        this.uiNotification = uiNotification;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
 
-        if (permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission()) {
-            createUpdateSWTypeLayout.init();
-        }
+        // if (permChecker.hasCreateRepositoryPermission() ||
+        // permChecker.hasUpdateRepositoryPermission()) {
+        // createUpdateSWTypeLayout.init();
+        // }
     }
 
     @Override
@@ -77,22 +86,44 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected Command addButtonClicked() {
-        // final Window addUpdateWindow = createUpdateSWTypeLayout.getWindow();
-        // UI.getCurrent().addWindow(addUpdateWindow);
-        // addUpdateWindow.setVisible(Boolean.TRUE);
-        return null;
+    protected Command getAddButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new CreateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement);
+            }
+        };
     }
 
     @Override
-    protected Command deleteButtonClicked() {
-        // TODO Auto-generated method stub
-        return null;
+    protected Command getDeleteButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new DeleteSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement, artifactUploadState.getSelectedDeleteSWModuleTypes());
+            }
+        };
     }
 
     @Override
-    protected Command updateButtonClicked() {
-        // TODO Auto-generated method stub
-        return null;
+    protected Command getUpdateButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new UpdateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement);
+            }
+        };
     }
 }

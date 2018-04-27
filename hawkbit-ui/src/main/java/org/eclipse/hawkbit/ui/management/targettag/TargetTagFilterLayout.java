@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -55,10 +54,6 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
-        if (BaseEntityEventType.ADD_ENTITY != tableEvent.getEventType()
-                && BaseEntityEventType.REMOVE_ENTITY != tableEvent.getEventType()) {
-            return;
-        }
         refreshContainer();
     }
 

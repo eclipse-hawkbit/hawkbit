@@ -60,26 +60,21 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     private void createComponents() {
         title = createHeaderCaption();
 
-        if (hasCreateUpdatePermission() && isAddTagRequired()) {
-            menu = new ConfigMenuBar();
-            if (hasCreateUpdatePermission()) {
-                menu.getConfig().addItem("create", FontAwesome.PLUS, addButtonClicked());
-                menu.getConfig().addItem("update", FontAwesome.EDIT, updateButtonClicked());
-            }
-            if (permChecker.hasDeleteRepositoryPermission()) {
-                menu.getConfig().addItem("delete", FontAwesome.TRASH_O, deleteButtonClicked());
-            }
+        if (isAddTagRequired()) {
+            menu = new ConfigMenuBar(permChecker.hasCreateRepositoryPermission(),
+                    permChecker.hasUpdateRepositoryPermission(), permChecker.hasDeleteRepositoryPermission(),
+                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand());
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleSmallNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
-    protected abstract Command deleteButtonClicked();
+    protected abstract Command getDeleteButtonCommand();
 
-    protected abstract Command updateButtonClicked();
+    protected abstract Command getUpdateButtonCommand();
 
-    protected abstract Command addButtonClicked();
+    protected abstract Command getAddButtonCommand();
 
     /**
      * Build layout.
@@ -91,7 +86,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         typeHeaderLayout.addComponentAsFirst(title);
         typeHeaderLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         typeHeaderLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
-        if (menu != null && hasCreateUpdatePermission()) {
+        if (menu != null) {
             typeHeaderLayout.addComponent(menu);
             typeHeaderLayout.setComponentAlignment(menu, Alignment.TOP_LEFT);
         }

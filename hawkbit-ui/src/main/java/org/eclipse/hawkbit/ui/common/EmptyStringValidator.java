@@ -48,8 +48,8 @@ public class EmptyStringValidator extends StringLengthValidator {
     }
 
     @Override
-    public boolean isValid(final Object value) {
-        return super.isValid(value != null ? value.toString().trim() : null);
+    public boolean isValidValue(final String value) {
+        return super.isValidValue(value != null ? value.trim() : null);
     }
 
 }

@@ -10,10 +10,8 @@ package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -24,8 +22,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  *
@@ -86,57 +82,45 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected Command addButtonClicked() {
+    protected Command getAddButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final CreateDistributionTagLayoutWindow createDistributionTagLayout = new CreateDistributionTagLayoutWindow(
-                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                openConfigureWindow(createDistributionTagLayout);
+                new CreateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
+                        permChecker, uiNotification);
             }
         };
     }
 
     @Override
-    protected Command deleteButtonClicked() {
+    protected Command getDeleteButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final DeleteDistributionTagLayoutWindow deleteDistributionTagLayout = new DeleteDistributionTagLayoutWindow(
-                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                deleteDistributionTagLayout
-                        .setSelectedTags(managementUIState.getDistributionTableFilters().getDistSetTags());
-                openConfigureWindow(deleteDistributionTagLayout);
+                new DeleteDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
+                        permChecker, uiNotification, managementUIState.getDistributionTableFilters().getDistSetTags());
             }
         };
     }
 
     @Override
-    protected Command updateButtonClicked() {
+    protected Command getUpdateButtonCommand() {
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                final UpdateDistributionTagLayoutWindow updateDistributionTagLayout = new UpdateDistributionTagLayoutWindow(
-                        i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-                openConfigureWindow(updateDistributionTagLayout);
+                new UpdateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
+                        permChecker, uiNotification);
             }
         };
-    }
-
-    private static void openConfigureWindow(final AbstractTagLayout<DistributionSetTag> distributionTagLayout) {
-        final Window window = distributionTagLayout.getWindow();
-        UI.getCurrent().addWindow(window);
-        window.setModal(true);
-        window.setVisible(Boolean.TRUE);
     }
 
 }

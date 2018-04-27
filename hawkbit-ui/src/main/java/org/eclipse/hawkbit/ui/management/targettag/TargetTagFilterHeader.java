@@ -73,19 +73,19 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected Command addButtonClicked() {
+    protected Command getAddButtonCommand() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected Command deleteButtonClicked() {
+    protected Command getDeleteButtonCommand() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected Command updateButtonClicked() {
+    protected Command getUpdateButtonCommand() {
         // TODO Auto-generated method stub
         return null;
     }

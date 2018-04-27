@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import java.util.Arrays;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -22,18 +24,34 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
  * Distribution Set Type filter buttons header.
  */
 public class DSTypeFilterHeader extends AbstractFilterHeader {
 
-    private static final long serialVersionUID = 3433417459392880222L;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistUIState manageDistUIState;
 
-    private final CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
+    VaadinMessageSource i18n;
+
+    SpPermissionChecker permChecker;
+
+    UIEventBus eventBus;
+
+    EntityFactory entityFactory;
+
+    UINotification uiNotification;
+
+    SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
+    DistributionSetTypeManagement distributionSetTypeManagement;
+
+    DistributionSetManagement distributionSetManagement;
 
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
@@ -42,12 +60,14 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             final DistributionSetManagement distributionSetManagement) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
-        this.createUpdateDistSetTypeLayout = new CreateUpdateDistSetTypeLayout(i18n, entityFactory, eventBus,
-                permChecker, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                distributionSetManagement);
-        if (hasCreateUpdatePermission()) {
-            createUpdateDistSetTypeLayout.init();
-        }
+        this.i18n = i18n;
+        this.permChecker = permChecker;
+        this.eventBus = eventBus;
+        this.entityFactory = entityFactory;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.uiNotification = uiNotification;
+        this.distributionSetManagement = distributionSetManagement;
     }
 
     @Override
@@ -83,24 +103,46 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected Command addButtonClicked() {
-        // TODO Auto-generated method stub
-        return null;
-        // final CommonDialogWindow addUpdateWindow =
-        // createUpdateDistSetTypeLayout.getWindow();
-        // UI.getCurrent().addWindow(addUpdateWindow);
+    protected Command getAddButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new CreateDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement, distributionSetTypeManagement);
+            }
+        };
     }
 
     @Override
-    protected Command deleteButtonClicked() {
-        // TODO Auto-generated method stub
-        return null;
+    protected Command getDeleteButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new DeleteDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
+                        Arrays.asList(manageDistUIState.getManageDistFilters().getClickedDistSetType()));
+            }
+        };
     }
 
     @Override
-    protected Command updateButtonClicked() {
-        // TODO Auto-generated method stub
-        return null;
+    protected Command getUpdateButtonCommand() {
+        return new MenuBar.Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                new UpdateDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                        softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement);
+            }
+        };
     }
 
 }

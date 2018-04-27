@@ -53,7 +53,7 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Abstract class tag layout.
+ * Abstract class for tag layout.
  *
  * @param <E>
  */
@@ -66,51 +66,45 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
-    protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
+    private static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
 
-    protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
+    private static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
-    protected static final int MAX_TAGS = 500;
+    private static final int MAX_TAGS = 500;
 
-    protected VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
-    protected transient EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
-    protected transient EventBus.UIEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
-    protected SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    protected UINotification uiNotification;
+    private final UINotification uiNotification;
 
     private final FormLayout formLayout = new FormLayout();
 
-    protected String createTagStr;
+    private CommonDialogWindow window;
 
-    protected CommonDialogWindow window;
+    private Label colorLabel;
 
-    protected Label colorLabel;
+    private TextField tagName;
 
-    protected TextField tagName;
+    private TextArea tagDesc;
 
-    protected TextArea tagDesc;
+    private Button tagColorPreviewBtn;
 
-    protected Button tagColorPreviewBtn;
+    private ColorPickerLayout colorPickerLayout;
 
-    protected ColorPickerLayout colorPickerLayout;
+    private GridLayout mainLayout;
 
-    protected GridLayout mainLayout;
+    private VerticalLayout contentLayout;
 
-    protected VerticalLayout contentLayout;
-
-    protected boolean tagPreviewBtnClicked;
+    private boolean tagPreviewBtnClicked;
 
     private String colorPicked;
 
-    protected String tagNameValue;
-
-    protected String tagDescValue;
-
-    protected HorizontalLayout colorLabelLayout;
+    private HorizontalLayout colorLabelLayout;
 
     /**
      * Constructor for AbstractCreateUpdateTagLayout
@@ -148,9 +142,13 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
         @Override
         public boolean canWindowSaveOrUpdate() {
-            return isUpdateAction() || !isDuplicate();
+            return isDeleteAction() || (isUpdateAction() || !isDuplicate());
         }
 
+    }
+
+    protected boolean isDeleteAction() {
+        return false;
     }
 
     /**
@@ -161,15 +159,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     }
 
     /**
-     * Select tag & set tag name & tag desc values corresponding to selected
-     * tag.
-     *
-     * @param distTagSelected
-     *            as the selected tag from combo
-     */
-    protected abstract void setTagDetails(final String tagSelected);
-
-    /**
      * Init the layout.
      */
     public void init() {
@@ -178,11 +167,16 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         buildLayout();
         addListeners();
         eventBus.subscribe(this);
+        openConfigureWindow();
     }
 
-    protected void createRequiredComponents() {
+    protected abstract Optional<E> findEntityByName();
 
-        createTagStr = i18n.getMessage("label.create.tag");
+    protected abstract String getWindowCaption();
+
+    protected abstract void saveEntity();
+
+    protected void createRequiredComponents() {
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
@@ -205,7 +199,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     }
 
     protected void buildLayout() {
-
         mainLayout = new GridLayout(3, 2);
         mainLayout.setSpacing(true);
         colorPickerLayout = new ColorPickerLayout();
@@ -241,26 +234,8 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     protected void addListeners() {
         colorPickerLayout.getColorSelect().addColorChangeListener(this);
         colorPickerLayout.getSelPreview().addColorChangeListener(this);
-        tagColorPreviewBtn.addClickListener(
-
-                event -> previewButtonClicked());
-
+        tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
         slidersValueChangeListeners();
-
-    }
-
-    /**
-     * Open color picker on click of preview button. Auto select the color based
-     * on target tag if already selected.
-     */
-    private void previewButtonClicked() {
-        if (!tagPreviewBtnClicked) {
-            colorPickerLayout
-                    .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-        }
-
-        tagPreviewBtnClicked = !tagPreviewBtnClicked;
-        colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
     protected Color getColorForColorPicker() {
@@ -268,69 +243,13 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     }
 
     protected void resetTagNameField() {
-        tagName.setEnabled(false);
+        tagName.setEnabled(true);
         tagName.clear();
         tagDesc.clear();
         restoreComponentStyles();
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
-    }
-
-    /**
-     * Listener for option group - Create tag/Update.
-     *
-     * @param event
-     *            ValueChangeEvent
-     */
-    protected void optionValueChanged(final ValueChangeEvent event) {
-
-        tagName.setEnabled(true);
-        tagName.clear();
-        tagDesc.clear();
-
-        // close the color picker layout
-        tagPreviewBtnClicked = false;
-        // reset the selected color - Set default color
-        restoreComponentStyles();
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        colorPickerLayout.getSelPreview()
-                .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-        window.setOrginaleValues();
-    }
-
-    /**
-     * reset the components.
-     */
-    protected void reset() {
-        tagName.setEnabled(true);
-        tagName.clear();
-        tagDesc.clear();
-        restoreComponentStyles();
-
-        // Default green color
-        colorPickerLayout.setVisible(false);
-        colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
-        colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
-        tagPreviewBtnClicked = false;
-    }
-
-    /**
-     * On change of color in color picker ,change RGB sliders, components border
-     * color and color of preview button.
-     */
-    @Override
-    public void colorChanged(final ColorChangeEvent event) {
-        setColor(event.getColor());
-        for (final ColorSelector select : colorPickerLayout.getSelectors()) {
-            if (!event.getSource().equals(select) && select.equals(this)
-                    && !select.getColor().equals(colorPickerLayout.getSelectedColor())) {
-                select.setColor(colorPickerLayout.getSelectedColor());
-            }
-        }
-        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
-        getPreviewButtonColor(event.getColor().getCSS());
-        createDynamicStyleForComponents(tagName, tagDesc, event.getColor().getCSS());
     }
 
     /**
@@ -372,15 +291,42 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
     }
 
+    protected void setColorToComponents(final Color newColor) {
+        setColor(newColor);
+        colorPickerLayout.getColorSelect().setColor(newColor);
+        getPreviewButtonColor(newColor.getCSS());
+        createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
+    }
+
     /**
-     * Get target style - Dynamically as per the color picked, cannot be done
-     * from the static css.
-     *
-     * @param colorPickedPreview
+     * Create new tag.
      */
-    private static void getTargetDynamicStyles(final String colorPickedPreview) {
-        Page.getCurrent().getJavaScript()
-                .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
+    protected void createNewTag() {
+        colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
+    }
+
+    protected void displaySuccess(final String tagName) {
+        uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { tagName }));
+    }
+
+    protected void displayValidationError(final String errorMessage) {
+        uiNotification.displayValidationError(errorMessage);
+    }
+
+    protected void setTagColor(final Color selectedColor, final String previewColor) {
+        getColorPickerLayout().setSelectedColor(selectedColor);
+        getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+        getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
+        createDynamicStyleForComponents(tagName, tagDesc, previewColor);
+        getPreviewButtonColor(previewColor);
+    }
+
+    protected boolean isUpdateAction() {
+        return false;
+    }
+
+    protected boolean isDuplicate() {
+        return isDuplicateByName();
     }
 
     @Override
@@ -406,13 +352,150 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         return colorPickerLayout;
     }
 
-    public CommonDialogWindow getWindow() {
-        reset();
+    public CommonDialogWindow createWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
                 .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         return window;
+    }
 
+    /**
+     * On change of color in color picker ,change RGB sliders, components border
+     * color and color of preview button.
+     */
+    @Override
+    public void colorChanged(final ColorChangeEvent event) {
+        setColor(event.getColor());
+        for (final ColorSelector select : colorPickerLayout.getSelectors()) {
+            if (!event.getSource().equals(select) && select.equals(this)
+                    && !select.getColor().equals(colorPickerLayout.getSelectedColor())) {
+                select.setColor(colorPickerLayout.getSelectedColor());
+            }
+        }
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
+        getPreviewButtonColor(event.getColor().getCSS());
+        createDynamicStyleForComponents(tagName, tagDesc, event.getColor().getCSS());
+    }
+
+    public String getColorPicked() {
+        return colorPicked;
+    }
+
+    public void setColorPicked(final String colorPicked) {
+        this.colorPicked = colorPicked;
+    }
+
+    public FormLayout getFormLayout() {
+        return formLayout;
+    }
+
+    public GridLayout getMainLayout() {
+        return mainLayout;
+    }
+
+    @Override
+    public void addColorChangeListener(final ColorChangeListener listener) {
+    }
+
+    @Override
+    public void removeColorChangeListener(final ColorChangeListener listener) {
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
+    public static String getTagNameDynamicStyle() {
+        return TAG_NAME_DYNAMIC_STYLE;
+    }
+
+    public static String getTagDescDynamicStyle() {
+        return TAG_DESC_DYNAMIC_STYLE;
+    }
+
+    public static String getTagDynamicStyle() {
+        return TAG_DYNAMIC_STYLE;
+    }
+
+    public static String getMessageErrorMissingTagname() {
+        return MESSAGE_ERROR_MISSING_TAGNAME;
+    }
+
+    public static int getMaxTags() {
+        return MAX_TAGS;
+    }
+
+    public VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    public EntityFactory getEntityFactory() {
+        return entityFactory;
+    }
+
+    public EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
+    public SpPermissionChecker getPermChecker() {
+        return permChecker;
+    }
+
+    public UINotification getUiNotification() {
+        return uiNotification;
+    }
+
+    public Label getColorLabel() {
+        return colorLabel;
+    }
+
+    public TextField getTagName() {
+        return tagName;
+    }
+
+    public TextArea getTagDesc() {
+        return tagDesc;
+    }
+
+    public Button getTagColorPreviewBtn() {
+        return tagColorPreviewBtn;
+    }
+
+    public VerticalLayout getContentLayout() {
+        return contentLayout;
+    }
+
+    public boolean isTagPreviewBtnClicked() {
+        return tagPreviewBtnClicked;
+    }
+
+    public HorizontalLayout getColorLabelLayout() {
+        return colorLabelLayout;
+    }
+
+    /**
+     * Open color picker on click of preview button. Auto select the color based
+     * on target tag if already selected.
+     */
+    private void previewButtonClicked() {
+        if (!tagPreviewBtnClicked) {
+            colorPickerLayout
+                    .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+        }
+
+        tagPreviewBtnClicked = !tagPreviewBtnClicked;
+        colorPickerLayout.setVisible(tagPreviewBtnClicked);
+    }
+
+    /**
+     * Get target style - Dynamically as per the color picked, cannot be done
+     * from the static css.
+     *
+     * @param colorPickedPreview
+     */
+    private static void getTargetDynamicStyles(final String colorPickedPreview) {
+        Page.getCurrent().getJavaScript()
+                .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
     }
 
     /**
@@ -454,38 +537,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         });
     }
 
-    protected void setColorToComponents(final Color newColor) {
-        setColor(newColor);
-        colorPickerLayout.getColorSelect().setColor(newColor);
-        getPreviewButtonColor(newColor.getCSS());
-        createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
-    }
-
-    /**
-     * Create new tag.
-     */
-    protected void createNewTag() {
-        colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
-        tagNameValue = tagName.getValue();
-        tagDescValue = tagDesc.getValue();
-    }
-
-    protected void displaySuccess(final String tagName) {
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { tagName }));
-    }
-
-    protected void displayValidationError(final String errorMessage) {
-        uiNotification.displayValidationError(errorMessage);
-    }
-
-    protected void setTagColor(final Color selectedColor, final String previewColor) {
-        getColorPickerLayout().setSelectedColor(selectedColor);
-        getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-        getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
-        createDynamicStyleForComponents(tagName, tagDesc, previewColor);
-        getPreviewButtonColor(previewColor);
-    }
-
     private boolean isDuplicateByName() {
         final Optional<E> existingType = findEntityByName();
         existingType.ifPresent(type -> uiNotification.displayValidationError(
@@ -493,58 +544,15 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         return existingType.isPresent();
     }
 
-    protected boolean isUpdateAction() {
-        return false;
+    private void openConfigureWindow() {
+        createWindow();
+        UI.getCurrent().addWindow(window);
+        window.setModal(true);
+        window.setVisible(Boolean.TRUE);
     }
 
-    protected boolean isDuplicate() {
-        return isDuplicateByName();
+    public CommonDialogWindow getWindow() {
+        return window;
     }
-
-    public String getColorPicked() {
-        return colorPicked;
-    }
-
-    public void setColorPicked(final String colorPicked) {
-        this.colorPicked = colorPicked;
-    }
-
-    public String getTagNameValue() {
-        return tagNameValue;
-    }
-
-    public void setTagNameValue(final String tagNameValue) {
-        this.tagNameValue = tagNameValue;
-    }
-
-    public String getTagDescValue() {
-        return tagDescValue;
-    }
-
-    public void setTagDescValue(final String tagDescValue) {
-        this.tagDescValue = tagDescValue;
-    }
-
-    public FormLayout getFormLayout() {
-        return formLayout;
-    }
-
-    public GridLayout getMainLayout() {
-        return mainLayout;
-    }
-
-    @Override
-    public void addColorChangeListener(final ColorChangeListener listener) {
-    }
-
-    @Override
-    public void removeColorChangeListener(final ColorChangeListener listener) {
-    }
-
-    protected abstract Optional<E> findEntityByName();
-
-    protected abstract String getWindowCaption();
-
-    protected abstract void saveEntity();
 
 }
