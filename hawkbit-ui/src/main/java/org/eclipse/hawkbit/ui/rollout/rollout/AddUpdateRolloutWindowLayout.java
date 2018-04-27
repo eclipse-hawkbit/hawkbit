@@ -333,7 +333,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private Long getScheduledStartTime() {
             return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
+                    : null;
         }
 
         private int getErrorThresholdPercentage(final int amountGroup) {
@@ -486,13 +487,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return new LabelBuilder().name(i18n.getMessage(key)).buildLabel();
     }
 
-    private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id).buildTextComponent();
+    private TextField createTextField(final String in18Key, final String id, final int maxLength) {
+        return new TextFieldBuilder(maxLength).prompt(i18n.getMessage(in18Key)).id(id).buildTextComponent();
     }
 
     private TextField createIntegerTextField(final String in18Key, final String id) {
-        final TextField textField = createTextField(in18Key, id);
-        textField.setNullRepresentation("");
+        final TextField textField = createTextField(in18Key, id, 32);
         textField.setConverter(new StringToIntegerConverter());
         textField.setConversionError(i18n.getMessage(MESSAGE_ENTER_NUMBER));
         textField.setSizeUndefined();
@@ -615,12 +615,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private static TextArea createTargetFilterQuery() {
-        final TextArea filterField = new TextAreaBuilder().style("text-area-style")
-                .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
+        final TextArea filterField = new TextAreaBuilder(TargetFilterQuery.QUERY_MAX_SIZE).style("text-area-style")
+                .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD).buildTextComponent();
 
         filterField.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
-        filterField.setNullRepresentation("");
         filterField.setEnabled(false);
         filterField.setSizeUndefined();
         return filterField;
@@ -776,11 +774,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThresholdOptionGroup.setValue(ERRORTHRESOLDOPTIONS.PERCENT.getValue());
     }
 
-    private TextArea createDescription() {
-        final TextArea descriptionField = new TextAreaBuilder().style("text-area-style")
-                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
-                .buildTextComponent();
-        descriptionField.setNullRepresentation("");
+    private static TextArea createDescription() {
+        final TextArea descriptionField = new TextAreaBuilder(Rollout.DESCRIPTION_MAX_SIZE).style("text-area-style")
+                .id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID).buildTextComponent();
         descriptionField.setSizeUndefined();
         return descriptionField;
     }
@@ -846,8 +842,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createRolloutNameField() {
-        final TextField rolloutNameField = createTextField("textfield.name",
-                UIComponentIdProvider.ROLLOUT_NAME_FIELD_ID);
+        final TextField rolloutNameField = new TextFieldBuilder(Rollout.NAME_MAX_SIZE)
+                .prompt(i18n.getMessage("textfield.name")).id(UIComponentIdProvider.ROLLOUT_NAME_FIELD_ID)
+                .required(true, i18n).buildTextComponent();
+
         rolloutNameField.setSizeUndefined();
         return rolloutNameField;
     }

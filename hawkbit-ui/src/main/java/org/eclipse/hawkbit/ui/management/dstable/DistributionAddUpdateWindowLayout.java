@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -222,8 +221,10 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Create required UI components.
      */
     private void createRequiredComponents() {
-        distNameTextField = createTextField("textfield.name", UIComponentIdProvider.DIST_ADD_NAME);
-        distVersionTextField = createTextField("textfield.version", UIComponentIdProvider.DIST_ADD_VERSION);
+        distNameTextField = createTextField("textfield.name", UIComponentIdProvider.DIST_ADD_NAME,
+                DistributionSet.NAME_MAX_SIZE);
+        distVersionTextField = createTextField("textfield.version", UIComponentIdProvider.DIST_ADD_VERSION,
+                DistributionSet.VERSION_MAX_SIZE);
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("label.combobox.type"), "", null,
                 "", false, "", i18n.getMessage("label.combobox.type"));
@@ -231,10 +232,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(UIComponentIdProvider.DIST_ADD_DISTSETTYPE);
 
-        descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
-                .prompt(i18n.getMessage("textfield.description")).immediate(true)
+        descTextArea = new TextAreaBuilder(DistributionSet.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .id(UIComponentIdProvider.DIST_ADD_DESC).buildTextComponent();
-        descTextArea.setNullRepresentation("");
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.getMessage("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
@@ -242,12 +242,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         reqMigStepCheckbox.setId(UIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
     }
 
-    private TextField createTextField(final String in18Key, final String id) {
-        final TextField buildTextField = new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true)
-                .validator(new EmptyStringValidator(i18n)).prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
+    private TextField createTextField(final String in18Key, final String id, final int maxLength) {
+        return new TextFieldBuilder(maxLength).caption(i18n.getMessage(in18Key)).required(true, i18n).id(id)
                 .buildTextComponent();
-        buildTextField.setNullRepresentation("");
-        return buildTextField;
     }
 
     /**

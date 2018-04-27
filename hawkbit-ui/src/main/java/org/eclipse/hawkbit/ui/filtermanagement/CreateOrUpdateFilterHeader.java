@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -201,8 +202,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private TextField createNameTextField() {
-        final TextField nameField = new TextFieldBuilder().caption(i18n.getMessage("textfield.customfiltername"))
-                .prompt(i18n.getMessage("textfield.customfiltername")).immediate(true)
+        final TextField nameField = new TextFieldBuilder(NamedEntity.NAME_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.customfiltername")).required(true, i18n)
                 .id(UIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).buildTextComponent();
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(this::onFilterNameChange);
@@ -368,8 +369,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory
-                .targetFilterQuery().create().name(nameTextField.getValue()).query(queryTextField.getValue()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
+                .create().name(nameTextField.getValue()).query(queryTextField.getValue()));
         notification.displaySuccess(
                 i18n.getMessage("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
