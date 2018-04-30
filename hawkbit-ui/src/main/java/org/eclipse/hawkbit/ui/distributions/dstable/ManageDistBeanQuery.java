@@ -38,13 +38,14 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  */
 public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
-    private static final long serialVersionUID = 5176481314404662215L;
+    private static final long serialVersionUID = 1L;
+
     private Sort sort = new Sort(Direction.ASC, "id");
     private String searchText;
     private transient DistributionSetManagement distributionSetManagement;
     private transient Page<DistributionSet> firstPageDistributionSets;
 
-    private DistributionSetType distributionSetType;
+    private transient DistributionSetType distributionSetType;
     private Boolean dsComplete;
 
     /**
@@ -64,8 +65,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                 searchText = String.format("%%%s%%", searchText);
             }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE) != null) {
-                distributionSetType = (DistributionSetType) queryConfig
-                        .get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE);
+                // distributionSetType = (DistributionSetType) Optional
+                // .ofNullable(queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE)).orElse(null);
             }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE) != null) {
                 dsComplete = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
@@ -120,7 +121,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        if (StringUtils.isEmpty(searchText) && distributionSetType == null) {
+        if (StringUtils.isEmpty(searchText) && distributionSetType != null) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
                     .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);

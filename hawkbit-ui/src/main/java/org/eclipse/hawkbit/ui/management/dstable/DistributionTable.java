@@ -961,7 +961,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected String getEntityName() {
-        return "Distribution Set";
+        return i18n.getMessage("distribution.details.header");
     }
 
     @Override

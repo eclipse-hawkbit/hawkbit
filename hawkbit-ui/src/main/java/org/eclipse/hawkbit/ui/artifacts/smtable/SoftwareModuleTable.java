@@ -293,7 +293,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected String getEntityName() {
-        return "Software Module";
+        return i18n.getMessage("upload.swModuleTable.header");
     }
 
     @Override

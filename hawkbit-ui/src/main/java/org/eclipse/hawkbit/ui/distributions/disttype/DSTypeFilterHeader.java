@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import java.util.Arrays;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -37,21 +35,15 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final ManageDistUIState manageDistUIState;
 
-    VaadinMessageSource i18n;
+    private final transient EntityFactory entityFactory;
 
-    SpPermissionChecker permChecker;
+    private final transient UINotification uiNotification;
 
-    UIEventBus eventBus;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    EntityFactory entityFactory;
+    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
-    UINotification uiNotification;
-
-    SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
-    DistributionSetTypeManagement distributionSetTypeManagement;
-
-    DistributionSetManagement distributionSetManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
 
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
@@ -60,9 +52,6 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             final DistributionSetManagement distributionSetManagement) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
-        this.i18n = i18n;
-        this.permChecker = permChecker;
-        this.eventBus = eventBus;
         this.entityFactory = entityFactory;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
@@ -83,7 +72,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         manageDistUIState.setDistTypeFilterClosed(true);
-        eventBus.publish(this, DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE);
+        getEventBus().publish(this, DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE);
     }
 
     @Override
@@ -110,23 +99,24 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement, distributionSetTypeManagement);
+                new CreateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
+                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement);
             }
         };
     }
 
     @Override
     protected Command getDeleteButtonCommand() {
+
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                        Arrays.asList(manageDistUIState.getManageDistFilters().getClickedDistSetType()));
+                new DeleteDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
+                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
+                        distributionSetManagement, manageDistUIState.getManageDistFilters().getClickedDistSetType());
             }
         };
     }
@@ -139,8 +129,9 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateDistributionSetTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement);
+                new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
+                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
+                        distributionSetManagement);
             }
         };
     }

@@ -33,9 +33,9 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    protected SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    protected transient EventBus.UIEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
     private Label title;
 
@@ -43,7 +43,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private ConfigMenuBar menu;
 
-    protected final VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
     protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final VaadinMessageSource i18n) {
@@ -107,15 +107,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     protected abstract String getHideButtonId();
 
     /**
-     * Check if user is authorized for this action.
-     * 
-     * @return true if user has permission otherwise false.
-     */
-    protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateRepositoryPermission() || permChecker.hasUpdateRepositoryPermission();
-    }
-
-    /**
      * Get the title to be displayed on the header of filter button layout.
      * 
      * @return title to be displayed.
@@ -143,5 +134,25 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      * @return
      */
     protected abstract boolean isAddTagRequired();
+
+    public SpPermissionChecker getPermChecker() {
+        return permChecker;
+    }
+
+    public EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
+    public Button getHideIcon() {
+        return hideIcon;
+    }
+
+    public ConfigMenuBar getMenu() {
+        return menu;
+    }
+
+    public VaadinMessageSource getI18n() {
+        return i18n;
+    }
 
 }

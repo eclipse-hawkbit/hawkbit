@@ -77,7 +77,6 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  */
-// TODO MR implement inherit methods!!
 public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
@@ -559,7 +558,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected String getEntityName() {
-        return "Distribution Set";
+        return i18n.getMessage("distribution.details.header");
     }
 
     @Override

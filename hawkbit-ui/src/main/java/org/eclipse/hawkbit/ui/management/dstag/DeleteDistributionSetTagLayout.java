@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -26,11 +25,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout for the pop-up window which is created when deleting a distribution
  * set tag on the Deployment View.
  */
-public class DeleteDistributionSetTagLayout extends UpdateDistributionSetTagLayout {
+public class DeleteDistributionSetTagLayout extends AbstractDistributionSetTagLayoutForModify {
 
     private static final long serialVersionUID = 1L;
-
-    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
     private final List<String> selectedTags;
 
@@ -39,7 +36,6 @@ public class DeleteDistributionSetTagLayout extends UpdateDistributionSetTagLayo
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final List<String> selectedTags) {
         super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-        this.distributionSetTagManagement = distributionSetTagManagement;
         this.selectedTags = selectedTags;
     }
 
@@ -63,22 +59,14 @@ public class DeleteDistributionSetTagLayout extends UpdateDistributionSetTagLayo
         getTagName().setEnabled(false);
     }
 
-    // @Override
-    // protected void setTagDetails(final String distTagSelected) {
-    // super.setTagDetails(distTagSelected);
-    // }
-
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.configure", getI18n().getMessage("caption.delete"),
-                getI18n().getMessage("caption.tag"));
+        return getI18n().getMessage("caption.delete") + " " + getI18n().getMessage("caption.tag");
     }
 
     @Override
     protected void saveEntity() {
-        if (canBeDeleted()) {
-            deleteDistributionTag();
-        }
+        deleteDistributionTag();
     }
 
     @Override
@@ -93,26 +81,16 @@ public class DeleteDistributionSetTagLayout extends UpdateDistributionSetTagLayo
 
     private void deleteDistributionTag() {
         final String tagNameToDelete = getTagName().getValue();
-        final Optional<DistributionSetTag> tagToDelete = distributionSetTagManagement.getByName(tagNameToDelete);
+        final Optional<DistributionSetTag> tagToDelete = getDistributionSetTagManagement().getByName(tagNameToDelete);
         tagToDelete.ifPresent(tag -> {
             if (selectedTags.contains(tagNameToDelete)) {
                 getUiNotification().displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
             } else {
-                distributionSetTagManagement.delete(tagNameToDelete);
+                getDistributionSetTagManagement().delete(tagNameToDelete);
                 getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));
-                getUiNotification().displaySuccess(getI18n().getMessage("message.delete.success", getTagName()));
-                selectedTags.remove(tagNameToDelete);
+                getUiNotification().displaySuccess(getI18n().getMessage("message.delete.success", tagNameToDelete));
             }
         });
-    }
-
-    private boolean canBeDeleted() {
-        if (!getPermChecker().hasDeleteRepositoryPermission()) {
-            getUiNotification().displayValidationError(
-                    getI18n().getMessage("message.permission.insufficient", SpPermission.DELETE_REPOSITORY));
-            return false;
-        }
-        return true;
     }
 
 }

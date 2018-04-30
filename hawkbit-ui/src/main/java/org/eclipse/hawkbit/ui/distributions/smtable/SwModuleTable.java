@@ -68,7 +68,6 @@ import com.vaadin.ui.Window;
  * Implementation of software module table using generic abstract table styles .
  */
 
-// TODO MR implement inherit methods!!
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private static final long serialVersionUID = 1L;
@@ -435,7 +434,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected String getEntityName() {
-        return "Software Module";
+        return i18n.getMessage("upload.swModuleTable.header");
     }
 
     @Override

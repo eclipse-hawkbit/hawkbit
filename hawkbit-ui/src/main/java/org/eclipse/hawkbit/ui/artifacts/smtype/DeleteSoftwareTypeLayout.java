@@ -14,44 +14,34 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.UploadArtifactView;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.distributions.DistributionsView;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * Layout for the create or update software module type.
+ * Layout for pop-up window which is created when deleting a software module
+ * type on Distributions and Upload View.
  *
  */
-public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
+public class DeleteSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayoutForModify {
 
     private static final long serialVersionUID = 1L;
 
     private final transient Optional<SoftwareModuleType> selectedSoftwareModuleType;
 
-    /**
-     * Constructor for CreateUpdateSoftwareTypeLayout
-     * 
-     * @param i18n
-     *            I18N
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param softwareModuleTypeManagement
-     *            management for {@link SoftwareModuleType}s
-     */
+    private final String currentView;
+
     public DeleteSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final Optional<SoftwareModuleType> selectedSoftwareModuleType) {
+            final Optional<SoftwareModuleType> selectedSoftwareModuleType, final String currentView) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
         this.selectedSoftwareModuleType = selectedSoftwareModuleType;
+        this.currentView = currentView;
     }
 
     @Override
@@ -63,8 +53,7 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.configure", getI18n().getMessage("caption.delete"),
-                getI18n().getMessage("caption.type"));
+        return getI18n().getMessage("caption.delete") + " " + getI18n().getMessage("caption.type");
     }
 
     @Override
@@ -76,10 +65,8 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
 
     @Override
     protected void disableFields() {
+        super.disableFields();
         getTagDesc().setEnabled(false);
-        getTagName().setEnabled(false);
-        getTypeKey().setEnabled(false);
-        getAssignOptiongroup().setEnabled(false);
     }
 
     @Override
@@ -106,10 +93,12 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
                 getUiNotification().displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
             } else {
                 getSoftwareModuleTypeManagement().delete(swmTypeToDelete.get().getId());
-                // TODO MR EVENTS!!!
-                getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
-                getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
-                getUiNotification().displaySuccess(getI18n().getMessage("message.sw.module.type.delete"));
+                if (DistributionsView.VIEW_NAME.equals(currentView)) {
+                    getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
+                } else if (UploadArtifactView.VIEW_NAME.equals(currentView)) {
+                    getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
+                }
+                getUiNotification().displaySuccess(getI18n().getMessage("message.delete.success", tagNameToDelete));
             }
         });
     }

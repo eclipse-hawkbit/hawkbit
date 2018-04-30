@@ -24,7 +24,7 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
- *
+ * Table header for filtering distribution set tags
  *
  */
 public class DistributionTagHeader extends AbstractFilterHeader {
@@ -57,7 +57,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return i18n.getMessage("header.filter.tag", new Object[] {});
+        return getI18n().getMessage("header.filter.tag", new Object[] {});
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         managementUIState.setDistTagFilterClosed(true);
-        eventBus.publish(this, ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT);
+        getEventBus().publish(this, ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT);
     }
 
     @Override
@@ -89,8 +89,8 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
-                        permChecker, uiNotification);
+                new CreateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
+                        getEventBus(), getPermChecker(), uiNotification);
             }
         };
     }
@@ -103,8 +103,9 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
-                        permChecker, uiNotification, managementUIState.getDistributionTableFilters().getDistSetTags());
+                new DeleteDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
+                        getEventBus(), getPermChecker(), uiNotification,
+                        managementUIState.getDistributionTableFilters().getDistSetTags());
             }
         };
     }
@@ -117,8 +118,8 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, eventBus,
-                        permChecker, uiNotification);
+                new UpdateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
+                        getEventBus(), getPermChecker(), uiNotification);
             }
         };
     }

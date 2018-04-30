@@ -13,8 +13,9 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.CreateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.DeleteSoftwareTypeLayout;
-import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareTypeLayout;
+import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareModuleTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
+import org.eclipse.hawkbit.ui.distributions.DistributionsView;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -36,11 +37,11 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     private final ManageDistUIState manageDistUIState;
 
-    EntityFactory entityFactory;
+    private final transient EntityFactory entityFactory;
 
-    UINotification uiNotification;
+    private final UINotification uiNotification;
 
-    SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
     DistSMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
@@ -50,10 +51,6 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
         this.entityFactory = entityFactory;
         this.uiNotification = uiNotification;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
-
-        // if (hasCreateUpdatePermission()) {
-        // createUpdateSWTypeLayout.init();
-        // }
     }
 
     @Override
@@ -74,7 +71,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         manageDistUIState.setSwTypeFilterClosed(true);
-        eventBus.publish(this, DistributionsUIEvent.HIDE_SM_FILTER_BY_TYPE);
+        getEventBus().publish(this, DistributionsUIEvent.HIDE_SM_FILTER_BY_TYPE);
     }
 
     @Override
@@ -95,7 +92,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                new CreateSoftwareTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
                         softwareModuleTypeManagement);
             }
         };
@@ -109,9 +106,10 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
+                new DeleteSoftwareTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
                         softwareModuleTypeManagement,
-                        manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType());
+                        manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType(),
+                        DistributionsView.VIEW_NAME);
             }
         };
     }
@@ -124,8 +122,8 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement);
+                new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
+                        uiNotification, softwareModuleTypeManagement);
             }
         };
     }

@@ -1106,8 +1106,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected String getEntityName() {
-        // TODO MR use constant
-        return "Target";
+        return i18n.getMessage("caption.target");
     }
 
     @Override

@@ -10,13 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.UpdateComboBoxForTagsAndTypes;
 import org.eclipse.hawkbit.ui.distributions.smtype.AbstractSoftwareModuleTypeLayout;
@@ -30,10 +25,12 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.data.Property.ValueChangeEvent;
 
 /**
- * Layout for the pop-up window which is created when updating a software module
- * type on the Upload or Distributions View.
+ * Abstract class for Software Module Type Layout which is used for updating and
+ * deleting Software Module Types, includes the combobox for selecting the type
+ * to modify
+ *
  */
-public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
+public abstract class AbstractSoftwareModuleTypeLayoutForModify extends AbstractSoftwareModuleTypeLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +52,7 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
      * @param softwareModuleTypeManagement
      *            management for {@link SoftwareModuleType}s
      */
-    public UpdateSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+    public AbstractSoftwareModuleTypeLayoutForModify(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
@@ -93,15 +90,9 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
 
     @Override
     protected void disableFields() {
+        getTagName().setEnabled(false);
         getTypeKey().setEnabled(false);
         getAssignOptiongroup().setEnabled(false);
-        getTagName().setEnabled(false);
-    }
-
-    @Override
-    protected String getWindowCaption() {
-        return getI18n().getMessage("caption.configure", getI18n().getMessage("caption.update"),
-                getI18n().getMessage("caption.type"));
     }
 
     /**
@@ -127,12 +118,6 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
     }
 
     @Override
-    protected void saveEntity() {
-        updateSWModuleType(findEntityByName()
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, getTagName().getValue())));
-    }
-
-    @Override
     protected boolean isUpdateAction() {
         return true;
     }
@@ -141,16 +126,6 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
         updateCombobox.getTagNameComboBox().setContainerDataSource(
                 HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
         updateCombobox.getTagNameComboBox().setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-    }
-
-    private void updateSWModuleType(final SoftwareModuleType existingType) {
-        getSoftwareModuleTypeManagement().update(getEntityFactory().softwareModuleType().update(existingType.getId())
-                .description(getTagDesc().getValue())
-                .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
-        getUiNotification().displaySuccess(
-                getI18n().getMessage("message.update.success", new Object[] { existingType.getName() }));
-        getEventBus().publish(this,
-                new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }
 
     public UpdateComboBoxForTagsAndTypes getUpdateCombobox() {

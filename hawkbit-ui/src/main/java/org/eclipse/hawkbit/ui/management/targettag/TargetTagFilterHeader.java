@@ -41,13 +41,8 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
-    protected boolean hasCreateUpdatePermission() {
-        return permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission();
-    }
-
-    @Override
     protected String getTitle() {
-        return i18n.getMessage("header.target.filter.tag", new Object[] {});
+        return getI18n().getMessage("header.target.filter.tag", new Object[] {});
     }
 
     @Override
@@ -59,7 +54,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         managementUIState.setTargetTagFilterClosed(true);
-        eventBus.publish(this, ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT);
+        getEventBus().publish(this, ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT);
     }
 
     @Override
@@ -74,19 +69,16 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected Command getAddButtonCommand() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected Command getDeleteButtonCommand() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected Command getUpdateButtonCommand() {
-        // TODO Auto-generated method stub
         return null;
     }
 

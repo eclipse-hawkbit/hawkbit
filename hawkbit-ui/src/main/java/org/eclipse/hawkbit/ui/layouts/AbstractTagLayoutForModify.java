@@ -26,13 +26,13 @@ import com.vaadin.data.Property.ValueChangeEvent;
  *
  * @param <E>
  */
-public abstract class AbstractUpdateTagLayout<E extends NamedEntity> extends AbstractTagLayout<E> {
+public abstract class AbstractTagLayoutForModify<E extends NamedEntity> extends AbstractTagLayout<E> {
 
     private static final long serialVersionUID = 1L;
 
     private UpdateComboBoxForTagsAndTypes updateCombobox;
 
-    public AbstractUpdateTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+    public AbstractTagLayoutForModify(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);
     }

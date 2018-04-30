@@ -169,8 +169,11 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      * @return true if ds type is selected
      */
     private boolean isDsTypeSelected(final String distTypeName) {
-        return null != manageDistUIState.getManageDistFilters().getClickedDistSetType() && manageDistUIState
-                .getManageDistFilters().getClickedDistSetType().getName().equalsIgnoreCase(distTypeName);
+        // return null !=
+        // manageDistUIState.getManageDistFilters().getClickedDistSetType() &&
+        // manageDistUIState
+        // .getManageDistFilters().getClickedDistSetType().getName().equalsIgnoreCase(distTypeName);
+        return false;
     }
 
     private void processDeleteSWType(final String swTypeId) {
