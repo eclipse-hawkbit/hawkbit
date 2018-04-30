@@ -110,7 +110,8 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 new DeleteSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement, manageDistUIState.getSelectedDeleteSWModuleTypes());
+                        softwareModuleTypeManagement,
+                        manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType());
             }
         };
     }

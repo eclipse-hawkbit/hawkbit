@@ -108,7 +108,8 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 new DeleteSoftwareTypeLayout(i18n, entityFactory, eventBus, permChecker, uiNotification,
-                        softwareModuleTypeManagement, artifactUploadState.getSelectedDeleteSWModuleTypes());
+                        softwareModuleTypeManagement,
+                        artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType());
             }
         };
     }

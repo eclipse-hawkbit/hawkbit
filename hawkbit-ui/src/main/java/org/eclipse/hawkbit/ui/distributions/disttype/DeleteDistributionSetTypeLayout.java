@@ -54,12 +54,23 @@ public class DeleteDistributionSetTypeLayout extends UpdateDistributionSetTypeLa
     @Override
     protected void buildLayout() {
         super.buildLayout();
-        getTagDesc().setEnabled(false);
-        getTwinTables().setEnabled(false);
-        getTagName().setEnabled(false);
+        disableFields();
         getContentLayout().removeComponent(getColorLabelLayout());
         getUpdateCombobox().getComboLabel()
                 .setValue(getI18n().getMessage("label.choose.type", getI18n().getMessage("label.choose.tag.delete")));
+    }
+
+    @Override
+    protected void disableFields() {
+        getTagDesc().setEnabled(false);
+        getTwinTables().setEnabled(false);
+        getTagName().setEnabled(false);
+        getTypeKey().setEnabled(false);
+    }
+
+    @Override
+    protected void resetFields() {
+        super.resetFields();
     }
 
     @Override
@@ -103,16 +114,20 @@ public class DeleteDistributionSetTypeLayout extends UpdateDistributionSetTypeLa
         final String tagNameToDelete = getTagName().getValue();
         final Optional<DistributionSetType> distTypeToDelete = getDistributionSetTypeManagement()
                 .getByName(tagNameToDelete);
-        distTypeToDelete.ifPresent(tag -> {
-            if (selectedTypes.contains(distTypeToDelete.get())) {
-                getUiNotification().displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
-            } else {
-                getDistributionSetTypeManagement().delete(distTypeToDelete.get().getId());
-                getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
-                getUiNotification().displaySuccess(getI18n().getMessage("message.dist.set.type.deleted.success"));
-                selectedTypes.remove(distTypeToDelete.get());
-            }
-        });
+        distTypeToDelete.ifPresent(
+
+                tag -> {
+                    if (selectedTypes.contains(distTypeToDelete.get())) {
+                        getUiNotification()
+                                .displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
+                    } else {
+                        getDistributionSetTypeManagement().delete(distTypeToDelete.get().getId());
+                        getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
+                        getUiNotification()
+                                .displaySuccess(getI18n().getMessage("message.dist.set.type.deleted.success"));
+                        selectedTypes.remove(distTypeToDelete.get());
+                    }
+                });
     }
 
 }

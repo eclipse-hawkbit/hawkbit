@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -29,7 +28,7 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private final Set<String> selectedTypes;
+    private final transient Optional<SoftwareModuleType> selectedSoftwareModuleType;
 
     /**
      * Constructor for CreateUpdateSoftwareTypeLayout
@@ -49,9 +48,10 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
      */
     public DeleteSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final Set<String> selectedTypes) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final Optional<SoftwareModuleType> selectedSoftwareModuleType) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
-        this.selectedTypes = selectedTypes;
+        this.selectedSoftwareModuleType = selectedSoftwareModuleType;
     }
 
     @Override
@@ -70,9 +70,16 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
     @Override
     protected void buildLayout() {
         super.buildLayout();
+        disableFields();
+        getContentLayout().removeComponent(getColorLabelLayout());
+    }
+
+    @Override
+    protected void disableFields() {
         getTagDesc().setEnabled(false);
         getTagName().setEnabled(false);
-        getContentLayout().removeComponent(getColorLabelLayout());
+        getTypeKey().setEnabled(false);
+        getAssignOptiongroup().setEnabled(false);
     }
 
     @Override
@@ -90,15 +97,12 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
         return true;
     }
 
-    // TODO MR: selectedTypes sind nicht korrekt. Je nach View werden andere
-    // Werte gesetzt!!! Events!!! Klasse muss für jede View extra generiert
-    // werden!!!!
     private void deleteSoftwareModuleType() {
         final String tagNameToDelete = getTagName().getValue();
         final Optional<SoftwareModuleType> swmTypeToDelete = getSoftwareModuleTypeManagement()
                 .getByName(tagNameToDelete);
         swmTypeToDelete.ifPresent(tag -> {
-            if (selectedTypes.contains(tagNameToDelete)) {
+            if (selectedSoftwareModuleType.equals(swmTypeToDelete)) {
                 getUiNotification().displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
             } else {
                 getSoftwareModuleTypeManagement().delete(swmTypeToDelete.get().getId());
@@ -106,7 +110,6 @@ public class DeleteSoftwareTypeLayout extends UpdateSoftwareTypeLayout {
                 getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
                 getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
                 getUiNotification().displaySuccess(getI18n().getMessage("message.sw.module.type.delete"));
-                selectedTypes.remove(tagNameToDelete);
             }
         });
     }

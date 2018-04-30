@@ -76,6 +76,11 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
     protected void buildLayout() {
         super.buildLayout();
         getFormLayout().addComponent(updateCombobox, 0);
+        disableFields();
+    }
+
+    @Override
+    protected void disableFields() {
         getTypeKey().setEnabled(false);
         getTagName().setEnabled(false);
     }
@@ -121,7 +126,7 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         if (tagSelected != null) {
             setTagDetails(tagSelected);
         } else {
-            resetTagNameField();
+            resetFields();
         }
         if (isUpdateAction()) {
             getWindow().setOrginaleValues();
@@ -159,7 +164,7 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
             selectedType.getMandatoryModuleTypes().forEach(swModuleType -> addTargetTableForUpdate(swModuleType, true));
             setColorPickerComponentsColor(selectedType.getColour());
         });
-        getTagName().setEnabled(false);
+        disableFields();
     }
 
     private void createOriginalSelectedTableContainer() {

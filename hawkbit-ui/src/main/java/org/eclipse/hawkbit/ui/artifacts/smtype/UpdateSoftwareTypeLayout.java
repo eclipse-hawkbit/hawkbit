@@ -77,7 +77,7 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
         if (tagSelected != null) {
             setTagDetails(tagSelected);
         } else {
-            resetTagNameField();
+            resetFields();
         }
         if (isUpdateAction()) {
             getWindow().setOrginaleValues();
@@ -88,8 +88,14 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
     protected void buildLayout() {
         super.buildLayout();
         getFormLayout().addComponent(updateCombobox, 0);
+        disableFields();
+    }
+
+    @Override
+    protected void disableFields() {
         getTypeKey().setEnabled(false);
         getAssignOptiongroup().setEnabled(false);
+        getTagName().setEnabled(false);
     }
 
     @Override
@@ -117,6 +123,7 @@ public class UpdateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
             }
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         });
+        disableFields();
     }
 
     @Override

@@ -52,8 +52,8 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
     }
 
     @Override
-    protected void resetTagNameField() {
-        super.resetTagNameField();
+    protected void resetFields() {
+        super.resetFields();
         twinTables.reset();
     }
 

@@ -48,14 +48,25 @@ public class DeleteDistributionSetTagLayout extends UpdateDistributionSetTagLayo
         super.init();
         getUpdateCombobox().getComboLabel()
                 .setValue(getI18n().getMessage("label.choose.tag", getI18n().getMessage("label.choose.tag.delete")));
-        getContentLayout().removeComponent(getColorLabelLayout());
     }
 
     @Override
-    protected void setTagDetails(final String distTagSelected) {
-        super.setTagDetails(distTagSelected);
-        getTagDesc().setEnabled(false);
+    protected void buildLayout() {
+        super.buildLayout();
+        getContentLayout().removeComponent(getColorLabelLayout());
+        disableFields();
     }
+
+    @Override
+    protected void disableFields() {
+        getTagDesc().setEnabled(false);
+        getTagName().setEnabled(false);
+    }
+
+    // @Override
+    // protected void setTagDetails(final String distTagSelected) {
+    // super.setTagDetails(distTagSelected);
+    // }
 
     @Override
     protected String getWindowCaption() {

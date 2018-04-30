@@ -134,8 +134,8 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
     }
 
     @Override
-    protected void resetTagNameField() {
-        super.resetTagNameField();
+    protected void resetFields() {
+        super.resetFields();
         typeKey.clear();
         typeKey.setEnabled(true);
     }

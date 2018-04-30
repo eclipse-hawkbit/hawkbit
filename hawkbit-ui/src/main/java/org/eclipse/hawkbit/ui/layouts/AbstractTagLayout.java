@@ -242,7 +242,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         return ColorPickerConstants.START_COLOR;
     }
 
-    protected void resetTagNameField() {
+    protected void resetFields() {
         tagName.setEnabled(true);
         tagName.clear();
         tagDesc.clear();
@@ -250,6 +250,11 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
+        disableFields();
+    }
+
+    protected void disableFields() {
+        // can be overwritten
     }
 
     /**

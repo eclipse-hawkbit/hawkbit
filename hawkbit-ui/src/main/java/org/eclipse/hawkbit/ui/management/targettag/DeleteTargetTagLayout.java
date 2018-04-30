@@ -47,14 +47,25 @@ public class DeleteTargetTagLayout extends UpdateTargetTagLayout {
         super.init();
         getUpdateCombobox().getComboLabel()
                 .setValue(getI18n().getMessage("label.choose.tag", getI18n().getMessage("label.choose.tag.delete")));
+    }
+
+    @Override
+    protected void buildLayout() {
+        super.buildLayout();
+        disableFields();
         getContentLayout().removeComponent(getColorLabelLayout());
     }
 
     @Override
-    protected void setTagDetails(final String distTagSelected) {
-        super.setTagDetails(distTagSelected);
+    protected void disableFields() {
         getTagDesc().setEnabled(false);
+        getTagName().setEnabled(false);
     }
+
+    // @Override
+    // protected void setTagDetails(final String distTagSelected) {
+    // super.setTagDetails(distTagSelected);
+    // }
 
     @Override
     protected String getWindowCaption() {

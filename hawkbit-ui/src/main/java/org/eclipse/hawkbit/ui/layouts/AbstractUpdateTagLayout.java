@@ -71,7 +71,7 @@ public abstract class AbstractUpdateTagLayout<E extends NamedEntity> extends Abs
         if (tagSelected != null) {
             setTagDetails(tagSelected);
         } else {
-            resetTagNameField();
+            resetFields();
         }
         if (isUpdateAction()) {
             getWindow().setOrginaleValues();
