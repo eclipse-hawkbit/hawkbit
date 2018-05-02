@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,7 @@ public interface DistributionSetTypeRepository
      * @param isDeleted
      *            to <code>true</code> if only soft deleted entries of
      *            <code>false</code> if undeleted ones
+     * 
      * @return list of found {@link DistributionSetType}s
      */
     Page<JpaDistributionSetType> findByDeleted(Pageable pageable, boolean isDeleted);
@@ -47,7 +49,8 @@ public interface DistributionSetTypeRepository
     /**
      * @param isDeleted
      *            to <code>true</code> if only marked as deleted have to be
-     *            count or all undeleted.
+     *            counted or all undeleted.
+     * 
      * @return number of {@link DistributionSetType}s in the repository.
      */
     long countByDeleted(boolean isDeleted);
@@ -59,6 +62,7 @@ public interface DistributionSetTypeRepository
      * @param softwareModuleType
      *            the software module type to count the distribution set type
      *            which has this software module type assigned
+     * 
      * @return the number of {@link DistributionSetType}s in the repository
      *         assigned to the given software module type
      */
@@ -78,8 +82,29 @@ public interface DistributionSetTypeRepository
     @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
 
+    /**
+     * Retrieves the {@link DistributionSetType}s for the given IDs. Workaround
+     * for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+     *
+     * @param ids
+     *            of the types to be located
+     * 
+     * @return a list of distribution set types
+     */
     @Override
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSetType d WHERE d.id IN ?1")
     List<JpaDistributionSetType> findAll(Iterable<Long> ids);
+
+    /**
+     * Counts the {@link SoftwareModuleType}s which are associated with the
+     * addressed {@link DistributionSetType}.
+     * 
+     * @param id
+     *            of the distribution set type
+     * 
+     * @return the number of associated software module types
+     */
+    @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")
+    long countSmTypesById(@Param("id") Long id);
+
 }

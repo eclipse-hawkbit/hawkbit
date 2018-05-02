@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -49,8 +51,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,6 +70,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Software Module Resource")
+@TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Before
@@ -147,7 +152,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
+    @Description("Tests the upload of an artifact binary. The upload is executed and the content checked in the repository for completeness.")
     public void uploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -181,6 +186,24 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 
         assertArtifact(sm, random);
+    }
+
+    @Test
+    @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
+    public void uploadArtifactFailsIfTooLarge() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
+        final long maxSize = quotaManagement.getMaxArtifactSize();
+
+        // create a file which exceeds the configured maximum size
+        final byte[] randomBytes = new byte[Math.toIntExact(maxSize) + 1024];
+        new Random().nextBytes(randomBytes);
+
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, randomBytes);
+
+        // try to upload
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
     }
 
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
@@ -313,16 +336,56 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
+    @Description("Verifies that only a limited number of artifacts can be uploaded for one software module.")
+    public void uploadArtifactsUntilQuotaExceeded() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+        final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
+
+        for (int i = 0; i < maxArtifacts; ++i) {
+            // create test file
+            final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+            final String md5sum = HashGeneratorUtils.generateMD5(random);
+            final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+            final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
+
+            // upload
+            mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                    .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                    .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                    .andExpect(jsonPath("$.size", equalTo(random.length)))
+                    .andExpect(jsonPath("$.providedFilename", equalTo("origFilename" + i))).andReturn();
+        }
+
+        // upload one more file to cause the quota to be exceeded
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        HashGeneratorUtils.generateMD5(random);
+        HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
+
+        // upload
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+    }
+
+    @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
     public void downloadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
+                false, artifactSize);
         final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
-                false);
+                false, artifactSize);
 
         downloadAndVerify(sm, random, artifact);
         downloadAndVerify(sm, random, artifact2);
@@ -348,9 +411,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // prepare data for test
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
+                false, artifactSize);
 
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
@@ -373,12 +438,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void getArtifacts() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
+                false, artifactSize);
         final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
-                false);
+                false, artifactSize);
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -402,7 +468,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
     public void invalidRequestsOnArtifactResource() throws Exception {
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -415,7 +483,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // SM does not exist
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize);
         mvc.perform(get("/rest/v1/softwaremodules/1234567890/artifacts")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -723,9 +791,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
         assertThat(artifactManagement.count()).isEqualTo(1);
@@ -743,11 +812,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void deleteAssignedSoftwareModule() throws Exception {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("a");
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         final Long appTypeSmId = ds1.findFirstModuleByType(appType).get().getId();
 
-        artifactManagement.create(new ByteArrayInputStream(random), appTypeSmId, "file1", false);
+        artifactManagement.create(new ByteArrayInputStream(random), appTypeSmId, "file1", false, artifactSize);
 
         assertThat(softwareModuleManagement.count()).isEqualTo(3);
         assertThat(artifactManagement.count()).isEqualTo(1);
@@ -771,12 +841,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // Create 1 SM
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         // Create 2 artifacts
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false);
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2", false);
+                false, artifactSize);
+        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize);
 
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
@@ -797,7 +868,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies the successfull creation of metadata.")
+    @Description("Verfies the successful creation of metadata and the enforcement of the meta data quota.")
     public void createMetadata() throws Exception {
 
         final String knownKey1 = "knownKey1";
@@ -807,12 +878,12 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final JSONArray jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
-        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2).put("targetVisible", true));
+        final JSONArray metaData1 = new JSONArray();
+        metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2).put("targetVisible", true));
 
         mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -827,6 +898,25 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
+
+        // verify quota enforcement
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+
+        final JSONArray metaData2 = new JSONArray();
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
+            metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
+        }
+
+        mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify that the number of meta data entries has not changed
+        // (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(softwareModuleManagement
+                .findMetaDataBySoftwareModuleId(new PageRequest(0, Integer.MAX_VALUE), sm.getId()).getTotalElements())
+                        .isEqualTo(metaData1.length());
+
     }
 
     @Test
@@ -930,4 +1020,5 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
             character++;
         }
     }
+
 }

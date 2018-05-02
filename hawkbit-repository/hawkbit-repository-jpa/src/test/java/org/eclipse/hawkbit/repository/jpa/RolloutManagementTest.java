@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -69,9 +73,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -1258,6 +1259,87 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify that a rollout cannot be created if the 'max targets per rollout group' quota is violated.")
+    public void createRolloutFailsIfQuotaGroupQuotaIsViolated() throws Exception {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+
+        final int amountTargetsForRollout = maxTargets + 1;
+        final int amountGroups = 1;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final String rolloutName = "rolloutTest";
+        final String targetPrefixName = rolloutName;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
+                        .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
+                amountGroups, conditions));
+
+    }
+
+    @Test
+    @Description("Verify that a rollout cannot be created based on group definitions if the 'max targets per rollout group' quota is violated for one of the groups.")
+    public void createRolloutWithGroupDefinitionsFailsIfQuotaGroupQuotaIsViolated() throws Exception {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+
+        final int amountTargetsForRollout = maxTargets * 2 + 2;
+        final String rolloutName = "rolloutTest";
+        final String targetPrefixName = rolloutName;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        // create group definitions
+        final RolloutGroupCreate group1 = entityFactory.rolloutGroup().create().conditions(conditions).name("group1")
+                .targetPercentage(50.0F);
+        final RolloutGroupCreate group2 = entityFactory.rolloutGroup().create().conditions(conditions).name("group2")
+                .targetPercentage(100.0F);
+
+        // group1 exceeds the quota
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
+                        .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
+                Arrays.asList(group1, group2), conditions));
+
+        // create group definitions
+        final RolloutGroupCreate group3 = entityFactory.rolloutGroup().create().conditions(conditions).name("group3")
+                .targetPercentage(1.0F);
+        final RolloutGroupCreate group4 = entityFactory.rolloutGroup().create().conditions(conditions).name("group4")
+                .targetPercentage(100.0F);
+
+        // group4 exceeds the quota
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
+                        .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
+                Arrays.asList(group3, group4), conditions));
+
+        // create group definitions
+        final RolloutGroupCreate group5 = entityFactory.rolloutGroup().create().conditions(conditions).name("group5")
+                .targetPercentage(33.3F);
+        final RolloutGroupCreate group6 = entityFactory.rolloutGroup().create().conditions(conditions).name("group6")
+                .targetPercentage(66.6F);
+        final RolloutGroupCreate group7 = entityFactory.rolloutGroup().create().conditions(conditions).name("group7")
+                .targetPercentage(100.0F);
+
+        // should work fine
+        assertThat(rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
+                        .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
+                Arrays.asList(group5, group6, group7), conditions)).isNotNull();
+
+    }
+
+    @Test
     @Description("Verify the creation and the automatic start of a rollout.")
     public void createAndAutoStartRollout() throws Exception {
 
@@ -1308,7 +1390,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify the creation of a Rollout with a groups definition.")
+    @Description("Verify the creation of a rollout with a groups definition.")
     public void createRolloutWithGroupDefinition() throws Exception {
         final String rolloutName = "rolloutTest3";
 
@@ -1355,7 +1437,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1and2 + amountTargetsInGroup1);
 
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent();
-        ;
+
         assertThat(groups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.READY);
         assertThat(groups.get(0).getTotalTargets()).isEqualTo(amountTargetsInGroup1);
 
@@ -1368,7 +1450,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify Exception when a Rollout with Group definition is created that does not address all targets")
+    @Description("Verify rollout creation fails if group definition does not address all targets")
     public void createRolloutWithGroupsNotMatchingTargets() throws Exception {
         final String rolloutName = "rolloutTest4";
         final int amountTargetsForRollout = 500;
@@ -1389,7 +1471,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify Exception when a Rollout with Group definition is created that contains an illegal percentage")
+    @Description("Verify rollout creation fails if group definition specifies illegal target percentage")
     public void createRolloutWithIllegalPercentage() throws Exception {
         final String rolloutName = "rolloutTest6";
         final int amountTargetsForRollout = 10;
@@ -1410,18 +1492,18 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify Exception when a Rollout is created with too much groups")
+    @Description("Verify rollout creation fails if the 'max rollout groups per rollout' quota is violated.")
     public void createRolloutWithIllegalAmountOfGroups() throws Exception {
         final String rolloutName = "rolloutTest5";
-        final int amountTargetsForRollout = 10;
-        final int illegalGroupAmount = 501;
+        final int targets = 10;
+        final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
-        final RolloutCreate myRollout = generateTargetsAndRollout(rolloutName, amountTargetsForRollout);
+        final RolloutCreate rollout = generateTargetsAndRollout(rolloutName, targets);
 
-        assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> rolloutManagement.create(myRollout, illegalGroupAmount, conditions))
-                .withMessageContaining("not be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> rolloutManagement.create(rollout, maxGroups + 1, conditions))
+                .withMessageContaining("not be greater than " + maxGroups);
 
     }
 

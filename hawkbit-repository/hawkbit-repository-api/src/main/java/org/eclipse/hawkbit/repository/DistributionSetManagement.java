@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -52,6 +53,7 @@ public interface DistributionSetManagement
      *            to assign and update
      * @param moduleIds
      *            to get assigned
+     * 
      * @return the updated {@link DistributionSet}.
      * 
      * @throws EntityNotFoundException
@@ -62,8 +64,12 @@ public interface DistributionSetManagement
      *             the DS is already in use.
      * 
      * @throws UnsupportedSoftwareModuleForThisDistributionSetException
-     *             is {@link SoftwareModule#getType()} is not supported by this
+     *             if {@link SoftwareModule#getType()} is not supported by this
      *             {@link DistributionSet#getType()}.
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link SoftwareModule}s is exceeded
+     *             for the addressed {@link DistributionSet}.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSet assignSoftwareModules(long setId, @NotEmpty Collection<Long> moduleIds);
@@ -76,6 +82,7 @@ public interface DistributionSetManagement
      *            to assign for
      * @param tagId
      *            to assign
+     * 
      * @return list of assigned ds
      * 
      * @throws EntityNotFoundException
@@ -86,7 +93,7 @@ public interface DistributionSetManagement
     List<DistributionSet> assignTag(@NotEmpty Collection<Long> setIds, long tagId);
 
     /**
-     * creates a list of distribution set meta data entries.
+     * Creates a list of distribution set meta data entries.
      *
      * @param setId
      *            if the {@link DistributionSet} the metadata has to be created
@@ -97,15 +104,20 @@ public interface DistributionSetManagement
      * 
      * @throws EntityNotFoundException
      *             if given set does not exist
+     * 
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link MetaData} entries is exceeded
+     *             for the addressed {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<DistributionSetMetadata> createMetaData(long setId, @NotEmpty Collection<MetaData> metadata);
 
     /**
-     * deletes a distribution set meta data entry.
+     * Deletes a distribution set meta data entry.
      *
      * @param setId
      *            where meta data has to be deleted
@@ -119,7 +131,7 @@ public interface DistributionSetManagement
     void deleteMetaData(long setId, @NotEmpty String key);
 
     /**
-     * retrieves the distribution set for a given action.
+     * Retrieves the distribution set for a given action.
      *
      * @param actionId
      *            the action associated with the distribution set
@@ -140,6 +152,7 @@ public interface DistributionSetManagement
      *
      * @param setId
      *            to look for.
+     * 
      * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -152,13 +165,14 @@ public interface DistributionSetManagement
      *            name of {@link DistributionSet}; case insensitive
      * @param version
      *            version of {@link DistributionSet}
+     * 
      * @return the page with the found {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSet> getByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
-     * finds all meta data by the given distribution set id.
+     * Finds all meta data by the given distribution set id.
      * 
      * @param pageable
      *            the page request to page the result
@@ -175,7 +189,7 @@ public interface DistributionSetManagement
     Page<DistributionSetMetadata> findMetaDataByDistributionSetId(@NotNull Pageable pageable, long setId);
 
     /**
-     * finds all meta data by the given distribution set id.
+     * Finds all meta data by the given distribution set id.
      * 
      * @param pageable
      *            the page request to page the result
@@ -190,6 +204,7 @@ public interface DistributionSetManagement
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
+     * 
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
      * 
@@ -201,7 +216,7 @@ public interface DistributionSetManagement
             @NotNull String rsqlParam);
 
     /**
-     * finds all {@link DistributionSet}s.
+     * Finds all {@link DistributionSet}s.
      *
      * @param pageable
      *            the pagination parameter
@@ -210,14 +225,13 @@ public interface DistributionSetManagement
      *            sets or <code>false</code> for only incomplete ones nor
      *            <code>null</code> to return both.
      *
-     *
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSet> findByCompleted(@NotNull Pageable pageable, Boolean complete);
 
     /**
-     * method retrieves all {@link DistributionSet}s from the repository in the
+     * Method retrieves all {@link DistributionSet}s from the repository in the
      * following order:
      * <p>
      * 1) {@link DistributionSet}s which have the given {@link Target} as
@@ -235,6 +249,7 @@ public interface DistributionSetManagement
      *            has details of filters to be applied
      * @param assignedOrInstalled
      *            the id of the Target to be ordered by
+     * 
      * @return {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -242,7 +257,7 @@ public interface DistributionSetManagement
             @NotNull DistributionSetFilterBuilder distributionSetFilterBuilder, @NotEmpty String assignedOrInstalled);
 
     /**
-     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
      *
      * @param pageable
      *            page parameter
@@ -255,7 +270,7 @@ public interface DistributionSetManagement
             @NotNull DistributionSetFilter distributionSetFilter);
 
     /**
-     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
      *
      * @param pageable
      *            page parameter
@@ -266,6 +281,7 @@ public interface DistributionSetManagement
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
+     * 
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
      * 
@@ -276,7 +292,7 @@ public interface DistributionSetManagement
     Page<DistributionSet> findByTag(@NotNull Pageable pageable, long tagId);
 
     /**
-     * retrieves {@link DistributionSet}s by filtering on the given parameters.
+     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
      *
      * @param pageable
      *            page parameter
@@ -293,7 +309,7 @@ public interface DistributionSetManagement
     Page<DistributionSet> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
-     * finds a single distribution set meta data by its id.
+     * Finds a single distribution set meta data by its id.
      *
      * @param setId
      *            of the {@link DistributionSet}
@@ -375,7 +391,7 @@ public interface DistributionSetManagement
     DistributionSet unAssignTag(long setId, long tagId);
 
     /**
-     * updates a distribution set meta data value if corresponding entry exists.
+     * Updates a distribution set meta data value if corresponding entry exists.
      *
      * @param setId
      *            {@link DistributionSet} of the meta data entry to be updated

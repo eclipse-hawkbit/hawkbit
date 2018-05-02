@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -53,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -103,7 +106,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final ArtifactManagement artifactManagement;
 
+    private final QuotaManagement quotaManagement;
+
     private final VirtualPropertyReplacer virtualPropertyReplacer;
+
     private final Database database;
 
     JpaSoftwareModuleManagement(final EntityManager entityManager,
@@ -112,8 +118,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
-            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
+            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -122,6 +128,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.auditorProvider = auditorProvider;
         this.artifactManagement = artifactManagement;
+        this.quotaManagement = quotaManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
     }
@@ -461,19 +468,13 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleMetadata createMetaData(final SoftwareModuleMetadataCreate c) {
+
         final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
+        final Long moduleId = create.getSoftwareModuleId();
+        assertSoftwareModuleExists(moduleId);
+        assertMetaDataQuota(moduleId, 1);
 
-        checkAndThrowAlreadyIfSoftwareModuleMetadataExists(create.getSoftwareModuleId(), create);
-        touch(create.getSoftwareModuleId());
-
-        return softwareModuleMetadataRepository.save(create.build());
-    }
-
-    private void checkAndThrowAlreadyIfSoftwareModuleMetadataExists(final Long moduleId,
-            final JpaSoftwareModuleMetadataCreate md) {
-        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
-            throwMetadataKeyAlreadyExists(md.getKey());
-        }
+        return saveMetadata(create);
     }
 
     @Override
@@ -482,7 +483,71 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
 
-        return create.stream().map(this::createMetaData).collect(Collectors.toList());
+        if (!create.isEmpty()) {
+
+            // check if all meta data entries refer to the same software module
+            final Long moduleId = ((JpaSoftwareModuleMetadataCreate) create.iterator().next()).getSoftwareModuleId();
+            if (createJpaMetadataCreateStream(create).allMatch(c -> moduleId.equals(c.getSoftwareModuleId()))) {
+
+                assertSoftwareModuleExists(moduleId);
+                assertMetaDataQuota(moduleId, create.size());
+
+                return createJpaMetadataCreateStream(create).map(this::saveMetadata).collect(Collectors.toList());
+
+            } else {
+
+                // group by software module id to minimize database access
+                final Map<Long, List<JpaSoftwareModuleMetadataCreate>> groups = createJpaMetadataCreateStream(create)
+                        .collect(Collectors.groupingBy(JpaSoftwareModuleMetadataCreate::getSoftwareModuleId));
+                return groups.entrySet().stream().flatMap(e -> {
+
+                    final Long id = e.getKey();
+                    final List<JpaSoftwareModuleMetadataCreate> group = e.getValue();
+
+                    assertSoftwareModuleExists(id);
+                    assertMetaDataQuota(id, group.size());
+
+                    return group.stream().map(this::saveMetadata);
+                }).collect(Collectors.toList());
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    private static Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
+            final Collection<SoftwareModuleMetadataCreate> create) {
+        return create.stream().map(c -> (JpaSoftwareModuleMetadataCreate) c);
+    }
+
+    private SoftwareModuleMetadata saveMetadata(final JpaSoftwareModuleMetadataCreate create) {
+        assertSoftwareModuleMetadataDoesNotExist(create.getSoftwareModuleId(), create);
+        return softwareModuleMetadataRepository.save(create.build());
+    }
+
+    private void assertSoftwareModuleMetadataDoesNotExist(final Long moduleId,
+            final JpaSoftwareModuleMetadataCreate md) {
+        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
+            throwMetadataKeyAlreadyExists(md.getKey());
+        }
+    }
+
+    private void assertSoftwareModuleExists(final Long moduleId) {
+        touch(moduleId);
+    }
+
+    /**
+     * Asserts the meta data quota for the software module with the given ID.
+     * 
+     * @param moduleId
+     *            The software module ID.
+     * @param requested
+     *            Number of meta data entries to be created.
+     */
+    private void assertMetaDataQuota(final Long moduleId, final int requested) {
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        QuotaHelper.assertAssignmentQuota(moduleId, requested, maxMetaData, SoftwareModuleMetadata.class,
+                SoftwareModule.class, softwareModuleMetadataRepository::countBySoftwareModuleId);
     }
 
     @Override
@@ -514,9 +579,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
      */
     private JpaSoftwareModule touch(final SoftwareModule latestModule) {
         // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
+        // log written because modifying metadata is modifying the base
+        // distribution set itself for auditing purposes.
         final JpaSoftwareModule result = entityManager.merge((JpaSoftwareModule) latestModule);
         result.setLastModifiedAt(0L);
 

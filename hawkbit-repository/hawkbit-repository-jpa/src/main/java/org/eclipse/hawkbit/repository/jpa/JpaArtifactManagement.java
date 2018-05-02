@@ -17,15 +17,18 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -49,6 +52,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaArtifactManagement.class);
 
+    private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
+
     private final LocalArtifactRepository localArtifactRepository;
 
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -57,12 +62,15 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final TenantAware tenantAware;
 
+    private final QuotaManagement quotaManagement;
+
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
+        this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
     }
 
@@ -87,12 +95,15 @@ public class JpaArtifactManagement implements ArtifactManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final InputStream stream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
-            final String contentType) {
+            final String contentType, final long filesize) {
         AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
         final Artifact existing = checkForExistingArtifact(filename, overrideExisting, softwareModule);
+
+        assertArtifactQuota(moduleId, 1);
+        assertMaxArtifactSizeQuota(filename, moduleId, filesize);
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
@@ -111,6 +122,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         return storeArtifactMetadata(softwareModule, filename, result, existing);
+    }
+
+    private void assertArtifactQuota(final long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
+                Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
+    }
+
+    private void assertMaxArtifactSizeQuota(final String filename, final long id, final long artifactSize) {
+        final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
+        if (maxArtifactSize <= 0) {
+            return;
+        }
+        if (artifactSize > maxArtifactSize) {
+            final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename, artifactSize, id, maxArtifactSize);
+            LOG.warn(msg);
+            throw new QuotaExceededException(msg);
+        }
     }
 
     @Override
@@ -207,8 +235,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final InputStream inputStream, final long moduleId, final String filename,
-            final boolean overrideExisting) {
-        return create(inputStream, moduleId, filename, null, null, overrideExisting, null);
+            final boolean overrideExisting, final long filesize) {
+        return create(inputStream, moduleId, filename, null, null, overrideExisting, null, filesize);
     }
 
     @Override
