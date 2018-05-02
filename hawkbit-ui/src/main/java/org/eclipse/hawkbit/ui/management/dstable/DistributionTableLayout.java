@@ -53,8 +53,8 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
                 distributionSetManagement, entityFactory, permissionChecker);
 
         this.distributionTable = new DistributionTable(eventBus, i18n, permissionChecker, notification,
-                managementUIState, managementViewClientCriterion, targetManagement, dsMetadataPopupLayout,
-                distributionSetManagement, deploymentManagement, targetTagManagement, uiProperties);
+                managementUIState, managementViewClientCriterion, targetManagement, distributionSetManagement,
+                deploymentManagement, targetTagManagement, uiProperties);
 
         super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,

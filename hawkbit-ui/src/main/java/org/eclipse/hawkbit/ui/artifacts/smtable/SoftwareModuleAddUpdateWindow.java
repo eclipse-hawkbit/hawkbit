@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -83,6 +84,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
     private FormLayout formLayout;
 
     private final AbstractTable<SoftwareModule> softwareModuleTable;
+
+    private Label softwareModuleType;
 
     /**
      * Constructor for SoftwareModuleAddUpdateWindow
@@ -250,7 +253,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         nameTextField.clear();
         versionTextField.clear();
         descTextArea.clear();
-        typeComboBox.clear();
+        if (!editSwModule) {
+            typeComboBox.clear();
+        }
         editSwModule = Boolean.FALSE;
     }
 
@@ -263,7 +268,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
         formLayout = new FormLayout();
         formLayout.setCaption(null);
-        formLayout.addComponent(typeComboBox);
+        if (editSwModule) {
+            formLayout.addComponent(softwareModuleType);
+        } else {
+            formLayout.addComponent(typeComboBox);
+            typeComboBox.focus();
+        }
+
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(versionTextField);
         formLayout.addComponent(vendorTextField);
@@ -276,8 +287,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
-        typeComboBox.setEnabled(!editSwModule);
-        typeComboBox.focus();
 
         return window;
     }
@@ -295,11 +304,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             versionTextField.setValue(swModule.getVersion());
             vendorTextField.setValue(swModule.getVendor());
             descTextArea.setValue(swModule.getDescription());
-
-            if (swModule.getType().isDeleted()) {
-                typeComboBox.addItem(swModule.getType().getName());
-            }
-            typeComboBox.setValue(swModule.getType().getName());
+            softwareModuleType = new LabelBuilder().name(swModule.getType().getName()).caption("Type").buildLabel();
         });
     }
 

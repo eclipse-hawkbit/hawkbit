@@ -36,9 +36,7 @@ import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -48,8 +46,6 @@ import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -68,8 +64,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -95,18 +89,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private final transient TargetManagement targetManagement;
 
-    private final DsMetadataPopupLayout dsMetadataPopupLayout;
-
-    private static final String DIST_NAME = "DistributionName";
-
-    private static final String SOFTWARE_MODULE_NAME = "SoftwareModuleName";
-
     DistributionSetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final TargetManagement targetManagement, final DsMetadataPopupLayout dsMetadataPopupLayout) {
+            final TargetManagement targetManagement) {
         super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.manageDistUIState = manageDistUIState;
@@ -114,7 +102,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
         this.targetManagement = targetManagement;
-        this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         addTableStyleGenerator();
         addNewContainerDS();
         setColumnProperties();
@@ -493,51 +480,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
-    }
-
-    @Override
-    protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                final String nameVersionStr = getNameAndVerion(itemId);
-                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
-                return manageMetaDataBtn;
-            }
-        });
-    }
-
-    @Override
-    protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = super.getTableVisibleColumns();
-        if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
-        }
-        return columnList;
-    }
-
-    private Button createManageMetadataButton(final String nameVersionStr) {
-        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
-        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
-        return manageMetadataBtn;
-    }
-
-    private void showMetadataDetails(final Long itemId) {
-        distributionSetManagement.getWithDetails(itemId)
-                .ifPresent(ds -> UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null)));
-    }
-
-    private String getNameAndVerion(final Object itemId) {
-        final Item item = getItem(itemId);
-        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
-        return name + "." + version;
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {

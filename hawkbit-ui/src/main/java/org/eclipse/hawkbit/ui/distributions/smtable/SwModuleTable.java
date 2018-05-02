@@ -14,21 +14,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -36,7 +31,6 @@ import org.eclipse.hawkbit.ui.push.SoftwareModuleUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -54,15 +48,10 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.shared.ui.window.WindowMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  * Implementation of software module table using generic abstract table styles .
@@ -78,22 +67,14 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    private final ArtifactDetailsLayout artifactDetailsLayout;
-
-    private final SwMetadataPopupLayout swMetadataPopupLayout;
-
     SwModuleTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification uiNotification,
             final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final ArtifactManagement artifactManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
-            final ArtifactUploadState artifactUploadState, final SpPermissionChecker permChecker) {
+            final SpPermissionChecker permChecker) {
         super(eventBus, i18n, uiNotification, permChecker);
         this.manageDistUIState = manageDistUIState;
         this.softwareModuleManagement = softwareManagement;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
-        this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
-                artifactManagement, softwareManagement);
-        this.swMetadataPopupLayout = swMetadataPopupLayout;
 
         addNewContainerDS();
         setColumnProperties();
@@ -199,29 +180,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     }
 
     @Override
-    protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUILabelDefinitions.ARTIFACT_ICON, new ColumnGenerator() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                final HorizontalLayout iconLayout = new HorizontalLayout();
-                // add artifactory details popup
-                final String nameVersionStr = getNameAndVerion(itemId);
-                final Button showArtifactDtlsBtn = createShowArtifactDtlsButton(nameVersionStr);
-                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                showArtifactDtlsBtn.addClickListener(event -> showArtifactDetailsWindow((Long) itemId, nameVersionStr));
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
-                iconLayout.addComponent(showArtifactDtlsBtn);
-                iconLayout.addComponent(manageMetaDataBtn);
-                return iconLayout;
-            }
-        });
-
-    }
-
-    @Override
     protected Object getItemIdToSelect() {
         return manageDistUIState.getSelectedSoftwareModules().isEmpty() ? null
                 : manageDistUIState.getSelectedSoftwareModules();
@@ -269,8 +227,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, "", 0.1F));
         }
         return columnList;
     }
@@ -335,31 +291,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         return null;
     }
 
-    private Button createShowArtifactDtlsButton(final String nameVersionStr) {
-        final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.FILE_O, SPUIButtonStyleSmallNoBorder.class);
-        showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        showArtifactDtlsBtn.setDescription(i18n.getMessage("tooltip.artifact.icon"));
-        return showArtifactDtlsBtn;
-    }
-
-    private Button createManageMetadataButton(final String nameVersionStr) {
-        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
-        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
-        return manageMetadataBtn;
-    }
-
-    private String getNameAndVerion(final Object itemId) {
-        final Item item = getItem(itemId);
-        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
-        return name + "." + version;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
@@ -372,55 +303,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         super.updateEntity(baseEntity, item);
     }
 
-    private void showArtifactDetailsWindow(final Long itemId, final String nameVersionStr) {
-        final Window artifactDtlsWindow = new Window();
-        artifactDtlsWindow.setCaption(HawkbitCommonUtil.getArtifactoryDetailsLabelId(nameVersionStr));
-        artifactDtlsWindow.setCaptionAsHtml(true);
-        artifactDtlsWindow.setClosable(true);
-        artifactDtlsWindow.setResizable(true);
-        artifactDtlsWindow.setImmediate(true);
-        artifactDtlsWindow.setWindowMode(WindowMode.NORMAL);
-        artifactDtlsWindow.setModal(true);
-        artifactDtlsWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
-
-        artifactDetailsLayout.setFullWindowMode(false);
-        artifactDetailsLayout.populateArtifactDetails(itemId, nameVersionStr);
-        /* Now add table to the window */
-        artifactDetailsLayout.getArtifactDetailsTable().setWidth(700, Unit.PIXELS);
-        artifactDetailsLayout.getArtifactDetailsTable().setHeight(500, Unit.PIXELS);
-        artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
-
-        /* Create maximized view of the table */
-        artifactDtlsWindow.addWindowModeChangeListener(
-
-                event -> {
-                    if (event.getWindowMode() == WindowMode.MAXIMIZED) {
-                        artifactDtlsWindow.setSizeFull();
-                        artifactDetailsLayout.setFullWindowMode(true);
-                        artifactDetailsLayout.createMaxArtifactDetailsTable();
-                        artifactDetailsLayout.getMaxArtifactDetailsTable().setWidth(100, Unit.PERCENTAGE);
-                        artifactDetailsLayout.getMaxArtifactDetailsTable().setHeight(100, Unit.PERCENTAGE);
-                        artifactDtlsWindow.setContent(artifactDetailsLayout.getMaxArtifactDetailsTable());
-                    } else {
-                        artifactDtlsWindow.setSizeUndefined();
-                        artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());
-                    }
-                });
-        /* display the window */
-        UI.getCurrent().addWindow(artifactDtlsWindow);
-
-    }
-
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvilableSwModule(!available);
-
-    }
-
-    private void showMetadataDetails(final Long itemId) {
-        softwareModuleManagement.get(itemId).ifPresent(
-
-                swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));
     }
 
     @Override

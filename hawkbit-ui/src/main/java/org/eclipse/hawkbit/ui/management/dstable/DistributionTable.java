@@ -45,8 +45,6 @@ import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
@@ -114,8 +112,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final transient TargetTagManagement targetTagManagement;
 
-    private final DsMetadataPopupLayout dsMetadataPopupLayout;
-
     private final transient DistributionSetManagement distributionSetManagement;
 
     private final transient DeploymentManagement deploymentManagement;
@@ -138,7 +134,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final SpPermissionChecker permissionChecker, final UINotification notification,
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
-            final DsMetadataPopupLayout dsMetadataPopupLayout,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
             final TargetTagManagement targetTagManagement, final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permissionChecker);
@@ -147,7 +142,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetManagement = targetManagement;
         this.targetTagManagement = targetTagManagement;
-        this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
@@ -310,38 +304,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected void addCustomGeneratedColumns() {
-        super.addCustomGeneratedColumns();
-        addGeneratedColumn(SPUILabelDefinitions.PIN_COLUMN, new Table.ColumnGenerator() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                final HorizontalLayout iconLayout = new HorizontalLayout();
-                final String nameVersionStr = getNameAndVerion(itemId);
-                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails(itemId));
-                iconLayout.addComponent((Button) getPinButton(itemId));
-                iconLayout.addComponent(manageMetaDataBtn);
-                return iconLayout;
-            }
-        });
-    }
-
-    private String getNameAndVerion(final Object itemId) {
-        final Item item = getItem(itemId);
-        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
-        return name + "." + version;
-    }
-
-    private Button createManageMetadataButton(final String nameVersionStr) {
-        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
-        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
-        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
-        return manageMetadataBtn;
+        addGeneratedColumn(SPUILabelDefinitions.PIN_COLUMN, (source, itemId, columnId) -> getPinButton(itemId));
     }
 
     @Override
@@ -375,7 +338,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (isMaximized()) {
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, "", 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, "", 0.0F));
         return columnList;
     }
 
@@ -740,19 +703,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void styleDistributionTableOnPinning() {
-
-        managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId).ifPresent(
-
-                controllerId -> {
-
+        managementUIState.getDistributionTableFilters().getPinnedTarget().map(TargetIdName::getControllerId)
+                .ifPresent(controllerId -> {
                     final Long installedDistId = deploymentManagement.getInstalledDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
                     final Long assignedDistId = deploymentManagement.getAssignedDistributionSet(controllerId)
                             .map(DistributionSet::getId).orElse(null);
-
                     styleDistributionSetTable(installedDistId, assignedDistId);
                 });
-
     }
 
     private static String getPinnedDistributionStyle(final Long installedDistItemIds,
@@ -773,8 +731,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return null;
     }
 
-    private Object getPinButton(final Object itemId) {
-        final Button pinBtn = getPinBtn(itemId);
+    private Button getPinButton(final Object itemId) {
+        final Button pinBtn = createPinBtn(itemId);
         saveDistributionPinnedBtn(pinBtn);
         pinBtn.addClickListener(this::addPinClickListener);
         rePinDistribution(pinBtn, (Long) itemId);
@@ -878,7 +836,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return pinBtnId.toString();
     }
 
-    private Button getPinBtn(final Object itemId) {
+    private Button createPinBtn(final Object itemId) {
 
         final Item item = getContainerDataSource().getItem(itemId);
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
@@ -926,15 +884,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected void setDataAvailable(final boolean available) {
         managementUIState.setNoDataAvailableDistribution(!available);
 
-    }
-
-    private void showMetadataDetails(final Object itemId) {
-        final Optional<DistributionSet> ds = distributionSetManagement.get((Long) itemId);
-        if (!ds.isPresent()) {
-            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
-            return;
-        }
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds.get(), null));
     }
 
     // Code for delete entity START

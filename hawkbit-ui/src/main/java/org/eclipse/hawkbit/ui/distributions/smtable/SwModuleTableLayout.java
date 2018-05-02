@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -42,16 +43,18 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
                 softwareModuleManagement, entityFactory, permChecker);
 
         this.swModuleTable = new SwModuleTable(eventBus, i18n, uiNotification, manageDistUIState,
-                softwareModuleManagement, distributionsViewClientCriterion, artifactManagement, swMetadataPopupLayout,
-                artifactUploadState, permChecker);
+                softwareModuleManagement, distributionsViewClientCriterion, permChecker);
 
         final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow = new SoftwareModuleAddUpdateWindow(i18n,
                 uiNotification, eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
                 swModuleTable);
+        final ArtifactDetailsLayout artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus,
+                artifactUploadState, uiNotification, artifactManagement, softwareModuleManagement);
+
         super.init(
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
-                        manageDistUIState, softwareModuleManagement, swMetadataPopupLayout));
+                        manageDistUIState, softwareModuleManagement, swMetadataPopupLayout, artifactDetailsLayout));
     }
 
     public SwModuleTable getSwModuleTable() {

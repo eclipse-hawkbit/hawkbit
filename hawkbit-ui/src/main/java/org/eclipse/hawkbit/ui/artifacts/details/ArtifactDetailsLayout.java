@@ -148,7 +148,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
 
         if (isMaximized()) {
-            maximizedArtifactDetailsView();
+            maximizeArtifactDetailsView();
         }
     }
 
@@ -183,7 +183,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
-
     }
 
     private void buildLayout() {
@@ -273,7 +272,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return deleteIcon;
             }
         });
-
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
@@ -359,10 +357,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void maxArtifactDetails() {
         final Boolean flag = (Boolean) maxMinButton.getData();
         if (flag == null || Boolean.FALSE.equals(flag)) {
-            // Clicked on max Button
-            maximizedArtifactDetailsView();
+            maximizeArtifactDetailsView();
         } else {
-            // Clicked on min Button
             minimizeArtifactDetailsView();
         }
     }
@@ -375,12 +371,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     }
 
-    private void maximizedArtifactDetailsView() {
+    private void maximizeArtifactDetailsView() {
         fullWindowMode = Boolean.TRUE;
         showMinIcon();
         setTableColumnDetails(artifactDetailsTable);
         createArtifactDetailsMaxView();
-
     }
 
     /**

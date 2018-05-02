@@ -137,10 +137,6 @@ public class TargetTable extends AbstractTable<Target> {
 
     private boolean targetPinned;
 
-    private static final String TARGET_NAME = "TargetName";
-
-    private static final String DISTRIBUTION_NAME = "DistributionName";
-
     private final UiProperties uiProperties;
 
     private ConfirmationDialog confirmDialog;

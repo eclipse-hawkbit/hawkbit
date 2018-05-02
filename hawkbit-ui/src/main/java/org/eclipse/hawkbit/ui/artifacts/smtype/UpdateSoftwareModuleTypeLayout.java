@@ -56,4 +56,5 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
         getEventBus().publish(this,
                 new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }
+
 }

@@ -71,6 +71,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final ManagementUIState managementUIState;
 
+    private HorizontalLayout nameEditLayout;
+
     protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
@@ -216,7 +218,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return managementUIState;
     }
 
-    private void createComponents() {
+    protected void createComponents() {
         caption = createHeaderCaption();
         caption.setImmediate(true);
         caption.setContentMode(ContentMode.HTML);
@@ -243,8 +245,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.setId(getTabSheetId());
     }
 
-    private void buildLayout() {
-        final HorizontalLayout nameEditLayout = new HorizontalLayout();
+    protected void buildLayout() {
+        nameEditLayout = new HorizontalLayout();
         nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
         nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
@@ -277,7 +279,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * If there is no data in table (i.e. no row selected), then disable the
      * edit button. If row is selected, enable edit button.
      */
-    private void populateData(final T selectedBaseEntity) {
+    protected void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;
         editButton.setEnabled(selectedBaseEntity != null);
         manageMetadataBtn.setEnabled(selectedBaseEntity != null);
@@ -337,5 +339,13 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract boolean isMetadataIconToBeDisplayed();
 
     protected abstract void showMetadata(Button.ClickEvent event);
+
+    public HorizontalLayout getNameEditLayout() {
+        return nameEditLayout;
+    }
+
+    public Button getEditButton() {
+        return editButton;
+    }
 
 }
