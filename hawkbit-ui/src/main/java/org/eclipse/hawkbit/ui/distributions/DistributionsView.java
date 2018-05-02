@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -57,7 +56,6 @@ import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 
 /**
@@ -84,8 +82,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private final SwModuleTableLayout softwareModuleTableLayout;
 
     private final DistSMTypeFilterLayout filterBySMTypeLayout;
-
-    private final DSDeleteActionsLayout deleteActionsLayout;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -121,9 +117,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
                 distributionsViewClientCriterion, artifactUploadState, artifactManagement);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
                 entityFactory, uiNotification, softwareModuleTypeManagement, distributionsViewClientCriterion);
-        this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
-                distributionSetTypeManagement, softwareModuleManagement, softwareModuleTypeManagement);
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewMenuItem = distributionsViewMenuItem;
     }
@@ -184,11 +177,9 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         mainLayout.addComponent(distributionTableLayout, 1, 0);
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setRowExpandRatio(0, 1.0F);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -212,7 +203,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private void maximizeSwTable() {
         mainLayout.removeComponent(filterByDSTypeLayout);
         mainLayout.removeComponent(distributionTableLayout);
-        mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.setColumnExpandRatio(2, 1F);
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0F);
@@ -221,26 +211,21 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private void minimizeSwTable() {
         mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
         mainLayout.addComponent(distributionTableLayout, 1, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
     private void minimizeDistTable() {
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
+    // TODO MR check column expand ratio
     private void maximizeDistTable() {
         mainLayout.removeComponent(softwareModuleTableLayout);
         mainLayout.removeComponent(filterBySMTypeLayout);
-        mainLayout.removeComponent(deleteActionsLayout);
-        mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
         mainLayout.setColumnExpandRatio(3, 0F);
     }

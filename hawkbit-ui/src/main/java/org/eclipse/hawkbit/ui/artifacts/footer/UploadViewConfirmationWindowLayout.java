@@ -35,7 +35,7 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 
-// TODO MR DELETE
+// TODO MR DELETE - Revert to Master when merge
 
 /**
  * Layout of confirm actions window on the Upload View.
