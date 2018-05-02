@@ -15,7 +15,7 @@
 |com.fasterxml|classmate|1.3.3| [CQ10368](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10368) |
 |com.github.gwtd3|gwt-d3-api|1.2.0| [CQ13029](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13029) |
 |com.github.gwtd3|gwt-d3-js|3.5.11| [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
-|com.google.guava|guava|19.0| [CQ12931](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12931) |
+|com.google.guava|guava|25.0-jre| [CQ16201](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=16201) |
 |com.h2database|h2|1.4.186| [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |
 |com.rabbitmq|amqp-client|4.0.2| [CQ13041](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13041) |
 |com.rabbitmq|http-client|1.1.1.RELEASE| [CQ13042](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13042) |
