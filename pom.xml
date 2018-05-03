@@ -168,7 +168,7 @@
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.6.5</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
-      <guava.version>24.1-jre</guava.version>
+      <guava.version>25.0-jre</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
       <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
