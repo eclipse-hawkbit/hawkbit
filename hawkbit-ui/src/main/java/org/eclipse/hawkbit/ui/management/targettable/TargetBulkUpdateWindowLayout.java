@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
@@ -98,9 +99,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
             final UIEventBus eventBus, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
-            final SpPermissionChecker checker, final UINotification uinotification, final TargetTagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
-            final Executor uiExecutor) {
+            final SpPermissionChecker checker, final UINotification uinotification,
+            final TargetTagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory, final Executor uiExecutor) {
         this.i18n = i18n;
         this.targetManagement = targetManagement;
         this.eventBus = eventBus;
@@ -194,10 +195,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private TextArea getDescriptionTextArea() {
-        final TextArea description = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
-                .style("text-area-style").prompt(i18n.getMessage("textfield.description")).immediate(true)
+        final TextArea description = new TextAreaBuilder(Target.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description")).style("text-area-style")
                 .id(UIComponentIdProvider.BULK_UPLOAD_DESC).buildTextComponent();
-        description.setNullRepresentation("");
         description.setWidth("100%");
         return description;
     }

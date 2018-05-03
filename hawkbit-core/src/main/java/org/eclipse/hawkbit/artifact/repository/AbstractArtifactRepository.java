@@ -30,7 +30,6 @@ import com.google.common.io.ByteStreams;
 /**
  * Abstract utility class for ArtifactRepository implementations with common
  * functionality, e.g. computation of hashes.
- *
  */
 public abstract class AbstractArtifactRepository implements ArtifactRepository {
     private static final String TEMP_FILE_PREFIX = "tmp";

@@ -48,4 +48,54 @@ public class PropertiesQuotaManagement implements QuotaManagement {
         return securityProperties.getDos().getMaxMessagesPerActionStatus();
     }
 
+    @Override
+    public int getMaxMetaDataEntriesPerSoftwareModule() {
+        return securityProperties.getDos().getMaxMetaDataEntriesPerSoftwareModule();
+    }
+
+    @Override
+    public int getMaxMetaDataEntriesPerDistributionSet() {
+        return securityProperties.getDos().getMaxMetaDataEntriesPerDistributionSet();
+    }
+
+    @Override
+    public int getMaxSoftwareModulesPerDistributionSet() {
+        return securityProperties.getDos().getMaxSoftwareModulesPerDistributionSet();
+    }
+
+    @Override
+    public int getMaxSoftwareModuleTypesPerDistributionSetType() {
+        return securityProperties.getDos().getMaxSoftwareModuleTypesPerDistributionSetType();
+    }
+
+    @Override
+    public int getMaxArtifactsPerSoftwareModule() {
+        return securityProperties.getDos().getMaxArtifactsPerSoftwareModule();
+    }
+
+    @Override
+    public int getMaxTargetsPerRolloutGroup() {
+        return securityProperties.getDos().getMaxTargetsPerRolloutGroup();
+    }
+
+    @Override
+    public int getMaxActionsPerTarget() {
+        return securityProperties.getDos().getMaxActionsPerTarget();
+    }
+
+    @Override
+    public int getMaxTargetsPerManualAssignment() {
+        return securityProperties.getDos().getMaxTargetsPerManualAssignment();
+    }
+
+    @Override
+    public int getMaxTargetsPerAutoAssignment() {
+        return securityProperties.getDos().getMaxTargetsPerAutoAssignment();
+    }
+
+    @Override
+    public long getMaxArtifactSize() {
+        return securityProperties.getDos().getMaxArtifactSize();
+    }
+
 }

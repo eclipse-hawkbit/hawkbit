@@ -27,9 +27,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -132,8 +134,44 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description("Verifies that rollout cannot be created if too many rollout groups are specified.")
+    public void createRolloutWithTooManyRolloutGroups() throws Exception {
+
+        final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
+        testdataFactory.createTargets(20, "target", "rollout");
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+    }
+
+    @Test
+    @Description("Verifies that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
+    public void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+        testdataFactory.createTargets(maxTargets + 1, "target", "rollout");
+
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+    }
+
+    @Test
     @Description("Testing that rollout can be created with groups")
-    public void createRolloutWithGroupsDefinitions() throws Exception {
+    public void createRolloutWithGroupDefinitions() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
@@ -160,7 +198,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithToLowlPercentage() throws Exception {
+    public void createRolloutWithTooLowPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
@@ -185,7 +223,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithToHighPercentage() throws Exception {
+    public void createRolloutWithTooHighPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
@@ -217,7 +255,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Terives sinle rollout from management API includinfg extra data that is delieverd only for single rollout access.")
+    @Description("Retrieves single rollout from management API including extra data that is delivered only for single rollout access.")
     public void retrieveSingleRollout() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");

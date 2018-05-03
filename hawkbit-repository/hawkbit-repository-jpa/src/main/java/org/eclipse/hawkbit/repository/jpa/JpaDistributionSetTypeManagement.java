@@ -17,11 +17,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -29,6 +31,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -64,17 +67,20 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     private final NoCountPagingRepository criteriaNoCountDao;
     private final Database database;
 
+    private final QuotaManagement quotaManagement;
+
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final Database database) {
+            final Database database, final QuotaManagement quotaManagement) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.database = database;
+        this.quotaManagement = quotaManagement;
     }
 
     @Override
@@ -116,6 +122,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
+        assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
         modules.forEach(type::addMandatoryModuleType);
 
@@ -138,9 +145,29 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
+        assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
+
         modules.forEach(type::addOptionalModuleType);
 
         return distributionSetTypeRepository.save(type);
+    }
+
+    /**
+     * Enforces the quota specifiying the maximum number of
+     * {@link SoftwareModuleType}s per {@link DistributionSetType}.
+     * 
+     * @param id
+     *            of the distribution set type
+     * @param requested
+     *            number of software module types to check
+     * 
+     * @throws QuotaExceededException
+     *             if the software module type quota is exceeded
+     */
+    private void assertSoftwareModuleTypeQuota(final long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested,
+                quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType(), SoftwareModuleType.class,
+                DistributionSetType.class, distributionSetTypeRepository::countSmTypesById);
     }
 
     @Override

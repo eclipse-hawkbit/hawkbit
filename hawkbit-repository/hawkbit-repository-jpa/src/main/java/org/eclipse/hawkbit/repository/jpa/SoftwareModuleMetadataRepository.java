@@ -30,11 +30,49 @@ public interface SoftwareModuleMetadataRepository
         extends PagingAndSortingRepository<JpaSoftwareModuleMetadata, SwMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaSoftwareModuleMetadata> {
 
+    /**
+     * Locates the meta data entries that match the given software module ID and
+     * target visibility flag.
+     * 
+     * @param page
+     *            The pagination parameters.
+     * @param moduleId
+     *            The ID of the software module.
+     * @param targetVisible
+     *            The target visibility flag.
+     * 
+     * @return A {@link Page} with the matching meta data entries.
+     */
     Page<JpaSoftwareModuleMetadata> findBySoftwareModuleIdAndTargetVisible(Pageable page, Long moduleId,
             boolean targetVisible);
 
+    /**
+     * Locates the meta data entries that match the given software module IDs
+     * and target visibility flag.
+     * 
+     * @param page
+     *            The pagination parameters.
+     * @param moduleId
+     *            List of software module IDs.
+     * @param targetVisible
+     *            The target visibility flag.
+     * 
+     * @return A {@link Page} with the matching meta data entries.
+     */
     @Query("SELECT smd.softwareModule.id, smd FROM JpaSoftwareModuleMetadata smd WHERE smd.softwareModule.id IN :moduleId AND smd.targetVisible = :targetVisible")
     Page<Object[]> findBySoftwareModuleIdInAndTargetVisible(Pageable page, @Param("moduleId") Collection<Long> moduleId,
             @Param("targetVisible") boolean targetVisible);
+
+    /**
+     * Counts the meta data entries that are associated with the addressed
+     * software module.
+     * 
+     * @param moduleId
+     *            The ID of the software module.
+     * 
+     * @return The number of meta data entries associated with the software
+     *         module.
+     */
+    long countBySoftwareModuleId(@Param("moduleId") Long moduleId);
 
 }

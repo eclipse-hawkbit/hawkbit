@@ -114,6 +114,58 @@ public class HawkbitSecurityProperties {
          */
         private int maxMessagesPerActionStatus = 50;
 
+        /**
+         * Maximum number of meta data entries per software module
+         */
+        private int maxMetaDataEntriesPerSoftwareModule = 100;
+
+        /**
+         * Maximum number of meta data entries per distribution set
+         */
+        private int maxMetaDataEntriesPerDistributionSet = 100;
+
+        /**
+         * Maximum number of software modules per distribution set
+         */
+        private int maxSoftwareModulesPerDistributionSet = 100;
+
+        /**
+         * Maximum number of software modules per distribution set
+         */
+        private int maxSoftwareModuleTypesPerDistributionSetType = 50;
+
+        /**
+         * Maximum number of artifacts per software module
+         */
+        private int maxArtifactsPerSoftwareModule = 50;
+
+        /**
+         * Maximum number of targets per rollout group
+         */
+        private int maxTargetsPerRolloutGroup = 20000;
+
+        /**
+         * Maximum number of targets per rollout group
+         */
+        private int maxActionsPerTarget = 500;
+
+        /**
+         * Maximum number of targets for a manual distribution set assignment.
+         * Must be greater than 1000.
+         */
+        private int maxTargetsPerManualAssignment = 5000;
+
+        /**
+         * Maximum number of targets for an automatic distribution set
+         * assignment
+         */
+        private int maxTargetsPerAutoAssignment = 5000;
+
+        /**
+         * Maximum size of artifacts in bytes.
+         */
+        private long maxArtifactSize = 1_000_000_000;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -157,6 +209,87 @@ public class HawkbitSecurityProperties {
             this.maxRolloutGroupsPerRollout = maxRolloutGroupsPerRollout;
         }
 
+        public int getMaxMetaDataEntriesPerSoftwareModule() {
+            return maxMetaDataEntriesPerSoftwareModule;
+        }
+
+        public void setMaxMetaDataEntriesPerSoftwareModule(final int maxMetaDataEntriesPerSoftwareModule) {
+            this.maxMetaDataEntriesPerSoftwareModule = maxMetaDataEntriesPerSoftwareModule;
+        }
+
+        public int getMaxMetaDataEntriesPerDistributionSet() {
+            return maxMetaDataEntriesPerDistributionSet;
+        }
+
+        public void setMaxMetaDataEntriesPerDistributionSet(final int maxMetaDataEntriesPerDistributionSet) {
+            this.maxMetaDataEntriesPerDistributionSet = maxMetaDataEntriesPerDistributionSet;
+        }
+
+        public int getMaxSoftwareModulesPerDistributionSet() {
+            return maxSoftwareModulesPerDistributionSet;
+        }
+
+        public void setMaxSoftwareModulesPerDistributionSet(final int maxSoftwareModulesPerDistributionSet) {
+            this.maxSoftwareModulesPerDistributionSet = maxSoftwareModulesPerDistributionSet;
+        }
+
+        public int getMaxSoftwareModuleTypesPerDistributionSetType() {
+            return maxSoftwareModuleTypesPerDistributionSetType;
+        }
+
+        public void setMaxSoftwareModuleTypesPerDistributionSetType(
+                final int maxSoftwareModuleTypesPerDistributionSetType) {
+            this.maxSoftwareModuleTypesPerDistributionSetType = maxSoftwareModuleTypesPerDistributionSetType;
+        }
+
+        public int getMaxArtifactsPerSoftwareModule() {
+            return maxArtifactsPerSoftwareModule;
+        }
+
+        public void setMaxArtifactsPerSoftwareModule(final int maxArtifactsPerSoftwareModule) {
+            this.maxArtifactsPerSoftwareModule = maxArtifactsPerSoftwareModule;
+        }
+
+        public int getMaxTargetsPerRolloutGroup() {
+            return maxTargetsPerRolloutGroup;
+        }
+
+        public void setMaxTargetsPerRolloutGroup(final int maxTargetsPerRolloutGroup) {
+            this.maxTargetsPerRolloutGroup = maxTargetsPerRolloutGroup;
+        }
+
+        public int getMaxActionsPerTarget() {
+            return maxActionsPerTarget;
+        }
+
+        public void setMaxActionsPerTarget(final int maxActionsPerTarget) {
+            this.maxActionsPerTarget = maxActionsPerTarget;
+        }
+
+        public int getMaxTargetsPerManualAssignment() {
+            return maxTargetsPerManualAssignment;
+        }
+
+        public void setMaxTargetsPerManualAssignment(final int maxTargetsPerManualAssignment) {
+            this.maxTargetsPerManualAssignment = maxTargetsPerManualAssignment;
+        }
+
+        public int getMaxTargetsPerAutoAssignment() {
+            return maxTargetsPerAutoAssignment;
+        }
+
+        public void setMaxTargetsPerAutoAssignment(final int maxTargetsPerAutoAssignment) {
+            this.maxTargetsPerAutoAssignment = maxTargetsPerAutoAssignment;
+        }
+
+        public void setMaxArtifactSize(final long maxArtifactSize) {
+            this.maxArtifactSize = maxArtifactSize;
+        }
+
+        public long getMaxArtifactSize() {
+            return maxArtifactSize;
+        }
+
         /**
          * Configuration for hawkBits DOS prevention filter. This is usually an
          * infrastructure topic (e.g. Web Application Firewall (WAF)) but might
@@ -179,13 +312,13 @@ public class HawkbitSecurityProperties {
              * # Maximum number of allowed REST read/GET requests per second per
              * client IP.
              */
-            int maxRead = 200;
+            private int maxRead = 200;
 
             /**
              * Maximum number of allowed REST write/(PUT/POST/etc.) requests per
              * second per client IP.
              */
-            int maxWrite = 50;
+            private int maxWrite = 50;
 
             public boolean isEnabled() {
                 return enabled;
@@ -220,5 +353,6 @@ public class HawkbitSecurityProperties {
             }
 
         }
+
     }
 }

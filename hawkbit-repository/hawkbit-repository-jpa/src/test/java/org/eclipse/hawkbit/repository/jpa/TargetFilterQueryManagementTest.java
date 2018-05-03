@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -24,6 +26,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -33,8 +36,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -95,6 +96,20 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery,
                 targetFilterQueryManagement.getByName(filterName).get());
+    }
+
+    @Test
+    @Description("Create a target filter query with an auto-assign distribution set and a query string that addresses too many targets.")
+    public void createTargetFilterQueryThatExceedsQuota() {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
+        // creation is supposed to work as there is no distribution set
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("testfilter").set(set.getId()).query("name==target*")));
     }
 
     @Test
@@ -179,6 +194,43 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         assertEquals("Returns correct distribution set", distributionSet, tfq.getAutoAssignDistributionSet());
 
+    }
+
+    @Test
+    @Description("Assigns a distribution set to an existing filter query and verifies that the quota 'max targets per auto assignment' is enforced.")
+    public void assignDistributionSetToTargetFilterQueryThatExceedsQuota() {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+
+        // creation is supposed to work as there is no distribution set
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("testfilter").query("name==target*"));
+
+        // assigning a distribution set is supposed to fail as the query
+        // addresses too many targets
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
+                .updateAutoAssignDS(targetFilterQuery.getId(), distributionSet.getId()));
+    }
+
+    @Test
+    @Description("Updates an existing filter query with a query string that addresses too many targets.")
+    public void updateTargetFilterQueryWithQueryThatExceedsQuota() {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
+        // creation is supposed to work as the query does not exceed the quota
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("testfilter").set(set.getId()).query("name==foo"));
+
+        // update with a query string that addresses too many targets
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
+                .update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query("name==target*")));
     }
 
     @Test

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -28,7 +29,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -56,18 +59,24 @@ import com.google.common.collect.Lists;
 public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
+    private final TargetRepository targetRepository;
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final DistributionSetManagement distributionSetManagement;
+    private final QuotaManagement quotaManagement;
+
     private final Database database;
 
     JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final Database database) {
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final Database database) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.distributionSetManagement = distributionSetManagement;
+        this.quotaManagement = quotaManagement;
         this.database = database;
     }
 
@@ -77,6 +86,10 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetFilterQuery create(final TargetFilterQueryCreate c) {
         final JpaTargetFilterQueryCreate create = (JpaTargetFilterQueryCreate) c;
+
+        // enforce the 'max targets per auto assign' quota right here even if
+        // the result of the filter query can vary over time
+        create.getSet().flatMap(set -> create.getQuery()).ifPresent(this::assertMaxTargetsQuota);
 
         return targetFilterQueryRepository.save(create.build());
     }
@@ -187,7 +200,18 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getId());
 
         update.getName().ifPresent(targetFilterQuery::setName);
-        update.getQuery().ifPresent(targetFilterQuery::setQuery);
+        update.getQuery().ifPresent(query -> {
+
+            // enforce the 'max targets per auto assignment'-quota only if the
+            // query is going to change
+            if (targetFilterQuery.getAutoAssignDistributionSet() != null
+                    && !query.equals(targetFilterQuery.getQuery())) {
+                assertMaxTargetsQuota(query);
+            }
+
+            // set the new query
+            targetFilterQuery.setQuery(query);
+        });
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
@@ -199,6 +223,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         targetFilterQuery.setAutoAssignDistributionSet(
                 Optional.ofNullable(dsId).map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null));
+
+        // we cannot be sure that the quota was enforced at creation time
+        // because the Target Filter Query REST API does not allow to specify an
+        // auto-assign distribution set when creating a target filter query
+        if (dsId != null) {
+            assertMaxTargetsQuota(targetFilterQuery.getQuery());
+        }
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
@@ -217,6 +248,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public boolean verifyTargetFilterQuerySyntax(final String query) {
         RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database);
         return true;
+    }
+
+    private void assertMaxTargetsQuota(final String query) {
+        QuotaHelper.assertAssignmentQuota(
+                targetRepository.count(RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database)),
+                quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
     }
 
 }

@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -53,6 +54,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
     private static final String JSON_PATH_FIELD_AUTO_ASSIGN_DS = ".autoAssignDistributionSet";
+    private static final String JSON_PATH_FIELD_EXCEPTION_CLASS = ".exceptionClass";
+    private static final String JSON_PATH_FIELD_ERROR_CODE = ".errorCode";
 
     // target
     // $.field
@@ -64,6 +67,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     private static final String JSON_PATH_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
     private static final String JSON_PATH_QUERY = JSON_PATH_ROOT + JSON_PATH_FIELD_QUERY;
     private static final String JSON_PATH_AUTO_ASSIGN_DS = JSON_PATH_ROOT + JSON_PATH_FIELD_AUTO_ASSIGN_DS;
+    private static final String JSON_PATH_EXCEPTION_CLASS = JSON_PATH_ROOT + JSON_PATH_FIELD_EXCEPTION_CLASS;
+    private static final String JSON_PATH_ERROR_CODE = JSON_PATH_ROOT + JSON_PATH_FIELD_ERROR_CODE;
 
     @Test
     @Description("Ensures that deletion is executed if permitted.")
@@ -126,8 +131,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
-        final TargetFilterQuery tfq = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -230,6 +235,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that a single target filter query can be retrieved via its id.")
     public void getSingleTarget() throws Exception {
         // create first a target which can be retrieved by rest interface
         final String knownQuery = "name=test01";
@@ -247,6 +253,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the retrieval of a non-existing target filter query results in a HTTP Not found error (404).")
     public void getSingleTargetNoExistsResponseNotFound() throws Exception {
         final String targetIdNotExists = "546546";
         // test
@@ -262,6 +269,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the creation of a target filter query based on an invalid request payload results in a HTTP Bad Request error (400).")
     public void createTargetFilterQueryWithBadPayloadBadRequest() throws Exception {
         final String notJson = "abc";
 
@@ -280,21 +288,71 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Ensures that the assignment of an auto-assign distribution set results in a HTTP Forbidden error (403) "
+            + "if the (existing) query addresses too many targets.")
+    public void setAutoAssignDistributionSetOnFilterQueryThatExceedsQuota() throws Exception {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+
+        // create the filter query and the distribution set
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
+
+        mvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+    }
+
+    @Test
+    @Description("Ensures that the update of a target filter query results in a HTTP Forbidden error (403) "
+            + "if the updated query addresses too many targets.")
+    public void updateTargetFilterQueryWithQueryThatExceedsQuota() throws Exception {
+
+        // create targets
+        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
+        testdataFactory.createTargets(maxTargets + 1, "target%s");
+
+        // create the filter query and the distribution set
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target1");
+
+        // assign the auto-assign distribution set, this should work
+        mvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetFilterQueryManagement.get(filterQuery.getId()).get().getAutoAssignDistributionSet())
+                .isEqualTo(set);
+
+        // update the query of the filter query to trigger a quota hit
+        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
+                .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+    }
+
+    @Test
     public void setAutoAssignDistributionSetToTargetFilterQuery() throws Exception {
 
-        final String knownQuery = "name=test05";
+        final String knownQuery = "name==test05";
         final String knownName = "filter05";
 
-        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isEqualTo(set);
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isEqualTo(set);
 
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
                 + tfq.getId();
@@ -311,7 +369,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Test
     public void deleteAutoAssignDistributionSetOfTargetFilterQuery() throws Exception {
 
-        final String knownQuery = "name=test06";
+        final String knownQuery = "name==test06";
         final String knownName = "filter06";
         final String dsName = "testDS";
 
@@ -319,9 +377,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
         targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), set.getId());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isEqualTo(set);
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isEqualTo(set);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
@@ -329,9 +385,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
-        assertThat(
-                targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet())
-                        .isNull();
+        assertThat(targetFilterQueryManagement.get(tfq.getId()).get().getAutoAssignDistributionSet()).isNull();
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
@@ -339,8 +393,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
-        return targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(name).query(query));
+        return targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(name).query(query));
     }
 
 }

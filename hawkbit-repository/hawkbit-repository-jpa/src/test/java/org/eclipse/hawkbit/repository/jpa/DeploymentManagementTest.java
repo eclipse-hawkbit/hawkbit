@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -169,6 +171,37 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(count).as("One Action for target").isEqualTo(1L).isEqualTo(actions.getContent().size());
         assertThat(actions.getContent().get(0).getId()).as("Action of target").isEqualTo(actionId);
+    }
+
+    @Test
+    @Description("Test verifies that the 'max actions per target' quota is enforced if the assigned distribution set is changed permanently.")
+    public void changeDistributionSetAssignmentUntilMaxActionsPerTargetQuotaIsExceeded() {
+
+        final int maxActions = quotaManagement.getMaxActionsPerTarget();
+        final List<Target> testTargets = testdataFactory.createTargets(1);
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+
+        IntStream.range(0, maxActions).forEach(i -> {
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTargets);
+        });
+
+        // change the distribution set one last time to trigger a quota hit
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds3, testTargets));
+    }
+
+    @Test
+    @Description("Assigns the same distribution set to many targets until the 'max targets per manual assignment' quota is exceeded.")
+    public void assignDistributionSetUntilQuotaIsExceeded() {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        assignDistributionSet(ds, testdataFactory.createTargets(maxTargets, "ok"));
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds, testdataFactory.createTargets(maxTargets + 1, "fail")));
     }
 
     @Test

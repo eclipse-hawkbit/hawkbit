@@ -15,6 +15,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -361,13 +363,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     public void deleteSoftwareModulesWithSharedArtifact() throws IOException {
 
         // Init artifact binary data, target and DistributionSets
-        final byte[] source = RandomUtils.nextBytes(1024);
+        final int artifactSize = 1024;
+        final byte[] source = RandomUtils.nextBytes(artifactSize);
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
-        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize);
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
@@ -375,7 +378,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
-        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false, artifactSize);
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -403,20 +406,21 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     public void deleteMultipleSoftwareModulesWhichShareAnArtifact() throws IOException {
 
         // Init artifact binary data, target and DistributionSets
-        final byte[] source = RandomUtils.nextBytes(1024);
+        final int artifactSize = 1024;
+        final byte[] source = RandomUtils.nextBytes(artifactSize);
         final Target target = testdataFactory.createTarget();
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize);
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
-        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false);
+        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false, artifactSize);
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -462,9 +466,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule softwareModule = softwareModuleManagement.create(entityFactory.softwareModule().create()
                 .type(type).name(name).version(version).description("description of artifact " + name));
 
+        final int artifactSize = 5 * 1024;
         for (int i = 0; i < numberArtifacts; i++) {
-            artifactManagement.create(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
-                    "file" + (i + 1), false);
+            artifactManagement.create(new RandomGeneratedInputStream(artifactSize), softwareModule.getId(),
+                    "file" + (i + 1), false, artifactSize);
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
@@ -653,13 +658,57 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies the enforcement of the metadata quota per software module.")
+    public void createSoftwareModuleMetadataUntilQuotaIsExceeded() {
+
+        // add meta data one by one
+        final SoftwareModule module = testdataFactory.createSoftwareModuleApp("m1");
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        for (int i = 0; i < maxMetaData; ++i) {
+            softwareModuleManagement.createMetaData(
+                    entityFactory.softwareModuleMetadata().create(module.getId()).key("k" + i).value("v" + i));
+        }
+
+        // quota exceeded
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+                        .create(module.getId()).key("k" + maxMetaData).value("v" + maxMetaData)));
+
+        // add multiple meta data entries at once
+        final SoftwareModule module2 = testdataFactory.createSoftwareModuleApp("m2");
+        final List<SoftwareModuleMetadataCreate> create = new ArrayList<>();
+        for (int i = 0; i < maxMetaData + 1; ++i) {
+            create.add(entityFactory.softwareModuleMetadata().create(module2.getId()).key("k" + i).value("v" + i));
+        }
+        // quota exceeded
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(create));
+
+        // add some meta data entries
+        final SoftwareModule module3 = testdataFactory.createSoftwareModuleApp("m3");
+        final int firstHalf = Math.round(maxMetaData / 2);
+        for (int i = 0; i < firstHalf; ++i) {
+            softwareModuleManagement.createMetaData(
+                    entityFactory.softwareModuleMetadata().create(module3.getId()).key("k" + i).value("v" + i));
+        }
+        // add too many data entries
+        final int secondHalf = maxMetaData - firstHalf;
+        final List<SoftwareModuleMetadataCreate> create2 = new ArrayList<>();
+        for (int i = 0; i < secondHalf + 1; ++i) {
+            create2.add(entityFactory.softwareModuleMetadata().create(module3.getId()).key("kk" + i).value("vv" + i));
+        }
+        // quota exceeded
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> softwareModuleManagement.createMetaData(create2));
+
+    }
+
+    @Test
     @Description("Checks that metadata for a software module cannot be created for an existing key.")
     public void createSoftwareModuleMetadataFailsIfKeyExists() {
 
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
-        final String knownValue2 = "myKnownValue2";
-
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
         softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1)
@@ -765,41 +814,43 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     public void findAllSoftwareModuleMetadataBySwId() {
 
         final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
+        final int metadataCountSw1 = 8;
 
         final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
+        final int metadataCountSw2 = 10;
 
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < metadataCountSw1; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw1.getId())
                     .key("key" + index).value("value" + index).targetVisible(true));
         }
 
-        for (int index = 0; index < 20; index++) {
+        for (int index = 0; index < metadataCountSw2; index++) {
             softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sw2.getId())
                     .key("key" + index).value("value" + index).targetVisible(false));
         }
 
-        Page<SoftwareModuleMetadata> metadataOfSw1 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataSw1 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw1.getId());
 
-        Page<SoftwareModuleMetadata> metadataOfSw2 = softwareModuleManagement
+        Page<SoftwareModuleMetadata> metadataSw2 = softwareModuleManagement
                 .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+        assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);
+        assertThat(metadataSw1.getTotalElements()).isEqualTo(metadataCountSw1);
 
-        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(20);
-        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(20);
+        assertThat(metadataSw2.getNumberOfElements()).isEqualTo(metadataCountSw2);
+        assertThat(metadataSw2.getTotalElements()).isEqualTo(metadataCountSw2);
 
-        metadataOfSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw1.getId());
 
-        metadataOfSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
                 sw2.getId());
 
-        assertThat(metadataOfSw1.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfSw1.getTotalElements()).isEqualTo(10);
+        assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);
+        assertThat(metadataSw1.getTotalElements()).isEqualTo(metadataCountSw1);
 
-        assertThat(metadataOfSw2.getNumberOfElements()).isEqualTo(0);
-        assertThat(metadataOfSw2.getTotalElements()).isEqualTo(0);
+        assertThat(metadataSw2.getNumberOfElements()).isEqualTo(0);
+        assertThat(metadataSw2.getTotalElements()).isEqualTo(0);
     }
 }
