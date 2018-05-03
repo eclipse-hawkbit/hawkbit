@@ -18,7 +18,7 @@
 |com.google.guava|guava|19.0| [CQ12931](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12931) |
 |com.h2database|h2|1.4.186| [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |
 |com.rabbitmq|amqp-client|4.0.2| [CQ13041](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13041) |
-|com.rabbitmq|http-client|1.1.1.RELEASE| [CQ13042](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13042) |
+|com.rabbitmq|http-client|1.3.1.RELEASE| [CQ15867](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15867) |
 |com.vaadin.external.atmosphere|atmosphere-runtime|2.2.9.vaadin2| [CQ10714](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10714) |
 |com.vaadin.external.flute|flute|1.3.0.gg2| [CQ11039](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11039) |
 |com.vaadin.external.gwt|gwt-elemental|2.7.0.vaadin4| [CQ13031](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13031) |
