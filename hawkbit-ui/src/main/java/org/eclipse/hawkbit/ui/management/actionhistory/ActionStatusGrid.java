@@ -58,7 +58,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
         final LabelConfig conf = new ActionHistoryGrid.LabelConfig();
         states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_STATUS_GRID_STATUS_LABEL_ID);
         alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, null);
-        tooltipGenerator = new TooltipGenerator();
+        tooltipGenerator = new TooltipGenerator(i18n);
 
         init();
     }

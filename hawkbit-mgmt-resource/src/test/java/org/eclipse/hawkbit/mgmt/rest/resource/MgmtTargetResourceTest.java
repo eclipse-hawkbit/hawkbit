@@ -1389,7 +1389,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final long nextExecutionStart = System.currentTimeMillis();
 
-        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("forcetime", "0")
+        final String body = new JSONObject().put("id", set.getId())
                 .put("maintenanceWindow", getMaintenanceWindowWithNextStart(getTestSchedule(10), getTestDuration(10),
                         getTestTimeZone(), nextExecutionStart))
                 .toString();

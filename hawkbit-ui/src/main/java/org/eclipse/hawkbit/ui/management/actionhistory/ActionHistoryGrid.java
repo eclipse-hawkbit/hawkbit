@@ -140,7 +140,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         activeStates = conf
                 .createActiveStatusLabelConfig(UIComponentIdProvider.ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID);
         alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, rightAlignedColumns);
-        tooltipGenerator = new TooltipGenerator();
+        tooltipGenerator = new TooltipGenerator(i18n);
 
         init();
     }

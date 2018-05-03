@@ -70,7 +70,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
@@ -90,7 +90,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringBootTest(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
@@ -225,7 +225,7 @@ public abstract class AbstractIntegrationTest {
         }
     };
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
         return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
                 new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
     }
@@ -256,21 +256,21 @@ public abstract class AbstractIntegrationTest {
      * @return result of the assignment as { @link
      *         DistributionSetAssignmentResult}.
      */
-    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final Long dsID,
-            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
+            final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
         return deploymentManagement.assignDistributionSet(dsID,
                 Arrays.asList(new TargetWithActionType(controllerId, ActionType.FORCED,
-                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceSchedule, maintenanceWindowDuration,
+                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceWindowSchedule, maintenanceWindowDuration,
                         maintenanceWindowTimeZone)));
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindowTimeForced(final Long dsID,
-            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindowTimeForced(final long dsID,
+            final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
         return deploymentManagement.assignDistributionSet(dsID,
                 Arrays.asList(new TargetWithActionType(controllerId, ActionType.TIMEFORCED, System.currentTimeMillis(),
-                        maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
+                        maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
@@ -289,11 +289,11 @@ public abstract class AbstractIntegrationTest {
                 new TargetWithActionType(target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis())));
     }
 
-    protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
+    protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
         return createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
     }
 
-    protected List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final List<MetaData> md) {
+    protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
         return distributionSetManagement.createMetaData(dsId, md);
     }
 
@@ -392,23 +392,23 @@ public abstract class AbstractIntegrationTest {
      *
      * @return {@link String} containing a valid cron expression.
      */
-    public static String getTestSchedule(final int minutesToAdd) {
+    protected static String getTestSchedule(final int minutesToAdd) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(minutesToAdd);
         return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
                 currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
     }
 
-    public static String getTestDuration(final int duration) {
+    protected static String getTestDuration(final int duration) {
         return String.format("%02d:%02d:00", duration / 60, duration % 60);
     }
 
-    public static String getTestTimeZone() {
+    protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
     }
 
-    public static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
+    protected static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
             final String timezone) {
         final Map<String, String> maintenanceWindowMap = new HashMap<>();
         maintenanceWindowMap.put("schedule", schedule);
@@ -417,7 +417,7 @@ public abstract class AbstractIntegrationTest {
         return maintenanceWindowMap;
     }
 
-    public static Map<String, String> getMaintenanceWindowWithNextStart(final String schedule, final String duration,
+    protected static Map<String, String> getMaintenanceWindowWithNextStart(final String schedule, final String duration,
             final String timezone, final long nextStartAt) {
         final Map<String, String> maintenanceWindowMap = getMaintenanceWindow(schedule, duration, timezone);
         maintenanceWindowMap.put("nextStartAt", String.valueOf(nextStartAt));

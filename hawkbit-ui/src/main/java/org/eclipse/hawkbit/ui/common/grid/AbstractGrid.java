@@ -585,7 +585,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * CellStyleGenerator that concerns about alignment in the grid cells.
      */
     protected static class AlignCellStyleGenerator implements CellStyleGenerator {
-        private static final long serialVersionUID = 5573570647129792429L;
+        private static final long serialVersionUID = 1L;
 
         private final String[] left;
         private final String[] center;
@@ -628,8 +628,14 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * Adds a tooltip to the 'Date and time' and 'Maintenance Window' columns in
      * detailed format.
      */
-    public static class TooltipGenerator implements CellDescriptionGenerator {
-        private static final long serialVersionUID = -6617911967167729195L;
+    protected static class TooltipGenerator implements CellDescriptionGenerator {
+        private static final long serialVersionUID = 1L;
+
+        private final VaadinMessageSource i18n;
+
+        public TooltipGenerator(final VaadinMessageSource i18n) {
+            this.i18n = i18n;
+        }
 
         @Override
         public String getDescription(final CellReference cell) {
@@ -642,18 +648,17 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
             case ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW:
                 final Action action = (Action) cell.getItem().getItemProperty(ProxyAction.PXY_ACTION).getValue();
-                return action.getMaintenanceWindowStartTime().map(TooltipGenerator::getFormatedNextMaintenanceWindow)
-                        .orElse(null);
+                return action.getMaintenanceWindowStartTime().map(this::getFormattedNextMaintenanceWindow).orElse(null);
 
             default:
                 return null;
             }
         }
 
-        private static String getFormatedNextMaintenanceWindow(final ZonedDateTime nextAt) {
+        private String getFormattedNextMaintenanceWindow(final ZonedDateTime nextAt) {
             final long nextAtMilli = nextAt.toInstant().toEpochMilli();
-            return "next on "
-                    + SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT);
+            return i18n.getMessage("tooltip.next.maintenancewindow",
+                    SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT));
         }
     }
 
