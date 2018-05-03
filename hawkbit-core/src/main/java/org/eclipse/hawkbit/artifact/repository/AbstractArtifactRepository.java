@@ -29,7 +29,6 @@ import com.google.common.io.ByteStreams;
 /**
  * Abstract utility class for ArtifactRepository implementations with common
  * functionality, e.g. computation of hashes.
- *
  */
 public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
@@ -71,7 +70,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
-            if (file.exists() && !file.delete()) {
+            if (file != null && file.exists() && !file.delete()) {
                 LOG.error("Could not delete temp file {}", file);
             }
         }

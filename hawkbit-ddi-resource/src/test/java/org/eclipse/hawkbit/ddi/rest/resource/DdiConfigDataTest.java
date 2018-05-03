@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -109,13 +111,13 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
-            + "upload limitation is inplace which is meant to protect the server from malicious attempts.")
-    public void putToMuchConfigData() throws Exception {
+            + "upload quota is enforced to protect the server from malicious attempts.")
+    public void putTooMuchConfigData() throws Exception {
         testdataFactory.createTarget("4717");
 
         // initial
         Map<String, String> attributes = new HashMap<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < quotaManagement.getMaxAttributeEntriesPerTarget(); i++) {
             attributes.put("dsafsdf" + i, "sdsds" + i);
         }
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
@@ -126,7 +128,9 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.put("on too many", "sdsds");
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
 
@@ -192,8 +196,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Step
-    private void putConfigDataWithInvalidUpdateMode(final String configDataPath)
-            throws Exception {
+    private void putConfigDataWithInvalidUpdateMode(final String configDataPath) throws Exception {
 
         // create some attriutes
         final Map<String, String> attributes = new HashMap<>();

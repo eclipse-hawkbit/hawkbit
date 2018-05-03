@@ -15,11 +15,11 @@ import java.util.concurrent.Executor;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -195,12 +195,11 @@ public class AutoCompleteTextFieldComponent extends HorizontalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField textField = new TextFieldBuilder().immediate(true).id(UIComponentIdProvider.CUSTOM_FILTER_QUERY)
-                .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
+        final TextField textField = new TextFieldBuilder(TargetFilterQuery.QUERY_MAX_SIZE)
+                .id(UIComponentIdProvider.CUSTOM_FILTER_QUERY).buildTextComponent();
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.EAGER);
-        textField.setImmediate(true);
         textField.setTextChangeTimeout(100);
         return textField;
     }

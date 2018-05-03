@@ -21,12 +21,12 @@ public class RolloutGroupsValidation {
     /**
      * The total amount of targets in a {@link Rollout}
      */
-    private long totalTargets;
+    private final long totalTargets;
 
     /**
      * A list containing the count of targets for each {@link RolloutGroup}
      */
-    private List<Long> targetsPerGroup;
+    private final List<Long> targetsPerGroup;
 
     /**
      * Instantiates a new validation result

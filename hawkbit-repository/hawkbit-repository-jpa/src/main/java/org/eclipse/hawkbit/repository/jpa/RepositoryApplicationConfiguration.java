@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -69,6 +70,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
@@ -376,7 +378,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetManagement distributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
@@ -386,7 +388,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
-                systemManagement, distributionSetTypeManagement, distributionSetMetadataRepository,
+                systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
                 targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisher, applicationContext,
                 tenantAware, virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
                 afterCommit, properties.getDatabase());
@@ -405,9 +407,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final JpaProperties properties) {
+            final JpaProperties properties, final QuotaManagement quotaManagement) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase());
+                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase(),
+                quotaManagement);
     }
 
     /**
@@ -457,22 +460,29 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * {@link JpaTargetFilterQueryManagement} bean.
      * 
      * @param targetFilterQueryRepository
-     *            to query entity access
+     *            holding {@link TargetFilterQuery} entities
+     * @param targetRepository
+     *            holding {@link Target} entities
      * @param virtualPropertyReplacer
      *            for RSQL handling
      * @param distributionSetManagement
      *            for auto assign DS access
-     *
+     * @param quotaManagement
+     *            to access quotas
+     * @param properties
+     *            JPA properties
+     * 
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
     @ConditionalOnMissingBean
     TargetFilterQueryManagement targetFilterQueryManagement(
-            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final JpaProperties properties) {
-        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, virtualPropertyReplacer,
-                distributionSetManagement, properties.getDatabase());
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final JpaProperties properties) {
+        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
+                virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase());
     }
 
     /**
@@ -518,11 +528,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
-            final ArtifactManagement artifactManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, criteriaNoCountDao, auditorProvider,
-                artifactManagement, virtualPropertyReplacer, properties.getDatabase());
+                artifactManagement, quotaManagement, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -585,12 +595,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
-                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, systemSecurityContext,
-                properties.getDatabase());
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, quotaManagement,
+                systemSecurityContext, properties.getDatabase());
     }
 
     /**
@@ -609,9 +619,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                tenantAware);
+                quotaManagement, tenantAware);
     }
 
     /**

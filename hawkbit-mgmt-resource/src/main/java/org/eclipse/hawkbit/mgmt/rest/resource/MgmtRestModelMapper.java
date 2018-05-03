@@ -46,11 +46,13 @@ final class MgmtRestModelMapper {
     }
 
     /**
-     * Convert a action rest type to a action repository type.
+     * Convert the given {@link MgmtActionType} into a corresponding repository
+     * {@link ActionType}.
      * 
      * @param actionTypeRest
-     *            the rest type
-     * @return <null> or the action repository type
+     *            the REST representation of the action type
+     * 
+     * @return <null> or the repository action type
      */
     public static ActionType convertActionType(final MgmtActionType actionTypeRest) {
         if (actionTypeRest == null) {
@@ -70,11 +72,13 @@ final class MgmtRestModelMapper {
     }
 
     /**
-     * Convert a action repository type to rest type.
+     * Converts the given repository {@link ActionType} into a corresponding
+     * {@link MgmtActionType}.
      * 
      * @param actionType
-     *            the rest type
-     * @return <null> or the action repository type
+     *            the repository representation of the action type
+     * 
+     * @return <null> or the REST action type
      */
     public static MgmtActionType convertActionType(final ActionType actionType) {
         if (actionType == null) {

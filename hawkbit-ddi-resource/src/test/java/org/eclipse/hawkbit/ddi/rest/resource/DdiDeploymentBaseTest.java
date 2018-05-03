@@ -110,11 +110,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false);
+                false, artifactSize);
         final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false);
+                "test1.signature", false, artifactSize);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -198,10 +199,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
 
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
-                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
-                                        + "/controller/v1/4712/softwaremodules/"
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                        contains(
+                                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
@@ -268,11 +268,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String visibleMetadataOsKey = "metaDataVisible";
         final String visibleMetadataOsValue = "withValue";
 
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false);
+                false, artifactSize);
         final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false);
+                "test1.signature", false, artifactSize);
 
         softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
@@ -391,11 +392,12 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
-        final byte random[] = RandomUtils.nextBytes(5 * 1024);
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false);
+                false, artifactSize);
         final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false);
+                "test1.signature", false, artifactSize);
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 

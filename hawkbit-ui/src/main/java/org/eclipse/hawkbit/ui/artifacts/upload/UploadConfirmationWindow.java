@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -264,7 +265,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
     }
 
     private static TextField createTextField(final String id) {
-        return new TextFieldBuilder().immediate(true).id(id).buildTextComponent();
+        return new TextFieldBuilder(64).id(id).buildTextComponent();
     }
 
     private void addFileNameLayout(final Item newItem, final String baseSoftwareModuleNameVersion,
@@ -591,7 +592,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
                             customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
                     if (customFile.getFileName().equals(fileName)
                             && baseSwModuleNameVersion.equals(baseSoftwareModuleNameVersion)) {
-                        createArtifact(itemId, customFile.getFilePath(), artifactManagement, bSoftwareModule);
+                        createArtifact(itemId, customFile.getFilePath(), customFile.getFileSize(), artifactManagement,
+                                bSoftwareModule);
                     }
                 }
                 refreshArtifactDetailsLayout = checkIfArtifactDetailsDisplayed(bSoftwareModule.getId());
@@ -618,8 +620,8 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         currentUploadResultWindow = null;
     }
 
-    private void createArtifact(final String itemId, final String filePath, final ArtifactManagement artifactManagement,
-            final SoftwareModule baseSw) {
+    private void createArtifact(final String itemId, final String filePath, final long fileSize,
+            final ArtifactManagement artifactManagement, final SoftwareModule baseSw) {
 
         final File newFile = new File(filePath);
         final Item item = tableContainer.getItem(itemId);
@@ -638,11 +640,11 @@ public class UploadConfirmationWindow implements Button.ClickListener {
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
             artifactManagement.create(fis, baseSw.getId(), providedFileName, md5Checksum, sha1Checksum, true,
-                    customFile.getMimeType());
+                    customFile.getMimeType(), fileSize);
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.SUCCESS, "");
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
-                | FileNotFoundException e) {
+                | FileNotFoundException | QuotaExceededException e) {
 
             saveUploadStatus(providedFileName, swModuleNameVersion, SPUILabelDefinitions.FAILED, e.getMessage());
             LOG.error(ARTIFACT_UPLOAD_EXCEPTION, e);

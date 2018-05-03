@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -46,17 +48,19 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final ApplicationContext applicationContext;
     private final ActionRepository actionRepository;
     private final ActionStatusRepository actionStatusRepository;
+    private final QuotaManagement quotaManagement;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final ApplicationContext applicationContext, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisher = eventPublisher;
         this.applicationContext = applicationContext;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
+        this.quotaManagement = quotaManagement;
     }
 
     /**
@@ -213,6 +217,11 @@ public abstract class AbstractDsAssignmentStrategy {
 
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
+
+        // enforce the 'max actions per target' quota
+        assertActionsPerTargetQuota(target, 1);
+
+        // create the action
         final JpaAction actionForTarget = new JpaAction();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
         actionForTarget.setActionType(targetWithActionType.getActionType());
@@ -237,4 +246,11 @@ public abstract class AbstractDsAssignmentStrategy {
 
         return actionStatus;
     }
+
+    private void assertActionsPerTargetQuota(final Target target, final int requested) {
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
+                actionRepository::countByTargetId);
+    }
+
 }

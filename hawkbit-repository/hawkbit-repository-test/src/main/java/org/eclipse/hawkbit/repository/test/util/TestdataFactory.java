@@ -463,8 +463,10 @@ public class TestdataFactory {
     public List<Artifact> createArtifacts(final Long moduleId) {
         final List<Artifact> artifacts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            final InputStream stubInputStream = IOUtils.toInputStream("some test data" + i, Charset.forName("UTF-8"));
-            artifacts.add(artifactManagement.create(stubInputStream, moduleId, "filename" + i, false));
+            final String artifactData = "some test data" + i;
+            final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));
+            artifacts.add(
+                    artifactManagement.create(stubInputStream, moduleId, "filename" + i, false, artifactData.length()));
 
         }
 

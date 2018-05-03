@@ -54,6 +54,8 @@ public interface ArtifactManagement {
      * @param overrideExisting
      *            to <code>true</code> if the artifact binary can be overridden
      *            if it already exists
+     * @param filesize
+     *            the size of the file in bytes.
      *
      * @return uploaded {@link Artifact}
      *
@@ -64,7 +66,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     Artifact create(@NotNull InputStream inputStream, long moduleId, final String filename,
-            final boolean overrideExisting);
+            final boolean overrideExisting, final long filesize);
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -85,6 +87,9 @@ public interface ArtifactManagement {
      *            if it already exists
      * @param contentType
      *            the contentType of the file
+     * @param filesize
+     *            the size of the file in bytes.
+     * 
      * @return uploaded {@link Artifact}
      *
      * @throws EntityNotFoundException
@@ -100,7 +105,7 @@ public interface ArtifactManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     Artifact create(@NotNull InputStream stream, long moduleId, @NotEmpty String filename, String providedMd5Sum,
-            String providedSha1Sum, boolean overrideExisting, String contentType);
+            String providedSha1Sum, boolean overrideExisting, String contentType, long filesize);
 
     /**
      * Garbage collects artifact binaries if only referenced by given

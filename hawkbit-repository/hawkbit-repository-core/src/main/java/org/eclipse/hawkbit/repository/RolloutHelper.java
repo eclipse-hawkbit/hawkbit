@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ValidationException;
 
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -75,9 +76,11 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupParameter(final int amountGroup, final QuotaManagement quotaManagement) {
         if (amountGroup <= 0) {
-            throw new ValidationException("the amount of groups cannot be lower than zero");
+            throw new ValidationException("The amount of groups cannot be lower than zero");
         } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
-            throw new ValidationException("the amount of groups cannot be greater than 500");
+            throw new QuotaExceededException(
+                    "The amount of groups cannot be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
+
         }
     }
 
@@ -89,9 +92,9 @@ public final class RolloutHelper {
      */
     public static void verifyRolloutGroupTargetPercentage(final float percentage) {
         if (percentage <= 0) {
-            throw new ValidationException("the percentage must be greater than zero");
+            throw new ValidationException("The percentage must be greater than zero");
         } else if (percentage > 100) {
-            throw new ValidationException("the percentage must not be greater than 100");
+            throw new ValidationException("The percentage must not be greater than 100");
         }
     }
 

@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,5 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DistributionSetMetadataRepository
         extends PagingAndSortingRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaDistributionSetMetadata> {
+
+    /**
+     * Counts the meta data entries that match the given distribution set ID.
+     * 
+     * @param id
+     *            of the distribution set.
+     * 
+     * @return The number of matching meta data entries.
+     */
+    long countByDistributionSetId(@Param("id") Long id);
 
 }

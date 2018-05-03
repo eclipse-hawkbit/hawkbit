@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
@@ -91,6 +93,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
 
+    private final QuotaManagement quotaManagement;
+
     private final DistributionSetMetadataRepository distributionSetMetadataRepository;
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
@@ -118,7 +122,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     JpaDistributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
@@ -132,6 +136,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.systemManagement = systemManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.quotaManagement = quotaManagement;
         this.distributionSetMetadataRepository = distributionSetMetadataRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
@@ -317,6 +322,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         assertDistributionSetIsNotAssignedToTargets(setId);
 
         final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+
+        assertSoftwareModuleQuota(setId, modules.size());
+
         modules.forEach(set::addModule);
 
         return distributionSetRepository.save(set);
@@ -452,12 +460,26 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
                 new DsMetadataCompositeKey(dsId, meta.getKey())));
 
+        assertMetaDataQuota(dsId, md.size());
+
         final JpaDistributionSet set = touch(dsId);
 
         return Collections.unmodifiableList(md.stream()
                 .map(meta -> distributionSetMetadataRepository
                         .save(new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue())))
                 .collect(Collectors.toList()));
+    }
+
+    private void assertMetaDataQuota(final Long dsId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
+                DistributionSetMetadata.class, DistributionSet.class,
+                distributionSetMetadataRepository::countByDistributionSetId);
+    }
+
+    private void assertSoftwareModuleQuota(final Long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
+                SoftwareModule.class, DistributionSet.class,
+                softwareModuleRepository::countByAssignedToId);
     }
 
     @Override
@@ -500,9 +522,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private JpaDistributionSet touch(final DistributionSet ds) {
 
         // merge base distribution set so optLockRevision gets updated and audit
-        // log written because
-        // modifying metadata is modifying the base distribution set itself for
-        // auditing purposes.
+        // log written because modifying metadata is modifying the base
+        // distribution set itself for auditing purposes.
         final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) ds);
         result.setLastModifiedAt(0L);
 

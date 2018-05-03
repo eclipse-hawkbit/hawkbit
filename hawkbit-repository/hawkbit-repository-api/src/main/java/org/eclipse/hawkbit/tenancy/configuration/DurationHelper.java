@@ -28,8 +28,8 @@ public final class DurationHelper {
      *
      */
     public static final class DurationRangeValidator {
-        final Duration min;
-        final Duration max;
+        private final Duration min;
+        private final Duration max;
 
         private DurationRangeValidator(final Duration min, final Duration max) {
             this.min = min;

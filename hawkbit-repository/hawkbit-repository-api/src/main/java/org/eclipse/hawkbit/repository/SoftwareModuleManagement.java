@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
@@ -60,37 +61,51 @@ public interface SoftwareModuleManagement
     long countByTextAndType(String searchText, Long typeId);
 
     /**
-     * creates a list of software module meta data entries.
+     * Creates a list of software module meta data entries.
      * 
      * @param metadata
      *            the meta data entries to create
+     * 
      * @return the updated or created software module meta data entries
+     * 
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
+     * 
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link SoftwareModuleMetadata}
+     *             entries is exceeded for the addressed {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<SoftwareModuleMetadata> createMetaData(@NotNull @Valid Collection<SoftwareModuleMetadataCreate> metadata);
 
     /**
-     * creates or updates a single software module meta data entry.
+     * Creates or updates a single software module meta data entry.
      * 
      * @param metadata
      *            the meta data entry to create
+     * 
      * @return the updated or created software module meta data entry
+     * 
      * @throws EntityAlreadyExistsException
      *             in case the meta data entry already exists for the specific
      *             key
+     * 
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link SoftwareModuleMetadata}
+     *             entries is exceeded for the addressed {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleMetadata createMetaData(@NotNull @Valid SoftwareModuleMetadataCreate metadata);
 
     /**
-     * deletes a software module meta data entry.
+     * Deletes a software module meta data entry.
      *
      * @param moduleId
      *            where meta data has to be deleted
@@ -104,12 +119,13 @@ public interface SoftwareModuleManagement
     void deleteMetaData(long moduleId, @NotEmpty String key);
 
     /**
-     * returns all modules assigned to given {@link DistributionSet}.
+     * Returns all modules assigned to given {@link DistributionSet}.
      * 
      * @param pageable
      *            the page request to page the result set
      * @param setId
      *            to search for
+     * 
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
      * 
@@ -130,6 +146,7 @@ public interface SoftwareModuleManagement
      *            to be filtered as "like" on {@link SoftwareModule#getName()}
      * @param typeId
      *            to be filtered as "like" on {@link SoftwareModule#getType()}
+     * 
      * @return the page of found {@link SoftwareModule}
      * 
      * @throws EntityNotFoundException
@@ -139,7 +156,7 @@ public interface SoftwareModuleManagement
     Slice<SoftwareModule> findByTextAndType(@NotNull Pageable pageable, String searchText, Long typeId);
 
     /**
-     * retrieves {@link SoftwareModule} by their name AND version AND type..
+     * Retrieves {@link SoftwareModule} by their name AND version AND type..
      *
      * @param name
      *            of the {@link SoftwareModule}
@@ -147,6 +164,7 @@ public interface SoftwareModuleManagement
      *            of the {@link SoftwareModule}
      * @param typeId
      *            of the {@link SoftwareModule}
+     * 
      * @return the found {@link SoftwareModule}
      * 
      * @throws EntityNotFoundException
@@ -156,7 +174,7 @@ public interface SoftwareModuleManagement
     Optional<SoftwareModule> getByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
 
     /**
-     * finds a single software module meta data by its id.
+     * Finds a single software module meta data by its id.
      *
      * @param moduleId
      *            where meta data has to be found
@@ -171,7 +189,7 @@ public interface SoftwareModuleManagement
     Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(long moduleId, @NotEmpty String key);
 
     /**
-     * finds all meta data by the given software module id.
+     * Finds all meta data by the given software module id.
      * 
      * @param pageable
      *            the page request to page the result
@@ -188,7 +206,7 @@ public interface SoftwareModuleManagement
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long moduleId);
 
     /**
-     * finds all meta data by the given software module id where
+     * Finds all meta data by the given software module id where
      * {@link SoftwareModuleMetadata#isTargetVisible()}.
      * 
      * @param pageable
@@ -207,7 +225,7 @@ public interface SoftwareModuleManagement
             long moduleId);
 
     /**
-     * finds all meta data by the given software module id.
+     * Finds all meta data by the given software module id.
      * 
      * @param pageable
      *            the page request to page the result
@@ -222,8 +240,10 @@ public interface SoftwareModuleManagement
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
+     * 
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
+     * 
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      */
@@ -249,6 +269,7 @@ public interface SoftwareModuleManagement
      *            filtered as "like" on {@link SoftwareModule#getName()}
      * @param typeId
      *            filtered as "equal" on {@link SoftwareModule#getType()}
+     * 
      * @return the page of found {@link SoftwareModule}
      * 
      * @throws EntityNotFoundException
@@ -259,13 +280,14 @@ public interface SoftwareModuleManagement
             @NotNull Pageable pageable, long orderByDistributionId, String searchText, Long typeId);
 
     /**
-     * retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
+     * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
      * .
      *
      * @param pageable
      *            page parameters
      * @param typeId
      *            to be filtered on
+     * 
      * @return the found {@link SoftwareModule}s
      * 
      * @throws EntityNotFoundException
@@ -275,7 +297,7 @@ public interface SoftwareModuleManagement
     Slice<SoftwareModule> findByType(@NotNull Pageable pageable, long typeId);
 
     /**
-     * updates a distribution set meta data value if corresponding entry exists.
+     * Updates a distribution set meta data value if corresponding entry exists.
      * 
      * @param update
      *            the meta data entry to be updated
