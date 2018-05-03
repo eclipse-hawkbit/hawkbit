@@ -34,6 +34,7 @@
    io.protostuff:protostuff-collectionschema:jar:1.5.6:compile
    io.protostuff:protostuff-core:jar:1.5.6:compile
    io.protostuff:protostuff-runtime:jar:1.5.6:compile
+   javax.annotation:javax.annotation-api:jar:1.2:compile
    javax.servlet:javax.servlet-api:jar:3.1.0:compile
    javax.transaction:javax.transaction-api:jar:1.2:compile
    javax.validation:validation-api:jar:2.0.1.Final:compile

@@ -1,2 +1,1 @@
-   javax.annotation:javax.annotation-api:jar:1.3.1:provided
    javax.servlet:javax.servlet-api:jar:3.1.0:provided
