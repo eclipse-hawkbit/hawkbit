@@ -73,7 +73,7 @@
   
   .menubar-position {
 	margin-top: -5px;
-	right: 5px;
+	right: 20px;
 	width: 20px;
   }
   
@@ -101,4 +101,17 @@
   	background-image: none;
   	background-color: inherit;
   }
+  
+  .v-menubar > .v-menubar-menuitem .v-icon {
+	margin: 0 4px 0 22px;
+  }
+  
+  .v-menubar-borderless .v-menubar-menuitem {
+	padding: 0px;
+  }
+  
+  .v-menubar > .v-menubar-menuitem {
+	padding: 0px;
+  }
+  
 }
