@@ -27,18 +27,15 @@ public class FileUploadProgress implements Serializable {
 
     private String filePath;
 
-    private String mimeType;
-
     FileUploadProgress(final FileUploadId fileUploadId) {
         this.fileUploadId = fileUploadId;
     }
 
     FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength,
-            final String mimeType, final String filePath) {
+            final String filePath) {
         this.fileUploadId = fileUploadId;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
-        this.mimeType = mimeType;
         this.filePath = filePath;
     }
 

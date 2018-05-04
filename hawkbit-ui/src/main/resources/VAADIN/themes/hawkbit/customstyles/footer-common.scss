@@ -17,32 +17,23 @@
     }
   }
 
-  .no-border {
-    border: 0px !important;
-  }
-
   //Style applied on all buttons of footer layout.Width and height of buttons can be configured
   .action-button {
     @include valo-gradient($color: $footer-button-background-color);
     background-image: none;
-    border: 1px solid $widget-border-color;
     color: $footer-button-color;
-    font-weight: $footer-button-font-weight;
-
+    font-weight: $footer-button-font-weight;    
+    font-size: $v-font-size--small !important;
+    height: round($action-button-height-scale * $v-unit-size) !important;
+    width: 100%;
+    
     .v-icon {
       color: $hawkbit-primary-color;
     }
-    height: round($action-button-height-scale * $v-unit-size) !important;
-    font-size: $v-font-size--small !important;
   }
 
   .action-button:focus:after {
-    border: 1px solid $footer-button-background-color;
     box-shadow: none !important;
-  }
-
-  .action-button:before {
-    height: 100% !important;
   }
 
   //Upload button style
@@ -90,15 +81,7 @@
     opacity: 1 !important;
   }
   
-   
-  .footer-layout{
-   .app-loading {
-   	background-position: bottom;
-    background-repeat: no-repeat;
-   }
-   
    .app-loading:before {
-   	  background: none;
     height: 20px !important;
     width: 20px !important;
     -webkit-box-sizing: border-box;
@@ -118,6 +101,5 @@
     margin-top: 12px;
     margin-left: -10px;
    }
-  }
  
 }

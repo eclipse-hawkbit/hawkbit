@@ -280,6 +280,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     public void enter(final ViewChangeEvent event) {
         smTableLayout.getSoftwareModuleTable()
                 .selectEntity(artifactUploadState.getSelectedBaseSwModuleId().orElse(null));
+        uploadButtonLayout.restoreState();
     }
 
 }

@@ -128,7 +128,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         try {
             final OutputStream outputStream = createOutputStreamForTempFile();
             this.mimeType = mimeType;
-            publishUploadProgressEvent(fileUploadId, 0, 0, mimeType, getTempFilePath());
+            publishUploadProgressEvent(fileUploadId, 0, 0, getTempFilePath());
 
             return outputStream;
         } catch (final IOException e) {
@@ -159,7 +159,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             return;
         }
 
-        publishUploadProgressEvent(fileUploadId, readBytes, contentLength, mimeType, getTempFilePath());
+        publishUploadProgressEvent(fileUploadId, readBytes, contentLength, getTempFilePath());
     }
 
     /**

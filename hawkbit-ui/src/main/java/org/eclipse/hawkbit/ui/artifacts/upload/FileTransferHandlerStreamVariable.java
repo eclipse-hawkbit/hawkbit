@@ -71,7 +71,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             @SuppressWarnings("squid:S2095")
             final OutputStream out = createOutputStreamForTempFile();
 
-            publishUploadProgressEvent(fileUploadId, 0, fileSize, mimeType, getTempFilePath());
+            publishUploadProgressEvent(fileUploadId, 0, fileSize, getTempFilePath());
 
             return out;
         } catch (final IOException e) {
@@ -113,7 +113,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         }
 
         publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(),
-                mimeType, getTempFilePath());
+                getTempFilePath());
     }
 
     /**

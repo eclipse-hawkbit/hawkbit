@@ -114,7 +114,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
                 if (artifactUploadState.isNoSoftwareModuleSelected()
                         || artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
                     upload.setEnabled(false);
-                } else {
+                } else if (artifactUploadState.areAllUploadsFinished()) {
                     upload.setEnabled(true);
                 }
             });
@@ -127,7 +127,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         uploadProgressButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadProgressButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadProgressButton.setIcon(null);
-        uploadProgressButton.setSizeFull();
         uploadProgressButton.setHtmlContentAllowed(true);
         uploadProgressButton.addClickListener(event -> onClickOfUploadProgressButton());
         uploadProgressButton.setVisible(false);
@@ -145,27 +144,27 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         upload.addFinishedListener(uploadHandler);
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
-        upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        upload.addStyleName("no-border");
-        upload.setSizeFull();
+        upload.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
 
-        addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         addComponent(upload);
         setComponentAlignment(upload, Alignment.TOP_RIGHT);
         addComponent(uploadProgressButton);
         setComponentAlignment(uploadProgressButton, Alignment.TOP_RIGHT);
 
-        setMargin(false);
-        setSizeFull();
         setSpacing(true);
     }
 
-    private void restoreState() {
+    /**
+     * Is called when view is shown to the user
+     */
+    public void restoreState() {
         if (artifactUploadState.areAllUploadsFinished()) {
             artifactUploadState.clearUploadDetails();
             hideUploadProgressButton();
+            upload.setEnabled(true);
         } else if (artifactUploadState.isAtLeastOneUploadInProgress()) {
             showUploadProgressButton();
+            upload.setEnabled(false);
         }
     }
 
@@ -179,6 +178,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     private void onUploadFinished() {
         if (artifactUploadState.areAllUploadsFinished()) {
             hideUploadProgressButton();
+            upload.setEnabled(true);
         }
     }
 

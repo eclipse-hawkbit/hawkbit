@@ -142,23 +142,22 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
-            final long fileSize, final String mimeType, final String tempFilePath) {
-        // TODO rollouts: set level to trace
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Upload in progress for file {} - {}%", fileUploadId,
+            final long fileSize, final String tempFilePath) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Upload in progress for file {} - {}%", fileUploadId,
                     String.format("%.0f", (double) bytesReceived / (double) fileSize * 100));
         }
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, bytesReceived, fileSize,
-                mimeType, tempFilePath);
+                tempFilePath);
         artifactUploadState.uploadInProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
                 fileUploadProgress));
     }
 
-    private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize, final String mimeType,
+    private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize,
             final String tempFilePath) {
         LOG.info("Upload succeeded for file {}", fileUploadId);
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, fileSize, fileSize, mimeType,
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, fileSize, fileSize,
                 tempFilePath);
         artifactUploadState.uploadSucceeded(fileUploadId, fileUploadProgress);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
@@ -232,7 +231,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
             artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true, mimeType);
 
-            publishUploadSucceeded(fileUploadId, fileSize, mimeType, tempFilePath);
+            publishUploadSucceeded(fileUploadId, fileSize, tempFilePath);
 
             eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
 
