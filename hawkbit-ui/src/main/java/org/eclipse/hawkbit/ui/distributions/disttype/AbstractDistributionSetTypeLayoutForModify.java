@@ -17,18 +17,11 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.components.UpdateComboBoxForTagsAndTypes;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.CheckBox;
 
@@ -46,33 +39,29 @@ public abstract class AbstractDistributionSetTypeLayoutForModify extends Abstrac
 
     private IndexedContainer originalSelectedTableContainer;
 
-    private UpdateComboBoxForTagsAndTypes updateCombobox;
+    private final String selectedTypeName;
 
     public AbstractDistributionSetTypeLayoutForModify(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final String selectedTypeName) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTypeManagement,
                 softwareModuleTypeManagement);
         this.distributionSetManagement = distributionSetManagement;
+        this.selectedTypeName = selectedTypeName;
         init();
-        populateTagNameCombo();
     }
 
     @Override
-    protected void createRequiredComponents() {
-        super.createRequiredComponents();
-        updateCombobox = new UpdateComboBoxForTagsAndTypes(
-                getI18n().getMessage("label.choose.type", getI18n().getMessage("label.choose.tag.update")),
-                getI18n().getMessage("label.combobox.type"));
-        updateCombobox.getTagNameComboBox().addValueChangeListener(this::tagNameChosen);
+    protected void init() {
+        super.init();
+        setTagDetails(selectedTypeName);
     }
 
     @Override
     protected void buildLayout() {
         super.buildLayout();
-        getFormLayout().addComponent(updateCombobox, 0);
         disableFields();
     }
 
@@ -85,37 +74,6 @@ public abstract class AbstractDistributionSetTypeLayoutForModify extends Abstrac
     @Override
     protected boolean isUpdateAction() {
         return true;
-    }
-
-    private void populateTagNameCombo() {
-        updateCombobox.getTagNameComboBox().setContainerDataSource(getDistSetTypeLazyQueryContainer());
-        updateCombobox.getTagNameComboBox().setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-    }
-
-    /**
-     * Get the LazyQueryContainer instance for DistributionSetTypes.
-     * 
-     * @return
-     */
-    private static LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-
-        final LazyQueryContainer disttypeContainer = HawkbitCommonUtil
-                .createLazyQueryContainer(new BeanQueryFactory<>(DistributionSetTypeBeanQuery.class));
-        disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
-
-        return disttypeContainer;
-    }
-
-    private void tagNameChosen(final ValueChangeEvent event) {
-        final String tagSelected = (String) event.getProperty().getValue();
-        if (tagSelected != null) {
-            setTagDetails(tagSelected);
-        } else {
-            resetFields();
-        }
-        if (isUpdateAction()) {
-            getWindow().setOrginaleValues();
-        }
     }
 
     /**
@@ -150,6 +108,9 @@ public abstract class AbstractDistributionSetTypeLayoutForModify extends Abstrac
             setColorPickerComponentsColor(selectedType.getColour());
         });
         disableFields();
+        if (isUpdateAction()) {
+            getWindow().setOrginaleValues();
+        }
     }
 
     private void createOriginalSelectedTableContainer() {
@@ -183,10 +144,6 @@ public abstract class AbstractDistributionSetTypeLayoutForModify extends Abstrac
                 .setValue(mandatoryCheckbox);
 
         getWindow().updateAllComponents(mandatoryCheckbox);
-    }
-
-    public UpdateComboBoxForTagsAndTypes getUpdateCombobox() {
-        return updateCombobox;
     }
 
     public DistributionSetManagement getDistributionSetManagement() {

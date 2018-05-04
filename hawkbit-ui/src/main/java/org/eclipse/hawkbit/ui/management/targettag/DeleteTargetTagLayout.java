@@ -33,16 +33,9 @@ public class DeleteTargetTagLayout extends AbstractTargetTagLayoutForModify {
 
     DeleteTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final List<String> selectedTags) {
-        super(i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+            final UINotification uiNotification, final List<String> selectedTags, final String selectedTagName) {
+        super(i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification, selectedTagName);
         this.selectedTags = selectedTags;
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        getUpdateCombobox().getComboLabel()
-                .setValue(getI18n().getMessage("label.choose.tag", getI18n().getMessage("label.choose.tag.delete")));
     }
 
     @Override

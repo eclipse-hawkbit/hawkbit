@@ -11,13 +11,9 @@ package org.eclipse.hawkbit.ui.layouts;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.components.UpdateComboBoxForTagsAndTypes;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.data.Property.ValueChangeEvent;
 
 /**
  * General Layout for pop-up window for Tags which is created when updating or
@@ -30,52 +26,20 @@ public abstract class AbstractTagLayoutForModify<E extends NamedEntity> extends 
 
     private static final long serialVersionUID = 1L;
 
-    private UpdateComboBoxForTagsAndTypes updateCombobox;
+    private final String selectedTagName;
 
     public AbstractTagLayoutForModify(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final String selectedTagName) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+        this.selectedTagName = selectedTagName;
+        init();
     }
 
     @Override
     public void init() {
         super.init();
-        populateTagNameCombo();
-    }
-
-    protected abstract void populateTagNameCombo();
-
-    @Override
-    protected void createRequiredComponents() {
-        super.createRequiredComponents();
-        updateCombobox = new UpdateComboBoxForTagsAndTypes(
-                getI18n().getMessage("label.choose.tag", getI18n().getMessage("label.choose.tag.update")),
-                getI18n().getMessage("label.combobox.tag"));
-        updateCombobox.getTagNameComboBox().setId(UIComponentIdProvider.DIST_TAG_COMBO);
-    }
-
-    @Override
-    protected void buildLayout() {
-        super.buildLayout();
-        getFormLayout().addComponent(updateCombobox, 0);
-    }
-
-    @Override
-    protected void addListeners() {
-        super.addListeners();
-        updateCombobox.getTagNameComboBox().addValueChangeListener(this::tagNameChosen);
-    }
-
-    protected void tagNameChosen(final ValueChangeEvent event) {
-        final String tagSelected = (String) event.getProperty().getValue();
-        if (tagSelected != null) {
-            setTagDetails(tagSelected);
-        } else {
-            resetFields();
-        }
-        if (isUpdateAction()) {
-            getWindow().setOrginaleValues();
-        }
+        setTagDetails(selectedTagName);
     }
 
     @Override
@@ -90,10 +54,6 @@ public abstract class AbstractTagLayoutForModify<E extends NamedEntity> extends 
      * @param distTagSelected
      *            as the selected tag from combo
      */
-    protected abstract void setTagDetails(final String tagSelected);
-
-    public UpdateComboBoxForTagsAndTypes getUpdateCombobox() {
-        return updateCombobox;
-    }
+    protected abstract void setTagDetails(final String selectedTagName);
 
 }

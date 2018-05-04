@@ -38,17 +38,12 @@ public class DeleteSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayoutFo
     public DeleteSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final Optional<SoftwareModuleType> selectedSoftwareModuleType, final String currentView) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
+            final Optional<SoftwareModuleType> selectedSoftwareModuleType, final String currentView,
+            final String selectedTypeName) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement,
+                selectedTypeName);
         this.selectedSoftwareModuleType = selectedSoftwareModuleType;
         this.currentView = currentView;
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        getUpdateCombobox().getComboLabel()
-                .setValue(getI18n().getMessage("label.choose.type", getI18n().getMessage("label.choose.tag.delete")));
     }
 
     @Override

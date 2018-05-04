@@ -32,8 +32,9 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
 
     public UpdateSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final String selectedTypeName) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement,
+                selectedTypeName);
     }
 
     @Override

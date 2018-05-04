@@ -72,7 +72,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             final EntityFactory entityFactory, final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetTagManagement targetTagManagement) {
         this.filterByButtons = new TargetTagFilterButtons(eventBus, managementUIState, managementViewClientCriterion,
-                i18n, notification, permChecker, entityFactory);
+                i18n, notification, permChecker, entityFactory, targetTagManagement);
         this.targetFilterQueryButtonsTab = new TargetFilterQueryButtons(managementUIState, eventBus);
         this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, managementUIState);
         this.customTargetTagFilterButtonClick = new CustomTargetTagFilterButtonClick(eventBus, managementUIState,
@@ -85,10 +85,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         this.entityFactory = entityFactory;
         this.targetTagManagement = targetTagManagement;
         buildComponents();
-    }
-
-    public TargetTagFilterButtons getFilterByButtons() {
-        return filterByButtons;
     }
 
     /**
@@ -193,8 +189,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
-                        uiNotification, managementUIState.getTargetTableFilters().getClickedTargetTags());
+                filterByButtons.addDeleteColumn();
             }
         };
     }
@@ -206,10 +201,13 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
-                        uiNotification);
+                filterByButtons.addEditColumn();
             }
         };
+    }
+
+    public TargetTagFilterButtons getFilterByButtons() {
+        return filterByButtons;
     }
 
 }

@@ -33,8 +33,9 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     UpdateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final String selectedTagId) {
+        super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification, selectedTagId);
     }
 
     @Override

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.UploadArtifactView;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
@@ -40,14 +39,18 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    private final SMTypeFilterButtons smTypeFilterButtons;
+
     SMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final EntityFactory entityFactory,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final SMTypeFilterButtons smTypeFilterButtons) {
         super(permChecker, eventBus, i18n);
         this.artifactUploadState = artifactUploadState;
         this.entityFactory = entityFactory;
         this.uiNotification = uiNotification;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.smTypeFilterButtons = smTypeFilterButtons;
     }
 
     @Override
@@ -103,10 +106,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteSoftwareTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
-                        softwareModuleTypeManagement,
-                        artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType(),
-                        UploadArtifactView.VIEW_NAME);
+                smTypeFilterButtons.addDeleteColumn();
             }
         };
     }
@@ -119,8 +119,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
-                        uiNotification, softwareModuleTypeManagement);
+                smTypeFilterButtons.addEditColumn();
             }
         };
     }

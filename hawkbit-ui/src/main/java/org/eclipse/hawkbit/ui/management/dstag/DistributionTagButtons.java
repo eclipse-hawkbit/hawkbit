@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -33,6 +34,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
+import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Class for defining the tag buttons of the distribution sets on the Deployment
@@ -42,27 +44,38 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
 
     private static final long serialVersionUID = 1L;
 
-    private static final String NO_TAG = "NO TAG";
-
     private final DistributionTagDropEvent spDistTagDropEvent;
 
     private final ManagementUIState managementUIState;
 
     private final transient EntityFactory entityFactory;
 
-    DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final EntityFactory entityFactory, final VaadinMessageSource i18n, final UINotification notification,
+    private final VaadinMessageSource i18n;
+
+    private final SpPermissionChecker permChecker;
+
+    private final UINotification uiNotification;
+
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
+
+    public DistributionTagButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final EntityFactory entityFactory, final VaadinMessageSource i18n, final UINotification uiNotification,
             final SpPermissionChecker permChecker, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
-            final ManagementViewClientCriterion managementViewClientCriterion) {
+            final ManagementViewClientCriterion managementViewClientCriterion,
+            final DistributionSetTagManagement distributionSetTagManagement) {
         super(eventBus, new DistributionTagButtonClick(eventBus, managementUIState));
-        this.spDistTagDropEvent = new DistributionTagDropEvent(i18n, notification, permChecker, distFilterParameters,
+        this.spDistTagDropEvent = new DistributionTagDropEvent(i18n, uiNotification, permChecker, distFilterParameters,
                 distributionSetManagement, eventBus, managementViewClientCriterion);
         this.managementUIState = managementUIState;
         this.entityFactory = entityFactory;
+        this.i18n = i18n;
+        this.permChecker = permChecker;
+        this.uiNotification = uiNotification;
+        this.distributionSetTagManagement = distributionSetTagManagement;
 
         if (permChecker.hasReadRepositoryPermission()) {
-            addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+            addNewTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         }
     }
 
@@ -96,7 +109,7 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected String createButtonId(final String name) {
-        if (NO_TAG.equals(name)) {
+        if (SPUIDefinitions.NO_TAG.equals(name)) {
             return UIComponentIdProvider.NO_TAG_DISTRIBUTION_SET;
         }
         return name;
@@ -128,7 +141,22 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
     public void refreshContainer() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
+        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
+        addNewTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
+    }
+
+    @Override
+    protected void addEditButtonClickListener(final ClickEvent event) {
+        new UpdateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, getEventBus(),
+                permChecker, uiNotification, getEntityId(event));
+    }
+
+    @Override
+    protected void addDeleteButtonClickListener(final ClickEvent event) {
+        new DeleteDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, getEventBus(),
+                permChecker, uiNotification, managementUIState.getDistributionTableFilters().getDistSetTags(),
+                getEntityId(event));
     }
 }

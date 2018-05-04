@@ -39,15 +39,18 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     private final transient DistributionSetTagManagement distributionSetTagManagement;
 
+    DistributionTagButtons distributionTagButtons;
+
     DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
-            final UINotification uiNotification) {
+            final UINotification uiNotification, final DistributionTagButtons distributionTagButtons) {
         super(permChecker, eventBus, i18n);
         this.entityFactory = entityFactory;
         this.managementUIState = managementUIState;
         this.uiNotification = uiNotification;
         this.distributionSetTagManagement = distributionSetTagManagement;
+        this.distributionTagButtons = distributionTagButtons;
     }
 
     @Override
@@ -103,9 +106,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
-                        getEventBus(), getPermChecker(), uiNotification,
-                        managementUIState.getDistributionTableFilters().getDistSetTags());
+                distributionTagButtons.addDeleteColumn();
             }
         };
     }
@@ -118,8 +119,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
-                        getEventBus(), getPermChecker(), uiNotification);
+                distributionTagButtons.addEditColumn();
             }
         };
     }

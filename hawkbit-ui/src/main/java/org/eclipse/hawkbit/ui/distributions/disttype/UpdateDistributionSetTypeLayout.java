@@ -40,9 +40,9 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final String selectedTypeName) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement,
-                distributionSetTypeManagement, distributionSetManagement);
+                distributionSetTypeManagement, distributionSetManagement, selectedTypeName);
     }
 
     @Override

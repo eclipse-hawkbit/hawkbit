@@ -15,15 +15,22 @@ import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_
 
 import java.util.Collections;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
+import org.eclipse.hawkbit.ui.artifacts.smtype.DeleteSoftwareTypeLayout;
+import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareModuleTypeLayout;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
+import org.eclipse.hawkbit.ui.distributions.DistributionsView;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -34,24 +41,42 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Software Module Type filter buttons.
  */
 public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
-    private static final long serialVersionUID = 6804534533362387433L;
+    private static final long serialVersionUID = 1L;;
 
     private final ManageDistUIState manageDistUIState;
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
+    private final VaadinMessageSource i18n;
+
+    private final transient EntityFactory entityFactory;
+
+    private final SpPermissionChecker permChecker;
+
+    private final UINotification uiNotification;
+
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
+    public DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,
+            final EntityFactory entityFactory, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
         super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareModuleTypeManagement));
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
+        this.i18n = i18n;
+        this.entityFactory = entityFactory;
+        this.permChecker = permChecker;
+        this.uiNotification = uiNotification;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
@@ -109,11 +134,11 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleTypeEvent event) {
         if (isCreateOrUpdate(event) && event.getSoftwareModuleType() != null) {
-            refreshTypeTable();
+            refreshTable();
         }
     }
 
-    private boolean isCreateOrUpdate(final SoftwareModuleTypeEvent event) {
+    private static boolean isCreateOrUpdate(final SoftwareModuleTypeEvent event) {
         return event.getSoftwareModuleTypeEnum() == ADD_SOFTWARE_MODULE_TYPE
                 || event.getSoftwareModuleTypeEnum() == UPDATE_SOFTWARE_MODULE_TYPE;
     }
@@ -121,11 +146,20 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES) {
-            refreshTypeTable();
+            refreshTable();
         }
     }
 
-    private void refreshTypeTable() {
-        setContainerDataSource(createButtonsLazyQueryContainer());
+    @Override
+    protected void addEditButtonClickListener(final ClickEvent event) {
+        new UpdateSoftwareModuleTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+                softwareModuleTypeManagement, getEntityId(event));
+    }
+
+    @Override
+    protected void addDeleteButtonClickListener(final ClickEvent event) {
+        new DeleteSoftwareTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+                softwareModuleTypeManagement, manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType(),
+                DistributionsView.VIEW_NAME, getEntityId(event));
     }
 }

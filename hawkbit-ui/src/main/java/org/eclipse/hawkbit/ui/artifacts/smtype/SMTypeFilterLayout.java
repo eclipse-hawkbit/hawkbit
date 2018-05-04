@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -26,18 +25,16 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  */
 public class SMTypeFilterLayout extends AbstractFilterLayout {
 
-    private static final long serialVersionUID = 1581066345157393665L;
+    private static final long serialVersionUID = 1L;;
 
     private final ArtifactUploadState artifactUploadState;
 
     public SMTypeFilterLayout(final ArtifactUploadState artifactUploadState, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final UploadViewClientCriterion uploadViewClientCriterion) {
+            final SMTypeFilterButtons sMTypeFilterButtons) {
         super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, entityFactory, uiNotification,
-                softwareModuleTypeManagement),
-                new SMTypeFilterButtons(eventBus, artifactUploadState, uploadViewClientCriterion,
-                        softwareModuleTypeManagement));
+                softwareModuleTypeManagement, sMTypeFilterButtons), sMTypeFilterButtons);
 
         this.artifactUploadState = artifactUploadState;
         restoreState();

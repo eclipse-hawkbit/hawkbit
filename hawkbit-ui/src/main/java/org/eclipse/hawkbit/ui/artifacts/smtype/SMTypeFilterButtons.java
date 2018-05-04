@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.EnumSet;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.UploadArtifactView;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -20,6 +23,8 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -29,6 +34,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Software module type filter buttons.
@@ -36,18 +42,35 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
  */
 public class SMTypeFilterButtons extends AbstractFilterButtons {
 
-    private static final long serialVersionUID = 169198312654380358L;
+    private static final long serialVersionUID = 1L;
 
     private final ArtifactUploadState artifactUploadState;
 
     private final UploadViewClientCriterion uploadViewClientCriterion;
 
-    SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
+    private final VaadinMessageSource i18n;
+
+    private final transient EntityFactory entityFactory;
+
+    private final SpPermissionChecker permChecker;
+
+    private final UINotification uiNotification;
+
+    public SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final UploadViewClientCriterion uploadViewClientCriterion,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,
+            final EntityFactory entityFactory, final SpPermissionChecker permChecker,
+            final UINotification uiNotification) {
         super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareModuleTypeManagement));
         this.artifactUploadState = artifactUploadState;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.i18n = i18n;
+        this.entityFactory = entityFactory;
+        this.permChecker = permChecker;
+        this.uiNotification = uiNotification;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -56,7 +79,6 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
                 && EnumSet.allOf(SoftwareModuleTypeEnum.class).contains(event.getSoftwareModuleTypeEnum())) {
             refreshTable();
         }
-
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -112,6 +134,19 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected String getButtonWrapperData() {
         return null;
+    }
+
+    @Override
+    protected void addEditButtonClickListener(final ClickEvent event) {
+        new UpdateSoftwareModuleTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+                softwareModuleTypeManagement, getEntityId(event));
+    }
+
+    @Override
+    protected void addDeleteButtonClickListener(final ClickEvent event) {
+        new DeleteSoftwareTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+                softwareModuleTypeManagement, artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType(),
+                UploadArtifactView.VIEW_NAME, getEntityId(event));
     }
 
 }

@@ -11,10 +11,13 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.NO_TAG_BUTTON_ID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
+import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -27,6 +30,7 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.Table;
@@ -37,7 +41,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractFilterButtons extends Table {
 
-    private static final long serialVersionUID = 7783305719009746375L;
+    private static final long serialVersionUID = 1L;;
 
     private static final String DEFAULT_GREEN = "rgb(44,151,32)";
 
@@ -90,6 +94,83 @@ public abstract class AbstractFilterButtons extends Table {
         addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
     }
 
+    public void addEditColumn() {
+        if (alreadyContainsColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN)) {
+            return;
+        }
+        deleteColumnIfVisible(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
+        addGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN,
+                (source, itemId, columnId) -> addUpdateCell(itemId));
+    }
+
+    public void addDeleteColumn() {
+        if (alreadyContainsColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN)) {
+            return;
+        }
+        deleteColumnIfVisible(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
+        addGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN,
+                (source, itemId, columnId) -> addDeleteCell(itemId));
+    }
+
+    private List<Object> getVisibleColumnsAsList() {
+        return Arrays.asList(getVisibleColumns());
+    }
+
+    private void deleteColumnIfVisible(final String columnName) {
+        final List<Object> columns = getVisibleColumnsAsList();
+        if (columns.contains(columnName)) {
+            removeGeneratedColumn(columnName);
+        }
+    }
+
+    private boolean alreadyContainsColumn(final String columnName) {
+        final List<Object> columns = getVisibleColumnsAsList();
+        if (columns.contains(columnName)) {
+            return true;
+        }
+        return false;
+    }
+
+    private Object addDeleteCell(final Object itemId) {
+        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+            return null;
+        }
+
+        final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
+                SPUIButtonStyleSmallNoBorder.class);
+        if (itemId instanceof TagIdName) {
+            deleteButton.setId(((TagIdName) itemId).getName());
+        } else {
+            deleteButton.setId(itemId.toString());
+        }
+        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.addClickListener(this::addDeleteButtonClickListener);
+
+        return deleteButton;
+    }
+
+    private Button addUpdateCell(final Object itemId) {
+        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+            return null;
+        }
+
+        final Button editButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.EDIT,
+                SPUIButtonStyleSmallNoBorder.class);
+        if (itemId instanceof TagIdName) {
+            editButton.setId(((TagIdName) itemId).getName());
+        } else {
+            editButton.setId(itemId.toString());
+        }
+        editButton.setDescription(SPUIDefinitions.EDIT);
+        editButton.addClickListener(this::addEditButtonClickListener);
+
+        return editButton;
+    }
+
+    protected abstract void addEditButtonClickListener(final ClickEvent event);
+
+    protected abstract void addDeleteButtonClickListener(final ClickEvent event);
+
     private DragAndDropWrapper addGeneratedCell(final Object itemId) {
 
         final Item item = getItem(itemId);
@@ -138,7 +219,7 @@ public abstract class AbstractFilterButtons extends Table {
         columnIds.add(FILTER_BUTTON_COLUMN);
         setVisibleColumns(columnIds.toArray());
         setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-        setColumnWidth(FILTER_BUTTON_COLUMN, 137);
+        setColumnWidth(FILTER_BUTTON_COLUMN, 120);
     }
 
     private Button createFilterButton(final Long id, final String name, final String description, final String color,
@@ -176,8 +257,14 @@ public abstract class AbstractFilterButtons extends Table {
         return caption.toString();
     }
 
+    protected String getEntityId(final ClickEvent event) {
+        return event.getButton().getId();
+    }
+
     protected void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
+        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
+        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
     }
 
     /**
@@ -232,4 +319,9 @@ public abstract class AbstractFilterButtons extends Table {
      * @return button wrapper info.
      */
     protected abstract String getButtonWrapperData();
+
+    public EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
 }

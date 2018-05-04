@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
+import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterButtons;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
@@ -101,8 +102,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
-        this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
-                entityFactory, uiNotification, softwareModuleTypeManagement, uploadViewClientCriterion);
         this.smTableLayout = new SoftwareModuleTableLayout(i18n, permChecker, artifactUploadState, uiNotification,
                 eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
                 uploadViewClientCriterion);
@@ -112,6 +111,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 multipartConfigElement, artifactManagement, softwareModuleManagement);
         this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
                 artifactUploadState, softwareModuleManagement, softwareModuleTypeManagement, uploadViewClientCriterion);
+        final SMTypeFilterButtons smTypeFilterButtons = new SMTypeFilterButtons(eventBus, artifactUploadState,
+                uploadViewClientCriterion, softwareModuleTypeManagement, i18n, entityFactory, permChecker,
+                uiNotification);
+        this.filterByTypeLayout = new SMTypeFilterLayout(artifactUploadState, i18n, permChecker, eventBus,
+                entityFactory, uiNotification, softwareModuleTypeManagement, smTypeFilterButtons);
     }
 
     @PostConstruct

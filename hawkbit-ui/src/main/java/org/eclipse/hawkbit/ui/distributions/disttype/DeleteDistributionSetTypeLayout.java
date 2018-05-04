@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
@@ -32,21 +33,18 @@ public class DeleteDistributionSetTypeLayout extends AbstractDistributionSetType
 
     private final transient DistributionSetType selectedType;
 
+    private final transient SystemManagement systemManagement;
+
     public DeleteDistributionSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement, final DistributionSetType selectedType) {
+            final DistributionSetManagement distributionSetManagement, final DistributionSetType selectedType,
+            final String selectedTypeName, final SystemManagement systemManagement) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement,
-                distributionSetTypeManagement, distributionSetManagement);
+                distributionSetTypeManagement, distributionSetManagement, selectedTypeName);
         this.selectedType = selectedType;
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        getUpdateCombobox().getComboLabel()
-                .setValue(getI18n().getMessage("label.choose.type", getI18n().getMessage("label.choose.tag.delete")));
+        this.systemManagement = systemManagement;
     }
 
     @Override
@@ -94,8 +92,11 @@ public class DeleteDistributionSetTypeLayout extends AbstractDistributionSetType
         final Optional<DistributionSetType> distTypeToDelete = getDistributionSetTypeManagement()
                 .getByName(tagNameToDelete);
         distTypeToDelete.ifPresent(tag -> {
-            if (selectedType.equals(tag)) {
+            if (tag.equals(selectedType)) {
                 getUiNotification().displayValidationError(getI18n().getMessage("message.tag.delete", tagNameToDelete));
+            } else if (isDefaultDsType(tagNameToDelete)) {
+                getUiNotification()
+                        .displayValidationError(getI18n().getMessage("message.cannot.delete.default.dstype"));
             } else {
                 getDistributionSetTypeManagement().delete(distTypeToDelete.get().getId());
                 getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
@@ -104,4 +105,11 @@ public class DeleteDistributionSetTypeLayout extends AbstractDistributionSetType
         });
     }
 
+    private boolean isDefaultDsType(final String dsTypeName) {
+        return getCurrentDistributionSetType() != null && getCurrentDistributionSetType().getName().equals(dsTypeName);
+    }
+
+    private DistributionSetType getCurrentDistributionSetType() {
+        return systemManagement.getTenantMetadata().getDefaultDsType();
+    }
 }

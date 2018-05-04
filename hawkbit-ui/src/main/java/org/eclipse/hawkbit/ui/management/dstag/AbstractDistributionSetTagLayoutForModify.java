@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -20,7 +19,6 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractTagLayoutForModify;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -36,18 +34,18 @@ public abstract class AbstractDistributionSetTagLayoutForModify extends Abstract
 
     AbstractDistributionSetTagLayoutForModify(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final String selectedTagId) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, selectedTagId);
         this.distributionSetTagManagement = distributionSetTagManagement;
-        init();
     }
 
     @Override
-    protected void setTagDetails(final String distTagSelected) {
-        getTagName().setValue(distTagSelected);
-        getTagName().setEnabled(false);
-        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement.getByName(distTagSelected);
-        if (selectedDistTag.isPresent()) {
+    protected void setTagDetails(final String selectedTagName) {
+        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement.getByName(selectedTagName);
+        selectedDistTag.ifPresent(tag -> {
+            getTagName().setValue(tag.getName());
+            getTagName().setEnabled(false);
             getTagDesc().setValue(selectedDistTag.get().getDescription());
             if (selectedDistTag.get().getColour() == null) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
@@ -55,23 +53,15 @@ public abstract class AbstractDistributionSetTagLayoutForModify extends Abstract
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.get().getColour()),
                         selectedDistTag.get().getColour());
             }
-        }
+            if (isUpdateAction()) {
+                getWindow().setOrginaleValues();
+            }
+        });
     }
 
     @Override
     protected Optional<DistributionSetTag> findEntityByName() {
         return distributionSetTagManagement.getByName(getTagName().getValue());
-    }
-
-    @Override
-    protected void populateTagNameCombo() {
-        if (getUpdateCombobox().getTagNameComboBox() == null) {
-            return;
-        }
-        getUpdateCombobox().getTagNameComboBox().removeAllItems();
-        final List<DistributionSetTag> distTagNameList = distributionSetTagManagement
-                .findAll(new PageRequest(0, getMaxTags())).getContent();
-        distTagNameList.forEach(value -> getUpdateCombobox().getTagNameComboBox().addItem(value.getName()));
     }
 
     public DistributionSetTagManagement getDistributionSetTagManagement() {

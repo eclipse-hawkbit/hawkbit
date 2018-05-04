@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusLayout;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusMsgGrid;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusMsgLayout;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
+import org.eclipse.hawkbit.ui.management.dstag.DistributionTagButtons;
 import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -114,10 +115,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     private final DeploymentViewMenuItem deploymentViewMenuItem;
 
     @Autowired
-    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
+    DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
-            final DistributionTableFilters distFilterParameters,
+            final DeploymentManagement deploymentManagement, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UiProperties uiProperties,
@@ -147,10 +147,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
                     targetTagManagement, deploymentManagement, uiProperties);
 
-            this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
-                    eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                    uiProperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement,
-                    uiExecutor);
+            this.targetTableLayout = new TargetTableLayout(eventBus, targetTable, targetManagement, entityFactory, i18n,
+                    uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
+                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor);
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout
@@ -164,9 +163,11 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         }
 
         if (permChecker.hasReadRepositoryPermission()) {
-            this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker,
-                    eventBus, distributionSetTagManagement, entityFactory, uiNotification, distFilterParameters,
-                    distributionSetManagement, managementViewClientCriterion);
+            final DistributionTagButtons distributionTagButtons = new DistributionTagButtons(eventBus,
+                    managementUIState, entityFactory, i18n, uiNotification, permChecker, distFilterParameters,
+                    distributionSetManagement, managementViewClientCriterion, distributionSetTagManagement);
+            this.distributionTagLayout = new DistributionTagLayout(eventBus, managementUIState, i18n, permChecker,
+                    distributionSetTagManagement, entityFactory, uiNotification, distributionTagButtons);
             this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                     distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion,
                     entityFactory, uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement,
@@ -175,7 +176,6 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             this.distributionTagLayout = null;
             this.distributionTableLayout = null;
         }
-
     }
 
     @PostConstruct

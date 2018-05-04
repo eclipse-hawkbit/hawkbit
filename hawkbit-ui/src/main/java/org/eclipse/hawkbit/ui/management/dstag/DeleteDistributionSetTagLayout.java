@@ -34,16 +34,9 @@ public class DeleteDistributionSetTagLayout extends AbstractDistributionSetTagLa
     DeleteDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final List<String> selectedTags) {
-        super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
+            final List<String> selectedTags, final String selectedTagId) {
+        super(i18n, distributionSetTagManagement, entityFactory, eventBus, permChecker, uiNotification, selectedTagId);
         this.selectedTags = selectedTags;
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        getUpdateCombobox().getComboLabel()
-                .setValue(getI18n().getMessage("label.choose.tag", getI18n().getMessage("label.choose.tag.delete")));
     }
 
     @Override

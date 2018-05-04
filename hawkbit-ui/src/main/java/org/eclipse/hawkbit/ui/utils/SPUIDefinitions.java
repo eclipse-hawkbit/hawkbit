@@ -416,6 +416,11 @@ public final class SPUIDefinitions {
     public static final String DELETE = "Delete";
 
     /**
+     * EDIT column/button.
+     */
+    public static final String EDIT = "Edit";
+
+    /**
      * TARGET_FILTER_MANAGEMENT - header caption .
      */
     public static final String TARGET_FILTER_LIST_HEADER_CAPTION = "Custom Filters";
@@ -459,6 +464,12 @@ public final class SPUIDefinitions {
      * id for delete icon in entity table
      */
     public static final String DELETE_ENTITY = "deleteEntity";
+
+    public static final String UPDATE_FILTER_BUTTON_COLUMN = "updateFilterButton";
+
+    public static final String DELETE_FILTER_BUTTON_COLUMN = "deleteFilterButton";
+
+    public static final String NO_TAG = "NO TAG";
 
     /**
      * /** Constructor.

@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -41,6 +42,7 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -50,7 +52,6 @@ import com.vaadin.ui.UI;
  * Target Tag filter buttons table.
  */
 public class TargetTagFilterButtons extends AbstractFilterButtons implements RefreshableContainer {
-    private static final String NO_TAG = "NO TAG";
 
     private static final long serialVersionUID = 1L;
 
@@ -66,10 +67,12 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     private final transient EntityFactory entityFactory;
 
+    private final transient TargetTagManagement targetTagManagement;
+
     TargetTagFilterButtons(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final VaadinMessageSource i18n,
-            final UINotification notification, final SpPermissionChecker permChecker,
-            final EntityFactory entityFactory) {
+            final UINotification notification, final SpPermissionChecker permChecker, final EntityFactory entityFactory,
+            final TargetTagManagement targetTagManagement) {
         super(eventBus, new TargetTagFilterButtonClick(eventBus, managementUIState));
         this.managementUIState = managementUIState;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -77,8 +80,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         this.notification = notification;
         this.permChecker = permChecker;
         this.entityFactory = entityFactory;
+        this.targetTagManagement = targetTagManagement;
 
-        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
     }
 
     @Override
@@ -105,7 +109,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected String createButtonId(final String name) {
-        if (NO_TAG.equals(name)) {
+        if (SPUIDefinitions.NO_TAG.equals(name)) {
             return UIComponentIdProvider.NO_TAG_TARGET;
         }
         return name;
@@ -164,7 +168,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
         final AbstractTable<?> source = (AbstractTable<?>) tabletransferable.getSourceComponent();
 
-        if (!validateIfSourceisTargetTable(source) && !hasTargetUpdatePermission()) {
+        if (!validateIfSourceIsTargetTable(source) && !hasTargetUpdatePermission()) {
             return false;
         }
 
@@ -211,7 +215,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         publishAssignTargetTagEvent(result);
 
         publishUnAssignTargetTagEvent(targTagName, result);
-
     }
 
     private void publishUnAssignTargetTagEvent(final String targTagName, final TargetTagAssignmentResult result) {
@@ -234,7 +237,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
         eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
     }
 
-    private boolean validateIfSourceisTargetTable(final Table source) {
+    private boolean validateIfSourceIsTargetTable(final Table source) {
         if (!source.getId().equals(UIComponentIdProvider.TARGET_TABLE_ID)) {
             notification.displayValidationError(i18n.getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
@@ -244,15 +247,16 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected String getButttonWrapperIdPrefix() {
-
         return SPUIDefinitions.TARGET_TAG_ID_PREFIXS;
     }
 
     @Override
     public void refreshContainer() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
+        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
+        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
     }
 
@@ -280,4 +284,17 @@ public class TargetTagFilterButtons extends AbstractFilterButtons implements Ref
     protected String getButtonWrapperData() {
         return SPUIDefinitions.TARGET_TAG_BUTTON;
     }
+
+    @Override
+    protected void addEditButtonClickListener(final ClickEvent event) {
+        new UpdateTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker, notification,
+                getEntityId(event));
+    }
+
+    @Override
+    protected void addDeleteButtonClickListener(final ClickEvent event) {
+        new DeleteTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker, notification,
+                managementUIState.getTargetTableFilters().getClickedTargetTags(), getEntityId(event));
+    }
+
 }

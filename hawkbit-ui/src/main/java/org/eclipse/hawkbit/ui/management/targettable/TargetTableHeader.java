@@ -77,20 +77,20 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    TargetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    TargetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TargetTagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
-            final TargetTable targetTable) {
-        super(i18n, permChecker, eventbus, managementUIState, null, null);
+            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final TargetTagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final Executor uiExecutor, final TargetTable targetTable) {
+        super(i18n, permChecker, eventBus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
-        this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
+        this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
                 entityFactory, targetTable);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
-                managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement,
+                managementUIState, deploymentManagement, uiproperties, permChecker, uiNotification, tagManagement,
                 distributionSetManagement, entityFactory, uiExecutor);
         this.distributionSetManagement = distributionSetManagement;
         onLoadRestoreState();
@@ -335,8 +335,7 @@ public class TargetTableHeader extends AbstractTableHeader {
                 return;
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
-            final Optional<DistributionSet> distributionSet = distributionSetManagement
-                    .get(distributionSetId);
+            final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distributionSetId);
             if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return;

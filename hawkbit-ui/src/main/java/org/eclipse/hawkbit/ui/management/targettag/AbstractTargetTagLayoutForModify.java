@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -20,7 +19,6 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractTagLayoutForModify;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -35,23 +33,25 @@ public abstract class AbstractTargetTagLayoutForModify extends AbstractTagLayout
 
     AbstractTargetTagLayoutForModify(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+            final UINotification uiNotification, final String selectedTagName) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, selectedTagName);
         this.targetTagManagement = targetTagManagement;
-        init();
     }
 
     @Override
-    protected void setTagDetails(final String distTagSelected) {
-        getTagName().setValue(distTagSelected);
-        getTagName().setEnabled(false);
-        final Optional<TargetTag> selectedTargetTag = targetTagManagement.getByName(distTagSelected);
+    protected void setTagDetails(final String selectedTagName) {
+        final Optional<TargetTag> selectedTargetTag = targetTagManagement.getByName(selectedTagName);
         selectedTargetTag.ifPresent(tag -> {
-            getTagDesc().setValue(selectedTargetTag.get().getDescription());
+            getTagName().setValue(tag.getName());
+            getTagName().setEnabled(false);
+            getTagDesc().setValue(tag.getDescription());
             if (tag.getColour() == null) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(tag.getColour()), tag.getColour());
+            }
+            if (isUpdateAction()) {
+                getWindow().setOrginaleValues();
             }
         });
     }
@@ -59,17 +59,6 @@ public abstract class AbstractTargetTagLayoutForModify extends AbstractTagLayout
     @Override
     protected Optional<TargetTag> findEntityByName() {
         return targetTagManagement.getByName(getTagName().getValue());
-    }
-
-    @Override
-    protected void populateTagNameCombo() {
-        if (getUpdateCombobox().getTagNameComboBox() == null) {
-            return;
-        }
-        getUpdateCombobox().getTagNameComboBox().removeAllItems();
-        final List<TargetTag> distTagNameList = targetTagManagement.findAll(new PageRequest(0, getMaxTags()))
-                .getContent();
-        distTagNameList.forEach(value -> getUpdateCombobox().getTagNameComboBox().addItem(value.getName()));
     }
 
     public TargetTagManagement getTargetTagManagement() {

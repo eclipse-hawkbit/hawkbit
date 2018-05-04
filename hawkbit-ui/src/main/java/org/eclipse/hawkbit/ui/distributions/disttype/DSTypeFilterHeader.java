@@ -45,11 +45,13 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
+    DSTypeFilterButtons dSTypeFilterButtons;
+
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final DSTypeFilterButtons dSTypeFilterButtons) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
         this.entityFactory = entityFactory;
@@ -57,6 +59,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.uiNotification = uiNotification;
         this.distributionSetManagement = distributionSetManagement;
+        this.dSTypeFilterButtons = dSTypeFilterButtons;
     }
 
     @Override
@@ -114,9 +117,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new DeleteDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
-                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                        distributionSetManagement, manageDistUIState.getManageDistFilters().getClickedDistSetType());
+                dSTypeFilterButtons.addDeleteColumn();
             }
         };
     }
@@ -129,9 +130,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
-                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                        distributionSetManagement);
+                dSTypeFilterButtons.addEditColumn();
             }
         };
     }

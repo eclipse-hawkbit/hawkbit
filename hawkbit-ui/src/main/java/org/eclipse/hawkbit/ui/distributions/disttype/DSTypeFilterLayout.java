@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -28,7 +27,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  */
 public class DSTypeFilterLayout extends AbstractFilterLayout {
 
-    private static final long serialVersionUID = 2689002932344750781L;
+    private static final long serialVersionUID = 1L;;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -36,12 +35,10 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement,
-            final DistributionsViewClientCriterion distributionsViewClientCriterion) {
+            final DistributionSetManagement distributionSetManagement, final DSTypeFilterButtons dSTypeFilterButtons) {
         super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, entityFactory, uiNotification,
-                softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement),
-                new DSTypeFilterButtons(eventBus, manageDistUIState, distributionsViewClientCriterion,
-                        distributionSetTypeManagement));
+                softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
+                dSTypeFilterButtons), dSTypeFilterButtons);
         this.manageDistUIState = manageDistUIState;
 
         restoreState();
@@ -60,7 +57,6 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
 
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
-
         return manageDistUIState.isDistTypeFilterClosed();
     }
 

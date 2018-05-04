@@ -161,7 +161,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     /**
      * Init the layout.
      */
-    public void init() {
+    protected void init() {
         setSizeUndefined();
         createRequiredComponents();
         buildLayout();
@@ -476,6 +476,18 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
     public HorizontalLayout getColorLabelLayout() {
         return colorLabelLayout;
+    }
+
+    public void setTagName(final TextField tagName) {
+        this.tagName = tagName;
+    }
+
+    public void setTagDesc(final TextArea tagDesc) {
+        this.tagDesc = tagDesc;
+    }
+
+    public void setTagColorPreviewBtn(final Button tagColorPreviewBtn) {
+        this.tagColorPreviewBtn = tagColorPreviewBtn;
     }
 
     /**
