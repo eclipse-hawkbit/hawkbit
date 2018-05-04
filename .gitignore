@@ -1,61 +1,56 @@
 # Directories #
-/build/
-/*/build/
-/bin/
-/*/bin/
-/target/
-/*/target/
-/*/*/target/
+build
+bin
+tmp
+.settings
+.classpath
+target
+.allure
+.vscode
+.springbeans
+.metadata
+.project
 
-# OS Files #
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+
+# OSX
 .DS_Store
+.svn
 
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Compiled filed
 *.class
 
 # Package Files #
 *.jar
 *.war
+*.ear
+*.db
 
 # Sonar
 .sonar_lock
+
+# VSCode
+classpath-data.json
 
 # Created by spring-boot-configuration-processor
 .factorypath
 
 # Eclipse IDE
 *.pydevproject
-.project
-.metadata
-bin/**
-tmp/**
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-
-# IDEA
-*.iml
-.idea
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
 
 # Maven
 maven.properties
-/*/maven.properties
 
-hawkbit-repository/hawkbit-repository-jpa/.springBeans
+# Test Files
+*.tmp
