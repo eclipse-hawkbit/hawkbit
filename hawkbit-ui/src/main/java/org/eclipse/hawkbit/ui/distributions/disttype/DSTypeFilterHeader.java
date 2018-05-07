@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -43,22 +42,19 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
-    private final transient DistributionSetManagement distributionSetManagement;
-
     DSTypeFilterButtons dSTypeFilterButtons;
 
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement, final DSTypeFilterButtons dSTypeFilterButtons) {
+            final DSTypeFilterButtons dSTypeFilterButtons) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
         this.entityFactory = entityFactory;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.uiNotification = uiNotification;
-        this.distributionSetManagement = distributionSetManagement;
         this.dSTypeFilterButtons = dSTypeFilterButtons;
     }
 

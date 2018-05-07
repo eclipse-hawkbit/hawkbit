@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -65,8 +66,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                 searchText = String.format("%%%s%%", searchText);
             }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE) != null) {
-                // distributionSetType = (DistributionSetType) Optional
-                // .ofNullable(queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE)).orElse(null);
+                distributionSetType = (DistributionSetType) Optional
+                        .ofNullable(queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE)).orElse(null);
             }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE) != null) {
                 dsComplete = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);

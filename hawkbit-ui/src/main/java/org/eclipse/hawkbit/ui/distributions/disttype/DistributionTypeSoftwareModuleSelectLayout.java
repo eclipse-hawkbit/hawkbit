@@ -38,7 +38,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Types on the Distributions View.
  */
 
-// TODO MR: Why is the Vaadin Component List Builder not used here??
 public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
@@ -152,9 +151,6 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
         });
     }
 
-    /**
-    *
-    */
     private void buildSourceTable() {
         sourceTable = new Table();
         sourceTable.setId(SPUIDefinitions.TWIN_TABLE_SOURCE_ID);
@@ -241,8 +237,6 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
                     sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_NAME).getValue());
             final CheckBox mandatoryCheckBox = new CheckBox();
-            // TODO MR what is this?
-            // window.updateAllComponents(mandatoryCheckBox);
             saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(mandatoryCheckBox);
             saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(
                     sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_DESCRIPTION).getValue());

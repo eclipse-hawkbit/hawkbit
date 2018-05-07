@@ -292,10 +292,6 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.setColumnExpandRatio(0, 1F);
     }
 
-    private boolean hasDeploymentPermission() {
-        return permChecker.hasReadRepositoryPermission() && permChecker.hasUpdateTargetPermission();
-    }
-
     private void displayTargetWidgetsOnly() {
         mainLayout.setColumns(3);
         mainLayout.setRows(2);

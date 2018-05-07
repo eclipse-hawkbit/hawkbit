@@ -113,7 +113,7 @@ public class DistributionsView extends AbstractNotificationView implements Brows
                 uiNotification, softwareModuleTypeManagement, distributionSetManagement, systemManagement);
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 entityFactory, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                distributionSetManagement, dsTypeFilterButtons);
+                dsTypeFilterButtons);
         this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
                 softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement, targetManagement,
                 entityFactory, uiNotification, distributionSetTagManagement, distributionsViewClientCriterion,

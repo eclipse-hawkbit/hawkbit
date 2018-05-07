@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterButtons;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
@@ -48,7 +47,6 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -80,11 +78,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private final UploadLayout uploadLayout;
 
-    private final SMDeleteActionsLayout deleteActionsLayout;
-
     private VerticalLayout detailAndUploadLayout;
-
-    private HorizontalLayout uplaodButtonsLayout;
 
     private GridLayout mainLayout;
 
@@ -109,8 +103,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 artifactManagement, softwareModuleManagement);
         this.uploadLayout = new UploadLayout(i18n, uiNotification, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareModuleManagement);
-        this.deleteActionsLayout = new SMDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                artifactUploadState, softwareModuleManagement, softwareModuleTypeManagement, uploadViewClientCriterion);
         final SMTypeFilterButtons smTypeFilterButtons = new SMTypeFilterButtons(eventBus, artifactUploadState,
                 uploadViewClientCriterion, softwareModuleTypeManagement, i18n, entityFactory, permChecker,
                 uiNotification);
@@ -189,28 +181,16 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private GridLayout createMainLayout() {
         createDetailsAndUploadLayout();
-        createUploadButtonLayout();
         mainLayout = new GridLayout(3, 2);
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
         mainLayout.addComponent(filterByTypeLayout, 0, 0);
         mainLayout.addComponent(smTableLayout, 1, 0);
         mainLayout.addComponent(detailAndUploadLayout, 2, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1);
-        mainLayout.addComponent(uplaodButtonsLayout, 2, 1);
         mainLayout.setRowExpandRatio(0, 1.0F);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
-        mainLayout.setComponentAlignment(uplaodButtonsLayout, Alignment.BOTTOM_CENTER);
         return mainLayout;
-    }
-
-    private void createUploadButtonLayout() {
-        uplaodButtonsLayout = new HorizontalLayout();
-        if (permChecker.hasCreateRepositoryPermission()) {
-            uplaodButtonsLayout = uploadLayout.getFileUploadLayout();
-        }
     }
 
     private void minimizeSwTable() {
@@ -220,7 +200,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void maximizeSwTable() {
         mainLayout.removeComponent(detailAndUploadLayout);
-        removeOtherComponents();
         mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
     }
@@ -238,23 +217,13 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.removeComponent(filterByTypeLayout);
         mainLayout.removeComponent(smTableLayout);
         detailAndUploadLayout.removeComponent(dadw);
-        removeOtherComponents();
         mainLayout.setColumnExpandRatio(1, 0F);
         mainLayout.setColumnExpandRatio(2, 1F);
     }
 
     private void addOtherComponents() {
-        mainLayout.addComponent(deleteActionsLayout, 1, 1);
-        mainLayout.addComponent(uplaodButtonsLayout, 2, 1);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
-        mainLayout.setComponentAlignment(uplaodButtonsLayout, Alignment.BOTTOM_CENTER);
-    }
-
-    private void removeOtherComponents() {
-        mainLayout.removeComponent(deleteActionsLayout);
-        mainLayout.removeComponent(uplaodButtonsLayout);
     }
 
     private void checkNoDataAvaialble() {

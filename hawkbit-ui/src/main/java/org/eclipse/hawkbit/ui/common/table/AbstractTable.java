@@ -419,15 +419,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         selectedEntities.forEach(entity -> table.unselect(entity));
     }
 
-    private static List<Long> selectEntityToBeDeletedInTable(final ClickEvent event, final Long id,
-            final List<Long> selectedEntities) {
-        final Button source = (Button) event.getSource();
-        final Table table = (Table) source.getParent();
-        selectedEntities.add(id);
-        table.select(id);
-        return selectedEntities;
-    }
-
     private static long getDeleteButtonId(final ClickEvent event) {
         final String id = event.getButton().getId();
         return Long.parseLong(id.substring(id.lastIndexOf('.') + 1));

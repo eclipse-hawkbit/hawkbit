@@ -98,6 +98,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         menu = new ConfigMenuBar(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission(),
                 permChecker.hasDeleteRepositoryPermission(), getAddButtonCommand(), getUpdateButtonCommand(),
                 getDeleteButtonCommand());
+        menu.addStyleName("targetTag");
         addStyleName(ValoTheme.ACCORDION_BORDERLESS);
         addTabs();
         setSizeFull();
