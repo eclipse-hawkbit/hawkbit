@@ -67,7 +67,9 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
 
     @Override
     protected AbstractDbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
-            final String contentType, final File file) throws IOException {
+            final String contentType, final String tempFile) throws IOException {
+
+        final File file = new File(tempFile);
         return renameFileToSHA1Naming(tenant, file, new ArtifactFilesystem(file, sha1Hash16,
                 new DbArtifactHash(sha1Hash16, mdMD5Hash16), file.length(), contentType));
     }

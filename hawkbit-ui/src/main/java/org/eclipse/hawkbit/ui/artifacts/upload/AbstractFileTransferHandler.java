@@ -229,7 +229,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         LOG.info("Transfering tempfile {} - {} to repository", filename, tempFilePath);
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true, mimeType);
+            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true, mimeType, fileSize);
 
             publishUploadSucceeded(fileUploadId, fileSize, tempFilePath);
 

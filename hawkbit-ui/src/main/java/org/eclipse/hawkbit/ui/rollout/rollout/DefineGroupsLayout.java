@@ -50,7 +50,6 @@ import com.vaadin.data.util.converter.StringToFloatConverter;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.FloatRangeValidator;
 import com.vaadin.data.validator.IntegerRangeValidator;
-import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.UserError;
 import com.vaadin.ui.Button;
@@ -68,7 +67,9 @@ import com.vaadin.ui.UI;
  */
 public class DefineGroupsLayout extends GridLayout {
 
-    private static final long serialVersionUID = 2939193468001472916L;
+    private static final long serialVersionUID = 1L;
+
+    private static final String MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED = "message.rollout.max.group.size.exceeded.advanced";
 
     private final VaadinMessageSource i18n;
 
@@ -268,7 +269,7 @@ public class DefineGroupsLayout extends GridLayout {
             validateRemainingTargets();
 
         } else {
-            resetRemainingTargetsError();
+            resetErrors();
             setValidationStatus(ValidationStatus.INVALID);
         }
     }
@@ -280,12 +281,12 @@ public class DefineGroupsLayout extends GridLayout {
         }
     }
 
-    private void resetRemainingTargetsError() {
-        groupRows.forEach(GroupRow::hideLastGroupError);
+    private void resetErrors() {
+        groupRows.forEach(GroupRow::resetError);
     }
 
     private void validateRemainingTargets() {
-        resetRemainingTargetsError();
+        resetErrors();
         if (targetFilter == null) {
             return;
         }
@@ -319,14 +320,31 @@ public class DefineGroupsLayout extends GridLayout {
         }
         groupsValidation = validation;
 
-        final GroupRow lastRow = groupRows.get(groupRows.size() - 1);
+        final int lastIdx = groupRows.size() - 1;
+        final GroupRow lastRow = groupRows.get(lastIdx);
         if (groupsValidation != null && groupsValidation.isValid() && validationStatus != ValidationStatus.INVALID) {
-            lastRow.hideLastGroupError();
+            lastRow.resetError();
             setValidationStatus(ValidationStatus.VALID);
-
         } else {
-            lastRow.markWithLastGroupError();
+            lastRow.setError(i18n.getMessage("message.rollout.remaining.targets.error"));
             setValidationStatus(ValidationStatus.INVALID);
+        }
+
+        // validate the single groups
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+        final boolean hasRemainingTargetsError = validationStatus == ValidationStatus.INVALID;
+        for (int i = 0; i < groupRows.size(); ++i) {
+            final GroupRow row = groupRows.get(i);
+            // do not mask the 'remaining targets' error
+            if (hasRemainingTargetsError && row.equals(lastRow)) {
+                continue;
+            }
+            row.resetError();
+            final Long count = groupsValidation.getTargetsPerGroup().get(i);
+            if (count != null && count > maxTargets) {
+                row.setError(i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxTargets));
+                setValidationStatus(ValidationStatus.INVALID);
+            }
         }
 
     }
@@ -390,13 +408,9 @@ public class DefineGroupsLayout extends GridLayout {
             groupName = createTextField("textfield.name", UIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID);
             groupName.setValue(i18n.getMessage("textfield.rollout.group.default.name", groupsCount));
             groupName.setStyleName("rollout-group-name");
-            groupName.addValueChangeListener(
+            groupName.addValueChangeListener(event -> valueChanged());
 
-                    event -> valueChanged());
-
-            targetFilterQueryCombo =
-
-                    createTargetFilterQueryCombo();
+            targetFilterQueryCombo = createTargetFilterQueryCombo();
 
             populateTargetFilterQuery();
             targetFilterQueryCombo.addValueChangeListener(event -> valueChanged());
@@ -419,19 +433,17 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private TextField createTextField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
-                    .buildTextComponent();
+            final TextField textField = new TextFieldBuilder(RolloutGroup.NAME_MAX_SIZE).required(true, i18n)
+                    .prompt(i18n.getMessage(in18Key)).id(id).buildTextComponent();
+
             textField.setSizeUndefined();
-            textField.addValidator(
-                    new StringLengthValidator(i18n.getMessage("message.rollout.group.name.invalid"), 1, 64, false));
             return textField;
         }
 
         private TextField createPercentageField(final String in18Key, final String id) {
-            final TextField textField = new TextFieldBuilder().prompt(i18n.getMessage(in18Key)).immediate(true).id(id)
+            final TextField textField = new TextFieldBuilder(32).prompt(i18n.getMessage(in18Key)).id(id)
                     .buildTextComponent();
             textField.setWidth(80, Unit.PIXELS);
-            textField.setNullRepresentation("");
             textField.setConverter(new StringToIntegerConverter());
             textField.addValidator(this::validateMandatoryPercentage);
             return textField;
@@ -474,11 +486,9 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         private TextArea createTargetFilterQuery() {
-            final TextArea filterField = new TextAreaBuilder().style("text-area-style")
-                    .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
-                    .maxLengthAllowed(SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH).buildTextComponent();
+            final TextArea filterField = new TextAreaBuilder(TargetFilterQuery.QUERY_MAX_SIZE).style("text-area-style")
+                    .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD).buildTextComponent();
 
-            filterField.setNullRepresentation("");
             filterField.setEnabled(false);
             filterField.setSizeUndefined();
             return filterField;
@@ -622,18 +632,16 @@ public class DefineGroupsLayout extends GridLayout {
                     && triggerThreshold.isValid() && errorThreshold.isValid();
         }
 
-        private void markWithLastGroupError() {
-            targetPercentage
-                    .setComponentError(new UserError(i18n.getMessage("message.rollout.remaining.targets.error")));
+        private void setError(final String error) {
+            targetPercentage.setComponentError(new UserError(error));
         }
 
         /**
          * Hides an error of the row
          */
-        private void hideLastGroupError() {
+        private void resetError() {
             targetPercentage.setComponentError(null);
         }
-
     }
 
 }

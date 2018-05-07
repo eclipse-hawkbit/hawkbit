@@ -40,6 +40,16 @@ public interface ActionStatusRepository
     Long countByAction(JpaAction action);
 
     /**
+     * Counts {@link ActionStatus} entries of given {@link Action} in
+     * repository.
+     *
+     * @param actionId
+     *            of the action to count status entries for
+     * @return number of actions in repository
+     */
+    long countByActionId(Long actionId);
+
+    /**
      * Retrieves all {@link ActionStatus} entries from repository of given
      * ActionId.
      *

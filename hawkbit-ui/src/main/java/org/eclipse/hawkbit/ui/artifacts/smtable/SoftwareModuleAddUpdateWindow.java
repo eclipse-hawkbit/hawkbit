@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -211,20 +210,19 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
     private void createRequiredComponents() {
 
-        nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME);
-        nameTextField.addValidator(new EmptyStringValidator(i18n));
+        nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME,
+                SoftwareModule.NAME_MAX_SIZE);
 
-        versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION);
-        versionTextField.addValidator(new EmptyStringValidator(i18n));
+        versionTextField = createTextField("textfield.version", UIComponentIdProvider.SOFT_MODULE_VERSION,
+                SoftwareModule.VERSION_MAX_SIZE);
 
-        vendorTextField = createTextField("textfield.vendor", UIComponentIdProvider.SOFT_MODULE_VENDOR);
-        vendorTextField.setRequired(false);
-        vendorTextField.setNullRepresentation("");
-
-        descTextArea = new TextAreaBuilder().caption(i18n.getMessage("textfield.description")).style("text-area-style")
-                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION)
+        vendorTextField = new TextFieldBuilder(SoftwareModule.VENDOR_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.vendor")).id(UIComponentIdProvider.SOFT_MODULE_VENDOR)
                 .buildTextComponent();
-        descTextArea.setNullRepresentation("");
+
+        descTextArea = new TextAreaBuilder(SoftwareModule.DESCRIPTION_MAX_SIZE)
+                .caption(i18n.getMessage("textfield.description")).style("text-area-style")
+                .id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION).buildTextComponent();
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.getMessage("upload.swmodule.type"), "", null, null, true,
                 null, i18n.getMessage("upload.swmodule.type"));
@@ -234,9 +232,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         typeComboBox.setImmediate(Boolean.TRUE);
     }
 
-    private TextField createTextField(final String in18Key, final String id) {
-        return new TextFieldBuilder().caption(i18n.getMessage(in18Key)).required(true).prompt(i18n.getMessage(in18Key))
-                .immediate(true).id(id).buildTextComponent();
+    private TextField createTextField(final String in18Key, final String id, final int maxLength) {
+        return new TextFieldBuilder(maxLength).caption(i18n.getMessage(in18Key)).required(true, i18n).id(id)
+                .buildTextComponent();
     }
 
     private void populateTypeNameCombo() {

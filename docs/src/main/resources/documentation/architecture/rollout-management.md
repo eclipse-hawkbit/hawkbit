@@ -35,9 +35,8 @@ The cascading execution of the deployment groups is based on two thresholds that
 - success condition by means of percentage of successfully installed targets in the current groups triggers.
 - error condition by means of absolute or percentage of failed installations which triggers an emergency shutdown of the entire rollout.
 
-[[images/DeploymentGroups.png]]
-
 ## Rollout state machine
+
 ### State Machine on Rollout
 ![](../images/rolloutstatediagram.png){:width="100%" .image-center}
 

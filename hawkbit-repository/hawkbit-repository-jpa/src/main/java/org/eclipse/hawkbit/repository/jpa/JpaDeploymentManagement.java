@@ -28,6 +28,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -46,6 +47,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -115,6 +117,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final QuotaManagement quotaManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final Database database;
 
@@ -124,7 +127,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final Database database) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
@@ -139,10 +142,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository);
+                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository);
+                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.database = database;
     }
@@ -215,8 +219,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *            a list of all targets and their action type
      * @param actionMessage
      *            an optional message to be written into the action status
-     * @param offline
-     *            to <code>true</code> in offline case
+     * @param assignmentStrategy
+     *            the assignment strategy (online /offline)
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -239,6 +243,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .collect(Collectors.toList());
+
+        // enforce the 'max targets per manual assignment' quota
+        if (!controllerIDs.isEmpty()) {
+            assertMaxTargetsPerManualAssignmentQuota(set.getId(), controllerIDs.size());
+        }
 
         LOG.debug("assignDistribution({}) to {} targets", set, controllerIDs.size());
 
@@ -316,6 +325,20 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
                 targetManagement);
+    }
+
+    /**
+     * Enforces the quota defining the maximum number of {@link Target}s per
+     * manual {@link DistributionSet} assignment.
+     * 
+     * @param id
+     *            of the distribution set
+     * @param requested
+     *            number of targets to check
+     */
+    private void assertMaxTargetsPerManualAssignmentQuota(final Long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
+                Target.class, DistributionSet.class, null);
     }
 
     @Override

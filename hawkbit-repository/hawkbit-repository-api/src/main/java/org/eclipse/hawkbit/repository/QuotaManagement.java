@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 public interface QuotaManagement {
 
     /**
-     * @return Maximum number of {@link ActionStatus} entries that the
+     * @return maximum number of {@link ActionStatus} entries that the
      *         controller can report for an {@link Action}.
      */
     int getMaxStatusEntriesPerAction();
@@ -42,5 +42,58 @@ public interface QuotaManagement {
      *         for an individual {@link ActionStatus}.
      */
     int getMaxMessagesPerActionStatus();
+
+    /**
+     * @return maximum number of meta data entries per software module
+     */
+    int getMaxMetaDataEntriesPerSoftwareModule();
+
+    /**
+     * @return maximum number of meta data entries per distribution set
+     */
+    int getMaxMetaDataEntriesPerDistributionSet();
+
+    /**
+     * @return maximum number of software modules per distribution set
+     */
+    int getMaxSoftwareModulesPerDistributionSet();
+
+    /**
+     * @return the maximum number of software module types per distribution set
+     *         type
+     */
+    int getMaxSoftwareModuleTypesPerDistributionSetType();
+
+    /**
+     * @return the maximum number of artifacts per software module
+     */
+    int getMaxArtifactsPerSoftwareModule();
+
+    /**
+     * @return the maximum number of targets per rollout group
+     */
+    int getMaxTargetsPerRolloutGroup();
+
+    /**
+     * @return the maximum number of targets which for a manual distribution set
+     *         assignment
+     */
+    int getMaxTargetsPerManualAssignment();
+
+    /**
+     * @return the maximum number of targets for an automatic distribution set
+     *         assignment
+     */
+    int getMaxTargetsPerAutoAssignment();
+
+    /**
+     * @return the maximum number of actions per target
+     */
+    int getMaxActionsPerTarget();
+
+    /**
+     * @return the maximum size of software artifacts in bytes
+     */
+    long getMaxArtifactSize();
 
 }

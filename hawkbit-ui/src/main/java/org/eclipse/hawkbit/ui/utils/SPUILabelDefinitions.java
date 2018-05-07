@@ -273,11 +273,6 @@ public final class SPUILabelDefinitions {
     public static final String STATUS_ICON = "statusIcon";
 
     /**
-     * Create custom target filter header - query text field length.
-     */
-    public static final int TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH = 1024;
-
-    /**
      * Status - column property.
      */
     public static final String VAR_STATUS = "status";

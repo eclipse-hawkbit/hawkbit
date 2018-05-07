@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -63,6 +64,10 @@ public interface DistributionSetTypeManagement
      * @throws EntityReadOnlyException
      *             if the {@link DistributionSetType} while it is already in use
      *             by a {@link DistributionSet}
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link SoftwareModuleType}s is
+     *             exceeded for the addressed {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType assignOptionalSoftwareModuleTypes(long dsTypeId,
@@ -84,6 +89,10 @@ public interface DistributionSetTypeManagement
      * @throws EntityReadOnlyException
      *             if the {@link DistributionSetType} while it is already in use
      *             by a {@link DistributionSet}
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link SoftwareModuleType}s is
+     *             exceeded for the addressed {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType assignMandatorySoftwareModuleTypes(long dsTypeId,

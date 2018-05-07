@@ -8,17 +8,26 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -27,10 +36,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -193,7 +198,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     }
 
     @Test
-    @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
+    @Description("Tests the successful module update of unused distribution set type which is in fact allowed.")
     public void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
@@ -215,6 +220,55 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
         assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(runtimeType);
+    }
+
+    @Test
+    @Description("Verifies that the quota for software module types per distribution set type is enforced as expected.")
+    public void quotaMaxSoftwareModuleTypes() {
+
+        final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
+        // create software module types
+        final List<Long> moduleTypeIds = Lists.newArrayList();
+        for (int i = 0; i < quota + 1; ++i) {
+            final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
+                    .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);
+            moduleTypeIds.add(softwareModuleTypeManagement.create(smCreate).getId());
+        }
+
+        // assign all types at once
+        final DistributionSetType dsType1 = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("dst1").name("dst1"));
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
+                () -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType1.getId(), moduleTypeIds));
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
+                () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType1.getId(), moduleTypeIds));
+
+        // assign as many mandatory modules as possible
+        final DistributionSetType dsType2 = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("dst2").name("dst2"));
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
+                moduleTypeIds.subList(0, quota));
+        assertThat(distributionSetTypeManagement.get(dsType2.getId())).isNotEmpty();
+        assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes().size())
+                .isEqualTo(quota);
+        // assign one more to trigger the quota exceeded error
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
+                        Collections.singletonList(moduleTypeIds.get(quota))));
+
+        // assign as many optional modules as possible
+        final DistributionSetType dsType3 = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("dst3").name("dst3"));
+        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(),
+                moduleTypeIds.subList(0, quota));
+        assertThat(distributionSetTypeManagement.get(dsType3.getId())).isNotEmpty();
+        assertThat(distributionSetTypeManagement.get(dsType3.getId()).get().getOptionalModuleTypes().size())
+                .isEqualTo(quota);
+        // assign one more to trigger the quota exceeded error
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(),
+                        Collections.singletonList(moduleTypeIds.get(quota))));
+
     }
 
     @Test
