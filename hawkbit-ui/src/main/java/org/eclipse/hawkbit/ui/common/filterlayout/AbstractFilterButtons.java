@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -147,7 +147,7 @@ public abstract class AbstractFilterButtons extends Table {
         }
 
         final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         if (itemId instanceof TagIdName) {
             deleteButton.setId(((TagIdName) itemId).getName());
         } else {
@@ -165,7 +165,7 @@ public abstract class AbstractFilterButtons extends Table {
         }
 
         final Button editButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.EDIT,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         if (itemId instanceof TagIdName) {
             editButton.setId(((TagIdName) itemId).getName());
         } else {

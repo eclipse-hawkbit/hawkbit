@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -353,11 +353,10 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private Object createDeleteButton(final Object itemId) {
         deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorderWithIcon.class);
         final String id = getEntityId(itemId);
         if (StringUtils.hasText(id)) {
             deleteButton.setId("delete.entity." + id);
-            deleteButton.addStyleName("highlightIconIfSelected");
             deleteButton.setDescription(SPUIDefinitions.DELETE);
             deleteButton.addClickListener(this::addDeleteButtonClickListener);
         }

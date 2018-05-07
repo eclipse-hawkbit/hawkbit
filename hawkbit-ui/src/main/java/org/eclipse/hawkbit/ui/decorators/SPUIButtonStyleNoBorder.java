@@ -15,7 +15,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Style for button: Small NoBorder.
  */
-public class SPUIButtonStyleSmallNoBorder implements SPUIButtonDecorator {
+public class SPUIButtonStyleNoBorder implements SPUIButtonDecorator {
 
     /**
      * Decorate Button and return.
@@ -32,13 +32,11 @@ public class SPUIButtonStyleSmallNoBorder implements SPUIButtonDecorator {
      */
     @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
-        // Set Style
-        if (null != style && setStyle) {
+        if (style != null && setStyle) {
             button.addStyleName(style);
         }
         button.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        // Set icon
-        if (null != icon) {
+        if (icon != null) {
             button.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
             button.addStyleName("button-no-border");
             button.setIcon(icon);

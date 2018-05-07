@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
@@ -172,7 +172,7 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
                 SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
         return deleteIcon;
@@ -223,7 +223,7 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row1.getItemProperty(SPUILabelDefinitions.NAME).getValue();
 
         final Button updateIcon = SPUIComponentProvider.getButton(getDetailLinkId(tfName), tfName,
-                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleNoBorder.class);
         updateIcon.setData(tfName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
         updateIcon.addClickListener(this::onClickOfDetailButton);
@@ -239,11 +239,11 @@ public class TargetFilterTable extends Table {
         if (distSet == null) {
             updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
                     i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    SPUIButtonStyleNoBorder.class);
         } else {
             updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
                     i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    SPUIButtonStyleNoBorder.class);
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);

@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -246,7 +246,7 @@ public class UploadConfirmationWindow implements Button.ClickListener {
             final Button deleteIcon = SPUIComponentProvider.getButton(
                     UIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
                     ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    SPUIButtonStyleNoBorder.class);
             deleteIcon.addClickListener(this);
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);

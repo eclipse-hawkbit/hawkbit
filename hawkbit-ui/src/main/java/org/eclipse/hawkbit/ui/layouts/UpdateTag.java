@@ -15,10 +15,10 @@ package org.eclipse.hawkbit.ui.layouts;
  *
  */
 @FunctionalInterface
-public interface UpdateTagLayout {
+public interface UpdateTag {
 
     /**
-     * Provide the update tag or type dialog with the tag or type information
+     * Provides the update tag or type dialog with the tag or type information
      *
      * @param selectedTagName
      *            the name of the selected tag

@@ -13,7 +13,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -87,10 +87,10 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
 
         final VerticalLayout selectButtonLayout = new VerticalLayout();
         final Button selectButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SELECT_DIST_TYPE, "", "",
-                "arrow-button", true, FontAwesome.FORWARD, SPUIButtonStyleSmallNoBorder.class);
+                "arrow-button", true, FontAwesome.FORWARD, SPUIButtonStyleNoBorder.class);
         selectButton.addClickListener(event -> addSMType());
         final Button unSelectButton = SPUIComponentProvider.getButton("unselect-dist-type", "", "", "arrow-button",
-                true, FontAwesome.BACKWARD, SPUIButtonStyleSmallNoBorder.class);
+                true, FontAwesome.BACKWARD, SPUIButtonStyleNoBorder.class);
         unSelectButton.addClickListener(event -> removeSMType());
         selectButtonLayout.addComponent(selectButton);
         selectButtonLayout.addComponent(unSelectButton);

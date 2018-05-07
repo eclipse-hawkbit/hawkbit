@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
-import org.eclipse.hawkbit.ui.layouts.UpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.UpdateTag;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -32,7 +32,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * set tag on the Deployment View.
  *
  */
-public class UpdateDistributionSetTagLayout extends AbstractTagLayout<DistributionSetTag> implements UpdateTagLayout {
+public class UpdateDistributionSetTagLayout extends AbstractTagLayout<DistributionSetTag> implements UpdateTag {
 
     private static final long serialVersionUID = 1L;
 

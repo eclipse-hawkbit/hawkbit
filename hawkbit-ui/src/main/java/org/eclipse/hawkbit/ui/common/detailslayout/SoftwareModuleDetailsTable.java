@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -223,7 +223,7 @@ public class SoftwareModuleDetailsTable extends Table {
                 horizontalLayout.setSizeFull();
                 final Label softwareModule = HawkbitCommonUtil.getFormatedLabel("");
                 final Button reassignSoftModule = SPUIComponentProvider.getButton(sw.getName(), "", "", "", true,
-                        FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+                        FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
                 reassignSoftModule
                         .addClickListener(event -> unassignSW(event, distributionSet, alreadyAssignedSwModules));
                 final String softwareModNameVersion = HawkbitCommonUtil.getFormattedNameVersion(sw.getName(),

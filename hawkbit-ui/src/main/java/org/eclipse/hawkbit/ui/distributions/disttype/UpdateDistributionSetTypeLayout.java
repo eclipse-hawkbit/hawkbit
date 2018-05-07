@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
-import org.eclipse.hawkbit.ui.layouts.UpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.UpdateTag;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
@@ -39,7 +39,7 @@ import com.vaadin.ui.CheckBox;
  * Set Type on the Distributions View.
  *
  */
-public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetTypeLayout implements UpdateTagLayout {
+public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetTypeLayout implements UpdateTag {
 
     private static final long serialVersionUID = 1L;
 

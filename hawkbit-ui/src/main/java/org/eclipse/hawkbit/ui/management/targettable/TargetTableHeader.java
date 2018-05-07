@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -382,7 +382,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private void addFilterTextField(final DistributionSetIdName distributionSetIdName) {
         final Button filterLabelClose = SPUIComponentProvider.getButton("drop.filter.close", "", "", "", true,
-                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
         filterLabelClose.addClickListener(clickEvent -> closeFilterByDistribution());
         final Label filteredDistLabel = new Label();
         filteredDistLabel.setStyleName(ValoTheme.LABEL_COLORED + " " + ValoTheme.LABEL_SMALL);

@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEven
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -405,7 +405,7 @@ public class UploadStatusInfoWindow extends Window {
     private Button getMinimizeButton() {
         final Button minimizeBtn = SPUIComponentProvider.getButton(
                 UIComponentIdProvider.UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
         minimizeBtn.setEnabled(true);
@@ -415,7 +415,7 @@ public class UploadStatusInfoWindow extends Window {
     private Button getResizeButton() {
         final Button resizeBtn = SPUIComponentProvider.getButton(
                 UIComponentIdProvider.UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID, "", "", "", true, FontAwesome.EXPAND,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         resizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         resizeBtn.addClickListener(event -> resizeWindow(event));
         return resizeBtn;
@@ -449,7 +449,7 @@ public class UploadStatusInfoWindow extends Window {
     private Button getCloseButton() {
         final Button closeBtn = SPUIComponentProvider.getButton(
                 UIComponentIdProvider.UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID, "", "", "", true, FontAwesome.TIMES,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         closeBtn.addClickListener(event -> onClose());
         return closeBtn;

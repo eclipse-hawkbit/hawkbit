@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.distributions.smtype.AbstractSoftwareModuleTypeLayout;
-import org.eclipse.hawkbit.ui.layouts.UpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.UpdateTag;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -28,7 +28,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Set Type on the Distributions View.
  *
  */
-public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLayout implements UpdateTagLayout {
+public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLayout implements UpdateTag {
 
     private static final long serialVersionUID = 1L;
 

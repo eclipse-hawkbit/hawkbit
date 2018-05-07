@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -209,7 +209,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "", "", null,
-                false, FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+                false, FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         button.setData(Boolean.FALSE);
         return button;
@@ -217,21 +217,21 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private Button createAddIcon() {
         final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createBulkUploadIcon() {
         final Button button = SPUIComponentProvider.getButton(getBulkUploadIconId(), "", "", null, false,
-                FontAwesome.UPLOAD, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.UPLOAD, SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::bulkUpload);
         return button;
     }
 
     private Button createShowFilterButtonLayout() {
         final Button button = SPUIComponentProvider.getButton(getShowFilterButtonLayoutId(), null, null, null, false,
-                FontAwesome.TAGS, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TAGS, SPUIButtonStyleNoBorder.class);
         button.setVisible(false);
         button.addClickListener(event -> showFilterButtonsIconClicked());
         return button;
@@ -239,7 +239,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private SPUIButton createMaxMinIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getMaxMinIconId(), "", "", null, false,
-                FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> maxMinButtonClicked());
         return button;
     }
