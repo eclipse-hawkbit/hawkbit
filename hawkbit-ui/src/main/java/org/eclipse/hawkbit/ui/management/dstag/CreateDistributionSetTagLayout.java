@@ -74,4 +74,9 @@ public class CreateDistributionSetTagLayout extends AbstractTagLayout<Distributi
                 getI18n().getMessage("caption.tag"));
     }
 
+    @Override
+    protected boolean isUpdateAction() {
+        return false;
+    }
+
 }

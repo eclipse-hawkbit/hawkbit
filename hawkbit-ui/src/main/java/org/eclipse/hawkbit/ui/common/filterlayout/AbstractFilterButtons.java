@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
@@ -34,6 +36,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -43,18 +46,20 @@ public abstract class AbstractFilterButtons extends Table {
 
     private static final long serialVersionUID = 1L;;
 
-    private static final String DEFAULT_GREEN = "rgb(44,151,32)";
+    protected static final String DEFAULT_GREEN = "rgb(44,151,32)";
 
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
-    protected transient EventBus.UIEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
-    protected final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
+    private final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
+
+    private final VaadinMessageSource i18n;
 
     protected AbstractFilterButtons(final UIEventBus eventBus,
-            final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
+            final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour, final VaadinMessageSource i18n) {
         this.eventBus = eventBus;
-
+        this.i18n = i18n;
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
         eventBus.subscribe(this);
@@ -110,6 +115,11 @@ public abstract class AbstractFilterButtons extends Table {
         deleteColumnIfVisible(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
         addGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN,
                 (source, itemId, columnId) -> addDeleteCell(itemId));
+    }
+
+    protected void removeEditAndDeleteColumn() {
+        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
+        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
     }
 
     private List<Object> getVisibleColumnsAsList() {
@@ -261,11 +271,27 @@ public abstract class AbstractFilterButtons extends Table {
         return event.getButton().getId();
     }
 
-    protected void refreshTable() {
+    public void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
-        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
-        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
+        removeEditAndDeleteColumn();
     }
+
+    protected void openConfirmationWindowForDeletion(final String entityToDelete, final String entityName) {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.entity.delete.action.confirmbox", entityName),
+                i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(), entityToDelete, ""),
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                    if (ok) {
+                        deleteEntity(entityToDelete);
+                    } else {
+                        removeEditAndDeleteColumn();
+                    }
+                });
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    protected abstract void deleteEntity(String entityToDelete);
 
     /**
      * Id of the buttons table to be used in test cases.
@@ -322,6 +348,14 @@ public abstract class AbstractFilterButtons extends Table {
 
     public EventBus.UIEventBus getEventBus() {
         return eventBus;
+    }
+
+    public VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    public AbstractFilterButtonClickBehaviour getFilterButtonClickBehaviour() {
+        return filterButtonClickBehaviour;
     }
 
 }

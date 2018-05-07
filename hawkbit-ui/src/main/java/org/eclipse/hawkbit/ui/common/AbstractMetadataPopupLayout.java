@@ -286,8 +286,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.metadata.delete.action.confirmbox"),
-                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage("button.ok"),
-                i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDeleteMetadata(event, key);
                     }

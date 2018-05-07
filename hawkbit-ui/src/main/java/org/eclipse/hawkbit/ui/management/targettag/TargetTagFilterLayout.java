@@ -64,6 +64,6 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
 
     @Override
     public void refreshContainer() {
-        getMultipleFilterTabs().getFilterByButtons().refreshContainer();
+        getMultipleFilterTabs().getFilterByButtons().refreshTable();
     }
 }

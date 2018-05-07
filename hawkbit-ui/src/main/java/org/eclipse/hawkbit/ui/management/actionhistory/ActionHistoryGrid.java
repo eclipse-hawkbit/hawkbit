@@ -57,8 +57,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final long serialVersionUID = 4324796883957831443L;
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryGrid.class);
-    private static final String BUTTON_CANCEL = "button.cancel";
-    private static final String BUTTON_OK = "button.ok";
     private static final double FIXED_PIX_MIN = 25;
     private static final double FIXED_PIX_MAX = 32;
 
@@ -304,7 +302,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.force.action.confirmbox"), i18n.getMessage("message.force.action.confirm"),
-                i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
@@ -327,8 +325,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.forcequit.action.confirmbox"),
-                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(BUTTON_OK),
-                i18n.getMessage(BUTTON_CANCEL), ok -> {
+                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
@@ -358,7 +356,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.cancel.action.confirmbox"), i18n.getMessage("message.cancel.action.confirm"),
-                i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }

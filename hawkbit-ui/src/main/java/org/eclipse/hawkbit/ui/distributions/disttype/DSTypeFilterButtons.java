@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -47,8 +50,6 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    private final VaadinMessageSource i18n;
-
     private final transient EntityFactory entityFactory;
 
     private final SpPermissionChecker permChecker;
@@ -69,10 +70,9 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
             final EntityFactory entityFactory, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetManagement distributionSetManagement, final SystemManagement systemManagement) {
-        super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetTypeManagement));
+        super(eventBus, new DSTypeFilterButtonClick(eventBus, manageDistUIState, distributionSetTypeManagement), i18n);
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
-        this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
@@ -148,15 +148,39 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
-        new UpdateDistributionSetTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+        new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
                 getEntityId(event));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        new DeleteDistributionSetTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                manageDistUIState.getManageDistFilters().getClickedDistSetType(), getEntityId(event), systemManagement);
+        openConfirmationWindowForDeletion(getEntityId(event), getI18n().getMessage("caption.entity.distribution.type"));
+    }
+
+    @Override
+    protected void deleteEntity(final String entityToDelete) {
+        final Optional<DistributionSetType> distTypeToDelete = distributionSetTypeManagement.getByName(entityToDelete);
+        distTypeToDelete.ifPresent(tag -> {
+            if (tag.equals(manageDistUIState.getManageDistFilters().getClickedDistSetType())) {
+                uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
+                removeEditAndDeleteColumn();
+            } else if (isDefaultDsType(entityToDelete)) {
+                uiNotification.displayValidationError(getI18n().getMessage("message.cannot.delete.default.dstype"));
+                removeEditAndDeleteColumn();
+            } else {
+                distributionSetTypeManagement.delete(distTypeToDelete.get().getId());
+                getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
+                uiNotification.displaySuccess(getI18n().getMessage("message.delete.success", entityToDelete));
+            }
+        });
+    }
+
+    private boolean isDefaultDsType(final String dsTypeName) {
+        return getCurrentDistributionSetType() != null && getCurrentDistributionSetType().getName().equals(dsTypeName);
+    }
+
+    private DistributionSetType getCurrentDistributionSetType() {
+        return systemManagement.getTenantMetadata().getDefaultDsType();
     }
 }

@@ -484,7 +484,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         confirmDialog = new ConfirmationDialog(i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                confirmQuestion, i18n.getMessage(BUTTON_OK), i18n.getMessage(BUTTON_CANCEL), ok -> {
+                confirmQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
                     }

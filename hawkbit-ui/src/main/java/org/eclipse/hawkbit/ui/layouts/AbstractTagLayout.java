@@ -326,9 +326,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         getPreviewButtonColor(previewColor);
     }
 
-    protected boolean isUpdateAction() {
-        return false;
-    }
+    protected abstract boolean isUpdateAction();
 
     protected boolean isDuplicate() {
         return isDuplicateByName();

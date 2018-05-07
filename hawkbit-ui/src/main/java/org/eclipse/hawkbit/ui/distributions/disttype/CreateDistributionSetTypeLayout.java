@@ -86,4 +86,9 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
         }
     }
 
+    @Override
+    protected boolean isUpdateAction() {
+        return false;
+    }
+
 }

@@ -9,11 +9,12 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.UploadArtifactView;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -50,8 +51,6 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    private final VaadinMessageSource i18n;
-
     private final transient EntityFactory entityFactory;
 
     private final SpPermissionChecker permChecker;
@@ -63,11 +62,10 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,
             final EntityFactory entityFactory, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
-        super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareModuleTypeManagement));
+        super(eventBus, new SMTypeFilterButtonClick(eventBus, artifactUploadState, softwareModuleTypeManagement), i18n);
         this.artifactUploadState = artifactUploadState;
         this.uploadViewClientCriterion = uploadViewClientCriterion;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
-        this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
@@ -138,15 +136,29 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
-        new UpdateSoftwareModuleTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+        new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, getEntityId(event));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        new DeleteSoftwareTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType(),
-                UploadArtifactView.VIEW_NAME, getEntityId(event));
+        openConfirmationWindowForDeletion(getEntityId(event),
+                getI18n().getMessage("caption.entity.software.module.type"));
+    }
+
+    @Override
+    protected void deleteEntity(final String entityToDelete) {
+        final Optional<SoftwareModuleType> swmTypeToDelete = softwareModuleTypeManagement.getByName(entityToDelete);
+        swmTypeToDelete.ifPresent(tag -> {
+            if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().equals(swmTypeToDelete)) {
+                uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
+                removeEditAndDeleteColumn();
+            } else {
+                softwareModuleTypeManagement.delete(swmTypeToDelete.get().getId());
+                getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
+                uiNotification.displaySuccess(getI18n().getMessage("message.delete.success", entityToDelete));
+            }
+        });
     }
 
 }

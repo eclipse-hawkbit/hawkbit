@@ -318,8 +318,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                     "software modules", distributionNameToAssign);
         }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion, i18n.getMessage(BUTTON_OK),
-                i18n.getMessage(BUTTON_CANCEL), ok -> {
+                i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion,
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         saveAllAssignments();
                     }

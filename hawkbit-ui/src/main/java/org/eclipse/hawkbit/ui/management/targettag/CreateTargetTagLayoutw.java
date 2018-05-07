@@ -94,4 +94,9 @@ public class CreateTargetTagLayoutw extends AbstractTagLayout<TargetTag> {
         createNewTag();
     }
 
+    @Override
+    protected boolean isUpdateAction() {
+        return false;
+    }
+
 }

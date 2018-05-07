@@ -14,17 +14,17 @@ import static org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions.VAR_NAME;
 import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
-import org.eclipse.hawkbit.ui.artifacts.smtype.DeleteSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareModuleTypeLayout;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
-import org.eclipse.hawkbit.ui.distributions.DistributionsView;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -54,8 +54,6 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private final DistributionsViewClientCriterion distributionsViewClientCriterion;
 
-    private final VaadinMessageSource i18n;
-
     private final transient EntityFactory entityFactory;
 
     private final SpPermissionChecker permChecker;
@@ -69,10 +67,10 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,
             final EntityFactory entityFactory, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
-        super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareModuleTypeManagement));
+        super(eventBus, new DistSMTypeFilterButtonClick(eventBus, manageDistUIState, softwareModuleTypeManagement),
+                i18n);
         this.manageDistUIState = manageDistUIState;
         this.distributionsViewClientCriterion = distributionsViewClientCriterion;
-        this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
@@ -152,14 +150,28 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
-        new UpdateSoftwareModuleTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
+        new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, getEntityId(event));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        new DeleteSoftwareTypeLayout(i18n, entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType(),
-                DistributionsView.VIEW_NAME, getEntityId(event));
+        openConfirmationWindowForDeletion(getEntityId(event),
+                getI18n().getMessage("caption.entity.software.module.type"));
+    }
+
+    @Override
+    protected void deleteEntity(final String entityToDelete) {
+        final Optional<SoftwareModuleType> swmTypeToDelete = softwareModuleTypeManagement.getByName(entityToDelete);
+        swmTypeToDelete.ifPresent(tag -> {
+            if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().equals(swmTypeToDelete)) {
+                uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
+                removeEditAndDeleteColumn();
+            } else {
+                softwareModuleTypeManagement.delete(swmTypeToDelete.get().getId());
+                getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
+                uiNotification.displaySuccess(getI18n().getMessage("message.delete.success", entityToDelete));
+            }
+        });
     }
 }

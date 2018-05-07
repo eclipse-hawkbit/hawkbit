@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
@@ -71,16 +69,7 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
 
     @Override
     public void refreshContainer() {
-        final AbstractFilterButtons filterButtons = getFilterButtons();
-        if (filterButtons instanceof RefreshableContainer) {
-            ((RefreshableContainer) filterButtons).refreshContainer();
-        }
-
-        final AbstractFilterHeader filterHeader = getFilterHeader();
-        if (filterHeader instanceof RefreshableContainer) {
-            ((RefreshableContainer) filterHeader).refreshContainer();
-        }
-
+        getFilterButtons().refreshTable();
     }
 
 }

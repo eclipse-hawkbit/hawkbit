@@ -544,7 +544,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final String formattedConfirmationQuestion = getConfirmationQuestion(rollout.get());
         final ConfirmationDialog confirmationDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.confirm.delete.rollout"), formattedConfirmationQuestion,
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }

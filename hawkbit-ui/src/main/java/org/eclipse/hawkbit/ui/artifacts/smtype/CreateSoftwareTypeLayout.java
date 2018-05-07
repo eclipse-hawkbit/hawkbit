@@ -73,7 +73,7 @@ public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
         } else if (assignValue != null && assignValue.equalsIgnoreCase(getMultiAssignStr())) {
             assignNumber = Integer.MAX_VALUE;
         }
-    
+
         if (typeNameValue != null && typeKeyValue != null) {
             final SoftwareModuleType newSWType = getSoftwareModuleTypeManagement()
                     .create(getEntityFactory().softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
@@ -85,6 +85,11 @@ public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
         } else {
             getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkey"));
         }
+    }
+
+    @Override
+    protected boolean isUpdateAction() {
+        return false;
     }
 
 }

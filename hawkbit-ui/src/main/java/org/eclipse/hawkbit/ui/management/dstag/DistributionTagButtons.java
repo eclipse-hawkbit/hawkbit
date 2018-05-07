@@ -9,15 +9,18 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -40,7 +43,7 @@ import com.vaadin.ui.Button.ClickEvent;
  * Class for defining the tag buttons of the distribution sets on the Deployment
  * View.
  */
-public class DistributionTagButtons extends AbstractFilterButtons implements RefreshableContainer {
+public class DistributionTagButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 1L;
 
@@ -64,7 +67,7 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
             final DistributionSetManagement distributionSetManagement,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetTagManagement distributionSetTagManagement) {
-        super(eventBus, new DistributionTagButtonClick(eventBus, managementUIState));
+        super(eventBus, new DistributionTagButtonClick(eventBus, managementUIState), i18n);
         this.spDistTagDropEvent = new DistributionTagDropEvent(i18n, uiNotification, permChecker, distFilterParameters,
                 distributionSetManagement, eventBus, managementViewClientCriterion);
         this.managementUIState = managementUIState;
@@ -138,11 +141,10 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
     }
 
     @Override
-    public void refreshContainer() {
+    public void refreshTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
-        removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
+        removeEditAndDeleteColumn();
         addNewTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
     }
@@ -155,8 +157,21 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        new DeleteDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, getEventBus(),
-                permChecker, uiNotification, managementUIState.getDistributionTableFilters().getDistSetTags(),
-                getEntityId(event));
+        openConfirmationWindowForDeletion(getEntityId(event), i18n.getMessage("caption.entity.distribution.tag"));
+    }
+
+    @Override
+    protected void deleteEntity(final String entityToDelete) {
+        final Optional<DistributionSetTag> tagToDelete = distributionSetTagManagement.getByName(entityToDelete);
+        tagToDelete.ifPresent(tag -> {
+            if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(entityToDelete)) {
+                uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
+                removeEditAndDeleteColumn();
+            } else {
+                distributionSetTagManagement.delete(entityToDelete);
+                getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));
+                uiNotification.displaySuccess(i18n.getMessage("message.delete.success", entityToDelete));
+            }
+        });
     }
 }

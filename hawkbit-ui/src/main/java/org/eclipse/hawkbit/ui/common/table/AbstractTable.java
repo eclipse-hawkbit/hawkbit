@@ -72,10 +72,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected static final String MESSAGE_CONFIRM_ASSIGN_ENTITY = "message.confirm.assign.entity";
 
-    protected static final String BUTTON_CANCEL = "button.cancel";
-
-    protected static final String BUTTON_OK = "button.ok";
-
     protected static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES = "message.confirm.assign.multiple.entities";
 
     private static final long serialVersionUID = 1L;
@@ -397,7 +393,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         }
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()), confirmationQuestion,
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDelete(entitiesToBeDeleted);
                     }
