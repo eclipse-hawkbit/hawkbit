@@ -25,14 +25,12 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 
 /**
- * @author Venugopal Boodidadinne(RBEI/BSJ)
- * 
- *         Count message label which display current filter details and details
- *         on pinning.
+ * Count message label which display current filter details and details on
+ * pinning.
  */
 public class TargetFilterCountMessageLabel extends Label {
 
-    private static final long serialVersionUID = -7188528790042766877L;
+    private static final long serialVersionUID = 1L;
 
     private final FilterManagementUIState filterManagementUIState;
 
@@ -54,7 +52,7 @@ public class TargetFilterCountMessageLabel extends Label {
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
                 || custFUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
                 || custFUIEvent == CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON) {
-            UI.getCurrent().access(() -> displayTargetFilterMessage());
+            UI.getCurrent().access(this::displayTargetFilterMessage);
         }
     }
 
@@ -67,7 +65,7 @@ public class TargetFilterCountMessageLabel extends Label {
     private void displayTargetFilterMessage() {
         long totalTargets = 0;
         if (filterManagementUIState.isCreateFilterViewDisplayed() || filterManagementUIState.isEditViewDisplayed()) {
-            if (null != filterManagementUIState.getFilterQueryValue()) {
+            if (filterManagementUIState.getFilterQueryValue() != null) {
                 totalTargets = filterManagementUIState.getTargetsCountAll().get();
             }
             final StringBuilder targetMessage = new StringBuilder(i18n.getMessage("label.target.filtered.total"));
@@ -88,9 +86,7 @@ public class TargetFilterCountMessageLabel extends Label {
                 targetMessage.append(i18n.getMessage("label.filter.shown"));
                 targetMessage.append(SPUIDefinitions.MAX_TABLE_ENTRIES);
             }
-
             setCaption(targetMessage.toString());
         }
-
     }
 }

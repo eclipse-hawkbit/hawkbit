@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.eclipse.hawkbit.ui.management.footer;
+package org.eclipse.hawkbit.ui.management.miscs;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
