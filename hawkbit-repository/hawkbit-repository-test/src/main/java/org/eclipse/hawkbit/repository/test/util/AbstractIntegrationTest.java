@@ -276,7 +276,11 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
-        return distributionSetManagement.createMetaData(dsId, Collections.singletonList(md)).get(0);
+        return createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
+    }
+
+    protected List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final List<MetaData> md) {
+        return distributionSetManagement.createMetaData(dsId, md);
     }
 
     protected Long getOsModule(final DistributionSet ds) {

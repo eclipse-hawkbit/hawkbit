@@ -286,7 +286,7 @@ public final class SPUIDefinitions {
     /**
      * Space.
      */
-    static final String SPACE = "&nbsp;";
+    public static final String SPACE = "&nbsp;";
 
     /**
      * Distribution tag button id prefix.
@@ -335,15 +335,15 @@ public final class SPUIDefinitions {
      * automatically and also horizontal scroll bars get displayed. Used for
      * Responsive UI.
      */
-    static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
+    public static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1000;
 
     public static final int MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 310;
 
-    static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
+    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
 
-    static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
+    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
 
     /** Artifact upload related entries - end. **/
 
@@ -409,6 +409,11 @@ public final class SPUIDefinitions {
      * Id f "NO TAG" button.
      */
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
+
+    /**
+     * CUSTOM_FILTER_DELETE.
+     */
+    public static final String CUSTOM_FILTER_DELETE = "Delete";
 
     /**
      * DELETE column/button.

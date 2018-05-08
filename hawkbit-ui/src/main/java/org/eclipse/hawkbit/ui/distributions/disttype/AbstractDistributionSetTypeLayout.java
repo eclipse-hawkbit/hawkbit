@@ -39,7 +39,8 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, DistributionSetType.NAME_MAX_SIZE,
+                DistributionSetType.DESCRIPTION_MAX_SIZE, DistributionSetType.KEY_MAX_SIZE);
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }

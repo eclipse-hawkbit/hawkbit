@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -43,13 +42,17 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
 
     private TextField typeKey;
 
+    private final int typeKeySize;
+
     private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
 
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
     public AbstractTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final int tagNameSize, final int tagDescSize, final int typeKeySize) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, tagNameSize, tagDescSize);
+        this.typeKeySize = typeKeySize;
     }
 
     @Override
@@ -90,11 +93,10 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
     @Override
     protected void createRequiredComponents() {
         super.createRequiredComponents();
-        typeKey = new TextFieldBuilder().id(UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY)
+        typeKey = new TextFieldBuilder(typeKeySize).id(UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY)
                 .caption(getI18n().getMessage("textfield.key"))
-                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY).required(true)
-                .prompt(getI18n().getMessage("textfield.key")).immediate(true)
-                .validator(new EmptyStringValidator(getI18n())).buildTextComponent();
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY).required(true, getI18n())
+                .prompt(getI18n().getMessage("textfield.key")).immediate(true).buildTextComponent();
         getColorLabel().setValue(getI18n().getMessage("label.choose.type.color"));
     }
 

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -53,7 +54,7 @@ public class CertificateAuthenticationConfigurationItem extends AbstractBooleanT
                 "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
         caRootAuthorityLabel.setWidthUndefined();
 
-        caRootAuthorityTextField = new TextFieldBuilder().immediate(true).maxLengthAllowed(160).buildTextComponent();
+        caRootAuthorityTextField = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();
         caRootAuthorityTextField.setWidth("100%");
         caRootAuthorityTextField.addTextChangeListener(event -> caRootAuthorityChanged());
 

@@ -8,15 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -27,28 +24,20 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout for pop-up window which is created when creating a distribution set
  * tag on the Deployment View.
  */
-public class CreateDistributionSetTagLayout extends AbstractTagLayout<DistributionSetTag> {
+public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLayout {
 
     private static final long serialVersionUID = 1L;
-
-    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
     CreateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
-        this.distributionSetTagManagement = distributionSetTagManagement;
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);
         init();
     }
 
     @Override
     protected void saveEntity() {
         createNewTag();
-    }
-
-    @Override
-    protected Optional<DistributionSetTag> findEntityByName() {
-        return distributionSetTagManagement.getByName(getTagName().getValue());
     }
 
     /**
@@ -62,7 +51,7 @@ public class CreateDistributionSetTagLayout extends AbstractTagLayout<Distributi
             colour = getColorPicked();
         }
 
-        final DistributionSetTag newDistTag = distributionSetTagManagement.create(getEntityFactory().tag().create()
+        final DistributionSetTag newDistTag = getDistributionSetTagManagement().create(getEntityFactory().tag().create()
                 .name(getTagName().getValue()).description(getTagDesc().getValue()).colour(colour));
         getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
         displaySuccess(newDistTag.getName());

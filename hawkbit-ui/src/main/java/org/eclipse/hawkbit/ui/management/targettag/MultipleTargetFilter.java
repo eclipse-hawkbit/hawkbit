@@ -177,7 +177,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateTargetTagLayoutw(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
+                new CreateTargetTagLayout(i18n, targetTagManagement, entityFactory, eventBus, permChecker,
                         uiNotification);
             }
         };

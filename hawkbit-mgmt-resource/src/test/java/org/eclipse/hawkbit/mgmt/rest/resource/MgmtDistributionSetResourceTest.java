@@ -27,9 +27,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -44,9 +47,11 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
@@ -179,6 +184,45 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(smIDs.size())));
+
+        // verify quota enforcement
+        final int maxSoftwareModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
+        final List<Long> moduleIDs = Lists.newArrayList();
+        for (int i = 0; i < maxSoftwareModules + 1; ++i) {
+            moduleIDs.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
+        }
+
+        // post assignment
+        final String jsonIDs = JsonBuilder.ids(moduleIDs.subList(0, maxSoftwareModules - smIDs.size()));
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON).content(jsonIDs)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+        // test if size corresponds with quota
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId()
+                + "/assignedSM?limit={limit}", maxSoftwareModules * 2)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(maxSoftwareModules)));
+
+        // post one more to cause the quota to be exceeded
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonBuilder.ids(Collections.singletonList(moduleIDs.get(moduleIDs.size() - 1)))))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+        // verify quota is also enforced for bulk uploads
+        final DistributionSet disSet2 = testdataFactory.createDistributionSetWithNoSoftwareModules("Saturn", "4.0");
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
+                .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(moduleIDs)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+        // verify size is still 0
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.size", equalTo(0)));
+
     }
 
     @Test
@@ -227,6 +271,48 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @Test
+    @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
+    public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
+
+        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
+        final List<Target> targets = testdataFactory.createTargets(maxTargets + 1);
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        final JSONArray payload = new JSONArray();
+        targets.forEach(trg -> payload.put(new JSONObject().put("id", trg.getId())));
+
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
+                .contentType(MediaType.APPLICATION_JSON).content(payload.toString())).andExpect(status().isForbidden());
+
+        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()).getContent()).isEmpty();
+    }
+
+    @Test
+    @Description("Ensures that the 'max actions per target' quota is enforced if the distribution set assignment of a target is changed permanently")
+    public void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
+
+        // create one target
+        final Target testTarget = testdataFactory.createTarget("trg1");
+        final int maxActions = quotaManagement.getMaxActionsPerTarget();
+
+        // create a set of distribution sets
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
+
+        IntStream.range(0, maxActions).forEach(i -> {
+            // toggle the distribution set
+            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTarget);
+        });
+
+        // assign our test target to another distribution set and verify that
+        // the 'max actions per target' quota is exceeded
+        final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getControllerId())).toString();
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds3.getId() + "/assignedTargets")
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
     }
 
     @Test
@@ -433,14 +519,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
 
-        targetFilterQueryManagement.updateAutoAssignDS(
-                targetFilterQueryManagement
-                        .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("x==y")).getId(),
+        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("name==y")).getId(),
                 createdDs.getId());
 
         // create some dummy target filter queries
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("x==y"));
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("c").query("x==y"));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==y"));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("c").query("name==y"));
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters")).andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
@@ -495,16 +580,16 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries that should be found
         targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("x==y")).getId(),
-                createdDs.getId());
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("name==y"))
+                .getId(), createdDs.getId());
         targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("x==y")).getId(),
-                createdDs.getId());
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("name==y"))
+                .getId(), createdDs.getId());
         // create some dummy target filter queries
         targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("x==y"));
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("name==y"));
         targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("x==y"));
+                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("name==y"));
     }
 
     @Test
@@ -902,12 +987,12 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValue1 = "knownValue1";
         final String knownValue2 = "knownValue2";
 
-        final JSONArray jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
-        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+        final JSONArray metaData1 = new JSONArray();
+        metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
         mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -921,6 +1006,25 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+
+        // verify quota enforcement
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
+
+        final JSONArray metaData2 = new JSONArray();
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
+            metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
+        }
+
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify that the number of meta data entries has not changed
+        // (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(distributionSetManagement
+                .findMetaDataByDistributionSetId(new PageRequest(0, Integer.MAX_VALUE), testDS.getId())
+                .getTotalElements()).isEqualTo(metaData1.length());
+
     }
 
     @Test

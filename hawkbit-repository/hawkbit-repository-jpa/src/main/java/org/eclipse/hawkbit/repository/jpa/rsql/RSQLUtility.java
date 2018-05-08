@@ -216,7 +216,7 @@ public final class RSQLUtility {
 
         private final SimpleTypeConverter simpleTypeConverter;
 
-        final Database database;
+        private final Database database;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
                 final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {

@@ -52,7 +52,8 @@ public abstract class AbstractSoftwareModuleTypeLayout extends AbstractTypeLayou
     public AbstractSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, SoftwareModuleType.NAME_MAX_SIZE,
+                SoftwareModuleType.DESCRIPTION_MAX_SIZE, SoftwareModuleType.KEY_MAX_SIZE);
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

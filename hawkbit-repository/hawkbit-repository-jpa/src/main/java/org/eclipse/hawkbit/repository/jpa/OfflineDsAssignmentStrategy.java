@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -43,9 +44,9 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final ApplicationContext applicationContext, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
         super(targetRepository, afterCommit, eventPublisher, applicationContext, actionRepository,
-                actionStatusRepository);
+                actionStatusRepository, quotaManagement);
     }
 
     @Override

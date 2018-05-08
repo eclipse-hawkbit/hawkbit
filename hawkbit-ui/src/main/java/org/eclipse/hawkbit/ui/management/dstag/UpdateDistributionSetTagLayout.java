@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.layouts.UpdateTag;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -32,11 +31,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * set tag on the Deployment View.
  *
  */
-public class UpdateDistributionSetTagLayout extends AbstractTagLayout<DistributionSetTag> implements UpdateTag {
+public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLayout implements UpdateTag {
 
     private static final long serialVersionUID = 1L;
-
-    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
     private final String selectedTagName;
 
@@ -44,8 +41,7 @@ public class UpdateDistributionSetTagLayout extends AbstractTagLayout<Distributi
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final String selectedTagName) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
-        this.distributionSetTagManagement = distributionSetTagManagement;
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);
         this.selectedTagName = selectedTagName;
         init();
     }
@@ -80,7 +76,8 @@ public class UpdateDistributionSetTagLayout extends AbstractTagLayout<Distributi
 
     @Override
     public void setTagDetails(final String selectedTagName) {
-        final Optional<DistributionSetTag> selectedDistTag = distributionSetTagManagement.getByName(selectedTagName);
+        final Optional<DistributionSetTag> selectedDistTag = getDistributionSetTagManagement()
+                .getByName(selectedTagName);
         selectedDistTag.ifPresent(tag -> {
             getTagName().setValue(tag.getName());
             getTagName().setEnabled(false);
@@ -95,15 +92,6 @@ public class UpdateDistributionSetTagLayout extends AbstractTagLayout<Distributi
                 getWindow().setOrginaleValues();
             }
         });
-    }
-
-    @Override
-    protected Optional<DistributionSetTag> findEntityByName() {
-        return distributionSetTagManagement.getByName(getTagName().getValue());
-    }
-
-    public DistributionSetTagManagement getDistributionSetTagManagement() {
-        return distributionSetTagManagement;
     }
 
     @Override

@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
@@ -106,6 +105,10 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
     private HorizontalLayout colorLabelLayout;
 
+    private final int tagNameSize;
+
+    private final int tagDescSize;
+
     /**
      * Constructor for AbstractCreateUpdateTagLayout
      * 
@@ -121,12 +124,15 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
      *            UINotification
      */
     public AbstractTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
+            final int tagNameSize, final int tagDescSize) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
+        this.tagNameSize = tagNameSize;
+        this.tagDescSize = tagDescSize;
     }
 
     /**
@@ -180,15 +186,15 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = new TextFieldBuilder().caption(i18n.getMessage("textfield.name"))
-                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true)
+        tagName = new TextFieldBuilder(tagNameSize).caption(i18n.getMessage("textfield.name"))
+                .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true, i18n)
                 .prompt(i18n.getMessage("textfield.name")).immediate(true).id(UIComponentIdProvider.NEW_TARGET_TAG_NAME)
-                .validator(new EmptyStringValidator(i18n)).buildTextComponent();
+                .buildTextComponent();
 
-        tagDesc = new TextAreaBuilder().caption(i18n.getMessage("textfield.description"))
+        tagDesc = new TextAreaBuilder(tagDescSize).caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.getMessage("textfield.description")).immediate(true)
-                .id(UIComponentIdProvider.NEW_TARGET_TAG_DESC).buildTextComponent();
+                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.NEW_TARGET_TAG_DESC)
+                .buildTextComponent();
 
         tagDesc.setNullRepresentation("");
 

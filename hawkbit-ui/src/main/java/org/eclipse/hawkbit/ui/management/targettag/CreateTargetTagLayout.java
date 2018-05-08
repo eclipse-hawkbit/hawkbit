@@ -8,15 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -27,11 +24,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout for pop-up window which is created when creating a target tag on the
  * Deployment View.
  */
-public class CreateTargetTagLayoutw extends AbstractTagLayout<TargetTag> {
+public class CreateTargetTagLayout extends AbstractTargetTagLayout {
 
     private static final long serialVersionUID = 1L;
-
-    private final transient TargetTagManagement targetTagManagement;
 
     /**
      * Constructor for CreateUpdateTargetTagLayoutWindow
@@ -49,17 +44,11 @@ public class CreateTargetTagLayoutw extends AbstractTagLayout<TargetTag> {
      * @param uiNotification
      *            UINotification
      */
-    public CreateTargetTagLayoutw(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
+    public CreateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
-        this.targetTagManagement = targetTagManagement;
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);
         init();
-    }
-
-    @Override
-    protected Optional<TargetTag> findEntityByName() {
-        return targetTagManagement.getByName(getTagName().getValue());
     }
 
     /**
@@ -74,7 +63,7 @@ public class CreateTargetTagLayoutw extends AbstractTagLayout<TargetTag> {
                 colour = getColorPicked();
             }
 
-            final TargetTag newTargetTag = targetTagManagement.create(getEntityFactory().tag().create()
+            final TargetTag newTargetTag = getTargetTagManagement().create(getEntityFactory().tag().create()
                     .name(getTagName().getValue()).description(getTagDesc().getValue()).colour(colour));
             getEventBus().publish(this, new TargetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newTargetTag));
             displaySuccess(newTargetTag.getName());

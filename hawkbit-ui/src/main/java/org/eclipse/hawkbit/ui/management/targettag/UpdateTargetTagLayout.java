@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
 import org.eclipse.hawkbit.ui.layouts.UpdateTag;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -32,19 +31,16 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Deployment View.
  *
  */
-public class UpdateTargetTagLayout extends AbstractTagLayout<TargetTag> implements UpdateTag {
+public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements UpdateTag {
 
     private static final long serialVersionUID = 1L;
-
-    private final transient TargetTagManagement targetTagManagement;
 
     private final String selectedTagName;
 
     UpdateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final String selectedTagName) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
-        this.targetTagManagement = targetTagManagement;
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);
         this.selectedTagName = selectedTagName;
         init();
     }
@@ -79,7 +75,7 @@ public class UpdateTargetTagLayout extends AbstractTagLayout<TargetTag> implemen
 
     @Override
     public void setTagDetails(final String selectedTagName) {
-        final Optional<TargetTag> selectedTargetTag = targetTagManagement.getByName(selectedTagName);
+        final Optional<TargetTag> selectedTargetTag = getTargetTagManagement().getByName(selectedTagName);
         selectedTargetTag.ifPresent(tag -> {
             getTagName().setValue(tag.getName());
             getTagName().setEnabled(false);
@@ -93,15 +89,6 @@ public class UpdateTargetTagLayout extends AbstractTagLayout<TargetTag> implemen
                 getWindow().setOrginaleValues();
             }
         });
-    }
-
-    @Override
-    protected Optional<TargetTag> findEntityByName() {
-        return targetTagManagement.getByName(getTagName().getValue());
-    }
-
-    public TargetTagManagement getTargetTagManagement() {
-        return targetTagManagement;
     }
 
     @Override

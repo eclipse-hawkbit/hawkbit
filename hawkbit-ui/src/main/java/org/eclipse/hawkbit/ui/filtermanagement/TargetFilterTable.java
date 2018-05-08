@@ -55,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TargetFilterTable extends Table {
 
-    private static final long serialVersionUID = -4307487829435474759L;
+    private static final long serialVersionUID = -1L;
 
     private final VaadinMessageSource i18n;
 
@@ -157,7 +157,7 @@ public class TargetFilterTable extends Table {
                 new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
                 i18n.getMessage("header.auto.assignment.ds"), 0.1F));
-        columnList.add(new TableColumn(SPUIDefinitions.DELETE, i18n.getMessage("header.delete"), 0.1F));
+        columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.getMessage("header.delete"), 0.1F));
         return columnList;
 
     }
@@ -208,7 +208,8 @@ public class TargetFilterTable extends Table {
     }
 
     protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUIDefinitions.DELETE, (source, itemId, columnId) -> getDeleteButton((Long) itemId));
+        addGeneratedColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE,
+                (source, itemId, columnId) -> getDeleteButton((Long) itemId));
 
         addGeneratedColumn(SPUILabelDefinitions.NAME,
                 (source, itemId, columnId) -> customFilterDetailButton((Long) itemId));
@@ -238,12 +239,10 @@ public class TargetFilterTable extends Table {
         Button updateIcon;
         if (distSet == null) {
             updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
         } else {
             updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);
