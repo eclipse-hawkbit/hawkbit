@@ -977,7 +977,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
-    @Description("Ensures that the expected response of geting actions with maintenance window of a target is returned.")
+    @Description("Ensures that the expected response of getting actions with maintenance window of a target is returned.")
     public void getMultipleActionsWithMaintenanceWindow() throws Exception {
         final String knownTargetId = "targetId";
         final String schedule = getTestSchedule(10);
