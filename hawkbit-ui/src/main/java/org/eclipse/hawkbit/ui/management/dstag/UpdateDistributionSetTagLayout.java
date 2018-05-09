@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.Window.CloseListener;
+
 /**
  * Layout for the pop-up window which is created when updating a distribution
  * set tag on the Deployment View.
@@ -37,12 +39,15 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     private final String selectedTagName;
 
+    private final CloseListener closeListener;
+
     UpdateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final String selectedTagName) {
+            final String selectedTagName, final CloseListener closeListener) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);
         this.selectedTagName = selectedTagName;
+        this.closeListener = closeListener;
         init();
     }
 
@@ -50,11 +55,12 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
     protected void init() {
         super.init();
         setTagDetails(selectedTagName);
+        getWindow().addCloseListener(closeListener);
     }
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.update") + " " + getI18n().getMessage("caption.tag");
+        return getI18n().getMessage("caption.update", getI18n().getMessage("caption.tag"));
     }
 
     @Override

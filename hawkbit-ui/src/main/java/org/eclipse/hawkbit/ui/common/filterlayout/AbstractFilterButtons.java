@@ -37,6 +37,9 @@ import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -287,8 +290,20 @@ public abstract class AbstractFilterButtons extends Table {
                         removeEditAndDeleteColumn();
                     }
                 });
+        confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag());
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
+    }
+
+    protected CloseListener getCloseListenerForEditAndDeleteTag() {
+        return new Window.CloseListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void windowClose(final CloseEvent e) {
+                removeEditAndDeleteColumn();
+            }
+        };
     }
 
     protected abstract void deleteEntity(String entityToDelete);

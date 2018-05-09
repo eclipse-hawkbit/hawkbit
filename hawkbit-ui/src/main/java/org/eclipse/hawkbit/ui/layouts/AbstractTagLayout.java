@@ -217,7 +217,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
         formLayout.addComponent(tagName);
         formLayout.addComponent(tagDesc);
-        formLayout.addStyleName("form-lastrow");
         formLayout.setSizeFull();
 
         contentLayout.addComponent(formLayout);

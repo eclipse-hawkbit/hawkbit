@@ -150,7 +150,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                getEntityId(event));
+                getEntityId(event), getCloseListenerForEditAndDeleteTag());
     }
 
     @Override

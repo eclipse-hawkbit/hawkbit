@@ -53,7 +53,7 @@ public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.add.type");
+        return getI18n().getMessage("caption.create.new", getI18n().getMessage("caption.type"));
     }
 
     @Override

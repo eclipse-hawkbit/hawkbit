@@ -20,14 +20,6 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_TABLE_ID = "target.tableId";
     /**
-     * caption for add target window
-     */
-    public static final String TARGET_ADD_CAPTION = "caption.add.new.target";
-    /**
-     * caption for update target window
-     */
-    public static final String TARGET_UPDATE_CAPTION = "caption.update.target";
-    /**
      * ID- Targ.Cont ID.
      */
     public static final String TARGET_ADD_CONTROLLER_ID = "target.add.ctrlId";
@@ -77,10 +69,6 @@ public final class UIComponentIdProvider {
      * ID-Dist. on deployment and distribution view
      */
     public static final String DIST_TABLE_ID = "dist.tableId";
-
-    public static final String DIST_ADD_CAPTION = "caption.add.dist";
-
-    public static final String DIST_UPDATE_CAPTION = "caption.update.dist";
 
     /**
      * ID-Dist.Name.

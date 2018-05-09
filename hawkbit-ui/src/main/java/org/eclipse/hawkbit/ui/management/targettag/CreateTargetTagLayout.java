@@ -74,8 +74,7 @@ public class CreateTargetTagLayout extends AbstractTargetTagLayout {
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.configure", getI18n().getMessage("caption.new"),
-                getI18n().getMessage("caption.tag"));
+        return getI18n().getMessage("caption.create.new", getI18n().getMessage("caption.tag"));
     }
 
     @Override

@@ -19,6 +19,10 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+/**
+ * Abstract class for tag Layout of Distribution Sets.
+ *
+ */
 public abstract class AbstractDistributionSetTagLayout extends AbstractTagLayout<DistributionSetTag> {
 
     private static final long serialVersionUID = 1L;

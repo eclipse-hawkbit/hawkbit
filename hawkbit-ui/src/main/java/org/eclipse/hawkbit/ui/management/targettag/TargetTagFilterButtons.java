@@ -287,7 +287,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateTargetTagLayout(getI18n(), targetTagManagement, entityFactory, getEventBus(), permChecker,
-                uiNotification, getEntityId(event));
+                uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag());
     }
 
     @Override

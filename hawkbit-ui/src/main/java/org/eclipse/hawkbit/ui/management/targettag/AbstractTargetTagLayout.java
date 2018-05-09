@@ -20,9 +20,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * TODO MR
- * 
- * @author rem1wa3
+ * Abstract class for tag layout of Targets.
  *
  */
 public abstract class AbstractTargetTagLayout extends AbstractTagLayout<TargetTag> {

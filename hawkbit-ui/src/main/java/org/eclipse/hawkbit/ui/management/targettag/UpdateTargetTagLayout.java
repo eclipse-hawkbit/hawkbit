@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.Window.CloseListener;
+
 /**
  * Layout for pop-up window which is created when updating a target tag on the
  * Deployment View.
@@ -37,11 +39,14 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
 
     private final String selectedTagName;
 
+    private final CloseListener closeListener;
+
     UpdateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final String selectedTagName) {
+            final UINotification uiNotification, final String selectedTagName, final CloseListener closeListener) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);
         this.selectedTagName = selectedTagName;
+        this.closeListener = closeListener;
         init();
     }
 
@@ -49,11 +54,12 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
     protected void init() {
         super.init();
         setTagDetails(selectedTagName);
+        getWindow().addCloseListener(closeListener);
     }
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.update") + " " + getI18n().getMessage("caption.tag");
+        return getI18n().getMessage("caption.update", getI18n().getMessage("caption.tag"));
     }
 
     @Override

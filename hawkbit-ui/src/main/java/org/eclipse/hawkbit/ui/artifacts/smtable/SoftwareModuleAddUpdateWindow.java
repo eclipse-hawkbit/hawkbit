@@ -281,8 +281,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
-                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
+                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module")))
+                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
+                .buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
 

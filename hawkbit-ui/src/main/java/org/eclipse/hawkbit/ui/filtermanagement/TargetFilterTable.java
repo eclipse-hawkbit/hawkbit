@@ -186,8 +186,9 @@ public class TargetFilterTable extends Table {
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.filter.delete.confirmbox"), i18n.getMessage("message.delete.filter.confirm"),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage("caption.entity.delete.action.confirmbox"),
+                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
                         final String deletedFilterName = targetFilterQueryManagement.get(rowId).get().getName();

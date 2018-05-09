@@ -116,7 +116,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         if (targetWindow == null) {
             return;
         }
-        targetWindow.setCaption(getI18n().getMessage(UIComponentIdProvider.TARGET_UPDATE_CAPTION));
+        targetWindow.setCaption(getI18n().getMessage("caption.update", getI18n().getMessage("caption.target")));
         UI.getCurrent().addWindow(targetWindow);
         targetWindow.setVisible(Boolean.TRUE);
     }

@@ -79,7 +79,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
     @Override
     protected void addNewItem(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
-        addSoftwareModule.setCaption(i18n.getMessage("upload.caption.add.new.swmodule"));
+        addSoftwareModule.setCaption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module")));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }

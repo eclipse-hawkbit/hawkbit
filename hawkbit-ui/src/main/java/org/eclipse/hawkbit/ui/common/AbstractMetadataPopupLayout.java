@@ -280,7 +280,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final String key = (String) item.getItemProperty(KEY).getValue();
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.metadata.delete.action.confirmbox"),
+                i18n.getMessage("caption.entity.delete.action.confirmbox"),
                 i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
                 i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
@@ -322,8 +322,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Button createAddIcon() {
         addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID,
-                i18n.getMessage("button.save"), null, null, false, FontAwesome.PLUS,
-                SPUIButtonStyleNoBorder.class);
+                i18n.getMessage("button.save"), null, null, false, FontAwesome.PLUS, SPUIButtonStyleNoBorder.class);
         addIcon.addClickListener(event -> onAdd());
         return addIcon;
     }

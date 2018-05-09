@@ -81,7 +81,8 @@ public abstract class AbstractSoftwareModuleDetails
     protected void onEdit(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow
                 .createUpdateSoftwareModuleWindow(getSelectedBaseEntityId());
-        addSoftwareModule.setCaption(getI18n().getMessage("upload.caption.update.swmodule"));
+        addSoftwareModule
+                .setCaption(getI18n().getMessage("caption.update", getI18n().getMessage("caption.software.module")));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }

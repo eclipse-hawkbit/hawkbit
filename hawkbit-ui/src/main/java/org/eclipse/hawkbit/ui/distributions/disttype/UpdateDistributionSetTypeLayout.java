@@ -33,6 +33,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Window.CloseListener;
 
 /**
  * Layout for the pop-up window which is created when updating a Distribution
@@ -49,15 +50,19 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
 
     private IndexedContainer originalSelectedTableContainer;
 
+    private final CloseListener closeListener;
+
     public UpdateDistributionSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetManagement distributionSetManagement, final String selectedTypeName) {
+            final DistributionSetManagement distributionSetManagement, final String selectedTypeName,
+            final CloseListener closeListener) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTypeManagement,
                 softwareModuleTypeManagement);
         this.distributionSetManagement = distributionSetManagement;
         this.selectedTypeName = selectedTypeName;
+        this.closeListener = closeListener;
         init();
     }
 
@@ -65,11 +70,12 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
     protected void init() {
         super.init();
         setTagDetails(selectedTypeName);
+        getWindow().addCloseListener(closeListener);
     }
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.update") + " " + getI18n().getMessage("caption.type");
+        return getI18n().getMessage("caption.update", getI18n().getMessage("caption.type"));
     }
 
     @Override
@@ -104,26 +110,33 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         getTwinTables().getSelectedTable().getContainerDataSource().removeAllItems();
         final Optional<DistributionSetType> selectedDistSetType = getDistributionSetTypeManagement()
                 .getByName(distSetTypeSelected);
-        selectedDistSetType.ifPresent(selectedType -> {
-            getTagDesc().setValue(selectedType.getDescription());
-            getTypeKey().setValue(selectedType.getKey());
-            if (distributionSetManagement.countByTypeId(selectedType.getId()) <= 0) {
-                getTwinTables().getDistTypeSelectLayout().setEnabled(true);
-                getTwinTables().getSelectedTable().setEnabled(true);
-            } else {
-                getUiNotification().displayValidationError(
-                        selectedType.getName() + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
-                getTwinTables().getDistTypeSelectLayout().setEnabled(false);
-                getTwinTables().getSelectedTable().setEnabled(false);
-            }
+        selectedDistSetType.ifPresent(
 
-            createOriginalSelectedTableContainer();
-            selectedType.getOptionalModuleTypes().forEach(swModuleType -> addTargetTableForUpdate(swModuleType, false));
-            selectedType.getMandatoryModuleTypes().forEach(swModuleType -> addTargetTableForUpdate(swModuleType, true));
-            setColorPickerComponentsColor(selectedType.getColour());
-        });
+                selectedType -> {
+                    getTagDesc().setValue(selectedType.getDescription());
+                    getTypeKey().setValue(selectedType.getKey());
+                    if (distributionSetManagement.countByTypeId(selectedType.getId()) <= 0) {
+                        getTwinTables().getDistTypeSelectLayout().setEnabled(true);
+                        getTwinTables().getSelectedTable().setEnabled(true);
+                    } else {
+                        getUiNotification().displayValidationError(selectedType.getName() + "  "
+                                + getI18n().getMessage("message.error.dist.set.type.update"));
+                        getTwinTables().getDistTypeSelectLayout().setEnabled(false);
+                        getTwinTables().getSelectedTable().setEnabled(false);
+                    }
+
+                    createOriginalSelectedTableContainer();
+                    selectedType.getOptionalModuleTypes()
+                            .forEach(swModuleType -> addTargetTableForUpdate(swModuleType, false));
+                    selectedType.getMandatoryModuleTypes()
+                            .forEach(swModuleType -> addTargetTableForUpdate(swModuleType, true));
+                    setColorPickerComponentsColor(selectedType.getColour());
+                });
+
         disableFields();
-        if (isUpdateAction()) {
+        if (
+
+        isUpdateAction()) {
             getWindow().setOrginaleValues();
         }
     }
@@ -168,15 +181,20 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
                 .description(getTagDesc().getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
         if (distributionSetManagement.countByTypeId(existingType.getId()) <= 0 && !CollectionUtils.isEmpty(itemIds)) {
-            update.mandatory(itemIds.stream()
-                    .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
-                            .isMandatoryModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
+            update.mandatory(itemIds.stream().filter(
+
+                    itemId -> DistributionTypeSoftwareModuleSelectLayout.isMandatoryModuleType(
+
+                            getTwinTables().getSelectedTable().getItem(itemId)))
                     .collect(Collectors.toList()))
-                    .optional(itemIds.stream()
-                            .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
-                                    .isOptionalModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
+                    .optional(itemIds.stream().filter(
+
+                            itemId -> DistributionTypeSoftwareModuleSelectLayout.isOptionalModuleType(
+
+                                    getTwinTables().getSelectedTable().getItem(itemId)))
                             .collect(Collectors.toList()));
         }
+
         final DistributionSetType updateDistSetType = getDistributionSetTypeManagement().update(update);
 
         getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updateDistSetType.getName()));

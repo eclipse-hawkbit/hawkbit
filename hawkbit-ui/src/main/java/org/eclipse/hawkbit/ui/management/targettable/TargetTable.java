@@ -61,8 +61,8 @@ import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
@@ -1038,7 +1038,6 @@ public class TargetTable extends AbstractTable<Target> {
             maintenanceWindowLayout.clearAllControls();
         });
         return enableMaintenanceWindow;
-
     }
 
     private Link maintenanceWindowHelpLinkControl() {

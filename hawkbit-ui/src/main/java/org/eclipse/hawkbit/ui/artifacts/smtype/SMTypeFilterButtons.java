@@ -137,7 +137,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, getEntityId(event));
+                softwareModuleTypeManagement, getEntityId(event), getCloseListenerForEditAndDeleteTag());
     }
 
     @Override

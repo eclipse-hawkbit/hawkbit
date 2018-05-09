@@ -23,6 +23,8 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.Window.CloseListener;
+
 /**
  * Layout for the pop-up window which is created when updating a Distribution
  * Set Type on the Distributions View.
@@ -34,11 +36,15 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
 
     private final String selectedTypeName;
 
+    private final CloseListener closeListener;
+
     public UpdateSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final String selectedTypeName) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final String selectedTypeName,
+            final CloseListener closeListener) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
         this.selectedTypeName = selectedTypeName;
+        this.closeListener = closeListener;
         init();
     }
 
@@ -46,11 +52,12 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
     protected void init() {
         super.init();
         setTagDetails(selectedTypeName);
+        getWindow().addCloseListener(closeListener);
     }
 
     @Override
     protected String getWindowCaption() {
-        return getI18n().getMessage("caption.update") + " " + getI18n().getMessage("caption.type");
+        return getI18n().getMessage("caption.update", getI18n().getMessage("caption.type"));
     }
 
     @Override
@@ -75,17 +82,21 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         getTagName().setValue(targetTagSelected);
-        getSoftwareModuleTypeManagement().getByName(targetTagSelected).ifPresent(selectedTypeTag -> {
-            getTagDesc().setValue(selectedTypeTag.getDescription());
-            getTypeKey().setValue(selectedTypeTag.getKey());
-            if (selectedTypeTag.getMaxAssignments() == 1) {
-                getAssignOptiongroup().setValue(getSingleAssignStr());
-            } else {
-                getAssignOptiongroup().setValue(getMultiAssignStr());
-            }
-            setColorPickerComponentsColor(selectedTypeTag.getColour());
-        });
+        getSoftwareModuleTypeManagement().getByName(targetTagSelected).ifPresent(
+
+                selectedTypeTag -> {
+                    getTagDesc().setValue(selectedTypeTag.getDescription());
+                    getTypeKey().setValue(selectedTypeTag.getKey());
+                    if (selectedTypeTag.getMaxAssignments() == 1) {
+                        getAssignOptiongroup().setValue(getSingleAssignStr());
+                    } else {
+                        getAssignOptiongroup().setValue(getMultiAssignStr());
+                    }
+                    setColorPickerComponentsColor(selectedTypeTag.getColour());
+                });
+
         disableFields();
+
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {
