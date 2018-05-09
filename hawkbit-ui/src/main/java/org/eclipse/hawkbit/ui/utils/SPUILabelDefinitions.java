@@ -133,6 +133,16 @@ public final class SPUILabelDefinitions {
      * Last modified date.
      */
     public static final String VAR_MODIFIED_DATE = "modifiedDate";
+
+    /**
+     * Approve/Deny remark.
+     */
+    public static final String VAR_APPROVAL_REMARK = "approvalRemark";
+    /**
+     * Approval decider.
+     */
+    public static final String VAR_APPROVAL_DECIDED_BY = "approvalDecidedBy";
+
     /**
      * Poll Status.
      */

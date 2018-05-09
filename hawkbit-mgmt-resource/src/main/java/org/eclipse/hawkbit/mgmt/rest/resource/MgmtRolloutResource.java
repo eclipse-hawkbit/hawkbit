@@ -130,6 +130,18 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
+    public ResponseEntity<Void> approve(@PathVariable("rolloutId") final Long rolloutId, final String remark) {
+        rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.APPROVED, remark);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> deny(@PathVariable("rolloutId") final Long rolloutId, final String remark) {
+        rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.DENIED, remark);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
         this.rolloutManagement.start(rolloutId);
         return ResponseEntity.ok().build();

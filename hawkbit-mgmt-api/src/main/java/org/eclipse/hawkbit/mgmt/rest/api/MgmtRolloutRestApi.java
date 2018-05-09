@@ -82,6 +82,36 @@ public interface MgmtRolloutRestApi {
     ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBody rolloutRequestBody);
 
     /**
+     * Handles the request for approving a rollout.
+     *
+     * @param rolloutId
+     *            the ID of the rollout to be approved.
+     * @param remark
+     *             an optional remark on the approval decision
+     * @return OK response (200) if rollout is approved now. In case of any
+     *         exception the corresponding errors occur.
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/approve", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> approve(@PathVariable("rolloutId") Long rolloutId,
+            @RequestParam(value = "remark", required = false) String remark);
+
+    /**
+     * Handles the request for denying the approval of a rollout.
+     *
+     * @param rolloutId
+     *            the ID of the rollout to be denied.
+     * @param remark
+     *             an optional remark on the denial decision
+     * @return OK response (200) if rollout is denied now. In case of any
+     *         exception the corresponding errors occur.
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/deny", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> deny(@PathVariable("rolloutId") Long rolloutId,
+            @RequestParam(value = "remark", required = false) String remark);
+
+    /**
      * Handles the POST request for starting a rollout.
      *
      * @param rolloutId

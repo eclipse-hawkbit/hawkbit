@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -94,6 +95,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TenantConfigurationProperties tenantConfigurationProperties;
+
+    @Autowired
+    protected RolloutTestApprovalStrategy approvalStrategy;
 
     @Transactional(readOnly = true)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {

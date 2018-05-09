@@ -151,4 +151,12 @@ public class SpPermissionChecker implements Serializable {
     public boolean hasRolloutTargetsReadPermission() {
         return hasTargetReadPermission() && permissionService.hasPermission(SpPermission.READ_ROLLOUT);
     }
+
+    /**
+     *
+     * @return <code>true</code> if rollout can be approved by the user.
+     */
+    public boolean hasRolloutApprovalPermission() {
+        return hasRolloutReadPermission() && permissionService.hasPermission(SpPermission.APPROVE_ROLLOUT);
+    }
 }
