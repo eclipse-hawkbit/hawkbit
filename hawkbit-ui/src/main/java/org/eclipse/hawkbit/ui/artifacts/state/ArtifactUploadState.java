@@ -297,7 +297,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         LOG.debug("Cleaning up temp data...");
         // delete file system zombies
         for (final FileUploadProgress fileUploadProgress : getAllFileUploadProgressValuesFromOverallUploadProcessList()) {
-            if (StringUtils.isNoneBlank(fileUploadProgress.getFilePath())) {
+            if (!StringUtils.isBlank(fileUploadProgress.getFilePath())) {
                 FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
             }
         }

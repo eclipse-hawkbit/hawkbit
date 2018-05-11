@@ -168,6 +168,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     private Grid createGrid() {
         final Grid statusGrid = new Grid(uploads);
         statusGrid.addStyleName(SPUIStyleDefinitions.UPLOAD_STATUS_GRID);
+        statusGrid.setId(UIComponentIdProvider.UPLOAD_STATUS_POPUP_GRID);
         statusGrid.setSelectionMode(SelectionMode.NONE);
         statusGrid.setHeaderVisible(true);
         statusGrid.setImmediate(true);

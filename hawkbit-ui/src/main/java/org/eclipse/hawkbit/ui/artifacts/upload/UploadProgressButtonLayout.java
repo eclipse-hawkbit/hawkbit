@@ -145,6 +145,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
         upload.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        upload.setId(UIComponentIdProvider.UPLOAD_BUTTON);
 
         addComponent(upload);
         setComponentAlignment(upload, Alignment.TOP_RIGHT);

@@ -270,7 +270,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("upload.caption.add.new.swmodule")).content(this).layout(formLayout).i18n(i18n)
+                .caption(i18n.getMessage("upload.caption.add.new.swmodule"))
+                .id(UIComponentIdProvider.SW_MODULE_CREATE_DIALOG)
+                .content(this)
+                .layout(formLayout)
+                .i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
