@@ -41,7 +41,7 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
 
     private final CloseListener closeListener;
 
-    UpdateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
+    public UpdateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final String selectedTagName, final CloseListener closeListener) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);

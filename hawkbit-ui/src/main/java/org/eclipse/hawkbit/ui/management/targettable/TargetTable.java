@@ -165,6 +165,12 @@ public class TargetTable extends AbstractTable<Target> {
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
+        showTotalTargets();
+    }
+
+    private void showTotalTargets() {
+        setFooterVisible(true);
+        setColumnFooter(SPUILabelDefinitions.VAR_NAME, "Total Amount: " + managementUIState.getTargetsCountAll());
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -742,6 +748,7 @@ public class TargetTable extends AbstractTable<Target> {
     @Override
     public void refreshContainer() {
         super.refreshContainer();
+        setColumnFooter(SPUILabelDefinitions.VAR_NAME, "Total Amount: " + managementUIState.getTargetsCountAll());
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 

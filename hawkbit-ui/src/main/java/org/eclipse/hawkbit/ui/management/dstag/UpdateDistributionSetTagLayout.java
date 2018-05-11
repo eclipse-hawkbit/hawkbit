@@ -41,7 +41,7 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     private final CloseListener closeListener;
 
-    UpdateDistributionSetTagLayout(final VaadinMessageSource i18n,
+    public UpdateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final String selectedTagName, final CloseListener closeListener) {

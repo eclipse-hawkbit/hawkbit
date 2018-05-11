@@ -28,7 +28,7 @@ public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     private static final long serialVersionUID = 1L;
 
-    CreateDistributionSetTagLayout(final VaadinMessageSource i18n,
+    public CreateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);

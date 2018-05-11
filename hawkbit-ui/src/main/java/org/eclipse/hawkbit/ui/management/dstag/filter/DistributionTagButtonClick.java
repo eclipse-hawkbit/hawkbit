@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.dstag;
+package org.eclipse.hawkbit.ui.management.dstag.filter;
 
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterMultiButtonClick;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;

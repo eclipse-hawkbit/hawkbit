@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.targettag;
+package org.eclipse.hawkbit.ui.management.targettag.filter;
 
 import java.util.ArrayList;
 import java.util.Collections;

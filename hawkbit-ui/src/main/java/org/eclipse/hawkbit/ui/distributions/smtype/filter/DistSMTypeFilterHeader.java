@@ -6,12 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.distributions.disttype;
+package org.eclipse.hawkbit.ui.distributions.smtype.filter;
 
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.artifacts.smtype.CreateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -26,9 +26,9 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
- * Distribution Set Type filter buttons header.
+ * Software Module Type filter buttons header.
  */
-public class DSTypeFilterHeader extends AbstractFilterHeader {
+public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,26 +36,27 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final transient EntityFactory entityFactory;
 
-    private final transient UINotification uiNotification;
+    private final UINotification uiNotification;
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    private final transient DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistSMTypeFilterButtons filterButtons;
 
-    DSTypeFilterButtons dSTypeFilterButtons;
-
-    DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
+    DistSMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DSTypeFilterButtons dSTypeFilterButtons) {
+            final DistSMTypeFilterButtons filterButtons) {
         super(permChecker, eventBus, i18n);
         this.manageDistUIState = manageDistUIState;
         this.entityFactory = entityFactory;
-        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
-        this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.uiNotification = uiNotification;
-        this.dSTypeFilterButtons = dSTypeFilterButtons;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.filterButtons = filterButtons;
+    }
+
+    @Override
+    protected String getHideButtonId() {
+        return UIComponentIdProvider.SM_SHOW_FILTER_BUTTON_ID;
     }
 
     @Override
@@ -70,19 +71,13 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected void hideFilterButtonLayout() {
-        manageDistUIState.setDistTypeFilterClosed(true);
-        getEventBus().publish(this, DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE);
+        manageDistUIState.setSwTypeFilterClosed(true);
+        getEventBus().publish(this, DistributionsUIEvent.HIDE_SM_FILTER_BY_TYPE);
     }
 
     @Override
     protected String getConfigureFilterButtonId() {
-
-        return UIComponentIdProvider.ADD_DISTRIBUTION_TYPE_TAG;
-    }
-
-    @Override
-    protected String getHideButtonId() {
-        return UIComponentIdProvider.HIDE_FILTER_DIST_TYPE;
+        return UIComponentIdProvider.ADD_SOFTWARE_MODULE_TYPE;
     }
 
     @Override
@@ -98,22 +93,21 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
-                        uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement);
+                new CreateSoftwareTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
+                        softwareModuleTypeManagement);
             }
         };
     }
 
     @Override
     protected Command getDeleteButtonCommand() {
-
         return new MenuBar.Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                dSTypeFilterButtons.addDeleteColumn();
+                filterButtons.addDeleteColumn();
             }
         };
     }
@@ -126,7 +120,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                dSTypeFilterButtons.addEditColumn();
+                filterButtons.addEditColumn();
             }
         };
     }

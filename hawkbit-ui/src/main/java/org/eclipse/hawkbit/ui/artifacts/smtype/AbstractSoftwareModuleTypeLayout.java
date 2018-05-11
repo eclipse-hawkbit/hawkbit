@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.distributions.smtype;
+package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +52,38 @@ public abstract class AbstractSoftwareModuleTypeLayout extends AbstractTypeLayou
     public AbstractSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, SoftwareModuleType.NAME_MAX_SIZE,
-                SoftwareModuleType.DESCRIPTION_MAX_SIZE, SoftwareModuleType.KEY_MAX_SIZE);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+    }
+
+    @Override
+    protected int getTagNameSize() {
+        return SoftwareModuleType.NAME_MAX_SIZE;
+    }
+
+    @Override
+    protected int getTagDescSize() {
+        return SoftwareModuleType.DESCRIPTION_MAX_SIZE;
+    }
+
+    @Override
+    protected int getTypeKeySize() {
+        return SoftwareModuleType.KEY_MAX_SIZE;
+    }
+
+    @Override
+    protected String getTagNameId() {
+        return UIComponentIdProvider.NEW_SOFTWARE_TYPE_NAME;
+    }
+
+    @Override
+    protected String getTagDescId() {
+        return UIComponentIdProvider.NEW_SOFTWARE_TYPE_DESC;
+    }
+
+    @Override
+    protected String getTypeKeyId() {
+        return UIComponentIdProvider.NEW_SOFTWARE_TYPE_KEY;
     }
 
     @Override

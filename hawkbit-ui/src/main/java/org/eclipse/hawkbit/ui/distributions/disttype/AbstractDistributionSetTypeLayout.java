@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.layouts.AbstractTypeLayout;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -39,10 +40,39 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, DistributionSetType.NAME_MAX_SIZE,
-                DistributionSetType.DESCRIPTION_MAX_SIZE, DistributionSetType.KEY_MAX_SIZE);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+    }
+
+    @Override
+    protected int getTagNameSize() {
+        return DistributionSetType.NAME_MAX_SIZE;
+    }
+
+    @Override
+    protected int getTagDescSize() {
+        return DistributionSetType.DESCRIPTION_MAX_SIZE;
+    }
+
+    @Override
+    protected int getTypeKeySize() {
+        return DistributionSetType.KEY_MAX_SIZE;
+    }
+
+    @Override
+    protected String getTagNameId() {
+        return UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_NAME;
+    }
+
+    @Override
+    protected String getTagDescId() {
+        return UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_DESC;
+    }
+
+    @Override
+    protected String getTypeKeyId() {
+        return UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY;
     }
 
     @Override

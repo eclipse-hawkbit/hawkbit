@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.targettag;
+package org.eclipse.hawkbit.ui.management.targettag.filter;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
+import org.eclipse.hawkbit.ui.management.targettag.UpdateTargetTagLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -288,6 +289,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateTargetTagLayout(getI18n(), targetTagManagement, entityFactory, getEventBus(), permChecker,
                 uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag());
+    }
+
+    private void removeMenuBar() {
     }
 
     @Override

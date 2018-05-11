@@ -665,6 +665,11 @@ public final class UIComponentIdProvider {
     public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
 
     /**
+     * New Distribution tag name field id.
+     */
+    public static final String NEW_DISTRIBUTION_TAG_NAME = "distribution.tag.add.name";
+
+    /**
      * New Software Module name field id.
      */
     public static final String NEW_SOFTWARE_TYPE_NAME = "software.type.add.name";
@@ -716,6 +721,11 @@ public final class UIComponentIdProvider {
      * New Target tag desc field id.
      */
     public static final String NEW_TARGET_TAG_DESC = "target.tag.add.desc";
+
+    /**
+     * New Distribution tag desc field id.
+     */
+    public static final String NEW_DISTRIBUTION_TAG_DESC = "distribution.tag.add.desc";
 
     /**
      * New distribution Type set tag add icon id.

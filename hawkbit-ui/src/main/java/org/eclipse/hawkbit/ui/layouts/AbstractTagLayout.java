@@ -105,10 +105,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
     private HorizontalLayout colorLabelLayout;
 
-    private final int tagNameSize;
-
-    private final int tagDescSize;
-
     /**
      * Constructor for AbstractCreateUpdateTagLayout
      * 
@@ -124,15 +120,12 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
      *            UINotification
      */
     public AbstractTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final int tagNameSize, final int tagDescSize) {
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         this.i18n = i18n;
         this.entityFactory = entityFactory;
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
-        this.tagNameSize = tagNameSize;
-        this.tagDescSize = tagDescSize;
     }
 
     /**
@@ -186,15 +179,13 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         colorLabel = new LabelBuilder().name(i18n.getMessage("label.choose.tag.color")).buildLabel();
         colorLabel.addStyleName(SPUIStyleDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = new TextFieldBuilder(tagNameSize).caption(i18n.getMessage("textfield.name"))
+        tagName = new TextFieldBuilder(getTagNameSize()).caption(i18n.getMessage("textfield.name"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME).required(true, i18n)
-                .prompt(i18n.getMessage("textfield.name")).immediate(true).id(UIComponentIdProvider.NEW_TARGET_TAG_NAME)
-                .buildTextComponent();
+                .prompt(i18n.getMessage("textfield.name")).immediate(true).id(getTagNameId()).buildTextComponent();
 
-        tagDesc = new TextAreaBuilder(tagDescSize).caption(i18n.getMessage("textfield.description"))
+        tagDesc = new TextAreaBuilder(getTagDescSize()).caption(i18n.getMessage("textfield.description"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC)
-                .prompt(i18n.getMessage("textfield.description")).id(UIComponentIdProvider.NEW_TARGET_TAG_DESC)
-                .buildTextComponent();
+                .prompt(i18n.getMessage("textfield.description")).id(getTagDescId()).buildTextComponent();
 
         tagDesc.setNullRepresentation("");
 
@@ -203,6 +194,14 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
     }
+
+    protected abstract String getTagDescId();
+
+    protected abstract String getTagNameId();
+
+    protected abstract int getTagDescSize();
+
+    protected abstract int getTagNameSize();
 
     protected void buildLayout() {
         mainLayout = new GridLayout(3, 2);

@@ -6,15 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.artifacts.smtype;
+package org.eclipse.hawkbit.ui.management.dstag.filter;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.management.dstag.CreateDistributionSetTagLayout;
+import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -25,58 +25,59 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
- * Software module type filter buttons header.
+ * Table header for filtering distribution set tags
+ *
  */
-public class SMTypeFilterHeader extends AbstractFilterHeader {
+public class DistributionTagHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 1L;
 
-    private final ArtifactUploadState artifactUploadState;
+    private final ManagementUIState managementUIState;
 
     private final transient EntityFactory entityFactory;
 
     private final UINotification uiNotification;
 
-    private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final transient DistributionSetTagManagement distributionSetTagManagement;
 
-    private final SMTypeFilterButtons smTypeFilterButtons;
+    DistributionTagButtons distributionTagButtons;
 
-    SMTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
-            final ArtifactUploadState artifactUploadState, final EntityFactory entityFactory,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final SMTypeFilterButtons smTypeFilterButtons) {
+    DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
+            final UINotification uiNotification, final DistributionTagButtons distributionTagButtons) {
         super(permChecker, eventBus, i18n);
-        this.artifactUploadState = artifactUploadState;
         this.entityFactory = entityFactory;
+        this.managementUIState = managementUIState;
         this.uiNotification = uiNotification;
-        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
-        this.smTypeFilterButtons = smTypeFilterButtons;
-    }
-
-    @Override
-    protected String getTitle() {
-        return SPUILabelDefinitions.TYPE;
-    }
-
-    @Override
-    protected boolean dropHitsRequired() {
-        return false;
-    }
-
-    @Override
-    protected void hideFilterButtonLayout() {
-        artifactUploadState.setSwTypeFilterClosed(true);
-        getEventBus().publish(this, UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE);
-    }
-
-    @Override
-    protected String getConfigureFilterButtonId() {
-        return UIComponentIdProvider.ADD_SOFTWARE_MODULE_TYPE;
+        this.distributionSetTagManagement = distributionSetTagManagement;
+        this.distributionTagButtons = distributionTagButtons;
     }
 
     @Override
     protected String getHideButtonId() {
-        return UIComponentIdProvider.SM_SHOW_FILTER_BUTTON_ID;
+        return "hide.distribution.tags";
+    }
+
+    @Override
+    protected String getTitle() {
+        return getI18n().getMessage("header.filter.tag", new Object[] {});
+    }
+
+    @Override
+    protected boolean dropHitsRequired() {
+        return true;
+    }
+
+    @Override
+    protected void hideFilterButtonLayout() {
+        managementUIState.setDistTagFilterClosed(true);
+        getEventBus().publish(this, ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT);
+    }
+
+    @Override
+    protected String getConfigureFilterButtonId() {
+        return UIComponentIdProvider.ADD_DISTRIBUTION_TAG;
     }
 
     @Override
@@ -92,8 +93,8 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                new CreateSoftwareTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
-                        softwareModuleTypeManagement);
+                new CreateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
+                        getEventBus(), getPermChecker(), uiNotification);
             }
         };
     }
@@ -106,7 +107,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                smTypeFilterButtons.addDeleteColumn();
+                distributionTagButtons.addDeleteColumn();
             }
         };
     }
@@ -119,8 +120,9 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
             @Override
             public void menuSelected(final MenuItem selectedItem) {
-                smTypeFilterButtons.addEditColumn();
+                distributionTagButtons.addEditColumn();
             }
         };
     }
+
 }

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.dstag;
+package org.eclipse.hawkbit.ui.management.dstag.filter;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
+import org.eclipse.hawkbit.ui.management.dstag.UpdateDistributionSetTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;

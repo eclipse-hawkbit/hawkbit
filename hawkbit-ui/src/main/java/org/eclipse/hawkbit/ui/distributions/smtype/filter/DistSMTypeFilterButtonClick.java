@@ -6,49 +6,48 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.artifacts.smtype;
+package org.eclipse.hawkbit.ui.distributions.smtype.filter;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Button;
 
 /**
- * Single button click behavior of filter buttons layout for software module
- * table on the Upload view.
+ * Single button click behaviour of filter buttons layout.
  */
-public class SMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
+public class DistSMTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4166632002904286983L;
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final ArtifactUploadState artifactUploadState;
+    private final ManageDistUIState manageDistUIState;
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    SMTypeFilterButtonClick(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
+    DistSMTypeFilterButtonClick(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.eventBus = eventBus;
-        this.artifactUploadState = artifactUploadState;
+        this.manageDistUIState = manageDistUIState;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
     protected void filterUnClicked(final Button clickedButton) {
-        artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(null);
+        manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(null);
         eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override
     protected void filterClicked(final Button clickedButton) {
         softwareModuleTypeManagement.getByName(clickedButton.getData().toString())
-                .ifPresent(softwareModuleType -> {
-                    artifactUploadState.getSoftwareModuleFilters().setSoftwareModuleType(softwareModuleType);
+                .ifPresent(smType -> {
+                    manageDistUIState.getSoftwareModuleFilters().setSoftwareModuleType(smType);
                     eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
                 });
     }

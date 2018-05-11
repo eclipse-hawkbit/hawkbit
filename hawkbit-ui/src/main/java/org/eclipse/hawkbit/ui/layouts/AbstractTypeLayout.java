@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -42,17 +41,13 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
 
     private TextField typeKey;
 
-    private final int typeKeySize;
-
     private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
 
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
     public AbstractTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final int tagNameSize, final int tagDescSize, final int typeKeySize) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, tagNameSize, tagDescSize);
-        this.typeKeySize = typeKeySize;
+            final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
     }
 
     @Override
@@ -93,12 +88,16 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
     @Override
     protected void createRequiredComponents() {
         super.createRequiredComponents();
-        typeKey = new TextFieldBuilder(typeKeySize).id(UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY)
+        typeKey = new TextFieldBuilder(getTypeKeySize()).id(getTypeKeyId())
                 .caption(getI18n().getMessage("textfield.key"))
                 .styleName(ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY).required(true, getI18n())
                 .prompt(getI18n().getMessage("textfield.key")).immediate(true).buildTextComponent();
         getColorLabel().setValue(getI18n().getMessage("label.choose.type.color"));
     }
+
+    protected abstract String getTypeKeyId();
+
+    protected abstract int getTypeKeySize();
 
     @Override
     protected void setColorToComponents(final Color newColor) {

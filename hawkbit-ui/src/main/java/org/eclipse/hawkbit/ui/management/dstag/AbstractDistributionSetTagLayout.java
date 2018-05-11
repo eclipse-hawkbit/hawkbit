@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.layouts.AbstractTagLayout;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -32,8 +33,7 @@ public abstract class AbstractDistributionSetTagLayout extends AbstractTagLayout
     public AbstractDistributionSetTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement) {
-        super(i18n, entityFactory, eventBus, permChecker, uiNotification, DistributionSetTag.NAME_MAX_SIZE,
-                DistributionSetTag.DESCRIPTION_MAX_SIZE);
+        super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.distributionSetTagManagement = distributionSetTagManagement;
     }
 
@@ -46,4 +46,23 @@ public abstract class AbstractDistributionSetTagLayout extends AbstractTagLayout
         return distributionSetTagManagement;
     }
 
+    @Override
+    protected int getTagNameSize() {
+        return DistributionSetTag.NAME_MAX_SIZE;
+    }
+
+    @Override
+    protected int getTagDescSize() {
+        return DistributionSetTag.DESCRIPTION_MAX_SIZE;
+    }
+
+    @Override
+    protected String getTagNameId() {
+        return UIComponentIdProvider.NEW_DISTRIBUTION_TAG_NAME;
+    }
+
+    @Override
+    protected String getTagDescId() {
+        return UIComponentIdProvider.NEW_DISTRIBUTION_TAG_DESC;
+    }
 }
