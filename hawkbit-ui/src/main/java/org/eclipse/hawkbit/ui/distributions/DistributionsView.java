@@ -231,7 +231,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         mainLayout.setColumnExpandRatio(2, 0.5F);
     }
 
-    // TODO MR check column expand ratio
     private void maximizeDistTable() {
         mainLayout.removeComponent(softwareModuleTableLayout);
         mainLayout.removeComponent(filterBySMTypeLayout);

@@ -67,6 +67,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     private final transient TargetTagManagement targetTagManagement;
 
+    private VerticalLayout targetTagTableLayout;
+
     MultipleTargetFilter(final SpPermissionChecker permChecker, final ManagementUIState managementUIState,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementViewClientCriterion managementViewClientCriterion, final UINotification notification,
@@ -128,7 +130,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     private Component getSimpleFilterTab() {
         simpleFilterTab = new VerticalLayout();
-        final VerticalLayout targetTagTableLayout = new VerticalLayout();
+        targetTagTableLayout = new VerticalLayout();
         targetTagTableLayout.setSizeFull();
         if (menu != null) {
             targetTagTableLayout.addComponent(menu);
@@ -192,6 +194,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addDeleteColumn();
+                // TODO MR target tags
+                // removeMenuBarAndAddAbortButton(filterByButtons);
             }
         };
     }
@@ -204,12 +208,21 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addEditColumn();
+                // removeMenuBarAndAddAbortButton(filterByButtons);
             }
         };
     }
 
     public TargetTagFilterButtons getFilterByButtons() {
         return filterByButtons;
+    }
+
+    public VerticalLayout getTargetTagTableLayout() {
+        return targetTagTableLayout;
+    }
+
+    public ConfigMenuBar getMenu() {
+        return menu;
     }
 
 }

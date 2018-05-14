@@ -314,7 +314,6 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.setColumnExpandRatio(4, 0F);
     }
 
-    // TODO MR check column expand ratio
     private void maximizeDistTable() {
         if (permChecker.hasTargetReadPermission()) {
             mainLayout.removeComponent(targetTagFilterLayout);

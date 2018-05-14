@@ -70,6 +70,8 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
     @Override
     public void refreshContainer() {
         getFilterButtons().refreshTable();
+        // TODO MR use events
+        getFilterHeader().removeAbortButtonAndAddMenuBar();
     }
 
 }

@@ -21,6 +21,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar.Command;
@@ -45,6 +46,10 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private final VaadinMessageSource i18n;
 
+    private HorizontalLayout typeHeaderLayout;
+
+    private Button cancelTagButton;
+
     protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final VaadinMessageSource i18n) {
         this.permChecker = permChecker;
@@ -52,6 +57,33 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         this.i18n = i18n;
         createComponents();
         buildLayout();
+    }
+
+    public void removeAbortButtonAndAddMenuBar() {
+        final HorizontalLayout layout = getTypeHeaderLayout();
+        layout.iterator().forEachRemaining(component -> {
+            if ("cancelUpdateTag".equals(component.getId())) {
+                getTypeHeaderLayout().removeComponent(cancelTagButton);
+                getTypeHeaderLayout().addComponent(getMenu(), 1);
+            }
+        });
+    }
+
+    protected void removeMenuBarAndAddAbortButton() {
+        getTypeHeaderLayout().removeComponent(getMenu());
+        getTypeHeaderLayout().addComponent(createAbortButtonForUpdateOrDeleteTag(), 1);
+    }
+
+    protected Button createAbortButtonForUpdateOrDeleteTag() {
+        cancelTagButton = SPUIComponentProvider.getButton("cancelUpdateTag", "", "", null, false,
+                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
+        cancelTagButton.addClickListener(this::abortUpdateOrDeleteTag);
+        return cancelTagButton;
+    }
+
+    protected void abortUpdateOrDeleteTag(final ClickEvent event) {
+        getTypeHeaderLayout().removeComponent(cancelTagButton);
+        getTypeHeaderLayout().addComponent(getMenu(), 1);
     }
 
     /**
@@ -67,7 +99,10 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleNoBorder.class);
-        hideIcon.addClickListener(event -> hideFilterButtonLayout());
+        hideIcon.addClickListener(
+
+                event -> hideFilterButtonLayout());
+
     }
 
     protected abstract Command getDeleteButtonCommand();
@@ -81,7 +116,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      */
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
-        final HorizontalLayout typeHeaderLayout = new HorizontalLayout();
+        typeHeaderLayout = new HorizontalLayout();
         typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);
         typeHeaderLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
@@ -153,6 +188,10 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     public VaadinMessageSource getI18n() {
         return i18n;
+    }
+
+    public HorizontalLayout getTypeHeaderLayout() {
+        return typeHeaderLayout;
     }
 
 }

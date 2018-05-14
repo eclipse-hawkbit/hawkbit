@@ -102,6 +102,10 @@ public abstract class AbstractFilterButtons extends Table {
         addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
     }
 
+    /**
+     * Insert the edit icons next to the filter tags in target, distribution and
+     * software module tags/types tables
+     */
     public void addEditColumn() {
         if (alreadyContainsColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN)) {
             return;
@@ -111,6 +115,10 @@ public abstract class AbstractFilterButtons extends Table {
                 (source, itemId, columnId) -> addUpdateCell(itemId));
     }
 
+    /**
+     * Insert the delete icons next to the filter tags in target, distribution
+     * and software module tags/types tables
+     */
     public void addDeleteColumn() {
         if (alreadyContainsColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN)) {
             return;
@@ -120,7 +128,12 @@ public abstract class AbstractFilterButtons extends Table {
                 (source, itemId, columnId) -> addDeleteCell(itemId));
     }
 
-    protected void removeEditAndDeleteColumn() {
+    /**
+     * Removes the edit and delete icon next to the filter tags in target,
+     * distribution and software module tags/types tables, when the edit/delete
+     * action is executed or cancelled
+     */
+    public void removeEditAndDeleteColumn() {
         removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
         removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
     }
@@ -274,6 +287,9 @@ public abstract class AbstractFilterButtons extends Table {
         return event.getButton().getId();
     }
 
+    /**
+     * Refreshes the tags tables
+     */
     public void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
         removeEditAndDeleteColumn();

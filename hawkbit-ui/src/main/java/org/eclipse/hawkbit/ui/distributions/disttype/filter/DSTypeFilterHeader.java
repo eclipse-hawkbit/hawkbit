@@ -115,6 +115,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addDeleteColumn();
+                removeMenuBarAndAddAbortButton();
             }
         };
     }
@@ -128,6 +129,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addEditColumn();
+                removeMenuBarAndAddAbortButton();
             }
         };
     }

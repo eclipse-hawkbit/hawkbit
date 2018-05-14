@@ -291,9 +291,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
                 uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag());
     }
 
-    private void removeMenuBar() {
-    }
-
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         final String entityName = getEntityId(event);

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -108,6 +109,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterButtons.addDeleteColumn();
+                removeMenuBarAndAddAbortButton();
             }
         };
     }
@@ -121,8 +123,15 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterButtons.addEditColumn();
+                removeMenuBarAndAddAbortButton();
             }
         };
+    }
+
+    @Override
+    protected void abortUpdateOrDeleteTag(final ClickEvent event) {
+        super.abortUpdateOrDeleteTag(event);
+        filterButtons.removeEditAndDeleteColumn();
     }
 
 }

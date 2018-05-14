@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -23,7 +24,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 /**
  * Software Module Type filter layout.
  */
-public class DistSMTypeFilterLayout extends AbstractFilterLayout {
+public class DistSMTypeFilterLayout extends AbstractFilterLayout implements RefreshableContainer {
 
     private static final long serialVersionUID = 3042297420534417538L;
 
@@ -54,8 +55,12 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
 
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
-
         return manageDistUIState.isSwTypeFilterClosed();
+    }
+
+    @Override
+    public void refreshContainer() {
+        getFilterHeader().removeAbortButtonAndAddMenuBar();
     }
 
 }
