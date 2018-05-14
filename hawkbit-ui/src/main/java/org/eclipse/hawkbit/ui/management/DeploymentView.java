@@ -114,6 +114,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private final DeploymentViewMenuItem deploymentViewMenuItem;
 
+    private CountMessageLabel countMessageLabel;
+
     @Autowired
     DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
@@ -146,6 +148,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
                     targetTagManagement, deploymentManagement, uiProperties);
+            this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
+                    targetTable);
 
             this.targetTableLayout = new TargetTableLayout(eventBus, targetTable, targetManagement, entityFactory, i18n,
                     uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
@@ -277,11 +281,17 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.addComponent(distributionTableLayout, 2, 0);
         mainLayout.addComponent(distributionTagLayout, 3, 0);
         mainLayout.addComponent(actionHistoryLayout, 4, 0);
+        showTargetCount();
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0.275F);
         mainLayout.setColumnExpandRatio(2, 0.275F);
         mainLayout.setColumnExpandRatio(3, 0F);
         mainLayout.setColumnExpandRatio(4, 0.45F);
+    }
+
+    private void showTargetCount() {
+        mainLayout.addComponent(countMessageLabel, 1, 1, 2, 1);
+        mainLayout.setComponentAlignment(countMessageLabel, Alignment.BOTTOM_CENTER);
     }
 
     private void displayDistributionWidgetsOnly() {
@@ -298,6 +308,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(actionHistoryLayout, 2, 0);
+        showTargetCount();
         mainLayout.setColumnExpandRatio(1, 0.4F);
         mainLayout.setColumnExpandRatio(2, 0.6F);
     }
@@ -308,6 +319,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(distributionTagLayout);
         }
         mainLayout.removeComponent(actionHistoryLayout);
+        mainLayout.removeComponent(countMessageLabel);
         mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
         mainLayout.setColumnExpandRatio(3, 0F);
@@ -319,6 +331,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(targetTagFilterLayout);
             mainLayout.removeComponent(targetTableLayout);
             mainLayout.removeComponent(actionHistoryLayout);
+            mainLayout.removeComponent(countMessageLabel);
         }
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0F);

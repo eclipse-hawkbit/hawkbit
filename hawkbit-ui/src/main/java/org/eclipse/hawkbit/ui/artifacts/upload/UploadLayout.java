@@ -186,12 +186,10 @@ public class UploadLayout extends VerticalLayout {
         upload.addFinishedListener(uploadHandler);
         upload.addProgressListener(uploadHandler);
         upload.addStartedListener(uploadHandler);
-        upload.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         upload.addStyleName("no-border");
 
         fileUploadLayout = new HorizontalLayout();
         fileUploadLayout.setSpacing(true);
-        fileUploadLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         fileUploadLayout.addComponent(upload);
         fileUploadLayout.setComponentAlignment(upload, Alignment.MIDDLE_LEFT);
         fileUploadLayout.addComponent(processBtn);
@@ -251,8 +249,7 @@ public class UploadLayout extends VerticalLayout {
                 artifactUploadState.getSelectedBaseSwModuleId().ifPresent(selectedSwId -> {
                     // reset the flag
                     hasDirectory = false;
-                    final SoftwareModule softwareModule = softwareModuleManagement.get(selectedSwId)
-                            .orElse(null);
+                    final SoftwareModule softwareModule = softwareModuleManagement.get(selectedSwId).orElse(null);
                     for (final Html5File file : files) {
                         processFile(file, softwareModule);
                     }
@@ -303,7 +300,8 @@ public class UploadLayout extends VerticalLayout {
 
         private StreamVariable createStreamVariable(final Html5File file, final SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw, softwareModuleManagement);
+                    multipartConfigElement.getMaxFileSize(), null, file.getType(), selectedSw,
+                    softwareModuleManagement);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -352,7 +350,6 @@ public class UploadLayout extends VerticalLayout {
                 SPUILabelDefinitions.PROCESS, SPUILabelDefinitions.PROCESS, null, false, null,
                 SPUIButtonStyleSmall.class);
         processBtn.setIcon(FontAwesome.BELL);
-        processBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         processBtn.addClickListener(this::displayConfirmWindow);
         processBtn.setHtmlContentAllowed(true);
         processBtn.setEnabled(false);
@@ -363,7 +360,6 @@ public class UploadLayout extends VerticalLayout {
                 SPUILabelDefinitions.DISCARD, SPUILabelDefinitions.DISCARD, null, false, null,
                 SPUIButtonStyleSmall.class);
         discardBtn.setIcon(FontAwesome.TRASH_O);
-        discardBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         discardBtn.addClickListener(this::discardUploadData);
     }
 
@@ -730,8 +726,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void refreshArtifactDetailsLayout(final Long selectedBaseSoftwareModuleId) {
-        final SoftwareModule softwareModule = softwareModuleManagement.get(selectedBaseSoftwareModuleId)
-                .orElse(null);
+        final SoftwareModule softwareModule = softwareModuleManagement.get(selectedBaseSoftwareModuleId).orElse(null);
         eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
     }
 
@@ -750,7 +745,6 @@ public class UploadLayout extends VerticalLayout {
     private void createUploadStatusButton() {
         uploadStatusButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
-        uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadStatusButton.setWidth("100px");
         uploadStatusButton.setHtmlContentAllowed(true);

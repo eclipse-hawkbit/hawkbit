@@ -106,16 +106,6 @@ public final class SPUIStyleDefinitions {
     public static final String REDICON = "redicon";
 
     /**
-     * Action button style- footer buttons.
-     */
-    public static final String ACTION_BUTTON = "action-button";
-
-    /**
-     * Width of 'drop to delete' layout and 'no actions' button
-     */
-    public static final String DEL_ACTION_BUTTON = "del-action-button";
-
-    /**
      * Confirmation window caption stle.
      */
     public static final String CONFIRMATION_WINDOW_CAPTION = "confirmation-window";
@@ -253,11 +243,6 @@ public final class SPUIStyleDefinitions {
      * Grid style.
      */
     public static final String METADATA_GRID = "metadata-grid";
-
-    /**
-     * Footer layout style.
-     */
-    public static final String FOOTER_LAYOUT = "footer-layout";
 
     /**
      * Tag combo style.
