@@ -16,6 +16,16 @@ package org.eclipse.hawkbit.repository.model;
 public interface TenantConfiguration extends TenantAwareBaseEntity {
 
     /**
+     * Maximum length of tenant configuration key.
+     */
+    int KEY_MAX_SIZE = 128;
+
+    /**
+     * Maximum length of tenant configuration value.
+     */
+    int VALUE_MAX_SIZE = 512;
+
+    /**
      * @return key of the entry
      */
     String getKey();
