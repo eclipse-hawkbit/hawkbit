@@ -54,7 +54,6 @@ public class IpUtilTest {
     public void getRemoteAddrFromRequestIfForwaredHeaderNotPresent() {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("127.0.0.1");
-        when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(null);
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
 
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, KNOWN_REQUEST_HEADER);
@@ -71,8 +70,6 @@ public class IpUtilTest {
     public void maskRemoteAddrIfDisabled() {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("***");
-        when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(null);
-        when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
         when(securityPropertyMock.getClients()).thenReturn(clientMock);
         when(clientMock.getRemoteIpHeader()).thenReturn(KNOWN_REQUEST_HEADER);
         when(clientMock.isTrackRemoteIp()).thenReturn(false);
@@ -91,7 +88,6 @@ public class IpUtilTest {
 
         final URI knownRemoteClientIP = IpUtil.createHttpUri("10.99.99.1");
         when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(knownRemoteClientIP.getHost());
-        when(requestMock.getRemoteAddr()).thenReturn(null);
 
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "X-Forwarded-For");
 
