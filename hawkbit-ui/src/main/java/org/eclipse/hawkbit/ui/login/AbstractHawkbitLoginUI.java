@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.login;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
 
@@ -81,6 +82,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
+    private static final Pattern FORBIDDEN_COOKIE_CONTENT = Pattern.compile(".*(<|>).*");
 
     private final transient ApplicationContext context;
 
@@ -365,8 +367,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (usernameCookie != null) {
             final String previousUser = usernameCookie.getValue();
-            username.setValue(previousUser);
-            password.focus();
+            if (!FORBIDDEN_COOKIE_CONTENT.matcher(previousUser).matches()) {
+                username.setValue(previousUser);
+                password.focus();
+            }
         } else {
             username.focus();
         }
@@ -375,7 +379,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (tenantCookie != null && multiTenancyIndicator.isMultiTenancySupported()) {
             final String previousTenant = tenantCookie.getValue();
-            tenant.setValue(previousTenant.toUpperCase());
+            if (!FORBIDDEN_COOKIE_CONTENT.matcher(previousTenant).matches()) {
+                tenant.setValue(previousTenant.toUpperCase());
+            }
         } else if (multiTenancyIndicator.isMultiTenancySupported()) {
             tenant.focus();
         } else {
