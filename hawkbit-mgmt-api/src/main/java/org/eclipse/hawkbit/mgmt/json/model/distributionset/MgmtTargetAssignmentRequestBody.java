@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,10 +28,10 @@ public class MgmtTargetAssignmentRequestBody {
     private MgmtActionType type;
 
     /**
-     * {@link MgmtMaintenanceWindow} object containing schedule, duration and
-     * timezone.
+     * {@link MgmtMaintenanceWindowRequestBody} object containing schedule,
+     * duration and timezone.
      */
-    private MgmtMaintenanceWindow maintenanceWindow;
+    private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
     public String getId() {
         return id;
@@ -57,11 +57,11 @@ public class MgmtTargetAssignmentRequestBody {
         this.forcetime = forcetime;
     }
 
-    public MgmtMaintenanceWindow getMaintenanceWindow() {
+    public MgmtMaintenanceWindowRequestBody getMaintenanceWindow() {
         return maintenanceWindow;
     }
 
-    public void setMaintenanceWindow(final MgmtMaintenanceWindow maintenanceWindow) {
+    public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
 

@@ -15,7 +15,7 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -276,7 +276,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         findTargetWithExceptionIfNotFound(controllerId);
-        final MgmtMaintenanceWindow maintenanceWindow = dsId.getMaintenanceWindow();
+        final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsId.getMaintenanceWindow();
 
         if (maintenanceWindow == null) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
@@ -284,9 +284,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                             MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
         }
 
-        final String cronSchedule = maintenanceWindow.getMaintenanceSchedule();
-        final String duration = maintenanceWindow.getMaintenanceWindowDuration();
-        final String timezone = maintenanceWindow.getMaintenanceWindowTimeZone();
+        final String cronSchedule = maintenanceWindow.getSchedule();
+        final String duration = maintenanceWindow.getDuration();
+        final String timezone = maintenanceWindow.getTimezone();
 
         MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
 
