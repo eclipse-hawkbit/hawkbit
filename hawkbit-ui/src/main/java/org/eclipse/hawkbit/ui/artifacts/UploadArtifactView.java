@@ -171,7 +171,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout = new VerticalLayout();
         detailAndUploadLayout.addComponent(artifactDetailsLayout);
         detailAndUploadLayout.setComponentAlignment(artifactDetailsLayout, Alignment.TOP_CENTER);
-        detailAndUploadLayout.setExpandRatio(artifactDetailsLayout, 1.0f);
+        detailAndUploadLayout.setExpandRatio(artifactDetailsLayout, 1.0F);
 
         if (permChecker.hasCreateRepositoryPermission()) {
             dadAndButtonGrid = new GridLayout(2, 1);
@@ -182,11 +182,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             dadAndButtonGrid.setComponentAlignment(uploadButtonLayout, Alignment.TOP_RIGHT);
             dadAndButtonGrid.setSpacing(true);
             dadAndButtonGrid.setSizeFull();
-            dadAndButtonGrid.setColumnExpandRatio(0, 1.0f);
-            dadAndButtonGrid.setColumnExpandRatio(1, 0.19f);
+            dadAndButtonGrid.setColumnExpandRatio(0, 1.0F);
+            dadAndButtonGrid.setColumnExpandRatio(1, 0.19F);
 
             detailAndUploadLayout.addComponent(dadAndButtonGrid);
-            detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3f);
+            detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3F);
             detailAndUploadLayout.setComponentAlignment(dadAndButtonGrid, Alignment.MIDDLE_CENTER);
         }
 
@@ -227,7 +227,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void minimizeArtifactoryDetails() {
         mainLayout.setSpacing(true);
         detailAndUploadLayout.addComponent(dadAndButtonGrid);
-        detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3f);
+        detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3F);
         detailAndUploadLayout.setComponentAlignment(dadAndButtonGrid, Alignment.MIDDLE_CENTER);
         mainLayout.addComponent(filterByTypeLayout, 0, 0);
         mainLayout.addComponent(smTableLayout, 1, 0);

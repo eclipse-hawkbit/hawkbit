@@ -262,7 +262,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return inProgressCount;
     }
 
-    private void assertFileStateConsistency(final int inProgressCount, final int overallUploadCount,
+    private static void assertFileStateConsistency(final int inProgressCount, final int overallUploadCount,
             final int succeededUploadCount, final int failedUploadCount) {
         if (inProgressCount < 0) {
             LOG.error("IllegalState: \n{}",

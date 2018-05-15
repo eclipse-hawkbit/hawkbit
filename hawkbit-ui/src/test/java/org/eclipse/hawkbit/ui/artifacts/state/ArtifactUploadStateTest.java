@@ -1,12 +1,9 @@
 package org.eclipse.hawkbit.ui.artifacts.state;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +46,7 @@ public class ArtifactUploadStateTest {
         simulateUploadFailedFor(fileUploadId2);
         simulateUploadSucceededFor(fileUploadId3);
 
-        assertTrue(stateUnderTest.isAtLeastOneUploadInProgress());
+        assertThat(stateUnderTest.isAtLeastOneUploadInProgress()).isTrue();
     }
 
     @Test
@@ -57,7 +54,7 @@ public class ArtifactUploadStateTest {
         simulateUploadFailedFor(fileUploadId1, fileUploadId2);
         simulateUploadSucceededFor(fileUploadId3);
 
-        assertFalse(stateUnderTest.isAtLeastOneUploadInProgress());
+        assertThat(stateUnderTest.isAtLeastOneUploadInProgress()).isFalse();
     }
 
     @Test
@@ -66,14 +63,14 @@ public class ArtifactUploadStateTest {
         simulateUploadSucceededFor(fileUploadId1);
         simulateUploadFailedFor(fileUploadId2, fileUploadId3);
 
-        assertTrue(stateUnderTest.areAllUploadsFinished());
+        assertThat(stateUnderTest.areAllUploadsFinished()).isTrue();
     }
 
     @Test
     public void areAllUploadsFinishedReturnsFalseForUploadInProgress() {
         simulateUploadInProgressFor(fileUploadId1, fileUploadId2, fileUploadId3);
 
-        assertFalse(stateUnderTest.areAllUploadsFinished());
+        assertThat(stateUnderTest.areAllUploadsFinished()).isFalse();
     }
 
     @Test
@@ -82,7 +79,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertTrue(stateUnderTest.areAllUploadsFinished());
+        assertThat(stateUnderTest.areAllUploadsFinished()).isTrue();
     }
 
     @Test
@@ -91,7 +88,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertFalse(stateUnderTest.isAtLeastOneUploadInProgress());
+        assertThat(stateUnderTest.isAtLeastOneUploadInProgress()).isFalse();
     }
 
     @Test
@@ -100,8 +97,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertThat(stateUnderTest.getAllFileUploadIdsFromOverallUploadProcessList(),
-                Matchers.emptyCollectionOf(FileUploadId.class));
+        assertThat(stateUnderTest.getAllFileUploadIdsFromOverallUploadProcessList()).isEmpty();
     }
 
     @Test
@@ -110,8 +106,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertThat(stateUnderTest.getAllFileUploadProgressValuesFromOverallUploadProcessList(),
-                Matchers.emptyCollectionOf(FileUploadProgress.class));
+        assertThat(stateUnderTest.getAllFileUploadProgressValuesFromOverallUploadProcessList()).isEmpty();
     }
 
     @Test
@@ -121,7 +116,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertThat(stateUnderTest.getFilesInFailedState(), Matchers.emptyCollectionOf(FileUploadId.class));
+        assertThat(stateUnderTest.getFilesInFailedState()).isEmpty();
     }
 
     @Test
@@ -130,7 +125,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertFalse(stateUnderTest.isFileInUploadState(fileUploadId1));
+        assertThat(stateUnderTest.isFileInUploadState(fileUploadId1)).isFalse();
     }
 
     @Test
@@ -140,7 +135,7 @@ public class ArtifactUploadStateTest {
 
         stateUnderTest.clearFileStates();
 
-        assertThat(stateUnderTest.getFilesInSucceededState(), Matchers.emptyCollectionOf(FileUploadId.class));
+        assertThat(stateUnderTest.getFilesInSucceededState()).isEmpty();
     }
 
     @Test
@@ -149,8 +144,8 @@ public class ArtifactUploadStateTest {
         simulateUploadFailedFor(fileUploadId1);
         simulateUploadSucceededFor(fileUploadId2);
 
-        assertThat(stateUnderTest.getAllFileUploadIdsFromOverallUploadProcessList(),
-                Matchers.containsInAnyOrder(fileUploadId1, fileUploadId2, fileUploadId3));
+        assertThat(stateUnderTest.getAllFileUploadIdsFromOverallUploadProcessList())
+                .containsExactlyInAnyOrder(fileUploadId1, fileUploadId2, fileUploadId3);
     }
 
     @Test
@@ -159,7 +154,7 @@ public class ArtifactUploadStateTest {
         simulateUploadFailedFor(fileUploadId2);
         simulateUploadSucceededFor(fileUploadId3);
 
-        assertThat(stateUnderTest.getFilesInSucceededState(), Matchers.contains(fileUploadId3));
+        assertThat(stateUnderTest.getFilesInSucceededState()).containsOnly(fileUploadId3);
     }
 
     @Test
@@ -168,14 +163,14 @@ public class ArtifactUploadStateTest {
         simulateUploadFailedFor(fileUploadId2);
         simulateUploadSucceededFor(fileUploadId3);
 
-        assertThat(stateUnderTest.getFilesInFailedState(), Matchers.contains(fileUploadId2));
+        assertThat(stateUnderTest.getFilesInFailedState()).containsOnly(fileUploadId2);
     }
 
     @Test
     public void isFileInUploadStateReturnsTrueForFileInProgress() {
         simulateUploadInProgressFor(fileUploadId1);
 
-        assertTrue(stateUnderTest.isFileInUploadState(fileUploadId1));
+        assertThat(stateUnderTest.isFileInUploadState(fileUploadId1)).isTrue();
     }
 
     @Test
@@ -183,7 +178,7 @@ public class ArtifactUploadStateTest {
         simulateUploadInProgressFor(fileUploadId1);
         simulateUploadFailedFor(fileUploadId1);
 
-        assertTrue(stateUnderTest.isFileInUploadState(fileUploadId1));
+        assertThat(stateUnderTest.isFileInUploadState(fileUploadId1)).isTrue();
     }
 
     @Test
@@ -191,13 +186,13 @@ public class ArtifactUploadStateTest {
         simulateUploadInProgressFor(fileUploadId1);
         simulateUploadSucceededFor(fileUploadId1);
 
-        assertTrue(stateUnderTest.isFileInUploadState(fileUploadId1));
+        assertThat(stateUnderTest.isFileInUploadState(fileUploadId1)).isTrue();
     }
 
     @Test
     public void isFileInUploadStateReturnsFalseForUnknownFileId() {
 
-        assertFalse(stateUnderTest.isFileInUploadState(fileUploadId1));
+        assertThat(stateUnderTest.isFileInUploadState(fileUploadId1)).isFalse();
     }
 
     private void simulateUploadInProgressFor(final FileUploadId... fileUploadIds) {

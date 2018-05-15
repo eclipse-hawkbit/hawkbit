@@ -60,7 +60,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private final VaadinMessageSource i18n;
 
-    public AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
+    AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
