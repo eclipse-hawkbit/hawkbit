@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -24,9 +23,9 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 /**
  * Software Module Type filter layout.
  */
-public class DistSMTypeFilterLayout extends AbstractFilterLayout implements RefreshableContainer {
+public class DistSMTypeFilterLayout extends AbstractFilterLayout {
 
-    private static final long serialVersionUID = 3042297420534417538L;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -36,7 +35,7 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout implements Refr
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistSMTypeFilterButtons filterButtons) {
         super(new DistSMTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, entityFactory, uiNotification,
-                softwareModuleTypeManagement, filterButtons), filterButtons);
+                softwareModuleTypeManagement, filterButtons), filterButtons, eventBus);
         this.manageDistUIState = manageDistUIState;
 
         restoreState();
@@ -56,11 +55,6 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout implements Refr
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
         return manageDistUIState.isSwTypeFilterClosed();
-    }
-
-    @Override
-    public void refreshContainer() {
-        getFilterHeader().removeAbortButtonAndAddMenuBar();
     }
 
 }

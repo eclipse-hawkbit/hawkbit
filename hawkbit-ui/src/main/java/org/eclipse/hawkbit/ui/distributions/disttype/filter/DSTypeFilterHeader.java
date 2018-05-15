@@ -11,7 +11,10 @@ package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.disttype.CreateDistributionSetTypeLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
@@ -21,7 +24,10 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -115,7 +121,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addDeleteColumn();
-                removeMenuBarAndAddAbortButton();
+                removeMenuBarAndAddCancelButton();
             }
         };
     }
@@ -129,9 +135,23 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addEditColumn();
-                removeMenuBarAndAddAbortButton();
+                removeMenuBarAndAddCancelButton();
             }
         };
+    }
+
+    @Override
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+        super.cancelUpdateOrDeleteTag(event);
+        dSTypeFilterButtons.removeEditAndDeleteColumn();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    public void onEvent(final FilterHeaderEvent<DistributionSetType> event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
+                && DistributionSetType.class == event.getEntityType()) {
+            removeCancelButtonAndAddMenuBar();
+        }
     }
 
 }

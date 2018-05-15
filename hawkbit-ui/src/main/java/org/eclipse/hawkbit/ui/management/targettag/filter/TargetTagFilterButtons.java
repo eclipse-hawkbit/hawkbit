@@ -254,8 +254,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     public void refreshTable() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        removeEditAndDeleteColumn();
         ((LazyQueryContainer) getContainerDataSource()).refresh();
+        removeEditAndDeleteColumn();
         addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
     }
@@ -288,13 +288,14 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateTargetTagLayout(getI18n(), targetTagManagement, entityFactory, getEventBus(), permChecker,
-                uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag());
+                uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag(TargetTag.class));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         final String entityName = getEntityId(event);
-        openConfirmationWindowForDeletion(entityName, getI18n().getMessage("caption.entity.target.tag"));
+        openConfirmationWindowForDeletion(entityName, getI18n().getMessage("caption.entity.target.tag"),
+                TargetTag.class);
     }
 
     @Override

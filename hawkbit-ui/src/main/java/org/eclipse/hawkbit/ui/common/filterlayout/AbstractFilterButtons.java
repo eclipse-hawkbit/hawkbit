@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
@@ -295,7 +297,8 @@ public abstract class AbstractFilterButtons extends Table {
         removeEditAndDeleteColumn();
     }
 
-    protected void openConfirmationWindowForDeletion(final String entityToDelete, final String entityName) {
+    protected <T> void openConfirmationWindowForDeletion(final String entityToDelete, final String entityName,
+            final Class<T> entityClass) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox", entityName),
                 i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(), entityToDelete, ""),
@@ -304,20 +307,23 @@ public abstract class AbstractFilterButtons extends Table {
                         deleteEntity(entityToDelete);
                     } else {
                         removeEditAndDeleteColumn();
+                        getEventBus().publish(this,
+                                new FilterHeaderEvent<T>(FilterHeaderEnum.SHOW_MENUBAR, entityClass));
                     }
                 });
-        confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag());
+        confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag(entityClass));
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    protected CloseListener getCloseListenerForEditAndDeleteTag() {
+    protected <T> CloseListener getCloseListenerForEditAndDeleteTag(final Class<T> entityClass) {
         return new Window.CloseListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void windowClose(final CloseEvent e) {
                 removeEditAndDeleteColumn();
+                getEventBus().publish(this, new FilterHeaderEvent<T>(FilterHeaderEnum.SHOW_MENUBAR, entityClass));
             }
         };
     }

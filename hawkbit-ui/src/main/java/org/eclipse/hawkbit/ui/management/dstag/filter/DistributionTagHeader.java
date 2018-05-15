@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.ui.management.dstag.filter;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.dstag.CreateDistributionSetTagLayout;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -19,6 +22,8 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar;
@@ -109,7 +114,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 distributionTagButtons.addDeleteColumn();
-                removeMenuBarAndAddAbortButton();
+                removeMenuBarAndAddCancelButton();
             }
         };
     }
@@ -123,15 +128,24 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 distributionTagButtons.addEditColumn();
-                removeMenuBarAndAddAbortButton();
+                removeMenuBarAndAddCancelButton();
             }
         };
     }
 
     @Override
-    protected void abortUpdateOrDeleteTag(final ClickEvent event) {
-        super.abortUpdateOrDeleteTag(event);
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+        super.cancelUpdateOrDeleteTag(event);
         distributionTagButtons.removeEditAndDeleteColumn();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    public void onEvent(final FilterHeaderEvent<DistributionSetTag> event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
+                && DistributionSetTag.class == event.getEntityType()
+                && getTypeHeaderLayout().getComponent(1).equals(getCancelTagButton())) {
+            removeCancelButtonAndAddMenuBar();
+        }
     }
 
 }

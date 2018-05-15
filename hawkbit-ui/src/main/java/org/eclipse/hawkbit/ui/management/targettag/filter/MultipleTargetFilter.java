@@ -11,9 +11,14 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettag.CreateTargetTagLayout;
@@ -23,9 +28,14 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -69,6 +79,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     private VerticalLayout targetTagTableLayout;
 
+    private Button cancelTagButton;
+
     MultipleTargetFilter(final SpPermissionChecker permChecker, final ManagementUIState managementUIState,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ManagementViewClientCriterion managementViewClientCriterion, final UINotification notification,
@@ -88,6 +100,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         this.entityFactory = entityFactory;
         this.targetTagManagement = targetTagManagement;
         buildComponents();
+        eventBus.subscribe(this);
     }
 
     /**
@@ -194,8 +207,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addDeleteColumn();
-                // TODO MR target tags
-                // removeMenuBarAndAddAbortButton(filterByButtons);
+                removeMenuBarAndAddAbortButton();
             }
         };
     }
@@ -208,9 +220,39 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addEditColumn();
-                // removeMenuBarAndAddAbortButton(filterByButtons);
+                removeMenuBarAndAddAbortButton();
             }
         };
+    }
+
+    protected void removeMenuBarAndAddAbortButton() {
+        targetTagTableLayout.removeComponent(menu);
+        targetTagTableLayout.addComponent(createCancelButtonForUpdateOrDeleteTag(), 0);
+        targetTagTableLayout.setComponentAlignment(cancelTagButton, Alignment.TOP_RIGHT);
+    }
+
+    protected Button createCancelButtonForUpdateOrDeleteTag() {
+        cancelTagButton = SPUIComponentProvider.getButton("cancelUpdateTag", "", "", null, false,
+                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
+        cancelTagButton.addClickListener(this::cancelUpdateOrDeleteTag);
+        return cancelTagButton;
+    }
+
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+        targetTagTableLayout.removeComponent(cancelTagButton);
+        targetTagTableLayout.addComponent(menu, 0);
+        targetTagTableLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
+        filterByButtons.removeEditAndDeleteColumn();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    public void onEvent(final FilterHeaderEvent<TargetTag> event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum() && TargetTag.class == event.getEntityType()
+                && targetTagTableLayout.getComponent(0).equals(cancelTagButton)) {
+            targetTagTableLayout.removeComponent(cancelTagButton);
+            targetTagTableLayout.addComponent(menu, 0);
+            targetTagTableLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
+        }
     }
 
     public TargetTagFilterButtons getFilterByButtons() {
@@ -219,10 +261,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     public VerticalLayout getTargetTagTableLayout() {
         return targetTagTableLayout;
-    }
-
-    public ConfigMenuBar getMenu() {
-        return menu;
     }
 
 }

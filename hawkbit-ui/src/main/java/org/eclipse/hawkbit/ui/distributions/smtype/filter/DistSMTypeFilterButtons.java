@@ -21,8 +21,11 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareModuleTypeLayout;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
@@ -134,6 +137,14 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
         if (isCreateOrUpdate(event) && event.getSoftwareModuleType() != null) {
             refreshTable();
         }
+        if (isUpdate(event)) {
+            getEventBus().publish(this,
+                    new FilterHeaderEvent<SoftwareModuleType>(FilterHeaderEnum.SHOW_MENUBAR, SoftwareModuleType.class));
+        }
+    }
+
+    private static boolean isUpdate(final SoftwareModuleTypeEvent event) {
+        return event.getSoftwareModuleTypeEnum() == SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE;
     }
 
     private static boolean isCreateOrUpdate(final SoftwareModuleTypeEvent event) {
@@ -151,13 +162,14 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, getEntityId(event), getCloseListenerForEditAndDeleteTag());
+                softwareModuleTypeManagement, getEntityId(event),
+                getCloseListenerForEditAndDeleteTag(SoftwareModuleType.class));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         openConfirmationWindowForDeletion(getEntityId(event),
-                getI18n().getMessage("caption.entity.software.module.type"));
+                getI18n().getMessage("caption.entity.software.module.type"), SoftwareModuleType.class);
     }
 
     @Override

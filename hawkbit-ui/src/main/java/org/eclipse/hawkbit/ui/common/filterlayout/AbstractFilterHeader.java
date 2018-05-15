@@ -57,31 +57,22 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         this.i18n = i18n;
         createComponents();
         buildLayout();
+        eventBus.subscribe(this);
     }
 
-    public void removeAbortButtonAndAddMenuBar() {
-        final HorizontalLayout layout = getTypeHeaderLayout();
-        layout.iterator().forEachRemaining(component -> {
-            if ("cancelUpdateTag".equals(component.getId())) {
-                getTypeHeaderLayout().removeComponent(cancelTagButton);
-                getTypeHeaderLayout().addComponent(getMenu(), 1);
-            }
-        });
-    }
-
-    protected void removeMenuBarAndAddAbortButton() {
+    protected void removeMenuBarAndAddCancelButton() {
         getTypeHeaderLayout().removeComponent(getMenu());
-        getTypeHeaderLayout().addComponent(createAbortButtonForUpdateOrDeleteTag(), 1);
+        getTypeHeaderLayout().addComponent(createCancelButtonForUpdateOrDeleteTag(), 1);
     }
 
-    protected Button createAbortButtonForUpdateOrDeleteTag() {
+    protected Button createCancelButtonForUpdateOrDeleteTag() {
         cancelTagButton = SPUIComponentProvider.getButton("cancelUpdateTag", "", "", null, false,
                 FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
-        cancelTagButton.addClickListener(this::abortUpdateOrDeleteTag);
+        cancelTagButton.addClickListener(this::cancelUpdateOrDeleteTag);
         return cancelTagButton;
     }
 
-    protected void abortUpdateOrDeleteTag(final ClickEvent event) {
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
         getTypeHeaderLayout().removeComponent(cancelTagButton);
         getTypeHeaderLayout().addComponent(getMenu(), 1);
     }
@@ -133,6 +124,11 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private Label createHeaderCaption() {
         return new LabelBuilder().name(getTitle()).buildCaptionLabel();
+    }
+
+    protected void removeCancelButtonAndAddMenuBar() {
+        getTypeHeaderLayout().removeComponent(getCancelTagButton());
+        getTypeHeaderLayout().addComponent(getMenu(), 1);
     }
 
     /**
@@ -192,6 +188,14 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     public HorizontalLayout getTypeHeaderLayout() {
         return typeHeaderLayout;
+    }
+
+    public Button getCancelTagButton() {
+        return cancelTagButton;
+    }
+
+    public void setCancelTagButton(final Button cancelTagButton) {
+        this.cancelTagButton = cancelTagButton;
     }
 
 }

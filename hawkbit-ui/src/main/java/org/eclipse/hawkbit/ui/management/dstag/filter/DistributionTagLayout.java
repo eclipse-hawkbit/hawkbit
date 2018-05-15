@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.ui.management.dstag.filter;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
@@ -38,7 +41,7 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
             final UINotification uiNotification, final DistributionTagButtons distributionTagButtons) {
 
         super(new DistributionTagHeader(i18n, managementUIState, permChecker, eventBus, distributionSetTagManagement,
-                entityFactory, uiNotification, distributionTagButtons), distributionTagButtons);
+                entityFactory, uiNotification, distributionTagButtons), distributionTagButtons, eventBus);
         this.managementUIState = managementUIState;
 
         restoreState();
@@ -60,6 +63,8 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagTableEvent(final DistributionSetTagTableEvent distributionSetTagTableEvent) {
         refreshContainer();
+        getEventBus().publish(this,
+                new FilterHeaderEvent<DistributionSetTag>(FilterHeaderEnum.SHOW_MENUBAR, DistributionSetTag.class));
     }
 
     @Override
@@ -70,8 +75,6 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
     @Override
     public void refreshContainer() {
         getFilterButtons().refreshTable();
-        // TODO MR use events
-        getFilterHeader().removeAbortButtonAndAddMenuBar();
     }
 
 }

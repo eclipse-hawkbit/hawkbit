@@ -153,12 +153,14 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, getEventBus(),
-                permChecker, uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag());
+                permChecker, uiNotification, getEntityId(event),
+                getCloseListenerForEditAndDeleteTag(DistributionSetTag.class));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        openConfirmationWindowForDeletion(getEntityId(event), i18n.getMessage("caption.entity.distribution.tag"));
+        openConfirmationWindowForDeletion(getEntityId(event), i18n.getMessage("caption.entity.distribution.tag"),
+                DistributionSetTag.class);
     }
 
     @Override

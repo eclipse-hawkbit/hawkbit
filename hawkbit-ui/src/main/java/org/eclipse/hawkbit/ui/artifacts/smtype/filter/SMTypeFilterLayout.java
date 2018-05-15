@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -24,7 +23,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 /**
  * Software module type filter buttons layout.
  */
-public class SMTypeFilterLayout extends AbstractFilterLayout implements RefreshableContainer {
+public class SMTypeFilterLayout extends AbstractFilterLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,12 +34,10 @@ public class SMTypeFilterLayout extends AbstractFilterLayout implements Refresha
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SMTypeFilterButtons sMTypeFilterButtons) {
         super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, entityFactory, uiNotification,
-                softwareModuleTypeManagement, sMTypeFilterButtons), sMTypeFilterButtons);
+                softwareModuleTypeManagement, sMTypeFilterButtons), sMTypeFilterButtons, eventBus);
 
         this.artifactUploadState = artifactUploadState;
         restoreState();
-
-        eventBus.subscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -56,11 +53,6 @@ public class SMTypeFilterLayout extends AbstractFilterLayout implements Refresha
     @Override
     public Boolean onLoadIsTypeFilterIsClosed() {
         return artifactUploadState.isSwTypeFilterClosed();
-    }
-
-    @Override
-    public void refreshContainer() {
-        getFilterHeader().removeAbortButtonAndAddMenuBar();
     }
 
 }

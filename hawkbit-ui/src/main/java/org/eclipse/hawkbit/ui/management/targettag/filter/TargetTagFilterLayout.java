@@ -11,7 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -30,6 +33,8 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
 
     private static final long serialVersionUID = 1L;
 
+    private final transient UIEventBus eventBus;
+
     public TargetTagFilterLayout(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,
@@ -39,6 +44,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
                 new MultipleTargetFilter(permChecker, managementUIState, i18n, eventBus, managementViewClientCriterion,
                         notification, entityFactory, targetFilterQueryManagement, targetTagManagement),
                 managementUIState);
+        this.eventBus = eventBus;
         eventBus.subscribe(this);
     }
 
@@ -55,6 +61,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
         refreshContainer();
+        eventBus.publish(this, new FilterHeaderEvent<TargetTag>(FilterHeaderEnum.SHOW_MENUBAR, TargetTag.class));
     }
 
     @Override

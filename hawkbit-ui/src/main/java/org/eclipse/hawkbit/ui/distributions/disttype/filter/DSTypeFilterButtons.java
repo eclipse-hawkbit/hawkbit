@@ -18,6 +18,8 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.disttype.UpdateDistributionSetTypeLayout;
@@ -45,7 +47,7 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 public class DSTypeFilterButtons extends AbstractFilterButtons {
 
-    private static final long serialVersionUID = 1L;;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -138,6 +140,11 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
                 || event.getDistributionSetTypeEnum() == DistributionSetTypeEvent.DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE) {
             refreshTable();
         }
+        if (event
+                .getDistributionSetTypeEnum() == DistributionSetTypeEvent.DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE) {
+            getEventBus().publish(this, new FilterHeaderEvent<DistributionSetType>(FilterHeaderEnum.SHOW_MENUBAR,
+                    DistributionSetType.class));
+        }
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -151,12 +158,13 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                getEntityId(event), getCloseListenerForEditAndDeleteTag());
+                getEntityId(event), getCloseListenerForEditAndDeleteTag(DistributionSetType.class));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        openConfirmationWindowForDeletion(getEntityId(event), getI18n().getMessage("caption.entity.distribution.type"));
+        openConfirmationWindowForDeletion(getEntityId(event), getI18n().getMessage("caption.entity.distribution.type"),
+                DistributionSetType.class);
     }
 
     @Override
