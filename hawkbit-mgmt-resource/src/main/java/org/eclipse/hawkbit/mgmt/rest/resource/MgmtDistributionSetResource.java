@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -252,14 +253,16 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament
                 .assignDistributionSet(distributionSetId, assignments.stream().map(t -> {
-                    if (t.getMaintenanceWindow() == null) {
+                    final MgmtMaintenanceWindowRequestBody maintenanceWindow = t.getMaintenanceWindow();
+
+                    if (maintenanceWindow == null) {
                         return new TargetWithActionType(t.getId(), MgmtRestModelMapper.convertActionType(t.getType()),
                                 t.getForcetime());
                     }
 
-                    final String cronSchedule = t.getMaintenanceWindow().getMaintenanceSchedule();
-                    final String duration = t.getMaintenanceWindow().getMaintenanceWindowDuration();
-                    final String timezone = t.getMaintenanceWindow().getMaintenanceWindowTimeZone();
+                    final String cronSchedule = maintenanceWindow.getSchedule();
+                    final String duration = maintenanceWindow.getDuration();
+                    final String timezone = maintenanceWindow.getTimezone();
 
                     MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
 

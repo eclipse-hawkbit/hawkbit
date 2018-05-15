@@ -225,7 +225,7 @@ public abstract class AbstractIntegrationTest {
         }
     };
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String controllerId) {
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
         return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
                 new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
     }
@@ -253,16 +253,24 @@ public abstract class AbstractIntegrationTest {
      *            start time of a maintenance window calculated based on the
      *            cron expression is relative to this time zone
      *
-     * @return result of the assignment as
-     *         {@link DistributionSetAssignmentResult}.
+     * @return result of the assignment as { @link
+     *         DistributionSetAssignmentResult}.
      */
-    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final Long dsID,
-            final String controllerId, final String maintenanceSchedule, final String maintenanceWindowDuration,
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
+            final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
         return deploymentManagement.assignDistributionSet(dsID,
                 Arrays.asList(new TargetWithActionType(controllerId, ActionType.FORCED,
-                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceSchedule, maintenanceWindowDuration,
+                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceWindowSchedule, maintenanceWindowDuration,
                         maintenanceWindowTimeZone)));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindowTimeForced(final long dsID,
+            final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Arrays.asList(new TargetWithActionType(controllerId, ActionType.TIMEFORCED, System.currentTimeMillis(),
+                        maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
@@ -275,11 +283,17 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(pset, Arrays.asList(target));
     }
 
-    protected DistributionSetMetadata createDistributionSetMetadata(final Long dsId, final MetaData md) {
+    protected DistributionSetAssignmentResult assignDistributionSetTimeForced(final DistributionSet pset,
+            final Target target) {
+        return deploymentManagement.assignDistributionSet(pset.getId(), Arrays.asList(
+                new TargetWithActionType(target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis())));
+    }
+
+    protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
         return createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
     }
 
-    protected List<DistributionSetMetadata> createDistributionSetMetadata(final Long dsId, final List<MetaData> md) {
+    protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
         return distributionSetManagement.createMetaData(dsId, md);
     }
 
@@ -378,28 +392,35 @@ public abstract class AbstractIntegrationTest {
      *
      * @return {@link String} containing a valid cron expression.
      */
-    public static String getTestSchedule(final int minutesToAdd) {
+    protected static String getTestSchedule(final int minutesToAdd) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(minutesToAdd);
         return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
                 currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
     }
 
-    public static String getTestDuration(final int duration) {
+    protected static String getTestDuration(final int duration) {
         return String.format("%02d:%02d:00", duration / 60, duration % 60);
     }
 
-    public static String getTestTimeZone() {
+    protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
     }
 
-    public static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
+    protected static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
             final String timezone) {
         final Map<String, String> maintenanceWindowMap = new HashMap<>();
         maintenanceWindowMap.put("schedule", schedule);
         maintenanceWindowMap.put("duration", duration);
         maintenanceWindowMap.put("timezone", timezone);
+        return maintenanceWindowMap;
+    }
+
+    protected static Map<String, String> getMaintenanceWindowWithNextStart(final String schedule, final String duration,
+            final String timezone, final long nextStartAt) {
+        final Map<String, String> maintenanceWindowMap = getMaintenanceWindow(schedule, duration, timezone);
+        maintenanceWindowMap.put("nextStartAt", String.valueOf(nextStartAt));
         return maintenanceWindowMap;
     }
 }

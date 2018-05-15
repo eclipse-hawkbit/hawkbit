@@ -84,7 +84,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Text field to specify the schedule.
      */
     private void createMaintenanceScheduleControl() {
-        schedule = new TextFieldBuilder(Action.MAINTENANCE_SCHEDULE_CRON_LENGTH)
+        schedule = new TextFieldBuilder(Action.MAINTENANCE_WINDOW_SCHEDULE_LENGTH)
                 .id(UIComponentIdProvider.MAINTENANCE_WINDOW_SCHEDULE_ID)
                 .caption(i18n.getMessage("caption.maintenancewindow.schedule")).validator(new CronValidator())
                 .prompt("0 0 3 ? * 6").required(true, i18n).buildTextComponent();
@@ -259,6 +259,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         schedule.setValue("");
         duration.setValue("");
         timeZone.setValue(getClientTimeZone());
+        scheduleTranslator.setValue(i18n.getMessage(CRON_VALIDATION_ERROR));
     }
 
     /**

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,7 +20,7 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * Maximum length of controllerId.
      */
-    int MAINTENANCE_SCHEDULE_CRON_LENGTH = 128;
+    int MAINTENANCE_WINDOW_SCHEDULE_LENGTH = 128;
 
     /**
      * Maximum length of controllerId.
@@ -80,6 +82,21 @@ public interface Action extends TenantAwareBaseEntity {
      * @return rollout related to this {@link Action}.
      */
     Rollout getRollout();
+
+    /**
+     * @return maintenance window schedule related to this {@link Action}.
+     */
+    String getMaintenanceWindowSchedule();
+
+    /**
+     * @return maintenance window duration related to this {@link Action}.
+     */
+    String getMaintenanceWindowDuration();
+
+    /**
+     * @return maintenance window time zone related to this {@link Action}.
+     */
+    String getMaintenanceWindowTimeZone();
 
     /**
      * checks if the {@link #getForcedTime()} is hit by the given
@@ -214,6 +231,15 @@ public interface Action extends TenantAwareBaseEntity {
          */
         TIMEFORCED;
     }
+
+    /**
+     * Returns the start time of next available maintenance window for the
+     * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * already active, the start time of currently active window is returned.
+     *
+     * @return the start time as { @link Optional<ZonedDateTime>}.
+     */
+    Optional<ZonedDateTime> getMaintenanceWindowStartTime();
 
     /**
      * The method checks whether the action has a maintenance schedule defined
