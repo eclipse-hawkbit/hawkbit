@@ -1,0 +1,694 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[targets]]
+= Targets
+
+toc::[]
+
+
+== GET /rest/v1/targets 
+
+=== Implementation notes
+
+Handles the GET request of retrieving all targets within SP. Required permission: READ_TARGET
+
+=== Get paged list of targets
+
+==== CURL
+
+include::{snippets}/targets/get-targets/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access the targets
+
+include::{snippets}/targets/get-targets/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/get-targets-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targets/get-targets-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targets/get-targets/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/targets/get-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targets 
+
+=== Implementation Notes
+
+Handles the POST request of creating new targets within SP. The request body must always be a list of targets. Required Permission: CREATE_TARGET
+
+=== Create list of targets 
+
+==== CURL
+
+include::{snippets}/targets/post-targets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/post-targets/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/post-targets/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/targets/post-targets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/post-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403_quota.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targets/{targetId} 
+
+=== Implementation Notes
+
+Handles the DELETE request of deleting a single target within SP. Required Permission: DELETE_TARGET
+
+=== Deleting a target
+
+==== CURL
+
+include::{snippets}/targets/delete-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/delete-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/delete-target/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targets/delete-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a single target within SP. Required Permission: READ_TARGET
+
+=== Get single target
+
+==== CURL
+
+include::{snippets}/targets/get-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-target/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/get-target/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/targets/{targetId}
+
+=== Implementation Notes
+
+Handles the PUT request of updating a target within SP. Required Permission: UPDATE_TARGET
+
+=== Update a target
+
+==== Curl
+
+include::{snippets}/targets/put-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/put-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/put-target/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/put-target/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/put-target/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/put-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/actions
+
+=== Implementation Notes
+
+Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET
+
+=== List all actions of Target
+
+==== Curl
+
+include::{snippets}/targets/get-actions-from-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-actions-from-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-actions-from-target/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/get-actions-from-target-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targets/get-actions-from-target-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/get-actions-from-target-with-maintenance-window/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-actions-from-target/http-response.adoc[]
+
+==== Response example with Maintenance Window
+
+include::{snippets}/targets/get-actions-from-target-with-maintenance-window/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/targets/{targetId}/actions/{actionId}
+
+=== Implementation Notes
+
+Handles the PUT request to switch an action from soft to forced. Required Permission: UPDATE_TARGET.
+
+=== Update a target
+
+==== Curl
+
+include::{snippets}/targets/switch-action-to-forced/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/switch-action-to-forced/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/switch-action-to-forced/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/switch-action-to-forced/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/switch-action-to-forced/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/switch-action-to-forced/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== DELETE /rest/v1/targets/{targetId}/actions/{actionId}
+
+=== Implementation Notes
+
+Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET
+
+=== Canceling an active action
+
+==== Curl
+
+include::{snippets}/targets/delete-action-from-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/delete-action-from-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/delete-action-from-target/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/delete-actions-from-target-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targets/delete-actions-from-target-with-parameters/http-request.adoc[]
+
+=== Response (Status 204)
+
+==== Response example
+
+include::{snippets}/targets/delete-action-from-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/actions/{actionId}
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET
+
+=== Get assigned action of target
+
+==== Curl
+
+include::{snippets}/targets/get-action-from-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-action-from-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-action-from-target/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targets/get-action-from-target-with-maintenance-window/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-action-from-target/http-response.adoc[]
+
+==== Response example with Maintenance Window
+
+include::{snippets}/targets/get-action-from-target-with-maintenance-window/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/actions/{actionId}/status
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET
+
+=== Get statuses of  assigned action
+
+==== Curl
+
+include::{snippets}/targets/get-status-from-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-status-from-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-status-from-action/path-parameters.adoc[]
+
+==== Request parameter
+
+include::{snippets}/targets/get-status-from-action-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targets/get-status-from-action-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targets/get-status-from-action/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-status-from-action/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/assignedDS
+
+=== Implementation Notes
+
+Handles the GET request of retrieving the assigned distribution set of an specific target. Required Permission: READ_TARGET
+
+=== Get assigned distribution set of target
+
+==== Curl
+
+include::{snippets}/targets/get-assigned-distribution-set-from-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-assigned-distribution-set-from-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-assigned-distribution-set-from-action/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targets/get-assigned-distribution-set-from-action/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-assigned-distribution-set-from-action/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targets/{targetId}/assignedDS
+
+=== Implementation Notes
+
+Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET
+
+=== Asssin distribution set to target
+
+==== Curl
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/curl-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/request-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/request-fields.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response example 
+
+include::{snippets}/targets/post-assign-distribution-set-to-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/attributes
+
+=== Implementation Notes
+
+Handles the GET request of retrieving the attributes of a specific target. Reponse is a key/value list. Required Permission: READ_TARGET
+
+=== Get attributes of target
+
+==== Curl
+
+include::{snippets}/targets/get-controller-attributes/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-controller-attributes/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-controller-attributes/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targets/get-controller-attributes/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/installedDS 
+
+=== Implementation Notes
+
+Handles the GET request of retrieving the installed distribution set of an specific target. Required Permission: READ_TARGET
+
+=== Get installed distribution set of target
+
+==== Curl
+
+include::{snippets}/targets/get-installed-distribution-set-from-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-installed-distribution-set-from-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-installed-distribution-set-from-target/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targets/get-installed-distribution-set-from-target/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-installed-distribution-set-from-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+
+

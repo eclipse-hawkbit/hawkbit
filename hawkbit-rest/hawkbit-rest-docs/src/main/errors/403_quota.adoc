@@ -1,0 +1,3 @@
+| `403 Forbidden`
+| Insufficient permissions, data volume restriction applies or quota limit exceeded.
+| See <<error-body>>

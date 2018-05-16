@@ -1,0 +1,3 @@
+| `403 Forbidden`
+| Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.
+| See <<error-body>>

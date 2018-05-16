@@ -1,0 +1,255 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[software-module-types]]
+= Software Module Types
+
+toc::[]
+
+== GET /rest/v1/softwaremoduletypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving all software module types within SP. Required Permission: READ_REPOSITORY
+
+=== Get software module types
+
+==== CURL
+
+include::{snippets}/softwaremoduletypes/get-software-module-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremoduletypes/get-software-module-types/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/softwaremoduletypes/get-software-module-types-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/softwaremoduletypes/get-software-module-types-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremoduletypes/get-software-module-types/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremoduletypes/get-software-module-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/softwaremoduletypes
+
+=== Implementation notes
+
+Handles the POST request of creating new software module types within SP. The request body must always be a list of module types. Required Permission: CREATE_REPOSITORY
+
+=== Creating software module types
+
+==== CURL
+
+include::{snippets}/softwaremoduletypes/post-software-module-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremoduletypes/post-software-module-types/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremoduletypes/post-software-module-types/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/softwaremoduletypes/post-software-module-types/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremoduletypes/post-software-module-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module Type.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/softwaremoduletypes/{softwareModuleTypeId}
+
+=== Implementation Notes
+
+Handles the DELETE request for a single software module type within SP. Required Permission: DELETE_REPOSITORY
+
+=== Delete software module type
+
+==== CURL
+
+include::{snippets}/softwaremoduletypes/delete-software-module-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremoduletypes/delete-software-module-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremoduletypes/delete-software-module-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/softwaremoduletypes/delete-software-module-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremoduletypes/{softwareModuleTypeId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single software module type within SP. Required Permission: READ_REPOSITORY
+
+=== Accessing a software module type
+
+==== CURL
+
+include::{snippets}/softwaremoduletypes/get-software-module-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremoduletypes/get-software-module-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremoduletypes/get-software-module-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremoduletypes/get-software-module-type/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremoduletypes/get-software-module-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/softwaremoduletypes/{softwareModuleTypeId} 
+
+=== Implementation notes
+
+Handles the PUT request for a single software module type within SP. Required Permission: UPDATE_REPOSITORY
+
+=== Updating a software module types
+
+==== CURL
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremoduletypes/put-software-module-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module Type.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+
