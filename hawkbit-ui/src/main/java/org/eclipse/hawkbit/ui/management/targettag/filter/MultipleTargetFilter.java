@@ -103,9 +103,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         eventBus.subscribe(this);
     }
 
-    /**
-     * Intialize component.
-     */
     private void buildComponents() {
         filterByStatusFooter.init();
 
@@ -122,9 +119,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         addSelectedTabChangeListener(this);
     }
 
-    /**
-     *
-     */
     private void switchToTabSelectedOnLoad() {
         if (managementUIState.isCustomFilterSelected()) {
             this.setSelectedTab(targetFilterQueryButtonsTab);
@@ -133,9 +127,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         }
     }
 
-    /**
-     * Add tabs.
-     */
     private void addTabs() {
         this.addTab(getSimpleFilterTab()).setId(UIComponentIdProvider.SIMPLE_FILTER_ACCORDION_TAB);
         this.addTab(getComplexFilterTab()).setId(UIComponentIdProvider.CUSTOM_FILTER_ACCORDION_TAB);
@@ -168,13 +159,6 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         return targetFilterQueryButtonsTab;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.vaadin.ui.TabSheet.SelectedTabChangeListener#selectedTabChange(com
-     * .vaadin.ui.TabSheet.SelectedTabChangeEvent)
-     */
     @Override
     public void selectedTabChange(final SelectedTabChangeEvent event) {
         if (i18n.getMessage("caption.filter.simple").equals(getSelectedTab().getCaption())) {
@@ -207,7 +191,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addDeleteColumn();
-                removeMenuBarAndAddAbortButton();
+                eventBus.publish(this,
+                        new FilterHeaderEvent<TargetTag>(FilterHeaderEnum.SHOW_CANCEL_BUTTON, TargetTag.class));
             }
         };
     }
@@ -220,12 +205,22 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterByButtons.addEditColumn();
-                removeMenuBarAndAddAbortButton();
+                eventBus.publish(this,
+                        new FilterHeaderEvent<TargetTag>(FilterHeaderEnum.SHOW_CANCEL_BUTTON, TargetTag.class));
             }
         };
     }
 
-    protected void removeMenuBarAndAddAbortButton() {
+    protected <T> void processFilterHeaderEvent(final FilterHeaderEvent<T> event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
+                && targetTagTableLayout.getComponent(0).equals(cancelTagButton)) {
+            removeCancelButtonAndAddMenuBar();
+        } else if (FilterHeaderEnum.SHOW_CANCEL_BUTTON == event.getFilterHeaderEnum()) {
+            removeMenuBarAndAddCancelButton();
+        }
+    }
+
+    protected void removeMenuBarAndAddCancelButton() {
         targetTagTableLayout.removeComponent(menu);
         targetTagTableLayout.addComponent(createCancelButtonForUpdateOrDeleteTag(), 0);
         targetTagTableLayout.setComponentAlignment(cancelTagButton, Alignment.TOP_RIGHT);
@@ -238,20 +233,21 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         return cancelTagButton;
     }
 
-    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+    protected void removeCancelButtonAndAddMenuBar() {
         targetTagTableLayout.removeComponent(cancelTagButton);
         targetTagTableLayout.addComponent(menu, 0);
         targetTagTableLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
         filterByButtons.removeEditAndDeleteColumn();
     }
 
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+        removeCancelButtonAndAddMenuBar();
+    }
+
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final FilterHeaderEvent<TargetTag> event) {
-        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum() && TargetTag.class == event.getEntityType()
-                && targetTagTableLayout.getComponent(0).equals(cancelTagButton)) {
-            targetTagTableLayout.removeComponent(cancelTagButton);
-            targetTagTableLayout.addComponent(menu, 0);
-            targetTagTableLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
+    private void onEvent(final FilterHeaderEvent<TargetTag> event) {
+        if (TargetTag.class == event.getEntityType()) {
+            processFilterHeaderEvent(event);
         }
     }
 

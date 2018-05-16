@@ -114,7 +114,8 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterButtons.addDeleteColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<SoftwareModuleType>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, SoftwareModuleType.class));
             }
         };
     }
@@ -128,7 +129,8 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 filterButtons.addEditColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<SoftwareModuleType>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, SoftwareModuleType.class));
             }
         };
     }
@@ -140,10 +142,9 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final FilterHeaderEvent<SoftwareModuleType> event) {
-        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
-                && SoftwareModuleType.class == event.getEntityType()) {
-            removeCancelButtonAndAddMenuBar();
+    private void onEvent(final FilterHeaderEvent<SoftwareModuleType> event) {
+        if (SoftwareModuleType.class == event.getEntityType()) {
+            processFilterHeaderEvent(event);
         }
     }
 

@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
@@ -65,7 +67,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         getTypeHeaderLayout().addComponent(createCancelButtonForUpdateOrDeleteTag(), 1);
     }
 
-    protected Button createCancelButtonForUpdateOrDeleteTag() {
+    private Button createCancelButtonForUpdateOrDeleteTag() {
         cancelTagButton = SPUIComponentProvider.getButton("cancelUpdateTag", "", "", null, false,
                 FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
         cancelTagButton.addClickListener(this::cancelUpdateOrDeleteTag);
@@ -73,8 +75,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     }
 
     protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
-        getTypeHeaderLayout().removeComponent(cancelTagButton);
-        getTypeHeaderLayout().addComponent(getMenu(), 1);
+        removeCancelButtonAndAddMenuBar();
     }
 
     /**
@@ -94,6 +95,15 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
                 event -> hideFilterButtonLayout());
 
+    }
+
+    protected <T> void processFilterHeaderEvent(final FilterHeaderEvent<T> event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
+                && getTypeHeaderLayout().getComponent(1).equals(getCancelTagButton())) {
+            removeCancelButtonAndAddMenuBar();
+        } else if (FilterHeaderEnum.SHOW_CANCEL_BUTTON == event.getFilterHeaderEnum()) {
+            removeMenuBarAndAddCancelButton();
+        }
     }
 
     protected abstract Command getDeleteButtonCommand();

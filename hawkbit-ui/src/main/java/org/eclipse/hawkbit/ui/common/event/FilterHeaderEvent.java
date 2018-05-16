@@ -21,7 +21,7 @@ public class FilterHeaderEvent<T> {
      * FilterHeaderEvent type
      */
     public enum FilterHeaderEnum {
-        SHOW_MENUBAR
+        SHOW_MENUBAR, SHOW_CANCEL_BUTTON
     }
 
     private final FilterHeaderEnum filterHeaderEnum;

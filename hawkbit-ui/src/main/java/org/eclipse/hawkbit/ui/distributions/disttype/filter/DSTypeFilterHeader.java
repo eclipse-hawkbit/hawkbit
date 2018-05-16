@@ -121,7 +121,8 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addDeleteColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetType>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetType.class));
             }
         };
     }
@@ -135,7 +136,8 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 dSTypeFilterButtons.addEditColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetType>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetType.class));
             }
         };
     }
@@ -147,10 +149,9 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final FilterHeaderEvent<DistributionSetType> event) {
-        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
-                && DistributionSetType.class == event.getEntityType()) {
-            removeCancelButtonAndAddMenuBar();
+    private void onEvent(final FilterHeaderEvent<DistributionSetType> event) {
+        if (DistributionSetType.class == event.getEntityType()) {
+            processFilterHeaderEvent(event);
         }
     }
 

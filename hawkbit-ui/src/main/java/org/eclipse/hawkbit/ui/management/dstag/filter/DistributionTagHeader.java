@@ -114,7 +114,8 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 distributionTagButtons.addDeleteColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetTag>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetTag.class));
             }
         };
     }
@@ -128,7 +129,8 @@ public class DistributionTagHeader extends AbstractFilterHeader {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 distributionTagButtons.addEditColumn();
-                removeMenuBarAndAddCancelButton();
+                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetTag>(
+                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetTag.class));
             }
         };
     }
@@ -140,11 +142,9 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    public void onEvent(final FilterHeaderEvent<DistributionSetTag> event) {
-        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
-                && DistributionSetTag.class == event.getEntityType()
-                && getTypeHeaderLayout().getComponent(1).equals(getCancelTagButton())) {
-            removeCancelButtonAndAddMenuBar();
+    private void onEvent(final FilterHeaderEvent<DistributionSetTag> event) {
+        if (DistributionSetTag.class == event.getEntityType()) {
+            processFilterHeaderEvent(event);
         }
     }
 
