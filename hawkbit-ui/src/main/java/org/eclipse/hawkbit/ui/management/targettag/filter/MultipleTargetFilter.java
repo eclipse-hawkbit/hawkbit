@@ -240,6 +240,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         filterByButtons.removeEditAndDeleteColumn();
     }
 
+    @SuppressWarnings("squid:S1172")
     protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
         removeCancelButtonAndAddMenuBar();
     }

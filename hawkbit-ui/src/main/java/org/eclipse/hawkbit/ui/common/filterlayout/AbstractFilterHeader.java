@@ -74,6 +74,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         return cancelTagButton;
     }
 
+    @SuppressWarnings("squid:S1172")
     protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
         removeCancelButtonAndAddMenuBar();
     }
