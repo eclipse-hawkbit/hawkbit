@@ -1,13 +1,12 @@
-version: '2'
+version: '3'
 
 services:
 
   # ---------------------
-  # The rabbitMQ service
+  # RabbitMQ service
   # ---------------------
   rabbitmq:
     image: "rabbitmq:3-management"
-    hostname: "rabbitmq"
     environment:
       RABBITMQ_DEFAULT_VHOST: "/"
     restart: always
@@ -16,13 +15,12 @@ services:
       - "5672:5672"
     labels:
       NAME: "rabbitmq"
-      
+
   # ---------------------
-  # The mysql service    
+  # MySQL service
   # ---------------------
   mysql:
     image: "mysql:5.7"
-    hostname: "mysql"
     environment:
       MYSQL_DATABASE: "hawkbit"
       MYSQL_USER: "root"
@@ -32,16 +30,12 @@ services:
       - "3306:3306"
     labels:
       NAME: "mysql"
-  
+
   # ---------------------
-  # The hawkbit service
+  # HawkBit service
   # ---------------------
   hawkbit:
-    image: "hawkbit/hawkbit-update-server:0.2.0M4-mysql"
-    hostname: "hawkbit"
-    links:
-        - mysql
-        - rabbitmq
+    image: "hawkbit/hawkbit-update-server:0.2.0M9-mysql"
     environment:
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
@@ -53,21 +47,3 @@ services:
       - "8080:8080"
     labels:
       NAME: "hawkbit"
-
-  # ---------------------
-  # The hawkbit-simulator service
-  # ---------------------
-  hawkbit-simulator:
-    image: "hawkbit/hawkbit-device-simulator:latest"
-    hostname: "hawkbit-device-simulator"
-    links:
-        - hawkbit
-        - rabbitmq    
-    environment:
-      - 'SPRING_RABBITMQ_HOST=rabbitmq'
-      - 'SERVER_SESSION_COOKIE_NAME=hawkbitsimu'
-    restart: always
-    ports:
-      - "8083:8083"
-    labels:
-      NAME: "hawkbit-device-simulator"

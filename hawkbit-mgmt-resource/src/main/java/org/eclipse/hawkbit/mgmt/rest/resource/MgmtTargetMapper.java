@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
@@ -192,6 +193,16 @@ public final class MgmtTargetMapper {
             result.setStatus(MgmtAction.ACTION_PENDING);
         } else {
             result.setStatus(MgmtAction.ACTION_FINISHED);
+        }
+
+        if (action.hasMaintenanceSchedule()) {
+            final MgmtMaintenanceWindow maintenanceWindow = new MgmtMaintenanceWindow();
+            maintenanceWindow.setSchedule(action.getMaintenanceWindowSchedule());
+            maintenanceWindow.setDuration(action.getMaintenanceWindowDuration());
+            maintenanceWindow.setTimezone(action.getMaintenanceWindowTimeZone());
+            action.getMaintenanceWindowStartTime()
+                    .ifPresent(nextStart -> maintenanceWindow.setNextStartAt(nextStart.toInstant().toEpochMilli()));
+            result.setMaintenanceWindow(maintenanceWindow);
         }
 
         MgmtRestModelMapper.mapBaseToBase(result, action);

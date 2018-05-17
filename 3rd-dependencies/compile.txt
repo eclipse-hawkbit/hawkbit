@@ -1,6 +1,7 @@
    aopalliance:aopalliance:jar:1.0:compile
    ch.qos.logback:logback-classic:jar:1.1.11:compile
    ch.qos.logback:logback-core:jar:1.1.11:compile
+   com.cronutils:cron-utils:jar:5.0.5:compile
    com.fasterxml.jackson.core:jackson-annotations:jar:2.8.9:compile
    com.fasterxml.jackson.core:jackson-core:jar:2.8.9:compile
    com.fasterxml.jackson.core:jackson-databind:jar:2.8.9:compile
@@ -9,23 +10,23 @@
    com.github.gwtd3:gwt-d3-api:jar:1.2.0:compile
    com.github.gwtd3:gwt-d3-js:jar:3.5.11:compile
    com.github.gwtd3:gwt-d3-js:jar:sources:3.5.11:compile
-   com.google.guava:guava:jar:19.0:compile
+   com.google.guava:guava:jar:25.0-jre:compile
    com.h2database:h2:jar:1.4.195:compile
    com.rabbitmq:amqp-client:jar:4.0.3:compile
-   com.rabbitmq:http-client:jar:1.1.1.RELEASE:compile
+   com.rabbitmq:http-client:jar:1.3.1.RELEASE:compile
    com.vaadin.external.atmosphere:atmosphere-runtime:jar:2.2.9.vaadin2:compile
    com.vaadin.external.flute:flute:jar:1.3.0.gg2:compile
-   com.vaadin.external.gwt:gwt-elemental:jar:2.7.0.vaadin5:compile
-   com.vaadin.external.gwt:gwt-user:jar:2.7.0.vaadin5:compile
+   com.vaadin.external.gwt:gwt-elemental:jar:2.7.0.vaadin6:compile
+   com.vaadin.external.gwt:gwt-user:jar:2.7.0.vaadin6:compile
    com.vaadin.external.slf4j:vaadin-slf4j-jdk14:jar:1.6.1:compile
-   com.vaadin:vaadin-client:jar:7.7.9:compile
-   com.vaadin:vaadin-push:jar:7.7.9:compile
+   com.vaadin:vaadin-client:jar:7.7.13:compile
+   com.vaadin:vaadin-push:jar:7.7.13:compile
    com.vaadin:vaadin-sass-compiler:jar:0.9.13:compile
-   com.vaadin:vaadin-server:jar:7.7.9:compile
-   com.vaadin:vaadin-shared:jar:7.7.9:compile
+   com.vaadin:vaadin-server:jar:7.7.13:compile
+   com.vaadin:vaadin-shared:jar:7.7.13:compile
    com.vaadin:vaadin-spring-boot:jar:1.1.1:compile
    com.vaadin:vaadin-spring:jar:1.1.1:compile
-   com.vaadin:vaadin-themes:jar:7.7.9:compile
+   com.vaadin:vaadin-themes:jar:7.7.13:compile
    commons-codec:commons-codec:jar:1.10:compile
    commons-io:commons-io:jar:2.4:compile
    cz.jirutka.rsql:rsql-parser:jar:2.1.0:compile
@@ -59,8 +60,8 @@
    org.slf4j:jul-to-slf4j:jar:1.7.25:compile
    org.slf4j:log4j-over-slf4j:jar:1.7.25:compile
    org.slf4j:slf4j-api:jar:1.7.25:compile
-   org.springframework.amqp:spring-amqp:jar:1.7.4.RELEASE:compile
-   org.springframework.amqp:spring-rabbit:jar:1.7.4.RELEASE:compile
+   org.springframework.amqp:spring-amqp:jar:1.7.6.RELEASE:compile
+   org.springframework.amqp:spring-rabbit:jar:1.7.6.RELEASE:compile
    org.springframework.boot:spring-boot-actuator:jar:1.4.7.RELEASE:compile
    org.springframework.boot:spring-boot-autoconfigure:jar:1.4.7.RELEASE:compile
    org.springframework.boot:spring-boot-starter-actuator:jar:1.4.7.RELEASE:compile

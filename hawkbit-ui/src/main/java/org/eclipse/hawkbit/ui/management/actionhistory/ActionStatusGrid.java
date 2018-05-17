@@ -36,7 +36,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String[] centerAlignedColumns = new String[] { ProxyActionStatus.PXY_AS_STATUS };
 
     private final AlignCellStyleGenerator alignGenerator;
-    private final ModifiedTimeTooltipGenerator modTimetooltipGenerator;
+    private final TooltipGenerator tooltipGenerator;
 
     private final Map<Action.Status, StatusFontIcon> states;
 
@@ -58,7 +58,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
         final LabelConfig conf = new ActionHistoryGrid.LabelConfig();
         states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_STATUS_GRID_STATUS_LABEL_ID);
         alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, null);
-        modTimetooltipGenerator = new ModifiedTimeTooltipGenerator(ProxyActionStatus.PXY_AS_CREATED_AT);
+        tooltipGenerator = new TooltipGenerator(i18n);
 
         init();
     }
@@ -153,7 +153,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return modTimetooltipGenerator;
+        return tooltipGenerator;
     }
 
 }

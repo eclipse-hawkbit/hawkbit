@@ -155,6 +155,8 @@
       <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
       <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
       <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
+      <!-- Java 9 support -->
+      <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>5.0.5</cron-utils.version>
@@ -162,10 +164,10 @@
       <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
-      <org.powermock.version>1.6.5</org.powermock.version>
-      <gwtmockito.version>1.1.6</gwtmockito.version>
+      <gwtmockito.version>1.1.8</gwtmockito.version>
+      <powermock.version>1.6.5</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
-      <guava.version>19.0</guava.version>
+      <guava.version>25.0-jre</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
       <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <embedded-mongo.version>1.50.5</embedded-mongo.version>
@@ -201,7 +203,7 @@
       <!-- Sonar - END -->
       
       <!-- ************************ -->
-      <!-- Maven Surefire settings -->
+      <!-- Maven Surefire settings  -->
       <!-- ************************ -->
       <surefire.forkcount>1</surefire.forkcount>
    </properties>
@@ -447,6 +449,30 @@
       </pluginManagement>
    </build>
    <profiles>
+    <profile>
+        <id>java-9</id>
+        <activation>
+            <jdk>9</jdk>
+        </activation>
+        <build>
+            <pluginManagement>
+                <plugins>
+                   <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>${maven.compiler.plugin.version}</version>
+                   </plugin>  
+                   <plugin>    
+                       <artifactId>maven-surefire-plugin</artifactId>
+                       <configuration>
+                           <argLine>
+                               --illegal-access=warn --add-modules=java.xml.bind
+                           </argLine>
+                       </configuration>
+                   </plugin>
+                </plugins>
+            </pluginManagement>
+        </build>
+    </profile>
       <profile>
          <id>nexus_staging</id>
          <activation>
@@ -769,21 +795,21 @@
             <scope>test</scope>
          </dependency>
          <dependency>
+            <groupId>com.google.gwt.gwtmockito</groupId>
+            <artifactId>gwtmockito</artifactId>
+            <version>${gwtmockito.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>${org.powermock.version}</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>${org.powermock.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>com.google.gwt.gwtmockito</groupId>
-            <artifactId>gwtmockito</artifactId>
-            <version>${gwtmockito.version}</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -812,6 +838,33 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+            <!-- https://github.com/google/guava/issues/2824 -->
+            <exclusions>
+               <exclusion>
+                  <groupId>com.google.j2objc</groupId>
+                  <artifactId>j2objc-annotations</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.google.code.findbugs</groupId>
+                  <artifactId>jsr305</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.checkerframework</groupId>
+                  <artifactId>checker-compat-qual</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.google.errorprone</groupId>
+                  <artifactId>error_prone_annotations</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.google.j2objc</groupId>
+                  <artifactId>j2objc-annotations</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>animal-sniffer-annotations</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
          <dependency>
             <groupId>com.jayway.awaitility</groupId>

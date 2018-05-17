@@ -465,6 +465,8 @@ public final class SPUIDefinitions {
      */
     public static final String SP_BUTTON_STATUS_STYLE = "targetStatusBtn";
 
+    public static final String ACTION_HIS_TBL_MAINTENANCE_WINDOW = "Maintenance Window";
+
     /**
      * id for delete icon in entity table
      */

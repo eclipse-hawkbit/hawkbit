@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -59,6 +60,17 @@ public class MgmtAction extends MgmtBaseEntity {
     @JsonProperty
     private MgmtActionType forceType;
 
+    @JsonProperty
+    private MgmtMaintenanceWindow maintenanceWindow;
+
+    public MgmtMaintenanceWindow getMaintenanceWindow() {
+        return maintenanceWindow;
+    }
+
+    public void setMaintenanceWindow(final MgmtMaintenanceWindow maintenanceWindow) {
+        this.maintenanceWindow = maintenanceWindow;
+    }
+
     public Long getForceTime() {
         return forceTime;
     }
@@ -75,47 +87,26 @@ public class MgmtAction extends MgmtBaseEntity {
         this.forceType = forceType;
     }
 
-    /**
-     * @return the status
-     */
     public String getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final String status) {
         this.status = status;
     }
 
-    /**
-     * @return the actionId
-     */
     public Long getActionId() {
         return actionId;
     }
 
-    /**
-     * @param actionId
-     *            the actionId to set
-     */
     public void setActionId(final Long actionId) {
         this.actionId = actionId;
     }
 
-    /**
-     * @return the type
-     */
     public String getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final String type) {
         this.type = type;
     }
