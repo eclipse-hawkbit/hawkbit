@@ -49,7 +49,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractFilterButtons extends Table {
 
-    private static final long serialVersionUID = 1L;;
+    private static final long serialVersionUID = 1L;
 
     protected static final String DEFAULT_GREEN = "rgb(44,151,32)";
 
@@ -80,8 +80,8 @@ public abstract class AbstractFilterButtons extends Table {
         addColumn();
         setTableVisibleColumns();
         setDragMode(TableDragMode.NONE);
-        setSelectable(false);
         setSizeFull();
+        setSelectable(false);
     }
 
     private void setStyle() {
