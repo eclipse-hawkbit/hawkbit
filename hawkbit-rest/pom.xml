@@ -19,6 +19,10 @@
    <artifactId>hawkbit-rest-parent</artifactId>
    <name>hawkBit :: RESTful APIs</name>
    <packaging>pom</packaging>
+   
+   <properties>
+      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
+   </properties>
 
    <modules>
       <module>hawkbit-rest-core</module>

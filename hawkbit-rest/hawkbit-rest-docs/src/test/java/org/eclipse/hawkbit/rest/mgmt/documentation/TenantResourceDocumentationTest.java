@@ -144,7 +144,7 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("keyName").description(MgmtApiModelProperties.CONFIG_PARAM))));
     }
 
-    private FieldDescriptor[] getTenantConfigurationValuesKeyResponseFields() throws Exception {
+    private FieldDescriptor[] getTenantConfigurationValuesKeyResponseFields() {
         final List<FieldDescriptor> fields = new ArrayList<>();
         for (final TenantConfigurationKey key : tenantConfigurationProperties.getConfigurationKeys()) {
             fields.add(fieldWithPath("['" + key.getKeyName() + "']").type(key.getDataType().getSimpleName())
@@ -165,9 +165,9 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                 fieldWithPath("_links.self").ignored() };
     }
 
-    private String getTenantConfigurationKeyDescription(final TenantConfigurationKey key) throws Exception {
+    private String getTenantConfigurationKeyDescription(final TenantConfigurationKey key) {
         if (!CONFIG_ITEM_DESCRIPTIONS.containsKey(key.getKeyName())) {
-            throw new Exception("Description for key " + key.getKeyName() + " is missing.");
+            throw new IllegalArgumentException("Description for key " + key.getKeyName() + " is missing.");
         }
 
         return "The configuration key '" + key.getKeyName() + "' defines "
