@@ -28,11 +28,12 @@ SCHEDULED                   | This can be used by the target to inform that it s
 RESUMED                     | This can be used by the target to inform that it continued to work on the action.                                                                                                                                                        | RUNNING
 
 # Resource Overview
+
 The following chapters provide basic examples for the most important resources but we provide also a [detailed resource documentation](https://docs.bosch-iot-rollouts.com/documentation/rest-api/rootcontroller-api-guide.html).
 
 ## Base Poll Resource
 
-```
+```bash
 GET /{tenant}/controller/v1/{controllerId}
 ```
 
@@ -40,7 +41,7 @@ In the answer to the baseUrl polling the backend can send action links. A possib
 
 _Example Response_
 
-```
+```json
 {
     "config": {
         "polling": {
@@ -60,13 +61,13 @@ _Example Response_
 
 ## Deployment Base Resource
 
-```
+```bash
 GET /{tenant}/controller/v1/{controllerId}/deploymentBase/{id}
 ```
 
 _Example Response_
 
-```
+```json
 {
     "deployment": {
         "download": "forced",
@@ -109,16 +110,17 @@ _Example Response_
 ```
 
 ## Deployment Feedback Resource
+
 To every deployment the client can post feedback back to the update-server about the deployment status.
 
-```
+```bash
 POST /{tenant}/controller/v1/{controllerId}/deploymentBase/{id}/feedback
 Content-Type: application/json
 ```
 
 _Example Body Deployment Success_
 
-```
+```json
 {
     "id": 1,
     "time": "20140511T121314",
@@ -134,7 +136,7 @@ _Example Body Deployment Success_
 
 _Example Body Deployment Proceeding_
 
-```
+```json
 {
     "id": "1",
     "time": "20140511T121314",
@@ -156,7 +158,7 @@ _Example Body Deployment Proceeding_
 
 _Example Body Deployment Error_
 
-```
+```json
 {
     "id": 1,
     "time": "20140511T121314",
