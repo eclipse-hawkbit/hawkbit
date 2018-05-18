@@ -215,10 +215,6 @@ public final class UIComponentIdProvider {
     public static final String TARGET_DROP_FILTER_ICON = "target.drop.filter.icon";
 
     /**
-     * Pending action button id.
-     */
-    public static final String PENDING_ACTION_BUTTON = "pending.action.button";
-    /**
      * Action history grid Id.
      */
     public static final String ACTION_HISTORY_GRID_ID = "action.history.gridId";
@@ -312,10 +308,6 @@ public final class UIComponentIdProvider {
      */
     public static final String MAINTENANCE_WINDOW_SCHEDULE_TRANSLATOR_ID = "maintenance.window.schedule.translator";
 
-    /**
-     * Delete button wrapper id.
-     */
-    public static final String DELETE_BUTTON_WRAPPER_ID = "delete.button";
     /**
      * tag color preview button id.
      */
