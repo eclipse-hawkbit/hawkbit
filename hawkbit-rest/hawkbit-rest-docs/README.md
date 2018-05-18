@@ -1,6 +1,6 @@
 # hawkBit Rest Documentation tests
 
-The Rollouts Rest Documentation tests are based on [Rest Docs](https://projects.spring.io/spring-restdocs/). These tests generate documentation for our RESTful services.
+The hawkBit Rest Documentation tests are based on [Rest Docs](https://projects.spring.io/spring-restdocs/). These tests generate documentation for our RESTful services.
 
 ## Run and create snippets
 

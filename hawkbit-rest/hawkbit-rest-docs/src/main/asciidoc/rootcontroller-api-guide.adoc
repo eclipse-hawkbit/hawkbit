@@ -199,7 +199,7 @@ include::../errors/429.adoc[]
 
 Core resource for deployment operations. Contains all information necessary in order to execute the operation. 
 
-Keep in mind that the provided download links for the artifacts are generated dynamically by the update server. Host, port and path and not guaranteed to be similar to the provided examples below but will be defined by rollouts at runtime.
+Keep in mind that the provided download links for the artifacts are generated dynamically by the update server. Host, port and path and not guaranteed to be similar to the provided examples below but will be defined at runtime.
 
 === Deployment or update action
 
@@ -234,7 +234,7 @@ include::{snippets}/rootcontroller/get-controller-basedeployment-action/http-res
 
 === Response (Status 200) with a maintenance window defined but not active yet
 
-In addition to the straight forward approach to inform the device to download and install the software in one transaction Rollouts supports the separation of download and installation into separate steps.
+In addition to the straight forward approach to inform the device to download and install the software in one transaction hawkBit supports the separation of download and installation into separate steps.
 
 This feature is called Maintenance Window where the device is informed to download the software first and then when it enters a defined (maintenance) window the installation triggers follows as in the example above.
 
