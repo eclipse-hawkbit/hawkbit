@@ -26,11 +26,11 @@ public class AbstractHawkbitLoginUITest {
 
     @Test
     @Description("Verfies that forbidden content is disallowed.")
-    public void isAllowedCookieContent() {
-        assertThat(AbstractHawkbitLoginUI.isAllowedCookieContent("<script>test</script>")).isFalse();
-        assertThat(AbstractHawkbitLoginUI.isAllowedCookieContent("\n<script>test</script>foobar")).isFalse();
-        assertThat(AbstractHawkbitLoginUI.isAllowedCookieContent("foobar<script>test</script>")).isFalse();
-        assertThat(AbstractHawkbitLoginUI.isAllowedCookieContent("\nfoobar<script>test</script>")).isFalse();
+    public void isAllowedCookieValue() {
+        assertThat(AbstractHawkbitLoginUI.isAllowedCookieValue("<script>test</script>")).isFalse();
+        assertThat(AbstractHawkbitLoginUI.isAllowedCookieValue("\n<script>test</script>foobar")).isFalse();
+        assertThat(AbstractHawkbitLoginUI.isAllowedCookieValue("foobar<script>test</script>")).isFalse();
+        assertThat(AbstractHawkbitLoginUI.isAllowedCookieValue("\nfoobar<script>test</script>")).isFalse();
     }
 
 }

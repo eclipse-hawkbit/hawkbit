@@ -367,7 +367,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (usernameCookie != null) {
             final String previousUser = usernameCookie.getValue();
-            if (isAllowedCookieContent(previousUser)) {
+            if (isAllowedCookieValue(previousUser)) {
                 username.setValue(previousUser);
                 password.focus();
             }
@@ -379,7 +379,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (tenantCookie != null && multiTenancyIndicator.isMultiTenancySupported()) {
             final String previousTenant = tenantCookie.getValue();
-            if (isAllowedCookieContent(previousTenant)) {
+            if (isAllowedCookieValue(previousTenant)) {
                 tenant.setValue(previousTenant.toUpperCase());
             }
         } else if (multiTenancyIndicator.isMultiTenancySupported()) {
@@ -389,7 +389,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         }
     }
 
-    protected static boolean isAllowedCookieContent(final String previousTenant) {
+    protected static boolean isAllowedCookieValue(final String previousTenant) {
         return !FORBIDDEN_COOKIE_CONTENT.matcher(previousTenant).matches();
     }
 
