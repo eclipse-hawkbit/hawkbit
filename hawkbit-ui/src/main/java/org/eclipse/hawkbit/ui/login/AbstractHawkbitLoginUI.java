@@ -82,7 +82,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     private static final String SP_LOGIN_USER = "sp-login-user";
     private static final String SP_LOGIN_TENANT = "sp-login-tenant";
-    private static final Pattern FORBIDDEN_COOKIE_CONTENT = Pattern.compile(".*(<|>).*");
+    private static final Pattern FORBIDDEN_COOKIE_CONTENT = Pattern.compile("(\\s|.)*(<|>)(\\s|.)*");
 
     private final transient ApplicationContext context;
 
@@ -367,7 +367,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (usernameCookie != null) {
             final String previousUser = usernameCookie.getValue();
-            if (!FORBIDDEN_COOKIE_CONTENT.matcher(previousUser).matches()) {
+            if (isAllowedCookieContent(previousUser)) {
                 username.setValue(previousUser);
                 password.focus();
             }
@@ -379,7 +379,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         if (tenantCookie != null && multiTenancyIndicator.isMultiTenancySupported()) {
             final String previousTenant = tenantCookie.getValue();
-            if (!FORBIDDEN_COOKIE_CONTENT.matcher(previousTenant).matches()) {
+            if (isAllowedCookieContent(previousTenant)) {
                 tenant.setValue(previousTenant.toUpperCase());
             }
         } else if (multiTenancyIndicator.isMultiTenancySupported()) {
@@ -387,6 +387,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         } else {
             username.focus();
         }
+    }
+
+    protected static boolean isAllowedCookieContent(final String previousTenant) {
+        return !FORBIDDEN_COOKIE_CONTENT.matcher(previousTenant).matches();
     }
 
     private void setCookies() {
