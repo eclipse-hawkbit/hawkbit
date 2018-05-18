@@ -13,7 +13,6 @@
    com.ibm.icu:icu4j:jar:50.1.1:test
    com.jayway.awaitility:awaitility:jar:1.7.0:test
    com.jayway.jsonpath:json-path:jar:2.0.0:test
-   com.microsoft.sqlserver:mssql-jdbc:jar:6.4.0.jre8:test
    commons-collections:commons-collections:jar:3.2.2:test
    javax.el:javax.el-api:jar:2.2.4:test
    junit:junit:jar:4.12:test
