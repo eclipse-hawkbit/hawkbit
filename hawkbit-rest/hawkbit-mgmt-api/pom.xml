@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-mgmt-api</artifactId>
-   <name>hawkBit :: Mgmt REST API</name>
+   <name>hawkBit :: Management :: API</name>
 
    <dependencies>
       <dependency>

@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-mgmt-resource</artifactId>
-   <name>hawkBit :: REST Mgmt Resources</name>
+   <name>hawkBit :: Management :: Resources</name>
 
 
    <dependencies>
