@@ -24,15 +24,16 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+
+import com.google.common.io.ByteStreams;
 
 /**
  * Abstract base class for transferring files from the browser to the
@@ -122,23 +123,11 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         return false;
     }
 
-    static class NullOutputStream extends OutputStream {
-        @Override
-        public void write(final int i) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public void write(final byte[] b, final int off, final int len) throws IOException {
-            // do nothing
-        }
-    }
-
     protected void publishUploadStarted(final FileUploadId fileUploadId) {
         LOG.info("Upload started for file {}", fileUploadId);
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId);
-        artifactUploadState.uploadInProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, fileUploadProgress));
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_STARTED);
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
     }
 
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
@@ -147,40 +136,37 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             LOG.trace("Upload in progress for file {} - {}%", fileUploadId,
                     String.format("%.0f", (double) bytesReceived / (double) fileSize * 100));
         }
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, bytesReceived, fileSize,
-                tempFilePath);
-        artifactUploadState.uploadInProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
-                fileUploadProgress));
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_IN_PROGRESS, bytesReceived, fileSize, tempFilePath);
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
     }
 
     private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize,
             final String tempFilePath) {
         LOG.info("Upload succeeded for file {}", fileUploadId);
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, fileSize, fileSize,
-                tempFilePath);
-        artifactUploadState.uploadSucceeded(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL,
-                fileUploadProgress));
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize, tempFilePath);
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
     }
 
     protected void publishUploadFinishedEvent(final FileUploadId fileUploadId) {
         LOG.info("Upload finished for file {}", fileUploadId);
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED,
-                new FileUploadProgress(fileUploadId)));
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_FINISHED);
+        eventBus.publish(this, fileUploadProgress);
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
             final Exception uploadException) {
         LOG.info("Upload failed for file {} due to {}", fileUploadId,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
-
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
-
-        artifactUploadState.uploadFailed(fileUploadId, fileUploadProgress);
-        eventBus.publish(this,
-                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, fileUploadProgress));
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final Exception uploadException) {
@@ -197,7 +183,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     protected OutputStream createOutputStreamForTempFile() throws IOException {
 
         if (isUploadInterrupted()) {
-            return new NullOutputStream();
+            return ByteStreams.nullOutputStream();
         }
 
         final File tempFile = File.createTempFile("spUiArtifactUpload", null);
@@ -221,19 +207,19 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     protected void transferArtifactToRepository(final FileUploadId fileUploadId, final long fileSize,
             final String mimeType, final String tempFilePath) {
 
-        final SoftwareModule softwareModule = fileUploadId.getSoftwareModule();
         final File newFile = new File(tempFilePath);
 
         final String filename = fileUploadId.getFilename();
-        softwareModule.getVersion();
         LOG.info("Transfering tempfile {} - {} to repository", filename, tempFilePath);
         try (FileInputStream fis = new FileInputStream(newFile)) {
 
-            artifactManagement.create(fis, softwareModule.getId(), filename, null, null, true, mimeType, fileSize);
+            artifactManagement.create(fis, fileUploadId.getSoftwareModuleId(), filename, null, null, true, mimeType,
+                    fileSize);
 
             publishUploadSucceeded(fileUploadId, fileSize, tempFilePath);
 
-            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, softwareModule));
+            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
+                    fileUploadId.getSoftwareModuleId()));
 
         } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
                 | IOException e) {

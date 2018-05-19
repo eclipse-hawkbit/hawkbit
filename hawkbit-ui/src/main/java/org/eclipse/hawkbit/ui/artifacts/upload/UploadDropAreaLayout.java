@@ -28,6 +28,9 @@ import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Container for drag and drop area in the upload view.
+ */
 public class UploadDropAreaLayout implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -49,6 +52,24 @@ public class UploadDropAreaLayout implements Serializable {
 
     private final transient ArtifactManagement artifactManagement;
 
+    /**
+     * Creates a new {@link UploadDropAreaLayout} instance.
+     * 
+     * @param i18n
+     *            the {@link VaadinMessageSource}
+     * @param uiNotification
+     *            {@link UINotification} for showing notifications
+     * @param artifactUploadState
+     *            the {@link ArtifactUploadState} for state information
+     * @param multipartConfigElement
+     *            the {@link MultipartConfigElement}
+     * @param softwareManagement
+     *            the {@link SoftwareModuleManagement} for retrieving the
+     *            {@link SoftwareModule}
+     * @param artifactManagement
+     *            the {@link ArtifactManagement} for storing the uploaded
+     *            artifacts
+     */
     public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement) {

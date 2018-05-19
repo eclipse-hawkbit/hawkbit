@@ -17,13 +17,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,14 +69,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
      * Map that holds all files that were selected for upload. They remain in
      * the list even if upload fails, succeeds or is aborted by the user.
      */
-    private final Map<FileUploadId, FileUploadProgress> overallFilesInUploadProcess = Maps.newHashMap();
-
-    private final Set<FileUploadId> succeededUploads = Sets.newHashSet();
-
-    private final Set<FileUploadId> failedUploads = Sets.newHashSet();
-
-    private final ReentrantReadWriteLock fileStateRWLock = new ReentrantReadWriteLock();
-
+    private Map<FileUploadId, FileUploadProgress> overallFilesInUploadProcess;
 
     @Autowired
     ArtifactUploadState(final SoftwareModuleFilters softwareModuleFilters) {
@@ -162,78 +155,31 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     }
 
     public void removeFilesFromOverallUploadProcessList(final Collection<FileUploadId> filesToRemove) {
-        fileStateRWLock.writeLock().lock();
-        overallFilesInUploadProcess.keySet().removeAll(filesToRemove);
-        fileStateRWLock.writeLock().unlock();
+        getOverallFilesInUploadProcessMap().keySet().removeAll(filesToRemove);
     }
 
     public Set<FileUploadId> getAllFileUploadIdsFromOverallUploadProcessList() {
-        fileStateRWLock.readLock().lock();
-        final Set<FileUploadId> set = Collections.unmodifiableSet(overallFilesInUploadProcess.keySet());
-        fileStateRWLock.readLock().unlock();
-
-        return set;
+        return Collections.unmodifiableSet(getOverallFilesInUploadProcessMap().keySet());
     }
 
     public Collection<FileUploadProgress> getAllFileUploadProgressValuesFromOverallUploadProcessList() {
-        fileStateRWLock.readLock().lock();
-        final Collection<FileUploadProgress> collection = Collections
-                .unmodifiableCollection(overallFilesInUploadProcess.values());
-        fileStateRWLock.readLock().unlock();
-
-        return collection;
-    }
-
-    public Set<FileUploadId> getFilesInSucceededState() {
-        fileStateRWLock.readLock().lock();
-        final Set<FileUploadId> set = Collections.unmodifiableSet(succeededUploads);
-        fileStateRWLock.readLock().unlock();
-
-        return set;
+        return Collections.unmodifiableCollection(getOverallFilesInUploadProcessMap().values());
     }
 
     public Set<FileUploadId> getFilesInFailedState() {
-        fileStateRWLock.readLock().lock();
-        final Set<FileUploadId> set = Collections.unmodifiableSet(failedUploads);
-        fileStateRWLock.readLock().unlock();
-
-        return set;
+        return Collections.unmodifiableSet(getFailedUploads());
     }
 
     public FileUploadProgress getFileUploadProgress(final FileUploadId fileUploadId) {
-        fileStateRWLock.readLock().lock();
-        final FileUploadProgress fileUploadProgress = overallFilesInUploadProcess.get(fileUploadId);
-        fileStateRWLock.readLock().unlock();
-
-        return fileUploadProgress;
+        return getOverallFilesInUploadProcessMap().get(fileUploadId);
     }
 
-    public void uploadInProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        fileStateRWLock.writeLock().lock();
-        overallFilesInUploadProcess.put(fileUploadId, fileUploadProgress);
-        fileStateRWLock.writeLock().unlock();
-    }
-
-    public void uploadFailed(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        fileStateRWLock.writeLock().lock();
-        overallFilesInUploadProcess.put(fileUploadId, fileUploadProgress);
-        failedUploads.add(fileUploadId);
-        fileStateRWLock.writeLock().unlock();
-    }
-
-    public void uploadSucceeded(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
-        fileStateRWLock.writeLock().lock();
-        overallFilesInUploadProcess.put(fileUploadId, fileUploadProgress);
-        succeededUploads.add(fileUploadId);
-        fileStateRWLock.writeLock().unlock();
+    public void updateFileUploadProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        getOverallFilesInUploadProcessMap().put(fileUploadId, fileUploadProgress);
     }
 
     public boolean isFileInUploadState(final FileUploadId fileUploadId) {
-        fileStateRWLock.readLock().lock();
-        final boolean isFileInUploadState = overallFilesInUploadProcess.containsKey(fileUploadId);
-        fileStateRWLock.readLock().unlock();
-
-        return isFileInUploadState;
+        return getOverallFilesInUploadProcessMap().containsKey(fileUploadId);
     }
 
     public boolean isFileInUploadState(final String filename, final SoftwareModule softwareModule) {
@@ -249,11 +195,9 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     }
 
     private int getInProgressCount() {
-        fileStateRWLock.readLock().lock();
-        final int succeededUploadCount = succeededUploads.size();
-        final int failedUploadCount = failedUploads.size();
-        final int overallUploadCount = overallFilesInUploadProcess.size();
-        fileStateRWLock.readLock().unlock();
+        final int succeededUploadCount = getSucceededUploads().size();
+        final int failedUploadCount = getFailedUploads().size();
+        final int overallUploadCount = getOverallFilesInUploadProcessMap().size();
 
         final int inProgressCount = overallUploadCount - failedUploadCount - succeededUploadCount;
 
@@ -283,11 +227,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     }
 
     void clearFileStates() {
-        fileStateRWLock.writeLock().lock();
-        failedUploads.clear();
-        succeededUploads.clear();
-        overallFilesInUploadProcess.clear();
-        fileStateRWLock.writeLock().unlock();
+        getOverallFilesInUploadProcessMap().clear();
     }
 
     /**
@@ -306,11 +246,43 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     public boolean isUploadinProgressForSelectedSoftwareModul(final Long softwareModuleId) {
         for (final FileUploadId fileUploadId : getAllFileUploadIdsFromOverallUploadProcessList()) {
-            if (fileUploadId.getSoftwareModule().getId().equals(softwareModuleId)) {
+            if (fileUploadId.getSoftwareModuleId().equals(softwareModuleId)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private Map<FileUploadId, FileUploadProgress> getOverallFilesInUploadProcessMap() {
+        if (overallFilesInUploadProcess == null) {
+            overallFilesInUploadProcess = Maps.newConcurrentMap();
+        }
+        return overallFilesInUploadProcess;
+    }
+
+    private Set<FileUploadId> getFailedUploads() {
+        final Collection<FileUploadProgress> allFileUploadProgressObjects = getOverallFilesInUploadProcessMap()
+                .values();
+        final Set<FileUploadId> failedFileUploads = Sets.newHashSet();
+        for (final FileUploadProgress fileUploadProgress : allFileUploadProgressObjects) {
+            if (fileUploadProgress.getFileUploadStatus() == FileUploadStatus.UPLOAD_FAILED) {
+                failedFileUploads.add(fileUploadProgress.getFileUploadId());
+            }
+        }
+        return failedFileUploads;
+    }
+
+    private Set<FileUploadId> getSucceededUploads(){
+
+        final Collection<FileUploadProgress> allFileUploadProgressObjects = getOverallFilesInUploadProcessMap()
+                .values();
+        final Set<FileUploadId> succeededFileUploads = Sets.newHashSet();
+        for (final FileUploadProgress fileUploadProgress : allFileUploadProgressObjects) {
+            if (fileUploadProgress.getFileUploadStatus() == FileUploadStatus.UPLOAD_SUCCESSFUL) {
+                succeededFileUploads.add(fileUploadProgress.getFileUploadId());
+            }
+        }
+        return succeededFileUploads;
     }
 
 }

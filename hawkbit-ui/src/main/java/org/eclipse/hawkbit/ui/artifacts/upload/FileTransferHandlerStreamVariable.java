@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.ByteStreams;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.SucceededEvent;
@@ -40,6 +41,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     private final String mimeType;
     private final FileUploadId fileUploadId;
 
+    private final SoftwareModule selectedSoftwareModule;
+
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final long maxSize,
             final String mimeType, final SoftwareModule selectedSw, final ArtifactManagement artifactManagement,
             final VaadinMessageSource i18n) {
@@ -47,6 +50,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         this.fileSize = fileSize;
         this.maxSize = maxSize;
         this.mimeType = mimeType;
+        this.selectedSoftwareModule = selectedSw;
         this.fileUploadId = new FileUploadId(fileName, selectedSw);
 
         publishUploadStarted(fileUploadId);
@@ -56,9 +60,9 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, fileUploadId.getSoftwareModule())) {
+        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, selectedSoftwareModule)) {
             LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
-                    fileUploadId.getSoftwareModule());
+                    selectedSoftwareModule);
             setDuplicateFile();
         }
     }
@@ -66,21 +70,29 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     @Override
     public final OutputStream getOutputStream() {
 
+        // we return the outputstream so we cannot close it here
+        @SuppressWarnings("squid:S2095")
+        OutputStream outputStream = ByteStreams.nullOutputStream();
         try {
-            // we return the outputstream so we cannot close it here
-            @SuppressWarnings("squid:S2095")
-            final OutputStream out = createOutputStreamForTempFile();
 
+            outputStream = createOutputStreamForTempFile();
             publishUploadProgressEvent(fileUploadId, 0, fileSize, getTempFilePath());
 
-            return out;
         } catch (final IOException e) {
-            LOG.error("Upload failed {}", e);
+            LOG.error("Creating temp file for upload failed {}.", e);
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (final IOException e1) {
+                    LOG.error("Closing output stream caused an exception {}", e1);
+                }
+            }
+
             setFailureReasonUploadFailed();
+            setUploadInterrupted();
         }
 
-        setUploadInterrupted();
-        return new NullOutputStream();
+        return outputStream;
     }
 
     /**
@@ -112,8 +124,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             return;
         }
 
-        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(),
-                getTempFilePath());
+        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(), getTempFilePath());
     }
 
     /**

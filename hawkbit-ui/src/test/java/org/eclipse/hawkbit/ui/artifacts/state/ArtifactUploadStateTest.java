@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +31,9 @@ public class ArtifactUploadStateTest {
     @Mock
     public FileUploadId fileUploadId3;
 
-    @Mock
-    public FileUploadProgress fileUploadProgress;
+    public FileUploadProgress fileUploadProgressStateFailed;
+    public FileUploadProgress fileUploadProgressStateSucceeded;
+    public FileUploadProgress fileUploadProgressStateInProgress;
 
     private ArtifactUploadState stateUnderTest;
 
@@ -129,16 +131,6 @@ public class ArtifactUploadStateTest {
     }
 
     @Test
-    public void getFilesInSucceededStateReturnsNothingAfterFileStateReset() {
-        simulateUploadInProgressFor(fileUploadId1, fileUploadId2, fileUploadId3);
-        simulateUploadSucceededFor(fileUploadId1, fileUploadId2, fileUploadId3);
-
-        stateUnderTest.clearFileStates();
-
-        assertThat(stateUnderTest.getFilesInSucceededState()).isEmpty();
-    }
-
-    @Test
     public void getAllFileUploadIdsFromOverallUploadProcessListReturnsAllFileIds() {
         simulateUploadInProgressFor(fileUploadId1, fileUploadId2, fileUploadId3);
         simulateUploadFailedFor(fileUploadId1);
@@ -146,15 +138,6 @@ public class ArtifactUploadStateTest {
 
         assertThat(stateUnderTest.getAllFileUploadIdsFromOverallUploadProcessList())
                 .containsExactlyInAnyOrder(fileUploadId1, fileUploadId2, fileUploadId3);
-    }
-
-    @Test
-    public void getFilesInSucceededStateReturnsOnlySucceedeFileIds() {
-        simulateUploadInProgressFor(fileUploadId1, fileUploadId2, fileUploadId3);
-        simulateUploadFailedFor(fileUploadId2);
-        simulateUploadSucceededFor(fileUploadId3);
-
-        assertThat(stateUnderTest.getFilesInSucceededState()).containsOnly(fileUploadId3);
     }
 
     @Test
@@ -197,19 +180,25 @@ public class ArtifactUploadStateTest {
 
     private void simulateUploadInProgressFor(final FileUploadId... fileUploadIds) {
         for (final FileUploadId fileUploadId : fileUploadIds) {
-            stateUnderTest.uploadInProgress(fileUploadId, fileUploadProgress);
+            final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                    FileUploadStatus.UPLOAD_IN_PROGRESS);
+            stateUnderTest.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         }
     }
 
     private void simulateUploadSucceededFor(final FileUploadId... fileUploadIds) {
         for (final FileUploadId fileUploadId : fileUploadIds) {
-            stateUnderTest.uploadSucceeded(fileUploadId, fileUploadProgress);
+            final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                    FileUploadStatus.UPLOAD_SUCCESSFUL);
+            stateUnderTest.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         }
     }
 
     private void simulateUploadFailedFor(final FileUploadId... fileUploadIds) {
         for (final FileUploadId fileUploadId : fileUploadIds) {
-            stateUnderTest.uploadFailed(fileUploadId, fileUploadProgress);
+            final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                    FileUploadStatus.UPLOAD_FAILED);
+            stateUnderTest.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         }
     }
 

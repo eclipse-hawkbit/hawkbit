@@ -12,9 +12,8 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -33,7 +32,7 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Upload files layout.
+ * Container for upload and progress button.
  */
 public class UploadProgressButtonLayout extends VerticalLayout {
 
@@ -59,6 +58,24 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
+    /**
+     * Creates a new {@link UploadProgressButtonLayout} instance.
+     * 
+     * @param i18n
+     *            the {@link VaadinMessageSource}
+     * @param eventBus
+     *            the {@link UIEventBus} for listening to ui events
+     * @param artifactUploadState
+     *            the {@link ArtifactUploadState} for state information
+     * @param multipartConfigElement
+     *            the {@link MultipartConfigElement}
+     * @param softwareManagement
+     *            the {@link SoftwareModuleManagement} for retrieving the
+     *            {@link SoftwareModule}
+     * @param artifactManagement
+     *            the {@link ArtifactManagement} for storing the uploaded
+     *            artifacts
+     */
     public UploadProgressButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement) {
@@ -85,8 +102,9 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final UploadStatusEvent event) {
-        final UploadStatusEventType uploadProgressEventType = event.getUploadStatusEventType();
+    void onEvent(final FileUploadProgress fileUploadProgress) {
+        final FileUploadProgress.FileUploadStatus uploadProgressEventType = fileUploadProgress
+                .getFileUploadStatus();
         switch (uploadProgressEventType) {
         case UPLOAD_STARTED:
             ui.access(this::onStartOfUpload);
@@ -101,7 +119,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         case UPLOAD_IN_PROGRESS:
             break;
         default:
-            throw new IllegalArgumentException("Enum " + UploadStatusEventType.class.getSimpleName()
+            throw new IllegalArgumentException("Enum " + FileUploadProgress.FileUploadStatus.class.getSimpleName()
                     + " doesn't contain value " + uploadProgressEventType);
         }
     }

@@ -11,9 +11,40 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.io.Serializable;
 
 /**
- * Holds file and upload progress details that are sent with upload events.
+ * Holds file and upload progress details.
  */
 public class FileUploadProgress implements Serializable {
+
+    /**
+     * Status of a file upload.
+     */
+    public enum FileUploadStatus {
+    
+        /**
+         * An upload for a file has been started.
+         */
+        UPLOAD_STARTED,
+    
+        /**
+         * Progress changed for one file upload.
+         */
+        UPLOAD_IN_PROGRESS,
+    
+        /**
+         * Upload of one file failed.
+         */
+        UPLOAD_FAILED,
+    
+        /**
+         * One file upload succeeded.
+         */
+        UPLOAD_SUCCESSFUL,
+    
+        /**
+         * One file upload finished ()
+         */
+        UPLOAD_FINISHED
+    }
 
     private static final long serialVersionUID = 1L;
 
@@ -26,41 +57,88 @@ public class FileUploadProgress implements Serializable {
     private String failureReason;
 
     private String filePath;
+    
+    private final FileUploadStatus fileUploadStatus;
 
-    FileUploadProgress(final FileUploadId fileUploadId) {
+
+    /**
+     * Creates a new {@link FileUploadProgress} instance.
+     * 
+     * @param fileUploadId
+     *            the {@link FileUploadId} to which this progress information
+     *            belongs.
+     * @param fileUploadStatus
+     *            the {@link FileUploadStatus} of this progress
+     */
+    public FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus) {
         this.fileUploadId = fileUploadId;
+        this.fileUploadStatus = fileUploadStatus;
     }
 
-    FileUploadProgress(final FileUploadId fileUploadId, final long bytesRead, final long contentLength,
+    /**
+     * Creates a new {@link FileUploadProgress} instance.
+     * 
+     * @param fileUploadId
+     *            the {@link FileUploadId} to which this progress information
+     *            belongs.
+     * @param fileUploadStatus
+     *            the {@link FileUploadStatus} of this progress
+     * @param bytesRead
+     *            number of bytes read
+     * @param contentLength
+     *            size of the file in bytes
+     * @param filePath
+     *            the path of the file
+     */
+    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus,
+            final long bytesRead, final long contentLength,
             final String filePath) {
         this.fileUploadId = fileUploadId;
+        this.fileUploadStatus = fileUploadStatus;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
         this.filePath = filePath;
     }
 
-    FileUploadProgress(final FileUploadId fileUploadId, final String failureReason) {
+    /**
+     * Creates a new {@link FileUploadProgress} instance.
+     * 
+     * @param fileUploadId
+     *            the {@link FileUploadId} to which this progress information
+     *            belongs.
+     * @param fileUploadStatus
+     *            the {@link FileUploadStatus} of this progress
+     * @param failureReason
+     *            the reason of the failed upload
+     */
+    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus,
+            final String failureReason) {
         this.fileUploadId = fileUploadId;
+        this.fileUploadStatus = fileUploadStatus;
         this.failureReason = failureReason;
     }
 
-    FileUploadId getFileUploadId() {
+    public FileUploadId getFileUploadId() {
         return fileUploadId;
     }
 
-    long getContentLength() {
+    public long getContentLength() {
         return contentLength;
     }
 
-    long getBytesRead() {
+    public long getBytesRead() {
         return bytesRead;
     }
 
-    String getFailureReason() {
+    public String getFailureReason() {
         return failureReason;
     }
 
     public String getFilePath() {
         return filePath;
+    }
+    
+    public FileUploadStatus getFileUploadStatus() {
+        return fileUploadStatus;
     }
 }

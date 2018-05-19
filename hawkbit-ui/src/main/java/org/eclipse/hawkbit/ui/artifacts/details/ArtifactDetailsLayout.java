@@ -9,13 +9,13 @@
 package org.eclipse.hawkbit.ui.artifacts.details;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -469,19 +469,26 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 }
             });
         }
-        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED
-                && softwareModuleEvent.getEntity() != null) {
+        if (isArtifactChangedEvent(softwareModuleEvent) && areEntityIdsNotEmpty(softwareModuleEvent)) {
             UI.getCurrent().access(() -> findSelectedSoftwareModule().ifPresent(selectedSoftwareModule -> {
-                if (softwareModulsAreEqual(softwareModuleEvent.getEntity(), selectedSoftwareModule)) {
-                    populateArtifactDetails(softwareModuleEvent.getEntity());
+                if (hasSelectedSoftwareModuleChanged(softwareModuleEvent.getEntityIds(), selectedSoftwareModule)) {
+                    populateArtifactDetails(selectedSoftwareModule);
                 }
             }));
         }
     }
 
-    private boolean softwareModulsAreEqual(final SoftwareModule left, final SoftwareModule right) {
-        return new EqualsBuilder().append(left.getName(), right.getName()).append(left.getId(), right.getId())
-                .isEquals();
+    private static boolean areEntityIdsNotEmpty(final SoftwareModuleEvent softwareModuleEvent) {
+        return softwareModuleEvent.getEntityIds() != null && !softwareModuleEvent.getEntityIds().isEmpty();
+    }
+
+    private static boolean isArtifactChangedEvent(final SoftwareModuleEvent softwareModuleEvent) {
+        return softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED;
+    }
+
+    private static boolean hasSelectedSoftwareModuleChanged(final Collection<Long> changedSoftwareModuleIds,
+            final SoftwareModule selectedSoftwareModule) {
+        return changedSoftwareModuleIds.stream().anyMatch(smId -> selectedSoftwareModule.getId().equals(smId));
     }
 
     public Table getArtifactDetailsTable() {

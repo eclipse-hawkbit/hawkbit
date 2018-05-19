@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -44,9 +42,9 @@ import com.vaadin.ui.themes.ValoTheme;
 import elemental.json.JsonValue;
 
 /**
- * Shows the progress of all uploads.
+ * Window that shows the progress of all uploads.
  */
-public class UploadProgressInfoWindow extends Window implements Serializable {
+public class UploadProgressInfoWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 
@@ -105,15 +103,15 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final UploadStatusEvent event) {
-        switch (event.getUploadStatusEventType()) {
+    void onEvent(final FileUploadProgress fileUploadProgress) {
+        switch (fileUploadProgress.getFileUploadStatus()) {
         case UPLOAD_STARTED:
-            ui.access(() -> onUploadStarted(event));
+            ui.access(() -> onUploadStarted(fileUploadProgress));
             break;
         case UPLOAD_IN_PROGRESS:
         case UPLOAD_FAILED:
         case UPLOAD_SUCCESSFUL:
-            ui.access(() -> updateUploadProgressinforRowObject(event));
+            ui.access(() -> updateUploadProgressInfoRowObject(fileUploadProgress));
             break;
         case UPLOAD_FINISHED:
             ui.access(this::onUploadFinished);
@@ -123,24 +121,22 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         }
     }
 
-    private void onUploadStarted(final UploadStatusEvent event) {
-        final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
-        final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-
-        updateUploadProgressInfoRowObject(fileUploadId);
+    private void onUploadStarted(final FileUploadProgress fileUploadProgress) {
+        updateUploadProgressInfoRowObject(fileUploadProgress);
 
         if (isFirstFileUpload()) {
             maximizeWindow();
         }
 
-        grid.scrollTo(fileUploadId);
+        grid.scrollTo(fileUploadProgress.getFileUploadId());
     }
 
     private void restoreState() {
         final Indexed container = grid.getContainerDataSource();
         container.removeAllItems();
-        for (final FileUploadId fileUploadId : artifactUploadState.getAllFileUploadIdsFromOverallUploadProcessList()) {
-            updateUploadProgressInfoRowObject(fileUploadId);
+        for (final FileUploadProgress fileUploadProgress : artifactUploadState
+                .getAllFileUploadProgressValuesFromOverallUploadProcessList()) {
+            updateUploadProgressInfoRowObject(fileUploadProgress);
         }
     }
 
@@ -176,7 +172,7 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         return statusGrid;
     }
 
-    private IndexedContainer getGridContainer() {
+    private static IndexedContainer getGridContainer() {
         final IndexedContainer uploadContainer = new IndexedContainer();
         uploadContainer.addContainerProperty(COLUMN_STATUS, String.class, "Active");
         uploadContainer.addContainerProperty(COLUMN_FILE_NAME, String.class, null);
@@ -263,13 +259,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
         }
     }
 
-    private void updateUploadProgressinforRowObject(final UploadStatusEvent event) {
-        final FileUploadProgress fileUploadProgress = event.getFileUploadProgress();
-        final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
-
-        updateUploadProgressInfoRowObject(fileUploadId);
-    }
-
     /**
      * Called for every finished (succeeded or failed) upload.
      */
@@ -320,19 +309,21 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private void updateUploadProgressInfoRowObject(final FileUploadId fileUploadId) {
+    private void updateUploadProgressInfoRowObject(final FileUploadProgress fileUploadProgress) {
+        final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
         Item item = uploads.getItem(fileUploadId);
         if (item == null) {
             item = grid.getContainerDataSource().addItem(fileUploadId);
             item.getItemProperty(COLUMN_FILE_NAME).setValue(fileUploadId.getFilename());
             item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(HawkbitCommonUtil.getFormattedNameVersion(
-                    fileUploadId.getSoftwareModule().getName(), fileUploadId.getSoftwareModule().getVersion()));
+                    fileUploadId.getSoftwareModuleName(), fileUploadId.getSoftwareModuleVersion()));
         }
 
         final String status;
-        if (artifactUploadState.getFilesInFailedState().contains(fileUploadId)) {
+        final FileUploadStatus uploadStatus = fileUploadProgress.getFileUploadStatus();
+        if (uploadStatus == FileUploadStatus.UPLOAD_FAILED) {
             status = STATUS_FAILED;
-        } else if (artifactUploadState.getFilesInSucceededState().contains(fileUploadId)) {
+        } else if (uploadStatus == FileUploadStatus.UPLOAD_SUCCESSFUL) {
             status = STATUS_FINISHED;
         } else {
             status = STATUS_INPROGRESS;
@@ -344,7 +335,6 @@ public class UploadProgressInfoWindow extends Window implements Serializable {
             item.getItemProperty(COLUMN_REASON).setValue(failureReason);
         }
 
-        final FileUploadProgress fileUploadProgress = artifactUploadState.getFileUploadProgress(fileUploadId);
         final long bytesRead = fileUploadProgress.getBytesRead();
         final long fileSize = fileUploadProgress.getContentLength();
         if (bytesRead > 0 && fileSize > 0) {

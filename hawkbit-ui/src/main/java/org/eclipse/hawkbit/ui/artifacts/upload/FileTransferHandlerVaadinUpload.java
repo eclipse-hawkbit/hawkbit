@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.ByteStreams;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -122,22 +123,32 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
 
         if (isUploadInterrupted()) {
-            return new NullOutputStream();
+            return ByteStreams.nullOutputStream();
         }
 
+        // we return the outputstream so we cannot close it here
+        @SuppressWarnings("squid:S2095")
+        OutputStream outputStream = ByteStreams.nullOutputStream();
         try {
-            final OutputStream outputStream = createOutputStreamForTempFile();
+            outputStream = createOutputStreamForTempFile();
             this.mimeType = mimeType;
             publishUploadProgressEvent(fileUploadId, 0, 0, getTempFilePath());
 
-            return outputStream;
         } catch (final IOException e) {
-            LOG.error("Creating temp file failed.", e);
+            LOG.error("Creating temp file for upload failed {}.", e);
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (final IOException e1) {
+                    LOG.error("Closing output stream caused an exception {}", e1);
+                }
+            }
+
             setFailureReasonUploadFailed();
+            setUploadInterrupted();
         }
 
-        setUploadInterrupted();
-        return new NullOutputStream();
+        return outputStream;
     }
 
     /**

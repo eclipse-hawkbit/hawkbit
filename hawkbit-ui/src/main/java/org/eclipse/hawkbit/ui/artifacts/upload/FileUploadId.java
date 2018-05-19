@@ -15,25 +15,64 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 
+/**
+ * The {@link FileUploadId} identifies a file that is uploaded for a
+ * {@link SoftwareModule}.
+ *
+ */
 public class FileUploadId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final String filename;
 
-    private final SoftwareModule softwareModule;
+    private final String softwareModuleName;
+
+    private final String softwareModuleVersion;
+
+    private Long softwareModuleId;
 
     private final String id;
 
+    /**
+     * Creates a new {@link FileUploadId} instance.
+     * 
+     * @param filename
+     *            the name of the file
+     * @param softwareModule
+     *            the {@link SoftwareModule} for which the file is uploaded
+     */
     public FileUploadId(final String filename, final SoftwareModule softwareModule) {
         this.filename = filename;
-        this.softwareModule = softwareModule;
-        this.id = createFileUploadIdString(filename, softwareModule);
+        this.softwareModuleName = softwareModule.getName();
+        this.softwareModuleVersion = softwareModule.getVersion();
+        this.softwareModuleId = softwareModule.getId();
+        this.id = createFileUploadIdString(filename, softwareModuleName, softwareModuleVersion);
     }
 
-    private static String createFileUploadIdString(final String filename, final SoftwareModule softwareModule) {
-        return new StringBuilder(filename).append(":").append(
-                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
+    /**
+     * Creates a new {@link FileUploadId} instance.
+     * 
+     * @param filename
+     *            the name of the file
+     * @param softwareModuleName
+     *            the name of a {@link SoftwareModule} for which the file is
+     *            uploaded
+     * @param softwareModuleVersion
+     *            the version of a {@link SoftwareModule} for which the file is
+     *            uploaded
+     */
+    public FileUploadId(final String filename, final String softwareModuleName, final String softwareModuleVersion) {
+        this.filename = filename;
+        this.softwareModuleName = softwareModuleName;
+        this.softwareModuleVersion = softwareModuleVersion;
+        this.id = createFileUploadIdString(filename, softwareModuleName, softwareModuleVersion);
+    }
+
+    private static String createFileUploadIdString(final String filename, final String softwareModuleName,
+            final String softwareModuleVersion) {
+        return new StringBuilder(filename).append(":")
+                .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModuleName, softwareModuleVersion))
                 .toString();
     }
 
@@ -67,7 +106,15 @@ public class FileUploadId implements Serializable {
         return filename;
     }
 
-    public SoftwareModule getSoftwareModule() {
-        return softwareModule;
+    public String getSoftwareModuleName() {
+        return softwareModuleName;
+    }
+
+    public String getSoftwareModuleVersion() {
+        return softwareModuleVersion;
+    }
+
+    public Long getSoftwareModuleId() {
+        return softwareModuleId;
     }
 }

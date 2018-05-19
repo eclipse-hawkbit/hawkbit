@@ -168,7 +168,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
             for (final FileUploadId fileUploadId : artifactUploadState
                     .getAllFileUploadIdsFromOverallUploadProcessList()) {
                 final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
-                        fileUploadId.getSoftwareModule().getName(), fileUploadId.getSoftwareModule().getVersion());
+                        fileUploadId.getSoftwareModuleName(), fileUploadId.getSoftwareModuleVersion());
                 if (deleteSoftwareNameVersion != null && deleteSoftwareNameVersion.equals(swNameVersion)) {
                     tobeRemoved.add(fileUploadId);
                 }
