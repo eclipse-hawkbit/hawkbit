@@ -13,6 +13,7 @@ import java.io.OutputStream;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         if (isFileAlreadyContainedInSoftwareModul(fileUploadId, selectedSoftwareModule)) {
             LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
                     selectedSoftwareModule);
+            getUploadState().updateFileUploadProgress(fileUploadId,
+                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
             setDuplicateFile();
         }
     }

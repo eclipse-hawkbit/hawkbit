@@ -275,7 +275,7 @@ public class UploadProgressInfoWindow extends Window {
 
     private void cleanupStates() {
         uploads.removeAllItems();
-        artifactUploadState.clearUploadDetails();
+        artifactUploadState.clearUploadTempData();
     }
 
     private void setPopupSizeInMinMode() {

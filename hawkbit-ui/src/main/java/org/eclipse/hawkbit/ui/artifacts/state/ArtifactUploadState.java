@@ -211,7 +211,6 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         if (inProgressCount < 0) {
             LOG.error("IllegalState: \n{}",
                     getStateListLogMessage(overallUploadCount, succeededUploadCount, failedUploadCount));
-            throw new IllegalStateException();
         }
     }
 
@@ -219,10 +218,8 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
             final int failedUploadCount) {
         final StringBuilder buffer = new StringBuilder();
         buffer.append("Overall uploads: " + overallUploadCount);
-        buffer.append("\n");
-        buffer.append("succeeded uploads: " + succeededUploadCount);
-        buffer.append("\n");
-        buffer.append("Failed Uploads: " + failedUploadCount);
+        buffer.append("| succeeded uploads: " + succeededUploadCount);
+        buffer.append("| Failed Uploads: " + failedUploadCount);
         return buffer.toString();
     }
 
@@ -233,7 +230,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     /**
      * Clears all temp data collected while uploading files.
      */
-    public void clearUploadDetails() {
+    public void clearUploadTempData() {
         LOG.debug("Cleaning up temp data...");
         // delete file system zombies
         for (final FileUploadProgress fileUploadProgress : getAllFileUploadProgressValuesFromOverallUploadProcessList()) {

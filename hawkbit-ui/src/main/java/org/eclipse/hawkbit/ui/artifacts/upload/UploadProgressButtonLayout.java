@@ -28,7 +28,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -50,7 +49,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final transient SoftwareModuleManagement softwareModuleManagement;
 
-    private final Upload upload;
+    private final UploadFixed upload;
 
     private FileTransferHandlerVaadinUpload uploadHandler;
 
@@ -92,7 +91,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         this.i18n = i18n;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareModuleManagement = softwareManagement;
-        this.upload = new Upload();
+        this.upload = new UploadFixed();
 
         createComponents();
         buildLayout();
@@ -178,7 +177,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
      */
     public void restoreState() {
         if (artifactUploadState.areAllUploadsFinished()) {
-            artifactUploadState.clearUploadDetails();
+            artifactUploadState.clearUploadTempData();
             hideUploadProgressButton();
             upload.setEnabled(true);
         } else if (artifactUploadState.isAtLeastOneUploadInProgress()) {
@@ -198,6 +197,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         if (artifactUploadState.areAllUploadsFinished()) {
             hideUploadProgressButton();
             upload.setEnabled(true);
+            artifactUploadState.clearUploadTempData();
         }
     }
 

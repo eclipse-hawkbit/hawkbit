@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
      */
     @Override
     public void uploadStarted(final StartedEvent event) {
-
         // reset internal state here because instance is reused for next upload!
         resetState();
         this.mimeType = null;
@@ -97,11 +97,14 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
             if (isFileAlreadyContainedInSoftwareModul(fileUploadId, softwareModule)) {
                 LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
+                getUploadState().updateFileUploadProgress(fileUploadId,
+                        new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
                 setDuplicateFile();
                 event.getUpload().interruptUpload();
             }
         }
     }
+
 
     private void assertThatOneSoftwareModulIsSelected() {
         // FileUpload button should be disabled if no SoftwareModul or more
