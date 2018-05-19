@@ -36,50 +36,52 @@ public class UploadFixed extends Upload {
 
     @Override
     protected StreamVariable getStreamVariable() {
+        return new StreamVariableFixed(super.getStreamVariable());
+    }
 
-        final StreamVariable originalStreamVariable = super.getStreamVariable();
+    private class StreamVariableFixed implements StreamVariable {
+        private static final long serialVersionUID = 1L;
+        private final StreamVariable originalStreamVariable;
 
-        return new com.vaadin.server.StreamVariable() {
+        public StreamVariableFixed(final StreamVariable originalStreamVariable) {
+            this.originalStreamVariable = originalStreamVariable;
+        }
 
-            private static final long serialVersionUID = 1L;
+        @Override
+        public boolean listenProgress() {
+            // this fixes the vaadin bug
+            return originalStreamVariable.listenProgress() && !uploadInterrupted;
+        }
 
-            @Override
-            public boolean listenProgress() {
-                // this fixes the vaadin bug
-                return originalStreamVariable.listenProgress() && !uploadInterrupted;
-            }
+        @Override
+        public void onProgress(final StreamingProgressEvent event) {
+            originalStreamVariable.onProgress(event);
+        }
 
-            @Override
-            public void onProgress(final StreamingProgressEvent event) {
-                originalStreamVariable.onProgress(event);
-            }
+        @Override
+        public boolean isInterrupted() {
+            return uploadInterrupted;
+        }
 
-            @Override
-            public boolean isInterrupted() {
-                return uploadInterrupted;
-            }
+        @Override
+        public OutputStream getOutputStream() {
+            return originalStreamVariable.getOutputStream();
+        }
 
-            @Override
-            public OutputStream getOutputStream() {
-                return originalStreamVariable.getOutputStream();
-            }
+        @Override
+        public void streamingStarted(final StreamingStartEvent event) {
+            originalStreamVariable.streamingStarted(event);
+        }
 
-            @Override
-            public void streamingStarted(final StreamingStartEvent event) {
-                originalStreamVariable.streamingStarted(event);
-            }
+        @Override
+        public void streamingFinished(final StreamingEndEvent event) {
+            originalStreamVariable.streamingFinished(event);
+        }
 
-            @Override
-            public void streamingFinished(final StreamingEndEvent event) {
-                originalStreamVariable.streamingFinished(event);
-            }
-
-            @Override
-            public void streamingFailed(final StreamingErrorEvent event) {
-                originalStreamVariable.streamingFailed(event);
-                uploadInterrupted = false;
-            }
-        };
-
+        @Override
+        public void streamingFailed(final StreamingErrorEvent event) {
+            originalStreamVariable.streamingFailed(event);
+            uploadInterrupted = false;
+        }
     }
 }
