@@ -64,6 +64,14 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
 
     private final VaadinMessageSource i18n;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     */
     public DistributionTypeSoftwareModuleSelectLayout(final VaadinMessageSource i18n,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -135,7 +143,7 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
 
     private void addTooltTipToSelectedTable() {
         selectedTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
-            private static final long serialVersionUID = 99432397408575324L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
@@ -181,7 +189,7 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
     protected void createSourceTableData() {
         sourceTableContainer.removeAllItems();
         final Iterable<SoftwareModuleType> moduleTypeBeans = softwareModuleTypeManagement
-                .findAll(new PageRequest(0, 1_000));
+                .findAll(new PageRequest(0, 1000));
         Item saveTblitem;
         for (final SoftwareModuleType swTypeTag : moduleTypeBeans) {
             saveTblitem = sourceTableContainer.addItem(swTypeTag.getId());

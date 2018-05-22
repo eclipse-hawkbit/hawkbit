@@ -36,9 +36,10 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     private static final long serialVersionUID = 1L;
 
-    /** The confirmation callback. */
     private transient ConfirmationDialogCallback callback;
+
     private final Button okButton;
+
     private final Window window;
 
     /**
@@ -55,8 +56,8 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param callback
      *            the callback.
      * @param tab
-     *            ConfirmationTab which consists of a table for visualizing more
-     *            information about the action which has to be confirmed.
+     *            ConfirmationTab which contains more information about the
+     *            action which has to be confirmed, e.g. maintenance window
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final ConfirmationTab tab) {
@@ -141,6 +142,9 @@ public class ConfirmationDialog implements Button.ClickListener {
      *            the icon of the dialog
      * @param id
      *            the id of the confirmation dialog
+     * @param tab
+     *            ConfirmationTab which contains more information about the
+     *            action which has to be confirmed, e.g. maintenance window
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
@@ -228,11 +232,6 @@ public class ConfirmationDialog implements Button.ClickListener {
         callback.response(event.getSource().equals(okButton));
     }
 
-    /**
-     * Get the window which holds the confirmation dialog
-     * 
-     * @return the window which holds the confirmation dialog
-     */
     public Window getWindow() {
         return window;
     }

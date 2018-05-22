@@ -25,8 +25,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.ui.Window.CloseListener;
 
 /**
- * Layout for the pop-up window which is created when updating a Distribution
- * Set Type on the Distributions View.
+ * Layout for the pop-up window which is created when updating a Software Module
+ * Type on the Upload View.
  *
  */
 public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLayout implements UpdateTag {
@@ -37,6 +37,29 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
 
     private final CloseListener closeListener;
 
+    /**
+     * Constructor for initializing the pop-up window for updating a software
+     * module type. The form fields are filled with the current data of the
+     * selected software module type.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param selectedTypeName
+     *            The name of the selected software module type to update
+     * @param closeListener
+     *            CloseListener which describes the action to do when closing
+     *            the window
+     */
     public UpdateSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final String selectedTypeName,
@@ -81,19 +104,16 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         getTagName().setValue(targetTagSelected);
-        getSoftwareModuleTypeManagement().getByName(targetTagSelected).ifPresent(
-
-                selectedTypeTag -> {
-                    getTagDesc().setValue(selectedTypeTag.getDescription());
-                    getTypeKey().setValue(selectedTypeTag.getKey());
-                    if (selectedTypeTag.getMaxAssignments() == 1) {
-                        getAssignOptiongroup().setValue(getSingleAssignStr());
-                    } else {
-                        getAssignOptiongroup().setValue(getMultiAssignStr());
-                    }
-                    setColorPickerComponentsColor(selectedTypeTag.getColour());
-                });
-
+        getSoftwareModuleTypeManagement().getByName(targetTagSelected).ifPresent(selectedTypeTag -> {
+            getTagDesc().setValue(selectedTypeTag.getDescription());
+            getTypeKey().setValue(selectedTypeTag.getKey());
+            if (selectedTypeTag.getMaxAssignments() == 1) {
+                getAssignOptiongroup().setValue(getSingleAssignStr());
+            } else {
+                getAssignOptiongroup().setValue(getMultiAssignStr());
+            }
+            setColorPickerComponentsColor(selectedTypeTag.getColour());
+        });
         disableFields();
 
     }
@@ -102,8 +122,7 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
         getSoftwareModuleTypeManagement().update(getEntityFactory().softwareModuleType().update(existingType.getId())
                 .description(getTagDesc().getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview())));
-        getUiNotification().displaySuccess(
-                getI18n().getMessage("message.update.success", new Object[] { existingType.getName() }));
+        getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", existingType.getName()));
         getEventBus().publish(this,
                 new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.UPDATE_SOFTWARE_MODULE_TYPE, existingType));
     }

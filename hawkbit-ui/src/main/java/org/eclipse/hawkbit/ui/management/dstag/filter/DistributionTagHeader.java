@@ -46,7 +46,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     private final transient DistributionSetTagManagement distributionSetTagManagement;
 
-    DistributionTagButtons distributionTagButtons;
+    private final DistributionTagButtons distributionTagButtons;
 
     DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus,
@@ -67,7 +67,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return getI18n().getMessage("header.filter.tag", new Object[] {});
+        return getI18n().getMessage("header.filter.tag");
     }
 
     @Override

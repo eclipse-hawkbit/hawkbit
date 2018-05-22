@@ -144,7 +144,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
             uiNotification.displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
-                    new Object[] { getI18n().getMessage("label.no.tag.assigned") }));
+                    getI18n().getMessage("label.no.tag.assigned")));
             return false;
         }
         return true;
@@ -175,7 +175,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
         final Set<Long> deletedEntityByTransferable = source.getSelectedEntitiesByTransferable(tabletransferable);
         if (deletedEntityByTransferable.isEmpty()) {
-            final String actionDidNotWork = getI18n().getMessage("message.action.did.not.work", new Object[] {});
+            final String actionDidNotWork = getI18n().getMessage("message.action.did.not.work");
             uiNotification.displayValidationError(actionDidNotWork);
             return false;
         }

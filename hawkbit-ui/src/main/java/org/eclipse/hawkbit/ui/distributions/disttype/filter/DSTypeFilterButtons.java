@@ -67,6 +67,32 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private final transient SystemManagement systemManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param manageDistUIState
+     *            ManageDistUIState
+     * @param distributionsViewClientCriterion
+     *            DistributionsViewClientCriterion
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     * @param systemManagement
+     *            SystemManagement
+     */
     public DSTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final DistributionSetTypeManagement distributionSetTypeManagement, final VaadinMessageSource i18n,

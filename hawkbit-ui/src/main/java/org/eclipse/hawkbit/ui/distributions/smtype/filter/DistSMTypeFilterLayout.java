@@ -29,6 +29,26 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
 
     private final ManageDistUIState manageDistUIState;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param i18n
+     *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param manageDistUIState
+     *            ManageDistUIState
+     * @param entityFactory
+     *            EntityFactory
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param filterButtons
+     *            DistSMTypeFilterButtons
+     */
     public DistSMTypeFilterLayout(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final ManageDistUIState manageDistUIState,
             final EntityFactory entityFactory, final UINotification uiNotification,
@@ -37,7 +57,6 @@ public class DistSMTypeFilterLayout extends AbstractFilterLayout {
         super(new DistSMTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, entityFactory, uiNotification,
                 softwareModuleTypeManagement, filterButtons), filterButtons, eventBus);
         this.manageDistUIState = manageDistUIState;
-
         restoreState();
         eventBus.subscribe(this);
     }

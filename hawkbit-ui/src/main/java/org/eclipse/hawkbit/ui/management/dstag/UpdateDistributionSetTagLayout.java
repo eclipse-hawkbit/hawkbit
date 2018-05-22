@@ -41,6 +41,26 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     private final CloseListener closeListener;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param distributionSetTagManagement
+     *            DistributionSetTagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param selectedTagName
+     *            name of the selected distribution set tag to update
+     * @param closeListener
+     *            CloseListener
+     */
     public UpdateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
@@ -76,8 +96,7 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
         getDistributionSetTagManagement().update(update);
         getEventBus().publish(this,
                 new DistributionSetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (DistributionSetTag) targetObj));
-        getUiNotification()
-                .displaySuccess(getI18n().getMessage("message.update.success", new Object[] { targetObj.getName() }));
+        getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", targetObj.getName()));
     }
 
     @Override

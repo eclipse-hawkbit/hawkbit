@@ -55,6 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Abstract class for tag layout.
  *
  * @param <E>
+ *            entity class
  */
 public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomComponent
         implements ColorChangeListener, ColorSelector {
@@ -307,15 +308,12 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
     }
 
-    /**
-     * Create new tag.
-     */
     protected void createNewTag() {
         colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
     }
 
     protected void displaySuccess(final String tagName) {
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { tagName }));
+        uiNotification.displaySuccess(i18n.getMessage("message.save.success", tagName));
     }
 
     protected void displayValidationError(final String errorMessage) {
@@ -359,6 +357,11 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         return colorPickerLayout;
     }
 
+    /**
+     * Creates the window to create or update a tag or type
+     * 
+     * @return the created window
+     */
     public CommonDialogWindow createWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getWindowCaption()).content(this)
                 .cancelButtonClickListener(event -> discard()).layout(mainLayout).i18n(i18n)
@@ -522,7 +525,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
      */
     private void slidersValueChangeListeners() {
         colorPickerLayout.getRedSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = -8336732888800920839L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
@@ -533,7 +536,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
             }
         });
         colorPickerLayout.getGreenSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1236358037766775663L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
@@ -544,7 +547,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
             }
         });
         colorPickerLayout.getBlueSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 8466370763686043947L;
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
@@ -558,8 +561,8 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
 
     private boolean isDuplicateByName() {
         final Optional<E> existingType = findEntityByName();
-        existingType.ifPresent(type -> uiNotification.displayValidationError(
-                i18n.getMessage("message.tag.duplicate.check", new Object[] { type.getName() })));
+        existingType.ifPresent(type -> uiNotification
+                .displayValidationError(i18n.getMessage("message.tag.duplicate.check", type.getName())));
         return existingType.isPresent();
     }
 

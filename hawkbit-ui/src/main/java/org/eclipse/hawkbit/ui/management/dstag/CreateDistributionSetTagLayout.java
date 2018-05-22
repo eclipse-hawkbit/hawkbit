@@ -28,6 +28,22 @@ public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLa
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param distributionSetTagManagement
+     *            DistributionSetTagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public CreateDistributionSetTagLayout(final VaadinMessageSource i18n,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
@@ -40,9 +56,6 @@ public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLa
         createNewTag();
     }
 
-    /**
-     * Create new tag.
-     */
     @Override
     protected void createNewTag() {
         super.createNewTag();

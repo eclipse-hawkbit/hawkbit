@@ -49,6 +49,22 @@ public abstract class AbstractSoftwareModuleTypeLayout extends AbstractTypeLayou
 
     private OptionGroup assignOptiongroup;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     */
     public AbstractSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
@@ -114,8 +130,7 @@ public abstract class AbstractSoftwareModuleTypeLayout extends AbstractTypeLayou
 
     @Override
     protected String getDuplicateKeyErrorMessage(final SoftwareModuleType existingType) {
-        return getI18n().getMessage("message.type.key.swmodule.duplicate.check",
-                new Object[] { existingType.getKey() });
+        return getI18n().getMessage("message.type.key.swmodule.duplicate.check", existingType.getKey());
     }
 
     public SoftwareModuleTypeManagement getSoftwareModuleTypeManagement() {

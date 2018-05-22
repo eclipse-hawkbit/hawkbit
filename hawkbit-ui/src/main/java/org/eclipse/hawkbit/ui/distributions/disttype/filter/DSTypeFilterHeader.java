@@ -49,8 +49,30 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
-    DSTypeFilterButtons dSTypeFilterButtons;
+    private final DSTypeFilterButtons dSTypeFilterButtons;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param eventBus
+     *            UIEventBus
+     * @param manageDistUIState
+     *            ManageDistUIState
+     * @param entityFactory
+     *            EntityFactory
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @param dSTypeFilterButtons
+     *            DSTypeFilterButtons
+     */
     DSTypeFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final ManageDistUIState manageDistUIState, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,

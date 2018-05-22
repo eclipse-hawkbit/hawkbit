@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 
-import java.io.Serializable;
-
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -22,7 +20,7 @@ import com.vaadin.ui.Button;
 /**
  * Single button click behaviour of filter buttons layout.
  */
-public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
+public class DSTypeFilterButtonClick extends AbstractFilterSingleButtonClick {
 
     private static final long serialVersionUID = 1L;
 

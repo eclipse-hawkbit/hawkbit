@@ -30,6 +30,22 @@ public abstract class AbstractDistributionSetTagLayout extends AbstractTagLayout
 
     private final transient DistributionSetTagManagement distributionSetTagManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param distributionSetTagManagement
+     *            DistributionSetTagManagement
+     */
     public AbstractDistributionSetTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement) {

@@ -60,6 +60,26 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     private final UINotification uiNotification;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param artifactUploadState
+     *            ArtifactUploadState
+     * @param uploadViewClientCriterion
+     *            UploadViewClientCriterion
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public SMTypeFilterButtons(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final UploadViewClientCriterion uploadViewClientCriterion,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,

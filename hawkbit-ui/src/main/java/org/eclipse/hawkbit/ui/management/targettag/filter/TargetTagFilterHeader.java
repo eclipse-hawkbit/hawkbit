@@ -27,10 +27,8 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final ManagementUIState managementUIState;
 
-    TargetTagFilterHeader(final VaadinMessageSource i18n,
-
-            final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus) {
+    TargetTagFilterHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
+            final SpPermissionChecker permChecker, final UIEventBus eventBus) {
         super(permChecker, eventBus, i18n);
         this.managementUIState = managementUIState;
     }
@@ -42,7 +40,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return getI18n().getMessage("header.target.filter.tag", new Object[] {});
+        return getI18n().getMessage("header.target.filter.tag");
     }
 
     @Override

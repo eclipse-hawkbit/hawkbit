@@ -34,6 +34,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Superclass defining common properties and methods for creating types.
  * 
  * @param <E>
+ *            entity
  */
 public abstract class AbstractTypeLayout<E extends NamedEntity> extends AbstractTagLayout<E> {
 
@@ -45,6 +46,20 @@ public abstract class AbstractTypeLayout<E extends NamedEntity> extends Abstract
 
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public AbstractTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);

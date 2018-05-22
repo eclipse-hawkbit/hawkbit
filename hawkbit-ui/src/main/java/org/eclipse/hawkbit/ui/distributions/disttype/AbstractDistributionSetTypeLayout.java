@@ -36,6 +36,24 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     */
     public AbstractDistributionSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final DistributionSetTypeManagement distributionSetTypeManagement,

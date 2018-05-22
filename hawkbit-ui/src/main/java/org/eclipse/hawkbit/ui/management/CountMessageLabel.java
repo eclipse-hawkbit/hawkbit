@@ -38,6 +38,7 @@ import com.vaadin.ui.Label;
  * pinning.
  */
 public class CountMessageLabel extends Label {
+
     private static final long serialVersionUID = 1L;
 
     private final transient TargetManagement targetManagement;
@@ -77,6 +78,7 @@ public class CountMessageLabel extends Label {
      * TenantAwareEvent Listener to show the message count.
      *
      * @param event
+     *            ManagementUIEvent which describes the action to execute
      */
     @EventBusListenerMethod(scope = EventScope.UI)
     public void onEvent(final ManagementUIEvent event) {
@@ -139,8 +141,8 @@ public class CountMessageLabel extends Label {
             filterMesgBuf.append(" ");
             filterMesgBuf.append(getStatusMsg(targetFilterParams.getClickedStatusTargetTags(), status));
             filterMesgBuf.append(getOverdueStateMsg(targetFilterParams.isOverdueFilterEnabled(), overdue));
-            filterMesgBuf
-                    .append(getTagsMsg(targetFilterParams.isNoTagSelected(), targetFilterParams.getClickedTargetTags(), tags));
+            filterMesgBuf.append(
+                    getTagsMsg(targetFilterParams.isNoTagSelected(), targetFilterParams.getClickedTargetTags(), tags));
             filterMesgBuf.append(targetFilterParams.getSearchText().map(search -> text).orElse(" "));
             filterMesgBuf.append(targetFilterParams.getDistributionSet().map(set -> dists).orElse(" "));
             filterMesgBuf.append(targetFilterParams.getTargetFilterQuery().map(query -> custom).orElse(" "));
@@ -183,9 +185,9 @@ public class CountMessageLabel extends Label {
         final Long targetsWithInstalledDsCount = targetManagement.countByInstalledDistributionSet(distId);
         final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.count"));
         message.append("<span class=\"assigned-count-message\">");
-        message.append(i18n.getMessage("label.assigned.count", new Object[] { targetsWithAssigedDsCount }));
+        message.append(i18n.getMessage("label.assigned.count", targetsWithAssigedDsCount));
         message.append("</span>, <span class=\"installed-count-message\"> ");
-        message.append(i18n.getMessage("label.installed.count", new Object[] { targetsWithInstalledDsCount }));
+        message.append(i18n.getMessage("label.installed.count", targetsWithInstalledDsCount));
         message.append("</span>");
         setValue(message.toString());
     }

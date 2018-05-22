@@ -52,6 +52,30 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
 
     private final CloseListener closeListener;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     * @param selectedTypeName
+     *            the name of the distribution set type to update
+     * @param closeListener
+     *            CloseListener
+     */
     public UpdateDistributionSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
@@ -96,13 +120,6 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         getTagName().setEnabled(false);
     }
 
-    /**
-     * Select tag & set tag name & tag desc values corresponding to selected
-     * tag.
-     * 
-     * @param distSetTypeSelected
-     *            as the selected tag
-     */
     @Override
     public void setTagDetails(final String distSetTypeSelected) {
         getTagName().setValue(distSetTypeSelected);
@@ -110,33 +127,27 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         getTwinTables().getSelectedTable().getContainerDataSource().removeAllItems();
         final Optional<DistributionSetType> selectedDistSetType = getDistributionSetTypeManagement()
                 .getByName(distSetTypeSelected);
-        selectedDistSetType.ifPresent(
+        selectedDistSetType.ifPresent(selectedType -> {
+            getTagDesc().setValue(selectedType.getDescription());
+            getTypeKey().setValue(selectedType.getKey());
+            if (distributionSetManagement.countByTypeId(selectedType.getId()) <= 0) {
+                getTwinTables().getDistTypeSelectLayout().setEnabled(true);
+                getTwinTables().getSelectedTable().setEnabled(true);
+            } else {
+                getUiNotification().displayValidationError(
+                        selectedType.getName() + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
+                getTwinTables().getDistTypeSelectLayout().setEnabled(false);
+                getTwinTables().getSelectedTable().setEnabled(false);
+            }
 
-                selectedType -> {
-                    getTagDesc().setValue(selectedType.getDescription());
-                    getTypeKey().setValue(selectedType.getKey());
-                    if (distributionSetManagement.countByTypeId(selectedType.getId()) <= 0) {
-                        getTwinTables().getDistTypeSelectLayout().setEnabled(true);
-                        getTwinTables().getSelectedTable().setEnabled(true);
-                    } else {
-                        getUiNotification().displayValidationError(selectedType.getName() + "  "
-                                + getI18n().getMessage("message.error.dist.set.type.update"));
-                        getTwinTables().getDistTypeSelectLayout().setEnabled(false);
-                        getTwinTables().getSelectedTable().setEnabled(false);
-                    }
-
-                    createOriginalSelectedTableContainer();
-                    selectedType.getOptionalModuleTypes()
-                            .forEach(swModuleType -> addTargetTableForUpdate(swModuleType, false));
-                    selectedType.getMandatoryModuleTypes()
-                            .forEach(swModuleType -> addTargetTableForUpdate(swModuleType, true));
-                    setColorPickerComponentsColor(selectedType.getColour());
-                });
+            createOriginalSelectedTableContainer();
+            selectedType.getOptionalModuleTypes().forEach(swModuleType -> addTargetTableForUpdate(swModuleType, false));
+            selectedType.getMandatoryModuleTypes().forEach(swModuleType -> addTargetTableForUpdate(swModuleType, true));
+            setColorPickerComponentsColor(selectedType.getColour());
+        });
 
         disableFields();
-        if (
-
-        isUpdateAction()) {
+        if (isUpdateAction()) {
             getWindow().setOrginaleValues();
         }
     }
@@ -181,17 +192,13 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
                 .description(getTagDesc().getValue())
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
         if (distributionSetManagement.countByTypeId(existingType.getId()) <= 0 && !CollectionUtils.isEmpty(itemIds)) {
-            update.mandatory(itemIds.stream().filter(
-
-                    itemId -> DistributionTypeSoftwareModuleSelectLayout.isMandatoryModuleType(
-
-                            getTwinTables().getSelectedTable().getItem(itemId)))
+            update.mandatory(itemIds.stream()
+                    .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                            .isMandatoryModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                     .collect(Collectors.toList()))
-                    .optional(itemIds.stream().filter(
-
-                            itemId -> DistributionTypeSoftwareModuleSelectLayout.isOptionalModuleType(
-
-                                    getTwinTables().getSelectedTable().getItem(itemId)))
+                    .optional(itemIds.stream()
+                            .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                                    .isOptionalModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                             .collect(Collectors.toList()));
         }
 

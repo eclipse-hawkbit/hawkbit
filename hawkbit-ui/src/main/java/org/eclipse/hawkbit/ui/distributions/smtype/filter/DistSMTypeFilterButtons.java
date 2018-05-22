@@ -51,7 +51,7 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
-    private static final long serialVersionUID = 1L;;
+    private static final long serialVersionUID = 1L;
 
     private final ManageDistUIState manageDistUIState;
 
@@ -65,6 +65,26 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param manageDistUIState
+     *            ManageDistUIState
+     * @param distributionsViewClientCriterion
+     *            DistributionsViewClientCriterion
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     */
     public DistSMTypeFilterButtons(final UIEventBus eventBus, final ManageDistUIState manageDistUIState,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final VaadinMessageSource i18n,

@@ -35,6 +35,28 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
 
     private final transient UIEventBus eventBus;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param managementUIState
+     *            ManagementUIState
+     * @param managementViewClientCriterion
+     *            ManagementViewClientCriterion
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param eventBus
+     *            UIEventBus
+     * @param notification
+     *            UINotification
+     * @param entityFactory
+     *            EntityFactory
+     * @param targetFilterQueryManagement
+     *            TargetFilterQueryManagement
+     * @param targetTagManagement
+     *            TargetTagManagement
+     */
     public TargetTagFilterLayout(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,

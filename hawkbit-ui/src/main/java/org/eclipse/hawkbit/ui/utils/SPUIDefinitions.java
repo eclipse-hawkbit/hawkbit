@@ -411,11 +411,6 @@ public final class SPUIDefinitions {
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
 
     /**
-     * CUSTOM_FILTER_DELETE.
-     */
-    public static final String CUSTOM_FILTER_DELETE = "Delete";
-
-    /**
      * DELETE column/button.
      */
     public static final String DELETE = "Delete";

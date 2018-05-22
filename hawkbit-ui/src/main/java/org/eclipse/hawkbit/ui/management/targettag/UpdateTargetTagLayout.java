@@ -41,6 +41,26 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
 
     private final CloseListener closeListener;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param targetTagManagement
+     *            TargetTagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param selectedTagName
+     *            name of the selected target tag to update
+     * @param closeListener
+     *            CloseListener
+     */
     public UpdateTargetTagLayout(final VaadinMessageSource i18n, final TargetTagManagement targetTagManagement,
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification, final String selectedTagName, final CloseListener closeListener) {
@@ -75,8 +95,7 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
 
         getTargetTagManagement().update(update);
         getEventBus().publish(this, new TargetTagTableEvent(BaseEntityEventType.UPDATED_ENTITY, (TargetTag) targetObj));
-        getUiNotification()
-                .displaySuccess(getI18n().getMessage("message.update.success", new Object[] { targetObj.getName() }));
+        getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", targetObj.getName()));
     }
 
     @Override

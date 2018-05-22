@@ -152,11 +152,7 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     private boolean alreadyContainsColumn(final String columnName) {
-        final List<Object> columns = getVisibleColumnsAsList();
-        if (columns.contains(columnName)) {
-            return true;
-        }
-        return false;
+        return getVisibleColumnsAsList().contains(columnName);
     }
 
     private Object addDeleteCell(final Object itemId) {

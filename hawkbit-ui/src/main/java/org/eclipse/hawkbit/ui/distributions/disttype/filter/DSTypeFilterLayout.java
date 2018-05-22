@@ -30,6 +30,28 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
 
     private final ManageDistUIState manageDistUIState;
 
+    /**
+     * Constructor
+     * 
+     * @param manageDistUIState
+     *            ManageDistUIState
+     * @param i18n
+     *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param eventBus
+     *            UIEventBus
+     * @param entityFactory
+     *            EntityFactory
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @param dSTypeFilterButtons
+     *            DSTypeFilterButtons
+     */
     public DSTypeFilterLayout(final ManageDistUIState manageDistUIState, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,

@@ -29,13 +29,32 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
+    /**
+     * Constructor
+     * 
+     * @param artifactUploadState
+     *            ArtifactUploadState
+     * @param i18n
+     *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param eventBus
+     *            UIEventBus
+     * @param entityFactory
+     *            EntityFactory
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param sMTypeFilterButtons
+     *            SMTypeFilterButtons
+     */
     public SMTypeFilterLayout(final ArtifactUploadState artifactUploadState, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
             final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SMTypeFilterButtons sMTypeFilterButtons) {
         super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, entityFactory, uiNotification,
                 softwareModuleTypeManagement, sMTypeFilterButtons), sMTypeFilterButtons, eventBus);
-
         this.artifactUploadState = artifactUploadState;
         restoreState();
     }

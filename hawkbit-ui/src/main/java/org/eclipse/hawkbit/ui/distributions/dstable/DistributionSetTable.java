@@ -306,7 +306,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    // Assign Software to Distribution START
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
             final SoftwareModuleIdName[] softwareModules) {
         final String confirmQuestion;
@@ -345,13 +344,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             count += entry.getValue().size();
         }
 
-        notification.displaySuccess(i18n.getMessage("message.software.assignment", new Object[] { count }));
+        notification.displaySuccess(i18n.getMessage("message.software.assignment", count));
         manageDistUIState.getAssignedList().clear();
         manageDistUIState.getConsolidatedDistSoftwareList().clear();
         eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
-
-    // Assign Software to Distribution END
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {
         if (!isSoftwareModuleDragged(distId, sm)) {

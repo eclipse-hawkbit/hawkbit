@@ -30,6 +30,22 @@ public abstract class AbstractTargetTagLayout extends AbstractTagLayout<TargetTa
 
     private final transient TargetTagManagement targetTagManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param targetTagManagement
+     *            TargetTagManagement
+     */
     public AbstractTargetTagLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final TargetTagManagement targetTagManagement) {

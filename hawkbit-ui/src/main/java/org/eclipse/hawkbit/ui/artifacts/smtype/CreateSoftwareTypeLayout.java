@@ -77,8 +77,7 @@ public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
             final SoftwareModuleType newSWType = getSoftwareModuleTypeManagement()
                     .create(getEntityFactory().softwareModuleType().create().key(typeKeyValue).name(typeNameValue)
                             .description(typeDescValue).colour(colorPicked).maxAssignments(assignNumber));
-            getUiNotification()
-                    .displaySuccess(getI18n().getMessage("message.save.success", new Object[] { newSWType.getName() }));
+            getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newSWType.getName()));
             getEventBus().publish(this,
                     new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
         } else {

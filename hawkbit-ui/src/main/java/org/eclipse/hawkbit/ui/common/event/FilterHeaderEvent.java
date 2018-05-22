@@ -14,11 +14,12 @@ package org.eclipse.hawkbit.ui.common.event;
  * cancel icon. The menubar for selecting a tag/type action is shown again.
  *
  * @param <T>
+ *            entity
  */
 public class FilterHeaderEvent<T> {
 
     /**
-     * FilterHeaderEvent type
+     * FilterHeaderEnum which describes the action to execute
      */
     public enum FilterHeaderEnum {
         SHOW_MENUBAR, SHOW_CANCEL_BUTTON
@@ -28,6 +29,14 @@ public class FilterHeaderEvent<T> {
 
     private final Class<T> entityType;
 
+    /**
+     * Constructor
+     * 
+     * @param filterHeaderEnum
+     *            Enum which describes the action to execute
+     * @param entityType
+     *            Entity type which the action should be executed for
+     */
     public FilterHeaderEvent(final FilterHeaderEnum filterHeaderEnum, final Class<T> entityType) {
         this.filterHeaderEnum = filterHeaderEnum;
         this.entityType = entityType;

@@ -415,7 +415,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private static void unselectSelectedEntitiesInTable(final Set<Long> selectedEntities, final Table table) {
-        selectedEntities.forEach(entity -> table.unselect(entity));
+        selectedEntities.forEach(table::unselect);
     }
 
     private static long getDeleteButtonId(final ClickEvent event) {

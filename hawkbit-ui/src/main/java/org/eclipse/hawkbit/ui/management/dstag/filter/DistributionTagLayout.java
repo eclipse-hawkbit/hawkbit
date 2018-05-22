@@ -26,7 +26,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 /**
- *
+ * Layout for Distribution Tags
  *
  */
 public class DistributionTagLayout extends AbstractFilterLayout implements RefreshableContainer {
@@ -35,6 +35,26 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
 
     private final ManagementUIState managementUIState;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param managementUIState
+     *            ManagementUIState
+     * @param i18n
+     *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param distributionSetTagManagement
+     *            DistributionSetTagManagement
+     * @param entityFactory
+     *            EntityFactory
+     * @param uiNotification
+     *            UINotification
+     * @param distributionTagButtons
+     *            DistributionTagButtons
+     */
     public DistributionTagLayout(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,

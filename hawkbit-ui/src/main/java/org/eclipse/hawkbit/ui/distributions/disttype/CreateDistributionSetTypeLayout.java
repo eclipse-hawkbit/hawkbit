@@ -32,6 +32,24 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param entityFactory
+     *            EntityFactory
+     * @param eventBus
+     *            UIEventBus
+     * @param permChecker
+     *            SpPermissionChecker
+     * @param uiNotification
+     *            UINotification
+     * @param softwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     */
     public CreateDistributionSetTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
@@ -51,9 +69,6 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
         createNewDistributionSetType();
     }
 
-    /**
-     * Create new DistSet Type tag.
-     */
     @SuppressWarnings("unchecked")
     private void createNewDistributionSetType() {
 
@@ -64,7 +79,6 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
         final List<Long> itemIds = (List<Long>) getTwinTables().getSelectedTable().getItemIds();
 
         if (typeNameValue != null && typeKeyValue != null && !CollectionUtils.isEmpty(itemIds)) {
-
             final List<Long> mandatory = itemIds.stream()
                     .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
                             .isMandatoryModuleType(getTwinTables().getSelectedTable().getItem(itemId)))

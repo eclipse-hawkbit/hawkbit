@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
-import java.io.Serializable;
-
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
@@ -25,9 +23,9 @@ import com.vaadin.ui.Button.ClickEvent;
  * Single button click behaviour of custom target filter buttons layout.
  *
  */
-public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButtonClick implements Serializable {
+public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButtonClick {
 
-    private static final long serialVersionUID = -6173433602055291533L;
+    private static final long serialVersionUID = 1L;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -35,6 +33,16 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
+    /**
+     * Constructor
+     * 
+     * @param eventBus
+     *            UIEventBus
+     * @param managementUIState
+     *            ManagementUIState
+     * @param targetFilterQueryManagement
+     *            TargetFilterQueryManagement
+     */
     public CustomTargetTagFilterButtonClick(final UIEventBus eventBus, final ManagementUIState managementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.eventBus = eventBus;
@@ -50,11 +58,10 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     @Override
     protected void filterClicked(final Button clickedButton) {
-        targetFilterQueryManagement.get((Long) clickedButton.getData())
-                .ifPresent(targetFilterQuery -> {
-                    this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery.getId());
-                    this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
-                });
+        targetFilterQueryManagement.get((Long) clickedButton.getData()).ifPresent(targetFilterQuery -> {
+            this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery.getId());
+            this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
+        });
     }
 
     protected void processButtonClick(final ClickEvent event) {

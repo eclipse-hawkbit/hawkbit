@@ -31,12 +31,11 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Action type option group layout.
- * 
- *
  */
 public class ActionTypeOptionGroupLayout extends HorizontalLayout {
 
-    private static final long serialVersionUID = -5624576558669213864L;
+    private static final long serialVersionUID = 1L;
+
     private static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
 
     private final VaadinMessageSource i18n;
@@ -45,6 +44,12 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
 
     private DateField forcedTimeDateField;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     */
     public ActionTypeOptionGroupLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
 
@@ -81,7 +86,6 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final FlexibleOptionGroupItemComponent forceItem = actionTypeOptionGroup
                 .getItemComponent(ActionTypeOption.FORCED);
         forceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        // set Id for Forced radio button.
         forceItem.setId("save.action.radio.forced");
         addComponent(forceItem);
         final Label forceLabel = new Label();
@@ -106,7 +110,6 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final FlexibleOptionGroupItemComponent autoForceItem = actionTypeOptionGroup
                 .getItemComponent(ActionTypeOption.AUTO_FORCED);
         autoForceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        // setted Id for Time Forced radio button.
         autoForceItem.setId(UIComponentIdProvider.ACTION_TYPE_OPTION_GROUP_SAVE_TIMEFORCED);
         addComponent(autoForceItem);
         final Label autoForceLabel = new Label();
@@ -142,6 +145,10 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         actionTypeOptionGroup.select(ActionTypeOption.FORCED);
     }
 
+    /**
+     * Enum which described the options for the action type
+     *
+     */
     public enum ActionTypeOption {
         FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED);
 
@@ -151,9 +158,6 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
             this.actionType = actionType;
         }
 
-        /**
-         * @return
-         */
         public ActionType getActionType() {
             return actionType;
         }
