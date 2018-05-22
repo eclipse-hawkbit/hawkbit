@@ -137,7 +137,6 @@
                      <doctype>book</doctype>
                      <attributes>
                         <snippets>${project.build.directory}/generated-snippets</snippets>
-                        <stylesheet>sp-theme.css</stylesheet>
                      </attributes>
                      <outputDirectory>${project.build.directory}/classes/rest-api</outputDirectory>
                   </configuration>

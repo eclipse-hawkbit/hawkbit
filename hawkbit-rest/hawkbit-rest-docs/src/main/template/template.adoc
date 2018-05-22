@@ -1,5 +1,5 @@
 = Management API
-Bosch IoT Software Provisioning;
+Eclipse hawkBit;
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs

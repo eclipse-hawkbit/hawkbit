@@ -18,7 +18,7 @@
      <version>0.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>hawkbit-ddi-resource</artifactId>
-  <name>hawkBit :: DDI :: Resources</name>
+  <name>hawkBit :: REST :: DDI Resources</name>
  
    <dependencies>
       <dependency>
