@@ -195,7 +195,7 @@
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
       <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
-      <jacoco.version>0.7.9</jacoco.version>
+      <jacoco.version>0.8.1</jacoco.version>
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
       <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
       <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
@@ -213,6 +213,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven.compiler.plugin.version}</version>
             <configuration>
                <compilerArgument>-Xlint:all</compilerArgument>
                <showWarnings>true</showWarnings>
@@ -385,7 +386,7 @@
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
-                     ${jacoco.agent.ut.arg}
+                     ${jacoco.agent.ut.arg} --illegal-access=warn --add-modules=java.xml.bind
                   </argLine>
                   <properties>
                      <property>
@@ -450,22 +451,19 @@
    </build>
    <profiles>
     <profile>
-        <id>java-9</id>
+        <id>jdk-8</id>
         <activation>
-            <jdk>9</jdk>
-        </activation>
+            <jdk>1.8</jdk>
+        </activation>   
         <build>
             <pluginManagement>
                 <plugins>
                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>${maven.compiler.plugin.version}</version>
-                   </plugin>  
-                   <plugin>    
+                       <groupId>org.apache.maven.plugins</groupId>
                        <artifactId>maven-surefire-plugin</artifactId>
                        <configuration>
                            <argLine>
-                               --illegal-access=warn --add-modules=java.xml.bind
+                              ${jacoco.agent.ut.arg}
                            </argLine>
                        </configuration>
                    </plugin>
