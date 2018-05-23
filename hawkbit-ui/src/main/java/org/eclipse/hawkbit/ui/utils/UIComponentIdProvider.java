@@ -38,14 +38,6 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_ADD_DESC = "target.add.desc";
     /**
-     * ID-Targ.DEL.
-     */
-    public static final String TARGET_DELETE_ALL = "target.delete.all";
-    /**
-     * ID-SW.DEL.
-     */
-    public static final String SW_DELETE_ALL = "swmodule.delete.all";
-    /**
      * ID-Targ.Edit.icon.
      */
     public static final String TARGET_EDIT_ICON = "target.edit.icon";
@@ -92,10 +84,6 @@ public final class UIComponentIdProvider {
      * ID-Dist.desc.
      */
     public static final String DIST_ADD_DESC = "dist.add.desc";
-    /**
-     * /** ID-Dist.DELETE.
-     */
-    public static final String DIST_DELETE_ALL = "dist.delete.all";
     /**
      * ID-Dist.MigCheck.
      */

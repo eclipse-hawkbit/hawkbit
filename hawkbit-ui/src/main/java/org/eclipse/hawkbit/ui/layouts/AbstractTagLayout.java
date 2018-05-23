@@ -127,6 +127,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         this.eventBus = eventBus;
         this.permChecker = permChecker;
         this.uiNotification = uiNotification;
+        init();
     }
 
     /**
@@ -306,10 +307,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         colorPickerLayout.getColorSelect().setColor(newColor);
         getPreviewButtonColor(newColor.getCSS());
         createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
-    }
-
-    protected void createNewTag() {
-        colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
     }
 
     protected void displaySuccess(final String tagName) {

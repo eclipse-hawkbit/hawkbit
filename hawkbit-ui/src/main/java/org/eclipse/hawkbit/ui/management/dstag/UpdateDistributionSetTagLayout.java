@@ -68,12 +68,10 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);
         this.selectedTagName = selectedTagName;
         this.closeListener = closeListener;
-        init();
+        initUpdatePopup();
     }
 
-    @Override
-    protected void init() {
-        super.init();
+    private void initUpdatePopup() {
         setTagDetails(selectedTagName);
         getWindow().addCloseListener(closeListener);
     }
@@ -113,9 +111,7 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.get().getColour()),
                         selectedDistTag.get().getColour());
             }
-            if (isUpdateAction()) {
-                getWindow().setOrginaleValues();
-            }
+            getWindow().setOrginaleValues();
         });
     }
 

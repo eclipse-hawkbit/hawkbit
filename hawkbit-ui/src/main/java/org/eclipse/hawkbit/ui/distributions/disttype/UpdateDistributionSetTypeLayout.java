@@ -87,12 +87,10 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         this.distributionSetManagement = distributionSetManagement;
         this.selectedTypeName = selectedTypeName;
         this.closeListener = closeListener;
-        init();
+        initUpdatePopup();
     }
 
-    @Override
-    protected void init() {
-        super.init();
+    private void initUpdatePopup() {
         setTagDetails(selectedTypeName);
         getWindow().addCloseListener(closeListener);
     }
@@ -147,15 +145,13 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         });
 
         disableFields();
-        if (isUpdateAction()) {
-            getWindow().setOrginaleValues();
-        }
+        getWindow().setOrginaleValues();
     }
 
     private void createOriginalSelectedTableContainer() {
         originalSelectedTableContainer = new IndexedContainer();
-        originalSelectedTableContainer
-                .addContainerProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeName(), String.class, "");
+        originalSelectedTableContainer.addContainerProperty(
+                DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeName(), String.class, "");
         originalSelectedTableContainer.addContainerProperty(
                 DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeDescription(), String.class, "");
         originalSelectedTableContainer.addContainerProperty(

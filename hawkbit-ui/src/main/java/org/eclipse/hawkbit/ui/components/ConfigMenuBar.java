@@ -93,8 +93,4 @@ public class ConfigMenuBar extends MenuBar {
         }
     }
 
-    public MenuItem getConfig() {
-        return config;
-    }
-
 }

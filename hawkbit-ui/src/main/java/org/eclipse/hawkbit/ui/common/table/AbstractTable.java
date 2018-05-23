@@ -396,7 +396,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
                     if (ok) {
                         handleOkDelete(entitiesToBeDeleted);
                     }
-                });
+                }, getDeleteConfirmationWindowId(event));
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
@@ -421,6 +421,11 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private static long getDeleteButtonId(final ClickEvent event) {
         final String id = event.getButton().getId();
         return Long.parseLong(id.substring(id.lastIndexOf('.') + 1));
+    }
+
+    private static String getDeleteConfirmationWindowId(final ClickEvent event) {
+        final String id = event.getButton().getId();
+        return id.substring(0, id.lastIndexOf('.'));
     }
 
     protected abstract String getDeletedEntityName(Long entityId);

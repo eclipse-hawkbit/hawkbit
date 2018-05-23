@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -48,7 +49,6 @@ public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLa
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTagManagement);
-        init();
     }
 
     @Override
@@ -56,18 +56,20 @@ public class CreateDistributionSetTagLayout extends AbstractDistributionSetTagLa
         createNewTag();
     }
 
-    @Override
-    protected void createNewTag() {
-        super.createNewTag();
-        String colour = ColorPickerConstants.START_COLOR.getCSS();
-        if (!StringUtils.isEmpty(getColorPicked())) {
-            colour = getColorPicked();
+    private void createNewTag() {
+        if (!StringUtils.isEmpty(getTagName().getValue())) {
+            setColorPicked(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
+            String colour = ColorPickerConstants.START_COLOR.getCSS();
+            if (!StringUtils.isEmpty(getColorPicked())) {
+                colour = getColorPicked();
+            }
+            final DistributionSetTag newDistTag = getDistributionSetTagManagement().create(getEntityFactory().tag()
+                    .create().name(getTagName().getValue()).description(getTagDesc().getValue()).colour(colour));
+            getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
+            displaySuccess(newDistTag.getName());
+        } else {
+            displayValidationError(getI18n().getMessage(getMessageErrorMissingTagname()));
         }
-
-        final DistributionSetTag newDistTag = getDistributionSetTagManagement().create(getEntityFactory().tag().create()
-                .name(getTagName().getValue()).description(getTagDesc().getValue()).colour(colour));
-        getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.ADD_ENTITY, newDistTag));
-        displaySuccess(newDistTag.getName());
     }
 
     @Override

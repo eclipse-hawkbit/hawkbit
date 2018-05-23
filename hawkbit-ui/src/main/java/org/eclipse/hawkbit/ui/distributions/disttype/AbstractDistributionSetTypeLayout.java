@@ -61,6 +61,12 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
         super(i18n, entityFactory, eventBus, permChecker, uiNotification);
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        createTwinTables();
+    }
+
+    private void createTwinTables() {
+        twinTables = new DistributionSetTypeSoftwareModuleSelectLayout(getI18n(), softwareModuleTypeManagement);
+        getMainLayout().addComponent(twinTables, 2, 0);
     }
 
     @Override
@@ -91,13 +97,6 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
     @Override
     protected String getTypeKeyId() {
         return UIComponentIdProvider.NEW_DISTRIBUTION_TYPE_KEY;
-    }
-
-    @Override
-    protected void buildLayout() {
-        super.buildLayout();
-        twinTables = new DistributionSetTypeSoftwareModuleSelectLayout(getI18n(), softwareModuleTypeManagement);
-        getMainLayout().addComponent(twinTables, 2, 0);
     }
 
     @Override

@@ -56,7 +56,6 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
             final DistributionSetTypeManagement distributionSetTypeManagement) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, distributionSetTypeManagement,
                 softwareModuleTypeManagement);
-        init();
     }
 
     @Override

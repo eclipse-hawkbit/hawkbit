@@ -67,12 +67,10 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);
         this.selectedTagName = selectedTagName;
         this.closeListener = closeListener;
-        init();
+        initUpdatePopup();
     }
 
-    @Override
-    protected void init() {
-        super.init();
+    private void initUpdatePopup() {
         setTagDetails(selectedTagName);
         getWindow().addCloseListener(closeListener);
     }
@@ -110,9 +108,7 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(tag.getColour()), tag.getColour());
             }
-            if (isUpdateAction()) {
-                getWindow().setOrginaleValues();
-            }
+            getWindow().setOrginaleValues();
         });
     }
 

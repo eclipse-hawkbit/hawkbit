@@ -67,12 +67,10 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
         this.selectedTypeName = selectedTypeName;
         this.closeListener = closeListener;
-        init();
+        initUpdatePopup();
     }
 
-    @Override
-    protected void init() {
-        super.init();
+    private void initUpdatePopup() {
         setTagDetails(selectedTypeName);
         getWindow().addCloseListener(closeListener);
     }

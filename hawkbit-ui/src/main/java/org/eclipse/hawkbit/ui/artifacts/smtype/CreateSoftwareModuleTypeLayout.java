@@ -47,7 +47,6 @@ public class CreateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);
-        init();
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -48,13 +49,11 @@ public class CreateTargetTagLayout extends AbstractTargetTagLayout {
             final EntityFactory entityFactory, final UIEventBus eventBus, final SpPermissionChecker permChecker,
             final UINotification uiNotification) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, targetTagManagement);
-        init();
     }
 
-    @Override
-    protected void createNewTag() {
-        super.createNewTag();
+    private void createNewTag() {
         if (!StringUtils.isEmpty(getTagName().getValue())) {
+            setColorPicked(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
             String colour = ColorPickerConstants.START_COLOR.getCSS();
             if (!StringUtils.isEmpty(getColorPicked())) {
                 colour = getColorPicked();
