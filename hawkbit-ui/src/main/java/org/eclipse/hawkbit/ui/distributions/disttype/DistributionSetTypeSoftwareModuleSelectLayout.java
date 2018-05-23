@@ -37,8 +37,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Layout for the software modules select tables for managing Distribution Set
  * Types on the Distributions View.
  */
-
-public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
+public class DistributionSetTypeSoftwareModuleSelectLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -72,7 +71,7 @@ public class DistributionTypeSoftwareModuleSelectLayout extends VerticalLayout {
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      */
-    public DistributionTypeSoftwareModuleSelectLayout(final VaadinMessageSource i18n,
+    public DistributionSetTypeSoftwareModuleSelectLayout(final VaadinMessageSource i18n,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.i18n = i18n;

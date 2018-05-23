@@ -23,7 +23,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Layout for the pop-up window which is created when creating a software module
  * type on the Upload or Distribution View.
  */
-public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
+public class CreateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public class CreateSoftwareTypeLayout extends AbstractSoftwareModuleTypeLayout {
      * @param softwareModuleTypeManagement
      *            management for {@link SoftwareModuleType}s
      */
-    public CreateSoftwareTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+    public CreateSoftwareModuleTypeLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final SpPermissionChecker permChecker, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         super(i18n, entityFactory, eventBus, permChecker, uiNotification, softwareModuleTypeManagement);

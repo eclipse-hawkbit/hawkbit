@@ -32,7 +32,7 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
 
-    private DistributionTypeSoftwareModuleSelectLayout twinTables;
+    private DistributionSetTypeSoftwareModuleSelectLayout twinTables;
 
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
@@ -96,7 +96,7 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
     @Override
     protected void buildLayout() {
         super.buildLayout();
-        twinTables = new DistributionTypeSoftwareModuleSelectLayout(getI18n(), softwareModuleTypeManagement);
+        twinTables = new DistributionSetTypeSoftwareModuleSelectLayout(getI18n(), softwareModuleTypeManagement);
         getMainLayout().addComponent(twinTables, 2, 0);
     }
 
@@ -121,7 +121,7 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
         return distributionSetTypeManagement.getByName(getTagName().getValue());
     }
 
-    public DistributionTypeSoftwareModuleSelectLayout getTwinTables() {
+    public DistributionSetTypeSoftwareModuleSelectLayout getTwinTables() {
         return twinTables;
     }
 

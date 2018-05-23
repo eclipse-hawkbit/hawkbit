@@ -180,29 +180,20 @@ public class TargetTable extends AbstractTable<Target> {
     void onTargetUpdatedEvents(final TargetUpdatedEventContainer eventContainer) {
         @SuppressWarnings("unchecked")
         final List<Long> visibleItemIds = (List<Long>) getVisibleItemIds();
-
         if (isFilterEnabled()) {
             refreshTargets();
         } else {
-            eventContainer.getEvents().stream().filter(
-
-                    event -> visibleItemIds.contains(event.getEntityId())).filter(Objects::nonNull).forEach(
-
-                            event -> updateVisibleItemOnEvent(event.getEntity()));
-
+            eventContainer.getEvents().stream().filter(event -> visibleItemIds.contains(event.getEntityId()))
+                    .filter(Objects::nonNull).forEach(event -> updateVisibleItemOnEvent(event.getEntity()));
         }
         publishTargetSelectedEntityForRefresh(eventContainer.getEvents().stream());
     }
 
     private void publishTargetSelectedEntityForRefresh(
             final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
-        targetEntityEventStream.filter(
-
-                event -> isLastSelectedTarget(event.getEntityId())).filter(Objects::nonNull).findAny().ifPresent(
-
-                        event -> eventBus.publish(this,
-                                new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
-
+        targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId())).filter(Objects::nonNull)
+                .findAny().ifPresent(event -> eventBus.publish(this,
+                        new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -445,10 +436,8 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private boolean isPinned(final TargetIdName target) {
-        return managementUIState.getDistributionTableFilters().getPinnedTarget().map(
-
-                pinnedTarget -> pinnedTarget.equals(target)).orElse(false);
-
+        return managementUIState.getDistributionTableFilters().getPinnedTarget()
+                .map(pinnedTarget -> pinnedTarget.equals(target)).orElse(false);
     }
 
     private void addPinClickListener(final ClickEvent event) {
@@ -647,7 +636,6 @@ public class TargetTable extends AbstractTable<Target> {
 
             /* Update the new Name, Description and poll date */
             item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(updatedTarget.getName());
-
         }
     }
 
@@ -674,18 +662,15 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
-        return managementUIState.getTargetTableFilters().getPinnedDistId().map(
-
-                distPinned -> {
-                    if (distPinned.equals(installedDistributionSetId)) {
-                        return SPUIDefinitions.HIGHLIGHT_GREEN;
-                    }
-                    if (distPinned.equals(assignedDistributionSetId)) {
-                        return SPUIDefinitions.HIGHLIGHT_ORANGE;
-                    }
-                    return null;
-                }).orElse(null);
-
+        return managementUIState.getTargetTableFilters().getPinnedDistId().map(distPinned -> {
+            if (distPinned.equals(installedDistributionSetId)) {
+                return SPUIDefinitions.HIGHLIGHT_GREEN;
+            }
+            if (distPinned.equals(assignedDistributionSetId)) {
+                return SPUIDefinitions.HIGHLIGHT_ORANGE;
+            }
+            return null;
+        }).orElse(null);
     }
 
     private String createTargetTableStyle(final Object itemId, final Object propertyId) {
@@ -1002,7 +987,7 @@ public class TargetTable extends AbstractTable<Target> {
                     if (!ok) {
                         managementUIState.getAssignedList().clear();
                     }
-                }, createAssignmentTab());
+                }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
@@ -1048,13 +1033,10 @@ public class TargetTable extends AbstractTable<Target> {
     private void initMaintenanceWindow() {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
-
-                event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
-        maintenanceWindowLayout.getDurationControl().addTextChangeListener(
-
-                event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
-
+        maintenanceWindowLayout.getScheduleControl()
+                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getDurationControl()
+                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
     }
 
     private void enableSaveButton(final boolean enabled) {
@@ -1067,9 +1049,6 @@ public class TargetTable extends AbstractTable<Target> {
         managementUIState.getAssignedList().put(createTargetIdName, distributionNameId);
     }
 
-    // Code for assignment end
-
-    // Code for delete icon start
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         targetManagement.delete(entitiesToDelete);
@@ -1118,5 +1097,4 @@ public class TargetTable extends AbstractTable<Target> {
         return "";
     }
 
-    // Code for delete icon end
 }

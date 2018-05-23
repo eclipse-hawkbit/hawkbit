@@ -80,12 +80,12 @@ public class CreateDistributionSetTypeLayout extends AbstractDistributionSetType
 
         if (typeNameValue != null && typeKeyValue != null && !CollectionUtils.isEmpty(itemIds)) {
             final List<Long> mandatory = itemIds.stream()
-                    .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                    .filter(itemId -> DistributionSetTypeSoftwareModuleSelectLayout
                             .isMandatoryModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                     .collect(Collectors.toList());
 
             final List<Long> optional = itemIds.stream()
-                    .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                    .filter(itemId -> DistributionSetTypeSoftwareModuleSelectLayout
                             .isOptionalModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                     .collect(Collectors.toList());
 

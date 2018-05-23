@@ -9,10 +9,8 @@
 package org.eclipse.hawkbit.ui.layouts;
 
 /**
- * General Layout for pop-up window for Tags which is created when updating or
- * deleting a tag. The layout includes the combobox for selecting the tag to
- * manage.
- *
+ * Interface which is implemented in tags and types layout classes for updating
+ * a tag or type.
  */
 @FunctionalInterface
 public interface UpdateTag {

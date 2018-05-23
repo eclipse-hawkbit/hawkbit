@@ -148,7 +148,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
 
         if (isMaximized()) {
-            maximizeArtifactDetailsView();
+            maximizedArtifactDetailsView();
         }
     }
 
@@ -357,13 +357,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void maxArtifactDetails() {
         final Boolean flag = (Boolean) maxMinButton.getData();
         if (flag == null || Boolean.FALSE.equals(flag)) {
-            maximizeArtifactDetailsView();
+            maximizedArtifactDetailsView();
         } else {
-            minimizeArtifactDetailsView();
+            minimizedArtifactDetailsView();
         }
     }
 
-    private void minimizeArtifactDetailsView() {
+    private void minimizedArtifactDetailsView() {
         fullWindowMode = Boolean.FALSE;
         showMaxIcon();
         setTableColumnDetails(artifactDetailsTable);
@@ -371,7 +371,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     }
 
-    private void maximizeArtifactDetailsView() {
+    private void maximizedArtifactDetailsView() {
         fullWindowMode = Boolean.TRUE;
         showMinIcon();
         setTableColumnDetails(artifactDetailsTable);

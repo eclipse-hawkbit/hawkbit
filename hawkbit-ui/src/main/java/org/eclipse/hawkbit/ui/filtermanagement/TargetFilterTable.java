@@ -55,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TargetFilterTable extends Table {
 
-    private static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 

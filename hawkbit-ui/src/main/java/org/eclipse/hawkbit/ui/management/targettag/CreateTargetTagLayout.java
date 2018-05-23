@@ -51,9 +51,6 @@ public class CreateTargetTagLayout extends AbstractTargetTagLayout {
         init();
     }
 
-    /**
-     * Create new tag.
-     */
     @Override
     protected void createNewTag() {
         super.createNewTag();

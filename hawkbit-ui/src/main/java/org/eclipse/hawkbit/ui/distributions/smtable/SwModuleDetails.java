@@ -75,7 +75,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     @Override
     protected void createComponents() {
         super.createComponents();
-        createShowArtifactDtlsButton();
+        createShowArtifactDetailsButton();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
         getNameEditLayout().setComponentAlignment(artifactDetailsButton, Alignment.TOP_RIGHT);
     }
 
-    private Button createShowArtifactDtlsButton() {
+    private Button createShowArtifactDetailsButton() {
         artifactDetailsButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.FILE_O,
                 SPUIButtonStyleNoBorder.class);
         artifactDetailsButton.setDescription(getI18n().getMessage("tooltip.artifact.icon"));

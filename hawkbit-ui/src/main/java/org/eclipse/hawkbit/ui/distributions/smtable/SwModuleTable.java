@@ -56,7 +56,6 @@ import com.vaadin.ui.UI;
 /**
  * Implementation of software module table using generic abstract table styles .
  */
-
 public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     private static final long serialVersionUID = 1L;

@@ -282,9 +282,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         }
 
         if (entityToBeDeletedIsSelectedInTable(tranferableData, selectedEntities)) {
-            ids.add(tranferableData);
-        } else {
             ids.addAll(selectedEntities);
+        } else {
+            ids.add(tranferableData);
         }
         return ids;
     }
@@ -373,13 +373,13 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final Long id = getDeleteButtonId(event);
         final Set<Long> selectedEntities = getSelectedEntities();
         if (entityToBeDeletedIsSelectedInTable(id, selectedEntities)) {
+            entitiesToBeDeleted = selectedEntities.stream().collect(Collectors.toList());
+        } else {
             final Table table = getTable(event);
             unselectSelectedEntitiesInTable(selectedEntities, table);
             selectEntityToDeleteInTable(id, table);
             entitiesToBeDeleted = new ArrayList<>();
             entitiesToBeDeleted.add(id);
-        } else {
-            entitiesToBeDeleted = selectedEntities.stream().collect(Collectors.toList());
         }
         String confirmationQuestion;
         if (entitiesToBeDeleted.size() == 1) {
@@ -402,7 +402,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private static boolean entityToBeDeletedIsSelectedInTable(final Long id, final Set<Long> selectedEntities) {
-        return !selectedEntities.contains(id);
+        return selectedEntities.contains(id);
     }
 
     private static Table getTable(final ClickEvent event) {
@@ -457,34 +457,27 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"),
                     getColumnNameMinimizedSize()));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"),
-                    0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY,
-                    i18n.getMessage("header.modifiedBy"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                    i18n.getMessage("header.modifiedDate"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
-            setItemDescriptionGenerator((source, itemId, propertyId) -> {
-
-                if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
-                    return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
-                }
-                if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
-                    return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue()
-                            .toString();
-                }
-                return null;
-            });
+            return columnList;
         }
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.getMessage("header.name"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.getMessage("header.createdBy"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.getMessage("header.createdDate"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.getMessage("header.modifiedBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                i18n.getMessage("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
+        setItemDescriptionGenerator((source, itemId, propertyId) -> {
+            if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
+            }
+            if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue().toString();
+            }
+            return null;
+        });
         return columnList;
-    }
-
-    protected static void moveDeleteColumnAtTheEnd(final List<TableColumn> columnList) {
-        Collections.swap(columnList, 0, columnList.size() - 1);
     }
 
     protected float getColumnNameMinimizedSize() {
@@ -523,10 +516,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final Long targetItemId = (Long) dropData.getItemIdOver();
 
         if (entityToBeDeletedIsSelectedInTable(targetItemId, targetSelected)) {
-            return Sets.newHashSet(targetItemId);
+            return targetSelected;
         }
-
-        return targetSelected;
+        return Sets.newHashSet(targetItemId);
     }
 
     private Set<Long> getDraggedTargetList(final TableTransferable transferable, final Table source) {
@@ -627,13 +619,5 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     protected abstract AcceptCriterion getDropAcceptCriterion();
 
     protected abstract void setDataAvailable(boolean available);
-
-    public Button getDeleteButton() {
-        return deleteButton;
-    }
-
-    public void setDeleteButton(final Button deleteButton) {
-        this.deleteButton = deleteButton;
-    }
 
 }

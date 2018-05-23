@@ -33,11 +33,6 @@ public final class SPUIStyleDefinitions {
     public static final String ACTION_HISTORY_MESSAGE_GRID = "action-history-message-grid";
 
     /**
-     * Style for accordion tab button.
-     */
-    public static final String SP_ACCORDION_TAB_BTN = "accordion-tab-button-style";
-
-    /**
      * Confirm box question label style.
      */
     public static final String CONFIRMBOX_QUESTION_LABEL = "confirmbox-question-label";
@@ -70,11 +65,6 @@ public final class SPUIStyleDefinitions {
     public static final String WIDGET_STYLE = "widget-style";
 
     public static final String WIDGET_TITLE = "widget-header";
-
-    /**
-     * Style of accordian in confirmation window.
-     */
-    public static final String CONFIRM_WINDOW_ACCORDIAN = "accordion";
 
     /**
      * Style of result action messages in the confirmation window.

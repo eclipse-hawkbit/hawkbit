@@ -218,11 +218,6 @@ public final class SPUIDefinitions {
     public static final String COMBO_BOX_SPECIFIC_STYLE = "combo-specific-style";
 
     /**
-     * Length of Assignment details table in save popup window.
-     */
-    public static final int ACCORDION_TAB_DETAILS_PAGE_LENGTH = 7;
-
-    /**
      * Target and distribution column width in save popup window.
      */
     public static final float TARGET_DISTRIBUTION_COLUMN_WIDTH = 2.8F;

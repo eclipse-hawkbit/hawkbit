@@ -63,8 +63,8 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     }
 
     protected void removeMenuBarAndAddCancelButton() {
-        getTypeHeaderLayout().removeComponent(getMenu());
-        getTypeHeaderLayout().addComponent(createCancelButtonForUpdateOrDeleteTag(), 1);
+        typeHeaderLayout.removeComponent(menu);
+        typeHeaderLayout.addComponent(createCancelButtonForUpdateOrDeleteTag(), 1);
     }
 
     private Button createCancelButtonForUpdateOrDeleteTag() {
@@ -79,9 +79,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         removeCancelButtonAndAddMenuBar();
     }
 
-    /**
-     * Create required components.
-     */
     private void createComponents() {
         title = createHeaderCaption();
 
@@ -92,30 +89,42 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleNoBorder.class);
-        hideIcon.addClickListener(
-
-                event -> hideFilterButtonLayout());
-
+        hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
     protected <T> void processFilterHeaderEvent(final FilterHeaderEvent<T> event) {
         if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
-                && getTypeHeaderLayout().getComponent(1).equals(getCancelTagButton())) {
+                && typeHeaderLayout.getComponent(1).equals(cancelTagButton)) {
             removeCancelButtonAndAddMenuBar();
         } else if (FilterHeaderEnum.SHOW_CANCEL_BUTTON == event.getFilterHeaderEnum()) {
             removeMenuBarAndAddCancelButton();
         }
     }
 
+    /**
+     * Command which should be executed when clicking on the delete tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
     protected abstract Command getDeleteButtonCommand();
 
+    /**
+     * Command which should be executed when clicking on the update tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
     protected abstract Command getUpdateButtonCommand();
 
+    /**
+     * Command which should be executed when clicking on the create tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
     protected abstract Command getAddButtonCommand();
 
-    /**
-     * Build layout.
-     */
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
         typeHeaderLayout = new HorizontalLayout();
@@ -126,7 +135,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         typeHeaderLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
         if (menu != null) {
             typeHeaderLayout.addComponent(menu);
-            typeHeaderLayout.setComponentAlignment(menu, Alignment.TOP_LEFT);
+            typeHeaderLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
         }
         typeHeaderLayout.addComponent(hideIcon);
         typeHeaderLayout.setComponentAlignment(hideIcon, Alignment.TOP_RIGHT);
@@ -139,13 +148,14 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     }
 
     protected void removeCancelButtonAndAddMenuBar() {
-        getTypeHeaderLayout().removeComponent(getCancelTagButton());
-        getTypeHeaderLayout().addComponent(getMenu(), 1);
+        typeHeaderLayout.removeComponent(cancelTagButton);
+        typeHeaderLayout.addComponent(menu, 1);
     }
 
     /**
+     * Returns the id of the hide filter button
      * 
-     * @return
+     * @return String containing the id
      */
     protected abstract String getHideButtonId();
 
@@ -174,7 +184,10 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     protected abstract String getConfigureFilterButtonId();
 
     /**
-     * @return
+     * Returns the information if the icon for configuring tags should be
+     * visible
+     * 
+     * @return boolean
      */
     protected abstract boolean isAddTagRequired();
 
@@ -186,28 +199,8 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         return eventBus;
     }
 
-    public Button getHideIcon() {
-        return hideIcon;
-    }
-
-    public ConfigMenuBar getMenu() {
-        return menu;
-    }
-
     public VaadinMessageSource getI18n() {
         return i18n;
-    }
-
-    public HorizontalLayout getTypeHeaderLayout() {
-        return typeHeaderLayout;
-    }
-
-    public Button getCancelTagButton() {
-        return cancelTagButton;
-    }
-
-    public void setCancelTagButton(final Button cancelTagButton) {
-        this.cancelTagButton = cancelTagButton;
     }
 
 }

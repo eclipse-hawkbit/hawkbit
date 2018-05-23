@@ -155,11 +155,11 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
     private void createOriginalSelectedTableContainer() {
         originalSelectedTableContainer = new IndexedContainer();
         originalSelectedTableContainer
-                .addContainerProperty(DistributionTypeSoftwareModuleSelectLayout.getDistTypeName(), String.class, "");
+                .addContainerProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeName(), String.class, "");
         originalSelectedTableContainer.addContainerProperty(
-                DistributionTypeSoftwareModuleSelectLayout.getDistTypeDescription(), String.class, "");
+                DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeDescription(), String.class, "");
         originalSelectedTableContainer.addContainerProperty(
-                DistributionTypeSoftwareModuleSelectLayout.getDistTypeMandatory(), CheckBox.class, null);
+                DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeMandatory(), CheckBox.class, null);
     }
 
     @SuppressWarnings("unchecked")
@@ -169,17 +169,17 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
         }
         final Item saveTblitem = getTwinTables().getSelectedTableContainer().addItem(swModuleType.getId());
         getTwinTables().getSourceTable().removeItem(swModuleType.getId());
-        saveTblitem.getItemProperty(DistributionTypeSoftwareModuleSelectLayout.getDistTypeName())
+        saveTblitem.getItemProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeName())
                 .setValue(swModuleType.getName());
         final CheckBox mandatoryCheckbox = new CheckBox("", mandatory);
         mandatoryCheckbox.setId(swModuleType.getName());
-        saveTblitem.getItemProperty(DistributionTypeSoftwareModuleSelectLayout.getDistTypeMandatory())
+        saveTblitem.getItemProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeMandatory())
                 .setValue(mandatoryCheckbox);
 
         final Item originalItem = originalSelectedTableContainer.addItem(swModuleType.getId());
-        originalItem.getItemProperty(DistributionTypeSoftwareModuleSelectLayout.getDistTypeName())
+        originalItem.getItemProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeName())
                 .setValue(swModuleType.getName());
-        originalItem.getItemProperty(DistributionTypeSoftwareModuleSelectLayout.getDistTypeMandatory())
+        originalItem.getItemProperty(DistributionSetTypeSoftwareModuleSelectLayout.getDistTypeMandatory())
                 .setValue(mandatoryCheckbox);
 
         getWindow().updateAllComponents(mandatoryCheckbox);
@@ -193,11 +193,11 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
                 .colour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
         if (distributionSetManagement.countByTypeId(existingType.getId()) <= 0 && !CollectionUtils.isEmpty(itemIds)) {
             update.mandatory(itemIds.stream()
-                    .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                    .filter(itemId -> DistributionSetTypeSoftwareModuleSelectLayout
                             .isMandatoryModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                     .collect(Collectors.toList()))
                     .optional(itemIds.stream()
-                            .filter(itemId -> DistributionTypeSoftwareModuleSelectLayout
+                            .filter(itemId -> DistributionSetTypeSoftwareModuleSelectLayout
                                     .isOptionalModuleType(getTwinTables().getSelectedTable().getItem(itemId)))
                             .collect(Collectors.toList()));
         }

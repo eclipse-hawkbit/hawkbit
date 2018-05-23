@@ -19,6 +19,12 @@ public final class UIComponentIdProvider {
      * ID-Target.
      */
     public static final String TARGET_TABLE_ID = "target.tableId";
+
+    /**
+     * ID of the confirmation window when assigning a distribution set to a
+     * target
+     */
+    public static final String DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID = "dist.to.target.assign.confirm.id";
     /**
      * ID- Targ.Cont ID.
      */
@@ -134,14 +140,6 @@ public final class UIComponentIdProvider {
      * ID - soft.module.vendor.
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
-    /**
-     * ID - Save Assign.
-     */
-    public static final String SAVE_ASSIGNMENT = "save.actions.popup.assign";
-    /**
-     * ID - Discard Assign.
-     */
-    public static final String DISCARD_ASSIGNMENT = "discard.actions.popup.assign";
     /**
      * ID - Delete Distribution SetType Save.
      */

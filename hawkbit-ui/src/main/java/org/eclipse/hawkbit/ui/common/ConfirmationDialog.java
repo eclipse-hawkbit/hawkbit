@@ -58,10 +58,13 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param tab
      *            ConfirmationTab which contains more information about the
      *            action which has to be confirmed, e.g. maintenance window
+     * @param id
+     *            the id of the confirmation window
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
-            final String cancelLabel, final ConfirmationDialogCallback callback, final ConfirmationTab tab) {
-        this(caption, question, okLabel, cancelLabel, callback, null, null, tab);
+            final String cancelLabel, final ConfirmationDialogCallback callback, final ConfirmationTab tab,
+            final String id) {
+        this(caption, question, okLabel, cancelLabel, callback, null, id, tab);
     }
 
     /**
