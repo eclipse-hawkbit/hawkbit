@@ -5,9 +5,11 @@
 Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
- [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent) 
+ [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
+![Docker Hub](https://img.shields.io/docker/build/hawkbit/hawkbit-update-server.svg)
+ [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
-Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://microbadger.com/images/hawkbit/hawkbit-update-server:0.2.0M9 "Get your own version badge on microbadger.com") [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://microbadger.com/images/hawkbit/hawkbit-update-server:0.2.0M9-mysql "Get your own version badge on microbadger.com")
+Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
 # Documentation
 
@@ -72,7 +74,7 @@ $  docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
 
 Open the update server in your browser:
 
-[localhost:8080](http://localhost:8080) 
+[localhost:8080](http://localhost:8080)
 
 See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
 
@@ -133,4 +135,3 @@ hawkBit is currently in '0.X' semantic version. That is due to the need that the
 However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
 
 Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
-
