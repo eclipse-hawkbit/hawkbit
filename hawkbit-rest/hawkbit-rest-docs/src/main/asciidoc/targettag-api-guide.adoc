@@ -1,0 +1,431 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[targettag]]
+= Target Tag
+
+toc::[]
+
+
+== GET /rest/v1/targettags 
+
+=== Implementation notes
+
+Handles the GET request of retrieving all target tags.
+
+=== Get paged list of target tags
+
+==== CURL
+
+include::{snippets}/targettag/get-target-tags/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access the target tags
+
+include::{snippets}/targettag/get-target-tags/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targettag/get-target-tags-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targettag/get-target-tags-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targettag/get-target-tags/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/targettag/get-target-tags/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targettags/{targetTagId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single target tag.
+
+=== Get a single target tag
+
+==== CURL
+
+include::{snippets}/targettag/get-target-tag/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access the target tag
+
+include::{snippets}/targettag/get-target-tag/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettag/get-target-tag/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targettag/get-target-tag/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/targettag/get-target-tag/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targettags
+
+=== Implementation Notes
+
+Handles the POST request of creating new target tag. The request body must always be a list of target tags.
+
+=== Create list of target tags
+
+==== CURL
+
+include::{snippets}/targettag/create-target-tags/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/create-target-tags/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettag/create-target-tags/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/targettag/create-target-tags/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettag/create-target-tags/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /rest/v1/targettags/{targetTagId}
+
+=== Implementation Notes
+
+Handles the PUT request of updating a target tag.
+
+=== Update a target tag
+
+==== Curl
+
+include::{snippets}/targettag/update-tagret-tag/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/update-tagret-tag/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettag/update-tagret-tag/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettag/update-tagret-tag/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettag/update-tagret-tag/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettag/update-tagret-tag/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targettags/{targetTagId}
+
+=== Implementation Notes
+
+Handles the DELETE request of deleting a single target tag.
+
+=== Deleting a target tag
+
+==== CURL
+
+include::{snippets}/targettag/delete-target-tag/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/delete-target-tag/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettag/delete-target-tag/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targettag/delete-target-tag/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targettags/{targetTagId}/assigned
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a list of assigned targets.
+
+=== Get a list of assigned targets
+
+==== CURL
+
+include::{snippets}/targettag/get-assigned-targets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/get-assigned-targets/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettag/get-assigned-targets/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettag/get-assigned-targets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettag/get-assigned-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targettags/{targetTagId}/assigned/toggleTagAssignment
+
+=== Implementation Notes
+
+Handles the POST request of toogle target assignment. The request body must always be a list of controller ids.
+
+=== Toogle target assignment
+
+==== CURL
+
+include::{snippets}/targettag/toggle-tag-assignment/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/toggle-tag-assignment/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettag/toggle-tag-assignment/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targettag/toggle-tag-assignment/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettag/toggle-tag-assignment/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /rest/v1/targettags/{targetTagId}/assigned
+
+=== Implementation Notes
+
+Handles the POST request of target assignment. Already assigned target will be ignored.
+
+=== Target assignment
+
+==== CURL
+
+include::{snippets}/targettag/assign-targets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/assign-targets/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettag/assign-targets/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targettag/assign-targets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettag/assign-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== DELETE /rest/v1/targettags/{targetTagId}/assigned/{controllerId}
+
+=== Implementation Notes
+
+Handles the DELETE request to unassign the given target. 
+
+=== Unassign a target
+
+==== CURL
+
+include::{snippets}/targettag/unassign-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettag/unassign-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettag/unassign-target/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targettag/unassign-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+
+
+

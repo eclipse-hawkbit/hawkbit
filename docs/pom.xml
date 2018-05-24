@@ -86,6 +86,32 @@
                      <jrubyVerbose>false</jrubyVerbose>
                   </configuration>
                </plugin>
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                    <execution>
+                        <id>unpack-api-docs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                <groupId>org.eclipse.hawkbit</groupId>
+                                <artifactId>hawkbit-rest-docs</artifactId>
+                                <version>${project.version}</version>
+                                <type>jar</type>
+                                <overWrite>true</overWrite>
+                                <outputDirectory>${basedir}/target/classes/documentation/</outputDirectory>
+                                <includes>**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                 </executions>
+                </plugin>
             </plugins>
          </build>
 

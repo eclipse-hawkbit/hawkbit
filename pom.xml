@@ -33,21 +33,17 @@
    <modules>
       <module>hawkbit-core</module>
       <module>hawkbit-security-core</module>
-      <module>hawkbit-rest-core</module>
-      <module>hawkbit-mgmt-api</module>
-      <module>hawkbit-mgmt-resource</module>
-      <module>hawkbit-ddi-api</module>
-      <module>hawkbit-ddi-resource</module>
-      <module>hawkbit-dmf</module>
-      <module>hawkbit-repository</module>
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
-      <module>hawkbit-ui</module>
+      <module>hawkbit-repository</module>
       <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
+      <module>hawkbit-ui</module>
+      <module>hawkbit-rest</module>
+      <module>hawkbit-dmf</module>
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
-      <module>hawkbit-starters</module>
+      <module>hawkbit-starters</module> 
    </modules>
 
    <scm>

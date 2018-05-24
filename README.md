@@ -5,7 +5,9 @@
 Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
- [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
+ [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent) 
+
+Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://microbadger.com/images/hawkbit/hawkbit-update-server:0.2.0M9 "Get your own version badge on microbadger.com") [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://microbadger.com/images/hawkbit/hawkbit-update-server:0.2.0M9-mysql "Get your own version badge on microbadger.com")
 
 # Documentation
 

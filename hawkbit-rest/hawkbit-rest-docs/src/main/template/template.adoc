@@ -1,0 +1,64 @@
+= Management API
+Eclipse hawkBit;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[resource-name]]
+= Resource name
+
+toc::[]
+
+
+== The request: Example: GET /rest/v1/targets 
+
+=== Implementation notes
+
+..... Implementation notes .....
+..... Implementation notes .....
+
+=== Describe the request: Example: Get paged list of targets
+
+==== CURL
+
+include::{snippets}/ ... ...curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/... ...http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/ ... ...path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/ ... ...request-fields.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/ ... ...with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/ ... ...with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/ ... ...response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/ ... ...http-response.adoc[]
+
+=== Error responses
+
+include::../errors/...
+include::../errors/...
+...
