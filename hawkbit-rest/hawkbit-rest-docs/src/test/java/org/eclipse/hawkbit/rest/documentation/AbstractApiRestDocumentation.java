@@ -219,6 +219,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                         .type("enum")
                         .attributes(key("value").value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                 fieldWithPath(fieldArrayPrefix + "securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
+                fieldWithPath(fieldArrayPrefix + "requestAttributes")
+                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                 fieldWithPath(fieldArrayPrefix + "installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
                 fieldWithPath(fieldArrayPrefix + "lastModifiedAt")
                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),

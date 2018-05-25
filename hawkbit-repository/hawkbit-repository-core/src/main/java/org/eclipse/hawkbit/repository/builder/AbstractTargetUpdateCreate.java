@@ -34,6 +34,8 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     protected Long lastTargetQuery;
     protected TargetUpdateStatus status;
 
+    protected  Boolean requestAttributes;
+
     protected AbstractTargetUpdateCreate(final String controllerId) {
         this.controllerId = StringUtils.trimWhitespace(controllerId);
     }
@@ -59,6 +61,11 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     public T securityToken(final String securityToken) {
         this.securityToken = StringUtils.trimWhitespace(securityToken);
+        return (T) this;
+    }
+
+    public T requestAttributes(final Boolean requestAttributes) {
+        this.requestAttributes = requestAttributes;
         return (T) this;
     }
 

@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -157,8 +158,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
      * returned else {@link EventTopic#DOWNLOAD} is returned.
      *
-     * @param target
-     *            for which to find the event type
+     * @param maintenanceWindowAvailable
+     *            valid maintenance window or not.
      *
      * @return {@link EventTopic} to use for message.
      */
@@ -197,6 +198,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
+    }
+
+    @EventListener(classes = TargetAttributesRequestedEvent.class)
+    protected void targetTriggerUpdateAttributes(final TargetAttributesRequestedEvent updateAttributesEvent) {
+        sendUpdateAttributesMessageToTarget(updateAttributesEvent.getTenant(), updateAttributesEvent.getControllerId(),
+                updateAttributesEvent.getTargetAddress());
     }
 
     protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
@@ -268,6 +275,18 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         amqpSenderService.sendMessage(message, address);
 
+    }
+
+    protected void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
+            final String targetAddress) {
+        if (!hasValidAddress(targetAddress)) {
+            return;
+        }
+
+        final Message message = new Message(null,
+                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.REQUEST_ATTRIBUTES_UPDATE));
+
+        amqpSenderService.sendMessage(message, URI.create(targetAddress));
     }
 
     private static MessageProperties createConnectorMessagePropertiesEvent(final String tenant,

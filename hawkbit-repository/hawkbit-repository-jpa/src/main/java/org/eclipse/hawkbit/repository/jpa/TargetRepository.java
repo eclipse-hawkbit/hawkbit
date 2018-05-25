@@ -178,8 +178,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByAssignedDistributionSetId(final Pageable pageable, final Long setID);
 
     /**
-     * Counts number of targets with given
-     * {@link Target#getAssignedDistributionSet()}.
+     * Counts number of targets with given distribution set Id.
      *
      * @param distId
      *            to search for
@@ -189,8 +188,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Long countByAssignedDistributionSetId(final Long distId);
 
     /**
-     * Counts number of targets with given
-     * {@link Target#getInstalledDistributionSet()}.
+     * Counts number of targets with given distribution set Id.
      *
      * @param distId
      *            to search for

@@ -24,6 +24,9 @@ public class MgmtTargetRequestBody {
     @JsonProperty
     private String securityToken;
 
+    @JsonProperty
+    private Boolean requestAttributes;
+
     public String getSecurityToken() {
         return securityToken;
     }
@@ -88,4 +91,11 @@ public class MgmtTargetRequestBody {
         this.address = address;
     }
 
+    public Boolean isRequestAttributes() {
+        return requestAttributes;
+    }
+
+    public void setRequestAttributes(final Boolean requestAttributes) {
+        this.requestAttributes = requestAttributes;
+    }
 }
