@@ -93,6 +93,11 @@ public abstract class AbstractSoftwareModuleDetails
     }
 
     @Override
+    protected String getMetadataButtonId() {
+        return UIComponentIdProvider.UPLOAD_SW_MODULE_METADATA_BUTTON;
+    }
+
+    @Override
     protected String getDefaultCaption() {
         return getI18n().getMessage("upload.swModuleTable.header");
     }

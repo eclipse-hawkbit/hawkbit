@@ -232,7 +232,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
         manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
                 SPUIButtonStyleNoBorder.class);
-        manageMetadataBtn.setId(getEditButtonId());
+        manageMetadataBtn.setId(getMetadataButtonId());
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
@@ -325,6 +325,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract void onEdit(Button.ClickEvent event);
 
     protected abstract String getEditButtonId();
+
+    protected abstract String getMetadataButtonId();
 
     protected abstract boolean onLoadIsTableMaximized();
 

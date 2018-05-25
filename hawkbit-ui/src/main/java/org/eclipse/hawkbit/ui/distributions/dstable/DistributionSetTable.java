@@ -245,8 +245,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             openConfirmationWindowForAssignment(distributionSetIdName.getName(),
                     softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
         });
-        getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
-        return;
+        if (!distributionSet.isPresent()) {
+            getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
+        }
     }
 
     private HashMap<Long, HashSet<SoftwareModuleIdName>> createAssignmentMap(
@@ -327,7 +328,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                         manageDistUIState.getAssignedList().clear();
                         manageDistUIState.getConsolidatedDistSoftwareList().clear();
                     }
-                });
+                }, UIComponentIdProvider.SOFT_MODULE_TO_DIST_ASSIGNMENT_CONFIRM_ID);
     }
 
     private String createConfirmationMessageForAssignment(final String distributionNameToAssign,

@@ -270,4 +270,10 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         // No implementation required
     }
 
+    @Override
+    protected String getMetadataButtonId() {
+        // No implementation required
+        return null;
+    }
+
 }

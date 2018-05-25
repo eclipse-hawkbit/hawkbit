@@ -25,6 +25,12 @@ public final class UIComponentIdProvider {
      * target
      */
     public static final String DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID = "dist.to.target.assign.confirm.id";
+
+    /**
+     * ID of the confirmation window when assigning a software module to a
+     * distribution set
+     */
+    public static final String SOFT_MODULE_TO_DIST_ASSIGNMENT_CONFIRM_ID = "swm.to.dist.assign.confirm.id";
     /**
      * ID- Targ.Cont ID.
      */
@@ -432,9 +438,19 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SW_MODULE_EDIT_BUTTON = "swmodule.edit.button";
 
     /**
+     * Artifact upload - sw module metadata button id.
+     */
+    public static final String UPLOAD_SW_MODULE_METADATA_BUTTON = "swmodule.metadata.button";
+
+    /**
      * Ds edit button id.
      */
     public static final String DS_EDIT_BUTTON = "ds.edit.button";
+
+    /**
+     * Ds metadata button id.
+     */
+    public static final String DS_METADATA_BUTTON = "ds.metadata.button";
     /**
      * Upload Artifact details max table Id.
      */
