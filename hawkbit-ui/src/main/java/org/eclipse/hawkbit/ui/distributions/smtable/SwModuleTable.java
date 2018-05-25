@@ -124,7 +124,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
         manageDistUIState.getLastSelectedSoftwareModule()
                 .ifPresent(lastSelectedModuleId -> events.stream()
                         .filter(event -> lastSelectedModuleId.equals(event.getEntityId())).filter(Objects::nonNull)
-                        .findAny().ifPresent(lastEvent -> eventBus.publish(this,
+                        .findAny().ifPresent(lastEvent -> getEventBus().publish(this,
                                 new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastEvent.getEntity()))));
     }
 
@@ -191,7 +191,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected void publishSelectedEntityEvent(final SoftwareModule selectedLastEntity) {
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        getEventBus().publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
     }
 
     @Override
@@ -204,7 +204,8 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected void setManagementEntityStateValues(final Set<Long> values, final Long lastId) {
-        if (values == null || lastId == null) {
+        final ManagementEntityState managementEntityState = getManagementEntityState();
+        if (managementEntityState == null) {
             return;
         }
         manageDistUIState.setLastSelectedSoftwareModule(lastId);
@@ -218,14 +219,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
 
     @Override
     protected ManagementEntityState getManagementEntityState() {
-        return null;
+        return manageDistUIState;
     }
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
+            columnList
+                    .add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, getI18n().getMessage("header.vendor"), 0.1F));
         }
         return columnList;
     }
@@ -310,15 +312,15 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule> {
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         softwareModuleManagement.delete(entitiesToDelete);
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
-        notification.displaySuccess(
-                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Software Module(s) "));
+        getEventBus().publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
+                entitiesToDelete.size() + " " + getI18n().getMessage("caption.software.module") + "(s)"));
         manageDistUIState.getSelectedSoftwareModules().clear();
     }
 
     @Override
-    protected String getEntityName() {
-        return i18n.getMessage("upload.swModuleTable.header");
+    protected String getEntityType() {
+        return getI18n().getMessage("upload.swModuleTable.header");
     }
 
     @Override

@@ -100,9 +100,9 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
     }
 
     @Override
-    public void setTagDetails(final String targetTagSelected) {
-        getTagName().setValue(targetTagSelected);
-        getSoftwareModuleTypeManagement().getByName(targetTagSelected).ifPresent(selectedTypeTag -> {
+    public void setTagDetails(final String selectedEntity) {
+        getSoftwareModuleTypeManagement().getByName(selectedEntity).ifPresent(selectedTypeTag -> {
+            getTagName().setValue(selectedTypeTag.getName());
             getTagDesc().setValue(selectedTypeTag.getDescription());
             getTypeKey().setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == 1) {
@@ -113,7 +113,6 @@ public class UpdateSoftwareModuleTypeLayout extends AbstractSoftwareModuleTypeLa
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         });
         disableFields();
-
     }
 
     private void updateSWModuleType(final SoftwareModuleType existingType) {

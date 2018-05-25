@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -85,14 +86,14 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         if (isAddTagRequired()) {
             menu = new ConfigMenuBar(permChecker.hasCreateRepositoryPermission(),
                     permChecker.hasUpdateRepositoryPermission(), permChecker.hasDeleteRepositoryPermission(),
-                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand());
+                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId());
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
-    protected <T> void processFilterHeaderEvent(final FilterHeaderEvent<T> event) {
+    protected <T> void processFilterHeaderEvent(final FilterHeaderEvent event) {
         if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
                 && typeHeaderLayout.getComponent(1).equals(cancelTagButton)) {
             removeCancelButtonAndAddMenuBar();
@@ -100,6 +101,13 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
             removeMenuBarAndAddCancelButton();
         }
     }
+
+    /**
+     * Returns the id for the menubar element for configuring tags and types
+     * 
+     * @return String with id
+     */
+    protected abstract String getMenuBarId();
 
     /**
      * Command which should be executed when clicking on the delete tag button
@@ -128,6 +136,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
         typeHeaderLayout = new HorizontalLayout();
+        typeHeaderLayout.setId(UIComponentIdProvider.DIST_TAG_MENU_BAR_ID);
         typeHeaderLayout.setHeight(32, Unit.PIXELS);
         typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);
@@ -191,16 +200,20 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      */
     protected abstract boolean isAddTagRequired();
 
-    public SpPermissionChecker getPermChecker() {
+    protected SpPermissionChecker getPermChecker() {
         return permChecker;
     }
 
-    public EventBus.UIEventBus getEventBus() {
+    protected EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 
-    public VaadinMessageSource getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
+    }
+
+    protected HorizontalLayout getTypeHeaderLayout() {
+        return typeHeaderLayout;
     }
 
 }

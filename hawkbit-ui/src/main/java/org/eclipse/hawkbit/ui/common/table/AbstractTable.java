@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -80,15 +79,13 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    protected transient EventBus.UIEventBus eventBus;
+    private transient EventBus.UIEventBus eventBus;
 
-    protected VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
-    protected UINotification notification;
+    private final UINotification notification;
 
-    protected SpPermissionChecker permChecker;
-
-    private Button deleteButton;
+    private final SpPermissionChecker permChecker;
 
     protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification notification, final SpPermissionChecker permChecker) {
@@ -352,15 +349,12 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private Object createDeleteButton(final Object itemId) {
-        deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
+        final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
                 SPUIButtonStyleNoBorderWithIcon.class);
         final String id = getEntityId(itemId);
-        if (StringUtils.hasText(id)) {
-            deleteButton.setId("delete.entity." + id);
-            deleteButton.setDescription(SPUIDefinitions.DELETE);
-            deleteButton.addClickListener(this::addDeleteButtonClickListener);
-        }
-
+        deleteButton.setId("delete.entity." + id);
+        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }
 
@@ -369,6 +363,15 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     private void openConfirmationWindowDeleteAction(final ClickEvent event) {
+        final List<Long> entitiesToBeDeleted = getEntitiesForDeletion(event);
+        final String confirmationQuestion = createConfirmationQuestionForDeletion(entitiesToBeDeleted);
+        final ConfirmationDialog confirmDialog = createConfirmationWindowForDeletion(event, entitiesToBeDeleted,
+                confirmationQuestion);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private List<Long> getEntitiesForDeletion(final ClickEvent event) {
         List<Long> entitiesToBeDeleted;
         final Long id = getDeleteButtonId(event);
         final Set<Long> selectedEntities = getSelectedEntities();
@@ -381,24 +384,28 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             entitiesToBeDeleted = new ArrayList<>();
             entitiesToBeDeleted.add(id);
         }
-        String confirmationQuestion;
-        if (entitiesToBeDeleted.size() == 1) {
-            final String entityName = getDeletedEntityName(entitiesToBeDeleted.get(0));
-            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityName().toLowerCase(),
-                    entityName, "");
-        } else {
-            confirmationQuestion = i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, entitiesToBeDeleted.size(),
-                    getEntityName().toLowerCase(), "s");
-        }
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityName()), confirmationQuestion,
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+        return entitiesToBeDeleted;
+    }
+
+    private ConfirmationDialog createConfirmationWindowForDeletion(final ClickEvent event,
+            final List<Long> entitiesToBeDeleted, final String confirmationQuestion) {
+        return new ConfirmationDialog(i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityType()),
+                confirmationQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDelete(entitiesToBeDeleted);
                     }
                 }, getDeleteConfirmationWindowId(event));
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-        confirmDialog.getWindow().bringToFront();
+    }
+
+    private String createConfirmationQuestionForDeletion(final List<Long> entitiesToBeDeleted) {
+        if (entitiesToBeDeleted.size() == 1) {
+            return i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityType().toLowerCase(),
+                    getDeletedEntityName(entitiesToBeDeleted.get(0)), "");
+        } else {
+            return i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, entitiesToBeDeleted.size(),
+                    getEntityType().toLowerCase(), "s");
+        }
     }
 
     private static boolean entityToBeDeletedIsSelectedInTable(final Long id, final Set<Long> selectedEntities) {
@@ -432,7 +439,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected abstract void handleOkDelete(List<Long> allEntities);
 
-    protected abstract String getEntityName();
+    protected abstract String getEntityType();
 
     protected abstract Set<Long> getSelectedEntities();
 
@@ -609,6 +616,18 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected void selectDraggedEntities(final AbstractTable<?> source, final Set<Long> ids) {
         source.setValue(ids);
+    }
+
+    protected EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    protected SpPermissionChecker getPermChecker() {
+        return permChecker;
     }
 
     protected abstract List<String> hasMissingPermissionsForDrop();

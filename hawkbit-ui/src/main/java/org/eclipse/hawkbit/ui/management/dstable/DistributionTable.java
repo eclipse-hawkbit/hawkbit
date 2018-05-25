@@ -167,7 +167,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
         final Long lastSelectedDsIdName = managementUIState.getLastSelectedDsIdName();
         eventContainer.getEvents().stream().filter(event -> event.getEntityId().equals(lastSelectedDsIdName))
-                .filter(Objects::nonNull).findAny().ifPresent(event -> eventBus.publish(this,
+                .filter(Objects::nonNull).findAny().ifPresent(event -> getEventBus().publish(this,
                         new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
@@ -303,7 +303,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected void publishSelectedEntityEvent(final DistributionSet selectedLastEntity) {
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        getEventBus().publish(this,
+                new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
     }
 
     @Override
@@ -372,7 +373,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distList,
                 distTagName);
 
-        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
+        getNotification().displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, getI18n()));
         if (result.getAssigned() >= 1 && managementUIState.getDistributionTableFilters().isNoTagSelected()) {
             refreshFilter();
         }
@@ -398,8 +399,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 }
             } while (assignedTargets.hasNext() && (query = assignedTargets.nextPageable()) != null);
             if (assigned) {
-                notification.displaySuccess(
-                        i18n.getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+                getNotification().displaySuccess(
+                        getI18n().getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
             }
         });
     }
@@ -420,7 +421,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
 
         if (targetDetailsList.isEmpty()) {
-            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS));
+            getNotification().displayWarning(getI18n().getMessage(TARGETS_NOT_EXISTS));
             return;
         }
 
@@ -428,7 +429,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         selectDroppedEntities(distId);
         final Optional<DistributionSet> findDistributionSetById = distributionSetManagement.get(distId);
         if (!findDistributionSetById.isPresent()) {
-            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
+            getNotification().displayWarning(getI18n().getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
 
@@ -448,7 +449,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 pendingActionMessage = getPendingActionMessage(pendingActionMessage, target.getControllerId(),
                         HawkbitCommonUtil.getDistributionNameAndVersion(distributionSetIdName.getName(),
                                 distributionSetIdName.getVersion()));
-                notification.displayValidationError(pendingActionMessage);
+                getNotification().displayValidationError(pendingActionMessage);
             } else {
                 managementUIState.getAssignedList().put(key, distributionSetIdName);
             }
@@ -457,27 +458,34 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
             final List<Target> targetDetailsList) {
-        String confirmQuestion;
-        if (targetDetailsList.size() == 1) {
-            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target",
-                    targetDetailsList.get(0).getName());
-        } else {
-            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetDetailsList.size(),
-                    "targets", distributionNameToAssign);
-        }
+        final String confirmQuestion = createConfirmationQuestionForAssignment(distributionNameToAssign,
+                targetDetailsList);
+        createConfirmationWindowForAssignment(confirmQuestion);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
 
-        confirmDialog = new ConfirmationDialog(i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                confirmQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
-                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+    private void createConfirmationWindowForAssignment(final String confirmQuestion) {
+        confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
+                confirmQuestion, getI18n().getMessage(SPUIDefinitions.BUTTON_OK),
+                getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
-                    }
-                    if (!ok) {
+                    } else {
                         managementUIState.getAssignedList().clear();
                     }
                 }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-        confirmDialog.getWindow().bringToFront();
+    }
+
+    private String createConfirmationQuestionForAssignment(final String distributionNameToAssign,
+            final List<Target> targetDetailsList) {
+        if (targetDetailsList.size() == 1) {
+            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target",
+                    targetDetailsList.get(0).getName());
+        } else {
+            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetDetailsList.size(), "targets",
+                    distributionNameToAssign);
+        }
     }
 
     private boolean isMaintenanceWindowValid() {
@@ -488,7 +496,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                         maintenanceWindowLayout.getMaintenanceTimeZone());
             } catch (final InvalidMaintenanceScheduleException e) {
                 LOG.error("Maintenance window is not valid", e);
-                notification.displayValidationError(e.getMessage());
+                getNotification().displayValidationError(e.getMessage());
                 return false;
             }
         }
@@ -537,19 +545,19 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                                     .collect(Collectors.toList()));
 
             if (distributionSetAssignmentResult.getAssigned() > 0) {
-                notification.displaySuccess(
-                        i18n.getMessage("message.target.assignment", distributionSetAssignmentResult.getAssigned()));
+                getNotification().displaySuccess(getI18n().getMessage("message.target.assignment",
+                        distributionSetAssignmentResult.getAssigned()));
             }
             if (distributionSetAssignmentResult.getAlreadyAssigned() > 0) {
-                notification.displaySuccess(i18n.getMessage("message.target.alreadyAssigned",
+                getNotification().displaySuccess(getI18n().getMessage("message.target.alreadyAssigned",
                         distributionSetAssignmentResult.getAlreadyAssigned()));
             }
         }
         resfreshPinnedDetails(saveAssignedList);
 
         managementUIState.getAssignedList().clear();
-        notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
-        eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        getNotification().displaySuccess(getI18n().getMessage("message.target.ds.assign.success"));
+        getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
@@ -558,12 +566,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
         if (pinnedDist.isPresent()) {
             if (saveAssignedList.keySet().contains(pinnedDist.get())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
+                getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
         } else if (pinnedTarget.isPresent()) {
             final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
             if (assignedTargetIds.contains(pinnedTarget.get())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+                getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
             }
         }
     }
@@ -586,7 +594,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private CheckBox enableMaintenanceWindowControl() {
-        final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
+        final CheckBox enableMaintenanceWindow = new CheckBox(
+                getI18n().getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
         enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
@@ -637,14 +646,14 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         } else if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             return !isNoTagButton(tagData, SPUIDefinitions.TARGET_TAG_BUTTON);
         }
-        notification.displayValidationError(notAllowedMsg);
+        getNotification().displayValidationError(notAllowedMsg);
         return false;
     }
 
     private boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
-            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            getNotification().displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
+                    new Object[] { getI18n().getMessage("label.no.tag.assigned") }));
             return true;
         }
         return false;
@@ -652,9 +661,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private String getPendingActionMessage(final String message, final String controllerId,
             final String distNameVersion) {
-        String pendActionMsg = i18n.getMessage("message.target.assigned.pending");
+        String pendActionMsg = getI18n().getMessage("message.target.assigned.pending");
         if (null == message) {
-            pendActionMsg = i18n.getMessage("message.dist.pending.action",
+            pendActionMsg = getI18n().getMessage("message.dist.pending.action",
                     new Object[] { controllerId, distNameVersion });
         }
         return pendActionMsg;
@@ -756,7 +765,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void unPinDistribution(final Button eventBtn) {
         managementUIState.getTargetTableFilters().setPinnedDistId(null);
-        eventBus.publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);
+        getEventBus().publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);
         resetPinStyle(eventBtn);
     }
 
@@ -766,7 +775,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void pinDitribution(final Button eventBtn) {
         managementUIState.getDistributionTableFilters().setPinnedTarget(null);
-        eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
+        getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         applyPinStyle(eventBtn);
         styleDistributionSetTable();
         distPinned = false;
@@ -777,7 +786,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             applyPinStyle(pinBtn);
             distPinned = true;
             distributionPinnedBtn = pinBtn;
-            eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
+            getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
         }
     }
 
@@ -861,9 +870,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         distributionSetManagement.delete(entitiesToDelete);
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
-        notification.displaySuccess(
-                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Distribution Set(s) "));
+        getEventBus().publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
+                entitiesToDelete.size() + " " + getI18n().getMessage("distribution.details.header")) + "(s)");
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(entitiesToDelete, distId));
         managementUIState.getSelectedDsIdName().clear();
@@ -872,13 +881,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private void unPinDeletedDS(final Collection<Long> deletedDsIds, final Long pinnedDsId) {
         if (deletedDsIds.contains(pinnedDsId)) {
             managementUIState.getTargetTableFilters().setPinnedDistId(null);
-            eventBus.publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);
+            getEventBus().publish(this, PinUnpinEvent.UNPIN_DISTRIBUTION);
         }
     }
 
     @Override
-    protected String getEntityName() {
-        return i18n.getMessage("distribution.details.header");
+    protected String getEntityType() {
+        return getI18n().getMessage("distribution.details.header");
     }
 
     @Override

@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
@@ -24,6 +23,7 @@ import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -105,10 +105,10 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     /**
-     * Insert the edit icons next to the filter tags in target, distribution and
-     * software module tags/types tables
+     * Insert the update icons next to the filter tags in target, distribution
+     * and software module tags/types tables
      */
-    public void addEditColumn() {
+    public void addUpdateColumn() {
         if (alreadyContainsColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN)) {
             return;
         }
@@ -135,7 +135,7 @@ public abstract class AbstractFilterButtons extends Table {
      * distribution and software module tags/types tables, when the edit/delete
      * action is executed or cancelled
      */
-    public void removeEditAndDeleteColumn() {
+    public void removeUpdateAndDeleteColumn() {
         removeGeneratedColumn(SPUIDefinitions.UPDATE_FILTER_BUTTON_COLUMN);
         removeGeneratedColumn(SPUIDefinitions.DELETE_FILTER_BUTTON_COLUMN);
     }
@@ -163,13 +163,12 @@ public abstract class AbstractFilterButtons extends Table {
         final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
                 SPUIButtonStyleNoBorder.class);
         if (itemId instanceof TagIdName) {
-            deleteButton.setId(((TagIdName) itemId).getName());
+            deleteButton.setId(UIComponentIdProvider.DELETE_TAG_ID + ((TagIdName) itemId).getName());
         } else {
-            deleteButton.setId(itemId.toString());
+            deleteButton.setId(UIComponentIdProvider.DELETE_TAG_ID + itemId.toString());
         }
         deleteButton.setDescription(SPUIDefinitions.DELETE);
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
-
         return deleteButton;
     }
 
@@ -181,13 +180,12 @@ public abstract class AbstractFilterButtons extends Table {
         final Button editButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.EDIT,
                 SPUIButtonStyleNoBorder.class);
         if (itemId instanceof TagIdName) {
-            editButton.setId(((TagIdName) itemId).getName());
+            editButton.setId(UIComponentIdProvider.UPDATE_TAG_ID + ((TagIdName) itemId).getName());
         } else {
-            editButton.setId(itemId.toString());
+            editButton.setId(UIComponentIdProvider.UPDATE_TAG_ID + itemId.toString());
         }
         editButton.setDescription(SPUIDefinitions.EDIT);
         editButton.addClickListener(this::addEditButtonClickListener);
-
         return editButton;
     }
 
@@ -209,7 +207,6 @@ public abstract class AbstractFilterButtons extends Table {
 
         if ((NO_TAG_BUTTON_ID.equals(typeButton.getData()) && isNoTagStateSelected())
                 || (id != null && isClickedByDefault(name))) {
-
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
 
@@ -282,7 +279,17 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     protected String getEntityId(final ClickEvent event) {
-        return event.getButton().getId();
+        final String buttonId = event.getButton().getId();
+        if (!StringUtils.hasText(buttonId)) {
+            return "";
+        }
+        if (buttonId.startsWith(UIComponentIdProvider.UPDATE_TAG_ID)) {
+            return buttonId.substring(UIComponentIdProvider.UPDATE_TAG_ID.length());
+        }
+        if (buttonId.startsWith(UIComponentIdProvider.DELETE_TAG_ID)) {
+            return buttonId.substring(UIComponentIdProvider.DELETE_TAG_ID.length());
+        }
+        return "";
     }
 
     /**
@@ -290,36 +297,36 @@ public abstract class AbstractFilterButtons extends Table {
      */
     public void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
-        removeEditAndDeleteColumn();
+        removeUpdateAndDeleteColumn();
     }
 
-    protected <T> void openConfirmationWindowForDeletion(final String entityToDelete, final String entityName,
-            final Class<T> entityClass) {
+    protected void openConfirmationWindowForDeletion(final String entityToDelete, final String entityName,
+            final FilterHeaderEvent event) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.entity.delete.action.confirmbox", entityName),
-                i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(), entityToDelete, ""),
+                i18n.getMessage("caption.entity.delete.action.confirmbox"),
+                i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(),
+                        entityToDelete.substring(entityToDelete.indexOf('.') + 1), ""),
                 i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         deleteEntity(entityToDelete);
                     } else {
-                        removeEditAndDeleteColumn();
-                        getEventBus().publish(this,
-                                new FilterHeaderEvent<T>(FilterHeaderEnum.SHOW_MENUBAR, entityClass));
+                        removeUpdateAndDeleteColumn();
+                        getEventBus().publish(this, event);
                     }
-                });
-        confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag(entityClass));
+                }, entityToDelete);
+        confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag(event));
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    protected <T> CloseListener getCloseListenerForEditAndDeleteTag(final Class<T> entityClass) {
+    protected CloseListener getCloseListenerForEditAndDeleteTag(final FilterHeaderEvent event) {
         return new Window.CloseListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void windowClose(final CloseEvent e) {
-                removeEditAndDeleteColumn();
-                getEventBus().publish(this, new FilterHeaderEvent<T>(FilterHeaderEnum.SHOW_MENUBAR, entityClass));
+                removeUpdateAndDeleteColumn();
+                getEventBus().publish(this, event);
             }
         };
     }
@@ -379,15 +386,15 @@ public abstract class AbstractFilterButtons extends Table {
      */
     protected abstract String getButtonWrapperData();
 
-    public EventBus.UIEventBus getEventBus() {
+    protected EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 
-    public VaadinMessageSource getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
     }
 
-    public AbstractFilterButtonClickBehaviour getFilterButtonClickBehaviour() {
+    protected AbstractFilterButtonClickBehaviour getFilterButtonClickBehaviour() {
         return filterButtonClickBehaviour;
     }
 

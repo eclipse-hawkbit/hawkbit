@@ -384,19 +384,19 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         createDynamicStyleForComponents(tagName, tagDesc, event.getColor().getCSS());
     }
 
-    public String getColorPicked() {
+    protected String getColorPicked() {
         return colorPicked;
     }
 
-    public void setColorPicked(final String colorPicked) {
+    protected void setColorPicked(final String colorPicked) {
         this.colorPicked = colorPicked;
     }
 
-    public FormLayout getFormLayout() {
+    protected FormLayout getFormLayout() {
         return formLayout;
     }
 
-    public GridLayout getMainLayout() {
+    protected GridLayout getMainLayout() {
         return mainLayout;
     }
 
@@ -408,87 +408,83 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
     public void removeColorChangeListener(final ColorChangeListener listener) {
     }
 
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
-
-    public static String getTagNameDynamicStyle() {
+    protected static String getTagNameDynamicStyle() {
         return TAG_NAME_DYNAMIC_STYLE;
     }
 
-    public static String getTagDescDynamicStyle() {
+    protected static String getTagDescDynamicStyle() {
         return TAG_DESC_DYNAMIC_STYLE;
     }
 
-    public static String getTagDynamicStyle() {
+    protected static String getTagDynamicStyle() {
         return TAG_DYNAMIC_STYLE;
     }
 
-    public static String getMessageErrorMissingTagname() {
+    protected static String getMessageErrorMissingTagname() {
         return MESSAGE_ERROR_MISSING_TAGNAME;
     }
 
-    public static int getMaxTags() {
+    protected static int getMaxTags() {
         return MAX_TAGS;
     }
 
-    public VaadinMessageSource getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
     }
 
-    public EntityFactory getEntityFactory() {
+    protected EntityFactory getEntityFactory() {
         return entityFactory;
     }
 
-    public EventBus.UIEventBus getEventBus() {
+    protected EventBus.UIEventBus getEventBus() {
         return eventBus;
     }
 
-    public SpPermissionChecker getPermChecker() {
+    protected SpPermissionChecker getPermChecker() {
         return permChecker;
     }
 
-    public UINotification getUiNotification() {
+    protected UINotification getUiNotification() {
         return uiNotification;
     }
 
-    public Label getColorLabel() {
+    protected Label getColorLabel() {
         return colorLabel;
     }
 
-    public TextField getTagName() {
+    protected TextField getTagName() {
         return tagName;
     }
 
-    public TextArea getTagDesc() {
+    protected TextArea getTagDesc() {
         return tagDesc;
     }
 
-    public Button getTagColorPreviewBtn() {
+    protected Button getTagColorPreviewBtn() {
         return tagColorPreviewBtn;
     }
 
-    public VerticalLayout getContentLayout() {
+    protected VerticalLayout getContentLayout() {
         return contentLayout;
     }
 
-    public boolean isTagPreviewBtnClicked() {
+    protected boolean isTagPreviewBtnClicked() {
         return tagPreviewBtnClicked;
     }
 
-    public HorizontalLayout getColorLabelLayout() {
+    protected HorizontalLayout getColorLabelLayout() {
         return colorLabelLayout;
     }
 
-    public void setTagName(final TextField tagName) {
+    protected void setTagName(final TextField tagName) {
         this.tagName = tagName;
     }
 
-    public void setTagDesc(final TextArea tagDesc) {
+    protected void setTagDesc(final TextArea tagDesc) {
         this.tagDesc = tagDesc;
     }
 
-    public void setTagColorPreviewBtn(final Button tagColorPreviewBtn) {
+    protected void setTagColorPreviewBtn(final Button tagColorPreviewBtn) {
         this.tagColorPreviewBtn = tagColorPreviewBtn;
     }
 
@@ -570,7 +566,7 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         window.setVisible(Boolean.TRUE);
     }
 
-    public CommonDialogWindow getWindow() {
+    protected CommonDialogWindow getWindow() {
         return window;
     }
 

@@ -21,8 +21,8 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtype.UpdateSoftwareModuleTypeLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
+import org.eclipse.hawkbit.ui.common.event.SoftwareModuleTypeFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -102,8 +102,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
         }
 
         if (isUpdate(event)) {
-            getEventBus().publish(this,
-                    new FilterHeaderEvent<SoftwareModuleType>(FilterHeaderEnum.SHOW_MENUBAR, SoftwareModuleType.class));
+            getEventBus().publish(this, new SoftwareModuleTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
         }
     }
 
@@ -169,14 +168,15 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
-                softwareModuleTypeManagement, getEntityId(event),
-                getCloseListenerForEditAndDeleteTag(SoftwareModuleType.class));
+                softwareModuleTypeManagement, getEntityId(event), getCloseListenerForEditAndDeleteTag(
+                        new SoftwareModuleTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR)));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         openConfirmationWindowForDeletion(getEntityId(event),
-                getI18n().getMessage("caption.entity.software.module.type"), SoftwareModuleType.class);
+                getI18n().getMessage("caption.entity.software.module.type"),
+                new SoftwareModuleTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override
@@ -185,7 +185,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
         swmTypeToDelete.ifPresent(tag -> {
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().equals(swmTypeToDelete)) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
-                removeEditAndDeleteColumn();
+                removeUpdateAndDeleteColumn();
             } else {
                 softwareModuleTypeManagement.delete(swmTypeToDelete.get().getId());
                 getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);

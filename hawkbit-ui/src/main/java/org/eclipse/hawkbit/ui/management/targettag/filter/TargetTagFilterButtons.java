@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
+import org.eclipse.hawkbit.ui.common.event.TargetTagFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -255,7 +257,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     public void refreshTable() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-        removeEditAndDeleteColumn();
+        removeUpdateAndDeleteColumn();
         addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
     }
@@ -288,14 +290,15 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateTargetTagLayout(getI18n(), targetTagManagement, entityFactory, getEventBus(), permChecker,
-                uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag(TargetTag.class));
+                uiNotification, getEntityId(event),
+                getCloseListenerForEditAndDeleteTag(new TargetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR)));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         final String entityName = getEntityId(event);
         openConfirmationWindowForDeletion(entityName, getI18n().getMessage("caption.entity.target.tag"),
-                TargetTag.class);
+                new TargetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override
@@ -304,7 +307,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         tagToDelete.ifPresent(tag -> {
             if (managementUIState.getTargetTableFilters().getClickedTargetTags().contains(entityName)) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityName));
-                removeEditAndDeleteColumn();
+                removeUpdateAndDeleteColumn();
             } else {
                 targetTagManagement.delete(entityName);
                 getEventBus().publish(this, new TargetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));

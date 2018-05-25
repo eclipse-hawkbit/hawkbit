@@ -97,8 +97,8 @@ public class UpdateTargetTagLayout extends AbstractTargetTagLayout implements Up
     }
 
     @Override
-    public void setTagDetails(final String selectedTagName) {
-        final Optional<TargetTag> selectedTargetTag = getTargetTagManagement().getByName(selectedTagName);
+    public void setTagDetails(final String selectedEntity) {
+        final Optional<TargetTag> selectedTargetTag = getTargetTagManagement().getByName(selectedEntity);
         selectedTargetTag.ifPresent(tag -> {
             getTagName().setValue(tag.getName());
             getTagName().setEnabled(false);

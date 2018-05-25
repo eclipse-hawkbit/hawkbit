@@ -10,9 +10,8 @@ package org.eclipse.hawkbit.ui.management.dstag.filter;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.DistributionSetTagFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.dstag.CreateDistributionSetTagLayout;
@@ -26,9 +25,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
  * Table header for filtering distribution set tags
@@ -93,59 +90,40 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     @Override
     protected Command getAddButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                new CreateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
-                        getEventBus(), getPermChecker(), uiNotification);
-            }
-        };
+        return command -> new CreateDistributionSetTagLayout(getI18n(), distributionSetTagManagement, entityFactory,
+                getEventBus(), getPermChecker(), uiNotification);
     }
 
     @Override
     protected Command getDeleteButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                distributionTagButtons.addDeleteColumn();
-                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetTag>(
-                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetTag.class));
-            }
+        return command -> {
+            distributionTagButtons.addDeleteColumn();
+            getEventBus().publish(this, new DistributionSetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_CANCEL_BUTTON));
         };
     }
 
     @Override
     protected Command getUpdateButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                distributionTagButtons.addEditColumn();
-                getEventBus().publish(this, new FilterHeaderEvent<DistributionSetTag>(
-                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, DistributionSetTag.class));
-            }
+        return command -> {
+            distributionTagButtons.addUpdateColumn();
+            getEventBus().publish(this, new DistributionSetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_CANCEL_BUTTON));
         };
     }
 
     @Override
     protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
         super.cancelUpdateOrDeleteTag(event);
-        distributionTagButtons.removeEditAndDeleteColumn();
+        distributionTagButtons.removeUpdateAndDeleteColumn();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    private void onEvent(final FilterHeaderEvent<DistributionSetTag> event) {
-        if (DistributionSetTag.class == event.getEntityType()) {
-            processFilterHeaderEvent(event);
-        }
+    private void onEvent(final DistributionSetTagFilterHeaderEvent event) {
+        processFilterHeaderEvent(event);
+    }
+
+    @Override
+    protected String getMenuBarId() {
+        return UIComponentIdProvider.DIST_TAG_MENU_BAR_ID;
     }
 
 }

@@ -80,4 +80,9 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
         return null;
     }
 
+    @Override
+    protected String getMenuBarId() {
+        return null;
+    }
+
 }

@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.DistributionSetTypeFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -168,8 +168,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
         }
         if (event
                 .getDistributionSetTypeEnum() == DistributionSetTypeEvent.DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE) {
-            getEventBus().publish(this, new FilterHeaderEvent<DistributionSetType>(FilterHeaderEnum.SHOW_MENUBAR,
-                    DistributionSetType.class));
+            getEventBus().publish(this, new DistributionSetTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
         }
     }
 
@@ -184,13 +183,14 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateDistributionSetTypeLayout(getI18n(), entityFactory, getEventBus(), permChecker, uiNotification,
                 softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                getEntityId(event), getCloseListenerForEditAndDeleteTag(DistributionSetType.class));
+                getEntityId(event), getCloseListenerForEditAndDeleteTag(
+                        new DistributionSetTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR)));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         openConfirmationWindowForDeletion(getEntityId(event), getI18n().getMessage("caption.entity.distribution.type"),
-                DistributionSetType.class);
+                new DistributionSetTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override
@@ -199,10 +199,10 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
         distTypeToDelete.ifPresent(tag -> {
             if (tag.equals(manageDistUIState.getManageDistFilters().getClickedDistSetType())) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
-                removeEditAndDeleteColumn();
+                removeUpdateAndDeleteColumn();
             } else if (isDefaultDsType(entityToDelete)) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.cannot.delete.default.dstype"));
-                removeEditAndDeleteColumn();
+                removeUpdateAndDeleteColumn();
             } else {
                 distributionSetTypeManagement.delete(distTypeToDelete.get().getId());
                 getEventBus().publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);

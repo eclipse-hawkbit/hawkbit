@@ -17,6 +17,8 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.event.DistributionSetTagFilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
@@ -145,7 +147,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     public void refreshTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        removeEditAndDeleteColumn();
+        removeUpdateAndDeleteColumn();
         addNewTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
         addColumn();
     }
@@ -153,14 +155,14 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Override
     protected void addEditButtonClickListener(final ClickEvent event) {
         new UpdateDistributionSetTagLayout(i18n, distributionSetTagManagement, entityFactory, getEventBus(),
-                permChecker, uiNotification, getEntityId(event),
-                getCloseListenerForEditAndDeleteTag(DistributionSetTag.class));
+                permChecker, uiNotification, getEntityId(event), getCloseListenerForEditAndDeleteTag(
+                        new DistributionSetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR)));
     }
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         openConfirmationWindowForDeletion(getEntityId(event), i18n.getMessage("caption.entity.distribution.tag"),
-                DistributionSetTag.class);
+                new DistributionSetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override
@@ -169,7 +171,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         tagToDelete.ifPresent(tag -> {
             if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(entityToDelete)) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
-                removeEditAndDeleteColumn();
+                removeUpdateAndDeleteColumn();
             } else {
                 distributionSetTagManagement.delete(entityToDelete);
                 getEventBus().publish(this, new DistributionSetTagTableEvent(BaseEntityEventType.REMOVE_ENTITY, tag));

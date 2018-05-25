@@ -10,11 +10,10 @@ package org.eclipse.hawkbit.ui.distributions.smtype.filter;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.CreateSoftwareModuleTypeLayout;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
+import org.eclipse.hawkbit.ui.common.event.SoftwareModuleTypeFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -27,9 +26,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 
 /**
  * Software Module Type filter buttons header.
@@ -93,59 +90,40 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected Command getAddButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                new CreateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(), uiNotification,
-                        softwareModuleTypeManagement);
-            }
-        };
+        return command -> new CreateSoftwareModuleTypeLayout(getI18n(), entityFactory, getEventBus(), getPermChecker(),
+                uiNotification, softwareModuleTypeManagement);
     }
 
     @Override
     protected Command getDeleteButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                filterButtons.addDeleteColumn();
-                getEventBus().publish(this, new FilterHeaderEvent<SoftwareModuleType>(
-                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, SoftwareModuleType.class));
-            }
+        return command -> {
+            filterButtons.addDeleteColumn();
+            getEventBus().publish(this, new SoftwareModuleTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_CANCEL_BUTTON));
         };
     }
 
     @Override
     protected Command getUpdateButtonCommand() {
-        return new MenuBar.Command() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                filterButtons.addEditColumn();
-                getEventBus().publish(this, new FilterHeaderEvent<SoftwareModuleType>(
-                        FilterHeaderEnum.SHOW_CANCEL_BUTTON, SoftwareModuleType.class));
-            }
+        return command -> {
+            filterButtons.addUpdateColumn();
+            getEventBus().publish(this, new SoftwareModuleTypeFilterHeaderEvent(FilterHeaderEnum.SHOW_CANCEL_BUTTON));
         };
     }
 
     @Override
     protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
         super.cancelUpdateOrDeleteTag(event);
-        filterButtons.removeEditAndDeleteColumn();
+        filterButtons.removeUpdateAndDeleteColumn();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
-    private void onEvent(final FilterHeaderEvent<SoftwareModuleType> event) {
-        if (SoftwareModuleType.class == event.getEntityType()) {
-            processFilterHeaderEvent(event);
-        }
+    private void onEvent(final SoftwareModuleTypeFilterHeaderEvent event) {
+        processFilterHeaderEvent(event);
+    }
+
+    @Override
+    protected String getMenuBarId() {
+        return UIComponentIdProvider.SOFT_MODULE_TYPE_MENU_BAR_ID;
     }
 
 }

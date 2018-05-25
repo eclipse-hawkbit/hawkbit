@@ -120,7 +120,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.getLastSelectedDistribution()
                 .ifPresent(lastSelectedDsIdName -> events.stream().filter(Objects::nonNull)
                         .filter(event -> event.getEntityId().equals(lastSelectedDsIdName)).findAny()
-                        .ifPresent(event -> eventBus.publish(this,
+                        .ifPresent(event -> getEventBus().publish(this,
                                 new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity()))));
     }
 
@@ -184,12 +184,12 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected void afterEntityIsSelected() {
-        eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
+        getEventBus().publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
     }
 
     @Override
     protected void publishSelectedEntityEvent(final DistributionSet distributionSet) {
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
+        getEventBus().publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         final Object distItemId = dropData.getItemIdOver();
         if (distItemId != null) {
-            assignSwmToDs(source, softwareModulesIdList, distItemId);
+            assignSwmToDs(source, softwareModulesIdList, (long) distItemId);
         }
     }
 
@@ -226,22 +226,31 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected boolean isDropValid(final DragAndDropEvent dragEvent) {
         final Component compsource = dragEvent.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
-            notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
+            getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
             return false;
         }
         return super.isDropValid(dragEvent);
     }
 
-    private void assignSwmToDs(final Table source, final Set<Long> softwareModulesIdList, final Object distId) {
-        final Optional<DistributionSet> distributionSet = distributionSetManagement.get((Long) distId);
+    private void assignSwmToDs(final Table source, final Set<Long> softwareModulesIdList, final long distId) {
+        final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distId);
+        distributionSet.ifPresent(set -> {
+            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(set);
+            selectDroppedEntities(distributionSetIdName.getId());
+            final HashMap<Long, HashSet<SoftwareModuleIdName>> map = createAssignmentMap(distributionSetIdName);
+            handleSoftwareModulesForAssignment(source, softwareModulesIdList, distId, map);
+            final HashSet<SoftwareModuleIdName> softwareModules = new HashSet<>();
+            map.keySet().forEach(typeId -> softwareModules.addAll(map.get(typeId)));
+            manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
+            openConfirmationWindowForAssignment(distributionSetIdName.getName(),
+                    softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
+        });
+        getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
+        return;
+    }
 
-        if (!distributionSet.isPresent()) {
-            notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
-            return;
-        }
-
-        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet.get());
-        selectDroppedEntities(distributionSetIdName.getId());
+    private HashMap<Long, HashSet<SoftwareModuleIdName>> createAssignmentMap(
+            final DistributionSetIdName distributionSetIdName) {
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwareList().containsKey(distributionSetIdName)) {
             map = manageDistUIState.getConsolidatedDistSoftwareList().get(distributionSetIdName);
@@ -249,7 +258,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             map = new HashMap<>();
             manageDistUIState.getConsolidatedDistSoftwareList().put(distributionSetIdName, map);
         }
+        return map;
+    }
 
+    private void handleSoftwareModulesForAssignment(final Table source, final Set<Long> softwareModulesIdList,
+            final long distId, final HashMap<Long, HashSet<SoftwareModuleIdName>> map) {
         for (final Long softwareModuleId : softwareModulesIdList) {
             final Item softwareItem = source.getContainerDataSource().getItem(softwareModuleId);
             final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
@@ -257,30 +270,19 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
             final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
 
-            if (softwareModule.isPresent() && validSoftwareModule((Long) distId, softwareModule.get())) {
+            if (softwareModule.isPresent() && validSoftwareModule(distId, softwareModule.get())) {
                 final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
                         name.concat(":" + swVersion));
-                publishAssignEvent((Long) distId, softwareModule.get());
+                publishAssignEvent(distId, softwareModule.get());
                 handleSoftwareCase(map, softwareModule.get(), softwareModuleIdName);
                 handleFirmwareCase(map, softwareModule.get(), softwareModuleIdName);
-            } else {
-                return;
             }
         }
-
-        // hashset is seriablizable
-        final HashSet<SoftwareModuleIdName> softwareModules = new HashSet<>();
-        map.keySet().forEach(typeId -> softwareModules.addAll(map.get(typeId)));
-
-        LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
-        manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
-        openConfirmationWindowForAssignment(distributionSetIdName.getName(),
-                softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
         if (manageDistUIState.getLastSelectedDistribution().map(distId::equals).orElse(false)) {
-            eventBus.publish(this,
+            getEventBus().publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
         }
     }
@@ -308,27 +310,35 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
             final SoftwareModuleIdName[] softwareModules) {
-        final String confirmQuestion;
-        if (softwareModules.length == 1) {
-            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign,
-                    "software module", softwareModules[0].getName());
-        } else {
-            confirmQuestion = i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, softwareModules.length,
-                    "software modules", distributionNameToAssign);
-        }
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion,
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+        final String confirmQuestion = createConfirmationMessageForAssignment(distributionNameToAssign,
+                softwareModules);
+        final ConfirmationDialog confirmDialog = createConfirmationWindowForAssignment(confirmQuestion);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private ConfirmationDialog createConfirmationWindowForAssignment(final String confirmQuestion) {
+        return new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion,
+                getI18n().getMessage(SPUIDefinitions.BUTTON_OK), getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL),
+                ok -> {
                     if (ok) {
                         saveAllAssignments();
-                    }
-                    if (!ok) {
+                    } else {
                         manageDistUIState.getAssignedList().clear();
                         manageDistUIState.getConsolidatedDistSoftwareList().clear();
                     }
                 });
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-        confirmDialog.getWindow().bringToFront();
+    }
+
+    private String createConfirmationMessageForAssignment(final String distributionNameToAssign,
+            final SoftwareModuleIdName[] softwareModules) {
+        if (softwareModules.length == 1) {
+            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "software module",
+                    softwareModules[0].getName());
+        } else {
+            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, softwareModules.length,
+                    "software modules", distributionNameToAssign);
+        }
     }
 
     private void saveAllAssignments() {
@@ -344,10 +354,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             count += entry.getValue().size();
         }
 
-        notification.displaySuccess(i18n.getMessage("message.software.assignment", count));
+        getNotification().displaySuccess(getI18n().getMessage("message.software.assignment", count));
         manageDistUIState.getAssignedList().clear();
         manageDistUIState.getConsolidatedDistSoftwareList().clear();
-        eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {
@@ -360,8 +370,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         if (distributionSetManagement.isInUse(ds.get().getId())) {
-            notification.displayValidationError(i18n.getMessage("message.error.notification.ds.target.assigned",
-                    ds.get().getName(), ds.get().getVersion()));
+            getNotification().displayValidationError(getI18n().getMessage(
+                    "message.error.notification.ds.target.assigned", ds.get().getName(), ds.get().getVersion()));
             return false;
         }
         return true;
@@ -370,14 +380,14 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     private boolean validateSoftwareModule(final SoftwareModule sm, final DistributionSet ds) {
         if (targetManagement.countByFilters(null, null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
             /* Distribution is already assigned */
-            notification.displayValidationError(i18n.getMessage("message.dist.inuse",
+            getNotification().displayValidationError(getI18n().getMessage("message.dist.inuse",
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
             return false;
         }
 
         if (ds.getModules().contains(sm)) {
             /* Already has software module */
-            notification.displayValidationError(i18n.getMessage("message.software.dist.already.assigned",
+            getNotification().displayValidationError(getI18n().getMessage("message.software.dist.already.assigned",
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
             return false;
@@ -385,7 +395,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         if (!ds.getType().containsModuleType(sm.getType())) {
             /* Invalid type of the software module */
-            notification.displayValidationError(i18n.getMessage("message.software.dist.type.notallowed",
+            getNotification().displayValidationError(getI18n().getMessage("message.software.dist.type.notallowed",
                     HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
                     HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()), sm.getType().getName()));
             return false;
@@ -402,7 +412,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final Set<SoftwareModuleIdName> swModuleIdNames = entry.getValue();
             for (final SoftwareModuleIdName swModuleIdName : swModuleIdNames) {
                 if ((sm.getName().concat(":" + sm.getVersion())).equals(swModuleIdName.getName())) {
-                    notification.displayValidationError(i18n.getMessage("message.software.already.dragged",
+                    getNotification().displayValidationError(getI18n().getMessage("message.software.already.dragged",
                             HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
                     return false;
                 }
@@ -487,17 +497,17 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         distributionSetManagement.delete(entitiesToDelete);
-        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
-        notification.displaySuccess(
-                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Distribution Set(s) "));
+        getEventBus().publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
+                entitiesToDelete.size() + " " + getI18n().getMessage("distribution.details.header") + "(s)"));
 
         manageDistUIState.getSelectedDistributions().clear();
-        eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
+        getEventBus().publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
     }
 
     @Override
-    protected String getEntityName() {
-        return i18n.getMessage("distribution.details.header");
+    protected String getEntityType() {
+        return getI18n().getMessage("distribution.details.header");
     }
 
     @Override

@@ -35,6 +35,8 @@ public class ConfigMenuBar extends MenuBar {
 
     private final Command deleteButtonCommand;
 
+    private final String id;
+
     /**
      * Constructor for the menubar
      * 
@@ -58,18 +60,21 @@ public class ConfigMenuBar extends MenuBar {
      *            command
      */
     public ConfigMenuBar(final boolean createPermission, final boolean updatePermission, final boolean deletePermission,
-            final Command addButtonCommand, final Command updateButtonCommand, final Command deleteButtonCommand) {
+            final Command addButtonCommand, final Command updateButtonCommand, final Command deleteButtonCommand,
+            final String id) {
         this.createPermission = createPermission;
         this.updatePermission = updatePermission;
         this.deletePermission = deletePermission;
         this.addButtonCommand = addButtonCommand;
         this.updateButtonCommand = updateButtonCommand;
         this.deleteButtonCommand = deleteButtonCommand;
+        this.id = id;
 
         init();
     }
 
     private void init() {
+        setId(id);
         if (!createPermission && !updatePermission && !deletePermission) {
             return;
         }

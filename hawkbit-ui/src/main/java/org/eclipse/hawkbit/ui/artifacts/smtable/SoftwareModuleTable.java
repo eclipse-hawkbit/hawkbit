@@ -145,7 +145,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected void publishSelectedEntityEvent(final SoftwareModule lastSoftwareModule) {
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
+        getEventBus().publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -188,7 +188,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.getMessage("header.vendor"), 0.1F));
+            columnList
+                    .add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, getI18n().getMessage("header.vendor"), 0.1F));
         }
         return columnList;
     }
@@ -211,9 +212,9 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         softwareModuleManagement.delete(entitiesToDelete);
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
-        notification.displaySuccess(
-                i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Software Module(s) "));
+        getEventBus().publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
+                entitiesToDelete.size() + " " + getI18n().getMessage("caption.software.module") + "(s)"));
 
         /*
          * Check if any information / files pending to upload for the deleted
@@ -238,12 +239,12 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
             artifactUploadState.getFileSelected().removeAll(toBeRemoved);
         }
         artifactUploadState.getSelectedSoftwareModules().clear();
-        eventBus.publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
+        getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
     }
 
     @Override
-    protected String getEntityName() {
-        return i18n.getMessage("upload.swModuleTable.header");
+    protected String getEntityType() {
+        return getI18n().getMessage("upload.swModuleTable.header");
     }
 
     @Override

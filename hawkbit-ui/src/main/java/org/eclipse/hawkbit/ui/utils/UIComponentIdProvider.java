@@ -59,6 +59,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
 
     /**
+     * ID for menubar for configuring target tags
+     */
+    public static final String TARGET_MENU_BAR_ID = "target.menu.bar.id";
+
+    /**
      * ID for NO TAG for targets
      */
     public static final String NO_TAG_TARGET = "no.tag.target";
@@ -108,6 +113,12 @@ public final class UIComponentIdProvider {
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
+
+    /**
+     * ID for menubar for configuring distribution set tags
+     */
+    public static final String DIST_TAG_MENU_BAR_ID = "distribution.set.menu.bar.id";
+
     /**
      * ID for NO TAG for distribution sets
      */
@@ -128,6 +139,12 @@ public final class UIComponentIdProvider {
      * ID - soft.module.vendor.
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
+
+    /**
+     * ID for menubar for configuring software module types
+     */
+    public static final String SOFT_MODULE_TYPE_MENU_BAR_ID = "soft.module.type.menu.bar.id";
+
     /**
      * ID - Delete Distribution SetType Save.
      */
@@ -491,6 +508,16 @@ public final class UIComponentIdProvider {
      * ID for cancel button in pop-up-windows instance of commonDialogWindow
      */
     public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
+
+    /**
+     * ID for update tags and types icon
+     */
+    public static final String UPDATE_TAG_ID = "update.";
+
+    /**
+     * ID for delete tags and types icon
+     */
+    public static final String DELETE_TAG_ID = "delete.";
 
     /**
      * Cancel button is.

@@ -98,9 +98,9 @@ public class UpdateDistributionSetTagLayout extends AbstractDistributionSetTagLa
     }
 
     @Override
-    public void setTagDetails(final String selectedTagName) {
+    public void setTagDetails(final String selectedEntity) {
         final Optional<DistributionSetTag> selectedDistTag = getDistributionSetTagManagement()
-                .getByName(selectedTagName);
+                .getByName(selectedEntity);
         selectedDistTag.ifPresent(tag -> {
             getTagName().setValue(tag.getName());
             getTagName().setEnabled(false);

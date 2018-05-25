@@ -192,7 +192,7 @@ public class TargetTable extends AbstractTable<Target> {
     private void publishTargetSelectedEntityForRefresh(
             final Stream<? extends RemoteEntityEvent<Target>> targetEntityEventStream) {
         targetEntityEventStream.filter(event -> isLastSelectedTarget(event.getEntityId())).filter(Objects::nonNull)
-                .findAny().ifPresent(event -> eventBus.publish(this,
+                .findAny().ifPresent(event -> getEventBus().publish(this,
                         new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, event.getEntity())));
     }
 
@@ -222,7 +222,7 @@ public class TargetTable extends AbstractTable<Target> {
         UI.getCurrent().access(() -> {
             if (checkFilterEvent(filterEvent)) {
                 refreshFilter();
-                eventBus.publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
+                getEventBus().publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
             }
         });
     }
@@ -315,7 +315,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected void publishSelectedEntityEvent(final Target selectedLastEntity) {
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        getEventBus().publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
     }
 
     @Override
@@ -428,7 +428,7 @@ public class TargetTable extends AbstractTable<Target> {
             pinBtn.addStyleName(TARGET_PINNED);
             targetPinned = Boolean.TRUE;
             targetPinnedBtn = pinBtn;
-            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+            getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
         }
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
         HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, itemId);
@@ -472,7 +472,7 @@ public class TargetTable extends AbstractTable<Target> {
         /* if distribution set is pinned ,unpin target if pinned */
         managementUIState.getTargetTableFilters().setPinnedDistId(null);
         /* on unpin of target dist table should refresh Dist table restyle */
-        eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+        getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
         /* change target table styling */
         styleTargetTable();
         eventBtn.addStyleName(TARGET_PINNED);
@@ -481,7 +481,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private void unPinTarget(final Button eventBtn) {
         managementUIState.getDistributionTableFilters().setPinnedTarget(null);
-        eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
+        getEventBus().publish(this, PinUnpinEvent.UNPIN_TARGET);
         resetPinStyle(eventBtn);
     }
 
@@ -512,8 +512,8 @@ public class TargetTable extends AbstractTable<Target> {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.getMessage("message.tag.cannot.be.assigned", i18n.getMessage("label.no.tag.assigned")));
+            getNotification().displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
+                    getI18n().getMessage("label.no.tag.assigned")));
             return false;
         }
         return true;
@@ -525,8 +525,8 @@ public class TargetTable extends AbstractTable<Target> {
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (targetList.isEmpty()) {
-            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work");
-            notification.displayValidationError(actionDidNotWork);
+            final String actionDidNotWork = getI18n().getMessage("message.action.did.not.work");
+            getNotification().displayValidationError(actionDidNotWork);
             return;
         }
 
@@ -554,21 +554,21 @@ public class TargetTable extends AbstractTable<Target> {
         final List<String> controllerIds = targetManagement.get(targetIds).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
         if (controllerIds.isEmpty()) {
-            notification.displayWarning(i18n.getMessage("targets.not.exists"));
+            getNotification().displayWarning(getI18n().getMessage("targets.not.exists"));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
 
         final Optional<TargetTag> tag = tagManagement.getByName(targTagName);
         if (!tag.isPresent()) {
-            notification.displayWarning(i18n.getMessage("targettag.not.exists", targTagName));
+            getNotification().displayWarning(getI18n().getMessage("targettag.not.exists", targTagName));
             return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
                     Lists.newArrayListWithCapacity(0), null);
         }
 
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(controllerIds, targTagName);
 
-        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
+        getNotification().displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, getI18n()));
 
         return result;
     }
@@ -579,11 +579,11 @@ public class TargetTable extends AbstractTable<Target> {
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
-                notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
+                getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
                 return false;
             }
         } else {
-            notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
+            getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
             return false;
         }
 
@@ -597,7 +597,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected List<String> hasMissingPermissionsForDrop() {
-        return permChecker.hasUpdateTargetPermission() ? Collections.emptyList()
+        return getPermChecker().hasUpdateTargetPermission() ? Collections.emptyList()
                 : Arrays.asList(SpPermission.UPDATE_TARGET);
     }
 
@@ -721,13 +721,13 @@ public class TargetTable extends AbstractTable<Target> {
         if (size != 0) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
         }
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
+        getEventBus().publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
     @Override
     public void refreshContainer() {
         super.refreshContainer();
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
+        getEventBus().publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
     @SuppressWarnings("unchecked")
@@ -740,7 +740,7 @@ public class TargetTable extends AbstractTable<Target> {
         item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(target.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
-                .setValue(HawkbitCommonUtil.getPollStatusToolTip(target.getPollStatus(), i18n));
+                .setValue(HawkbitCommonUtil.getPollStatusToolTip(target.getPollStatus(), getI18n()));
     }
 
     private boolean isLastSelectedTarget(final Long targetId) {
@@ -895,19 +895,19 @@ public class TargetTable extends AbstractTable<Target> {
                                     .collect(Collectors.toList()));
 
             if (distributionSetAssignmentResult.getAssigned() > 0) {
-                notification.displaySuccess(
-                        i18n.getMessage("message.target.assignment", distributionSetAssignmentResult.getAssigned()));
+                getNotification().displaySuccess(getI18n().getMessage("message.target.assignment",
+                        distributionSetAssignmentResult.getAssigned()));
             }
             if (distributionSetAssignmentResult.getAlreadyAssigned() > 0) {
-                notification.displaySuccess(i18n.getMessage("message.target.alreadyAssigned",
+                getNotification().displaySuccess(getI18n().getMessage("message.target.alreadyAssigned",
                         distributionSetAssignmentResult.getAlreadyAssigned()));
             }
         }
         resfreshPinnedDetails(saveAssignedList);
 
         managementUIState.getAssignedList().clear();
-        notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
-        eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        getNotification().displaySuccess(getI18n().getMessage("message.target.ds.assign.success"));
+        getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
@@ -916,12 +916,12 @@ public class TargetTable extends AbstractTable<Target> {
 
         if (pinnedDist.isPresent()) {
             if (saveAssignedList.keySet().contains(pinnedDist.get())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
+                getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
         } else if (pinnedTarget.isPresent()) {
             final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
             if (assignedTargetIds.contains(pinnedTarget.get())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+                getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
             }
         }
     }
@@ -934,7 +934,7 @@ public class TargetTable extends AbstractTable<Target> {
                         maintenanceWindowLayout.getMaintenanceTimeZone());
             } catch (final InvalidMaintenanceScheduleException e) {
                 LOG.error("Maintenance window is not valid", e);
-                notification.displayValidationError(e.getMessage());
+                getNotification().displayValidationError(e.getMessage());
                 return false;
             }
         }
@@ -952,7 +952,7 @@ public class TargetTable extends AbstractTable<Target> {
         final Object targetItemId = dropData.getItemIdOver();
         LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
         if (targetItemId == null) {
-            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS, ""));
+            getNotification().displayWarning(getI18n().getMessage(TARGETS_NOT_EXISTS, ""));
             return;
         }
 
@@ -960,7 +960,7 @@ public class TargetTable extends AbstractTable<Target> {
         selectDroppedEntities(targetId);
         final Optional<Target> target = targetManagement.get(targetId);
         if (!target.isPresent()) {
-            getNotification().displayWarning(i18n.getMessage(TARGETS_NOT_EXISTS, ""));
+            getNotification().displayWarning(getI18n().getMessage(TARGETS_NOT_EXISTS, ""));
             return;
         }
 
@@ -969,7 +969,7 @@ public class TargetTable extends AbstractTable<Target> {
                 .get(new HashSet<>(Arrays.asList(idToSelect)));
 
         if (findDistributionSetById.isEmpty()) {
-            notification.displayWarning(i18n.getMessage(DISTRIBUTIONSET_NOT_EXISTS));
+            getNotification().displayWarning(getI18n().getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
         final DistributionSet distributionSetToAssign = findDistributionSetById.get(0);
@@ -978,13 +978,13 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
-        confirmDialog = new ConfirmationDialog(i18n.getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                i18n.getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+        confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
+                getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
+                getI18n().getMessage(SPUIDefinitions.BUTTON_OK), getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL),
+                ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
-                    }
-                    if (!ok) {
+                    } else {
                         managementUIState.getAssignedList().clear();
                     }
                 }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
@@ -1006,12 +1006,12 @@ public class TargetTable extends AbstractTable<Target> {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.addComponent(enableMaintenanceWindowControl());
         layout.addComponent(maintenanceWindowHelpLinkControl());
-
         return layout;
     }
 
     private CheckBox enableMaintenanceWindowControl() {
-        final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
+        final CheckBox enableMaintenanceWindow = new CheckBox(
+                getI18n().getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
         enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
@@ -1052,8 +1052,9 @@ public class TargetTable extends AbstractTable<Target> {
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
         targetManagement.delete(entitiesToDelete);
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
-        notification.displaySuccess(i18n.getMessage("message.delete.success", entitiesToDelete.size() + " Target(s) "));
+        getEventBus().publish(this, new TargetTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
+        getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
+                entitiesToDelete.size() + " " + getI18n().getMessage("caption.target") + "(s)"));
         managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(this::unPinDeletedTarget);
         managementUIState.getSelectedTargetId().clear();
     }
@@ -1062,7 +1063,7 @@ public class TargetTable extends AbstractTable<Target> {
         final Set<Long> deletedTargetIds = managementUIState.getSelectedTargetId();
         if (deletedTargetIds.contains(pinnedTarget.getTargetId())) {
             managementUIState.getDistributionTableFilters().setPinnedTarget(null);
-            eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
+            getEventBus().publish(this, PinUnpinEvent.UNPIN_TARGET);
         }
     }
 
@@ -1079,13 +1080,13 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     @Override
-    protected String getEntityName() {
-        return i18n.getMessage("caption.target");
+    protected String getEntityType() {
+        return getI18n().getMessage("caption.target");
     }
 
     @Override
     protected boolean hasDeletePermission() {
-        return permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission();
+        return getPermChecker().hasDeleteRepositoryPermission() || getPermChecker().hasDeleteTargetPermission();
     }
 
     @Override

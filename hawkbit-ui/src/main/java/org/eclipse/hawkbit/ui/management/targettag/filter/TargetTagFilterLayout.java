@@ -11,10 +11,9 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
+import org.eclipse.hawkbit.ui.common.event.TargetTagFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -83,7 +82,7 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
         refreshContainer();
-        eventBus.publish(this, new FilterHeaderEvent<TargetTag>(FilterHeaderEnum.SHOW_MENUBAR, TargetTag.class));
+        eventBus.publish(this, new TargetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override

@@ -119,13 +119,13 @@ public class UpdateDistributionSetTypeLayout extends AbstractDistributionSetType
     }
 
     @Override
-    public void setTagDetails(final String distSetTypeSelected) {
-        getTagName().setValue(distSetTypeSelected);
+    public void setTagDetails(final String selectedEntity) {
         getTwinTables().createSourceTableData();
         getTwinTables().getSelectedTable().getContainerDataSource().removeAllItems();
         final Optional<DistributionSetType> selectedDistSetType = getDistributionSetTypeManagement()
-                .getByName(distSetTypeSelected);
+                .getByName(selectedEntity);
         selectedDistSetType.ifPresent(selectedType -> {
+            getTagName().setValue(selectedType.getName());
             getTagDesc().setValue(selectedType.getDescription());
             getTypeKey().setValue(selectedType.getKey());
             if (distributionSetManagement.countByTypeId(selectedType.getId()) <= 0) {
