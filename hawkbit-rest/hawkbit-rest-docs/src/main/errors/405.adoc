@@ -1,0 +1,3 @@
+| `405 Method Not Allowed`
+| The http request method is not allowed on the resource. 
+|

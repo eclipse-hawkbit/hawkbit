@@ -1,0 +1,194 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[tenant]]
+= System Configuration
+
+toc::[]
+
+
+== GET /rest/v1/system/configs 
+
+=== Implementation notes
+
+The GET request returns a list of all possible configuration keys for the tenant. Required Permission: TENANT_CONFIGURATION
+
+=== Get all configuration parameters
+
+==== CURL
+
+include::{snippets}/tenant/get-tenant-configrations/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/tenant/get-tenant-configrations/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/tenant/get-tenant-configrations/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/tenant/get-tenant-configrations/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /rest/v1/system/configs/{keyName}
+
+=== Implementation notes
+
+The GET request returns the configuration value of a specific configuration key for the tenant. Required Permission: TENANT_CONFIGURATION
+
+=== Read a configuration parameter
+
+==== CURL
+
+include::{snippets}/tenant/get-tenant-configration/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/tenant/get-tenant-configration/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/tenant/get-tenant-configration/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/tenant/get-tenant-configration/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/tenant/get-tenant-configration/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /rest/v1/system/configs/{keyName}
+
+=== Implementation notes
+
+The PUT request changes a configuration value of a specific configuration key for the tenant. Required Permission: TENANT_CONFIGURATION
+
+=== Change a configuration parameter
+
+==== CURL
+
+include::{snippets}/tenant/put-tenant-configration/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/tenant/put-tenant-configration/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/tenant/put-tenant-configration/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/tenant/put-tenant-configration/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/tenant/put-tenant-configration/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/tenant/put-tenant-configration/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== DELETE /rest/v1/system/configs/{keyName}
+
+=== Implementation notes
+
+The DELETE request removes a tenant specific configuration value for the tenant. Afterwards the global default value is used. Required Permission: TENANT_CONFIGURATION
+
+=== Removes a configuration parameter
+
+==== CURL
+
+include::{snippets}/tenant/delete-tenant-configration/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/tenant/delete-tenant-configration/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/tenant/delete-tenant-configration/path-parameters.adoc[]
+
+=== Response (Status 204)
+
+==== Response example
+
+include::{snippets}/tenant/delete-tenant-configration/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]

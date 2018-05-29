@@ -8,6 +8,7 @@ title: Management-API
 # Management API
 
 ## Overview
+
 The Management API is a RESTful API that enables to perform Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software). Based on the Management API you can manage and monitor software update operations via HTTP/HTTPS. The _Management API_ supports JSON payload with hypermedia as well as filtering, sorting and paging. Furthermore the Management API provides permission based access control and standard roles as well as custom role creation.  
 
 The API is protected and needs authentication and authorization based on the security concept.
@@ -29,15 +30,16 @@ Supported HTTP-methods are:
 
 Available Management APIs resources are:
 
-* [Targets](https://docs.bosch-iot-rollouts.com/documentation/rest-api/targets-api-guide.html)
-* [Distribution Sets](https://docs.bosch-iot-rollouts.com/documentation/rest-api/distributionsets-api-guide.html)
-* [Distribution Set Types](https://docs.bosch-iot-rollouts.com/documentation/rest-api/distributionsettypes-api-guide.html)
-* [Software Modules](https://docs.bosch-iot-rollouts.com/documentation/rest-api/softwaremodules-api-guide.html)
-* [Software Module Types](https://docs.bosch-iot-rollouts.com/documentation/rest-api/softwaremoduletypes-api-guide.html)
-* [Target Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/targettag-api-guide.html)
-* [Distribution Set Tag](https://docs.bosch-iot-rollouts.com/documentation/rest-api/distributionsettag-api-guide.html)
-* [Rollouts](https://docs.bosch-iot-rollouts.com/documentation/rest-api/rollout-api-guide.html)
-* [System Configuration](https://docs.bosch-iot-rollouts.com/documentation/rest-api/tenant-api-guide.html)
+- [Targets](managementapi/targets.html)
+- [Distribution sets](managementapi/distributionsets.html)
+- [Distribution set types](managementapi/distributionsettypes.html)
+- [Software modules](managementapi/softwaremodules.html)
+- [Software module types](managementapi/softwaremoduletypes.html)
+- [Target tag](managementapi/targettag.html)
+- [Distribution set tag](managementapi/distributionsettag.html)
+- [Rollouts](managementapi/rollouts.html)
+- [Target filters](managementapi/targetfilters.html)
+- [System configuration](managementapi/tenant.html)
 
 
 ## Headers

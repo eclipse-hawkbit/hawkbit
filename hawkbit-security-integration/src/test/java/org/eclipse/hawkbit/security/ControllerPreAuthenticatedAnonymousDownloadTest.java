@@ -24,7 +24,6 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * @author Michael Hirsch
  *
  */
 @Features("Unit Tests - Security")

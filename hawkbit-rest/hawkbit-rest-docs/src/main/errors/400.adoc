@@ -1,0 +1,3 @@
+| `400 Bad Request`
+| Bad Request - e.g. invalid parameters
+|

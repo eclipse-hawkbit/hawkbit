@@ -25,8 +25,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 
 /**
- * @author Venugopal Boodidadinne(RBEI/BSJ)
- * 
  *         Count message label which display current filter details and details
  *         on pinning.
  */

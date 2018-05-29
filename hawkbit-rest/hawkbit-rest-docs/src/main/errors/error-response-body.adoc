@@ -1,0 +1,27 @@
+[source,http]
+----
+
+{
+  "errorCode": "string",
+  "exceptionClass": "string",
+  "message": "string",
+  "parameters": [
+    "string"
+  ]
+}
+
+----
+
+=== Field description
+
+|=== 
+|**Field** |**Description** 
+| errorCode
+| A error code/key set by server
+| exceptionClass
+| The involved exceptionClass
+| message
+| An error message set by the server
+| parameters
+| A list of parameters
+|===

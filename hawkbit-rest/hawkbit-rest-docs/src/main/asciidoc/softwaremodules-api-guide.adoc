@@ -1,0 +1,745 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[software-modules]]
+= Software Modules
+
+toc::[]
+
+== GET /rest/v1/softwaremodules
+
+=== Implementation notes
+
+Handles the GET request of retrieving all softwaremodules within SP. Required Permission: READ_REPOSITORY
+
+=== Get software modules
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-software-modules/http-request.adoc[]
+
+==== Request parameter
+
+include::{snippets}/softwaremodules/get-software-modules-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/softwaremodules/get-software-modules-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-software-modules/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/softwaremodules
+
+=== Implementation notes
+
+Handles the POST request of creating new software modules within SP. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY
+
+=== Create software modules
+
+==== CURL
+
+include::{snippets}/softwaremodules/post-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/post-software-modules/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremodules/post-software-modules/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/post-software-modules/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremodules/post-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/softwaremodules/{softwareModuleId}
+
+=== Implementation Notes
+
+Handles the DELETE request for a single softwaremodule within SP. Required Permission: DELETE_REPOSITORY
+
+=== Delete software module
+
+==== CURL
+
+include::{snippets}/softwaremodules/delete-software-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/delete-software-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/delete-software-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/softwaremodules/delete-software-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremodules/{softwareModuleId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single softwaremodule within SP. Required Permission: READ_REPOSITORY
+
+=== Get software module
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-software-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-software-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-software-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-software-module/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-software-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/softwaremodules/{softwareModuleId}
+
+=== Implementation notes
+
+Handles the PUT request for a single softwaremodule within SP. Required Permission: UPDATE_REPOSITORY
+
+=== Update  software module
+
+==== CURL
+
+include::{snippets}/softwaremodules/put-software-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/put-software-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/put-software-module/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremodules/put-software-module/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/put-software-module/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremodules/put-software-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremodules/{softwareModuleId}/artifacts
+
+=== Implementation notes
+
+Handles the GET request of retrieving all meta data of artifacts assigned to a software module. Required Permission: READ_REPOSITORY
+
+=== List artifacts metadata
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-artifacts/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-artifacts/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-artifacts/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-artifacts/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-artifacts/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/softwaremodules/{softwareModuleId}/artifacts
+
+=== Implementation notes
+
+Handles POST request for artifact upload. Required Permission: CREATE_REPOSITORY
+
+=== Upload artifact
+
+==== CURL
+
+include::{snippets}/softwaremodules/post-artifact/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/post-artifact/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/post-artifact/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/softwaremodules/post-artifact-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/softwaremodules/post-artifact-with-parameters/http-request.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/post-artifact/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremodules/post-artifact/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/softwaremodules/{softwareModuleId}/artifacts/{artifactId}
+
+=== Implementation Notes
+
+Handles the DELETE request for a single SoftwareModule within SP. Required Permission: DELETE_REPOSITORY
+
+=== Delete arifact
+
+==== CURL
+
+include::{snippets}/softwaremodules/delete-artifact/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/delete-artifact/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/delete-artifact/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/softwaremodules/delete-artifact/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremodules/{softwareModuleId}/artifacts/{artifactId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single Artifact meta data request. Required Permission: READ_REPOSITORY
+
+=== Get artifact metadata
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-artifact/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-artifact/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-artifact/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-artifact/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-artifact/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+    
+== GET /rest/v1/softwaremodules/{softwareModuleId}/artifacts/{artifactId}/download
+
+=== Implementation notes
+
+Handles the GET request for downloading an artifact. Required Permission: READ_REPOSITORY
+
+=== Download artifact
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-download-artifact/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-download-artifact/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-download-artifact/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-download-artifact/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremodules/{softwareModuleId}/metadata
+
+=== Implementation notes
+
+Get a paged list of meta data for a software module. Required Permission: READ_REPOSITORY
+
+=== Get a paged list of metadata
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-metadata/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/softwaremodules/get-metadata-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/softwaremodules/get-metadata-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-metadata/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/softwaremodules/{softwareModuleId}/metadata
+
+=== Implementation notes
+
+Create a list of meta data entries Required Permission: UPDATE_REPOSITORY
+
+=== Create a list of metadata entries
+
+==== CURL
+
+include::{snippets}/softwaremodules/post-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/post-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/post-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremodules/post-metadata/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/post-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremodules/post-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== DELETE /rest/v1/softwaremodules/{softwareModuleId}/metadata/{metadataKey}
+
+=== Implementation Notes
+
+Delete a single meta data. Required Permission: UPDATE_REPOSITORY
+
+=== Deleting a single metadata
+
+==== CURL
+
+include::{snippets}/softwaremodules/delete-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/delete-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/delete-metadata/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/softwaremodules/delete-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/softwaremodules/{softwareModuleId}/metadata/{metadataKey}
+
+=== Implementation notes
+
+Get a single meta data value for a meta data key. Required Permission: READ_REPOSITORY
+
+=== Get a single metadata value
+
+==== CURL
+
+include::{snippets}/softwaremodules/get-metadata-value/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/get-metadata-value/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/get-metadata-value/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/get-metadata-value/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/softwaremodules/get-metadata-value/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/softwaremodules/{softwareModuleId}/metadata/{metadataKey} 
+
+=== Implementation notes
+
+Update a single meta data value for speficic key. Required Permission: UPDATE_REPOSITORY
+
+=== Updating a single metadata value
+
+==== CURL
+
+include::{snippets}/softwaremodules/put-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/softwaremodules/put-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/softwaremodules/put-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/softwaremodules/put-metadata/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/softwaremodules/put-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/softwaremodules/put-software-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Not Found Software Module.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+
+
