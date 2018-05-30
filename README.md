@@ -6,7 +6,6 @@ Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain indepe
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
  [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
-[![Docker Hub](https://img.shields.io/docker/build/hawkbit/hawkbit-update-server.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server/builds)
  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
 Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
