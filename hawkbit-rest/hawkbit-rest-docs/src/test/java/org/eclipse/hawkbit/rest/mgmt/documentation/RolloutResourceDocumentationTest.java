@@ -133,12 +133,6 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         allFieldDescriptor.add(
                 fieldWithPath(arrayPrefix + "totalTargets").description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.self").ignored());
-        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.approve")
-                .description(MgmtApiModelProperties.ROLLOUT_LINKS_APPROVE));
-        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.deny")
-                .description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
-
-
         if (withDetails) {
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalTargetsPerStatus")
                     .description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS_PER_STATUS));
@@ -150,6 +144,10 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_RESUME));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.groups")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_GROUPS));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.approve")
+                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_APPROVE));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.deny")
+                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
         }
 
         return new DocumenationResponseFieldsSnippet(allFieldDescriptor);
