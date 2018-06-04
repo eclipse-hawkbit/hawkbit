@@ -124,6 +124,8 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
         proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
         proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
+        proxyRollout.setApprovalDecidedBy(rollout.getApprovalDecidedBy());
+        proxyRollout.setApprovalRemark(rollout.getApprovalRemark());
         return proxyRollout;
     }
 

@@ -88,7 +88,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
             @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "7"),
             @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "8"),
             @ConversionValue(objectValue = "DELETING", dataValue = "9"),
-            @ConversionValue(objectValue = "DELETED", dataValue = "10") })
+            @ConversionValue(objectValue = "DELETED", dataValue = "10"),
+            @ConversionValue(objectValue = "WAITING_FOR_APPROVAL", dataValue = "11"),
+            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12")})
     @Convert("rolloutstatus")
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
@@ -119,6 +121,14 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Column(name = "start_at")
     private Long startAt;
+
+    @Column(name = "approval_decided_by")
+    @Size(min = 1, max = Rollout.APPROVED_BY_MAX_SIZE)
+    private String approvalDecidedBy;
+
+    @Column(name = "approval_remark")
+    @Size(max = Rollout.APPROVAL_REMARK_MAX_SIZE)
+    private String approvalRemark;
 
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -269,6 +279,24 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public String getApprovalDecidedBy() {
+        return approvalDecidedBy;
+    }
+
+    public void setApprovalDecidedBy(final String approvalDecidedBy) {
+        this.approvalDecidedBy = approvalDecidedBy;
+    }
+
+    @Override
+    public String getApprovalRemark() {
+        return approvalRemark;
+    }
+
+    public void setApprovalRemark(final String approvalRemark) {
+        this.approvalRemark = approvalRemark;
     }
 
 }

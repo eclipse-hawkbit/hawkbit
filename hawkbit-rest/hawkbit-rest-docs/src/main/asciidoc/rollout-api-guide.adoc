@@ -179,6 +179,81 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 
+== POST /rest/v1/rollouts/{rolloutId}/approve
+
+=== Implementation Notes
+Handles the POST request of approving a created rollout within SP.
+Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL.
+Required Permission: APPROVE_ROLLOUT
+
+=== Approve Rollout
+
+==== CURL
+
+include::{snippets}/rollouts/approve-rollout/curl-request.adoc[]
+
+
+==== Request URL
+
+include::{snippets}/rollouts/approve-rollout/http-request.adoc[]
+
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/rollouts/approve-rollout/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /rest/v1/rollouts/{rolloutId}/deny
+
+=== Implementation Notes
+Handles the POST request of denying a created rollout within SP.
+Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL.
+Required Permission: APPROVE_ROLLOUT
+
+=== Deny Rollout
+
+
+==== CURL
+
+include::{snippets}/rollouts/deny-rollout/curl-request.adoc[]
+
+
+==== Request URL
+
+include::{snippets}/rollouts/deny-rollout/http-request.adoc[]
+
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/rollouts/deny-rollout/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
 == POST /rest/v1/rollouts/{rolloutId}/start
 
 === Implementation Notes

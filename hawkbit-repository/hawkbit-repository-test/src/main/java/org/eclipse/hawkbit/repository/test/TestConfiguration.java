@@ -23,11 +23,13 @@ import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
+import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -128,7 +130,6 @@ public class TestConfiguration implements AsyncConfigurer {
     TenantAwareCacheManager cacheManager() {
         return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware());
     }
-
     /**
      * Bean for the download id cache.
      *
@@ -212,6 +213,11 @@ public class TestConfiguration implements AsyncConfigurer {
         serviceMatcher.setMatcher(new AntPathMatcher(":"));
         serviceMatcher.setApplicationContext(applicationContext);
         return serviceMatcher;
+    }
+
+    @Bean
+    RolloutApprovalStrategy rolloutApprovalStrategy() {
+        return new RolloutTestApprovalStrategy();
     }
 
     /**

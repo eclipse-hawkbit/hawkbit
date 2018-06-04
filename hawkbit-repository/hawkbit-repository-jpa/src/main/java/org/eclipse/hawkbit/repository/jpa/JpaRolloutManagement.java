@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
@@ -157,9 +158,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final Database database) {
+            final Database database,  final RolloutApprovalStrategy rolloutApprovalStrategy) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry);
+                eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
         this.database = database;
     }
 
@@ -357,8 +358,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         // When all groups are ready the rollout status can be changed to be
         // ready, too.
         if (readyGroups == rolloutGroups.size()) {
-            LOGGER.debug("rollout {} creation done. Switch to READY.", rollout.getId());
-            rollout.setStatus(RolloutStatus.READY);
+            if (!rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
+                rollout.setStatus(RolloutStatus.READY);
+                LOGGER.debug("rollout {} creation done. Switch to READY.", rollout.getId());
+            } else  {
+                LOGGER.debug("rollout {} creation done. Switch to WAITING_FOR_APPROVAL.", rollout.getId());
+                rollout.setStatus(RolloutStatus.WAITING_FOR_APPROVAL);
+                rolloutApprovalStrategy.onApprovalRequired(rollout);
+            }
             rollout.setLastCheck(0);
             rollout.setTotalTargets(totalTargets);
             rolloutRepository.save(rollout);
@@ -449,6 +456,39 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         return new AsyncResult<>(validateTargetsInGroups(
                 groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
+        return this.approveOrDeny(rolloutId, decision, null);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
+        LOGGER.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
+        RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
+        switch (decision) {
+            case APPROVED:
+                rollout.setStatus(RolloutStatus.READY);
+                break;
+            case DENIED:
+                rollout.setStatus(RolloutStatus.APPROVAL_DENIED);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown approval decision: " + decision);
+        }
+        rollout.setApprovalDecidedBy(rolloutApprovalStrategy.getApprovalUser(rollout));
+        if (remark != null) {
+            rollout.setApprovalRemark(remark);
+        }
+        return rolloutRepository.save(rollout);
     }
 
     @Override
@@ -964,7 +1004,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
 
         checkIfDeleted(update.getId(), rollout.getStatus());
-
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
         update.getActionType().ifPresent(rollout::setActionType);
@@ -976,6 +1015,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
             rollout.setDistributionSet(set);
         });
+        if (rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
+            rollout.setStatus(RolloutStatus.WAITING_FOR_APPROVAL);
+            rollout.setApprovalDecidedBy(null);
+            rollout.setApprovalRemark(null);
+        }
 
         return rolloutRepository.save(rollout);
     }
@@ -1067,7 +1111,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     /**
      * Enforces the quota defining the maximum number of {@link Target}s per
      * {@link RolloutGroup}.
-     * 
+     *
      * @param group
      *            The rollout group
      * @param requested
@@ -1081,7 +1125,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     /**
      * Enforces the quota defining the maximum number of {@link Action}s per
      * {@link Target}.
-     * 
+     *
      * @param target
      *            The target
      * @param requested

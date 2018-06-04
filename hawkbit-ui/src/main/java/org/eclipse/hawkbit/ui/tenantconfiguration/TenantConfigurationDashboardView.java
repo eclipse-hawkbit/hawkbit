@@ -62,6 +62,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private final PollingConfigurationView pollingConfigurationView;
 
+    private final RolloutConfigurationView rolloutConfigurationView;
+
     private final VaadinMessageSource i18n;
 
     private final UiProperties uiProperties;
@@ -90,6 +92,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
                 tenantConfigurationManagement);
         this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement);
+        this.rolloutConfigurationView = new RolloutConfigurationView(i18n, tenantConfigurationManagement, uiProperties);
 
         this.i18n = i18n;
         this.uiProperties = uiProperties;
@@ -105,7 +108,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
             configurationViews.add(defaultDistributionSetTypeLayout);
         }
         configurationViews.add(repositoryConfigurationView);
-
+        configurationViews.add(rolloutConfigurationView);
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {

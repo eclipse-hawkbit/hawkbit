@@ -80,6 +80,8 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                 "if the anonymous download mode is enabled.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED,
                 "if autoclose running actions with new Distribution Set assignment is enabled.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED,
+                "if approval mode for Rollout Management is enabled.");
     }
 
     @Autowired

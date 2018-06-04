@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
@@ -106,6 +107,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
@@ -471,7 +473,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to access quotas
      * @param properties
      *            JPA properties
-     * 
+     *
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
@@ -559,10 +561,25 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final JpaProperties properties) {
+            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy) {
         return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
                 distributionSetManagement, context, eventPublisher, virtualPropertyReplacer, txManager, tenantAware,
-                lockRegistry, properties.getDatabase());
+                lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
+    }
+
+
+    /**
+     * {@link DefaultRolloutApprovalStrategy} bean.
+     *
+     * @return a new {@link RolloutApprovalStrategy}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    RolloutApprovalStrategy rolloutApprovalStrategy(final UserDetailsService userDetailsService,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
+        return new DefaultRolloutApprovalStrategy(userDetailsService, tenantConfigurationManagement,
+                systemSecurityContext);
     }
 
     /**

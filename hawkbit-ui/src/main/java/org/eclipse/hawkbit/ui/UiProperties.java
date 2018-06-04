@@ -138,6 +138,11 @@ public class UiProperties implements Serializable {
             private String security = "";
 
             /**
+             * Link to rollout related documentation.
+             */
+            private String rollout = "";
+
+            /**
              * Link to target filter view.
              */
             private String targetfilterView = "";
@@ -165,6 +170,10 @@ public class UiProperties implements Serializable {
 
             public String getSecurity() {
                 return security;
+            }
+
+            public String getRollout() {
+                return rollout;
             }
 
             public String getSystemConfigurationView() {
@@ -201,6 +210,10 @@ public class UiProperties implements Serializable {
 
             public void setSecurity(final String security) {
                 this.security = security;
+            }
+
+            public void setRollout(final String rollout) {
+                this.rollout = rollout;
             }
 
             public void setSystemConfigurationView(final String systemConfigurationView) {

@@ -24,7 +24,12 @@ The following capabilities are currently supported by the _Rollout Management_:
   - Selection of targets as input for the rollout based on _target filter_ functionality.
   - Selection of a _DistributionSet_.
   - Auto-splitting of the input target list into a defined number deployment groups.
-
+- Approval workflow
+  - Has to be enabled explicitly in configuration.
+  - Enables a workflow that requires a user with adequate permissions to review any new or updated rollout before it 
+  can be started.
+  - Allows integration with 3rd party workflow engines.
+  
 - Cascading start of the deployment groups based on installation status of the previous group.
 - Emergency shutdown of the rollout in case a group exceeds the defined error threshold.
 - Rollout progress monitoring for the entire rollout and the individual groups.

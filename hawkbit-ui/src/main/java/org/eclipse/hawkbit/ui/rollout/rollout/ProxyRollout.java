@@ -43,6 +43,8 @@ public class ProxyRollout {
     private long forcedTime;
     private RolloutStatus status;
     private TotalTargetCountStatus totalTargetCountStatus;
+    private String approvalDecidedBy;
+    private String approvalRemark;
 
     public RolloutRendererData getRolloutRendererData() {
         return rolloutRendererData;
@@ -216,5 +218,21 @@ public class ProxyRollout {
 
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
+    }
+
+    public String getApprovalDecidedBy() {
+        return approvalDecidedBy;
+    }
+
+    public void setApprovalDecidedBy(final String approvalDecidedBy) {
+        this.approvalDecidedBy = approvalDecidedBy;
+    }
+
+    public String getApprovalRemark() {
+        return approvalRemark;
+    }
+
+    public void setApprovalRemark(final String approvalRemark) {
+        this.approvalRemark = approvalRemark;
     }
 }

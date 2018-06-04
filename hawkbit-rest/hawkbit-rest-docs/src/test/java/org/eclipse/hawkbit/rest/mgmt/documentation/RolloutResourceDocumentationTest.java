@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessActi
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.DocumenationResponseFieldsSnippet;
@@ -41,6 +42,7 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -62,12 +64,16 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Rollout Resource")
 public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentation {
 
+    @Autowired
+    private RolloutTestApprovalStrategy approvalStrategy;
+
     @Override
     @Before
     public void setUp() {
         this.resourceName = "rollouts";
         super.setUp();
         arrayPrefix = "content[].";
+        approvalStrategy.setApprovalNeeded(false);
     }
 
     @Test
@@ -127,7 +133,6 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         allFieldDescriptor.add(
                 fieldWithPath(arrayPrefix + "totalTargets").description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.self").ignored());
-
         if (withDetails) {
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalTargetsPerStatus")
                     .description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS_PER_STATUS));
@@ -139,6 +144,10 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_RESUME));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.groups")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_GROUPS));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.approve")
+                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_APPROVE));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.deny")
+                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
         }
 
         return new DocumenationResponseFieldsSnippet(allFieldDescriptor);
@@ -381,6 +390,29 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         rolloutManagement.pauseRollout(rollout.getId());
         mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/resume", rollout.getId())
+                .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
+    @Description("Handles the POST request of approving a rollout. Required Permission: "
+            + SpPermission.APPROVE_ROLLOUT)
+    public void approveRollout() throws Exception {
+        approvalStrategy.setApprovalNeeded(true);
+        final Rollout rollout = createRolloutEntity();
+        mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve", rollout.getId())
+                .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
+    @Description("Handles the POST request of denying a rollout. Required Permission: " + SpPermission.APPROVE_ROLLOUT)
+    public void denyRollout() throws Exception {
+        approvalStrategy.setApprovalNeeded(true);
+        final Rollout rollout = createRolloutEntity();
+        mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", rollout.getId())
                 .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
