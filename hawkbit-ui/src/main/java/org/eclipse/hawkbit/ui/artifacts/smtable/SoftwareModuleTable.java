@@ -224,9 +224,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         for (final Long id : entitiesToDelete) {
             final Optional<SoftwareModule> deleteSoftwareNameVersion = softwareModuleManagement.get(id);
             deleteSoftwareNameVersion.ifPresent(dsnv -> {
-                // TODO Refactor this when PR for branch
-                // 'feature_improve_upload_ux' is merged / merge branch into
-                // this one
                 for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
                     if (dsnv.getName().equals(customFile.getBaseSoftwareModuleName())
                             && dsnv.getVersion().equals(customFile.getBaseSoftwareModuleVersion())) {

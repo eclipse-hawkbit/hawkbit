@@ -366,10 +366,6 @@ public abstract class AbstractTagLayout<E extends NamedEntity> extends CustomCom
         return window;
     }
 
-    /**
-     * On change of color in color picker ,change RGB sliders, components border
-     * color and color of preview button.
-     */
     @Override
     public void colorChanged(final ColorChangeEvent event) {
         setColor(event.getColor());

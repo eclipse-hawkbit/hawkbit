@@ -93,7 +93,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
-    protected <T> void processFilterHeaderEvent(final FilterHeaderEvent event) {
+    protected void processFilterHeaderEvent(final FilterHeaderEvent event) {
         if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
                 && typeHeaderLayout.getComponent(1).equals(cancelTagButton)) {
             removeCancelButtonAndAddMenuBar();
