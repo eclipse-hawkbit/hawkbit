@@ -245,7 +245,6 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void buildLayout() {
-        // Build only if user has both permissions
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             setSizeFull();
             createMainLayout();

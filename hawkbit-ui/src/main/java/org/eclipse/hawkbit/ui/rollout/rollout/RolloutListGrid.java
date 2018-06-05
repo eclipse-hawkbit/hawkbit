@@ -308,7 +308,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnHeaderNames() {
         getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
-                .setHeaderCaption(i18n.getMessage(UIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID));
+                .setHeaderCaption(i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
