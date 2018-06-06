@@ -11,8 +11,8 @@
 # data example to a cloud foundry enviroment. Expects existing CF CLI
 # installation and login to be existing already.
 
-#cf api https://api.eu-gb.bluemix.net
-#cf login
+cf api https://api.eu-gb.bluemix.net
+cf login
 cf stop hawkbit-simulator
 cd hawkbit-runtime/hawkbit-update-server/target/
 cf push
