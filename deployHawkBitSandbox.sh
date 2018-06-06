@@ -11,13 +11,13 @@
 # data example to a cloud foundry enviroment. Expects existing CF CLI
 # installation and login to be existing already.
 
-cf api https://api.eu-gb.bluemix.net
-cf login
+#cf api https://api.eu-gb.bluemix.net
+#cf login
 cf stop hawkbit-simulator
 cd hawkbit-runtime/hawkbit-update-server/target/
 cf push
 cd ../../../../hawkbit-examples/
-java -jar hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-0.2.0-SNAPSHOT-exec.jar --hawkbit.url=https://hawkbit-demo-sandbox.eu-gb.mybluemix.net
+java -jar hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-0.2.0-SNAPSHOT-exec.jar --hawkbit.url=https://hawkbit-demo-sandbox.eu-gb.mybluemix.net --hawkbit.username=demo --hawkbit.password=demo
 cd hawkbit-device-simulator/target/
 cf push
 cd ../../..
