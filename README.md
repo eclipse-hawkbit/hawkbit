@@ -44,7 +44,6 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
-
 # Runtime dependencies and support
 
 ## Java Runtime Environment: 1.8
@@ -86,7 +85,7 @@ Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also p
 
 ## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
 
-```
+```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
@@ -95,19 +94,19 @@ $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server
 
 ## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
-```
+```bash
 $ git clone https://github.com/eclipse/hawkbit-examples.git
 $ cd hawkbit-examples
 $ mvn clean install
 ```
 
-```
+```bash
 $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
 ## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
-```
+```bash
 $ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
 ```
 
