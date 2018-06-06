@@ -89,9 +89,7 @@ Contributor Agreement (ECA) on file.
 For more information, please see the Eclipse Committer Handbook:
 https://www.eclipse.org/projects/handbook/#resources-commit
 
-"Sign-off" your commits:
-
-Every commit you make in your patch or pull request MUST be "signed off".
+HowTo "Sign-off" your commits:
 
 You do this by adding the `-s` flag when you make the commit(s), e.g.
 
