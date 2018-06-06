@@ -145,6 +145,11 @@ public final class SpPermission {
      */
     public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
 
+    /**
+     * Permission to approve or deny a rollout prior to starting.
+     */
+    public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
+
     private SpPermission() {
         // Constants only
     }
@@ -387,6 +392,14 @@ public final class SpPermission {
          * {@link #IS_SYSTEM_CODE}.
          */
         public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE = HAS_AUTH_PREFIX + HANDLE_ROLLOUT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#APPROVE_ROLLOUT} or
+         * {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE = HAS_AUTH_PREFIX + APPROVE_ROLLOUT
                 + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**

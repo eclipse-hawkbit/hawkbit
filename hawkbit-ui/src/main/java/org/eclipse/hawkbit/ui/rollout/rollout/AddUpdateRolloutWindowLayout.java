@@ -78,9 +78,11 @@ import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.data.validator.NullValidator;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TabSheet;
@@ -105,6 +107,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private static final String MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS = "message.rollout.filter.target.exists";
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
+
+    private static final String APPROVAL_BUTTON_LABEL = "button.approve";
+
+    private static final String DENY_BUTTON_LABEL = "button.deny";
 
     private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
@@ -150,6 +156,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private OptionGroup errorThresholdOptionGroup;
 
+    private Label approvalLabel;
+
+    private HorizontalLayout approvalButtonsLayout;
+
     private CommonDialogWindow window;
 
     private boolean editRolloutEnabled;
@@ -165,6 +175,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private GroupsPieChart groupsPieChart;
 
     private GroupsLegendLayout groupsLegendLayout;
+
+    private OptionGroup approveButtonsGroup;
+
+    private TextField approvalRemarkField;
 
     private final transient RolloutGroupConditions defaultRolloutGroupConditions;
 
@@ -213,6 +227,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             if (editRolloutEnabled) {
                 editRollout();
+                if (rollout.getStatus().equals(Rollout.RolloutStatus.WAITING_FOR_APPROVAL)) {
+                    rolloutManagement.approveOrDeny(rollout.getId(),
+                            (Rollout.ApprovalDecision) approveButtonsGroup.getValue(), approvalRemarkField.getValue());
+                    eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
+                }
                 return;
             }
             createRollout();
@@ -412,6 +431,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rollout = null;
         groupsDefinitionTabs.setVisible(true);
         groupsDefinitionTabs.setSelectedTab(0);
+
+        approvalLabel.setVisible(false);
+        approvalButtonsLayout.setVisible(false);
+        approveButtonsGroup.clear();
+        approvalRemarkField.clear();
+        approveButtonsGroup.removeAllValidators();
     }
 
     private void addGroupsDefinitionTabs() {
@@ -442,7 +467,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         setSpacing(true);
         setSizeUndefined();
-        setRows(7);
+        setRows(8);
         setColumns(4);
         setStyleName("marginTop");
         setColumnExpandRatio(3, 1);
@@ -475,6 +500,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(autoStartOptionGroupLayout, 1, 5, 3, 5);
 
         addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
+
+        addComponent(approvalLabel, 0, 7);
+        addComponent(approvalButtonsLayout, 1, 7, 3, 7);
 
         rolloutName.focus();
     }
@@ -540,6 +568,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         groupsLegendLayout = new GroupsLegendLayout(i18n);
 
+        approvalLabel = getLabel("label.approval.decision");
+        approvalButtonsLayout = createApprovalLayout();
     }
 
     private void displayValidationStatus(final DefineGroupsLayout.ValidationStatus status) {
@@ -606,6 +636,29 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThreshold.addValidator(nullValidator);
         layout.addComponent(errorThresholdOptionGroup, 2, 3);
 
+        return layout;
+    }
+
+    private HorizontalLayout createApprovalLayout() {
+        approveButtonsGroup = new OptionGroup();
+        approveButtonsGroup.setId(UIComponentIdProvider.ROLLOUT_APPROVAL_OPTIONGROUP_ID);
+        approveButtonsGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+        approveButtonsGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        approveButtonsGroup.addStyleName("custom-option-group");
+        approveButtonsGroup.addItems(Rollout.ApprovalDecision.APPROVED, Rollout.ApprovalDecision.DENIED);
+
+        approveButtonsGroup.setItemCaption(Rollout.ApprovalDecision.APPROVED, i18n.getMessage(APPROVAL_BUTTON_LABEL));
+        approveButtonsGroup.setItemIcon(Rollout.ApprovalDecision.APPROVED, FontAwesome.CHECK);
+        approveButtonsGroup.setItemCaption(Rollout.ApprovalDecision.DENIED, i18n.getMessage(DENY_BUTTON_LABEL));
+        approveButtonsGroup.setItemIcon(Rollout.ApprovalDecision.DENIED, FontAwesome.TIMES);
+
+        approvalRemarkField = createTextField("label.approval.remark",
+                UIComponentIdProvider.ROLLOUT_APPROVAL_REMARK_FIELD_ID, Rollout.APPROVAL_REMARK_MAX_SIZE);
+        approvalRemarkField.setWidth(100.0F, Unit.PERCENTAGE);
+
+        HorizontalLayout layout = new HorizontalLayout(approveButtonsGroup, approvalRemarkField);
+        layout.setWidth(100.0F, Unit.PERCENTAGE);
+        layout.setExpandRatio(approvalRemarkField, 1.0F);
         return layout;
     }
 
@@ -965,6 +1018,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             if (rollout.getStatus() != Rollout.RolloutStatus.READY) {
                 disableRequiredFieldsOnEdit();
             }
+
+            if (rollout.getStatus() == Rollout.RolloutStatus.WAITING_FOR_APPROVAL) {
+                approvalButtonsLayout.setVisible(true);
+                approveButtonsGroup.addValidator(nullValidator);
+                approvalLabel.setVisible(true);
+            }
+
             rolloutName.setValue(rollout.getName());
             groupsDefinitionTabs.setVisible(false);
 

@@ -1,0 +1,398 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[root-controller]]
+= Root Controller
+
+toc::[]
+
+== GET /{tenant}/controller/v1/{targetid}
+
+=== Implementation notes
+
+This base resource can be regularly polled by the controller on the provisioning target or device in order to retrieve actions that need to be executed. Those are provided as a list of links to more detailed information about the action. The resource supports Etag based modification checks in order to save traffic. Note: deployments have to be confirmed in order to move on to the next action. Cancellations have to be confirmed or rejected.
+
+=== Controller base poll resource
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deplyoment/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deplyoment/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deplyoment/path-parameters.adoc[]
+
+=== Response (Status 200) with an active deployment
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deplyoment/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deplyoment/http-response.adoc[]
+
+=== Response (Status 200) with an active cancellation
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deployment-cancellation/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/rootcontroller/get-controller-base-with-open-deployment-cancellation/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403_quota.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /{tenant}/controller/v1/{targetid}/cancelAction/{actionId}
+
+=== Implementation notes
+
+The SP server might cancel an operation, e.g. an unfinished update has a sucessor. It is up to the provisiong target to decide to accept the cancelation or reject it.
+
+=== Cancel an action
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-controller-cancel-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-controller-cancel-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-controller-cancel-action/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-controller-cancel-action/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/rootcontroller/get-controller-cancel-action/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+
+== POST /{tenant}/controller/v1/{targetid}/cancelAction/{actionId}/feedback
+
+=== Implementation notes
+
+It is up to the device how much intermediate feedback is provided. However, the action will be kept open until the controller on the device reports a finished (either successful or error) or rejects the action, e.g. the canceled actions have been started already.
+
+=== Feedback channel for cancel actions
+
+==== Curl
+
+include::{snippets}/rootcontroller/post-cancel-action-feedback/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/post-cancel-action-feedback/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/post-cancel-action-feedback/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/rootcontroller/post-cancel-action-feedback/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /{tenant}/controller/v1/{targetid}/configData
+
+=== Implementation notes
+
+The usual behaviour is that when a new device resgisters at the server it is requested to provide the meta information that will allow the server to identify the device on a hardware level (e.g. hardware revision, mac address, serial number etc.).
+
+=== Response to a requested metadata pull from the provisioning target device.
+
+==== Curl
+
+include::{snippets}/rootcontroller/put-config-data/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/put-config-data/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/put-config-data/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/rootcontroller/put-config-data/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /{tenant}/controller/v1/{targetid}/deploymentBase/{actionId}
+
+=== Implementation notes
+
+Core resource for deployment operations. Contains all information necessary in order to execute the operation. 
+
+Keep in mind that the provided download links for the artifacts are generated dynamically by the update server. Host, port and path and not guaranteed to be similar to the provided examples below but will be defined at runtime.
+
+=== Deployment or update action
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/request-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/response-fields.adoc[]
+
+==== Response example
+
+In this case the (optional) query for the last 10 messages, previously provided by the device, are included. Useful if the devices provide state information previously on the feedback channel and won't store it locally.
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action/http-response.adoc[]
+
+
+=== Response (Status 200) with a maintenance window defined but not active yet
+
+In addition to the straight forward approach to inform the device to download and install the software in one transaction hawkBit supports the separation of download and installation into separate steps.
+
+This feature is called Maintenance Window where the device is informed to download the software first and then when it enters a defined (maintenance) window the installation triggers follows as in the example above.
+
+==== Response example
+
+Note: artifact details not shown in this example.
+
+include::{snippets}/rootcontroller/get-controller-basedeployment-action-with-maintenance-window/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+
+
+== POST /{tenant}/controller/v1/{targetid}/deploymentBase/{actionId}/feedback
+
+
+=== Implementation notes
+
+Feedback channel. It is up to the device how much intermediate feedback is provided. However, the action will be kept open until the controller on the device reports a finished (either successful or error).
+
+=== Feedback channel for update action
+
+==== Curl
+
+include::{snippets}/rootcontroller/post-basedeployment-action-feedback/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/post-basedeployment-action-feedback/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/post-basedeployment-action-feedback/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/rootcontroller/post-basedeployment-action-feedback/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+////
+== GET /{tenant}/controller/v1/{targetid}/softwaremodules
+
+=== Implementation notes
+
+Returns all available software modules for a given target
+
+=== Returns software modules of given target
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-software-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-software-modules/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-software-modules/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/rootcontroller/get-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+////
+
+== GET /{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts
+
+=== Implementation notes
+
+Returns all artifacts whichs is assigned to the software module
+
+=== Returns artifacts of given software module
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-software-modules-artifacts/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-software-modules-artifacts/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-software-modules-artifacts/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-software-modules-artifacts/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/rootcontroller/get-software-modules-artifacts/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]

@@ -1,0 +1,3 @@
+| `409 Conflict`
+| E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.  
+| See <<error-body>>

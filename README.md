@@ -5,7 +5,10 @@
 Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
- [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
+ [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
+ [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
+
+Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
 # Documentation
 
@@ -53,9 +56,9 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 | DDLs maintained by project  | X | X | X | X |
 | Test dependencies defined | X | X | X | - |
 | Versions tested | 1.4 | MySQL 5.6/5.7, AWS Aurora | MS SQL Server 2017 | DB2 Server v11.1 |
-| Docker image with driver provided  | X | X | - | - |
+| Docker image with driver provided  | X | X (Tag: "-mysql") | X | - |
 | JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  | - |
-| Status | Test, Dev, Trial | Production grade  | Experimental | Test, Dev |
+| Status | Test, Dev, Trial | Production grade  | Production grade | Test, Dev |
 
 ## (Optional) RabbitMQ: 3.6,3.7
 
@@ -70,7 +73,7 @@ $  docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
 
 Open the update server in your browser:
 
-[localhost:8080](http://localhost:8080) 
+[localhost:8080](http://localhost:8080)
 
 See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
 
@@ -131,4 +134,3 @@ hawkBit is currently in '0.X' semantic version. That is due to the need that the
 However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
 
 Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
-

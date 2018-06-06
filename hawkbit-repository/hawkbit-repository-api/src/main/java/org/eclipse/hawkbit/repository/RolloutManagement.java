@@ -341,6 +341,54 @@ public interface RolloutManagement {
     void resumeRollout(long rolloutId);
 
     /**
+     * Approves or denies a created rollout being in state
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
+     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
+     * {@link RolloutStatus#APPROVAL_DENIED}
+     *
+     * @param rolloutId
+     *            the rollout to be approved or denied.
+     * @param decision
+     *            decision whether a rollout is approved or denied.
+     *
+     * @return approved or denied rollout
+     *
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
+     * @throws RolloutIllegalStateException
+     *             if given rollout is not in
+     *             {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
+     *             waiting for approval can be acted upon.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE)
+    Rollout approveOrDeny(long rolloutId, Rollout.ApprovalDecision decision);
+
+    /**
+     * Approves or denies a created rollout being in state
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
+     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
+     * {@link RolloutStatus#APPROVAL_DENIED}
+     * 
+     * @param rolloutId
+     *            the rollout to be approved or denied.
+     * @param decision
+     *            decision whether a rollout is approved or denied.
+     * @param remark
+     *            user remark on approve / deny decision
+     * 
+     * @return approved or denied rollout
+     *
+     * @throws EntityNotFoundException
+     *             if rollout with given ID does not exist
+     * @throws RolloutIllegalStateException
+     *             if given rollout is not in
+     *             {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
+     *             waiting for approveOrDeny can be acted upon.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE)
+    Rollout approveOrDeny(long rolloutId, Rollout.ApprovalDecision decision, String remark);
+
+    /**
      * Starts a rollout which has been created. The rollout must be in
      * {@link RolloutStatus#READY} state. The Rollout will be set into the
      * {@link RolloutStatus#STARTING} state. The RolloutScheduler will ensure

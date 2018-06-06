@@ -59,12 +59,14 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
     protected final LockRegistry lockRegistry;
 
+    protected final RolloutApprovalStrategy rolloutApprovalStrategy;
+
     protected AbstractRolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware,
-            final LockRegistry lockRegistry) {
+            final LockRegistry lockRegistry, final RolloutApprovalStrategy rolloutApprovalStrategy) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -75,6 +77,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.txManager = txManager;
         this.tenantAware = tenantAware;
         this.lockRegistry = lockRegistry;
+        this.rolloutApprovalStrategy = rolloutApprovalStrategy;
     }
 
     protected Long runInNewTransaction(final String transactionName, final TransactionCallback<Long> action) {

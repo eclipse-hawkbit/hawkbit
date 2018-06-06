@@ -1,0 +1,638 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[distributionset-types]]
+= Distribution Set Types
+
+toc::[]
+
+== GET /rest/v1/distributionsettypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving all distribution set types withinfGET /rest/v1/distributionsettypes SP. Required Permission: READ_REPOSITORY
+
+=== Get distribution set types
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-distribution-set-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-distribution-set-types/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsettypes/get-distribution-set-types-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsettypes/get-distribution-set-types-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-distribution-set-types/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-distribution-set-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/distributionsettypes
+
+=== Implementation notes
+
+Handles the POST request for creating new distribution set types within SP. The request body must always be a list of types. Required Permission: CREATE_REPOSITORY
+
+=== Create distribution set types
+
+==== CURL
+
+include::{snippets}/distributionsettypes/post-distribution-set-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/post-distribution-set-types/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsettypes/post-distribution-set-types/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/post-distribution-set-types/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsettypes/post-distribution-set-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+| `409 Conflict`
+| Distribution set type already exists
+| See <<error-body>>
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/distributionsettypes/{distributionSetTypeId}
+
+=== Implementation Notes
+
+Handles the DELETE request for a single distribution set type within SP. Required Permission: DELETE_REPOSITORY
+
+=== Delete distribution set type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/delete-distribution-set-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/delete-distribution-set-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/delete-distribution-set-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsettypes/delete-distribution-set-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsettypes/{distributionSetTypeId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single distribution set type within SP. Required Permission: READ_REPOSITORY
+
+=== Get distribution set type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-distribution-set-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-distribution-set-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/get-distribution-set-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-distribution-set-type/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-distribution-set-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /rest/v1/distributionsettypes/{distributionSetTypeId} 
+
+=== Implementation notes
+
+Handles the PUT request for a single distribution set type within SP. Required Permission: UPDATE_REPOSITORY
+
+=== Update distribution set type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsettypes/put-distribution-set-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsettypes/{distributionSetTypeId}/mandatorymoduletypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving the list of mandatory software module types in that distribution set type. Required Permission: READ_REPOSITORY
+
+=== Lists all mandatory software module types
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-mandatory-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-mandatory-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/get-mandatory-modules/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-mandatory-modules/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-mandatory-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/distributionsettypes/{distributionSetTypeId}/mandatorymoduletypes
+
+=== Implementation notes
+
+Handles the POST request for adding a mandatory software module type to a distribution set type.Note that a DS type cannot be changed after it has been used by a DS. Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY
+
+=== Add mandatory software module type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/post-mandatory-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/post-mandatory-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/post-mandatory-module/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsettypes/post-mandatory-module/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response example
+
+include::{snippets}/distributionsettypes/post-mandatory-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+| `409 Conflict`
+| Distribution set type already exists
+| See <<error-body>>
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/distributionsettypes/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}
+
+=== Implementation Notes
+
+Handles the DELETE request for removing a software module type from a single distribution set type within SP. Required Permission: DELETE_REPOSITORY
+
+Delete mandatory software module type.
+
+=== Remove mandatory module from distribution set type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/delete-mandatory-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/delete-mandatory-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/delete-mandatory-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsettypes/delete-mandatory-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+    
+== GET /rest/v1/distributionsettypes/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving the single mandatory software module type in that distribution set type. Required Permission: READ_REPOSITORY
+
+=== Retrieve mandatory software module type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-mandatory-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-mandatory-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/get-mandatory-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-mandatory-module/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-mandatory-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsettypes/{distributionSetTypeId}/optionalmoduletypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving the list of optional software module types in that distribution set type. Required Permission: READ_REPOSITORY
+
+=== Lists all optional software module types
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-optional-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-optional-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/get-optional-modules/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-optional-modules/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-optional-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /rest/v1/distributionsettypes/{distributionSetTypeId}/optionalmoduletypes
+
+=== Implementation notes
+
+Handles the POST request for adding an optional software module type to a distribution set type.Note that a DS type cannot be changed after it has been used by a DS. Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY
+
+=== Add optional software module type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/post-optional-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/post-optional-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/post-optional-module/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsettypes/post-optional-module/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response example
+
+include::{snippets}/distributionsettypes/post-optional-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+| `409 Conflict`
+| Distribution set type already exists
+| See <<error-body>>
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/distributionsettypes/{distributionSetTypeId}/optionalmoduletypes/{softwareModuleTypeId}
+
+== DELETE /rest/v1/distributionsettypes/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}
+
+=== Implementation Notes
+
+Handles DELETE request for removing an optional module from the distribution set type.Note that a DS type cannot be changed after it has been used by a DS. Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY
+
+=== Remove optional module from distribution set type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/delete-optional-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/delete-optional-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/delete-optional-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsettypes/delete-optional-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsettypes/{distributionSetTypeId}/optionalmoduletypes/{softwareModuleTypeId} 
+
+=== Implementation notes
+
+Handles the GET request of retrieving the single optional software module type in that distribution set type. Required Permission: READ_REPOSITORY
+
+=== Retrieve optional software module type
+
+==== CURL
+
+include::{snippets}/distributionsettypes/get-optional-module/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsettypes/get-optional-module/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsettypes/post-optional-module/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsettypes/get-optional-module/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/distributionsettypes/get-optional-module/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]

@@ -976,6 +976,16 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".6";
 
     /**
+     * Rollout approval button id.
+     */
+    public static final String ROLLOUT_APPROVAL_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
+
+    /**
+     * Rollout approve/deny option button group id.
+     */
+    public static final String ROLLOUT_APPROVAL_OPTIONGROUP_ID = ROLLOUT_ACTION_ID + ".12";
+
+    /**
      * Rollout pause button id.
      */
     public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".7";
@@ -1190,6 +1200,17 @@ public final class UIComponentIdProvider {
      * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
      */
     public static final String REPOSITORY_ACTIONS_AUTOCLOSE_CHECKBOX = "repositoryactionsautoclosecheckbox";
+
+    /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#ROLLOUT_APPROVAL_ENABLED}
+     */
+    public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
+
+    /**
+     * Id of the rollout approval remark field
+     */
+    public static final String ROLLOUT_APPROVAL_REMARK_FIELD_ID = "rollout.approve.remark";
 
     /**
      * /* Private Constructor.

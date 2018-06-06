@@ -68,11 +68,16 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -86,6 +91,12 @@ import ru.yandex.qatools.allure.annotations.Title;
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
+
+    @Before
+    @After
+    public void reset() {
+        this.approvalStrategy.setApprovalNeeded(false);
+    }
 
     @Test
     @Description("Verifies that a running action with distribution-set (A) is not canceled by a rollout which tries to also assign a distribution-set (A)")
@@ -1537,6 +1548,59 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> rolloutManagement.start(rolloutId))
                 .withMessageContaining("can only be started in state ready");
 
+    }
+
+    @Test
+    @Description("Creating a rollout with approval role or approval engine disabled results in the rollout being in " +
+            "READY state.")
+    public void createdRolloutWithApprovalRoleOrApprovalDisabledTransitionsToReadyState() {
+        approvalStrategy.setApprovalNeeded(false);
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
+                5, successCondition, errorCondition);
+        assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.READY);
+    }
+
+    @Test
+    @Description("Creating a rollout without approver role and approval enabled leads to transition to " +
+            "WAITING_FOR_APPROVAL state.")
+    public void createdRolloutWithoutApprovalRoleTransitionsToWaitingForApprovalState() {
+        approvalStrategy.setApprovalNeeded(true);
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
+                5, successCondition, errorCondition);
+        assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
+    }
+
+
+    @Test
+    @Description("Approving a rollout leads to transition to READY state.")
+    public void approvedRolloutTransitionsToReadyState() {
+        approvalStrategy.setApprovalNeeded(true);
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
+                5, successCondition, errorCondition);
+        assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
+        rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED);
+        final Rollout resultingRollout = rolloutRepository.findOne(rollout.getId());
+        assertThat(resultingRollout.getStatus()).isEqualTo(Rollout.RolloutStatus.READY);
+    }
+
+    @Test
+    @Description("Denying approval for a rollout leads to transition to APPROVAL_DENIED state.")
+    public void deniedRolloutTransitionsToApprovalDeniedState() {
+        approvalStrategy.setApprovalNeeded(true);
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
+                5, successCondition, errorCondition);
+        assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
+        rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.DENIED);
+        final Rollout resultingRollout = rolloutRepository.findOne(rollout.getId());
+        assertThat(resultingRollout.getStatus()).isEqualTo(RolloutStatus.APPROVAL_DENIED);
     }
 
     @Test

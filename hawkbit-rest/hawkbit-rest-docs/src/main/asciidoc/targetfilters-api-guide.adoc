@@ -1,0 +1,392 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[targetfilters]]
+= Target filter queries
+
+toc::[]
+
+
+== GET /rest/v1/targetfilters
+
+=== Implementation notes
+
+Handles the GET request of retrieving all target filter queries within SP. Required permission: READ_TARGET
+
+=== Get paged list of target filter queries
+
+==== CURL
+
+include::{snippets}/targetfilters/get-target-filter-queries/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access the target filter queries
+
+include::{snippets}/targetfilters/get-target-filter-queries/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targetfilters/get-target-filter-queries-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targetfilters/get-target-filter-queries-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/targetfilters/get-target-filter-queries/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/targetfilters/get-target-filter-queries/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targetfilters
+
+=== Implementation Notes
+
+Handles the POST request to create a new target filter query within SP. Required permission: CREATE_TARGET
+
+=== Create a target filter query
+
+==== CURL
+
+include::{snippets}/targetfilters/post-target-filter-query/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/post-target-filter-query/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targetfilters/post-target-filter-query/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields 
+
+include::{snippets}/targetfilters/post-target-filter-query/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targetfilters/post-target-filter-query/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403_quota.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targetfilters/{targetFilterQueryId}
+
+=== Implementation Notes
+
+Handles the DELETE request of deleting a target filter query within SP. Required permission: DELETE_TARGET
+
+=== Deleting a target
+
+==== CURL
+
+include::{snippets}/targetfilters/delete-target-filter-query/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/delete-target-filter-query/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/delete-target-filter-query/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targetfilters/delete-target-filter-query/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targetfilters/{targetFilterQueryId}
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a single target filter query within SP. Required permission: READ_TARGET
+
+=== Get single target
+
+==== CURL
+
+include::{snippets}/targetfilters/get-target-filter-query/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/get-target-filter-query/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/get-target-filter-query/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targetfilters/get-target-filter-query/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targetfilters/get-target-filter-query/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/targetfilters/{targetFilterQueryId}
+
+=== Implementation Notes
+
+Handles the PUT request of updating a target filter query within SP. Required permission: UPDATE_TARGET
+
+=== Update a target
+
+==== Curl
+
+include::{snippets}/targetfilters/put-target-filter-query/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/put-target-filter-query/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/put-target-filter-query/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targetfilters/put-target-filter-query/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targetfilters/put-target-filter-query/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targetfilters/put-target-filter-query/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targetfilters/{targetFilterQueryId}/autoAssignDS
+
+=== Implementation Notes
+
+Handles the GET request of retrieving the auto assign distribution set. Required permission: READ_TARGET
+
+=== Get auto assign distribution set
+
+==== Curl
+
+include::{snippets}/targetfilters/get-assign-d-s/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/get-assign-d-s/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/get-assign-d-s/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targetfilters/get-assign-d-s/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targetfilters/get-assign-d-s/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targetfilters/{targetFilterQueryId}/autoAssignDS
+
+=== Implementation Notes
+
+Handles the POST request of setting the auto assign distribution set for a target filter query.
+Required permissions: UPDATE_TARGET and READ_REPOSITORY
+
+=== Set auto assign distribution set
+
+==== Curl
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targetfilters/post-auto-assign-d-s/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targetfilters/{targetFilterQueryId}/autoAssignDS
+
+=== Implementation Notes
+
+Removes the auto assign distribution set from the target filter query. Required permission: UPDATE_TARGET
+
+=== Removing the auto assign distribution set
+
+==== Curl
+
+include::{snippets}/targetfilters/delete-auto-assign-d-s/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targetfilters/delete-auto-assign-d-s/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targetfilters/delete-auto-assign-d-s/path-parameters.adoc[]
+
+=== Response (Status 204)
+
+==== Response example
+
+include::{snippets}/targetfilters/delete-auto-assign-d-s/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+
+

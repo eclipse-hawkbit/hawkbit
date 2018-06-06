@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -38,6 +39,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final transient EntityFactory entityFactory;
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
     private final transient QuotaManagement quotaManagement;
+    private final transient TenantConfigurationManagement tenantConfigManagement;
 
     private final SpPermissionChecker permissionChecker;
     private final RolloutUIState rolloutUIState;
@@ -45,11 +47,13 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final UiProperties uiProperties;
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
+                           final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+                           final TargetManagement targetManagement, final UINotification uiNotification,
+                           final UiProperties uiProperties, final EntityFactory entityFactory,
+                           final VaadinMessageSource i18n,
+                           final TargetFilterQueryManagement targetFilterQueryManagement,
+                           final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
+                           final TenantConfigurationManagement tenantConfigManagement) {
         super(i18n, eventBus);
         this.permissionChecker = permissionChecker;
         this.rolloutUIState = rolloutUIState;
@@ -61,6 +65,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
         this.uiProperties = uiProperties;
         this.entityFactory = entityFactory;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.tenantConfigManagement = tenantConfigManagement;
 
         init();
     }
@@ -76,7 +81,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     public AbstractGrid<LazyQueryContainer> createGrid() {
         return new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState, permissionChecker,
                 targetManagement, entityFactory, uiProperties, targetFilterQueryManagement, rolloutGroupManagement,
-                quotaManagement);
+                quotaManagement, tenantConfigManagement);
     }
 
 }

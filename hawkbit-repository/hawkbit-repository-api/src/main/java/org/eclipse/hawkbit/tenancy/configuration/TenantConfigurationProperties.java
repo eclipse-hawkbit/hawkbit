@@ -115,6 +115,11 @@ public class TenantConfigurationProperties {
         public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
 
         /**
+         * Represents setting if approval for a rollout is needed.
+         */
+        public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
+
+        /**
          * Repository on autoclose mode instead of canceling in case of new DS
          * assignment over active actions.
          */

@@ -26,6 +26,17 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 public interface Rollout extends NamedEntity {
 
     /**
+     * Maximum length of author name.
+     */
+    int APPROVED_BY_MAX_SIZE = 40;
+
+
+    /**
+     * Maximum length on comment regarding approval decision.
+     */
+    int APPROVAL_REMARK_MAX_SIZE = 255;
+
+    /**
      * @return <code>true</code> if the rollout is deleted and only kept for
      *         history purposes.
      */
@@ -82,6 +93,16 @@ public interface Rollout extends NamedEntity {
     TotalTargetCountStatus getTotalTargetCountStatus();
 
     /**
+     * @return user that approved or denied the {@link Rollout}.
+     */
+    String getApprovalDecidedBy();
+
+    /**
+     * @return additional note on approval/denial decision.
+     */
+    String getApprovalRemark();
+
+    /**
      *
      * State machine for rollout.
      *
@@ -92,6 +113,16 @@ public interface Rollout extends NamedEntity {
          * Rollouts is being created.
          */
         CREATING,
+
+        /**
+         * Rollout needs to be approved.
+         */
+        WAITING_FOR_APPROVAL,
+
+        /**
+         * Rollout approval is denied. Can not be started.
+         */
+        APPROVAL_DENIED,
 
         /**
          * Rollout is ready to start.
@@ -152,6 +183,20 @@ public interface Rollout extends NamedEntity {
          */
         @Deprecated
         ERROR_STARTING;
+    }
+
+    /**
+     * Enum that holds all possible approval workflow decisions.
+     */
+    enum ApprovalDecision {
+        /**
+         * Representing an granted approval for a rollout.
+         */
+        APPROVED,
+        /**
+         * Representing a rejected rollout.
+         */
+        DENIED
     }
 
 }

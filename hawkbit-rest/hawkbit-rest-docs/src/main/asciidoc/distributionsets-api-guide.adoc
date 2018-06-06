@@ -1,0 +1,840 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[distributionsets]]
+= Distributionsets
+
+toc::[]
+
+== GET /rest/v1/distributionsets
+
+=== Implementation notes
+
+Handles the GET request of retrieving all distribution sets within SP. Required permission: READ_REPOSITORY
+
+=== Get paged list of Distribution Sets
+
+==== Curl
+
+include::{snippets}/distributionsets/get-distribution-sets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-distribution-sets/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-distribution-sets-with-parameters/request-parameters.adoc[]
+
+==== Request query parameter example
+
+include::{snippets}/distributionsets/get-distribution-sets-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-distribution-sets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-distribution-sets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/distributionsets
+
+=== Implementation Notes
+Handles the POST request of creating new distribution sets within SP. The request body must always be a list of sets. Required permission: CREATE_REPOSITORY
+
+=== Create Distribution Sets
+
+
+==== CURL
+
+include::{snippets}/distributionsets/create-distribution-sets/curl-request.adoc[]
+
+
+==== Request URL
+
+include::{snippets}/distributionsets/create-distribution-sets/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/create-distribution-sets/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsets/create-distribution-sets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/create-distribution-sets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/distributionsets/{distributionSetId}
+
+
+=== Implementation Notes
+
+Handles the DELETE request for a single Distribution Set within SP. Required permission: DELETE_REPOSITORY
+
+=== Delete Distribution Set
+
+==== CURL
+
+include::{snippets}/distributionsets/delete-distribution-set/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/delete-distribution-set/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/delete-distribution-set/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/delete-distribution-set/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /rest/v1/distributionsets/{distributionSetId}
+
+=== Implementation Notes
+
+Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+
+=== Get Distribution Set
+
+==== CURL
+
+include::{snippets}/distributionsets/get-distribution-set/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-distribution-set/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-distribution-set/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-distribution-set/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-distribution-set/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/distributionsets/{distributionSetId}
+
+=== Implementation Notes
+
+Handles the UPDATE request for a single Distribution Set within SP. Required permission: UPDATE_REPOSITORY
+
+=== Updating a Distribution Set
+
+==== Curl
+
+include::{snippets}/distributionsets/update-distribution-set/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/update-distribution-set/http-request.adoc[]
+
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/update-distribution-set/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/update-distribution-set/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/update-distribution-set/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/update-distribution-set/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /rest/v1/distributionsets/{distributionSetId}/assignedSM
+
+===  Implementation Notes
+Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+
+=== Get assigned Software Modules
+
+==== Curl
+
+include::{snippets}/distributionsets/get-assigned-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-assigned-software-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-assigned-software-modules/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-assigned-software-modules-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsets/get-assigned-software-modules-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-assigned-software-modules/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-assigned-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+    
+== POST /rest/v1/distributionsets/{distributionSetId}/assignedSM
+
+=== Implementation Notes
+
+Handles the POST request for assigning multiple software modules to a distribution set.The request body must always be a list of software module IDs. Required permissions: READ_REPOSITORY and UPDATE_REPOSITORY
+
+=== Assign Software Modules to Distribution Set
+
+
+==== CURL
+
+include::{snippets}/distributionsets/assign-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/assign-software-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/assign-software-modules/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/assign-software-modules/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/assign-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== DELETE /rest/v1/distributionsets/{distributionSetId}/assignedSM/{softwareModuleId}
+
+
+=== Implementation Notes
+
+Delete a assignment. Required permission: UPDATE_REPOSITORY
+
+=== Delete assignment of Software Module
+
+==== CURL
+
+include::{snippets}/distributionsets/delete-assign-software-modules/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/delete-assign-software-modules/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/delete-assign-software-modules/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/delete-assign-software-modules/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsets/{distributionSetId}/assignedTargets
+
+
+===  Implementation Notes
+Handles the GET request for retrieving assigned targets of a single distribution set. Required permissions: READ_REPOSITORY and READ_TARGET
+
+=== Get assigned targets
+
+==== Curl
+
+include::{snippets}/distributionsets/get-assigned-targets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-assigned-targets/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-assigned-targets/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-assigned-targets-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsets/get-assigned-targets-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-assigned-targets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-assigned-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/distributionsets/{distributionSetId}/assignedTargets
+
+
+=== Implementation Notes
+
+Handles the POST request for assigning multiple targets to a distribution set.The request body must always be a list of target IDs. Required permissions: READ_REPOSITORY and UPDATE_TARGET
+
+=== Assign targets to a distribution set
+
+==== CURL
+
+include::{snippets}/distributionsets/create-assigned-target/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/create-assigned-target/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/create-assigned-target/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/create-assigned-target/request-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/create-assigned-target/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/distributionsets/create-assigned-target/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/create-assigned-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /rest/v1/distributionsets/{distributionSetId}/installedTargets
+
+===  Implementation Notes
+
+Handles the GET request for retrieving installed targets of a single distribution set. Required permissions: READ_REPOSITORY and READ_TARGET
+
+=== Get installed targets
+
+==== Curl
+
+include::{snippets}/distributionsets/get-installed-targets/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-installed-targets/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-installed-targets/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-installed-targets-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsets/get-installed-targets-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-installed-targets/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-installed-targets/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsets/{distributionSetId}/autoAssignTargetFilters
+
+===  Implementation Notes
+
+Handles the GET request for retrieving assigned target filter queries of a single distribution set. Required permissions: READ_REPOSITORY and READ_TARGET
+
+=== Get installed targets
+
+==== Curl
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-auto-assign-target-filter-queries/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsets/{distributionSetId}/metadata
+
+===  Implementation Notes
+
+Get a paged list of meta data for a distribution set. Required permission: READ_REPOSITORY
+
+=== Get a paged list of meta data
+
+==== Curl
+
+include::{snippets}/distributionsets/get-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-metadata/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/distributionsets/get-metadata-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/distributionsets/get-metadata-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /rest/v1/distributionsets/{distributionSetId}/metadata
+
+=== Implementation Notes
+
+Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET
+
+=== Create a list of meta data entries
+
+
+==== CURL
+
+include::{snippets}/distributionsets/create-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/create-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/create-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/create-metadata/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/create-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/distributionsets/{distributionSetId}/metadata/{metadataKey}
+
+
+=== Implementation Notes
+
+Delete a single meta data. Required permission: UPDATE_REPOSITORY
+
+=== Delete a single meta data
+
+==== CURL
+
+include::{snippets}/distributionsets/delete-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/delete-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/delete-metadata/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/delete-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/distributionsets/{distributionSetId}/metadata/{metadataKey}
+
+
+===  Implementation Notes
+
+Get a single meta data value for a meta data key. Required permission: READ_REPOSITORY
+
+=== Get a single meta data value
+
+==== Curl
+
+include::{snippets}/distributionsets/get-metadata-value/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/get-metadata-value/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/get-metadata-value/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/get-metadata-value/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/get-metadata-value/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /rest/v1/distributionsets/{distributionSetId}/metadata/{metadataKey} 
+
+
+=== Implementation Notes
+
+Update a single meta data value for speficic key. Required permission: UPDATE_REPOSITORY
+
+=== Update a single meta data value
+
+==== Curl
+
+include::{snippets}/distributionsets/update-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/update-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/update-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/update-metadata/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/distributionsets/update-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/distributionsets/update-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]
+

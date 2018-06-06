@@ -4,6 +4,7 @@
 
 | Group ID  | Artifact ID  | Version  | CQ  |
 |---|---|---|---|
+|com.microsoft.sqlserver|mssql-jdbc|6.4.0| [CQ15896](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15896) |
 |com.cronutils|cron-utils|5.0.5| [CQ15762](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15762) |
 |com.github.ben-manes.caffeine|caffeine|2.3.5| [CQ13563](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13563) |
 |aopalliance|aopalliance|1.0| [CQ10346](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10346) |
