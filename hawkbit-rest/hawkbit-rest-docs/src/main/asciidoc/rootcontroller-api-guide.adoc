@@ -11,7 +11,7 @@
 
 toc::[]
 
-== GET /{tenant}/controller/v1/{targetid}
+== GET /{tenant}/controller/v1/{controllerid}
 
 === Implementation notes
 
@@ -65,7 +65,7 @@ include::../errors/429.adoc[]
 |===
 
 
-== GET /{tenant}/controller/v1/{targetid}/cancelAction/{actionId}
+== GET /{tenant}/controller/v1/{controllerid}/cancelAction/{actionId}
 
 === Implementation notes
 
@@ -110,7 +110,7 @@ include::../errors/429.adoc[]
 
 
 
-== POST /{tenant}/controller/v1/{targetid}/cancelAction/{actionId}/feedback
+== POST /{tenant}/controller/v1/{controllerid}/cancelAction/{actionId}/feedback
 
 === Implementation notes
 
@@ -151,7 +151,7 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 
-== PUT /{tenant}/controller/v1/{targetid}/configData
+== PUT /{tenant}/controller/v1/{controllerid}/configData
 
 === Implementation notes
 
@@ -193,7 +193,7 @@ include::../errors/429.adoc[]
 |===
 
 
-== GET /{tenant}/controller/v1/{targetid}/deploymentBase/{actionId}
+== GET /{tenant}/controller/v1/{controllerid}/deploymentBase/{actionId}
 
 === Implementation notes
 
@@ -260,7 +260,7 @@ include::../errors/429.adoc[]
 
 
 
-== POST /{tenant}/controller/v1/{targetid}/deploymentBase/{actionId}/feedback
+== POST /{tenant}/controller/v1/{controllerid}/deploymentBase/{actionId}/feedback
 
 
 === Implementation notes
@@ -302,7 +302,7 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 ////
-== GET /{tenant}/controller/v1/{targetid}/softwaremodules
+== GET /{tenant}/controller/v1/{controllerid}/softwaremodules
 
 === Implementation notes
 
@@ -346,7 +346,7 @@ include::../errors/429.adoc[]
 |===
 ////
 
-== GET /{tenant}/controller/v1/{targetid}/softwaremodules/{softwareModuleId}/artifacts
+== GET /{tenant}/controller/v1/{controllerid}/softwaremodules/{softwareModuleId}/artifacts
 
 === Implementation notes
 

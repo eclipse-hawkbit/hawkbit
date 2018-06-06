@@ -73,7 +73,7 @@ Examples for hawkBit components:
 @Stories("Distribution Set Type Resource")
 ```
 
-In addition all test method's name describes in **camel case** what the test is all about and has a long description auth Allures **@Description** annotation.
+In addition all test method's name describes in **camel case** what the test is all about and has in addition a long description in Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 
@@ -89,9 +89,7 @@ Contributor Agreement (ECA) on file.
 For more information, please see the Eclipse Committer Handbook:
 https://www.eclipse.org/projects/handbook/#resources-commit
 
-"Sign-off" your commits:
-
-Every commit you make in your patch or pull request MUST be "signed off".
+HowTo "Sign-off" your commits:
 
 You do this by adding the `-s` flag when you make the commit(s), e.g.
 
