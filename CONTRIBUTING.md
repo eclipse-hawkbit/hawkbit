@@ -73,7 +73,7 @@ Examples for hawkBit components:
 @Stories("Distribution Set Type Resource")
 ```
 
-In addition all test method's name describes in **camel case** what the test is all about and has a long description auth Allures **@Description** annotation.
+In addition all test method's name describes in **camel case** what the test is all about and has in addition a long description in Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 
