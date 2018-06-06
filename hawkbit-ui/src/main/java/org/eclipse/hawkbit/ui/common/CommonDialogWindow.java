@@ -259,7 +259,7 @@ public class CommonDialogWindow extends Window {
         cancelButton.addClickListener(closeClickListener);
     }
 
-    protected void addComponentListeners() {
+    public void addComponentListeners() {
         // avoid duplicate registration
         removeListeners();
 

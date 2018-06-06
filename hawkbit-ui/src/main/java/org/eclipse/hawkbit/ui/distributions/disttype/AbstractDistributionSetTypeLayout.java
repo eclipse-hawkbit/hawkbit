@@ -67,6 +67,12 @@ public abstract class AbstractDistributionSetTypeLayout extends AbstractTypeLayo
     private void createTwinTables() {
         twinTables = new DistributionSetTypeSoftwareModuleSelectLayout(getI18n(), softwareModuleTypeManagement);
         getMainLayout().addComponent(twinTables, 2, 0);
+        updateRequiredFields();
+    }
+
+    private void updateRequiredFields() {
+        getWindow().updateAllComponents(getMainLayout());
+        getWindow().addComponentListeners();
     }
 
     @Override
