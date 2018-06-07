@@ -202,8 +202,8 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     }
 
     protected Button createCancelButtonForUpdateOrDeleteTag() {
-        cancelTagButton = SPUIComponentProvider.getButton("cancelUpdateTag", "", "", null, false,
-                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
+        cancelTagButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_UPDATE_TAG_ID, "", "", null,
+                false, FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
         cancelTagButton.addClickListener(this::cancelUpdateOrDeleteTag);
         return cancelTagButton;
     }

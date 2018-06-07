@@ -70,6 +70,12 @@ public final class UIComponentIdProvider {
     public static final String TARGET_MENU_BAR_ID = "target.menu.bar.id";
 
     /**
+     * ID for the cancel button in the tag header, when updating or deleting a
+     * tag is selected
+     */
+    public static final String CANCEL_UPDATE_TAG_ID = "cancel.update.tag.id";
+
+    /**
      * ID for NO TAG for targets
      */
     public static final String NO_TAG_TARGET = "no.tag.target";
