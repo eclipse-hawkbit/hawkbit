@@ -55,7 +55,7 @@ public abstract class AbstractFilterButtons extends Table {
 
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
-    private transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
 

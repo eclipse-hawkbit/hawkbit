@@ -39,7 +39,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private final SpPermissionChecker permChecker;
 
-    private transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private Label title;
 

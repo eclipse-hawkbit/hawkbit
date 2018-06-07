@@ -61,6 +61,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTable<E extends NamedEntity> extends Table implements RefreshableContainer {
 
+    private static final long serialVersionUID = 1L;
+
     protected static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
 
     protected static final String DISTRIBUTIONSET_NOT_EXISTS = "distributionset.not.exists";
@@ -73,13 +75,11 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES = "message.confirm.assign.multiple.entities";
 
-    private static final long serialVersionUID = 1L;
-
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    private transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final VaadinMessageSource i18n;
 
@@ -273,15 +273,15 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     public Set<Long> getSelectedEntitiesByTransferable(final TableTransferable transferable) {
         final Set<Long> selectedEntities = getTableValue(this);
         final Set<Long> ids = new HashSet<>();
-        final Long tranferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
-        if (tranferableData == null) {
+        final Long transferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
+        if (transferableData == null) {
             return ids;
         }
 
-        if (entityToBeDeletedIsSelectedInTable(tranferableData, selectedEntities)) {
+        if (entityToBeDeletedIsSelectedInTable(transferableData, selectedEntities)) {
             ids.addAll(selectedEntities);
         } else {
-            ids.add(tranferableData);
+            ids.add(transferableData);
         }
         return ids;
     }
