@@ -872,7 +872,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         distributionSetManagement.delete(entitiesToDelete);
         getEventBus().publish(this, new DistributionTableEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
-                entitiesToDelete.size() + " " + getI18n().getMessage("distribution.details.header")) + "(s)");
+                entitiesToDelete.size() + " " + getI18n().getMessage("distribution.details.header") + "(s)"));
         managementUIState.getTargetTableFilters().getPinnedDistId()
                 .ifPresent(distId -> unPinDeletedDS(entitiesToDelete, distId));
         managementUIState.getSelectedDsIdName().clear();
