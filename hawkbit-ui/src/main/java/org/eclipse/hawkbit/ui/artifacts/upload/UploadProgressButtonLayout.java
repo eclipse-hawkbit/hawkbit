@@ -96,8 +96,9 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         createComponents();
         buildLayout();
         restoreState();
-        eventBus.subscribe(this);
         ui = UI.getCurrent();
+
+        eventBus.subscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

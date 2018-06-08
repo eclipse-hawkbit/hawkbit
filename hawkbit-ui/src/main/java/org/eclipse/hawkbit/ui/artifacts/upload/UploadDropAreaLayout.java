@@ -16,12 +16,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
@@ -34,6 +40,7 @@ import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -65,6 +72,8 @@ public class UploadDropAreaLayout implements Serializable {
      * 
      * @param i18n
      *            the {@link VaadinMessageSource}
+     * @param eventBus
+     *            the {@link EventBus} used to send/retrieve events
      * @param uiNotification
      *            {@link UINotification} for showing notifications
      * @param artifactUploadState
@@ -78,9 +87,10 @@ public class UploadDropAreaLayout implements Serializable {
      *            the {@link ArtifactManagement} for storing the uploaded
      *            artifacts
      */
-    public UploadDropAreaLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,
-            final SoftwareModuleManagement softwareManagement, final ArtifactManagement artifactManagement) {
+    public UploadDropAreaLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
+            final MultipartConfigElement multipartConfigElement, final SoftwareModuleManagement softwareManagement,
+            final ArtifactManagement artifactManagement) {
         this.i18n = i18n;
         this.uiNotification = uiNotification;
         this.artifactUploadState = artifactUploadState;
@@ -89,6 +99,23 @@ public class UploadDropAreaLayout implements Serializable {
         this.artifactManagement = artifactManagement;
 
         buildLayout();
+
+        eventBus.subscribe(this);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onEvent(final SoftwareModuleEvent event) {
+        final BaseEntityEventType eventType = event.getEventType();
+        if (eventType == BaseEntityEventType.SELECTED_ENTITY) {
+            UI.getCurrent().access(() -> {
+                if (artifactUploadState.isNoSoftwareModuleSelected()
+                        || artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
+                    dropAreaWrapper.setEnabled(false);
+                } else if (artifactUploadState.areAllUploadsFinished()) {
+                    dropAreaWrapper.setEnabled(true);
+                }
+            });
+        }
     }
 
     private void buildLayout() {
