@@ -313,7 +313,7 @@ public abstract class AbstractFilterButtons extends Table {
                         removeUpdateAndDeleteColumn();
                         getEventBus().publish(this, event);
                     }
-                }, entityToDelete);
+                });
         confirmDialog.getWindow().addCloseListener(getCloseListenerForEditAndDeleteTag(event));
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();

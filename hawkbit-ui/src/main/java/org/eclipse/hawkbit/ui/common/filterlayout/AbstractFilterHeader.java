@@ -136,7 +136,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
         typeHeaderLayout = new HorizontalLayout();
-        typeHeaderLayout.setId(UIComponentIdProvider.DIST_TAG_MENU_BAR_ID);
         typeHeaderLayout.setHeight(32, Unit.PIXELS);
         typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);

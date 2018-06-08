@@ -1219,6 +1219,21 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_APPROVAL_REMARK_FIELD_ID = "rollout.approve.remark";
 
     /**
+     * ID for the menu bar item to update a tag or type
+     */
+    public static final String CONFIG_MENU_BAR_UPDATE = "update";
+
+    /**
+     * ID for the menu bar item to delete a tag or type
+     */
+    public static final String CONFIG_MENU_BAR_DELETE = "delete";
+
+    /**
+     * ID for the menu bar item to create a tag or type
+     */
+    public static final String CONFIG_MENU_BAR_CREATE = "create";
+
+    /**
      * /* Private Constructor.
      */
     private UIComponentIdProvider() {

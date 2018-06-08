@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.themes.ValoTheme;
@@ -79,22 +82,22 @@ public class ConfigMenuBar extends MenuBar {
             return;
         }
         setStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        addStyleName("menubar-position");
+        addStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_POSITION);
         config = addItem("", FontAwesome.COG, null);
-        config.setStyleName("tags");
+        config.setStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_ITEMS);
 
         addMenuItems();
     }
 
     private void addMenuItems() {
         if (createPermission) {
-            config.addItem("create", FontAwesome.PLUS, addButtonCommand);
+            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_CREATE, FontAwesome.PLUS, addButtonCommand);
         }
         if (updatePermission) {
-            config.addItem("update", FontAwesome.EDIT, updateButtonCommand);
+            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_UPDATE, FontAwesome.EDIT, updateButtonCommand);
         }
         if (deletePermission) {
-            config.addItem("delete", FontAwesome.TRASH_O, deleteButtonCommand);
+            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_DELETE, FontAwesome.TRASH_O, deleteButtonCommand);
         }
     }
 

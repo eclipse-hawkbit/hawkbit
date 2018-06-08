@@ -395,7 +395,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
                     if (ok) {
                         handleOkDelete(entitiesToBeDeleted);
                     }
-                }, getDeleteConfirmationWindowId(event));
+                });
     }
 
     private String createConfirmationQuestionForDeletion(final List<Long> entitiesToBeDeleted) {

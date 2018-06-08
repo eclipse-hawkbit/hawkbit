@@ -272,6 +272,10 @@ public final class SPUIStyleDefinitions {
 
     public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
 
+    public static final String CONFIG_MENU_BAR_POSITION = "menubar-position";
+
+    public static final String CONFIG_MENU_BAR_ITEMS = "tags";
+
     /**
      * Constructor.
      */
