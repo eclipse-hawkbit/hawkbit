@@ -365,7 +365,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private void openConfirmationWindowDeleteAction(final ClickEvent event) {
         final List<Long> entitiesToBeDeleted = getEntitiesForDeletion(event);
         final String confirmationQuestion = createConfirmationQuestionForDeletion(entitiesToBeDeleted);
-        final ConfirmationDialog confirmDialog = createConfirmationWindowForDeletion(event, entitiesToBeDeleted,
+        final ConfirmationDialog confirmDialog = createConfirmationWindowForDeletion(entitiesToBeDeleted,
                 confirmationQuestion);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
@@ -387,8 +387,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         return entitiesToBeDeleted;
     }
 
-    private ConfirmationDialog createConfirmationWindowForDeletion(final ClickEvent event,
-            final List<Long> entitiesToBeDeleted, final String confirmationQuestion) {
+    private ConfirmationDialog createConfirmationWindowForDeletion(final List<Long> entitiesToBeDeleted,
+            final String confirmationQuestion) {
         return new ConfirmationDialog(i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityType()),
                 confirmationQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
                 i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
@@ -428,11 +428,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private static long getDeleteButtonId(final ClickEvent event) {
         final String id = event.getButton().getId();
         return Long.parseLong(id.substring(id.lastIndexOf('.') + 1));
-    }
-
-    private static String getDeleteConfirmationWindowId(final ClickEvent event) {
-        final String id = event.getButton().getId();
-        return id.substring(0, id.lastIndexOf('.'));
     }
 
     protected abstract String getDeletedEntityName(Long entityId);
