@@ -112,7 +112,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE) {
+        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFTWARE_TYPE) {
             refreshTable();
         }
     }
@@ -188,7 +188,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
                 removeUpdateAndDeleteColumn();
             } else {
                 softwareModuleTypeManagement.delete(swmTypeToDelete.get().getId());
-                getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFWARE_TYPE);
+                getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE_TYPE);
                 uiNotification.displaySuccess(getI18n().getMessage("message.delete.success", entityToDelete));
             }
         });

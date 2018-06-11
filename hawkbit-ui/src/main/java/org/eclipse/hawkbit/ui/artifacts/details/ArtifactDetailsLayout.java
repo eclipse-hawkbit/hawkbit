@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.details;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -284,9 +285,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         final Optional<SoftwareModule> softwareModule = findSelectedSoftwareModule();
                         if (softwareModule.isPresent()) {
-                            populateArtifactDetails(softwareModule.get().getId(),
-                                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.get().getName(),
-                                            softwareModule.get().getVersion()));
+                            populateArtifactDetails(softwareModule.get());
                         } else {
                             populateArtifactDetails(null, null);
                         }
@@ -409,6 +408,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         eventBus.publish(this, ArtifactDetailsEvent.MINIMIZED);
     }
 
+    public void populateArtifactDetails(final SoftwareModule softwareModule) {
+        populateArtifactDetails(softwareModule.getId(),
+                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
+    }
+
     /**
      * Populate artifact details.
      *
@@ -451,18 +455,35 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
-        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY
-                || softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED) {
+        if (softwareModuleEvent.getEventType() == BaseEntityEventType.SELECTED_ENTITY) {
             UI.getCurrent().access(() -> {
                 if (softwareModuleEvent.getEntity() != null) {
-                    populateArtifactDetails(softwareModuleEvent.getEntity().getId(),
-                            HawkbitCommonUtil.getFormattedNameVersion(softwareModuleEvent.getEntity().getName(),
-                                    softwareModuleEvent.getEntity().getVersion()));
+                    populateArtifactDetails(softwareModuleEvent.getEntity());
                 } else {
                     populateArtifactDetails(null, null);
                 }
             });
         }
+        if (isArtifactChangedEvent(softwareModuleEvent) && areEntityIdsNotEmpty(softwareModuleEvent)) {
+            UI.getCurrent().access(() -> findSelectedSoftwareModule().ifPresent(selectedSoftwareModule -> {
+                if (hasSelectedSoftwareModuleChanged(softwareModuleEvent.getEntityIds(), selectedSoftwareModule)) {
+                    populateArtifactDetails(selectedSoftwareModule);
+                }
+            }));
+        }
+    }
+
+    private static boolean areEntityIdsNotEmpty(final SoftwareModuleEvent softwareModuleEvent) {
+        return softwareModuleEvent.getEntityIds() != null && !softwareModuleEvent.getEntityIds().isEmpty();
+    }
+
+    private static boolean isArtifactChangedEvent(final SoftwareModuleEvent softwareModuleEvent) {
+        return softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED;
+    }
+
+    private static boolean hasSelectedSoftwareModuleChanged(final Collection<Long> changedSoftwareModuleIds,
+            final SoftwareModule selectedSoftwareModule) {
+        return changedSoftwareModuleIds.stream().anyMatch(smId -> selectedSoftwareModule.getId().equals(smId));
     }
 
     public Table getArtifactDetailsTable() {

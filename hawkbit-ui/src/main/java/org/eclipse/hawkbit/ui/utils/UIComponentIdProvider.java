@@ -351,19 +351,7 @@ public final class UIComponentIdProvider {
      * Upload - type button id.
      */
     public static final String UPLOAD_TYPE_BUTTON_PREFIX = "upload.type.button.";
-    /**
-     * Upload - process button id.
-     */
-    public static final String UPLOAD_PROCESS_BUTTON = "upload.process.button";
-    /**
-     * Upload - discard button id.
-     */
-    public static final String UPLOAD_DISCARD_BUTTON = "upload.discard.button";
 
-    /**
-     * Upload - artifact detail close button.
-     */
-    public static final String UPLOAD_ARTIFACT_DETAILS_CLOSE = "upload.artifactdetails.close.button";
     /**
      * Upload - artifact detail table.
      */
@@ -374,14 +362,9 @@ public final class UIComponentIdProvider {
      */
     public static final String UPLOAD_BUTTON = "artifact.upload.button";
     /**
-     * Upload - process button id.
-     */
-    public static final String UPLOAD_DISCARD_DETAILS_BUTTON = "upload.discard.details.button";
-    /**
      * Upload - delete button id.
      */
     public static final String UPLOAD_DELETE_ICON = "upload.delete.button";
-
     /**
      * Upload- file delete button id.
      */
@@ -392,19 +375,6 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SOFTWARE_MODULE_TABLE = "upload.swModule.table";
 
     /**
-     * Upload result popup close button.
-     */
-    public static final String UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE = "upload.resultwindow.close.button";
-
-    /**
-     * Upload result popup close button.
-     */
-    public static final String UPLOAD_ARTIFACT_RESULT_CLOSE = "upload.results.close.button";
-    /**
-     * Upload - artifact result table.
-     */
-    public static final String UPLOAD_RESULT_TABLE = "upload.result.table";
-    /**
      * Upload - software module search text id.
      */
     public static final String SW_MODULE_SEARCH_TEXT_FIELD = "swmodule.search.textfield";
@@ -414,14 +384,14 @@ public final class UIComponentIdProvider {
     public static final String SW_MODULE_SEARCH_RESET_ICON = "sw.search.reset.icon";
 
     /**
-     * Upload - artifact upload error reason.
-     */
-    public static final String UPLOAD_ERROR_REASON = "upload-error-reason";
-
-    /**
      * Upload - artifact upload - Software module add button.
      */
     public static final String SW_MODULE_ADD_BUTTON = "sw.module.add.button";
+
+    /**
+     * Create Software Module dialog.
+     */
+    public static final String SW_MODULE_CREATE_DIALOG = "sw.module.create.dialog";
 
     /**
      * Upload - artifact upload - Software module type combo id.
@@ -1064,19 +1034,9 @@ public final class UIComponentIdProvider {
     public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
-     * Artifact upload status popup - minimize button id.
-     */
-    public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
-
-    /**
      * Artifact upload status popup - close button id.
      */
     public static final String UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID = "artifact.upload.close.button.id";
-
-    /**
-     * Artifact upload status popup - resize button id.
-     */
-    public static final String UPLOAD_STATUS_POPUP_RESIZE_BUTTON_ID = "artifact.upload.resize.button.id";
 
     /**
      * Artifact upload view - upload status button id.
@@ -1084,9 +1044,14 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_STATUS_BUTTON = "artficat.upload.status.button.id";
 
     /**
-     * Artifact uplaod view - uplod status popup id.
+     * Artifact upload view - uplod status popup id.
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
+
+    /**
+     * Artifact upload view - uplod status popup grid.
+     */
+    public static final String UPLOAD_STATUS_POPUP_GRID = "artifact.upload.status.popup.grid";
 
     /**
      * Software module table - Manage metadata id.

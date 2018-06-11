@@ -281,7 +281,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module")))
+                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module"))).id(UIComponentIdProvider.SW_MODULE_CREATE_DIALOG)
                 .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
                 .buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);

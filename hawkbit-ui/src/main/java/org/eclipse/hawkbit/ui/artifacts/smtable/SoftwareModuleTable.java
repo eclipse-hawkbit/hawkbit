@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
@@ -220,20 +220,22 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
          * Check if any information / files pending to upload for the deleted
          * software modules. If so, then delete the files from the upload list.
          */
-        final List<CustomFile> toBeRemoved = new ArrayList<>();
+        // TODO MR check this part of deletion
+        final List<FileUploadId> toBeRemoved = new ArrayList<>();
         for (final Long id : entitiesToDelete) {
             final Optional<SoftwareModule> deleteSoftwareNameVersion = softwareModuleManagement.get(id);
             deleteSoftwareNameVersion.ifPresent(dsnv -> {
-                for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
-                    if (dsnv.getName().equals(customFile.getBaseSoftwareModuleName())
-                            && dsnv.getVersion().equals(customFile.getBaseSoftwareModuleVersion())) {
-                        toBeRemoved.add(customFile);
+                for (final FileUploadId fileUploadId : artifactUploadState
+                        .getAllFileUploadIdsFromOverallUploadProcessList()) {
+                    if (dsnv.getName().equals(fileUploadId.getSoftwareModuleName())
+                            && dsnv.getVersion().equals(fileUploadId.getSoftwareModuleVersion())) {
+                        toBeRemoved.add(fileUploadId);
                     }
                 }
             });
         }
         if (!toBeRemoved.isEmpty()) {
-            artifactUploadState.getFileSelected().removeAll(toBeRemoved);
+            artifactUploadState.removeFilesFromOverallUploadProcessList(toBeRemoved);
         }
         artifactUploadState.getSelectedSoftwareModules().clear();
         getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
