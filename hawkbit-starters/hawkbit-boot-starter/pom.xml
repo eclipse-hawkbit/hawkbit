@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-starters</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.3.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-boot-starter</artifactId>
    <name>hawkBit :: Spring Boot Starter</name>

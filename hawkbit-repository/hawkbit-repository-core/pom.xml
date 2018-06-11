@@ -13,7 +13,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-repository</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.3.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-repository-core</artifactId>
    <name>hawkBit :: Repository :: Core Implementation Support</name>

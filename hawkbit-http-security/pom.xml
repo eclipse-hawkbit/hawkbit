@@ -12,7 +12,7 @@
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <artifactId>hawkbit-parent</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.3.0-SNAPSHOT</version>
       <groupId>org.eclipse.hawkbit</groupId>
    </parent>
    <artifactId>hawkbit-http-security</artifactId>
