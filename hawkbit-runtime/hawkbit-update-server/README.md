@@ -2,9 +2,9 @@
 The hawkBit Update Server is a standalone spring-boot application with an embedded servlet container .
 
 ## Try out the update server in our hawkBit sandbox on Bluemix
-- try out Management UI https://hawkbit.eu-gb.mybluemix.net/UI (username: admin, passwd: admin)
-- try out Management API https://hawkbit.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
-- try out DDI API https://hawkbit.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
+- try out Management UI https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/UI (username: admin, passwd: admin)
+- try out Management API https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
+- try out DDI API https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
 
 ## On your own workstation
 ### Run

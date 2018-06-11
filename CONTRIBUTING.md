@@ -53,12 +53,14 @@ All test classes are documented with [Allure's](https://github.com/allure-framew
 ```
 
 Test types are:
+
 * Unit Tests - for single units tests with a mocked environment
 * Component Tests - for complete components including lower layers, e.g. Spring MVC test on rest API including repository and database.
 * Integration Tests - including clients, e.g. Selenium UI tests with various browsers.
 * System Tests - on target environments, e.g. Cloud Foundry.
 
 Examples for hawkBit components:
+
 * Management API
 * Direct Device Integration API
 * Device Management Federation API
@@ -66,34 +68,28 @@ Examples for hawkBit components:
 * Repository
 * Security
 
-```
+```java
 @Features("Component Tests - Management API")
 @Stories("Distribution Set Type Resource")
 ```
 
-In addition all test method's name describes in **camel case** what the test is all about and has a long description aith Allures **@Description** annotation.
+In addition all test method's name describes in **camel case** what the test is all about and has in addition a long description in Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 
-The following steps are necessary to comply with the Eclipse Foundation's IP policy.
+Before your contribution can be accepted by the project team contributors must
+electronically sign the [Eclipse Contributor Agreement (ECA)](http://www.eclipse.org/legal/ECA.php).
 
-Please also read [this](http://wiki.eclipse.org/Development_Resources/Contributing_via_Git)
+Commits that are provided by non-committers must have a Signed-off-by field in
+the footer indicating that the author is aware of the terms by which the
+contribution has been provided to the project. The non-committer must
+additionally have an Eclipse Foundation account and must have a signed Eclipse
+Contributor Agreement (ECA) on file.
 
-In order for any contributions to be accepted you MUST do the following things.
+For more information, please see the Eclipse Committer Handbook:
+https://www.eclipse.org/projects/handbook/#resources-commit
 
-* Sign the [Eclipse Foundation Contributor License Agreement](http://www.eclipse.org/legal/CLA.php).
-To sign the Eclipse CLA you need to:
-
-  * Obtain an Eclipse Foundation userid. Anyone who currently uses Eclipse Bugzilla or Gerrit systems already has one of those.
-If you don’t, you need to [register](https://dev.eclipse.org/site_login/createaccount.php).
-
-  * Login into the [projects portal](https://projects.eclipse.org/), select “My Account”, and then the “Contributor License Agreement” tab.
-
-* Add your github username in your Eclipse Foundation account settings. Log in it to Eclipse and go to account settings.
-
-* "Sign-off" your commits
-
-Every commit you make in your patch or pull request MUST be "signed off".
+HowTo "Sign-off" your commits:
 
 You do this by adding the `-s` flag when you make the commit(s), e.g.
 
@@ -120,6 +116,6 @@ Submit a pull request via the normal GitHub UI (desktop or web).
 
 * Do not use your branch for any other development, otherwise further changes that you make will be visible in the PR.
 
-# Further information
+## Further information
 
 * [Eclipse Project Page](http://projects.eclipse.org/projects/iot.hawkbit)

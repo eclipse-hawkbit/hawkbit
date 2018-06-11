@@ -26,9 +26,9 @@ Next to the hawkBit core hosted here the project maintains as well [examples](ht
 
 # hawkBit sandbox
 
-We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management UI, Management API and DDI API.
+We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management UI, Management API and DDI API. Keep in mind as well that you are not permitted to store any kind of personal data in the sandbox.
 
-https://hawkbit.eu-gb.mybluemix.net/UI/
+https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/UI/
 
 In addition the following vendors offer free trial accounts for their hawkBit compatible products:
 
@@ -44,7 +44,6 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
-
 # Runtime dependencies and support
 
 ## Java Runtime Environment: 1.8
@@ -52,12 +51,12 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 ## SQL database
 
 | Database |  H2 |  MySQL/MariaDB | MS SQL Server | IBM DB2 |
-|---|---|---|---|---|
-| DDLs maintained by project  | X | X | X | X |
-| Test dependencies defined | X | X | X | - |
+|---|:---:|:---:|:---:|:---:|
+| DDLs maintained by project  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Test dependencies defined | :white_check_mark: | :white_check_mark: | :white_check_mark: |  |
 | Versions tested | 1.4 | MySQL 5.6/5.7, AWS Aurora | MS SQL Server 2017 | DB2 Server v11.1 |
-| Docker image with driver provided  | X | X (Tag: "-mysql") | X | - |
-| JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  | - |
+| Docker image with driver provided  | :white_check_mark: | :white_check_mark: (Tag: "-mysql") | :white_check_mark: |  |
+| JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  |  |
 | Status | Test, Dev, Trial | Production grade  | Production grade | Test, Dev |
 
 ## (Optional) RabbitMQ: 3.6,3.7
@@ -86,7 +85,7 @@ Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also p
 
 ## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
 
-```
+```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
@@ -95,19 +94,19 @@ $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server
 
 ## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
-```
+```bash
 $ git clone https://github.com/eclipse/hawkbit-examples.git
 $ cd hawkbit-examples
 $ mvn clean install
 ```
 
-```
+```bash
 $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
 ## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
-```
+```bash
 $ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
 ```
 

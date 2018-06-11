@@ -9,7 +9,7 @@
 
 ---
 applications:
-- name: hawkbit
+- name: hawkbit-demo-sandbox
   memory: 2048M
   disk_quota: 2048M
   instances: 1
