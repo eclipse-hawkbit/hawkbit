@@ -25,7 +25,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -137,7 +136,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     private void createComponents() {
         uploadProgressButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
-        uploadProgressButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadProgressButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadProgressButton.setIcon(null);
         uploadProgressButton.setHtmlContentAllowed(true);
@@ -158,7 +156,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         upload.setId(UIComponentIdProvider.UPLOAD_BUTTON);
 
         addComponent(upload);
-        setComponentAlignment(upload, Alignment.TOP_RIGHT);
         setSpacing(true);
     }
 

@@ -99,7 +99,7 @@ public class UploadDropAreaLayout implements Serializable {
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
-        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
+        UploadDropAreaLayout.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareManagement);
 
         buildLayout();
@@ -137,10 +137,12 @@ public class UploadDropAreaLayout implements Serializable {
         dropIcon.setWidth(null);
 
         dropAreaLayout.addComponent(dropIcon);
-        dropAreaLayout.setComponentAlignment(dropIcon, Alignment.BOTTOM_CENTER);
+        dropAreaLayout.setComponentAlignment(dropIcon, Alignment.TOP_CENTER);
         dropAreaLayout.addComponent(dropHereLabel);
         dropAreaLayout.setComponentAlignment(dropHereLabel, Alignment.TOP_CENTER);
 
+        uploadButtonLayout.setWidth(null);
+        uploadButtonLayout.addStyleName("upload-button");
         dropAreaLayout.addComponent(uploadButtonLayout);
         dropAreaLayout.setComponentAlignment(uploadButtonLayout, Alignment.BOTTOM_RIGHT);
 

@@ -281,11 +281,6 @@ public final class SPUIStyleDefinitions {
     public static final String CONFIG_MENU_BAR_ITEMS = "tags";
 
     /**
-     * Action button style- footer buttons.
-     */
-    public static final String ACTION_BUTTON = "action-button";
-
-    /**
      * Constructor.
      */
     private SPUIStyleDefinitions() {
