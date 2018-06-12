@@ -67,7 +67,7 @@ public class UploadDropAreaLayout implements Serializable {
 
     private final transient ArtifactManagement artifactManagement;
 
-    private static UploadProgressButtonLayout uploadButtonLayout;
+    private final UploadProgressButtonLayout uploadButtonLayout;
 
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.
@@ -99,7 +99,7 @@ public class UploadDropAreaLayout implements Serializable {
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
-        UploadDropAreaLayout.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
+        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareManagement);
 
         buildLayout();
@@ -127,7 +127,7 @@ public class UploadDropAreaLayout implements Serializable {
         dropAreaWrapper.setDropHandler(new DropAreahandler());
     }
 
-    private static VerticalLayout createDropAreaLayout() {
+    private VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
         final Label dropHereLabel = new Label("Drop files to upload");
         dropHereLabel.setWidth(null);
