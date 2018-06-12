@@ -270,11 +270,20 @@ public final class SPUIStyleDefinitions {
     public static final String SP_NOTIFICATION_WARNING_MESSAGE_STYLE = ValoTheme.NOTIFICATION_WARNING + " "
             + ValoTheme.NOTIFICATION_TRAY;
 
-    public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
-
+    /**
+     * Style for the positio of the menu bar to configure tags and types
+     */
     public static final String CONFIG_MENU_BAR_POSITION = "menubar-position";
 
+    /**
+     * Style for the menu bar items of the menu bar to configure tags and types
+     */
     public static final String CONFIG_MENU_BAR_ITEMS = "tags";
+
+    /**
+     * Action button style- footer buttons.
+     */
+    public static final String ACTION_BUTTON = "action-button";
 
     /**
      * Constructor.

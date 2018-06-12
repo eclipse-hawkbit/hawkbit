@@ -46,7 +46,6 @@ import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.VerticalLayout;
 
@@ -173,20 +172,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         detailAndUploadLayout.setExpandRatio(artifactDetailsLayout, 1.0F);
 
         if (permChecker.hasCreateRepositoryPermission()) {
-            dadAndButtonGrid = new GridLayout(2, 1);
-            final DragAndDropWrapper dropAreaWrapper = dropAreaLayout.getDropAreaWrapper();
-            dadAndButtonGrid.addComponent(dropAreaWrapper, 0, 0);
-            dadAndButtonGrid.addComponent(uploadButtonLayout, 1, 0);
-            dadAndButtonGrid.setComponentAlignment(dropAreaWrapper, Alignment.TOP_LEFT);
-            dadAndButtonGrid.setComponentAlignment(uploadButtonLayout, Alignment.TOP_RIGHT);
-            dadAndButtonGrid.setSpacing(true);
-            dadAndButtonGrid.setSizeFull();
-            dadAndButtonGrid.setColumnExpandRatio(0, 1.0F);
-            dadAndButtonGrid.setColumnExpandRatio(1, 0.19F);
-
-            detailAndUploadLayout.addComponent(dadAndButtonGrid);
-            detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3F);
-            detailAndUploadLayout.setComponentAlignment(dadAndButtonGrid, Alignment.MIDDLE_CENTER);
+            detailAndUploadLayout.addComponent(dropAreaLayout.getDropAreaWrapper());
         }
 
         detailAndUploadLayout.setSizeFull();

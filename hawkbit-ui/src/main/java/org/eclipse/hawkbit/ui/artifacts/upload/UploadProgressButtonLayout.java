@@ -51,8 +51,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final UploadFixed upload;
 
-    private FileTransferHandlerVaadinUpload uploadHandler;
-
     private final transient ArtifactManagement artifactManagement;
 
     private final ArtifactUploadState artifactUploadState;
@@ -109,13 +107,11 @@ public class UploadProgressButtonLayout extends VerticalLayout {
             ui.access(this::onStartOfUpload);
             break;
         case UPLOAD_FAILED:
-            break;
         case UPLOAD_SUCCESSFUL:
+        case UPLOAD_IN_PROGRESS:
             break;
         case UPLOAD_FINISHED:
             ui.access(this::onUploadFinished);
-            break;
-        case UPLOAD_IN_PROGRESS:
             break;
         default:
             throw new IllegalArgumentException("Enum " + FileUploadProgress.FileUploadStatus.class.getSimpleName()
@@ -141,17 +137,16 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     private void createComponents() {
         uploadProgressButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
+        uploadProgressButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadProgressButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadProgressButton.setIcon(null);
         uploadProgressButton.setHtmlContentAllowed(true);
         uploadProgressButton.addClickListener(event -> onClickOfUploadProgressButton());
-        uploadProgressButton.setVisible(false);
     }
 
     private void buildLayout() {
-
-        uploadHandler = new FileTransferHandlerVaadinUpload(multipartConfigElement.getMaxFileSize(),
-                softwareModuleManagement, artifactManagement, i18n);
+        final FileTransferHandlerVaadinUpload uploadHandler = new FileTransferHandlerVaadinUpload(
+                multipartConfigElement.getMaxFileSize(), softwareModuleManagement, artifactManagement, i18n);
         upload.setButtonCaption(i18n.getMessage("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -164,9 +159,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
         addComponent(upload);
         setComponentAlignment(upload, Alignment.TOP_RIGHT);
-        addComponent(uploadProgressButton);
-        setComponentAlignment(uploadProgressButton, Alignment.TOP_RIGHT);
-
         setSpacing(true);
     }
 
@@ -180,7 +172,6 @@ public class UploadProgressButtonLayout extends VerticalLayout {
             upload.setEnabled(true);
         } else if (artifactUploadState.isAtLeastOneUploadInProgress()) {
             showUploadProgressButton();
-            upload.setEnabled(false);
         }
     }
 
@@ -204,10 +195,12 @@ public class UploadProgressButtonLayout extends VerticalLayout {
     }
 
     private void showUploadProgressButton() {
-        uploadProgressButton.setVisible(true);
+        removeComponent(upload);
+        addComponent(uploadProgressButton);
     }
 
     private void hideUploadProgressButton() {
-        uploadProgressButton.setVisible(false);
+        removeComponent(uploadProgressButton);
+        addComponent(upload);
     }
 }
