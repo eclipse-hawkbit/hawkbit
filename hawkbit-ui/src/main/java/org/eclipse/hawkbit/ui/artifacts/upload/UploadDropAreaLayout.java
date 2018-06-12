@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import java.io.Serializable;
-
 import javax.servlet.MultipartConfigElement;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +33,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.event.dd.acceptcriteria.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
@@ -46,7 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Container for drag and drop area in the upload view.
  */
-public class UploadDropAreaLayout implements Serializable {
+public class UploadDropAreaLayout extends AbstractComponent {
 
     private static final long serialVersionUID = 1L;
 
@@ -237,4 +236,9 @@ public class UploadDropAreaLayout implements Serializable {
             return true;
         }
     }
+
+    public UploadProgressButtonLayout getUploadButtonLayout() {
+        return uploadButtonLayout;
+    }
+
 }

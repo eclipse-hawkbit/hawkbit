@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterButtons;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
-import org.eclipse.hawkbit.ui.artifacts.upload.UploadProgressButtonLayout;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -76,15 +75,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private final ArtifactDetailsLayout artifactDetailsLayout;
 
-    private final UploadProgressButtonLayout uploadButtonLayout;
-
     private final UploadDropAreaLayout dropAreaLayout;
 
     private VerticalLayout detailAndUploadLayout;
 
     private GridLayout mainLayout;
-
-    private GridLayout dadAndButtonGrid;
 
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
@@ -103,8 +98,6 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 uploadViewClientCriterion);
         this.artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus, artifactUploadState, uiNotification,
                 artifactManagement, softwareModuleManagement);
-        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement, softwareModuleManagement);
         final SMTypeFilterButtons smTypeFilterButtons = new SMTypeFilterButtons(eventBus, artifactUploadState,
                 uploadViewClientCriterion, softwareModuleTypeManagement, i18n, entityFactory, permChecker,
                 uiNotification);
@@ -210,9 +203,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void minimizeArtifactoryDetails() {
         mainLayout.setSpacing(true);
-        detailAndUploadLayout.addComponent(dadAndButtonGrid);
-        detailAndUploadLayout.setExpandRatio(dadAndButtonGrid, 0.3F);
-        detailAndUploadLayout.setComponentAlignment(dadAndButtonGrid, Alignment.MIDDLE_CENTER);
+        detailAndUploadLayout.addComponent(dropAreaLayout);
+        detailAndUploadLayout.setExpandRatio(dropAreaLayout, 0.3F);
+        detailAndUploadLayout.setComponentAlignment(dropAreaLayout, Alignment.MIDDLE_CENTER);
         mainLayout.addComponent(filterByTypeLayout, 0, 0);
         mainLayout.addComponent(smTableLayout, 1, 0);
         addOtherComponents();
@@ -222,7 +215,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.setSpacing(false);
         mainLayout.removeComponent(filterByTypeLayout);
         mainLayout.removeComponent(smTableLayout);
-        detailAndUploadLayout.removeComponent(dadAndButtonGrid);
+        detailAndUploadLayout.removeComponent(dropAreaLayout);
         mainLayout.setColumnExpandRatio(1, 0F);
         mainLayout.setColumnExpandRatio(2, 1F);
     }
@@ -257,7 +250,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     public void enter(final ViewChangeEvent event) {
         smTableLayout.getSoftwareModuleTable()
                 .selectEntity(artifactUploadState.getSelectedBaseSwModuleId().orElse(null));
-        uploadButtonLayout.restoreState();
+        dropAreaLayout.getUploadButtonLayout().restoreState();
     }
 
 }

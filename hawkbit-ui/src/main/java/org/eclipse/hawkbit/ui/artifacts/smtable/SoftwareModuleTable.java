@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +21,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.RefreshSoftwareModuleByFilterEvent
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.UploadViewClientCriterion;
@@ -100,10 +98,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
         artifactUploadState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
         artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
-
         return queryConfig;
     }
 
@@ -211,34 +207,26 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected void handleOkDelete(final List<Long> entitiesToDelete) {
+        if (isUploadInProgressForSoftwareModule(entitiesToDelete)) {
+            getNotification().displayValidationError(getI18n().getMessage("message.error.swModule.notDeleted"));
+            return;
+        }
         softwareModuleManagement.delete(entitiesToDelete);
         getEventBus().publish(this, new SoftwareModuleEvent(BaseEntityEventType.REMOVE_ENTITY, entitiesToDelete));
         getNotification().displaySuccess(getI18n().getMessage("message.delete.success",
                 entitiesToDelete.size() + " " + getI18n().getMessage("caption.software.module") + "(s)"));
 
-        /*
-         * Check if any information / files pending to upload for the deleted
-         * software modules. If so, then delete the files from the upload list.
-         */
-        // TODO MR check this part of deletion
-        final List<FileUploadId> toBeRemoved = new ArrayList<>();
-        for (final Long id : entitiesToDelete) {
-            final Optional<SoftwareModule> deleteSoftwareNameVersion = softwareModuleManagement.get(id);
-            deleteSoftwareNameVersion.ifPresent(dsnv -> {
-                for (final FileUploadId fileUploadId : artifactUploadState
-                        .getAllFileUploadIdsFromOverallUploadProcessList()) {
-                    if (dsnv.getName().equals(fileUploadId.getSoftwareModuleName())
-                            && dsnv.getVersion().equals(fileUploadId.getSoftwareModuleVersion())) {
-                        toBeRemoved.add(fileUploadId);
-                    }
-                }
-            });
-        }
-        if (!toBeRemoved.isEmpty()) {
-            artifactUploadState.removeFilesFromOverallUploadProcessList(toBeRemoved);
-        }
         artifactUploadState.getSelectedSoftwareModules().clear();
         getEventBus().publish(this, UploadArtifactUIEvent.DELETED_ALL_SOFTWARE);
+    }
+
+    private boolean isUploadInProgressForSoftwareModule(final List<Long> entitiesToDelete) {
+        for (final Long id : entitiesToDelete) {
+            if (artifactUploadState.isUploadInProgressForSelectedSoftwareModule(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

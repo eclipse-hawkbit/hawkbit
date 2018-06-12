@@ -241,7 +241,14 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         clearFileStates();
     }
 
-    public boolean isUploadinProgressForSelectedSoftwareModul(final Long softwareModuleId) {
+    /**
+     * Checks if an upload is in progress for the given Software Module
+     * 
+     * @param softwareModuleId
+     *            id of the software module
+     * @return boolean
+     */
+    public boolean isUploadInProgressForSelectedSoftwareModule(final Long softwareModuleId) {
         for (final FileUploadId fileUploadId : getAllFileUploadIdsFromOverallUploadProcessList()) {
             if (fileUploadId.getSoftwareModuleId().equals(softwareModuleId)) {
                 return true;
@@ -269,8 +276,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return failedFileUploads;
     }
 
-    private Set<FileUploadId> getSucceededUploads(){
-
+    private Set<FileUploadId> getSucceededUploads() {
         final Collection<FileUploadProgress> allFileUploadProgressObjects = getOverallFilesInUploadProcessMap()
                 .values();
         final Set<FileUploadId> succeededFileUploads = Sets.newHashSet();
