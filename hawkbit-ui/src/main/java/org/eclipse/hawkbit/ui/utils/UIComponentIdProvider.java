@@ -1199,6 +1199,11 @@ public final class UIComponentIdProvider {
     public static final String CONFIG_MENU_BAR_CREATE = "create";
 
     /**
+     * Artifact upload status popup - minimize button id.
+     */
+    public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
+
+    /**
      * /* Private Constructor.
      */
     private UIComponentIdProvider() {
