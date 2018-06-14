@@ -68,6 +68,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -1537,6 +1538,56 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // test query target over rest resource
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/attributes"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+    }
+
+    @Test
+    @Description("Request update of Controller Attributes.")
+    public void triggerControllerAttributesUpdate() throws Exception {
+        // create target with attributes
+        final String knownTargetId = "targetIdNeedsUpdate";
+        final Map<String, String> knownControllerAttrs = new HashMap<>();
+        knownControllerAttrs.put("a", "1");
+        knownControllerAttrs.put("b", "2");
+        testdataFactory.createTarget(knownTargetId);
+        controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
+        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isFalse();
+
+        verifyAttributeUpdateCanBeRequested(knownTargetId);
+
+        verifyRequestAttributesAttributeIsOptional(knownTargetId);
+
+        verifyResettingRequestAttributesIsNotAllowed(knownTargetId);
+    }
+
+    @Step
+    private void verifyAttributeUpdateCanBeRequested(final String knownTargetId) throws Exception {
+        final String body = new JSONObject().put("requestAttributes", true).toString();
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+    }
+
+    @Step
+    private void verifyRequestAttributesAttributeIsOptional(final String knownTargetId) throws Exception {
+        final String body = new JSONObject().put("description", "verify attribute can be missing").toString();
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+    }
+
+    @Step
+    private void verifyResettingRequestAttributesIsNotAllowed(final String knownTargetId) throws Exception {
+        final String body = new JSONObject().put("requestAttributes", false).toString();
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }
 
     @Test

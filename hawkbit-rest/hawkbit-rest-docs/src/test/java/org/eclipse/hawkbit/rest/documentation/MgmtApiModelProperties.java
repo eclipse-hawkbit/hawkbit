@@ -143,6 +143,8 @@ public final class MgmtApiModelProperties {
 
     public static final String SECURITY_TOKEN = "Pre-Shared key that allows targets to authenticate at Direct Device Integration API if enabled in the tenant settings.";
 
+    public static final String REQUEST_ATTRIBUTES = "Request re-transmission of target attributes.";
+
     public static final String META_DATA = "List of metadata.";
 
     public static final String META_DATA_KEY = "Metadata property key.";

@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -213,6 +214,19 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             });
         }
     }
+    
+    @Test
+    @Description("Verifies that sending update controller attributes event works.")
+    public void sendUpdateAttributesRequest() {
+        final String amqpUri = "amqp://anyhost";
+        final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
+                1L, CONTROLLER_ID, amqpUri, Target.class.getName(), serviceMatcher.getServiceId());
+
+        amqpMessageDispatcherService.targetTriggerUpdateAttributes(targetAttributesRequestedEvent);
+
+        final Message sendMessage = createArgumentCapture(URI.create(amqpUri));
+        assertUpdateAttributesMessage(sendMessage);
+    }
 
     @Test
     @Description("Verifies that send cancel event works")
@@ -299,12 +313,20 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
                 DmfDownloadAndUpdateRequest.class);
         assertEquals(downloadAndUpdateRequest.getActionId(), action);
-        assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
+        assertEquals("The topic of the event should contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
         assertEquals("Security token of target", TEST_TOKEN, downloadAndUpdateRequest.getTargetSecurityToken());
 
         return downloadAndUpdateRequest;
 
+    }
+
+    private void assertUpdateAttributesMessage(final Message sendMessage) {
+        assertEventMessage(sendMessage);
+
+        assertEquals("The topic of the event should contain REQUEST_ATTRIBUTES_UPDATE",
+                EventTopic.REQUEST_ATTRIBUTES_UPDATE,
+                sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
     }
 
     private void assertEventMessage(final Message sendMessage) {

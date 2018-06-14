@@ -46,6 +46,9 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonProperty
     private String securityToken;
 
+    @JsonProperty
+    private boolean requestAttributes;
+
     /**
      * @return the controllerId
      */
@@ -166,5 +169,14 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonIgnore
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
+    }
+
+    public boolean isRequestAttributes() {
+        return requestAttributes;
+    }
+
+    @JsonIgnore
+    public void setRequestAttributes(final boolean requestAttributes) {
+        this.requestAttributes = requestAttributes;
     }
 }
