@@ -60,7 +60,7 @@ public final class SPUIDefinitions {
     /**
      * Action history distribution set column.
      */
-    public static final String ACTION_HIS_TBL_DIST = "Distributionset";
+    public static final String ACTION_HIS_TBL_DIST = "Distribution set";
 
     /**
      * Action history Action Id hidden column.

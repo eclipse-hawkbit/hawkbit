@@ -128,7 +128,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
 
     private VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
-        final Label dropHereLabel = new Label("Drop files to upload");
+        final Label dropHereLabel = new Label("Drop Files to upload");
         dropHereLabel.setWidth(null);
 
         final Label dropIcon = new Label(FontAwesome.ARROW_DOWN.getHtml(), ContentMode.HTML);
@@ -143,7 +143,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
         uploadButtonLayout.setWidth(null);
         uploadButtonLayout.addStyleName("upload-button");
         dropAreaLayout.addComponent(uploadButtonLayout);
-        dropAreaLayout.setComponentAlignment(uploadButtonLayout, Alignment.BOTTOM_RIGHT);
+        dropAreaLayout.setComponentAlignment(uploadButtonLayout, Alignment.BOTTOM_CENTER);
 
         dropAreaLayout.setSizeFull();
         dropAreaLayout.setStyleName("upload-drop-area-layout-info");

@@ -351,14 +351,6 @@ public final class UIComponentIdProvider {
      * Upload - type button id.
      */
     public static final String UPLOAD_TYPE_BUTTON_PREFIX = "upload.type.button.";
-    /**
-     * Upload - process button id.
-     */
-    public static final String UPLOAD_PROCESS_BUTTON = "upload.process.button";
-    /**
-     * Upload - discard button id.
-     */
-    public static final String UPLOAD_DISCARD_BUTTON = "upload.discard.button";
 
     /**
      * Upload - artifact detail close button.
