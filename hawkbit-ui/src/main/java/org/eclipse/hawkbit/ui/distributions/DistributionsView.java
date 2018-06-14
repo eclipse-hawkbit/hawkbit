@@ -179,9 +179,11 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     }
 
     private void createMainLayout() {
-        mainLayout = new GridLayout(4, 2);
+        mainLayout = new GridLayout(4, 1);
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
+        mainLayout.setStyleName("fullSize");
+
         mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
         mainLayout.addComponent(distributionTableLayout, 1, 0);
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);

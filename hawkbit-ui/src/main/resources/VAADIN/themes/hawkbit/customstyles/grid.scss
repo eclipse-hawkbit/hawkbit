@@ -34,4 +34,8 @@
    .v-button-borderless-colored {
 	color: inherit;
    }
+   
+   .fullSize .v-gridlayout-slot {
+	height: 100% !important;
+   }
 }

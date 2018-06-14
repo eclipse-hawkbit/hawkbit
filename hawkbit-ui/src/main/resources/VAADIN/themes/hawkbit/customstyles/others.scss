@@ -33,7 +33,7 @@
 
   //Deployment view - Style of count message
   .v-caption-count-msg-box {
-    text-align: center;
+    margin-left: 180px;
     color: $info-message-color-grey;
     font-weight: bold;
     height: 10px;
@@ -41,6 +41,7 @@
 
   //*Deployment view -Assigned and installed message*
   .count-msg-box {
+    margin-left: 180px;
     padding-top: 3px;
     color: $info-message-color-grey;
     font-weight: italic;

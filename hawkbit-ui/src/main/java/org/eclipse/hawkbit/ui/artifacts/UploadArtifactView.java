@@ -176,9 +176,10 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private GridLayout createMainLayout() {
         createDetailsAndUploadLayout();
-        mainLayout = new GridLayout(3, 2);
+        mainLayout = new GridLayout(3, 1);
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
+        mainLayout.setStyleName("fullSize");
         mainLayout.addComponent(filterByTypeLayout, 0, 0);
         mainLayout.addComponent(smTableLayout, 1, 0);
         mainLayout.addComponent(detailAndUploadLayout, 2, 0);

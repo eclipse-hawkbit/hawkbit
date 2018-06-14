@@ -248,7 +248,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             setSizeFull();
             createMainLayout();
-            addComponents(mainLayout);
+            addComponent(mainLayout, 0);
             setExpandRatio(mainLayout, 1);
         }
     }
@@ -259,6 +259,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
         mainLayout.setRowExpandRatio(0, 1F);
+        mainLayout.setStyleName("fullSize");
     }
 
     private void layoutWidgets() {
@@ -274,7 +275,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void displayAllWidgets() {
         mainLayout.setColumns(5);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(distributionTableLayout, 2, 0);
@@ -289,13 +290,12 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void showTargetCount() {
-        mainLayout.addComponent(countMessageLabel, 1, 1, 2, 1);
-        mainLayout.setComponentAlignment(countMessageLabel, Alignment.BOTTOM_CENTER);
+        addComponent(countMessageLabel);
     }
 
     private void displayDistributionWidgetsOnly() {
         mainLayout.setColumns(2);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(distributionTableLayout, 0, 0);
         mainLayout.addComponent(distributionTagLayout, 1, 0);
         mainLayout.setColumnExpandRatio(0, 1F);
@@ -303,7 +303,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void displayTargetWidgetsOnly() {
         mainLayout.setColumns(3);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(actionHistoryLayout, 2, 0);
@@ -318,7 +318,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(distributionTagLayout);
         }
         mainLayout.removeComponent(actionHistoryLayout);
-        mainLayout.removeComponent(countMessageLabel);
+        removeComponent(countMessageLabel);
         mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
         mainLayout.setColumnExpandRatio(3, 0F);
@@ -330,7 +330,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(targetTagFilterLayout);
             mainLayout.removeComponent(targetTableLayout);
             mainLayout.removeComponent(actionHistoryLayout);
-            mainLayout.removeComponent(countMessageLabel);
+            removeComponent(countMessageLabel);
         }
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0F);
@@ -339,6 +339,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void maximizeActionHistory() {
+        removeComponent(countMessageLabel);
         mainLayout.removeAllComponents();
         mainLayout.setColumns(3);
         mainLayout.setRows(1);
