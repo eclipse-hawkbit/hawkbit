@@ -61,6 +61,8 @@ public class ConfigMenuBar extends MenuBar {
      * @param deleteButtonCommand
      *            action which should be executed when clicking on the delete
      *            command
+     * @param id
+     *            the id of the menuBar
      */
     public ConfigMenuBar(final boolean createPermission, final boolean updatePermission, final boolean deletePermission,
             final Command addButtonCommand, final Command updateButtonCommand, final Command deleteButtonCommand,

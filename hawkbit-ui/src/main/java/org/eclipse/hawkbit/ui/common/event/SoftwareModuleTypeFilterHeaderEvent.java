@@ -15,6 +15,12 @@ package org.eclipse.hawkbit.ui.common.event;
  */
 public class SoftwareModuleTypeFilterHeaderEvent extends FilterHeaderEvent {
 
+    /**
+     * Constructor
+     * 
+     * @param filterHeaderEnum
+     *            FilterHeaderEnum
+     */
     public SoftwareModuleTypeFilterHeaderEvent(final FilterHeaderEnum filterHeaderEnum) {
         super(filterHeaderEnum);
     }

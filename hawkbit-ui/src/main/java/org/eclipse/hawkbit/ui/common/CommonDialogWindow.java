@@ -259,6 +259,10 @@ public class CommonDialogWindow extends Window {
         cancelButton.addClickListener(closeClickListener);
     }
 
+    /**
+     * adds a listener to a component. Depending on the type of component a
+     * valueChange-, textChange- or itemSetChangeListener will be added.
+     */
     public void addComponentListeners() {
         // avoid duplicate registration
         removeListeners();
@@ -272,7 +276,6 @@ public class CommonDialogWindow extends Window {
                 ((Table) field).addItemSetChangeListener(new ChangeListener(field));
             }
             field.addValueChangeListener(new ChangeListener(field));
-
         }
     }
 

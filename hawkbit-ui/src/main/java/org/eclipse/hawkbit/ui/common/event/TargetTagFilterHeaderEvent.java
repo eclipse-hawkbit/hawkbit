@@ -15,6 +15,12 @@ package org.eclipse.hawkbit.ui.common.event;
  */
 public class TargetTagFilterHeaderEvent extends FilterHeaderEvent {
 
+    /**
+     * Constructor
+     * 
+     * @param filterHeaderEnum
+     *            FilterHeaderEnum
+     */
     public TargetTagFilterHeaderEvent(final FilterHeaderEnum filterHeaderEnum) {
         super(filterHeaderEnum);
     }
