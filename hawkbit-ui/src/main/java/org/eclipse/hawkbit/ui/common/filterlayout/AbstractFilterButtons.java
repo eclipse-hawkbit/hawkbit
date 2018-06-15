@@ -53,6 +53,15 @@ public abstract class AbstractFilterButtons extends Table {
 
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
+        subscribeToEventBus();
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden if the
+     * view does not contain any listener to avoid Vaadin blowing up our logs
+     * with warnings.
+     */
+    protected void subscribeToEventBus() {
         eventBus.subscribe(this);
     }
 

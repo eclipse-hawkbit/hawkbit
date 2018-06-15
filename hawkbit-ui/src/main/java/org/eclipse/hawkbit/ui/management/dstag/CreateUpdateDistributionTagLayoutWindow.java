@@ -55,6 +55,11 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         this.distributionSetTagManagement = distributionSetTagManagement;
     }
 
+    @Override
+    protected void subscribeToEventBus() {
+        // nothing to listen
+    }
+
     /**
      * @return the color which should be selected in the color-picker component.
      */

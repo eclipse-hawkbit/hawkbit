@@ -75,6 +75,11 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
+    protected void subscribeToEventBus() {
+        // nothing to listen
+    }
+
+    @Override
     protected LazyQueryContainer createContainer() {
         configureQueryFactory();
         return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, null), targetQF);
@@ -207,4 +212,5 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
             return null;
         }
     }
+
 }

@@ -40,10 +40,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
      * Constructor.
      *
      * @param i18n
-     * @param deploymentManagement
      * @param eventBus
-     * @param notification
-     * @param managementUIState
      */
     public AbstractGridComponentLayout(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         this.i18n = i18n;
@@ -59,6 +56,15 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
         buildLayout();
         setSizeFull();
         setImmediate(true);
+        subscribeToEventBus();
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden if the
+     * view does not contain any listener to avoid Vaadin blowing up our logs
+     * with warnings.
+     */
+    protected void subscribeToEventBus() {
         eventBus.subscribe(this);
     }
 

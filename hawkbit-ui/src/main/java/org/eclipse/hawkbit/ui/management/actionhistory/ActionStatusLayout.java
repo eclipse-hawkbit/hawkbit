@@ -37,6 +37,11 @@ public class ActionStatusLayout extends AbstractGridComponentLayout {
     }
 
     @Override
+    protected void subscribeToEventBus() {
+        // nothing to listen
+    }
+
+    @Override
     public DefaultGridHeader createGridHeader() {
         return new DefaultGridHeader(managementUIState, "Action States").init();
     }
