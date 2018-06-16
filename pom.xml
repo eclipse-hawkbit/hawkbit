@@ -316,10 +316,10 @@
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>
-                     <exclude>3rd-dependencies/**</exclude>
+                     <exclude>.3rd-party/**</exclude>
+                     <exclude>.github/**</exclude>
                      <exclude>**/.git*</exclude>
                      <exclude>.git*</exclude>
-                     <exclude>**/*.sql</exclude>
                      <exclude>**/*.sql</exclude>
                      <exclude>eclipse_codeformatter.xml</exclude>
                      <exclude>**/addons.scss</exclude>
