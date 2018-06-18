@@ -56,8 +56,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     /**

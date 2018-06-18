@@ -67,8 +67,8 @@ public class DistributionTagButtons extends AbstractFilterButtons implements Ref
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override

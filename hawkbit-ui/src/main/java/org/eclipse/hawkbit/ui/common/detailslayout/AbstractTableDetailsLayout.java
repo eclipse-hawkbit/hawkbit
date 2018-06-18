@@ -71,14 +71,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private final ManagementUIState managementUIState;
 
-    private final transient UIEventBus eventBus;
-
     protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
-        this.eventBus = eventBus;
         detailsLayout = createTabLayout();
         descriptionLayout = createTabLayout();
         logLayout = createTabLayout();
@@ -86,16 +83,18 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         tagsLayout = createTabLayout();
         createComponents();
         buildLayout();
-        subscribeToEventBus();
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
     }
 
     /**
-     * Subscribes the view to the eventBus. Method has to be overriden if the
-     * view does not contain any listener to avoid Vaadin blowing up our logs
-     * with warnings.
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
      */
-    protected void subscribeToEventBus() {
-        eventBus.subscribe(this);
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     public void setSelectedBaseEntity(final T selectedBaseEntity) {

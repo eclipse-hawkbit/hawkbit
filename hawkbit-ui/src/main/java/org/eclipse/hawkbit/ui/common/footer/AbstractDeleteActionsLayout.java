@@ -64,17 +64,18 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.notification = notification;
-
-        subscribeToEventBus();
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
     }
 
     /**
-     * Subscribes the view to the eventBus. Method has to be overriden if the
-     * view does not contain any listener to avoid Vaadin blowing up our logs
-     * with warnings.
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
      */
-    protected void subscribeToEventBus() {
-        eventBus.subscribe(this);
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     protected void init() {

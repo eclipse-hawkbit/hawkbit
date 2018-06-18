@@ -65,8 +65,8 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override

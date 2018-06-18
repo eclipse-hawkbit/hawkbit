@@ -52,8 +52,8 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override

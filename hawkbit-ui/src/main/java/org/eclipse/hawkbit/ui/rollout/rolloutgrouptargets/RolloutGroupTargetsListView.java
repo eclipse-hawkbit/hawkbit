@@ -34,8 +34,8 @@ public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override

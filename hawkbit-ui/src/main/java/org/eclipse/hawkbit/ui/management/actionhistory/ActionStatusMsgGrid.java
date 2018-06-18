@@ -75,8 +75,8 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void subscribeToEventBus() {
-        // nothing to listen
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override
