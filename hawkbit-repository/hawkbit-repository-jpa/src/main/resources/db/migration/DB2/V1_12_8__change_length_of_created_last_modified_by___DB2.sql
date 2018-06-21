@@ -21,6 +21,7 @@ ALTER TABLE sp_distribution_set_type ALTER COLUMN last_modified_by SET DATA TYPE
 
 ALTER TABLE sp_rollout ALTER COLUMN created_by SET DATA TYPE VARCHAR(64);
 ALTER TABLE sp_rollout ALTER COLUMN last_modified_by SET DATA TYPE VARCHAR(64);
+ALTER TABLE sp_rollout ALTER COLUMN approval_decided_by SET DATA TYPE VARCHAR(64);
 
 ALTER TABLE sp_rolloutgroup ALTER COLUMN created_by SET DATA TYPE VARCHAR(64);
 ALTER TABLE sp_rolloutgroup ALTER COLUMN last_modified_by SET DATA TYPE VARCHAR(64);
