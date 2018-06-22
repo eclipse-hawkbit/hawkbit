@@ -11,12 +11,12 @@ cd ..
 
 # Provided and compile (excludes the test modules)
 mvn dependency:list -DexcludeGroupIds=org.eclipse -pl !org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test  -Dsort=true -DoutputFile=dependencies.txt
-find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:compile'|sort|uniq > 3rd-dependencies/compile.txt
-find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:provided'|sort|uniq > 3rd-dependencies/provided.txt
+find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:compile'|sort|uniq > .3rd-party/compile.txt
+find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:provided'|sort|uniq > .3rd-party/provided.txt
 
 # Test dependencies
 mvn dependency:list -DexcludeGroupIds=org.eclipse -Dsort=true -DoutputFile=dependencies.txt
-find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:test'|sort|uniq > 3rd-dependencies/test.txt
+find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:test'|sort|uniq > .3rd-party/test.txt
 
 # Cleanup temp files
 find . -name dependencies.txt|while read i; do rm $i;done
