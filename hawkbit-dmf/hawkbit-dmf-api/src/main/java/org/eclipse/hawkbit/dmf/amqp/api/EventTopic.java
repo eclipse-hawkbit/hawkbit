@@ -32,6 +32,10 @@ public enum EventTopic {
     /**
      * Topic when sending a download only task, skipping the install.
      */
-    DOWNLOAD;
+    DOWNLOAD,
+    /**
+     * Topic when an update of device attributes is requested.
+     */
+    REQUEST_ATTRIBUTES_UPDATE;
 
 }

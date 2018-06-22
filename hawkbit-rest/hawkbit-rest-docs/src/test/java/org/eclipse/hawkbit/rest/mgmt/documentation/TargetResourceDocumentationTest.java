@@ -90,6 +90,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .type("enum").attributes(
                                         key("value").value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                         fieldWithPath("content[].securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
+                        fieldWithPath("content[].requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                         fieldWithPath("content[].installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
                         fieldWithPath("content[].lastModifiedAt")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
@@ -141,6 +142,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value")
                                                 .value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                                 fieldWithPath("[]securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
+                                fieldWithPath("[]requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 
@@ -180,12 +182,13 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
-                        requestFields(requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                                requestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                                requestFieldWithPath("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPath("address").description(MgmtApiModelProperties.ADDRESS),
-                                requestFieldWithPath("securityToken")
-                                        .description(MgmtApiModelProperties.SECURITY_TOKEN)),
+                        requestFields(optionalRequestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                                optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                optionalRequestFieldWithPath("address").description(MgmtApiModelProperties.ADDRESS),
+                                optionalRequestFieldWithPath("securityToken")
+                                        .description(MgmtApiModelProperties.SECURITY_TOKEN),
+                                optionalRequestFieldWithPath("requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
                         getResponseFieldTarget(false)));
     }
 
@@ -570,6 +573,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         target.put("name", name);
         target.put("address", "https://192.168.0.1");
         target.put("securityToken", "2345678DGGDGFTDzztgf");
+        target.put("requestAttributes", true);
         return this.objectMapper.writeValueAsString(target);
     }
 

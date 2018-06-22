@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
@@ -638,6 +639,26 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         return target.getControllerAttributes();
+    }
+
+    @Override
+    public void requestControllerAttributes(final String controllerId) {
+        final JpaTarget target = (JpaTarget) getByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        target.setRequestControllerAttributes(true);
+
+        eventPublisher.publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
+                JpaTarget.class.getName(), applicationContext.getId()));
+    }
+
+    @Override
+    public boolean isControllerAttributesRequested(final String controllerId) {
+        final JpaTarget target = (JpaTarget) getByControllerID(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        return target.isRequestControllerAttributes();
     }
 
 }

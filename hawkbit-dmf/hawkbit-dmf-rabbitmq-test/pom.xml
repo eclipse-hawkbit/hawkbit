@@ -15,7 +15,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-dmf-parent</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.3.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-dmf-rabbitmq-test</artifactId>
    <name>hawkBit :: DMF :: RabbitMq Test module</name>

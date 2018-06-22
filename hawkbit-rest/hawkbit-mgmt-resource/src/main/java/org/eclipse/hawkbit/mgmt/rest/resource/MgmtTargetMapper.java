@@ -133,6 +133,7 @@ public final class MgmtTargetMapper {
         targetRest.setLastModifiedAt(target.getLastModifiedAt());
 
         targetRest.setSecurityToken(target.getSecurityToken());
+        targetRest.setRequestAttributes(target.isRequestControllerAttributes());
 
         // last target query is the last controller request date
         final Long lastTargetQuery = target.getLastTargetQuery();

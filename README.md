@@ -41,7 +41,6 @@ hawkBit does not provide off the shelf clients for devices as part of the projec
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 * [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
-
 * [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
 # Runtime dependencies and support
@@ -66,8 +65,8 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. 
 Run with docker:
 
-```
-$  docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
+```bash
+docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
 ```
 
 Open the update server in your browser:
@@ -75,7 +74,6 @@ Open the update server in your browser:
 [localhost:8080](http://localhost:8080)
 
 See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
-
 
 # hawkBit (Spring boot) starters
 
@@ -86,45 +84,29 @@ Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also p
 ## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit
-$ mvn clean install
-$ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
+git clone https://github.com/eclipse/hawkbit.git
+cd hawkbit
+mvn clean install
+java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
 
 ## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit-examples.git
-$ cd hawkbit-examples
-$ mvn clean install
+git clone https://github.com/eclipse/hawkbit-examples.git
+cd hawkbit-examples
+mvn clean install
 ```
 
 ```bash
-$ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
 ## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
 ```bash
-$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
+java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
 ```
-
-# Releases and Roadmap
-
-* In the upcoming release [0.2](https://github.com/eclipse/hawkbit/issues/390):
-  * Rollout management for large scale update campaigns.
-  * Clustering capabilities for the update server.
-  * Upgrade of Spring Boot and Vaadin dependencies (Boot 1.4, Vaadin 7.7).
-  * Improvements on modularization and customizability based on Spring's auto-configuration mechanism.
-  * Provide Spring Boot Starters for custom apps based on hawkBit.
-  * Provide standard runtime by means of Spring Boot based hawkBit update server (and hopefully a docker image).
-  * And of course tons of usability improvements and bug fixes.
-* Future releases
-  * Integrate with Eclipse hono as DMF provider.
-  * Flexible DMF messaging infrastructure (e.g. with Spring Cloud Stream).
-  * Migrate to Spring Framework 5, Spring Boot 2 and Vaadin 8
-  * Re-evaluate JPA as persistence provider (e.g. look into jOOQ)
 
 # Status and API stability
 

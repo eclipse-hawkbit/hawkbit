@@ -880,4 +880,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Long> collect = foundDs.stream().map(Target::getId).collect(Collectors.toList());
         assertThat(collect).containsAll(searchIds);
     }
+
+    @Test
+    @Description("Verify that the flag for requesting controller attributes is set correctly.")
+    public void verifyRequestControllerAttributes() {
+        final String knownTargetId = "KnownControllerId";
+        createTargetWithAttributes(knownTargetId);
+
+        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isFalse();
+        targetManagement.requestControllerAttributes(knownTargetId);
+        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+
+    }
 }

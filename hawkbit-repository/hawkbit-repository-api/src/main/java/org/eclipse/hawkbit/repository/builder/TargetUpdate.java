@@ -67,4 +67,10 @@ public interface TargetUpdate {
      * @return updated builder instance
      */
     TargetUpdate status(@NotNull TargetUpdateStatus status);
+
+    /**
+     * @param requestAttributes for {@link Target#isRequestControllerAttributes()}
+     * @return updated builder instance
+     */
+    TargetUpdate requestAttributes(Boolean requestAttributes);
 }

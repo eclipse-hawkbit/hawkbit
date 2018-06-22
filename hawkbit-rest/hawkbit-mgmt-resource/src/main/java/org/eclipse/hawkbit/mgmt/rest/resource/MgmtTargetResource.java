@@ -120,9 +120,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
+        if (targetRest.isRequestAttributes() != null) {
+            if (targetRest.isRequestAttributes()) {
+                targetManagement.requestControllerAttributes(controllerId);
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
         final Target updateTarget = this.targetManagement.update(entityFactory.target().update(controllerId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()));
+                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
