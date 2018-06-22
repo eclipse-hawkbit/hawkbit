@@ -22,7 +22,7 @@ find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:test'|sor
 find . -name dependencies.txt|while read i; do rm $i;done
 
 # Sort and order content
-cd 3rd-dependencies/
+cd .3rd-party/
 cat compile.txt provided.txt|cut -d':' -f1-4|while read i; do grep -h $i test.txt;done|sort|uniq|while read x; do sed -i.bak -e s/$x// test.txt ;done
 sed -i.bak '/^[[:space:]]*$/d' test.txt
 rm *.bak
