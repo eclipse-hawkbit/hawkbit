@@ -106,7 +106,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
         artifactDtlsWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
 
         artifactDetailsLayout.setFullWindowMode(false);
-        artifactDetailsLayout.populateArtifactDetails(softwareModule.getId(), softwareModule.getName());
+        artifactDetailsLayout.populateArtifactDetails(softwareModule);
         artifactDetailsLayout.getArtifactDetailsTable().setWidth(700, Unit.PIXELS);
         artifactDetailsLayout.getArtifactDetailsTable().setHeight(500, Unit.PIXELS);
         artifactDtlsWindow.setContent(artifactDetailsLayout.getArtifactDetailsTable());

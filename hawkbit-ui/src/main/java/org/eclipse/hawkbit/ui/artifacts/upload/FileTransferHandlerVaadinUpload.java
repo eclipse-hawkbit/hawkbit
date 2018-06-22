@@ -78,14 +78,17 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         // selected software module at the time of this callback is considered
         SoftwareModule softwareModule = null;
         final Optional<Long> selectedSoftwareModuleId = getUploadState().getSelectedBaseSwModuleId();
-        if (selectedSoftwareModuleId.isPresent()) {
-            softwareModule = softwareModuleManagement.get(selectedSoftwareModuleId.get()).orElse(null);
+        final Long softwareModuleId = selectedSoftwareModuleId.orElse(null);
+        if (softwareModuleId != null) {
+            softwareModule = softwareModuleManagement.get(softwareModuleId).orElse(null);
         }
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
         this.mimeType = event.getMIMEType();
 
-        if (getUploadState().isFileInUploadState(this.fileUploadId)) {
+        if (
+
+        getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
             // actual interrupt will happen a bit late so setting the below
             // flag
@@ -104,7 +107,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             }
         }
     }
-
 
     private void assertThatOneSoftwareModulIsSelected() {
         // FileUpload button should be disabled if no SoftwareModul or more

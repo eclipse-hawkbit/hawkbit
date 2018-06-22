@@ -284,11 +284,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
                         final Optional<SoftwareModule> softwareModule = findSelectedSoftwareModule();
-                        if (softwareModule.isPresent()) {
-                            populateArtifactDetails(softwareModule.get());
-                        } else {
-                            populateArtifactDetails(null, null);
-                        }
+                        populateArtifactDetails(softwareModule.orElse(null));
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -408,20 +404,22 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         eventBus.publish(this, ArtifactDetailsEvent.MINIMIZED);
     }
 
-    public void populateArtifactDetails(final SoftwareModule softwareModule) {
-        populateArtifactDetails(softwareModule.getId(),
-                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
-    }
-
     /**
      * Populate artifact details.
      *
-     * @param baseSwModuleId
-     *            software module id
-     * @param swModuleName
-     *            software module name
+     * @param softwareModule
+     *            software module
      */
-    public void populateArtifactDetails(final Long baseSwModuleId, final String swModuleName) {
+    public void populateArtifactDetails(final SoftwareModule softwareModule) {
+        if (softwareModule == null) {
+            populateArtifactDetails(null, null);
+        } else {
+            populateArtifactDetails(softwareModule.getId(),
+                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
+        }
+    }
+
+    private void populateArtifactDetails(final Long baseSwModuleId, final String swModuleName) {
         if (!readOnly) {
             if (StringUtils.isEmpty(swModuleName)) {
                 setTitleOfLayoutHeader();
