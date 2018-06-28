@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.*;
 import static org.eclipse.hawkbit.ui.rollout.DistributionBarHelper.getTooltip;
 
 import java.util.Arrays;
@@ -31,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -113,7 +113,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
             RolloutStatus.PAUSED);
 
-    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections.singletonList(RolloutStatus.WAITING_FOR_APPROVAL);
+    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections
+            .singletonList(RolloutStatus.WAITING_FOR_APPROVAL);
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
@@ -146,13 +147,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-                    final RolloutManagement rolloutManagement, final UINotification uiNotification,
-                    final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
-                    final TargetManagement targetManagement, final EntityFactory entityFactory,
-                    final UiProperties uiProperties,
-                    final TargetFilterQueryManagement targetFilterQueryManagement,
-                    final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-                    final TenantConfigurationManagement tenantConfigManagement) {
+            final RolloutManagement rolloutManagement, final UINotification uiNotification,
+            final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
+            final TenantConfigurationManagement tenantConfigManagement) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -267,8 +267,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
                 false);
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY, String.class, null, false,
-                false);
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY, String.class, null,
+                false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_REMARK, String.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, String.class, null, false,
@@ -339,7 +339,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
         getColumn(SPUILabelDefinitions.VAR_APPROVAL_REMARK).setHeaderCaption(i18n.getMessage("header.approvalRemark"));
-        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY).setHeaderCaption(i18n.getMessage("header.approvalDecidedBy"));
+        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY)
+                .setHeaderCaption(i18n.getMessage("header.approvalDecidedBy"));
         getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
                 .setHeaderCaption(i18n.getMessage("header.detail.status"));
@@ -357,8 +358,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private HeaderCell joinColumns() {
 
-        return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_APPROVE, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE, VIRT_PROP_COPY,
-                VIRT_PROP_DELETE);
+        return getDefaultHeaderRow().join(VIRT_PROP_RUN, VIRT_PROP_APPROVE, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE,
+                VIRT_PROP_COPY, VIRT_PROP_DELETE);
     }
 
     @Override
@@ -372,8 +373,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final List<String> columnsToShowInOrder = Arrays.asList(ROLLOUT_RENDERER_DATA,
                 SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
                 SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
-                SPUILabelDefinitions.VAR_TOTAL_TARGETS, VIRT_PROP_APPROVE, VIRT_PROP_RUN, VIRT_PROP_PAUSE, VIRT_PROP_UPDATE,
-                VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS, VIRT_PROP_APPROVE, VIRT_PROP_RUN, VIRT_PROP_PAUSE,
+                VIRT_PROP_UPDATE, VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
                 SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
                 SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
                 SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
@@ -789,9 +790,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
-        if (!permissionChecker.hasRolloutApprovalPermission() ||
-                !tenantConfigManagement.getConfigurationValue(
-                        TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
+        if (!permissionChecker.hasRolloutApprovalPermission() || !tenantConfigManagement
+                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
             modifiableColumnsList.remove(VIRT_PROP_APPROVE);
         }
         if (!permissionChecker.hasRolloutDeletePermission()) {

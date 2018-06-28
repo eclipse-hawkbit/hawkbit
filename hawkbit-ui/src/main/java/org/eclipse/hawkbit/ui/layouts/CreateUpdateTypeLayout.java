@@ -52,6 +52,11 @@ public abstract class CreateUpdateTypeLayout<E extends NamedEntity> extends Abst
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     protected void addListeners() {
         super.addListeners();
         optiongroup.addValueChangeListener(this::optionValueChanged);

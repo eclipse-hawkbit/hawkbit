@@ -50,28 +50,28 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     @Override
     protected void showFilterButtonsLayout() {
         getManageDistUIstate().setSwTypeFilterClosed(false);
-        eventbus.publish(this, DistributionsUIEvent.SHOW_SM_FILTER_BY_TYPE);
+        eventBus.publish(this, DistributionsUIEvent.SHOW_SM_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
         if (getManageDistUIstate().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
+            eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
         }
     }
 
     @Override
     public void maximizeTable() {
         getManageDistUIstate().setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
 
     }
 
     @Override
     public void minimizeTable() {
         getManageDistUIstate().setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class SwModuleTableHeader extends AbstractSoftwareModuleTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
+        eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
 }

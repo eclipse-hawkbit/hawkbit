@@ -48,7 +48,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     @Override
     protected void showFilterButtonsLayout() {
         getArtifactUploadState().setSwTypeFilterClosed(false);
-        eventbus.publish(this, UploadArtifactUIEvent.SHOW_FILTER_BY_TYPE);
+        eventBus.publish(this, UploadArtifactUIEvent.SHOW_FILTER_BY_TYPE);
 
     }
 
@@ -56,20 +56,20 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     protected void resetSearchText() {
         if (getArtifactUploadState().getSoftwareModuleFilters().getSearchText().isPresent()) {
             getArtifactUploadState().getSoftwareModuleFilters().setSearchText(null);
-            eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
+            eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
         }
     }
 
     @Override
     public void maximizeTable() {
         getArtifactUploadState().setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         getArtifactUploadState().setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class SoftwareModuleTableHeader extends AbstractSoftwareModuleTableHeader
     @Override
     protected void searchBy(final String newSearchText) {
         getArtifactUploadState().getSoftwareModuleFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new RefreshSoftwareModuleByFilterEvent());
+        eventBus.publish(this, new RefreshSoftwareModuleByFilterEvent());
     }
 
     @Override

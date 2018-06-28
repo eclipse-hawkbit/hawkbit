@@ -297,8 +297,7 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
 
         @Override
         public void click(final RendererClickEvent event) {
-            final Optional<RolloutGroup> group = rolloutGroupManagement
-                    .getWithDetailedStatus((Long) event.getItemId());
+            final Optional<RolloutGroup> group = rolloutGroupManagement.getWithDetailedStatus((Long) event.getItemId());
             if (!group.isPresent()) {
                 eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
                 return;

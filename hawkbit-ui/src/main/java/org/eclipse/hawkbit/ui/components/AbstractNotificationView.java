@@ -63,7 +63,18 @@ public abstract class AbstractNotificationView extends VerticalLayout implements
         this.notificationUnreadButton = notificationUnreadButton;
         this.viewUnreadNotifcations = new AtomicInteger(0);
         skipUiEventsCache = CacheBuilder.newBuilder().expireAfterAccess(10, SECONDS).build();
-        eventBus.subscribe(this);
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
+     */
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

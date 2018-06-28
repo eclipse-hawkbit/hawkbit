@@ -47,13 +47,12 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final UiProperties uiProperties;
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-                           final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-                           final TargetManagement targetManagement, final UINotification uiNotification,
-                           final UiProperties uiProperties, final EntityFactory entityFactory,
-                           final VaadinMessageSource i18n,
-                           final TargetFilterQueryManagement targetFilterQueryManagement,
-                           final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-                           final TenantConfigurationManagement tenantConfigManagement) {
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final TargetManagement targetManagement, final UINotification uiNotification,
+            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
+            final TenantConfigurationManagement tenantConfigManagement) {
         super(i18n, eventBus);
         this.permissionChecker = permissionChecker;
         this.rolloutUIState = rolloutUIState;
@@ -68,6 +67,11 @@ public class RolloutListView extends AbstractGridComponentLayout {
         this.tenantConfigManagement = tenantConfigManagement;
 
         init();
+    }
+
+    @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
     }
 
     @Override

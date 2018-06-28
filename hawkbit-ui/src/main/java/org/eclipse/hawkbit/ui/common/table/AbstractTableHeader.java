@@ -46,7 +46,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     protected SpPermissionChecker permChecker;
 
-    protected transient EventBus.UIEventBus eventbus;
+    protected transient EventBus.UIEventBus eventBus;
 
     private Label headerCaption;
 
@@ -71,18 +71,29 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private final ArtifactUploadState artifactUploadState;
 
     protected AbstractTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventbus, final ManagementUIState managementUIState,
+            final UIEventBus eventBus, final ManagementUIState managementUIState,
             final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState) {
         this.i18n = i18n;
         this.permChecker = permChecker;
-        this.eventbus = eventbus;
+        this.eventBus = eventBus;
         this.managementUIState = managementUIState;
         this.manageDistUIstate = manageDistUIstate;
         this.artifactUploadState = artifactUploadState;
         createComponents();
         buildLayout();
         restoreState();
-        eventbus.subscribe(this);
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
+     */
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     private void createComponents() {
