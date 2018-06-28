@@ -51,6 +51,8 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
@@ -567,7 +569,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
     }
 
-
     /**
      * {@link DefaultRolloutApprovalStrategy} bean.
      *
@@ -728,6 +729,37 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
             final LockRegistry lockRegistry) {
         return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignChecker, lockRegistry);
+    }
+
+    /**
+     * 
+     * @param actionRepository
+     * @param configManagement
+     * @return
+     */
+    @Bean
+    AutoActionCleanup actionCleanup(final ActionRepository actionRepository,
+            final TenantConfigurationManagement configManagement) {
+        return new AutoActionCleanup(actionRepository, configManagement);
+    }
+
+    /**
+     * 
+     * @param tenantAware
+     * @param systemManagement
+     * @param systemSecurityContext
+     * @param lockRegistry
+     * @param actionCleanup
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @Profile("!test")
+    @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
+    AutoCleanupScheduler autoCleanupScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
+            final AutoActionCleanup actionCleanup) {
+        return new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, actionCleanup);
     }
 
     /**

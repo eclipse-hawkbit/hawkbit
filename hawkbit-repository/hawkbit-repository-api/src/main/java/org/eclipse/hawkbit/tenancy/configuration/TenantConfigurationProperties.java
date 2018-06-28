@@ -125,6 +125,12 @@ public class TenantConfigurationProperties {
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
 
+        public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
+
+        public static final String ACTION_CLEANUP_ACTION_EXPIRY = "action.cleanup.actionExpiry";
+
+        public static final String ACTION_CLEANUP_ACTION_STATUS = "action.cleanup.actionStatus";
+
         private String keyName;
         private String defaultValue = "";
         private Class<?> dataType = String.class;
