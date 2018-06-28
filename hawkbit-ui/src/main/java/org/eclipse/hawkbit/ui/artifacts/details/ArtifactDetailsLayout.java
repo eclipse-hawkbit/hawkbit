@@ -292,7 +292,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void setTableColumnDetails(final Table table) {
-
         table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
         table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
         if (fullWindowMode) {
@@ -388,7 +387,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void createArtifactDetailsMaxView() {
-
         artifactDetailsTable.setValue(null);
         artifactDetailsTable.setSelectable(false);
         artifactDetailsTable.setMultiSelect(false);

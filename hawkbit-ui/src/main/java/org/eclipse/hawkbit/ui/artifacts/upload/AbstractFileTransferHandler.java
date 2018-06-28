@@ -111,7 +111,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
-    protected boolean isFileAlreadyContainedInSoftwareModul(final FileUploadId newFileUploadId,
+    protected boolean isFileAlreadyContainedInSoftwareModule(final FileUploadId newFileUploadId,
             final SoftwareModule softwareModule) {
         for (final Artifact artifact : softwareModule.getArtifacts()) {
             final FileUploadId existingId = new FileUploadId(artifact.getFilename(), softwareModule);

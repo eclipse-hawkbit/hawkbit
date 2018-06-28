@@ -204,9 +204,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void minimizeArtifactoryDetails() {
         mainLayout.setSpacing(true);
-        detailAndUploadLayout.addComponent(dropAreaLayout);
-        detailAndUploadLayout.setExpandRatio(dropAreaLayout, 0.3F);
-        detailAndUploadLayout.setComponentAlignment(dropAreaLayout, Alignment.MIDDLE_CENTER);
+        detailAndUploadLayout.addComponent(dropAreaLayout.getDropAreaWrapper());
         mainLayout.addComponent(filterByTypeLayout, 0, 0);
         mainLayout.addComponent(smTableLayout, 1, 0);
         addOtherComponents();
@@ -216,7 +214,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.setSpacing(false);
         mainLayout.removeComponent(filterByTypeLayout);
         mainLayout.removeComponent(smTableLayout);
-        detailAndUploadLayout.removeComponent(dropAreaLayout);
+        detailAndUploadLayout.removeComponent(dropAreaLayout.getDropAreaWrapper());
         mainLayout.setColumnExpandRatio(1, 0F);
         mainLayout.setColumnExpandRatio(2, 1F);
     }

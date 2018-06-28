@@ -123,7 +123,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
 
     private void buildLayout() {
         dropAreaWrapper = new DragAndDropWrapper(createDropAreaLayout());
-        dropAreaWrapper.setDropHandler(new DropAreahandler());
+        dropAreaWrapper.setDropHandler(new DropAreaHandler());
     }
 
     private VerticalLayout createDropAreaLayout() {
@@ -155,7 +155,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
         return dropAreaWrapper;
     }
 
-    private class DropAreahandler implements DropHandler {
+    private class DropAreaHandler implements DropHandler {
 
         private static final long serialVersionUID = 1L;
 
@@ -171,11 +171,11 @@ public class UploadDropAreaLayout extends AbstractComponent {
                 // selected software module at the time of file drop is
                 // considered for upload
                 artifactUploadState.getSelectedBaseSwModuleId()
-                        .ifPresent(selectedSwId -> uploadFilesForSoftwaremodul(files, selectedSwId));
+                        .ifPresent(selectedSwId -> uploadFilesForSoftwareModule(files, selectedSwId));
             }
         }
 
-        private void uploadFilesForSoftwaremodul(final Html5File[] files, final Long softwareModuleId) {
+        private void uploadFilesForSoftwareModule(final Html5File[] files, final Long softwareModuleId) {
             final SoftwareModule softwareModule = softwareManagement.get(softwareModuleId).orElse(null);
 
             boolean isDirectory = false;

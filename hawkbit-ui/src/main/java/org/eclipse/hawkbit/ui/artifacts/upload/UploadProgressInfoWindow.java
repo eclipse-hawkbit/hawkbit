@@ -124,11 +124,15 @@ public class UploadProgressInfoWindow extends Window {
     private void onUploadStarted(final FileUploadProgress fileUploadProgress) {
         updateUploadProgressInfoRowObject(fileUploadProgress);
 
-        if (isFirstFileUpload()) {
+        if (isWindowNotAlreadyAttached()) {
             maximizeWindow();
         }
 
         grid.scrollTo(fileUploadProgress.getFileUploadId());
+    }
+
+    private boolean isWindowNotAlreadyAttached() {
+        return !UI.getCurrent().getWindows().contains(this);
     }
 
     private void restoreState() {
@@ -188,7 +192,6 @@ public class UploadProgressInfoWindow extends Window {
         captionLayout.setHeight("36px");
         captionLayout.addComponents(windowCaption, closeButton);
         captionLayout.setExpandRatio(windowCaption, 1.0F);
-
         captionLayout.addStyleName("v-window-header");
         return captionLayout;
     }
@@ -233,10 +236,6 @@ public class UploadProgressInfoWindow extends Window {
 
             return super.encode(result);
         }
-    }
-
-    private boolean isFirstFileUpload() {
-        return artifactUploadState.getAllFileUploadIdsFromOverallUploadProcessList().size() == 1;
     }
 
     private void openWindow() {

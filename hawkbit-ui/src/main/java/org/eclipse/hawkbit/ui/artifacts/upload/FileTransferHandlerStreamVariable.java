@@ -61,7 +61,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (isFileAlreadyContainedInSoftwareModul(fileUploadId, selectedSoftwareModule)) {
+        if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
             LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
                     selectedSoftwareModule);
             getUploadState().updateFileUploadProgress(fileUploadId,
@@ -77,18 +77,15 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         @SuppressWarnings("squid:S2095")
         OutputStream outputStream = ByteStreams.nullOutputStream();
         try {
-
             outputStream = createOutputStreamForTempFile();
             publishUploadProgressEvent(fileUploadId, 0, fileSize, getTempFilePath());
 
         } catch (final IOException e) {
             LOG.error("Creating temp file for upload failed {}.", e);
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (final IOException e1) {
-                    LOG.error("Closing output stream caused an exception {}", e1);
-                }
+            try {
+                outputStream.close();
+            } catch (final IOException e1) {
+                LOG.error("Closing output stream caused an exception {}", e1);
             }
 
             setFailureReasonUploadFailed();
