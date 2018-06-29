@@ -388,7 +388,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
         }
 
-        LOG.warn("action ({}) was still activ and has been force quite.", action);
+        LOG.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),

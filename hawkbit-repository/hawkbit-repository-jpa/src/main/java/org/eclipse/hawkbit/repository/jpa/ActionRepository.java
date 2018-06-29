@@ -458,7 +458,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaAction a WHERE a.status IN ?1 AND a.lastModifiedAt>?2")
+    @Query("DELETE FROM JpaAction a WHERE a.status IN ?1 AND a.lastModifiedAt<?2")
     void deleteByStatusAndLastModifiedBefore(final Set<Action.Status> status, final long lastModified);
 
 }
