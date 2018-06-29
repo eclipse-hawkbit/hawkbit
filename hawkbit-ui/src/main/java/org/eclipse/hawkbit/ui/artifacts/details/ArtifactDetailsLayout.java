@@ -180,7 +180,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
-                "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
+                "", i18n.getMessage("tooltip.maximize"), null, true, FontAwesome.EXPAND,
+                SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
 
@@ -380,7 +381,6 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         showMinIcon();
         setTableColumnDetails(artifactDetailsTable);
         createArtifactDetailsMaxView();
-
     }
 
     /**
@@ -485,11 +485,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void showMinIcon() {
         maxMinButton.toggleIcon(FontAwesome.COMPRESS);
         maxMinButton.setData(Boolean.TRUE);
+        maxMinButton.setDescription(i18n.getMessage("tooltip.minimzie"));
     }
 
     private void showMaxIcon() {
         maxMinButton.toggleIcon(FontAwesome.EXPAND);
         maxMinButton.setData(Boolean.FALSE);
+        maxMinButton.setDescription(i18n.getMessage("tooltip.maximize"));
     }
 
     private boolean isMaximized() {

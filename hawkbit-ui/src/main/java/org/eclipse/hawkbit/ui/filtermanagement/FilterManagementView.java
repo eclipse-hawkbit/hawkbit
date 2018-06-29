@@ -71,7 +71,7 @@ public class FilterManagementView extends VerticalLayout implements View {
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final AutoCompleteTextFieldComponent queryTextField, final ManageDistUIState manageDistUIState,
             final TargetManagement targetManagement) {
-        this.targetFilterHeader = new TargetFilterHeader(eventBus, filterManagementUIState, permissionChecker);
+        this.targetFilterHeader = new TargetFilterHeader(eventBus, filterManagementUIState, permissionChecker, i18n);
         this.targetFilterTable = new TargetFilterTable(i18n, notification, eventBus, filterManagementUIState,
                 targetFilterQueryManagement, manageDistUIState, targetManagement, permissionChecker);
         this.createNewFilterHeader = new CreateOrUpdateFilterHeader(i18n, eventBus, filterManagementUIState,

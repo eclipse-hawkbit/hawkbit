@@ -43,7 +43,8 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     protected final VaadinMessageSource i18n;
 
-    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n) {
+    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final VaadinMessageSource i18n) {
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.i18n = i18n;
@@ -62,8 +63,8 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
                     SPUIButtonStyleSmallNoBorder.class);
             config.addClickListener(this::settingsIconClicked);
         }
-        hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
-                SPUIButtonStyleSmallNoBorder.class);
+        hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", i18n.getMessage("tooltips.close"), "", true,
+                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
@@ -73,7 +74,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
         final HorizontalLayout typeHeaderLayout = new HorizontalLayout();
-        typeHeaderLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);
         typeHeaderLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         typeHeaderLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
@@ -83,7 +84,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         }
         typeHeaderLayout.addComponent(hideIcon);
         typeHeaderLayout.setComponentAlignment(hideIcon, Alignment.TOP_RIGHT);
-        typeHeaderLayout.setExpandRatio(title, 1.0f);
+        typeHeaderLayout.setExpandRatio(title, 1.0F);
         addComponent(typeHeaderLayout);
     }
 

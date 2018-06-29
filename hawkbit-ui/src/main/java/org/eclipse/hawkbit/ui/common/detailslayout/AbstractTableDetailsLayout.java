@@ -233,16 +233,15 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setContentMode(ContentMode.HTML);
         caption.setId(getDetailsHeaderCaptionId());
 
-        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
-                SPUIButtonStyleSmallNoBorder.class);
+        editButton = SPUIComponentProvider.getButton("", "", i18n.getMessage("tooltip.update"), null, false,
+                FontAwesome.PENCIL_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
-        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
-                SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "", i18n.getMessage("tooltip.metadata.icon"), null,
+                false, FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
 
