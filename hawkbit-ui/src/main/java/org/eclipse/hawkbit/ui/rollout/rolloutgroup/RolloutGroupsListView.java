@@ -53,6 +53,11 @@ public class RolloutGroupsListView extends AbstractGridComponentLayout {
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     public RolloutGroupsListHeader createGridHeader() {
         return new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n);
     }

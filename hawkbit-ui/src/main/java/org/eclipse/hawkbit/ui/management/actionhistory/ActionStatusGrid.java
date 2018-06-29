@@ -64,6 +64,11 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     protected LazyQueryContainer createContainer() {
         configureQueryFactory();
         return new LazyQueryContainer(

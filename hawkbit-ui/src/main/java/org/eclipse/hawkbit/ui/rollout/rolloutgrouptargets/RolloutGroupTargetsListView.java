@@ -34,6 +34,11 @@ public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     public AbstractOrderedLayout createGridHeader() {
         return new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState);
     }

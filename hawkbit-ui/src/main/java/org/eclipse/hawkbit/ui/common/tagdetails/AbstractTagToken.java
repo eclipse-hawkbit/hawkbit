@@ -88,7 +88,18 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         this.managementUIState = managementUIState;
         createTokenField();
         checkIfTagAssignedIsAllowed();
-        eventBus.subscribe(this);
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
+     */
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {

@@ -83,7 +83,18 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setDefault();
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
-        eventBus.subscribe(this);
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
+    }
+
+    /**
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
+     */
+    protected boolean doSubscribeToEventBus() {
+        return true;
     }
 
     /**
