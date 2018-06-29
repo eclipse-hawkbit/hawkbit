@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ENABLED;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -27,19 +28,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A cleanup handler for {@link Action} entities which can be used to delete
+ * actions which are in a certain {@link Action.Status}. It is recommended to
+ * only clean up actions which have terminated already (i.e. actions in status
+ * CANCELLED, ERROR, or FINISHED).
  * 
+ * The cleanup mechanism can be enabled /disabled and configured on a per tenant
+ * basis.
  */
 public class AutoActionCleanup implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoActionCleanup.class);
 
     private static final boolean ACTION_CLEANUP_ENABLED_DEFAULT = false;
-
     private static final long ACTION_CLEANUP_ACTION_EXPIRY_DEFAULT = TimeUnit.DAYS.toMillis(30);
 
     private final ActionRepository actionRepository;
     private final TenantConfigurationManagement config;
 
+    /**
+     * Constructs the action cleanup handler.
+     * 
+     * @param actionRepo
+     *            The {@link ActionRepository} to operate on.
+     * @param configMgmt
+     *            The {@link TenantConfigurationManagement} service.
+     */
     public AutoActionCleanup(final ActionRepository actionRepo, final TenantConfigurationManagement configMgmt) {
         this.actionRepository = actionRepo;
         this.config = configMgmt;
@@ -48,10 +62,13 @@ public class AutoActionCleanup implements Runnable {
     @Override
     public void run() {
         if (isEnabled()) {
+            LOGGER.debug("Action cleanup is enabled for this tenant...");
             final Set<Action.Status> status = getActionStatus();
             if (!status.isEmpty()) {
                 final long lastModified = System.currentTimeMillis() - getExpiry();
                 actionRepository.deleteByStatusAndLastModifiedBefore(status, lastModified);
+                LOGGER.debug("Deleted all actions in status {} which have not been modified since {}", status,
+                        Instant.ofEpochMilli(lastModified));
             }
         }
     }
@@ -79,7 +96,6 @@ public class AutoActionCleanup implements Runnable {
     private <T extends Serializable> TenantConfigurationValue<T> getConfigValue(final String key,
             final Class<T> valueType) {
         return config.getConfigurationValue(key, valueType);
-
     }
 
 }

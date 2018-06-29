@@ -732,10 +732,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * {@link AutoActionCleanup} bean.
      * 
      * @param actionRepository
+     *            Action repository
      * @param configManagement
-     * @return
+     *            Tenant configuration service
+     * 
+     * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
     AutoActionCleanup actionCleanup(final ActionRepository actionRepository,
@@ -744,13 +748,20 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * {@link AutoCleanupScheduler} bean.
      * 
      * @param tenantAware
+     *            to run as specific tenant
      * @param systemManagement
+     *            to find all tenants
      * @param systemSecurityContext
+     *            to run as system
      * @param lockRegistry
+     *            to lock the tenant for auto assignment
      * @param actionCleanup
-     * @return
+     *            cleanup handler for actions
+     * 
+     * @return a new {@link AutoCleanupScheduler} bean
      */
     @Bean
     @ConditionalOnMissingBean

@@ -20,24 +20,33 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Scheduler to invoke a set of cleanup handlers periodically.
+ * A scheduler to invoke a set of cleanup handlers periodically.
  */
 public class AutoCleanupScheduler implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoCleanupScheduler.class);
 
     private static final Object AUTO_CLEANUP = new Object();
-
     private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
-
     private final SystemSecurityContext systemSecurityContext;
-
     private final LockRegistry lockRegistry;
-
     private final List<Runnable> cleanupHandlers;
 
+    /**
+     * Constructs the cleanup schedulers and initializes it with a set of
+     * cleanup handlers.
+     * 
+     * @param systemManagement
+     *            Management APIs to invoke actions in a certain tenant context.
+     * @param systemSecurityContext
+     *            The system security context.
+     * @param lockRegistry
+     *            A registry for shared locks.
+     * @param cleanupHandlers
+     *            An array of cleanup handlers.
+     */
     public AutoCleanupScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
             final Runnable... cleanupHandlers) {
@@ -48,17 +57,16 @@ public class AutoCleanupScheduler implements Runnable {
     }
 
     /**
-     * Scheduler method called by the spring-async mechanism. Retrieves all
-     * tenants from the {@link SystemManagement#findTenants()} and runs for each
-     * tenant the auto assignments defined in the target filter queries
-     * {@link SystemSecurityContext}.
+     * Scheduler method which retrieves all tenants from
+     * {@link SystemManagement#findTenants()} and runs all registered auto
+     * cleanup handlers for each of them.
      */
     @Override
     @Scheduled(initialDelayString = PROP_AUTO_CLEANUP_INTERVAL, fixedDelayString = PROP_AUTO_CLEANUP_INTERVAL)
     public void run() {
-        LOGGER.debug("auto cleanup scheduler has been triggered.");
+        LOGGER.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary
-        // permission to query and create entities.
+        // permission to query and create entities
         if (!cleanupHandlers.isEmpty()) {
             systemSecurityContext.runAsSystem(this::executeAutoCleanup);
         }
