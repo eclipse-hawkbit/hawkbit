@@ -31,7 +31,7 @@ import com.vaadin.ui.MenuBar.Command;
  * Table header for filtering distribution set tags
  *
  */
-public class DistributionTagHeader extends AbstractFilterHeader {
+public class DistributionTagFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     private final DistributionTagButtons distributionTagButtons;
 
-    DistributionTagHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
+    DistributionTagFilterHeader(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UINotification uiNotification, final DistributionTagButtons distributionTagButtons) {

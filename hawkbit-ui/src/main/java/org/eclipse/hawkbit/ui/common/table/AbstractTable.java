@@ -107,8 +107,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
         if (doSubscribeToEventBus()) {
-        eventBus.subscribe(this);
-    }
+            eventBus.subscribe(this);
+        }
     }
 
     /**

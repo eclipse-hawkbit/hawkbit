@@ -34,6 +34,11 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     protected String getHideButtonId() {
         return UIComponentIdProvider.HIDE_TARGET_TAGS;
     }

@@ -86,6 +86,11 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     }
 
     @Override
+    protected boolean doSubscribeToEventBus() {
+        return false;
+    }
+
+    @Override
     protected String getButtonsTableId() {
         return UIComponentIdProvider.DISTRIBUTION_TAG_TABLE_ID;
     }
