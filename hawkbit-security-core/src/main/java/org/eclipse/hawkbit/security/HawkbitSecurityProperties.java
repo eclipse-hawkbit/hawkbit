@@ -147,7 +147,7 @@ public class HawkbitSecurityProperties {
         /**
          * Maximum number of targets per rollout group
          */
-        private int maxActionsPerTarget = 500;
+        private int maxActionsPerTarget = 2000;
 
         /**
          * Maximum number of targets for a manual distribution set assignment.
