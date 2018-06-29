@@ -80,7 +80,13 @@ public class AutoCleanupScheduler implements Runnable {
         }
 
         try {
-            systemManagement.forEachTenant(tenant -> cleanupHandlers.forEach(Runnable::run));
+            systemManagement.forEachTenant(tenant -> cleanupHandlers.forEach(handler -> {
+                try {
+                    handler.run();
+                } catch (final RuntimeException e) {
+                    LOGGER.error("One of the cleanup processes failed", e);
+                }
+            }));
         } finally {
             lock.unlock();
         }
