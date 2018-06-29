@@ -228,14 +228,14 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected void showFilterButtonsLayout() {
         getManagementUIState().setTargetTagFilterClosed(false);
-        eventbus.publish(this, ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT);
+        eventBus.publish(this, ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT);
     }
 
     @Override
     protected void resetSearchText() {
         if (getManagementUIState().getTargetTableFilters().getSearchText().isPresent()) {
             getManagementUIState().getTargetTableFilters().setSearchText(null);
-            eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+            eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
     }
 
@@ -251,13 +251,13 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         getManagementUIState().setTargetTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         getManagementUIState().setTargetTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
@@ -273,7 +273,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected void searchBy(final String newSearchText) {
         getManagementUIState().getTargetTableFilters().setSearchText(newSearchText);
-        eventbus.publish(this, TargetFilterEvent.FILTER_BY_TEXT);
+        eventBus.publish(this, TargetFilterEvent.FILTER_BY_TEXT);
     }
 
     @Override
@@ -399,7 +399,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         getFilterDroppedInfo().addComponent(filteredDistLabel);
         getFilterDroppedInfo().addComponent(filterLabelClose);
         getFilterDroppedInfo().setExpandRatio(filteredDistLabel, 1.0F);
-        eventbus.publish(this, TargetFilterEvent.FILTER_BY_DISTRIBUTION);
+        eventBus.publish(this, TargetFilterEvent.FILTER_BY_DISTRIBUTION);
     }
 
     private void closeFilterByDistribution() {
@@ -411,7 +411,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         getManagementUIState().getTargetTableFilters().setDistributionSet(null);
 
         /* Reload the table */
-        eventbus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
+        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
     }
 
     @Override

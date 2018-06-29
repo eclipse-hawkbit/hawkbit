@@ -67,7 +67,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = 40)
+    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = 64)
     public String getCreatedBy() {
         return createdBy;
     }
@@ -81,7 +81,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = 40)
+    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = 64)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }

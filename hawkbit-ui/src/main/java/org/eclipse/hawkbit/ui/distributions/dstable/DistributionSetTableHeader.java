@@ -56,27 +56,27 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void showFilterButtonsLayout() {
         getManageDistUIstate().setDistTypeFilterClosed(false);
-        eventbus.publish(this, DistributionsUIEvent.SHOW_DIST_FILTER_BY_TYPE);
+        eventBus.publish(this, DistributionsUIEvent.SHOW_DIST_FILTER_BY_TYPE);
     }
 
     @Override
     protected void resetSearchText() {
         if (getManageDistUIstate().getManageDistFilters().getSearchText().isPresent()) {
             getManageDistUIstate().getManageDistFilters().setSearchText(null);
-            eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
+            eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
         }
     }
 
     @Override
     public void maximizeTable() {
         getManageDistUIstate().setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED));
     }
 
     @Override
     public void minimizeTable() {
         getManageDistUIstate().setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class DistributionSetTableHeader extends AbstractDistributionSetTableHead
     @Override
     protected void searchBy(final String newSearchText) {
         getManageDistUIstate().getManageDistFilters().setSearchText(newSearchText);
-        eventbus.publish(this, new RefreshDistributionTableByFilterEvent());
+        eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
 
     @Override
