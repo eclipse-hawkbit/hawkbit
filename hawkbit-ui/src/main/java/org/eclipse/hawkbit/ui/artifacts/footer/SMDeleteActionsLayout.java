@@ -155,7 +155,12 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();
-            artifactUploadState.getDeleteSofwareModules().put(id, swModuleName);
+            if (artifactUploadState.isUploadinProgressForSelectedSoftwareModul(id)) {
+                notification.displayValidationError(i18n.getMessage("message.error.swModule.notDeleted"));
+            } else {
+                artifactUploadState.getDeleteSofwareModules().put(id, swModuleName);
+            }
+
         });
     }
 

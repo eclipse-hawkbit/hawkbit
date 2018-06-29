@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.springframework.util.StringUtils;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -132,6 +133,7 @@ public class ConfirmationDialog implements Button.ClickListener {
         okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON, okLabel, "",
                 ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
         okButton.addClickListener(this);
+        okButton.setClickShortcut(KeyCode.ENTER);
 
         final Button cancelButton = SPUIComponentProvider.getButton(null, cancelLabel, "", null, false, null,
                 SPUIButtonStyleTiny.class);
