@@ -48,9 +48,11 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
 
-        final Target trg1 = testdataFactory.createTarget("trg1"), trg2 = testdataFactory.createTarget("trg2");
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1"),
-                ds2 = testdataFactory.createDistributionSet("ds2");
+        final Target trg1 = testdataFactory.createTarget("trg1");
+        final Target trg2 = testdataFactory.createTarget("trg2");
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
         deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
                 Collections.singletonList(trg1.getControllerId()));
@@ -66,8 +68,36 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that nothing is cleaned up if the cleanup is disabled.")
+    public void cleanupDisabled() {
+
+        // cleanup config for this test case
+        setupCleanupConfiguration(false, 0, Action.Status.CANCELED);
+
+        final Target trg1 = testdataFactory.createTarget("trg1");
+        final Target trg2 = testdataFactory.createTarget("trg2");
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+
+        final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg1.getControllerId())).getActions().get(0);
+        deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg2.getControllerId()));
+
+        setActionToCanceled(action1);
+
+        assertThat(actionRepository.count()).isEqualTo(2);
+
+        autoActionCleanup.run();
+
+        assertThat(actionRepository.count()).isEqualTo(2);
+
+    }
+
+    @Test
     @Description("Verifies that canceled and failed actions are cleaned up.")
-    public void canceledActionsAreCleanedUp() throws InterruptedException {
+    public void canceledAndFailedActionsAreCleanedUp() {
 
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
@@ -100,6 +130,84 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
     }
 
+    @Test
+    @Description("Verifies that canceled and failed actions are cleaned up.")
+    public void canceledActionsAreCleanedUp() {
+
+        // cleanup config for this test case
+        setupCleanupConfiguration(true, 0, Action.Status.CANCELED);
+
+        final Target trg1 = testdataFactory.createTarget("trg1");
+        final Target trg2 = testdataFactory.createTarget("trg2");
+        final Target trg3 = testdataFactory.createTarget("trg3");
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+
+        final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg1.getControllerId())).getActions().get(0);
+        final Long action2 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg2.getControllerId())).getActions().get(0);
+        final Long action3 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg3.getControllerId())).getActions().get(0);
+
+        assertThat(actionRepository.count()).isEqualTo(3);
+
+        setActionToCanceled(action1);
+        setActionToFailed(action2);
+
+        assertThat(actionRepository.count()).isEqualTo(3);
+
+        autoActionCleanup.run();
+
+        assertThat(actionRepository.count()).isEqualTo(2);
+        assertThat(actionRepository.getById(action2)).isPresent();
+        assertThat(actionRepository.getById(action3)).isPresent();
+
+    }
+
+    @Test
+    @Description("Verifies that canceled and failed actions are cleaned up once they expired.")
+    @SuppressWarnings("squid:S2925")
+    public void canceledAndFailedActionsAreCleanedUpWhenExpired() throws InterruptedException {
+
+        // cleanup config for this test case
+        setupCleanupConfiguration(true, 500, Action.Status.CANCELED, Action.Status.ERROR);
+
+        final Target trg1 = testdataFactory.createTarget("trg1");
+        final Target trg2 = testdataFactory.createTarget("trg2");
+        final Target trg3 = testdataFactory.createTarget("trg3");
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
+
+        final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg1.getControllerId())).getActions().get(0);
+        final Long action2 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg2.getControllerId())).getActions().get(0);
+        final Long action3 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
+                Collections.singletonList(trg3.getControllerId())).getActions().get(0);
+
+        assertThat(actionRepository.count()).isEqualTo(3);
+
+        setActionToCanceled(action1);
+        setActionToFailed(action2);
+
+        autoActionCleanup.run();
+
+        // actions have not expired yet
+        assertThat(actionRepository.count()).isEqualTo(3);
+
+        // wait for expiry to elapse
+        Thread.sleep(800);
+
+        autoActionCleanup.run();
+
+        assertThat(actionRepository.count()).isEqualTo(1);
+        assertThat(actionRepository.getById(action3)).isPresent();
+
+    }
+
     private void setActionToCanceled(final Long id) {
         deploymentManagement.cancelAction(id);
         deploymentManagement.forceQuitAction(id);
@@ -110,7 +218,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     }
 
     private void setupCleanupConfiguration(final boolean cleanupEnabled, final long expiry, final Status... status) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ENABLED, true);
+        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ENABLED, cleanupEnabled);
         tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ACTION_EXPIRY, expiry);
         tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ACTION_STATUS,
                 Arrays.stream(status).map(Status::toString).collect(Collectors.joining(",")));
