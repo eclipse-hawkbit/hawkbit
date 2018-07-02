@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -113,7 +113,7 @@ public class TargetFilterHeader extends VerticalLayout {
 
     private Button createAddButton() {
         final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.TARGET_FILTER_ADD_ICON_ID, "",
-                i18n.getMessage("tooltip.add"), null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
+                i18n.getMessage("tooltip.add"), null, false, FontAwesome.PLUS, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> addNewFilter());
         return button;
 
@@ -142,7 +142,7 @@ public class TargetFilterHeader extends VerticalLayout {
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
                 UIComponentIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID, "", i18n.getMessage("tooltip.search"), null,
-                false, FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+                false, FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         return button;
 

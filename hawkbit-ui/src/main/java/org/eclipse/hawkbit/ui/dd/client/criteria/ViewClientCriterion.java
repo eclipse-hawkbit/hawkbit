@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.hawkbit.ui.dd.criteria.ServerViewClientCriterion;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -95,8 +96,8 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
         SafeHtml notificationMsg(String msg);
     }
 
-    private static VAcceptCriterion getCriteria(UIDL configuration, int i) {
-        UIDL childUIDL = configuration.getChildUIDL(i);
+    private static VAcceptCriterion getCriteria(final UIDL configuration, final int i) {
+        final UIDL childUIDL = configuration.getChildUIDL(i);
         return VAcceptCriteria.get(childUIDL.getStringAttribute("name"));
     }
 
@@ -121,7 +122,7 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
         if (isDragStarting(drag)) {
             final NativePreviewHandler nativeEventHandler = new NativePreviewHandler() {
                 @Override
-                public void onPreviewNativeEvent(NativePreviewEvent event) {
+                public void onPreviewNativeEvent(final NativePreviewEvent event) {
                     if (isEscKey(event) || isMouseUp(event)) {
                         try {
                             hideDropTargetHints(configuration);
@@ -136,10 +137,10 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
             setMultiRowDragDecoration(drag);
         }
 
-        int childCount = configuration.getChildCount();
+        final int childCount = configuration.getChildCount();
         accepted = false;
         for (int childIndex = 0; childIndex < childCount; childIndex++) {
-            VAcceptCriterion crit = getCriteria(configuration, childIndex);
+            final VAcceptCriterion crit = getCriteria(configuration, childIndex);
             crit.accept(drag, configuration.getChildUIDL(childIndex), this);
             if (Boolean.TRUE.equals(accepted)) {
                 callback.accepted(drag);
@@ -155,18 +156,18 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     }
 
     @Override
-    public boolean needsServerSideCheck(VDragEvent drag, UIDL criterioUIDL) {
+    public boolean needsServerSideCheck(final VDragEvent drag, final UIDL criterioUIDL) {
         return false;
     }
 
     @Override
-    protected boolean accept(VDragEvent drag, UIDL configuration) {
+    protected boolean accept(final VDragEvent drag, final UIDL configuration) {
         // not used here:
         return false;
     }
 
     @Override
-    public void accepted(VDragEvent event) {
+    public void accepted(final VDragEvent event) {
         accepted = true;
     }
 
@@ -176,24 +177,25 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
      * @param drag
      *            the current drag event holding the context.
      */
-    void setMultiRowDragDecoration(VDragEvent drag) {
-        Widget widget = drag.getTransferable().getDragSource().getWidget();
+    void setMultiRowDragDecoration(final VDragEvent drag) {
+        final Widget widget = drag.getTransferable().getDragSource().getWidget();
 
         if (widget instanceof VScrollTable) {
-            VScrollTable table = (VScrollTable) widget;
-            int rowCount = table.selectedRowKeys.size();
+            final VScrollTable table = (VScrollTable) widget;
+            final int rowCount = table.selectedRowKeys.size();
 
             Element dragCountElement = Document.get().getElementById(SP_DRAG_COUNT);
             if (rowCount > 1 && table.selectedRowKeys.contains(table.focusedRow.getKey())) {
                 if (dragCountElement == null) {
                     dragCountElement = Document.get().createStyleElement();
                     dragCountElement.setId(SP_DRAG_COUNT);
-                    HeadElement head = HeadElement.as(Document.get().getElementsByTagName(HeadElement.TAG).getItem(0));
+                    final HeadElement head = HeadElement
+                            .as(Document.get().getElementsByTagName(HeadElement.TAG).getItem(0));
                     head.appendChild(dragCountElement);
                 }
-                SafeHtml formattedCssStyle = getDraggableTemplate().multiSelectionStyle(determineActiveTheme(drag),
-                        String.valueOf(rowCount));
-                StyleElement dragCountStyleElement = StyleElement.as(dragCountElement);
+                final SafeHtml formattedCssStyle = getDraggableTemplate()
+                        .multiSelectionStyle(determineActiveTheme(drag), String.valueOf(rowCount));
+                final StyleElement dragCountStyleElement = StyleElement.as(dragCountElement);
                 dragCountStyleElement.setInnerSafeHtml(formattedCssStyle);
             } else if (dragCountElement != null) {
                 dragCountElement.removeFromParent();
@@ -210,9 +212,9 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
      *         key, otherwise <code>false</code>.
      */
     private static boolean isEscKey(final NativePreviewEvent event) {
-        int typeInt = event.getTypeInt();
+        final int typeInt = event.getTypeInt();
         if (typeInt == Event.ONKEYDOWN) {
-            int keyCode = event.getNativeEvent().getKeyCode();
+            final int keyCode = event.getNativeEvent().getKeyCode();
             if (KeyCodes.KEY_ESCAPE == keyCode) {
                 return true;
             }
@@ -242,16 +244,16 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     // Exception squid:S2221 - This code is trans-coded to JavaScript, hence
     // Exception semantics changes
     @SuppressWarnings({ "squid:S1166", "squid:S2221" })
-    void hideDropTargetHints(UIDL configuration) {
-        int totalDropTargetHintsCount = configuration.getIntAttribute(DROP_AREA_CONFIG_COUNT);
+    void hideDropTargetHints(final UIDL configuration) {
+        final int totalDropTargetHintsCount = configuration.getIntAttribute(DROP_AREA_CONFIG_COUNT);
         for (int dropAreaIndex = 0; dropAreaIndex < totalDropTargetHintsCount; dropAreaIndex++) {
             try {
-                String dropArea = configuration.getStringAttribute(DROP_AREA_CONFIG + dropAreaIndex);
-                Element hideHintFor = Document.get().getElementById(dropArea);
+                final String dropArea = configuration.getStringAttribute(DROP_AREA_CONFIG + dropAreaIndex);
+                final Element hideHintFor = Document.get().getElementById(dropArea);
                 if (hideHintFor != null) {
                     hideHintFor.removeClassName(ViewComponentClientCriterion.HINT_AREA_STYLE);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // log and continue
                 LOGGER.log(Level.SEVERE, "Error highlighting valid drop targets: " + e.getLocalizedMessage());
             }
@@ -264,11 +266,11 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
      * @param drag
      *            the current drag event holding the context.
      */
-    private void showErrorNotification(VDragEvent drag) {
-        VNotification n = VNotification.createNotification(SPUILabelDefinitions.SP_DELAY,
+    private void showErrorNotification(final VDragEvent drag) {
+        final VNotification n = VNotification.createNotification(SPUILabelDefinitions.SP_DELAY,
                 drag.getTransferable().getDragSource().getWidget());
         n.show(getDraggableTemplate().notificationMsg(SPUILabelDefinitions.ACTION_NOT_ALLOWED).asString(),
-                Position.BOTTOM_RIGHT, SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
+                Position.BOTTOM_RIGHT, SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
     }
 
     /**
@@ -278,7 +280,7 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
      *            the event the UI theme is retrieved for.
      * @return the active theme (e.g. "hawkbit").
      */
-    private static String determineActiveTheme(VDragEvent drag) {
+    private static String determineActiveTheme(final VDragEvent drag) {
         return drag.getTransferable().getDragSource().getConnection().getUIConnector().getActiveTheme();
     }
 
@@ -292,7 +294,7 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
      * @return <code>true</code> if the drag operation is starting, otherwise
      *         <code>false</code>
      */
-    private boolean isDragStarting(VDragEvent drag) {
+    private boolean isDragStarting(final VDragEvent drag) {
         boolean result = false;
         if (!drag.equals(previousDragEvent)) {
             result = true;

@@ -66,13 +66,13 @@ public final class SPUIComponentProvider {
      *            signifies if combo is mandatory
      * @param data
      *            combo box data
-     * @param promt
+     * @param prompt
      *            input prompt
      * @return ComboBox
      */
     public static ComboBox getComboBox(final String caption, final String width, final String style,
-            final String styleName, final boolean required, final String data, final String promt) {
-        return SPUIComboBoxDecorator.decorate(caption, width, style, styleName, required, data, promt);
+            final String styleName, final boolean required, final String data, final String prompt) {
+        return SPUIComboBoxDecorator.decorate(caption, width, style, styleName, required, data, prompt);
     }
 
     /**

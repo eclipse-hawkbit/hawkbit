@@ -18,10 +18,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -40,6 +44,9 @@ import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
@@ -56,21 +63,36 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private static final long serialVersionUID = 1L;
 
+    protected static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
+
+    protected static final String DISTRIBUTIONSET_NOT_EXISTS = "distributionset.not.exists";
+
+    protected static final String TARGETS_NOT_EXISTS = "targets.not.exists";
+
+    protected static final String CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX = "caption.entity.assign.action.confirmbox";
+
+    protected static final String MESSAGE_CONFIRM_ASSIGN_ENTITY = "message.confirm.assign.entity";
+
+    protected static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES = "message.confirm.assign.multiple.entities";
+
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
     protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    protected transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
-    protected VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
-    protected UINotification notification;
+    private final UINotification notification;
+
+    private final SpPermissionChecker permChecker;
 
     protected AbstractTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification notification) {
+            final UINotification notification, final SpPermissionChecker permChecker) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.notification = notification;
+        this.permChecker = permChecker;
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
@@ -80,6 +102,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setSortEnabled(false);
         setId(getTableId());
         addCustomGeneratedColumns();
+        addDeleteColumn();
         setDefault();
         addValueChangeListener(event -> onValueChange());
         setPageLength(SPUIDefinitions.PAGE_SIZE);
@@ -95,6 +118,17 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
      */
     protected boolean doSubscribeToEventBus() {
         return true;
+    }
+
+    // can be overriden
+    protected boolean hasDeletePermission() {
+        return permChecker.hasDeleteRepositoryPermission();
+    }
+
+    private void addDeleteColumn() {
+        if (hasDeletePermission()) {
+            addGeneratedColumn(SPUIDefinitions.DELETE_ENTITY, (source, itemId, columnId) -> createDeleteButton(itemId));
+        }
     }
 
     /**
@@ -156,11 +190,11 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected void selectRow() {
         if (!isMaximized()) {
-            if (isFirstRowSelectedOnLoad()) {
-                selectFirstRow();
-            } else {
-                setValue(getItemIdToSelect());
+            final Object itemIdToSelect = getItemIdToSelect();
+            if (itemIdToSelect == null) {
+                return;
             }
+            setValue(itemIdToSelect);
         }
     }
 
@@ -176,6 +210,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     protected void setColumnProperties() {
         final List<TableColumn> columnList = getTableVisibleColumns();
+        addDeleteButtonToColumnList(columnList);
         final List<Object> swColumnIds = new ArrayList<>();
         for (final TableColumn column : columnList) {
             setColumnHeader(column.getColumnPropertyId(), column.getColumnHeader());
@@ -185,11 +220,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setVisibleColumns(swColumnIds.toArray());
     }
 
-    private void selectFirstRow() {
-        final Container container = getContainerDataSource();
-        final int size = container.size();
-        if (size > 0) {
-            select(firstItemId());
+    private void addDeleteButtonToColumnList(final List<TableColumn> columnList) {
+        if (hasDeletePermission()) {
+            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, "", 0.0F));
         }
     }
 
@@ -248,18 +281,18 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
      *            the table transferable
      * @return set of entities id which will deleted
      */
-    public Set<Long> getDeletedEntityByTransferable(final TableTransferable transferable) {
+    public Set<Long> getSelectedEntitiesByTransferable(final TableTransferable transferable) {
         final Set<Long> selectedEntities = getTableValue(this);
         final Set<Long> ids = new HashSet<>();
-        final Long tranferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
-        if (tranferableData == null) {
+        final Long transferableData = (Long) transferable.getData(SPUIDefinitions.ITEMID);
+        if (transferableData == null) {
             return ids;
         }
 
-        if (!selectedEntities.contains(tranferableData)) {
-            ids.add(tranferableData);
-        } else {
+        if (entityToBeDeletedIsSelectedInTable(transferableData, selectedEntities)) {
             ids.addAll(selectedEntities);
+        } else {
+            ids.add(transferableData);
         }
         return ids;
     }
@@ -291,6 +324,9 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     protected abstract void publishSelectedEntityEvent(final E selectedLastEntity);
 
     protected void setLastSelectedEntityId(final Long selectedLastEntityId) {
+        if (selectedLastEntityId == null) {
+            return;
+        }
         getManagementEntityState().setLastSelectedEntityId(selectedLastEntityId);
     }
 
@@ -323,14 +359,97 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         // can be overriden
     }
 
-    /**
-     * Check if the first row should be selected by default on load. (if there
-     * is no other item selected)
-     * 
-     * @return true if it should be selected otherwise return false, if there is
-     *         a different item already selected.
-     */
-    protected abstract boolean isFirstRowSelectedOnLoad();
+    private Object createDeleteButton(final Object itemId) {
+        final Button deleteButton = SPUIComponentProvider.getButton("", "", "", "", true, FontAwesome.TRASH_O,
+                SPUIButtonStyleNoBorderWithIcon.class);
+        final String id = getEntityId(itemId);
+        deleteButton.setId("delete.entity." + id);
+        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.addClickListener(this::addDeleteButtonClickListener);
+        return deleteButton;
+    }
+
+    private void addDeleteButtonClickListener(final ClickEvent event) {
+        openConfirmationWindowDeleteAction(event);
+    }
+
+    private void openConfirmationWindowDeleteAction(final ClickEvent event) {
+        final List<Long> entitiesToBeDeleted = getEntitiesForDeletion(event);
+        final String confirmationQuestion = createConfirmationQuestionForDeletion(entitiesToBeDeleted);
+        final ConfirmationDialog confirmDialog = createConfirmationWindowForDeletion(entitiesToBeDeleted,
+                confirmationQuestion);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private List<Long> getEntitiesForDeletion(final ClickEvent event) {
+        List<Long> entitiesToBeDeleted;
+        final Long id = getDeleteButtonId(event);
+        final Set<Long> selectedEntities = getSelectedEntities();
+        if (entityToBeDeletedIsSelectedInTable(id, selectedEntities)) {
+            entitiesToBeDeleted = selectedEntities.stream().collect(Collectors.toList());
+        } else {
+            final Table table = getTable(event);
+            unselectSelectedEntitiesInTable(selectedEntities, table);
+            selectEntityToDeleteInTable(id, table);
+            entitiesToBeDeleted = new ArrayList<>();
+            entitiesToBeDeleted.add(id);
+        }
+        return entitiesToBeDeleted;
+    }
+
+    private ConfirmationDialog createConfirmationWindowForDeletion(final List<Long> entitiesToBeDeleted,
+            final String confirmationQuestion) {
+        return new ConfirmationDialog(i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityType()),
+                confirmationQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                    if (ok) {
+                        handleOkDelete(entitiesToBeDeleted);
+                    }
+                });
+    }
+
+    private String createConfirmationQuestionForDeletion(final List<Long> entitiesToBeDeleted) {
+        if (entitiesToBeDeleted.size() == 1) {
+            return i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityType().toLowerCase(),
+                    getDeletedEntityName(entitiesToBeDeleted.get(0)), "");
+        } else {
+            return i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, entitiesToBeDeleted.size(),
+                    getEntityType().toLowerCase(), "s");
+        }
+    }
+
+    private static boolean entityToBeDeletedIsSelectedInTable(final Long id, final Set<Long> selectedEntities) {
+        return selectedEntities.contains(id);
+    }
+
+    private static Table getTable(final ClickEvent event) {
+        final Button source = (Button) event.getSource();
+        return (Table) source.getParent();
+    }
+
+    private static void selectEntityToDeleteInTable(final Long id, final Table table) {
+        table.select(id);
+    }
+
+    private static void unselectSelectedEntitiesInTable(final Set<Long> selectedEntities, final Table table) {
+        selectedEntities.forEach(table::unselect);
+    }
+
+    private static long getDeleteButtonId(final ClickEvent event) {
+        final String id = event.getButton().getId();
+        return Long.parseLong(id.substring(id.lastIndexOf('.') + 1));
+    }
+
+    protected abstract String getDeletedEntityName(Long entityId);
+
+    protected abstract void handleOkDelete(List<Long> allEntities);
+
+    protected abstract String getEntityType();
+
+    protected abstract Set<Long> getSelectedEntities();
+
+    protected abstract String getEntityId(Object itemId);
 
     /**
      * Get Item Id which should be displayed as selected.
@@ -368,7 +487,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
                 i18n.getMessage("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.getMessage("header.description"), 0.2F));
         setItemDescriptionGenerator((source, itemId, propertyId) -> {
-
             if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
                 return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
             }
@@ -377,7 +495,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             }
             return null;
         });
-
         return columnList;
     }
 
@@ -416,17 +533,16 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Long targetItemId = (Long) dropData.getItemIdOver();
 
-        if (!targetSelected.contains(targetItemId)) {
-            return Sets.newHashSet(targetItemId);
+        if (entityToBeDeletedIsSelectedInTable(targetItemId, targetSelected)) {
+            return targetSelected;
         }
-
-        return targetSelected;
+        return Sets.newHashSet(targetItemId);
     }
 
     private Set<Long> getDraggedTargetList(final TableTransferable transferable, final Table source) {
         @SuppressWarnings("unchecked")
         final AbstractTable<NamedEntity> table = (AbstractTable<NamedEntity>) source;
-        return table.getDeletedEntityByTransferable(transferable);
+        return table.getSelectedEntitiesByTransferable(transferable);
     }
 
     private boolean validateDropList(final Set<?> droplist) {
@@ -497,6 +613,27 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
         setLastSelectedEntityId(entityId);
         publishSelectedEntityEvent(entity);
+    }
+
+    protected void selectDroppedEntities(final Long targetId) {
+        getSelectedEntities().forEach(this::unselect);
+        select(targetId);
+    }
+
+    protected void selectDraggedEntities(final AbstractTable<?> source, final Set<Long> ids) {
+        source.setValue(ids);
+    }
+
+    protected EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    protected SpPermissionChecker getPermChecker() {
+        return permChecker;
     }
 
     protected abstract List<String> hasMissingPermissionsForDrop();

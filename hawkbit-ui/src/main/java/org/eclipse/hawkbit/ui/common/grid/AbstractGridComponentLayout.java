@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -193,7 +192,6 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
         private Layout createFooterMessageComponent() {
             final HorizontalLayout footerLayout = new HorizontalLayout();
             footerLayout.addComponent(getFooterMessageLabel());
-            footerLayout.setStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
             footerLayout.setWidth(100, Unit.PERCENTAGE);
             return footerLayout;
         }

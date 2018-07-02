@@ -150,8 +150,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     public Window createNewWindow() {
         window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION)).content(this).layout(formLayout)
-                .i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
+                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.target"))).content(this)
+                .layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
+                .buildCommonDialogWindow();
         return window;
     }
 
@@ -171,6 +172,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         }
         populateValuesOfTarget(target.get());
         createNewWindow();
+        window.setCaption(i18n.getMessage("caption.update", i18n.getMessage("caption.target")));
         window.addStyleName("target-update-window");
         return window;
     }

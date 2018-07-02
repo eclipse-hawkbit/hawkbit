@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
-import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -87,8 +86,6 @@ public class CommonDialogWindow extends Window {
     private Button cancelButton;
 
     private HorizontalLayout buttonsLayout;
-
-    protected ValueChangeListener buttonEnableListener;
 
     private final ClickListener cancelButtonClickListener;
 
@@ -262,7 +259,11 @@ public class CommonDialogWindow extends Window {
         cancelButton.addClickListener(closeClickListener);
     }
 
-    protected void addComponentListeners() {
+    /**
+     * adds a listener to a component. Depending on the type of component a
+     * valueChange-, textChange- or itemSetChangeListener will be added.
+     */
+    public void addComponentListeners() {
         // avoid duplicate registration
         removeListeners();
 
@@ -275,7 +276,6 @@ public class CommonDialogWindow extends Window {
                 ((Table) field).addItemSetChangeListener(new ChangeListener(field));
             }
             field.addValueChangeListener(new ChangeListener(field));
-
         }
     }
 
@@ -438,8 +438,6 @@ public class CommonDialogWindow extends Window {
             ((TargetAddUpdateWindowLayout) content).getFormLayout().addComponent(mandatoryLabel);
         } else if (content instanceof SoftwareModuleAddUpdateWindow) {
             ((SoftwareModuleAddUpdateWindow) content).getFormLayout().addComponent(mandatoryLabel);
-        } else if (content instanceof AbstractCreateUpdateTagLayout) {
-            ((AbstractCreateUpdateTagLayout) content).getMainLayout().addComponent(mandatoryLabel);
         }
 
         mainLayout.addComponent(mandatoryLabel);

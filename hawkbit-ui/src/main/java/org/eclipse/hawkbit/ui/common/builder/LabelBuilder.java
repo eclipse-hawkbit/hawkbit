@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
+import org.springframework.util.StringUtils;
+
 import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -17,6 +19,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class LabelBuilder {
 
+    private String caption;
+
     private String name;
 
     private String id;
@@ -25,11 +29,21 @@ public class LabelBuilder {
 
     /**
      * @param name
-     *            the name to set
+     *            the value to set
      * @return builder
      */
     public LabelBuilder name(final String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * @param caption
+     *            the caption to set
+     * @return builder
+     */
+    public LabelBuilder caption(final String caption) {
+        this.caption = caption;
         return this;
     }
 
@@ -60,7 +74,6 @@ public class LabelBuilder {
      */
     public Label buildCaptionLabel() {
         final Label label = createLabel();
-        label.setValue(name);
         label.addStyleName("header-caption");
         return label;
     }
@@ -75,6 +88,9 @@ public class LabelBuilder {
         label.setImmediate(false);
         label.setWidth("-1px");
         label.setHeight("-1px");
+        if (StringUtils.hasText(caption)) {
+            label.setCaption(caption);
+        }
 
         return label;
     }

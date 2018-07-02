@@ -30,4 +30,12 @@
    .v-grid-cell.frozen + th {
    	   border-left: $v-grid-border-size solid $widget-border-color ;
    }
+   
+   .v-button-borderless-colored {
+	color: inherit;
+   }
+   
+   .fullSize .v-gridlayout-slot {
+	height: 100% !important;
+   }
 }

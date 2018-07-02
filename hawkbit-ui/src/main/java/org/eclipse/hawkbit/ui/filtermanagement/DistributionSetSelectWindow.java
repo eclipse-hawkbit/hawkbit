@@ -61,8 +61,9 @@ public class DistributionSetSelectWindow
     private CheckBox checkBox;
     private Long tfqId;
 
-    DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState) {
+    DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
         this.dsTable = new DistributionSetSelectTable(i18n, eventBus, manageDistUIState);
         this.eventBus = eventBus;
@@ -260,8 +261,7 @@ public class DistributionSetSelectWindow
             if (targetsCount == 0) {
                 mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.none"));
             } else {
-                mainTextLabel = new Label(
-                        i18n.getMessage("message.confirm.assign.consequences.text", targetsCount));
+                mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.text", targetsCount));
             }
 
             layout.addComponent(mainTextLabel);
@@ -272,8 +272,9 @@ public class DistributionSetSelectWindow
             buttonsLayout.addStyleName("actionButtonsMargin");
             layout.addComponent(buttonsLayout);
 
-            okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, i18n.getMessage("button.ok"), "", "",
-                    true, FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
+            okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
+                    i18n.getMessage(SPUIDefinitions.BUTTON_OK), "", "", true, FontAwesome.SAVE,
+                    SPUIButtonStyleNoBorderWithIcon.class);
             okButton.setSizeUndefined();
             okButton.addStyleName("default-color");
             okButton.addClickListener(this);
@@ -282,7 +283,8 @@ public class DistributionSetSelectWindow
             buttonsLayout.setExpandRatio(okButton, 1.0F);
 
             final Button cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
-                    i18n.getMessage("button.cancel"), "", "", true, FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
+                    i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), "", "", true, FontAwesome.TIMES,
+                    SPUIButtonStyleNoBorderWithIcon.class);
             cancelButton.setSizeUndefined();
             cancelButton.addStyleName("default-color");
             cancelButton.addClickListener(this);

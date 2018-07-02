@@ -243,7 +243,7 @@ public class ManagementUIState implements ManagementEntityState, Serializable {
         return noDataAvilableTarget;
     }
 
-    public void setNoDataAvilableTarget(final boolean noDataAvilableTarget) {
+    public void setNoDataAvailableTarget(final boolean noDataAvilableTarget) {
         this.noDataAvilableTarget = noDataAvilableTarget;
     }
 

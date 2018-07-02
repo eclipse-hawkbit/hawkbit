@@ -67,8 +67,6 @@ $menu-title-bg-color: #551f62;
 //Color of icons like add ,config,search etc
 $button-icon-color: #551f62;
 
-//Footer button background color
-$footer-button-background-color: #fff;
 
 //Color of assigned distribution,when target is selected
 $installed-row-color: $lighter-orange-color;
@@ -85,18 +83,8 @@ $success-icon-color: #ff0000;
 //Error icon color on invalid target filter query
 $error-icon-color: #008000;
 
-
 //Font style of view caption
 $view-caption-font-style: 400 1.6em "Open Sans", sans-serif;
-
-//Footer button width scale
-$action-button-width-scale: 3;
-
-//Footer button height scale
-$action-button-height-scale:1.2;
-
-//Delete button width scale
-$delete-action-button-width-scale:4.8;
 
 //Detail tab - font scale
 $details-tab-font-scale: 1;

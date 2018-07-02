@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -192,7 +192,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Button createBreadcrumbButton() {
         final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
         createFilterViewLink.setDescription(i18n.getMessage(BREADCRUMB_CUSTOM_FILTERS));
         createFilterViewLink.setCaption(i18n.getMessage(BREADCRUMB_CUSTOM_FILTERS));
@@ -314,7 +314,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
                 UIComponentIdProvider.CUSTOM_FILTER_CLOSE, "", "", null, false, FontAwesome.TIMES,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> closeFilterLayout());
         return button;
     }
@@ -330,7 +330,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private Button createSaveButton() {
         saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON,
                 UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         saveButton.addClickListener(this);
         saveButton.setEnabled(false);
         return saveButton;
@@ -338,7 +338,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Button createSearchIcon() {
         searchIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.FILTER_SEARCH_ICON_ID, "", "", null, false,
-                FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
         searchIcon.addClickListener(event -> onSearchIconClick());
         searchIcon.setEnabled(false);
         searchIcon.setData(false);

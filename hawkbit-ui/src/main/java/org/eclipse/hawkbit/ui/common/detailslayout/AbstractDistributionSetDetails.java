@@ -104,6 +104,11 @@ public abstract class AbstractDistributionSetDetails
     }
 
     @Override
+    protected String getMetadataButtonId() {
+        return UIComponentIdProvider.DS_METADATA_BUTTON;
+    }
+
+    @Override
     protected boolean hasEditPermission() {
         return getPermissionChecker().hasUpdateRepositoryPermission();
     }

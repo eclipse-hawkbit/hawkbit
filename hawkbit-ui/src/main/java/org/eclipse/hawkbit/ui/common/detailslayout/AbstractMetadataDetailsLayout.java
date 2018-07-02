@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Item;
@@ -25,7 +25,9 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractMetadataDetailsLayout extends Table {
 
-    protected static final String METADATA_KEY = "Key";
+    private static final long serialVersionUID = 1L;
+
+    private static final String METADATA_KEY = "Key";
 
     protected static final int MAX_METADATA_QUERY = 500;
 
@@ -80,7 +82,7 @@ public abstract class AbstractMetadataDetailsLayout extends Table {
 
     private Button customMetadataDetailButton(final String metadataKey) {
         final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
-                "View " + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                "View " + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.BUTTON_TINY + " " + ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link"
                 + " " + "text-style");

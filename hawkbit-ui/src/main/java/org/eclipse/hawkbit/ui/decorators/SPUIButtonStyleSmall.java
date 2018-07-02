@@ -21,16 +21,14 @@ public class SPUIButtonStyleSmall implements SPUIButtonDecorator {
     @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
         button.addStyleName(ValoTheme.BUTTON_SMALL);
-        // Set Style
-        if (null != style) {
+        if (style != null) {
             if (setStyle) {
                 button.setStyleName(style);
             } else {
                 button.addStyleName(style);
             }
         }
-        // Set icon
-        if (null != icon) {
+        if (icon != null) {
             button.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
             button.setIcon(icon);
         }

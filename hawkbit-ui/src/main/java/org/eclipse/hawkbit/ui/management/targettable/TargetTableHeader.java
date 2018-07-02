@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -77,20 +77,20 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    TargetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventbus,
+    TargetTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker, final UIEventBus eventBus,
             final UINotification notification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiproperties, final UIEventBus eventBus,
-            final EntityFactory entityFactory, final UINotification uinotification, final TargetTagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
-            final TargetTable targetTable) {
-        super(i18n, permChecker, eventbus, managementUIState, null, null);
+            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
+            final EntityFactory entityFactory, final UINotification uiNotification,
+            final TargetTagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
+            final Executor uiExecutor, final TargetTable targetTable) {
+        super(i18n, permChecker, eventBus, managementUIState, null, null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
-        this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uinotification,
+        this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
                 entityFactory, targetTable);
         this.targetBulkUpdateWindow = new TargetBulkUpdateWindowLayout(i18n, targetManagement, eventBus,
-                managementUIState, deploymentManagement, uiproperties, permChecker, uinotification, tagManagement,
+                managementUIState, deploymentManagement, uiproperties, permChecker, uiNotification, tagManagement,
                 distributionSetManagement, entityFactory, uiExecutor);
         this.distributionSetManagement = distributionSetManagement;
         onLoadRestoreState();
@@ -280,7 +280,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     protected void addNewItem(final ClickEvent event) {
         targetAddUpdateWindow.resetComponents();
         final Window addTargetWindow = targetAddUpdateWindow.createNewWindow();
-        addTargetWindow.setCaption(i18n.getMessage(UIComponentIdProvider.TARGET_ADD_CAPTION));
+        addTargetWindow.setCaption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.target")));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
@@ -335,8 +335,7 @@ public class TargetTableHeader extends AbstractTableHeader {
                 return;
             }
             final Long distributionSetId = distributionIdSet.iterator().next();
-            final Optional<DistributionSet> distributionSet = distributionSetManagement
-                    .get(distributionSetId);
+            final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distributionSetId);
             if (!distributionSet.isPresent()) {
                 notification.displayWarning(i18n.getMessage("distributionset.not.exists"));
                 return;
@@ -378,12 +377,12 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private static Set<Long> getDropppedDistributionDetails(final TableTransferable transferable) {
         final AbstractTable<?> distTable = (AbstractTable<?>) transferable.getSourceComponent();
-        return distTable.getDeletedEntityByTransferable(transferable);
+        return distTable.getSelectedEntitiesByTransferable(transferable);
     }
 
     private void addFilterTextField(final DistributionSetIdName distributionSetIdName) {
         final Button filterLabelClose = SPUIComponentProvider.getButton("drop.filter.close", "", "", "", true,
-                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
         filterLabelClose.addClickListener(clickEvent -> closeFilterByDistribution());
         final Label filteredDistLabel = new Label();
         filteredDistLabel.setStyleName(ValoTheme.LABEL_COLORED + " " + ValoTheme.LABEL_SMALL);

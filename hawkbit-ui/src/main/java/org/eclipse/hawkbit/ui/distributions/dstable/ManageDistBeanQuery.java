@@ -38,13 +38,14 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  */
 public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
-    private static final long serialVersionUID = 5176481314404662215L;
+    private static final long serialVersionUID = 1L;
+
     private Sort sort = new Sort(Direction.ASC, "id");
     private String searchText;
     private transient DistributionSetManagement distributionSetManagement;
     private transient Page<DistributionSet> firstPageDistributionSets;
 
-    private DistributionSetType distributionSetType;
+    private transient DistributionSetType distributionSetType;
     private Boolean dsComplete;
 
     /**
