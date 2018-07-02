@@ -61,7 +61,9 @@ public class AutoActionCleanup implements Runnable {
 
     @Override
     public void run() {
+        System.out.println(">> Action cleanup...");
         if (isEnabled()) {
+            System.out.println("Action cleanup is enabled for this tenant...");
             LOGGER.debug("Action cleanup is enabled for this tenant...");
             final Set<Action.Status> status = getActionStatus();
             if (!status.isEmpty()) {
@@ -90,6 +92,7 @@ public class AutoActionCleanup implements Runnable {
 
     private boolean isEnabled() {
         final TenantConfigurationValue<Boolean> isEnabled = getConfigValue(ACTION_CLEANUP_ENABLED, Boolean.class);
+        System.out.println(isEnabled);
         return isEnabled != null ? isEnabled.getValue() : ACTION_CLEANUP_ENABLED_DEFAULT;
     }
 

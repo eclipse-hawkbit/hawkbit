@@ -1094,6 +1094,12 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration checkbox for
+     * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
+     */
+    public static final String REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX = "repositoryactionsautocleanupcheckbox";
+
+    /**
+     * Configuration checkbox for
      * {@link TenantConfigurationKey#ROLLOUT_APPROVAL_ENABLED}
      */
     public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
