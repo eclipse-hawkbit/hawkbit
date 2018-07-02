@@ -97,7 +97,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         if (isAddTagRequired()) {
             menu = new ConfigMenuBar(permChecker.hasCreateRepositoryPermission(),
                     permChecker.hasUpdateRepositoryPermission(), permChecker.hasDeleteRepositoryPermission(),
-                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId());
+                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId(), i18n);
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", i18n.getMessage("tooltips.close"), "", true,
                 FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);

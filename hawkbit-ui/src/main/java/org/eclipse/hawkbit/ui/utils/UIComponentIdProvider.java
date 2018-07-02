@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ui.utils;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
- * Interface to provide the unchanged constants.
+ * Class that contains the unique ids of the UI components.
  */
 public final class UIComponentIdProvider {
     /**

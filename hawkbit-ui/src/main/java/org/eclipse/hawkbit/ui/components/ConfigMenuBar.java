@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
@@ -40,6 +41,8 @@ public class ConfigMenuBar extends MenuBar {
 
     private final String id;
 
+    private final VaadinMessageSource i18n;
+
     /**
      * Constructor for the menubar
      * 
@@ -66,7 +69,7 @@ public class ConfigMenuBar extends MenuBar {
      */
     public ConfigMenuBar(final boolean createPermission, final boolean updatePermission, final boolean deletePermission,
             final Command addButtonCommand, final Command updateButtonCommand, final Command deleteButtonCommand,
-            final String id) {
+            final String id, final VaadinMessageSource i18n) {
         this.createPermission = createPermission;
         this.updatePermission = updatePermission;
         this.deletePermission = deletePermission;
@@ -74,6 +77,7 @@ public class ConfigMenuBar extends MenuBar {
         this.updateButtonCommand = updateButtonCommand;
         this.deleteButtonCommand = deleteButtonCommand;
         this.id = id;
+        this.i18n = i18n;
 
         init();
     }
@@ -87,6 +91,7 @@ public class ConfigMenuBar extends MenuBar {
         addStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_POSITION);
         config = addItem("", FontAwesome.COG, null);
         config.setStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_ITEMS);
+        config.setDescription(i18n.getMessage("tooltip.configure"));
 
         addMenuItems();
     }

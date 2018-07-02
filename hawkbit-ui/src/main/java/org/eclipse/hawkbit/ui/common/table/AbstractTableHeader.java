@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
@@ -251,7 +252,8 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private SPUIButton createMaxMinIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getMaxMinIconId(), "",
-                i18n.getMessage("tooltip.maximize"), null, false, FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE), null, false, FontAwesome.EXPAND,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> maxMinButtonClicked());
         return button;
     }
@@ -316,13 +318,13 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private void showMinIcon() {
         maxMinIcon.toggleIcon(FontAwesome.COMPRESS);
         maxMinIcon.setData(Boolean.TRUE);
-        maxMinIcon.setDescription(i18n.getMessage("tooltip.minimize"));
+        maxMinIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MINIMIZE));
     }
 
     private void showMaxIcon() {
         maxMinIcon.toggleIcon(FontAwesome.EXPAND);
         maxMinIcon.setData(Boolean.FALSE);
-        maxMinIcon.setDescription(i18n.getMessage("tooltip.maximize"));
+        maxMinIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE));
     }
 
     private static HorizontalLayout createHeaderFilterIconLayout() {

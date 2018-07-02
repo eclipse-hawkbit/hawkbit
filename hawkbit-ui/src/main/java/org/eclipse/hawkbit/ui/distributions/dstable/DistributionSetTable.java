@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDistributionsViewFilter;
@@ -316,8 +317,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private ConfirmationDialog createConfirmationWindowForAssignment(final String confirmQuestion) {
         return new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX), confirmQuestion,
-                getI18n().getMessage(SPUIDefinitions.BUTTON_OK), getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL),
-                ok -> {
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         saveAllAssignments();
                     } else {

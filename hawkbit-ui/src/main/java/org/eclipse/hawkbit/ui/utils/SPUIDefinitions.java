@@ -468,10 +468,6 @@ public final class SPUIDefinitions {
 
     public static final String NO_TAG = "NO TAG";
 
-    public static final String BUTTON_CANCEL = "button.cancel";
-
-    public static final String BUTTON_OK = "button.ok";
-
     /**
      * /** Constructor.
      */

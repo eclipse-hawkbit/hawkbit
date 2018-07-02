@@ -75,6 +75,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -980,8 +981,8 @@ public class TargetTable extends AbstractTable<Target> {
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
                 getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
-                getI18n().getMessage(SPUIDefinitions.BUTTON_OK), getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL),
-                ok -> {
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
                     } else {
