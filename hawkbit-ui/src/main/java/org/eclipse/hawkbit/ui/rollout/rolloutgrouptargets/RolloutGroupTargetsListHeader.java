@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -143,14 +143,14 @@ public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
         headerCaption = new LabelBuilder().name("").buildCaptionLabel();
         headerCaption.setStyleName(ValoTheme.LABEL_BOLD + " " + ValoTheme.LABEL_SMALL);
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
         rolloutsListViewLink.setDescription(i18n.getMessage("message.rollouts"));
         rolloutsListViewLink.setCaption(i18n.getMessage("message.rollouts"));
         rolloutsListViewLink.addClickListener(value -> showRolloutListView());
 
         rolloutNameLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         rolloutNameLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
         rolloutNameLink.setDescription("Rollout");
         rolloutNameLink.addClickListener(value -> showRolloutGroupListView());

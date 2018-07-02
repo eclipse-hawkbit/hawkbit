@@ -26,16 +26,22 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 @SpringComponent
 public class TargetTableFilters implements Serializable {
 
-    private static final long serialVersionUID = -5251492630546463593L;
+    private static final long serialVersionUID = 1L;
 
     private final List<String> clickedTargetTags = new ArrayList<>();
+
     private final List<TargetUpdateStatus> clickedStatusTargetTags = new ArrayList<>();
+
     private boolean isOverdueFilterEnabled = Boolean.FALSE;
 
     private String searchText;
+
     private DistributionSetIdName distributionSet;
+
     private Long pinnedDistId;
+
     private Long targetsCreatedCount;
+
     private Float progressBarCurrentValue;
 
     private final TargetBulkUpload bulkUpload = new TargetBulkUpload();

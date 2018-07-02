@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
@@ -55,7 +55,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class TargetFilterTable extends Table {
 
-    private static final long serialVersionUID = -4307487829435474759L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -157,7 +157,7 @@ public class TargetFilterTable extends Table {
                 new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.getMessage("header.modifiedDate"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET,
                 i18n.getMessage("header.auto.assignment.ds"), 0.1F));
-        columnList.add(new TableColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE, i18n.getMessage("header.delete"), 0.1F));
+        columnList.add(new TableColumn(SPUIDefinitions.DELETE, i18n.getMessage("header.delete"), 0.1F));
         return columnList;
 
     }
@@ -172,7 +172,7 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
                 SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
         return deleteIcon;
@@ -186,8 +186,9 @@ public class TargetFilterTable extends Table {
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.filter.delete.confirmbox"), i18n.getMessage("message.delete.filter.confirm"),
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("caption.entity.delete.action.confirmbox"),
+                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
                         final String deletedFilterName = targetFilterQueryManagement.get(rowId).get().getName();
@@ -208,8 +209,7 @@ public class TargetFilterTable extends Table {
     }
 
     protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUIDefinitions.CUSTOM_FILTER_DELETE,
-                (source, itemId, columnId) -> getDeleteButton((Long) itemId));
+        addGeneratedColumn(SPUIDefinitions.DELETE, (source, itemId, columnId) -> getDeleteButton((Long) itemId));
 
         addGeneratedColumn(SPUILabelDefinitions.NAME,
                 (source, itemId, columnId) -> customFilterDetailButton((Long) itemId));
@@ -224,7 +224,7 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row1.getItemProperty(SPUILabelDefinitions.NAME).getValue();
 
         final Button updateIcon = SPUIComponentProvider.getButton(getDetailLinkId(tfName), tfName,
-                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleSmallNoBorder.class);
+                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleNoBorder.class);
         updateIcon.setData(tfName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
         updateIcon.addClickListener(this::onClickOfDetailButton);
@@ -239,12 +239,10 @@ public class TargetFilterTable extends Table {
         Button updateIcon;
         if (distSet == null) {
             updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
         } else {
             updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null,
-                    SPUIButtonStyleSmallNoBorder.class);
+                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);

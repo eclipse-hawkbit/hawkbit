@@ -42,19 +42,17 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
 
     public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
             final TargetManagement targetManagement, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final UIEventBus eventbus, final UINotification notification, final ManagementUIState managementUIState,
+            final UINotification uiNotification, final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion,
-            final DeploymentManagement deploymentManagement, final UiProperties uiproperties,
-            final SpPermissionChecker permissionChecker, final UINotification uinotification,
-            final TargetTagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
-            final Executor uiExecutor) {
+            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
+            final SpPermissionChecker permissionChecker, final TargetTagManagement tagManagement,
+            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor) {
         this.eventBus = eventBus;
-        this.targetDetails = new TargetDetails(i18n, eventbus, permissionChecker, managementUIState, uinotification,
+        this.targetDetails = new TargetDetails(i18n, eventBus, permissionChecker, managementUIState, uiNotification,
                 tagManagement, targetManagement, deploymentManagement, entityFactory, targetTable);
-        this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, notification,
-                managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiproperties,
-                eventbus, entityFactory, uinotification, tagManagement, distributionSetManagement, uiExecutor,
-                targetTable);
+        this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, uiNotification,
+                managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiProperties,
+                entityFactory, uiNotification, tagManagement, distributionSetManagement, uiExecutor, targetTable);
 
         super.init(targetTableHeader, targetTable, targetDetails);
     }

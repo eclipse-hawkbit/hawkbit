@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -30,20 +31,18 @@ import com.vaadin.ui.DragAndDropWrapper;
  */
 public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity> extends AbstractTable<E> {
 
-    private static final long serialVersionUID = 780050712209750719L;
+    private static final long serialVersionUID = 1L;
 
     protected AbstractNamedVersionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification notification) {
-        super(eventBus, i18n, notification);
-        setMultiSelect(true);
-        setSelectable(true);
+            final UINotification notification, final SpPermissionChecker permChecker) {
+        super(eventBus, i18n, notification, permChecker);
     }
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         final float versionColumnSize = isMaximized() ? 0.1F : 0.2F;
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.getMessage("header.version"),
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, getI18n().getMessage("header.version"),
                 versionColumnSize));
         return columnList;
     }

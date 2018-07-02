@@ -336,24 +336,23 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private CommonDialogWindow getWindow(final Long editDistId) {
 
         final SaveDialogCloseListener saveDialogCloseListener;
-        String captionId;
+        String caption;
 
         resetComponents();
         populateDistSetTypeNameCombo();
 
         if (editDistId == null) {
             saveDialogCloseListener = new CreateOnCloseDialogListener();
-            captionId = UIComponentIdProvider.DIST_ADD_CAPTION;
+            caption = i18n.getMessage("caption.create.new", i18n.getMessage("caption.distribution"));
         } else {
             saveDialogCloseListener = new UpdateOnCloseDialogListener(editDistId);
-            captionId = UIComponentIdProvider.DIST_UPDATE_CAPTION;
+            caption = i18n.getMessage("caption.update", i18n.getMessage("caption.distribution"));
 
             populateValuesOfDistribution(editDistId);
         }
 
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(i18n.getMessage(captionId)).content(this)
-                .layout(formLayout).i18n(i18n).saveDialogCloseListener(saveDialogCloseListener)
-                .buildCommonDialogWindow();
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(caption).content(this).layout(formLayout)
+                .i18n(i18n).saveDialogCloseListener(saveDialogCloseListener).buildCommonDialogWindow();
     }
 
     /**

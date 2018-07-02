@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -116,7 +116,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
 
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "", "", null,
-                false, FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+                false, FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         button.setData(Boolean.FALSE);
         return button;
@@ -124,14 +124,14 @@ public abstract class AbstractGridHeader extends VerticalLayout {
 
     private Button createAddButton() {
         final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createCloseButton() {
         final Button button = SPUIComponentProvider.getButton(getCloseButtonId(), "", "", null, false,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::onClose);
         return button;
     }

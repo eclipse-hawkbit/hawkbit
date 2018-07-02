@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
 import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
@@ -158,7 +158,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 .map(selected -> targetManagement.countByAssignedDistributionSet(selected) <= 0).orElse(false)) {
 
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
-                    FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+                    FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
             reassignSoftModule.setEnabled(false);
             return reassignSoftModule;
         }

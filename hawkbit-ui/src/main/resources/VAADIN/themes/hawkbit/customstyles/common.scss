@@ -86,20 +86,6 @@
       z-index: 1;
     }
 
-    .view-header:before {
-      border-bottom: $app-header-border-bottom;
-      font-size: 42px;
-      font-weight: bold;
-      height: 42px;
-      line-height: 50px;
-      padding-bottom: 5px;
-      padding-left: 0;
-      padding-top: 0;
-      position: absolute;
-      top: 0;
-      width: calc(100% - 15px);
-      z-index: 1;
-    }
     .view-header:after {
       background: $logo-image no-repeat right top;
       background-position: $logo-position;

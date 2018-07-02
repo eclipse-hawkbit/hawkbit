@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui;
 
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -64,7 +64,7 @@ public class ErrorView extends VerticalLayout implements View {
             final Notification nt = new Notification("Access denied",
                     i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }),
                     Type.ERROR_MESSAGE, false);
-            nt.setStyleName(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
+            nt.setStyleName(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
             nt.setPosition(Position.BOTTOM_RIGHT);
             nt.show(UI.getCurrent().getPage());
             message.setValue(i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }));

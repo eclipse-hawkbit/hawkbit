@@ -30,11 +30,12 @@ import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
-import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
+import org.eclipse.hawkbit.ui.distributions.disttype.filter.DSTypeFilterButtons;
+import org.eclipse.hawkbit.ui.distributions.disttype.filter.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.footer.DSDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
-import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
+import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterButtons;
+import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -57,7 +58,6 @@ import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 
 /**
@@ -85,8 +85,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private final DistSMTypeFilterLayout filterBySMTypeLayout;
 
-    private final DSDeleteActionsLayout deleteActionsLayout;
-
     private final ManageDistUIState manageDistUIState;
 
     private final DistributionsViewMenuItem distributionsViewMenuItem;
@@ -109,9 +107,13 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.permChecker = permChecker;
         this.i18n = i18n;
         this.uiNotification = uiNotification;
+        this.manageDistUIState = manageDistUIState;
+        final DSTypeFilterButtons dsTypeFilterButtons = new DSTypeFilterButtons(eventBus, manageDistUIState,
+                distributionsViewClientCriterion, distributionSetTypeManagement, i18n, entityFactory, permChecker,
+                uiNotification, softwareModuleTypeManagement, distributionSetManagement, systemManagement);
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 entityFactory, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                distributionSetManagement, distributionsViewClientCriterion);
+                dsTypeFilterButtons);
         this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
                 softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement, targetManagement,
                 entityFactory, uiNotification, distributionSetTagManagement, distributionsViewClientCriterion,
@@ -119,12 +121,12 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus,
                 softwareModuleManagement, softwareModuleTypeManagement, entityFactory, manageDistUIState, permChecker,
                 distributionsViewClientCriterion, artifactUploadState, artifactManagement);
+
+        final DistSMTypeFilterButtons distSmTypeFilterButtons = new DistSMTypeFilterButtons(eventBus, manageDistUIState,
+                distributionsViewClientCriterion, softwareModuleTypeManagement, i18n, entityFactory, permChecker,
+                uiNotification);
         this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
-                entityFactory, uiNotification, softwareModuleTypeManagement, distributionsViewClientCriterion);
-        this.deleteActionsLayout = new DSDeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                systemManagement, manageDistUIState, distributionsViewClientCriterion, distributionSetManagement,
-                distributionSetTypeManagement, softwareModuleManagement, softwareModuleTypeManagement);
-        this.manageDistUIState = manageDistUIState;
+                entityFactory, uiNotification, softwareModuleTypeManagement, distSmTypeFilterButtons);
         this.distributionsViewMenuItem = distributionsViewMenuItem;
     }
 
@@ -177,18 +179,18 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     }
 
     private void createMainLayout() {
-        mainLayout = new GridLayout(4, 2);
+        mainLayout = new GridLayout(4, 1);
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
+        mainLayout.setStyleName("fullSize");
+
         mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
         mainLayout.addComponent(distributionTableLayout, 1, 0);
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setRowExpandRatio(0, 1.0F);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -212,7 +214,6 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private void maximizeSwTable() {
         mainLayout.removeComponent(filterByDSTypeLayout);
         mainLayout.removeComponent(distributionTableLayout);
-        mainLayout.removeComponent(deleteActionsLayout);
         mainLayout.setColumnExpandRatio(2, 1F);
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0F);
@@ -221,26 +222,20 @@ public class DistributionsView extends AbstractNotificationView implements Brows
     private void minimizeSwTable() {
         mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
         mainLayout.addComponent(distributionTableLayout, 1, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
     private void minimizeDistTable() {
         mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
         mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.addComponent(deleteActionsLayout, 1, 1, 2, 1);
         mainLayout.setColumnExpandRatio(1, 0.5F);
         mainLayout.setColumnExpandRatio(2, 0.5F);
-        mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
     }
 
     private void maximizeDistTable() {
         mainLayout.removeComponent(softwareModuleTableLayout);
         mainLayout.removeComponent(filterBySMTypeLayout);
-        mainLayout.removeComponent(deleteActionsLayout);
-        mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
         mainLayout.setColumnExpandRatio(3, 0F);
     }

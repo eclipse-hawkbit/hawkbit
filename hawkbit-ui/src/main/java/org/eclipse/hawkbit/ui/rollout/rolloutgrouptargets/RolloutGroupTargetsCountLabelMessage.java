@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -37,7 +37,8 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
     private final VaadinMessageSource i18n;
 
     RolloutGroupTargetsCountLabelMessage(final RolloutUIState rolloutUIState,
-            final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid, final VaadinMessageSource i18n, final UIEventBus eventBus) {
+            final RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid, final VaadinMessageSource i18n,
+            final UIEventBus eventBus) {
         this.rolloutUIState = rolloutUIState;
         this.rolloutGroupTargetsListGrid = rolloutGroupTargetsListGrid;
         this.i18n = i18n;
@@ -61,7 +62,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
 
     private void applyStyle() {
         /* Create label for Targets count message displaying below the table */
-        addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
+        addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
         setId(UIComponentIdProvider.COUNT_LABEL);
     }

@@ -562,14 +562,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private void updateRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, false);
-        addTargetWindow.setCaption(i18n.getMessage("caption.update.rollout"));
+        addTargetWindow.setCaption(i18n.getMessage("caption.update", i18n.getMessage("caption.rollout")));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
 
     private void copyRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, true);
-        addTargetWindow.setCaption(i18n.getMessage("caption.create.rollout"));
+        addTargetWindow.setCaption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.rollout")));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }
@@ -583,8 +583,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         final String formattedConfirmationQuestion = getConfirmationQuestion(rollout.get());
         final ConfirmationDialog confirmationDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.confirm.delete.rollout"), formattedConfirmationQuestion,
-                i18n.getMessage("button.ok"), i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("caption.entity.delete.action.confirmbox"), formattedConfirmationQuestion,
+                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }

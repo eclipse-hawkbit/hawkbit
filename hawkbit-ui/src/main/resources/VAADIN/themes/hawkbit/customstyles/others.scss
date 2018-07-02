@@ -33,7 +33,7 @@
 
   //Deployment view - Style of count message
   .v-caption-count-msg-box {
-    text-align: center;
+    margin-left: 180px;
     color: $info-message-color-grey;
     font-weight: bold;
     height: 10px;
@@ -41,9 +41,8 @@
 
   //*Deployment view -Assigned and installed message*
   .count-msg-box {
-    padding-left: 10px;
+    margin-left: 180px;
     padding-top: 3px;
-    text-align: center;
     color: $info-message-color-grey;
     font-weight: italic;
     font-size: 12px;
@@ -288,4 +287,31 @@
   .breadcrumbPaddingLeft{
    	padding-left: 3px !important;
   }
+  
+  .app-loading {
+   	background-position: bottom;
+    background-repeat: no-repeat;
+   }
+   
+   .app-loading:before {
+   	  background: none;
+    height: 20px !important;
+    width: 20px !important;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-top-color: $hawkbit-primary-color;
+    border-right-color: $hawkbit-primary-color;
+    border-radius: 100%;
+    -webkit-animation: v-rotate-360 500ms infinite linear;
+    -moz-animation: v-rotate-360 500ms infinite linear;
+    -ms-animation: v-rotate-360 500ms infinite linear;
+    -o-animation: v-rotate-360 500ms infinite linear;
+    animation: v-rotate-360 500ms infinite linear;
+    pointer-events: none;
+    position: fixed;
+    margin-top: 12px;
+    margin-left: -10px;
+   }
 }

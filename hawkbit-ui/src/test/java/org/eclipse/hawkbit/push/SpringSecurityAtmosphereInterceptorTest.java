@@ -26,13 +26,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Unit Tests - Management UI")
 @Stories("Push Security")
 @RunWith(MockitoJUnitRunner.class)
-// TODO: create description annotations
 public class SpringSecurityAtmosphereInterceptorTest {
 
     @Mock
@@ -52,6 +52,7 @@ public class SpringSecurityAtmosphereInterceptorTest {
     }
 
     @Test
+    @Description("Verify that Security Context is set from Request to thread local when calling inspect")
     public void inspectRetrievesSetsSecurityContextFromRequestToThreadLocal() {
 
         when(atmosphereResourceMock.getRequest()).thenReturn(atmosphereRequestMock);
@@ -64,6 +65,7 @@ public class SpringSecurityAtmosphereInterceptorTest {
     }
 
     @Test
+    @Description("Verify that security Context gets cleared after atmosphere request")
     public void afterAtmosphereRequestSecurityContextGetsCleared() {
         SecurityContextHolder.setContext(sessionSecurityContextMock);
 

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.event;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -75,6 +76,19 @@ public class SoftwareModuleEvent extends BaseUIEntityEvent<SoftwareModule> {
     public SoftwareModuleEvent(final SoftwareModuleEventType softwareModuleEventType,
             final SoftwareModule softwareModule) {
         super(null, softwareModule);
+        this.softwareModuleEventType = softwareModuleEventType;
+    }
+
+    /**
+     * Creates software module event.
+     * 
+     * @param softwareModuleEventType
+     *            the event type
+     * @param softwareModuleId
+     *            the id of the {@link SoftwareModule}
+     */
+    public SoftwareModuleEvent(final SoftwareModuleEventType softwareModuleEventType, final long softwareModuleId) {
+        super(null, Arrays.asList(softwareModuleId), SoftwareModule.class);
         this.softwareModuleEventType = softwareModuleEventType;
     }
 

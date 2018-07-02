@@ -43,16 +43,16 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
             final SystemManagement systemManagement) {
 
-        final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
-                distributionSetManagement, entityFactory, permissionChecker);
-
         this.distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification, permissionChecker,
                 manageDistUIState, distributionSetManagement, softwareManagement, distributionsViewClientCriterion,
-                targetManagement, popupLayout);
+                targetManagement);
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, uiNotification, eventBus, distributionSetManagement, distributionSetTypeManagement,
                 systemManagement, entityFactory, distributionSetTable);
+
+        final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
+                distributionSetManagement, entityFactory, permissionChecker);
 
         super.init(
                 new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,

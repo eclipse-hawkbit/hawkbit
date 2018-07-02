@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -160,7 +160,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private Button getCloseButton() {
         final Button closeBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
-                "", "", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+                "", "", true, FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         closeBtn.addClickListener(event -> closePopup());
         return closeBtn;
@@ -168,7 +168,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private Button getMinimizeButton() {
         final Button minimizeBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID,
-                "", "", "", true, FontAwesome.MINUS, SPUIButtonStyleSmallNoBorder.class);
+                "", "", "", true, FontAwesome.MINUS, SPUIButtonStyleNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
         minimizeBtn.setEnabled(false);

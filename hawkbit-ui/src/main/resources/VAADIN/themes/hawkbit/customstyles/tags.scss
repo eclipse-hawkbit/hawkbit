@@ -70,4 +70,55 @@
   	text-overflow:ellipsis;
   	text-align:left; 
   }
+  
+  .menubar-position {
+	margin-top: -5px;
+	right: 20px;
+	width: 20px;
+  }
+  
+  .v-menubar-menuitem-tags .v-menubar-submenu-indicator + .v-menubar-menuitem-caption:after {
+      content: none;
+  }
+  
+  .v-menubar-popup .v-menubar-menuitem-menubar-position {
+	padding-left: 0px;
+	width: 100px;
+  	right: 0px;
+  }
+  
+  .v-menubar-submenu-menubar-position {
+	width: 100px;
+  	right: 0px;
+  }
+  
+  .v-menubar-submenu-menubar-position .v-menubar-menuitem {
+ 	padding-left: 3px;
+  }
+  
+  .v-menubar-borderless .v-menubar-menuitem-selected {
+  	color: inherit;
+  	background-image: none;
+  	background-color: inherit;
+  }
+  
+  .v-menubar > .v-menubar-menuitem .v-icon {
+	margin: 0 4px 0 19px;
+  }
+  
+  .v-menubar-borderless .v-menubar-menuitem {
+	padding: 0px;
+  }
+  
+  .v-menubar > .v-menubar-menuitem {
+	padding: 0px;
+  }
+  
+   .targetTag {
+  	right: 19px;
+  }
+  
+  #target\.tag\.drop\.area .v-slot-icon-only {
+	height: 32px;
+  }
 }

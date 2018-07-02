@@ -40,7 +40,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -390,7 +390,7 @@ public class BulkUploadHandler extends CustomComponent
     public void uploadStarted(final StartedEvent event) {
         if (!event.getFilename().endsWith(".csv")) {
 
-            new HawkbitErrorNotificationMessage(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, null,
+            new HawkbitErrorNotificationMessage(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, null,
                     i18n.getMessage("bulk.targets.upload"), true).show(Page.getCurrent());
             LOG.error("Wrong file format for file {}", event.getFilename());
             upload.interruptUpload();

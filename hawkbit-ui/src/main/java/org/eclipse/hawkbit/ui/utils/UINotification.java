@@ -39,7 +39,7 @@ public class UINotification implements Serializable {
      *            is the message to displayed as success.
      */
     public void displaySuccess(final String message) {
-        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE, null, message,
+        notificationMessage.showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE, null, message,
                 true);
     }
 
@@ -50,7 +50,7 @@ public class UINotification implements Serializable {
      *            is the message to displayed as warning.
      */
     public void displayWarning(final String message) {
-        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE, null, message,
+        notificationMessage.showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE, null, message,
                 true);
     }
 
@@ -64,7 +64,7 @@ public class UINotification implements Serializable {
         final StringBuilder updatedMsg = new StringBuilder(FontAwesome.EXCLAMATION_TRIANGLE.getHtml());
         updatedMsg.append(' ');
         updatedMsg.append(message);
-        notificationMessage.showNotification(SPUILabelDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, null,
+        notificationMessage.showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, null,
                 updatedMsg.toString(), true);
     }
 

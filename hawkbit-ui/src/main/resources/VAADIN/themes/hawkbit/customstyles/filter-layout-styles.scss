@@ -11,7 +11,7 @@
 
   //Tag widget header height adjusted to match table header heights
   .filter-btns-header-layout {
-    padding-bottom: 22px;
+    padding-bottom: 14px;
   }
 
   //Tag layout style
@@ -33,6 +33,10 @@
 
     .v-table-table {
       box-shadow: none !important;
+    }
+    
+    .v-table-body {
+    	overflow-x:hidden;
     }
   }
 

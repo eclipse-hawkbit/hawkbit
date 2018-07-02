@@ -29,19 +29,23 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
  */
 public class ColorPickerLayout extends GridLayout {
 
-    private static final long serialVersionUID = -7025970080613796692L;
+    private static final long serialVersionUID = 1L;
 
     private SpColorPickerPreview selPreview;
 
     private ColorPickerGradient colorSelect;
+
     private Set<ColorSelector> selectors;
+
     private Color selectedColor;
 
     /** RGB color converter. */
     private final Coordinates2Color rgbConverter = new CoordinatesToColor();
 
     private Slider redSlider;
+
     private Slider greenSlider;
+
     private Slider blueSlider;
 
     public ColorPickerLayout() {
@@ -80,7 +84,7 @@ public class ColorPickerLayout extends GridLayout {
         selectors.add(colorSelect);
     }
 
-    private Slider createRGBSlider(final String caption, final String styleName) {
+    private static Slider createRGBSlider(final String caption, final String styleName) {
         final Slider slider = new Slider(caption, 0, 255);
         slider.setImmediate(true);
         slider.setWidth("150px");

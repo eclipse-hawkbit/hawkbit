@@ -8,22 +8,29 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.state;
 
+import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.common.ManagementEntityState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 
@@ -36,15 +43,13 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactUploadState.class);
+
     private final SoftwareModuleFilters softwareModuleFilters;
 
     private final Map<Long, String> deleteSofwareModules = new HashMap<>();
 
-    private final Set<CustomFile> fileSelected = new HashSet<>();
-
     private transient Optional<Long> selectedBaseSwModuleId = Optional.empty();
-
-    private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
@@ -60,47 +65,15 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
 
     private boolean statusPopupMinimized;
 
-    private boolean uploadCompleted;
-
-    private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
-
-    private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
-
-    private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
-
-    private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
+    /**
+     * Map that holds all files that were selected for upload. They remain in
+     * the list even if upload fails, succeeds or is aborted by the user.
+     */
+    private Map<FileUploadId, FileUploadProgress> overallFilesInUploadProcess;
 
     @Autowired
     ArtifactUploadState(final SoftwareModuleFilters softwareModuleFilters) {
         this.softwareModuleFilters = softwareModuleFilters;
-    }
-
-    public AtomicInteger getNumberOfFileUploadsFailed() {
-        return numberOfFileUploadsFailed;
-    }
-
-    public AtomicInteger getNumberOfFilesActuallyUpload() {
-        return numberOfFilesActuallyUpload;
-    }
-
-    public AtomicInteger getNumberOfFileUploadsExpected() {
-        return numberOfFileUploadsExpected;
-    }
-
-    public List<UploadStatusObject> getUploadedFileStatusList() {
-        return uploadedFileStatusList;
-    }
-
-    public void setUploadedFileStatusList(final List<UploadStatusObject> uploadedFileStatusList) {
-        this.uploadedFileStatusList = uploadedFileStatusList;
-    }
-
-    public boolean isUploadCompleted() {
-        return uploadCompleted;
-    }
-
-    public void setUploadCompleted(final boolean uploadCompleted) {
-        this.uploadCompleted = uploadCompleted;
     }
 
     public void setStatusPopupMinimized(final boolean statusPopupMinimized) {
@@ -115,20 +88,12 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
         return softwareModuleFilters;
     }
 
-    public Map<Long, String> getDeleteSofwareModules() {
+    public Map<Long, String> getDeleteSoftwareModules() {
         return deleteSofwareModules;
-    }
-
-    public Set<CustomFile> getFileSelected() {
-        return fileSelected;
     }
 
     public Optional<Long> getSelectedBaseSwModuleId() {
         return selectedBaseSwModuleId;
-    }
-
-    public Map<String, SoftwareModule> getBaseSwModuleList() {
-        return baseSwModuleList;
     }
 
     public Set<Long> getSelectedSoftwareModules() {
@@ -180,4 +145,150 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
     public void setNoDataAvilableSoftwareModule(final boolean noDataAvilableSoftwareModule) {
         this.noDataAvilableSoftwareModule = noDataAvilableSoftwareModule;
     }
+
+    public boolean isMoreThanOneSoftwareModulesSelected() {
+        return getSelectedSoftwareModules().size() > 1;
+    }
+
+    public boolean isNoSoftwareModuleSelected() {
+        return !getSelectedBaseSwModuleId().isPresent();
+    }
+
+    public void removeFilesFromOverallUploadProcessList(final Collection<FileUploadId> filesToRemove) {
+        getOverallFilesInUploadProcessMap().keySet().removeAll(filesToRemove);
+    }
+
+    public Set<FileUploadId> getAllFileUploadIdsFromOverallUploadProcessList() {
+        return Collections.unmodifiableSet(getOverallFilesInUploadProcessMap().keySet());
+    }
+
+    public Collection<FileUploadProgress> getAllFileUploadProgressValuesFromOverallUploadProcessList() {
+        return Collections.unmodifiableCollection(getOverallFilesInUploadProcessMap().values());
+    }
+
+    public Set<FileUploadId> getFilesInFailedState() {
+        return Collections.unmodifiableSet(getFailedUploads());
+    }
+
+    public FileUploadProgress getFileUploadProgress(final FileUploadId fileUploadId) {
+        return getOverallFilesInUploadProcessMap().get(fileUploadId);
+    }
+
+    public void updateFileUploadProgress(final FileUploadId fileUploadId, final FileUploadProgress fileUploadProgress) {
+        getOverallFilesInUploadProcessMap().put(fileUploadId, fileUploadProgress);
+    }
+
+    public boolean isFileInUploadState(final FileUploadId fileUploadId) {
+        return getOverallFilesInUploadProcessMap().containsKey(fileUploadId);
+    }
+
+    public boolean isFileInUploadState(final String filename, final SoftwareModule softwareModule) {
+        return isFileInUploadState(new FileUploadId(filename, softwareModule));
+    }
+
+    public boolean isAtLeastOneUploadInProgress() {
+        return getInProgressCount() > 0;
+    }
+
+    public boolean areAllUploadsFinished() {
+        return getInProgressCount() == 0;
+    }
+
+    private int getInProgressCount() {
+        final int succeededUploadCount = getSucceededUploads().size();
+        final int failedUploadCount = getFailedUploads().size();
+        final int overallUploadCount = getOverallFilesInUploadProcessMap().size();
+
+        final int inProgressCount = overallUploadCount - failedUploadCount - succeededUploadCount;
+
+        assertFileStateConsistency(inProgressCount, overallUploadCount, succeededUploadCount, failedUploadCount);
+
+        return inProgressCount;
+    }
+
+    private static void assertFileStateConsistency(final int inProgressCount, final int overallUploadCount,
+            final int succeededUploadCount, final int failedUploadCount) {
+        if (inProgressCount < 0) {
+            LOG.error("IllegalState: \n{}",
+                    getStateListLogMessage(overallUploadCount, succeededUploadCount, failedUploadCount));
+        }
+    }
+
+    private static String getStateListLogMessage(final int overallUploadCount, final int succeededUploadCount,
+            final int failedUploadCount) {
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append("Overall uploads: " + overallUploadCount);
+        buffer.append("| succeeded uploads: " + succeededUploadCount);
+        buffer.append("| Failed Uploads: " + failedUploadCount);
+        return buffer.toString();
+    }
+
+    void clearFileStates() {
+        getOverallFilesInUploadProcessMap().clear();
+    }
+
+    /**
+     * Clears all temp data collected while uploading files.
+     */
+    public void clearUploadTempData() {
+        LOG.debug("Cleaning up temp data...");
+        // delete file system zombies
+        for (final FileUploadProgress fileUploadProgress : getAllFileUploadProgressValuesFromOverallUploadProcessList()) {
+            if (!StringUtils.isBlank(fileUploadProgress.getFilePath())) {
+                final boolean deleted = FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
+                if (!deleted) {
+                    LOG.warn("TempFile was not deleted: " + fileUploadProgress.getFilePath());
+                }
+            }
+        }
+        clearFileStates();
+    }
+
+    /**
+     * Checks if an upload is in progress for the given Software Module
+     * 
+     * @param softwareModuleId
+     *            id of the software module
+     * @return boolean
+     */
+    public boolean isUploadInProgressForSelectedSoftwareModule(final Long softwareModuleId) {
+        for (final FileUploadId fileUploadId : getAllFileUploadIdsFromOverallUploadProcessList()) {
+            if (fileUploadId.getSoftwareModuleId().equals(softwareModuleId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Map<FileUploadId, FileUploadProgress> getOverallFilesInUploadProcessMap() {
+        if (overallFilesInUploadProcess == null) {
+            overallFilesInUploadProcess = Maps.newConcurrentMap();
+        }
+        return overallFilesInUploadProcess;
+    }
+
+    private Set<FileUploadId> getFailedUploads() {
+        final Collection<FileUploadProgress> allFileUploadProgressObjects = getOverallFilesInUploadProcessMap()
+                .values();
+        final Set<FileUploadId> failedFileUploads = Sets.newHashSet();
+        for (final FileUploadProgress fileUploadProgress : allFileUploadProgressObjects) {
+            if (fileUploadProgress.getFileUploadStatus() == FileUploadStatus.UPLOAD_FAILED) {
+                failedFileUploads.add(fileUploadProgress.getFileUploadId());
+            }
+        }
+        return failedFileUploads;
+    }
+
+    private Set<FileUploadId> getSucceededUploads() {
+        final Collection<FileUploadProgress> allFileUploadProgressObjects = getOverallFilesInUploadProcessMap()
+                .values();
+        final Set<FileUploadId> succeededFileUploads = Sets.newHashSet();
+        for (final FileUploadProgress fileUploadProgress : allFileUploadProgressObjects) {
+            if (fileUploadProgress.getFileUploadStatus() == FileUploadStatus.UPLOAD_SUCCESSFUL) {
+                succeededFileUploads.add(fileUploadProgress.getFileUploadId());
+            }
+        }
+        return succeededFileUploads;
+    }
+
 }

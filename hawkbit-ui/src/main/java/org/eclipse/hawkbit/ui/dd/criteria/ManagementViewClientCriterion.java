@@ -43,40 +43,32 @@ public final class ManagementViewClientCriterion extends ServerViewClientCriteri
      * @return accept criterion elements
      */
     static ServerViewComponentClientCriterion[] createViewComponentClientCriteria() {
-        ServerViewComponentClientCriterion[] criteria = new ServerViewComponentClientCriterion[4];
+        final ServerViewComponentClientCriterion[] criteria = new ServerViewComponentClientCriterion[4];
 
         // Target table acceptable components.
         criteria[0] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(UIComponentIdProvider.TARGET_TABLE_ID)
-                .dropTargetIdPrefixes(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, UIComponentIdProvider.DIST_TABLE_ID,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.TARGET_TAG_DROP_AREA_ID, UIComponentIdProvider.DIST_TABLE_ID,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
+                .dropTargetIdPrefixes(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, UIComponentIdProvider.DIST_TABLE_ID)
+                .dropAreaIds(UIComponentIdProvider.TARGET_TAG_DROP_AREA_ID, UIComponentIdProvider.DIST_TABLE_ID)
                 .build();
         // Target Tag acceptable components.
         criteria[1] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)
-                .dropTargetIdPrefixes(UIComponentIdProvider.TARGET_TABLE_ID, UIComponentIdProvider.DIST_TABLE_ID,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.TARGET_TABLE_ID, UIComponentIdProvider.DIST_TABLE_ID,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .build();
+                .dropTargetIdPrefixes(UIComponentIdProvider.TARGET_TABLE_ID, UIComponentIdProvider.DIST_TABLE_ID)
+                .dropAreaIds(UIComponentIdProvider.TARGET_TABLE_ID, UIComponentIdProvider.DIST_TABLE_ID).build();
         // Distribution table acceptable components.
         criteria[2] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(UIComponentIdProvider.DIST_TABLE_ID)
                 .dropTargetIdPrefixes(UIComponentIdProvider.TARGET_TABLE_ID,
-                        UIComponentIdProvider.TARGET_DROP_FILTER_ICON, SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
+                        UIComponentIdProvider.TARGET_DROP_FILTER_ICON, SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)
                 .dropAreaIds(UIComponentIdProvider.TARGET_TABLE_ID, UIComponentIdProvider.TARGET_DROP_FILTER_ICON,
-                        UIComponentIdProvider.DISTRIBUTION_TAG_TABLE_ID, UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
+                        UIComponentIdProvider.DISTRIBUTION_TAG_TABLE_ID)
                 .build();
         // Distribution tag acceptable components.
         criteria[3] = ServerViewComponentClientCriterion.createBuilder()
                 .dragSourceIdPrefix(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)
-                .dropTargetIdPrefixes(UIComponentIdProvider.DIST_TABLE_ID,
-                        UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .dropAreaIds(UIComponentIdProvider.DIST_TABLE_ID, UIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID)
-                .build();
+                .dropTargetIdPrefixes(UIComponentIdProvider.DIST_TABLE_ID)
+                .dropAreaIds(UIComponentIdProvider.DIST_TABLE_ID).build();
 
         return criteria;
     }
