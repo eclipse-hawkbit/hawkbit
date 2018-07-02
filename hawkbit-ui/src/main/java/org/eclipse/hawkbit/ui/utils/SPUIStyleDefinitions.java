@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
+import com.vaadin.ui.themes.ValoTheme;
+
 /**
  * RepositoryConstants required for Style.
  *
@@ -31,11 +33,6 @@ public final class SPUIStyleDefinitions {
     public static final String ACTION_HISTORY_MESSAGE_GRID = "action-history-message-grid";
 
     /**
-     * Style for accordion tab button.
-     */
-    public static final String SP_ACCORDION_TAB_BTN = "accordion-tab-button-style";
-
-    /**
      * Confirm box question label style.
      */
     public static final String CONFIRMBOX_QUESTION_LABEL = "confirmbox-question-label";
@@ -43,7 +40,7 @@ public final class SPUIStyleDefinitions {
     /**
      * Confirm box window style.
      */
-    public static final String CONFIRMBOX_WINDOW_SYLE = "confirmbox-window-style";
+    public static final String CONFIRMBOX_WINDOW_STYLE = "confirmbox-window-style";
 
     /**
      * Error label style.
@@ -68,11 +65,6 @@ public final class SPUIStyleDefinitions {
     public static final String WIDGET_STYLE = "widget-style";
 
     public static final String WIDGET_TITLE = "widget-header";
-
-    /**
-     * Style of accordian in confirmation window.
-     */
-    public static final String CONFIRM_WINDOW_ACCORDIAN = "accordion";
 
     /**
      * Style of result action messages in the confirmation window.
@@ -102,16 +94,6 @@ public final class SPUIStyleDefinitions {
      * Confirmation popup - discard style.
      */
     public static final String REDICON = "redicon";
-
-    /**
-     * Action button style- footer buttons.
-     */
-    public static final String ACTION_BUTTON = "action-button";
-
-    /**
-     * Width of 'drop to delete' layout and 'no actions' button
-     */
-    public static final String DEL_ACTION_BUTTON = "del-action-button";
 
     /**
      * Confirmation window caption stle.
@@ -253,9 +235,50 @@ public final class SPUIStyleDefinitions {
     public static final String METADATA_GRID = "metadata-grid";
 
     /**
-     * Footer layout style.
+     * Tag combo style.
      */
-    public static final String FOOTER_LAYOUT = "footer-layout";
+    public static final String FILTER_TYPE_COMBO_STYLE = "filter-combo-specific-style";
+
+    /**
+     * Color label style.
+     */
+    public static final String COLOR_LABEL_STYLE = "color-label-style";
+
+    /**
+     * Style - Message.
+     */
+    public static final String SP_LABEL_MESSAGE_STYLE = "count-msg-box";
+
+    /**
+     * Message hint text style.
+     */
+    public static final String SP_MESSAGE_HINT_TEXT = "message-hint-text";
+    /**
+     * Style - Success.
+     */
+    public static final String SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE = ValoTheme.NOTIFICATION_SUCCESS + " "
+            + ValoTheme.NOTIFICATION_TRAY;
+    /**
+     * Style - Error.
+     */
+    public static final String SP_NOTIFICATION_ERROR_MESSAGE_STYLE = ValoTheme.NOTIFICATION_ERROR + " "
+            + ValoTheme.NOTIFICATION_TRAY;
+
+    /**
+     * Style - Warning.
+     */
+    public static final String SP_NOTIFICATION_WARNING_MESSAGE_STYLE = ValoTheme.NOTIFICATION_WARNING + " "
+            + ValoTheme.NOTIFICATION_TRAY;
+
+    /**
+     * Style for the positio of the menu bar to configure tags and types
+     */
+    public static final String CONFIG_MENU_BAR_POSITION = "menubar-position";
+
+    /**
+     * Style for the menu bar items of the menu bar to configure tags and types
+     */
+    public static final String CONFIG_MENU_BAR_ITEMS = "tags";
 
     /**
      * Constructor.

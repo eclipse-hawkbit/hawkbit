@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,6 @@ public class NotificationUnreadButton extends Button {
         this.unreadNotifications = new ConcurrentHashMap<>();
         setIcon(FontAwesome.BELL);
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
-        addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         addStyleName(ValoTheme.BUTTON_SMALL);
         addStyleName(STYLE);
         setHtmlContentAllowed(true);

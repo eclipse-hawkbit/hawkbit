@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.grid;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
@@ -218,7 +218,7 @@ public class DefaultGridHeader extends VerticalLayout {
          */
         protected SPUIButton createMinMaxButton(final String buttonId) {
             return (SPUIButton) SPUIComponentProvider.getButton(buttonId, "", "Maximize", null, true,
-                    FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
+                    FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
         }
 
         /**

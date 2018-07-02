@@ -36,17 +36,16 @@ import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusLayout;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusMsgGrid;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionStatusMsgLayout;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
-import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
+import org.eclipse.hawkbit.ui.management.dstag.filter.DistributionTagButtons;
+import org.eclipse.hawkbit.ui.management.dstag.filter.DistributionTagLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.footer.DeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTableLayout;
-import org.eclipse.hawkbit.ui.management.targettag.CreateUpdateTargetTagLayoutWindow;
-import org.eclipse.hawkbit.ui.management.targettag.TargetTagFilterLayout;
+import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayout;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetDeletedEventContainer;
@@ -111,20 +110,19 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private final DistributionTableLayout distributionTableLayout;
 
-    private final DeleteActionsLayout deleteAndActionsLayout;
-
     private GridLayout mainLayout;
 
     private final DeploymentViewMenuItem deploymentViewMenuItem;
 
+    private CountMessageLabel countMessageLabel;
+
     @Autowired
-    DeploymentView(final UIEventBus eventbus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
+    DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final UIEventBus eventBus,
-            final DistributionTableFilters distFilterParameters,
+            final DeploymentManagement deploymentManagement, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiproperties,
+            final EntityFactory entityFactory, final UiProperties uiProperties,
             final ManagementViewClientCriterion managementViewClientCriterion,
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
@@ -144,22 +142,18 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     managementUIState);
             this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
             this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
-            final CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout = new CreateUpdateTargetTagLayoutWindow(
-                    i18n, targetTagManagement, entityFactory, eventBus, permChecker, uiNotification);
-            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, createUpdateTargetTagLayout, managementUIState,
+            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, managementUIState,
                     managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
-                    targetFilterQueryManagement);
+                    targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement);
+                    targetTagManagement, deploymentManagement, uiProperties);
+            this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
+                    targetTable);
 
-            this.targetTableLayout = new TargetTableLayout(eventbus, targetTable, targetManagement, entityFactory, i18n,
-                    eventBus, uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                    uiproperties, permChecker, uiNotification, targetTagManagement, distributionSetManagement,
-                    uiExecutor);
-            this.deleteAndActionsLayout = new DeleteActionsLayout(i18n, permChecker, eventBus, uiNotification,
-                    targetTagManagement, distributionSetTagManagement, managementViewClientCriterion, managementUIState,
-                    targetManagement, targetTable, deploymentManagement, distributionSetManagement, uiproperties);
+            this.targetTableLayout = new TargetTableLayout(eventBus, targetTable, targetManagement, entityFactory, i18n,
+                    uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
+                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor);
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout
@@ -170,22 +164,22 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             this.actionStatusMsgLayout = null;
             this.targetTagFilterLayout = null;
             this.targetTableLayout = null;
-            this.deleteAndActionsLayout = null;
         }
 
         if (permChecker.hasReadRepositoryPermission()) {
-            this.distributionTagLayout = new DistributionTagLayout(eventbus, managementUIState, i18n, permChecker,
-                    eventBus, distributionSetTagManagement, entityFactory, uiNotification, distFilterParameters,
-                    distributionSetManagement, managementViewClientCriterion);
+            final DistributionTagButtons distributionTagButtons = new DistributionTagButtons(eventBus,
+                    managementUIState, entityFactory, i18n, uiNotification, permChecker, distFilterParameters,
+                    distributionSetManagement, managementViewClientCriterion, distributionSetTagManagement);
+            this.distributionTagLayout = new DistributionTagLayout(eventBus, managementUIState, i18n, permChecker,
+                    distributionSetTagManagement, entityFactory, uiNotification, distributionTagButtons);
             this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                     distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion,
                     entityFactory, uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement,
-                    targetManagement, deploymentManagement);
+                    targetManagement, deploymentManagement, uiProperties);
         } else {
             this.distributionTagLayout = null;
             this.distributionTableLayout = null;
         }
-
     }
 
     @PostConstruct
@@ -251,11 +245,10 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void buildLayout() {
-        // Build only if user has both permissions
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             setSizeFull();
             createMainLayout();
-            addComponents(mainLayout);
+            addComponent(mainLayout, 0);
             setExpandRatio(mainLayout, 1);
         }
     }
@@ -266,6 +259,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
         mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
         mainLayout.setRowExpandRatio(0, 1F);
+        mainLayout.setStyleName("fullSize");
     }
 
     private void layoutWidgets() {
@@ -281,60 +275,41 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
     private void displayAllWidgets() {
         mainLayout.setColumns(5);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(distributionTableLayout, 2, 0);
         mainLayout.addComponent(distributionTagLayout, 3, 0);
         mainLayout.addComponent(actionHistoryLayout, 4, 0);
+        showTargetCount();
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0.275F);
         mainLayout.setColumnExpandRatio(2, 0.275F);
         mainLayout.setColumnExpandRatio(3, 0F);
         mainLayout.setColumnExpandRatio(4, 0.45F);
-        if (showFooterLayout()) {
-            mainLayout.addComponent(deleteAndActionsLayout, 1, 1, 2, 1);
-            mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
-        }
+    }
+
+    private void showTargetCount() {
+        addComponent(countMessageLabel);
     }
 
     private void displayDistributionWidgetsOnly() {
         mainLayout.setColumns(2);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(distributionTableLayout, 0, 0);
         mainLayout.addComponent(distributionTagLayout, 1, 0);
         mainLayout.setColumnExpandRatio(0, 1F);
-        if (showFooterLayout()) {
-            mainLayout.addComponent(deleteAndActionsLayout, 0, 1);
-            mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
-        }
-    }
-
-    private Boolean showFooterLayout() {
-        if (permChecker.hasTargetReadPermission()
-                || (permChecker.hasDeleteRepositoryPermission() || permChecker.hasDeleteTargetPermission())
-                || hasDeploymentPermission()) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean hasDeploymentPermission() {
-        return permChecker.hasReadRepositoryPermission() && permChecker.hasUpdateTargetPermission();
     }
 
     private void displayTargetWidgetsOnly() {
         mainLayout.setColumns(3);
-        mainLayout.setRows(2);
+        mainLayout.setRows(1);
         mainLayout.addComponent(targetTagFilterLayout, 0, 0);
         mainLayout.addComponent(targetTableLayout, 1, 0);
         mainLayout.addComponent(actionHistoryLayout, 2, 0);
+        showTargetCount();
         mainLayout.setColumnExpandRatio(1, 0.4F);
         mainLayout.setColumnExpandRatio(2, 0.6F);
-        if (showFooterLayout()) {
-            mainLayout.addComponent(deleteAndActionsLayout, 1, 1);
-            mainLayout.setComponentAlignment(deleteAndActionsLayout, Alignment.BOTTOM_CENTER);
-        }
     }
 
     private void maximizeTargetTable() {
@@ -343,7 +318,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(distributionTagLayout);
         }
         mainLayout.removeComponent(actionHistoryLayout);
-        mainLayout.removeComponent(deleteAndActionsLayout);
+        removeComponent(countMessageLabel);
         mainLayout.setColumnExpandRatio(1, 1F);
         mainLayout.setColumnExpandRatio(2, 0F);
         mainLayout.setColumnExpandRatio(3, 0F);
@@ -355,8 +330,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             mainLayout.removeComponent(targetTagFilterLayout);
             mainLayout.removeComponent(targetTableLayout);
             mainLayout.removeComponent(actionHistoryLayout);
+            removeComponent(countMessageLabel);
         }
-        mainLayout.removeComponent(deleteAndActionsLayout);
         mainLayout.setColumnExpandRatio(0, 0F);
         mainLayout.setColumnExpandRatio(1, 0F);
         mainLayout.setColumnExpandRatio(2, 1F);
@@ -364,6 +339,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     }
 
     private void maximizeActionHistory() {
+        removeComponent(countMessageLabel);
         mainLayout.removeAllComponents();
         mainLayout.setColumns(3);
         mainLayout.setRows(1);

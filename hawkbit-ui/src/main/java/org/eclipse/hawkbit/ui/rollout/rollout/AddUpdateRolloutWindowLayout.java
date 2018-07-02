@@ -48,8 +48,8 @@ import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
-import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -356,8 +356,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private Long getScheduledStartTime() {
             return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
-                    : null;
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
         }
 
         private int getErrorThresholdPercentage(final int amountGroup) {
@@ -391,8 +390,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private CommonDialogWindow createWindow() {
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.configure.rollout")).content(this).layout(this).i18n(i18n)
-                .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
+                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.rollout"))).content(this)
+                .layout(this).i18n(i18n).helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
     }
 

@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -70,6 +70,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private final VerticalLayout tagsLayout;
 
     private final ManagementUIState managementUIState;
+
+    private HorizontalLayout nameEditLayout;
 
     protected AbstractTableDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState) {
@@ -227,21 +229,21 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return managementUIState;
     }
 
-    private void createComponents() {
+    protected void createComponents() {
         caption = createHeaderCaption();
         caption.setImmediate(true);
         caption.setContentMode(ContentMode.HTML);
         caption.setId(getDetailsHeaderCaptionId());
 
         editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
         manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
-                SPUIButtonStyleSmallNoBorder.class);
-        manageMetadataBtn.setId(getEditButtonId());
+                SPUIButtonStyleNoBorder.class);
+        manageMetadataBtn.setId(getMetadataButtonId());
         manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
@@ -254,8 +256,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.setId(getTabSheetId());
     }
 
-    private void buildLayout() {
-        final HorizontalLayout nameEditLayout = new HorizontalLayout();
+    protected void buildLayout() {
+        nameEditLayout = new HorizontalLayout();
         nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
         nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
@@ -288,7 +290,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
      * If there is no data in table (i.e. no row selected), then disable the
      * edit button. If row is selected, enable edit button.
      */
-    private void populateData(final T selectedBaseEntity) {
+    protected void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;
         editButton.setEnabled(selectedBaseEntity != null);
         manageMetadataBtn.setEnabled(selectedBaseEntity != null);
@@ -335,6 +337,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected abstract String getEditButtonId();
 
+    protected abstract String getMetadataButtonId();
+
     protected abstract boolean onLoadIsTableMaximized();
 
     protected abstract String getTabSheetId();
@@ -348,5 +352,13 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract boolean isMetadataIconToBeDisplayed();
 
     protected abstract void showMetadata(Button.ClickEvent event);
+
+    public HorizontalLayout getNameEditLayout() {
+        return nameEditLayout;
+    }
+
+    public Button getEditButton() {
+        return editButton;
+    }
 
 }

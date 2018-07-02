@@ -27,7 +27,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 @SpringComponent
 public class DistributionTableFilters implements Serializable {
 
-    private static final long serialVersionUID = -5251492630546463593L;
+    private static final long serialVersionUID = 1L;
 
     private String searchText;
 
@@ -36,8 +36,6 @@ public class DistributionTableFilters implements Serializable {
     private TargetIdName pinnedTarget;
 
     private final List<String> distSetTags = new ArrayList<>();
-
-    private List<String> clickedDistSetTags = new ArrayList<>();
 
     private Boolean noTagSelected = Boolean.FALSE;
 
@@ -51,14 +49,6 @@ public class DistributionTableFilters implements Serializable {
 
     public List<String> getDistSetTags() {
         return distSetTags;
-    }
-
-    public List<String> getClickedDistSetTags() {
-        return clickedDistSetTags;
-    }
-
-    public void setClickedDistSetTags(final List<String> clickedDistSetTags) {
-        this.clickedDistSetTags = clickedDistSetTags;
     }
 
     public Optional<Long> getDistId() {

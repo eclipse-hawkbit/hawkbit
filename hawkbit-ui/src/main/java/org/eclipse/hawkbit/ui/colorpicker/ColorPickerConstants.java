@@ -17,6 +17,7 @@ import com.vaadin.shared.ui.colorpicker.Color;
 public final class ColorPickerConstants {
 
     public static final String DEFAULT_COLOR = "rgb(44,151,32)";
+
     public static final Color START_COLOR = new Color(0, 146, 58);
 
     private ColorPickerConstants() {

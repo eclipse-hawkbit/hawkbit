@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.VerticalLayout;
@@ -18,16 +19,21 @@ import com.vaadin.ui.VerticalLayout;
  */
 public abstract class AbstractFilterLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = 9190616426688385851L;
+    private static final long serialVersionUID = 1L;
 
     private final AbstractFilterHeader filterHeader;
 
     private final AbstractFilterButtons filterButtons;
 
-    protected AbstractFilterLayout(final AbstractFilterHeader filterHeader, final AbstractFilterButtons filterButtons) {
+    private final transient UIEventBus eventBus;
+
+    protected AbstractFilterLayout(final AbstractFilterHeader filterHeader, final AbstractFilterButtons filterButtons,
+            final UIEventBus eventBus) {
         this.filterHeader = filterHeader;
         this.filterButtons = filterButtons;
+        this.eventBus = eventBus;
         buildLayout();
+        eventBus.subscribe(this);
     }
 
     private void buildLayout() {
@@ -65,4 +71,9 @@ public abstract class AbstractFilterLayout extends VerticalLayout {
      * @return true if filter is cleaned before.
      */
     public abstract Boolean onLoadIsTypeFilterIsClosed();
+
+    public UIEventBus getEventBus() {
+        return eventBus;
+    }
+
 }

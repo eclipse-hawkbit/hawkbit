@@ -202,10 +202,10 @@ public interface TargetManagement {
     void delete(@NotEmpty Collection<Long> targetIDs);
 
     /**
-     * Deletes target with the given IDs.
+     * Deletes target with the given controller ID.
      *
      * @param controllerID
-     *            the ID of the targets to be deleted
+     *            the controller ID of the target to be deleted
      * 
      * @throws EntityNotFoundException
      *             if target with given ID does not exist

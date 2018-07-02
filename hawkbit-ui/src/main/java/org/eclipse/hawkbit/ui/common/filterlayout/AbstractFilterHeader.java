@@ -10,9 +10,13 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent;
+import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
+import org.eclipse.hawkbit.ui.components.ConfigMenuBar;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -20,8 +24,10 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -29,61 +35,130 @@ import com.vaadin.ui.VerticalLayout;
  */
 public abstract class AbstractFilterHeader extends VerticalLayout {
 
-    private static final long serialVersionUID = -1388340600522323332L;
+    private static final long serialVersionUID = 1L;
 
-    protected SpPermissionChecker permChecker;
+    private final SpPermissionChecker permChecker;
 
-    protected transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private Label title;
 
-    private Button config;
-
     private Button hideIcon;
 
-    protected final VaadinMessageSource i18n;
+    private ConfigMenuBar menu;
 
-    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n) {
+    private final VaadinMessageSource i18n;
+
+    private HorizontalLayout typeHeaderLayout;
+
+    private Button cancelTagButton;
+
+    protected AbstractFilterHeader(final SpPermissionChecker permChecker, final UIEventBus eventBus,
+            final VaadinMessageSource i18n) {
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.i18n = i18n;
         createComponents();
         buildLayout();
+        if (doSubscribeToEventBus()) {
+            eventBus.subscribe(this);
+        }
     }
 
     /**
-     * Create required components.
+     * Subscribes the view to the eventBus. Method has to be overriden (return
+     * false) if the view does not contain any listener to avoid Vaadin blowing
+     * up our logs with warnings.
      */
+    protected boolean doSubscribeToEventBus() {
+        return true;
+    }
+
+    protected void removeMenuBarAndAddCancelButton() {
+        typeHeaderLayout.removeComponent(menu);
+        typeHeaderLayout.addComponent(createCancelButtonForUpdateOrDeleteTag(), 1);
+    }
+
+    private Button createCancelButtonForUpdateOrDeleteTag() {
+        cancelTagButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_UPDATE_TAG_ID, "", "", null,
+                false, FontAwesome.TIMES_CIRCLE, SPUIButtonStyleNoBorder.class);
+        cancelTagButton.addClickListener(this::cancelUpdateOrDeleteTag);
+        return cancelTagButton;
+    }
+
+    @SuppressWarnings("squid:S1172")
+    protected void cancelUpdateOrDeleteTag(final ClickEvent event) {
+        removeCancelButtonAndAddMenuBar();
+    }
+
     private void createComponents() {
         title = createHeaderCaption();
 
-        if (hasCreateUpdatePermission() && isAddTagRequired()) {
-            config = SPUIComponentProvider.getButton(getConfigureFilterButtonId(), "", "", "", true, FontAwesome.COG,
-                    SPUIButtonStyleSmallNoBorder.class);
-            config.addClickListener(this::settingsIconClicked);
+        if (isAddTagRequired()) {
+            menu = new ConfigMenuBar(permChecker.hasCreateRepositoryPermission(),
+                    permChecker.hasUpdateRepositoryPermission(), permChecker.hasDeleteRepositoryPermission(),
+                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId());
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
-                SPUIButtonStyleSmallNoBorder.class);
+                SPUIButtonStyleNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }
 
+    protected void processFilterHeaderEvent(final FilterHeaderEvent event) {
+        if (FilterHeaderEnum.SHOW_MENUBAR == event.getFilterHeaderEnum()
+                && typeHeaderLayout.getComponent(1).equals(cancelTagButton)) {
+            removeCancelButtonAndAddMenuBar();
+        } else if (FilterHeaderEnum.SHOW_CANCEL_BUTTON == event.getFilterHeaderEnum()) {
+            removeMenuBarAndAddCancelButton();
+        }
+    }
+
     /**
-     * Build layout.
+     * Returns the id for the menubar element for configuring tags and types
+     * 
+     * @return String with id
      */
+    protected abstract String getMenuBarId();
+
+    /**
+     * Command which should be executed when clicking on the delete tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
+    protected abstract Command getDeleteButtonCommand();
+
+    /**
+     * Command which should be executed when clicking on the update tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
+    protected abstract Command getUpdateButtonCommand();
+
+    /**
+     * Command which should be executed when clicking on the create tag button
+     * in the menubar
+     * 
+     * @return Command
+     */
+    protected abstract Command getAddButtonCommand();
+
     private void buildLayout() {
         setStyleName("filter-btns-header-layout");
-        final HorizontalLayout typeHeaderLayout = new HorizontalLayout();
-        typeHeaderLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        typeHeaderLayout = new HorizontalLayout();
+        typeHeaderLayout.setHeight(32, Unit.PIXELS);
+        typeHeaderLayout.setWidth(100.0F, Unit.PERCENTAGE);
         typeHeaderLayout.addComponentAsFirst(title);
         typeHeaderLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         typeHeaderLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
-        if (config != null && hasCreateUpdatePermission()) {
-            typeHeaderLayout.addComponent(config);
-            typeHeaderLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        if (menu != null) {
+            typeHeaderLayout.addComponent(menu);
+            typeHeaderLayout.setComponentAlignment(menu, Alignment.TOP_RIGHT);
         }
         typeHeaderLayout.addComponent(hideIcon);
         typeHeaderLayout.setComponentAlignment(hideIcon, Alignment.TOP_RIGHT);
-        typeHeaderLayout.setExpandRatio(title, 1.0f);
+        typeHeaderLayout.setExpandRatio(title, 1.0F);
         addComponent(typeHeaderLayout);
     }
 
@@ -91,18 +166,17 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         return new LabelBuilder().name(getTitle()).buildCaptionLabel();
     }
 
-    /**
-     * 
-     * @return
-     */
-    protected abstract String getHideButtonId();
+    protected void removeCancelButtonAndAddMenuBar() {
+        typeHeaderLayout.removeComponent(cancelTagButton);
+        typeHeaderLayout.addComponent(menu, 1);
+    }
 
     /**
-     * Check if user is authorized for this action.
+     * Returns the id of the hide filter button
      * 
-     * @return true if user has permission otherwise false.
+     * @return String containing the id
      */
-    protected abstract boolean hasCreateUpdatePermission();
+    protected abstract String getHideButtonId();
 
     /**
      * Get the title to be displayed on the header of filter button layout.
@@ -110,14 +184,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
      * @return title to be displayed.
      */
     protected abstract String getTitle();
-
-    /**
-     * This method will be called when settings icon (or) clicked on the header.
-     * 
-     * @param event
-     *            reference of {@link Button.ClicEvent}.
-     */
-    protected abstract void settingsIconClicked(final Button.ClickEvent event);
 
     /**
      * Space required to show drop hits in the filter layout header.
@@ -137,8 +203,27 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     protected abstract String getConfigureFilterButtonId();
 
     /**
-     * @return
+     * Returns the information if the icon for configuring tags should be
+     * visible
+     * 
+     * @return boolean
      */
     protected abstract boolean isAddTagRequired();
+
+    protected SpPermissionChecker getPermChecker() {
+        return permChecker;
+    }
+
+    protected EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    protected HorizontalLayout getTypeHeaderLayout() {
+        return typeHeaderLayout;
+    }
 
 }

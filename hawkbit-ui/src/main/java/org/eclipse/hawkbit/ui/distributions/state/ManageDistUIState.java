@@ -201,7 +201,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
         this.noDataAvailableDist = noDataAvailableDist;
     }
 
-    public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
+    public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwareList() {
         return consolidatedDistSoftwarewList;
     }
 

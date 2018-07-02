@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -280,9 +280,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final String key = (String) item.getItemProperty(KEY).getValue();
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.metadata.delete.action.confirmbox"),
-                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage("button.ok"),
-                i18n.getMessage("button.cancel"), ok -> {
+                i18n.getMessage("caption.entity.delete.action.confirmbox"),
+                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
+                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDeleteMetadata(event, key);
                     }
@@ -322,8 +322,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Button createAddIcon() {
         addIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.METADTA_ADD_ICON_ID,
-                i18n.getMessage("button.save"), null, null, false, FontAwesome.PLUS,
-                SPUIButtonStyleSmallNoBorder.class);
+                i18n.getMessage("button.save"), null, null, false, FontAwesome.PLUS, SPUIButtonStyleNoBorder.class);
         addIcon.addClickListener(event -> onAdd());
         return addIcon;
     }
