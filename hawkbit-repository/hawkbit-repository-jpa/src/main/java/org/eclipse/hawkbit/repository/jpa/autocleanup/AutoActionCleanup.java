@@ -87,7 +87,6 @@ public class AutoActionCleanup implements Runnable {
                     .collect(Collectors.toSet());
         }
         return Collections.emptySet();
-
     }
 
     private boolean isEnabled() {
