@@ -64,8 +64,6 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
             new ActionStatusOption(Status.CANCELED), new ActionStatusOption(Status.ERROR),
             new ActionStatusOption(Status.CANCELED, Status.ERROR));
 
-    private static final String CSS_CLASS_LABEL_STYLE = "assignlabelstyle";
-
     private final VerticalLayout container;
     private final ComboBox actionStatusCombobox;
     private final TextField actionExpiryInput;
