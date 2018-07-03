@@ -104,6 +104,12 @@ public class RepositoryConfigurationView extends BaseConfigurationView
     }
 
     @Override
+    public boolean isUserInputValid() {
+        return actionAutocloseConfigurationItem.isUserInputValid()
+                && actionAutocleanupConfigurationItem.isUserInputValid();
+    }
+
+    @Override
     public void undo() {
         actionAutocloseConfigurationItem.undo();
         actionAutocloseCheckBox.setValue(actionAutocloseConfigurationItem.isConfigEnabled());

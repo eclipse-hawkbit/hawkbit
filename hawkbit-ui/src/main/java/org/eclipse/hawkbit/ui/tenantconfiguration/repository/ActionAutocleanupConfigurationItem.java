@@ -48,11 +48,12 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
 
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_EXPIRY_IN_DAYS = 1000000;
+    private static final int MAX_EXPIRY_IN_DAYS = 10000;
 
     private static final String MSG_KEY_PREFIX = "label.configuration.repository.autocleanup.action.prefix";
     private static final String MSG_KEY_BODY = "label.configuration.repository.autocleanup.action.body";
     private static final String MSG_KEY_SUFFIX = "label.configuration.repository.autocleanup.action.suffix";
+    private static final String MSG_KEY_INVALID_EXPIRY = "label.configuration.repository.autocleanup.action.expiry.invalid";
 
     private static final Collection<ActionStatusOption> ACTION_STATUS_OPTIONS = Arrays.asList(
             new ActionStatusOption(Status.CANCELED), new ActionStatusOption(Status.ERROR),
@@ -102,7 +103,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
         actionExpiryInput.setWidth(75, Unit.PIXELS);
         actionExpiryInput.setNullSettingAllowed(false);
         actionExpiryInput.addTextChangeListener(e -> onActionExpiryChanged());
-        actionExpiryInput.addValidator(new ActionExpiryValidator("Not valid"));
+        actionExpiryInput.addValidator(new ActionExpiryValidator(i18n.getMessage(MSG_KEY_INVALID_EXPIRY)));
         actionExpiryInput.setValue(String.valueOf(getActionExpiry()));
 
         horizontalContainer.addComponent(newLabel(MSG_KEY_PREFIX));
@@ -151,6 +152,11 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
             setActionExpiry(Long.parseLong(actionExpiryInput.getValue()));
             actionExpiryChanged = false;
         }
+    }
+
+    @Override
+    public boolean isUserInputValid() {
+        return actionExpiryInput.getErrorMessage() == null;
     }
 
     @Override
@@ -243,7 +249,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
 
         public String getName() {
             if (name == null) {
-                name = statusSet.stream().map(Status::name).collect(Collectors.joining(SEPARATOR));
+                name = assembleName();
             }
             return name;
         }
@@ -252,32 +258,39 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
             return statusSet;
         }
 
+        private String assembleName() {
+            return statusSet.stream().map(Status::name).collect(Collectors.joining(SEPARATOR));
+        }
+
     }
 
     static class ActionExpiryValidator implements Validator {
+
         private static final long serialVersionUID = 1L;
 
         private final String message;
 
+        private final Validator rangeValidator;
+
         ActionExpiryValidator(final String message) {
             this.message = message;
+            this.rangeValidator = new IntegerRangeValidator(message, 1, MAX_EXPIRY_IN_DAYS);
         }
 
         @Override
         public void validate(final Object value) {
-            System.out.println(value);
-            if (!StringUtils.isEmpty(value)) {
-                try {
-                    new IntegerRangeValidator(message, 1, MAX_EXPIRY_IN_DAYS)
-                            .validate(Integer.parseInt(value.toString()));
-                } catch (final RuntimeException e) {
-                    throw new InvalidValueException(message);
-                }
-            } else {
-                System.out.println("empty");
+
+            if (StringUtils.isEmpty(value)) {
+                throw new InvalidValueException(message);
+            }
+
+            try {
+                rangeValidator.validate(Integer.parseInt(value.toString()));
+            } catch (final RuntimeException e) {
                 throw new InvalidValueException(message);
             }
         }
+
     }
 
 }
