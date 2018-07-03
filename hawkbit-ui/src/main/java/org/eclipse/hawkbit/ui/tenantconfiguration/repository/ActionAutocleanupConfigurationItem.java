@@ -191,7 +191,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
         return label;
     }
 
-    private HorizontalLayout newHorizontalLayout() {
+    private static HorizontalLayout newHorizontalLayout() {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.setSpacing(true);
         layout.setImmediate(true);
