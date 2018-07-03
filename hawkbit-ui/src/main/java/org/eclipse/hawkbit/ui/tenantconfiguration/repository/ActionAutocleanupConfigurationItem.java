@@ -43,8 +43,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * This class represents the UI item for the target security token section in
- * the authentication configuration view.
+ * This class represents the UI item for configuring automatic action cleanup in
+ * the Repository Configuration view.
  */
 public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
@@ -75,6 +75,15 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
     private boolean actionStatusChanged;
     private boolean actionExpiryChanged;
 
+    /**
+     * Constructs the Action Cleanup configuration UI.
+     * 
+     * @param tenantConfigurationManagement
+     *            Configuration service to read /write tenant-specific
+     *            configuration settings.
+     * @param i18n
+     *            The resource bundle to get all localized strings from.
+     */
     public ActionAutocleanupConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
             final VaadinMessageSource i18n) {
         super(TenantConfigurationKey.ACTION_CLEANUP_ENABLED, tenantConfigurationManagement, i18n);
