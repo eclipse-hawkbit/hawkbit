@@ -27,9 +27,8 @@ public class AutoCleanupScheduler implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoCleanupScheduler.class);
 
     private static final String AUTO_CLEANUP = "autocleanup";
-    // private static final String PROP_AUTO_CLEANUP_INTERVAL =
-    // "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
-    private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:10000}";
+
+    private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
     private final SystemSecurityContext systemSecurityContext;

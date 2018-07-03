@@ -30,6 +30,8 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.Validator;
@@ -47,6 +49,8 @@ import com.vaadin.ui.VerticalLayout;
 public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionAutocleanupConfigurationItem.class);
 
     private static final int MAX_EXPIRY_IN_DAYS = 1000;
 
@@ -298,6 +302,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
             try {
                 rangeValidator.validate(Integer.parseInt(value.toString()));
             } catch (final RuntimeException e) {
+                LOGGER.debug("Action expiry validation failed", e);
                 throw new InvalidValueException(message);
             }
         }
