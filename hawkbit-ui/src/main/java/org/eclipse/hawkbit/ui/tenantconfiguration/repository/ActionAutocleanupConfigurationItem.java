@@ -48,16 +48,19 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
 
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_EXPIRY_IN_DAYS = 10000;
+    private static final int MAX_EXPIRY_IN_DAYS = 1000;
 
     private static final String MSG_KEY_PREFIX = "label.configuration.repository.autocleanup.action.prefix";
     private static final String MSG_KEY_BODY = "label.configuration.repository.autocleanup.action.body";
     private static final String MSG_KEY_SUFFIX = "label.configuration.repository.autocleanup.action.suffix";
     private static final String MSG_KEY_INVALID_EXPIRY = "label.configuration.repository.autocleanup.action.expiry.invalid";
+    private static final String MSG_KEY_NOTICE = "label.configuration.repository.autocleanup.action.notice";
 
     private static final Collection<ActionStatusOption> ACTION_STATUS_OPTIONS = Arrays.asList(
             new ActionStatusOption(Status.CANCELED), new ActionStatusOption(Status.ERROR),
             new ActionStatusOption(Status.CANCELED, Status.ERROR));
+
+    private static final String CSS_CLASS_LABEL_STYLE = "assignlabelstyle";
 
     private final VerticalLayout container;
     private final ComboBox actionStatusCombobox;
@@ -81,9 +84,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
         container = new VerticalLayout();
         container.setImmediate(true);
 
-        final HorizontalLayout horizontalContainer = new HorizontalLayout();
-        horizontalContainer.setSpacing(true);
-        horizontalContainer.setImmediate(true);
+        final HorizontalLayout row1 = newHorizontalLayout();
 
         actionStatusCombobox = SPUIComponentProvider.getComboBox(null, "200", null, null, false, "",
                 "label.combobox.action.status.options");
@@ -100,19 +101,22 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
 
         actionExpiryInput = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();
         actionExpiryInput.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_EXPIRY);
-        actionExpiryInput.setWidth(75, Unit.PIXELS);
+        actionExpiryInput.setWidth(55, Unit.PIXELS);
         actionExpiryInput.setNullSettingAllowed(false);
         actionExpiryInput.addTextChangeListener(e -> onActionExpiryChanged());
         actionExpiryInput.addValidator(new ActionExpiryValidator(i18n.getMessage(MSG_KEY_INVALID_EXPIRY)));
         actionExpiryInput.setValue(String.valueOf(getActionExpiry()));
 
-        horizontalContainer.addComponent(newLabel(MSG_KEY_PREFIX));
-        horizontalContainer.addComponent(actionStatusCombobox);
-        horizontalContainer.addComponent(newLabel(MSG_KEY_BODY));
-        horizontalContainer.addComponent(actionExpiryInput);
-        horizontalContainer.addComponent(newLabel(MSG_KEY_SUFFIX));
+        row1.addComponent(newLabel(MSG_KEY_PREFIX));
+        row1.addComponent(actionStatusCombobox);
+        row1.addComponent(newLabel(MSG_KEY_BODY));
+        row1.addComponent(actionExpiryInput);
+        row1.addComponent(newLabel(MSG_KEY_SUFFIX));
+        container.addComponent(row1);
 
-        container.addComponent(horizontalContainer);
+        final HorizontalLayout row2 = newHorizontalLayout();
+        row2.addComponent(newLabel(MSG_KEY_NOTICE));
+        container.addComponent(row2);
 
         if (isConfigEnabled()) {
             setSettingsVisible(true);
@@ -183,6 +187,13 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
         final Label label = new LabelBuilder().name(i18n.getMessage(msgKey)).buildLabel();
         label.setWidthUndefined();
         return label;
+    }
+
+    private HorizontalLayout newHorizontalLayout() {
+        final HorizontalLayout layout = new HorizontalLayout();
+        layout.setSpacing(true);
+        layout.setImmediate(true);
+        return layout;
     }
 
     private void setSettingsVisible(final boolean visible) {

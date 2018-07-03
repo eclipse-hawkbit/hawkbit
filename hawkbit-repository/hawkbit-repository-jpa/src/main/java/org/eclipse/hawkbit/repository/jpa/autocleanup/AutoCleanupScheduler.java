@@ -82,7 +82,6 @@ public class AutoCleanupScheduler implements Runnable {
         }
 
         try {
-            System.out.println(">> Auto cleanup...");
             systemManagement.forEachTenant(tenant -> cleanupHandlers.forEach(handler -> {
                 try {
                     handler.run();
