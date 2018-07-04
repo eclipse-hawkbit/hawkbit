@@ -138,7 +138,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          * @param managementUIState
          */
         ActionHistoryHeader(final ManagementUIState managementUIState) {
-            super(managementUIState);
+            super(managementUIState, i18n);
             this.setHeaderMaximizeSupport(
                     new ActionHistoryHeaderMaxSupport(this, SPUIDefinitions.EXPAND_ACTION_HISTORY));
         }

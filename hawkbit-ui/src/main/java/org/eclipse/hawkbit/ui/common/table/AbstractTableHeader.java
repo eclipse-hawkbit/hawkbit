@@ -222,29 +222,33 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "",
-                i18n.getMessage("tooltip.search"), null, false, FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_SEARCH), null, false, FontAwesome.SEARCH,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         button.setData(Boolean.FALSE);
         return button;
     }
 
     private Button createAddIcon() {
-        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", i18n.getMessage("tooltip.add"), null,
-                false, FontAwesome.PLUS, SPUIButtonStyleNoBorder.class);
+        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_ADD), null, false, FontAwesome.PLUS,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createBulkUploadIcon() {
         final Button button = SPUIComponentProvider.getButton(getBulkUploadIconId(), "",
-                i18n.getMessage("tooltip.bulkUpload"), null, false, FontAwesome.UPLOAD, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_BULK_UPLOAD), null, false, FontAwesome.UPLOAD,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::bulkUpload);
         return button;
     }
 
     private Button createShowFilterButtonLayout() {
         final Button button = SPUIComponentProvider.getButton(getShowFilterButtonLayoutId(), null,
-                i18n.getMessage("tooltip.showTags"), null, false, FontAwesome.TAGS, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_SHOW_TAGS), null, false, FontAwesome.TAGS,
+                SPUIButtonStyleNoBorder.class);
         button.setVisible(false);
         button.addClickListener(event -> showFilterButtonsIconClicked());
         return button;
@@ -277,7 +281,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.toggleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);
-        searchResetIcon.setDescription(i18n.getMessage("tooltip.reset"));
+        searchResetIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_RESET));
         searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchField.focus();
     }
@@ -285,7 +289,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private void closeSearchTextField() {
         searchField.setValue("");
         searchField.addStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
-        searchResetIcon.setDescription(i18n.getMessage("tooltip.search"));
+        searchResetIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SEARCH));
         searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.toggleIcon(FontAwesome.SEARCH);
         searchResetIcon.setData(Boolean.FALSE);

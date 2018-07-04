@@ -179,7 +179,7 @@ public abstract class AbstractFilterButtons extends Table {
         } else {
             deleteButton.setId(UIComponentIdProvider.DELETE_TAG_ID + itemId.toString());
         }
-        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE));
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }

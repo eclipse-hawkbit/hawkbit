@@ -403,10 +403,12 @@ public class TargetTable extends AbstractTable<Target> {
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
         if (StringUtils.hasText(pollStatusToolTip)) {
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.setDescription(pollStatusToolTip);
         } else {
             statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
+            statusLabel.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_TARGET_STATUS_UNKNOWN));
         }
-        statusLabel.setDescription(pollStatusToolTip);
+
         return statusLabel;
     }
 
@@ -425,6 +427,7 @@ public class TargetTable extends AbstractTable<Target> {
         pinBtn.setData(pinnedTarget);
         pinBtn.setId(UIComponentIdProvider.TARGET_PIN_ICON + controllerId);
         pinBtn.addClickListener(this::addPinClickListener);
+        pinBtn.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_TARGET_PIN));
         if (isPinned(pinnedTarget)) {
             pinBtn.addStyleName(TARGET_PINNED);
             targetPinned = Boolean.TRUE;

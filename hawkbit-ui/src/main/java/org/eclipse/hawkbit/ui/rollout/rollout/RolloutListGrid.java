@@ -639,37 +639,38 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private StatusFontIcon createApprovalButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, APPROVE_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.GAVEL, null, i18n.getMessage("tooltip.rollout.approve"),
+        return new StatusFontIcon(FontAwesome.GAVEL, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_APPROVE),
                 UIComponentIdProvider.ROLLOUT_APPROVAL_BUTTON_ID, isDisabled);
     }
 
     private StatusFontIcon createRunButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, RUN_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.PLAY, null, i18n.getMessage("tooltip.rollout.run"),
+        return new StatusFontIcon(FontAwesome.PLAY, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_RUN),
                 UIComponentIdProvider.ROLLOUT_RUN_BUTTON_ID, isDisabled);
     }
 
     private StatusFontIcon createPauseButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, PAUSE_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.PAUSE, null, i18n.getMessage("tooltip.rollout.pause"),
+        return new StatusFontIcon(FontAwesome.PAUSE, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_PAUSE),
                 UIComponentIdProvider.ROLLOUT_PAUSE_BUTTON_ID, isDisabled);
     }
 
     private StatusFontIcon createCopyButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.COPY, null, i18n.getMessage("tooltip.rollout.copy"),
+        return new StatusFontIcon(FontAwesome.COPY, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_COPY),
                 UIComponentIdProvider.ROLLOUT_COPY_BUTTON_ID, isDisabled);
     }
 
     private StatusFontIcon createUpdateButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, UPDATE_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.EDIT, null, i18n.getMessage("tooltip.rollout.update"),
+        return new StatusFontIcon(FontAwesome.EDIT, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_UPDATE),
                 UIComponentIdProvider.ROLLOUT_UPDATE_BUTTON_ID, isDisabled);
     }
 
     private StatusFontIcon createDeleteButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.TRASH_O, null, i18n.getMessage("tooltip.rollout.delete"),
+        return new StatusFontIcon(FontAwesome.TRASH_O, null,
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE),
                 UIComponentIdProvider.ROLLOUT_DELETE_BUTTON_ID, isDisabled);
     }
 

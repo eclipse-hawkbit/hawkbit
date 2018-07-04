@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.server.FontAwesome;
@@ -91,7 +92,7 @@ public class ConfigMenuBar extends MenuBar {
         addStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_POSITION);
         config = addItem("", FontAwesome.COG, null);
         config.setStyleName(SPUIStyleDefinitions.CONFIG_MENU_BAR_ITEMS);
-        config.setDescription(i18n.getMessage("tooltip.configure"));
+        config.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_CONFIGURE));
 
         addMenuItems();
     }

@@ -14,6 +14,8 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -35,13 +37,15 @@ public class DefaultGridHeader extends VerticalLayout {
     private HorizontalLayout titleLayout;
     private transient AbstractHeaderMaximizeSupport maximizeSupport;
 
+    private final VaadinMessageSource i18n;
+
     /**
      * Constructor.
      *
      * @param managementUIState
      */
-    public DefaultGridHeader(final ManagementUIState managementUIState) {
-        this(managementUIState, "");
+    public DefaultGridHeader(final ManagementUIState managementUIState, final VaadinMessageSource i18n) {
+        this(managementUIState, "", i18n);
     }
 
     /**
@@ -50,9 +54,11 @@ public class DefaultGridHeader extends VerticalLayout {
      * @param managementUIState
      * @param titleText
      */
-    public DefaultGridHeader(final ManagementUIState managementUIState, final String titleText) {
+    public DefaultGridHeader(final ManagementUIState managementUIState, final String titleText,
+            final VaadinMessageSource i18n) {
         this.managementUIState = managementUIState;
         this.titleText = titleText;
+        this.i18n = i18n;
     }
 
     /**
@@ -217,8 +223,9 @@ public class DefaultGridHeader extends VerticalLayout {
          * @return newly cretaed min-max-button
          */
         protected SPUIButton createMinMaxButton(final String buttonId) {
-            return (SPUIButton) SPUIComponentProvider.getButton(buttonId, "", "Maximize", null, true,
-                    FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
+            return (SPUIButton) SPUIComponentProvider.getButton(buttonId, "",
+                    i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE), null, true, FontAwesome.EXPAND,
+                    SPUIButtonStyleNoBorder.class);
         }
 
         /**
@@ -226,7 +233,7 @@ public class DefaultGridHeader extends VerticalLayout {
          */
         public void showMinIcon() {
             maxMinButton.toggleIcon(FontAwesome.COMPRESS);
-            maxMinButton.setDescription("Minimize");
+            maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MINIMIZE));
             maxMinButton.setData(Boolean.TRUE);
         }
 
@@ -235,7 +242,7 @@ public class DefaultGridHeader extends VerticalLayout {
          */
         public void showMaxIcon() {
             maxMinButton.toggleIcon(FontAwesome.EXPAND);
-            maxMinButton.setDescription("Maximize");
+            maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE));
             maxMinButton.setData(Boolean.FALSE);
         }
     }

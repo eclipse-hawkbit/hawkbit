@@ -365,7 +365,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
                 SPUIButtonStyleNoBorderWithIcon.class);
         final String id = getEntityId(itemId);
         deleteButton.setId("delete.entity." + id);
-        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE));
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }
