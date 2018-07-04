@@ -43,6 +43,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     private transient AbstractGrid<?>.DetailsSupport details;
     private Long masterForDetails;
 
+    private final String actionHistoryCaption;
+
     /**
      * Constructor.
      *
@@ -58,7 +60,14 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
+        actionHistoryCaption = getActionHistoryCaption("");
         init();
+    }
+
+    private String getActionHistoryCaption(final String targetName) {
+        return HawkbitCommonUtil.DIV_DESCRIPTION_START
+                + getI18n().getMessage("caption.action.history", HawkbitCommonUtil.getBoldHTMLText(targetName))
+                + HawkbitCommonUtil.DIV_DESCRIPTION_END;
     }
 
     @Override
@@ -138,7 +147,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          * @param managementUIState
          */
         ActionHistoryHeader(final ManagementUIState managementUIState) {
-            super(managementUIState, i18n);
+            super(managementUIState, actionHistoryCaption, i18n);
             this.setHeaderMaximizeSupport(
                     new ActionHistoryHeaderMaxSupport(this, SPUIDefinitions.EXPAND_ACTION_HISTORY));
         }
@@ -160,7 +169,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          *            name of the target
          */
         public void updateActionHistoryHeader(final String targetName) {
-            updateTitle(HawkbitCommonUtil.getActionHistoryLabelId(targetName));
+            updateTitle(getActionHistoryCaption(targetName));
         }
 
         /**
@@ -212,4 +221,5 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
             return abstractGridHeader;
         }
     }
+
 }
