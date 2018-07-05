@@ -66,9 +66,9 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
-        final Label headerDisSetType = new Label(i18n.getMessage("configuration.repository.title"));
-        headerDisSetType.addStyleName("config-panel-header");
-        vLayout.addComponent(headerDisSetType);
+        final Label header = new Label(i18n.getMessage("configuration.repository.title"));
+        header.addStyleName("config-panel-header");
+        vLayout.addComponent(header);
 
         final GridLayout gridLayout = new GridLayout(2, 2);
         gridLayout.setSpacing(true);

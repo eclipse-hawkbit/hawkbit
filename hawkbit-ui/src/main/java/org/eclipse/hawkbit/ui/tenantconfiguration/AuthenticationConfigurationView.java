@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -87,17 +88,14 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
-        final Label headerDisSetType = new Label(i18n.getMessage("configuration.authentication.title"));
-        headerDisSetType.addStyleName("config-panel-header");
-        vLayout.addComponent(headerDisSetType);
+        final Label header = new Label(i18n.getMessage("configuration.authentication.title"));
+        header.addStyleName("config-panel-header");
+        vLayout.addComponent(header);
 
-        final Link linkToSecurityHelp = SPUIComponentProvider
-                .getHelpLink(uiProperties.getLinks().getDocumentation().getSecurity());
-        vLayout.addComponent(linkToSecurityHelp);
-
-        final GridLayout gridLayout = new GridLayout(2, 4);
+        final GridLayout gridLayout = new GridLayout(3, 4);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
+        gridLayout.setSizeFull();
         gridLayout.setColumnExpandRatio(1, 1.0F);
 
         certificateAuthCheckbox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
@@ -129,6 +127,11 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         anonymousDownloadAuthenticationConfigurationItem.addChangeListener(this);
         gridLayout.addComponent(downloadAnonymousCheckBox, 0, 3);
         gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, 3);
+
+        final Link linkToSecurityHelp = SPUIComponentProvider
+                .getHelpLink(uiProperties.getLinks().getDocumentation().getSecurity());
+        gridLayout.addComponent(linkToSecurityHelp, 2, 3);
+        gridLayout.setComponentAlignment(linkToSecurityHelp, Alignment.BOTTOM_RIGHT);
 
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);

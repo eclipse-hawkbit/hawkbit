@@ -456,6 +456,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
     void deleteByIdIn(final Collection<Long> actionIDs);
 
+    /**
+     * Deletes all actions which match one of the given action status and which
+     * have not been modified since the given timestamp.
+     * 
+     * @param status
+     *            Set of action status.
+     * @param lastModified
+     *            A timestamp in milliseconds.
+     */
     @Modifying
     @Transactional
     @Query("DELETE FROM JpaAction a WHERE a.status IN ?1 AND a.lastModifiedAt<?2")
