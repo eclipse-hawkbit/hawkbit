@@ -64,6 +64,8 @@ public class TargetFilterHeader extends VerticalLayout {
      *            FilterManagementUIState
      * @param permissionChecker
      *            SpPermissionChecker
+     * @param i18n
+     *            VaadinMessageSource
      */
     public TargetFilterHeader(final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
             final SpPermissionChecker permissionChecker, final VaadinMessageSource i18n) {

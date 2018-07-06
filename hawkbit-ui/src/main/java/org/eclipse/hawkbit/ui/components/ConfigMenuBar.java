@@ -67,6 +67,8 @@ public class ConfigMenuBar extends MenuBar {
      *            command
      * @param id
      *            the id of the menuBar
+     * @param i18n
+     *            VaadinMessageSource
      */
     public ConfigMenuBar(final boolean createPermission, final boolean updatePermission, final boolean deletePermission,
             final Command addButtonCommand, final Command updateButtonCommand, final Command deleteButtonCommand,
