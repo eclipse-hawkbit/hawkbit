@@ -8,7 +8,7 @@ Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](
  [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
-Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.0M9-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
+Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.1.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.1-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
 # Documentation
 
@@ -62,7 +62,7 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 # Getting Started
 
-We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes. 
+We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation purposes.
 Run with docker:
 
 ```bash
