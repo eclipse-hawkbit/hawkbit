@@ -28,15 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A cleanup handler for {@link Action} entities which can be used to delete
+ * A cleanup task for {@link Action} entities which can be used to delete
  * actions which are in a certain {@link Action.Status}. It is recommended to
  * only clean up actions which have terminated already (i.e. actions in status
  * CANCELLED, ERROR, or FINISHED).
  * 
- * The cleanup mechanism can be enabled /disabled and configured on a per tenant
+ * The cleanup task can be enabled /disabled and configured on a per tenant
  * basis.
  */
-public class AutoActionCleanup implements Runnable {
+public class AutoActionCleanup implements CleanupTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoActionCleanup.class);
 

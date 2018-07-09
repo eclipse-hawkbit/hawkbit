@@ -140,8 +140,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *         assigned {@link DistributionSet}.
      */
     @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
-    List<Action> findActionByTargetAndSoftwareModule(@Param("target") String targetId,
-            @Param("module") Long moduleId);
+    List<Action> findActionByTargetAndSoftwareModule(@Param("target") String targetId, @Param("module") Long moduleId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -457,8 +456,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     void deleteByIdIn(Collection<Long> actionIDs);
 
     /**
-     * Deletes all actions which match one of the given action status and which
-     * have not been modified since the given (absolute) time-stamp.
+     * Deletes up to 1000 actions which match one of the given action status and
+     * which have not been modified since the given (absolute) time-stamp.
      * 
      * @param status
      *            Set of action status.

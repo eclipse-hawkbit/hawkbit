@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -37,16 +38,16 @@ public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     public void executeHandlerChain() {
 
         final AtomicInteger counter = new AtomicInteger();
-        final Runnable successHandler = () -> {
+        final CleanupTask successHandler = () -> {
             counter.incrementAndGet();
         };
-        final Runnable failingHandler = () -> {
+        final CleanupTask failingHandler = () -> {
             counter.incrementAndGet();
             throw new RuntimeException("cleanup failed");
         };
 
-        new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, successHandler, successHandler,
-                failingHandler, successHandler).run();
+        new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry,
+                Arrays.asList(successHandler, successHandler, failingHandler, successHandler)).run();
 
         assertThat(counter.get()).isEqualTo(4);
 

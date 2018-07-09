@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -53,6 +54,7 @@ import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
@@ -742,7 +744,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
-    AutoActionCleanup actionCleanup(final ActionRepository actionRepository,
+    CleanupTask actionCleanup(final ActionRepository actionRepository,
             final TenantConfigurationManagement configManagement) {
         return new AutoActionCleanup(actionRepository, configManagement);
     }
@@ -769,8 +771,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
     AutoCleanupScheduler autoCleanupScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
-            final AutoActionCleanup actionCleanup) {
-        return new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, actionCleanup);
+            final List<CleanupTask> cleanupTasks) {
+        return new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, cleanupTasks);
     }
 
     /**

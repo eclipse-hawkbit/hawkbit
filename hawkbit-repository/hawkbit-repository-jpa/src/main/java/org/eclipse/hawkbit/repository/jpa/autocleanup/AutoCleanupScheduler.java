@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -22,18 +21,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 /**
  * A scheduler to invoke a set of cleanup handlers periodically.
  */
-public class AutoCleanupScheduler implements Runnable {
+public class AutoCleanupScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoCleanupScheduler.class);
 
-    private static final String AUTO_CLEANUP = "autocleanup";
+    private static final String AUTO_CLEANUP_PREFIX = "autocleanup_";
 
     private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final LockRegistry lockRegistry;
-    private final List<Runnable> cleanupHandlers;
+    private final List<CleanupTask> cleanupTasks;
 
     /**
      * Constructs the cleanup schedulers and initializes it with a set of
@@ -45,16 +44,16 @@ public class AutoCleanupScheduler implements Runnable {
      *            The system security context.
      * @param lockRegistry
      *            A registry for shared locks.
-     * @param cleanupHandlers
-     *            An array of cleanup handlers.
+     * @param cleanupTasks
+     *            A list of cleanup tasks.
      */
     public AutoCleanupScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
-            final Runnable... cleanupHandlers) {
+            final List<CleanupTask> cleanupTasks) {
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.lockRegistry = lockRegistry;
-        this.cleanupHandlers = Arrays.asList(cleanupHandlers);
+        this.cleanupTasks = cleanupTasks;
     }
 
     /**
@@ -62,37 +61,38 @@ public class AutoCleanupScheduler implements Runnable {
      * {@link SystemManagement#findTenants()} and runs all registered auto
      * cleanup handlers for each of them.
      */
-    @Override
     @Scheduled(initialDelayString = PROP_AUTO_CLEANUP_INTERVAL, fixedDelayString = PROP_AUTO_CLEANUP_INTERVAL)
     public void run() {
         LOGGER.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities
-        if (!cleanupHandlers.isEmpty()) {
+        if (!cleanupTasks.isEmpty()) {
             systemSecurityContext.runAsSystem(this::executeAutoCleanup);
         }
     }
 
     @SuppressWarnings("squid:S3516")
     private Void executeAutoCleanup() {
-        final Lock lock = lockRegistry.obtain(AUTO_CLEANUP);
-        if (!lock.tryLock()) {
-            return null;
-        }
-
-        try {
-            systemManagement.forEachTenant(tenant -> cleanupHandlers.forEach(handler -> {
-                try {
-                    handler.run();
-                } catch (final RuntimeException e) {
-                    LOGGER.error("One of the cleanup processes failed", e);
-                }
-            }));
-        } finally {
-            lock.unlock();
-        }
-
+        systemManagement.forEachTenant(tenant -> cleanupTasks.forEach(task -> {
+            final Lock lock = obtainLock(task, tenant);
+            if (!lock.tryLock()) {
+                return;
+            }
+            try {
+                task.run();
+            } catch (final RuntimeException e) {
+                LOGGER.error("Cleanup task failed.", e);
+            } finally {
+                lock.unlock();
+            }
+        }));
         return null;
+    }
+
+    private Lock obtainLock(final CleanupTask task, final String tenant) {
+        final String lockId = new StringBuilder().append(task.getClass().getSimpleName()).append("_").append(tenant)
+                .toString();
+        return lockRegistry.obtain(lockId);
     }
 
 }
