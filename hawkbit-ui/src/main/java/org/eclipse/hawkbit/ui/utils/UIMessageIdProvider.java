@@ -25,7 +25,7 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_SEARCH = "tooltip.search";
 
-    public static final String TOOLTIP_CLOSE = "tooltips.close";
+    public static final String TOOLTIP_CLOSE = "tooltip.close";
 
     public static final String TOOLTIP_SAVE = "tooltip.save";
 
@@ -82,6 +82,8 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_ROLLOUT_RUN = "tooltip.rollout.run";
 
     public static final String TOOLTIP_ROLLOUT_APPROVE = "tooltip.rollout.approve";
+
+    public static final String TOOLTIP_IN_TIME = "tooltip.in.time";
 
     /**
      * /* Private Constructor.

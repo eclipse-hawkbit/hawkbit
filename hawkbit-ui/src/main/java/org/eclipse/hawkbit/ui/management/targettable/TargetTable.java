@@ -403,10 +403,11 @@ public class TargetTable extends AbstractTable<Target> {
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
         if (StringUtils.hasText(pollStatusToolTip)) {
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.setDescription(pollStatusToolTip);
         } else {
             statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
+            statusLabel.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_IN_TIME));
         }
-        statusLabel.setDescription(pollStatusToolTip);
 
         return statusLabel;
     }
