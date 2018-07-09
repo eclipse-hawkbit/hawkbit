@@ -64,7 +64,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the {@link DistributionSet} on which will be filtered
      * @return the found {@link Action}s
      */
-    Page<Action> findByDistributionSetId(final Pageable pageable, final Long dsId);
+    Page<Action> findByDistributionSetId(Pageable pageable, Long dsId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -99,7 +99,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the action active flag
      * @return the found {@link Action}s
      */
-    List<Action> findByTargetAndActiveOrderByIdAsc(final JpaTarget target, boolean active);
+    List<Action> findByTargetAndActiveOrderByIdAsc(JpaTarget target, boolean active);
 
     /**
      * Retrieves the oldest {@link Action} that is active and referring to the
@@ -115,7 +115,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Optional<Action> findFirstByTargetControllerIdAndActive(final Sort sort, final String controllerId, boolean active);
+    Optional<Action> findFirstByTargetControllerIdAndActive(Sort sort, String controllerId, boolean active);
 
     /**
      * Checks if an active action exists for given
@@ -140,7 +140,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *         assigned {@link DistributionSet}.
      */
     @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
-    List<Action> findActionByTargetAndSoftwareModule(@Param("target") final String targetId,
+    List<Action> findActionByTargetAndSoftwareModule(@Param("target") String targetId,
             @Param("module") Long moduleId);
 
     /**
@@ -156,7 +156,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found {@link Action}s
      */
     @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds")
-    Page<JpaAction> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final JpaTarget target,
+    Page<JpaAction> findByTargetAndDistributionSet(Pageable pageable, @Param("target") JpaTarget target,
             @Param("ds") JpaDistributionSet ds);
 
     /**
@@ -454,20 +454,20 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
-    void deleteByIdIn(final Collection<Long> actionIDs);
+    void deleteByIdIn(Collection<Long> actionIDs);
 
     /**
      * Deletes all actions which match one of the given action status and which
-     * have not been modified since the given timestamp.
+     * have not been modified since the given (absolute) time-stamp.
      * 
      * @param status
      *            Set of action status.
      * @param lastModified
-     *            A timestamp in milliseconds.
+     *            A time-stamp in milliseconds.
      */
     @Modifying
     @Transactional
     @Query("DELETE FROM JpaAction a WHERE a.status IN ?1 AND a.lastModifiedAt<?2")
-    void deleteByStatusAndLastModifiedBefore(final Set<Action.Status> status, final long lastModified);
+    void deleteByStatusAndLastModifiedBefore(Set<Action.Status> status, long lastModified);
 
 }

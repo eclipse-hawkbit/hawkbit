@@ -112,7 +112,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Transactional
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
-    void deleteByIdIn(final Collection<Long> targetIDs);
+    void deleteByIdIn(Collection<Long> targetIDs);
 
     /**
      * Finds {@link Target}s by assigned {@link Tag}.
@@ -125,7 +125,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return page of found targets
      */
     @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
-    Page<JpaTarget> findByTag(Pageable page, @Param("tag") final Long tagId);
+    Page<JpaTarget> findByTag(Pageable page, @Param("tag") Long tagId);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
@@ -138,8 +138,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return {@link List} of found {@link Target}s.
      */
     @Query(value = "SELECT DISTINCT t from JpaTarget t JOIN t.tags tt WHERE tt.name = :tagname AND t.controllerId IN :targets")
-    List<JpaTarget> findByTagNameAndControllerIdIn(@Param("tagname") final String tag,
-            @Param("targets") final Collection<String> controllerIds);
+    List<JpaTarget> findByTagNameAndControllerIdIn(@Param("tagname") String tag,
+            @Param("targets") Collection<String> controllerIds);
 
     /**
      * Used by UI to filter based on selected status.
@@ -151,7 +151,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *
      * @return found targets
      */
-    Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status);
+    Page<Target> findByUpdateStatus(Pageable pageable, TargetUpdateStatus status);
 
     /**
      * retrieves the {@link Target}s which has the {@link DistributionSet}
@@ -163,7 +163,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            the ID of the {@link DistributionSet}
      * @return the found {@link Target}s
      */
-    Page<Target> findByInstalledDistributionSetId(final Pageable pageable, final Long setID);
+    Page<Target> findByInstalledDistributionSetId(Pageable pageable, Long setID);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
@@ -175,7 +175,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *
      * @return page of found targets
      */
-    Page<Target> findByAssignedDistributionSetId(final Pageable pageable, final Long setID);
+    Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
 
     /**
      * Counts number of targets with given distribution set Id.
@@ -185,7 +185,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *
      * @return number of found {@link Target}s.
      */
-    Long countByAssignedDistributionSetId(final Long distId);
+    Long countByAssignedDistributionSetId(Long distId);
 
     /**
      * Counts number of targets with given distribution set Id.
@@ -194,7 +194,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            to search for
      * @return number of found {@link Target}s.
      */
-    Long countByInstalledDistributionSetId(final Long distId);
+    Long countByInstalledDistributionSetId(Long distId);
 
     /**
      * Finds all {@link Target}s in the repository.
@@ -221,7 +221,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByRolloutTargetGroupRolloutGroupId(final Long rolloutGroupId, Pageable page);
+    Page<Target> findByRolloutTargetGroupRolloutGroupId(Long rolloutGroupId, Pageable page);
 
     /**
      * Finds all targets related to a target rollout group stored for a specific

@@ -75,7 +75,7 @@ public interface SoftwareModuleRepository
     @Transactional
     @Query("UPDATE JpaSoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.id IN :ids")
     void deleteSoftwareModule(@Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
-            @Param("ids") final Long... ids);
+            @Param("ids") Long... ids);
 
     /**
      * @param pageable
