@@ -28,7 +28,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class GroupsLegendLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = 5483206203739308677L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -128,7 +128,7 @@ public class GroupsLegendLayout extends VerticalLayout {
      *            null to hide the label or a count to be displayed as total
      *            targets message
      */
-    public void populateTotalTargets(Long totalTargets) {
+    public void populateTotalTargets(final Long totalTargets) {
         if (totalTargets == null) {
             totalTargetsLabel.setVisible(false);
         } else {
@@ -152,8 +152,8 @@ public class GroupsLegendLayout extends VerticalLayout {
             final Label label = (Label) component;
             if (targetsPerGroup.size() > i) {
                 final Long targetCount = targetsPerGroup.get(i);
-                label.setValue(
-                        getTargetsInGroupMessage(targetCount, i18n.getMessage("textfield.rollout.group.default.name", i + 1)));
+                label.setValue(getTargetsInGroupMessage(targetCount,
+                        i18n.getMessage("textfield.rollout.group.default.name", i + 1)));
                 label.setVisible(true);
             } else {
                 label.setValue("");
@@ -185,7 +185,7 @@ public class GroupsLegendLayout extends VerticalLayout {
         if (validation == null) {
             return;
         }
-        List<Long> targetsPerGroup = validation.getTargetsPerGroup();
+        final List<Long> targetsPerGroup = validation.getTargetsPerGroup();
         final long unassigned = validation.getTotalTargets() - validation.getTargetsInGroups();
         final int labelsToUpdate = (unassigned > 0) ? (groupsLegend.getComponentCount() - 1)
                 : groupsLegend.getComponentCount();
