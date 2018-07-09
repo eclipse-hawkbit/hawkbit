@@ -45,7 +45,7 @@ public class ConfigMenuBar extends MenuBar {
     private final VaadinMessageSource i18n;
 
     /**
-     * Constructor for the menubar
+     * Constructor for the Menubar
      * 
      * @param createPermission
      *            flag if the logged-in user has permission to create the entity
