@@ -40,12 +40,12 @@ public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
 
     @Override
     public AbstractOrderedLayout createGridHeader() {
-        return new RolloutGroupTargetsListHeader(eventBus, i18n, rolloutUIState);
+        return new RolloutGroupTargetsListHeader(getEventBus(), getI18n(), rolloutUIState);
     }
 
     @Override
     public RolloutGroupTargetsListGrid createGrid() {
-        return new RolloutGroupTargetsListGrid(i18n, eventBus, rolloutUIState);
+        return new RolloutGroupTargetsListGrid(getI18n(), getEventBus(), rolloutUIState);
     }
 
     class RolloutTargetsCountFooterSupport extends AbstractFooterSupport {
@@ -54,7 +54,7 @@ public class RolloutGroupTargetsListView extends AbstractGridComponentLayout {
         @Override
         protected Label getFooterMessageLabel() {
             final RolloutGroupTargetsCountLabelMessage countMessageLabel = new RolloutGroupTargetsCountLabelMessage(
-                    rolloutUIState, (RolloutGroupTargetsListGrid) getGrid(), i18n, eventBus);
+                    rolloutUIState, (RolloutGroupTargetsListGrid) getGrid(), getI18n(), getEventBus());
             countMessageLabel.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
             return countMessageLabel;
         }

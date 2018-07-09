@@ -1214,7 +1214,7 @@ public final class UIComponentIdProvider {
     /**
      * ID for the menu bar item to update a tag or type
      */
-    public static final String CONFIG_MENU_BAR_UPDATE = "update";
+    public static final String CONFIG_MENU_BAR_UPDATE = "edit";
 
     /**
      * ID for the menu bar item to delete a tag or type

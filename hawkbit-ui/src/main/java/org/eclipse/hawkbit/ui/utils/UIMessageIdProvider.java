@@ -86,7 +86,7 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_IN_TIME = "tooltip.in.time";
 
     /**
-     * /* Private Constructor.
+     * Private Constructor.
      */
     private UIMessageIdProvider() {
 

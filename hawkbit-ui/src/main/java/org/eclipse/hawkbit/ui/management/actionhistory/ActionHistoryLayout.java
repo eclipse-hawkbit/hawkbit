@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -60,14 +61,21 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
-        actionHistoryCaption = getActionHistoryCaption("");
+        actionHistoryCaption = getActionHistoryCaption();
         init();
     }
 
+    private final String getActionHistoryCaption() {
+        return getActionHistoryCaption(null);
+    }
+
     private String getActionHistoryCaption(final String targetName) {
-        return HawkbitCommonUtil.DIV_DESCRIPTION_START
-                + getI18n().getMessage("caption.action.history", HawkbitCommonUtil.getBoldHTMLText(targetName))
-                + HawkbitCommonUtil.DIV_DESCRIPTION_END;
+        String caption = getI18n().getMessage("caption.action.history");
+        if (StringUtils.hasText(targetName)) {
+            caption = caption + " for " + HawkbitCommonUtil.getBoldHTMLText(targetName);
+        }
+
+        return HawkbitCommonUtil.DIV_DESCRIPTION_START + caption + HawkbitCommonUtil.DIV_DESCRIPTION_END;
     }
 
     @Override
@@ -77,7 +85,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
 
     @Override
     public ActionHistoryGrid createGrid() {
-        return new ActionHistoryGrid(i18n, deploymentManagement, eventBus, notification, managementUIState);
+        return new ActionHistoryGrid(getI18n(), deploymentManagement, getEventBus(), notification, managementUIState);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -147,7 +155,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          * @param managementUIState
          */
         ActionHistoryHeader(final ManagementUIState managementUIState) {
-            super(managementUIState, actionHistoryCaption, i18n);
+            super(managementUIState, actionHistoryCaption, getI18n());
             this.setHeaderMaximizeSupport(
                     new ActionHistoryHeaderMaxSupport(this, SPUIDefinitions.EXPAND_ACTION_HISTORY));
         }
@@ -204,12 +212,12 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         @Override
         protected void maximize() {
             details.populateMasterDataAndRecreateContainer(masterForDetails);
-            eventBus.publish(this, ManagementUIEvent.MAX_ACTION_HISTORY);
+            getEventBus().publish(this, ManagementUIEvent.MAX_ACTION_HISTORY);
         }
 
         @Override
         protected void minimize() {
-            eventBus.publish(this, ManagementUIEvent.MIN_ACTION_HISTORY);
+            getEventBus().publish(this, ManagementUIEvent.MIN_ACTION_HISTORY);
         }
 
         /**
