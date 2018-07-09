@@ -656,7 +656,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 UIComponentIdProvider.ROLLOUT_APPROVAL_REMARK_FIELD_ID, Rollout.APPROVAL_REMARK_MAX_SIZE);
         approvalRemarkField.setWidth(100.0F, Unit.PERCENTAGE);
 
-        HorizontalLayout layout = new HorizontalLayout(approveButtonsGroup, approvalRemarkField);
+        final HorizontalLayout layout = new HorizontalLayout(approveButtonsGroup, approvalRemarkField);
         layout.setWidth(100.0F, Unit.PERCENTAGE);
         layout.setExpandRatio(approvalRemarkField, 1.0F);
         return layout;

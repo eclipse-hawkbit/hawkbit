@@ -28,6 +28,8 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class GroupsLegendLayout extends VerticalLayout {
 
+    private static final int MAX_GROUPS_TO_BE_DISPLAYED = 7;
+
     private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
@@ -63,9 +65,10 @@ public class GroupsLegendLayout extends VerticalLayout {
         addComponent(loadingLabel);
         addComponent(unassignedTargetsLabel);
         addComponent(groupsLegend);
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < MAX_GROUPS_TO_BE_DISPLAYED; i++) {
             groupsLegend.addComponent(createGroupTargetsLabel());
         }
+        groupsLegend.addComponent(createToBeContinuedLabel());
 
     }
 
@@ -75,6 +78,9 @@ public class GroupsLegendLayout extends VerticalLayout {
     public void reset() {
         totalTargetsLabel.setVisible(false);
         populateGroupsLegendByTargetCounts(Collections.emptyList());
+        if (groupsLegend.getComponentCount() > MAX_GROUPS_TO_BE_DISPLAYED) {
+            groupsLegend.getComponent(MAX_GROUPS_TO_BE_DISPLAYED).setVisible(false);
+        }
     }
 
     private static Label createTotalTargetsLabel() {
@@ -106,6 +112,10 @@ public class GroupsLegendLayout extends VerticalLayout {
         label.addStyleName("rollout-group-count");
         label.setSizeUndefined();
         return label;
+    }
+
+    private static Label createToBeContinuedLabel() {
+        return new LabelBuilder().caption("...").visible(false).buildLabel();
     }
 
     private String getTotalTargetMessage(final long totalTargetsCount) {
@@ -141,17 +151,17 @@ public class GroupsLegendLayout extends VerticalLayout {
      * Populates the legend based on a list of anonymous groups. They can't have
      * unassigned targets.
      * 
-     * @param targetsPerGroup
+     * @param listOfTargetConuntPerGroup
      *            list of target counts
      */
-    public void populateGroupsLegendByTargetCounts(final List<Long> targetsPerGroup) {
+    public void populateGroupsLegendByTargetCounts(final List<Long> listOfTargetConuntPerGroup) {
         loadingLabel.setVisible(false);
 
-        for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
+        for (int i = 0; i < getGroupsWithoutToBeContinuedLabel(listOfTargetConuntPerGroup.size()); i++) {
             final Component component = groupsLegend.getComponent(i);
             final Label label = (Label) component;
-            if (targetsPerGroup.size() > i) {
-                final Long targetCount = targetsPerGroup.get(i);
+            if (listOfTargetConuntPerGroup.size() > i) {
+                final Long targetCount = listOfTargetConuntPerGroup.get(i);
                 label.setValue(getTargetsInGroupMessage(targetCount,
                         i18n.getMessage("textfield.rollout.group.default.name", i + 1)));
                 label.setVisible(true);
@@ -161,9 +171,25 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
+        showToBeContinueLabel(listOfTargetConuntPerGroup);
+
         unassignedTargetsLabel.setValue("");
         unassignedTargetsLabel.setVisible(false);
+    }
 
+    private void showToBeContinueLabel(final List<?> targetsPerGroup) {
+        if (targetsPerGroup.size() > MAX_GROUPS_TO_BE_DISPLAYED) {
+            groupsLegend.getComponent(MAX_GROUPS_TO_BE_DISPLAYED).setVisible(true);
+        } else if (groupsLegend.getComponentCount() > targetsPerGroup.size()) {
+            groupsLegend.getComponent(groupsLegend.getComponentCount() - 1).setVisible(false);
+        }
+    }
+
+    private int getGroupsWithoutToBeContinuedLabel(final int amountOfRolloutGroups) {
+        if (amountOfRolloutGroups <= groupsLegend.getComponentCount()) {
+            return groupsLegend.getComponentCount();
+        }
+        return groupsLegend.getComponentCount() - 1;
     }
 
     /**
@@ -187,9 +213,9 @@ public class GroupsLegendLayout extends VerticalLayout {
         }
         final List<Long> targetsPerGroup = validation.getTargetsPerGroup();
         final long unassigned = validation.getTotalTargets() - validation.getTargetsInGroups();
-        final int labelsToUpdate = (unassigned > 0) ? (groupsLegend.getComponentCount() - 1)
+        final int labelsToUpdate = (unassigned > 0) ? getGroupsWithoutToBeContinuedLabel(groups.size())
                 : groupsLegend.getComponentCount();
-        for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
+        for (int i = 0; i < getGroupsWithoutToBeContinuedLabel(groups.size()) - 1; i++) {
             final Component component = groupsLegend.getComponent(i);
             final Label label = (Label) component;
             if (targetsPerGroup.size() > i && groups.size() > i && labelsToUpdate > i) {
@@ -204,6 +230,8 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
+        showToBeContinueLabel(groups);
+
         if (unassigned > 0) {
             unassignedTargetsLabel.setValue(getTargetsInGroupMessage(unassigned, "Unassigned"));
             unassignedTargetsLabel.setVisible(true);
@@ -211,7 +239,6 @@ public class GroupsLegendLayout extends VerticalLayout {
             unassignedTargetsLabel.setValue("");
             unassignedTargetsLabel.setVisible(false);
         }
-
     }
 
     /**
@@ -223,7 +250,7 @@ public class GroupsLegendLayout extends VerticalLayout {
     public void populateGroupsLegendByGroups(final List<RolloutGroup> groups) {
         loadingLabel.setVisible(false);
 
-        for (int i = 0; i < groupsLegend.getComponentCount(); i++) {
+        for (int i = 0; i < getGroupsWithoutToBeContinuedLabel(groups.size()); i++) {
             final Component component = groupsLegend.getComponent(i);
             final Label label = (Label) component;
             if (groups.size() > i) {
@@ -238,6 +265,7 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
+        showToBeContinueLabel(groups);
     }
 
     private String getTargetsInGroupMessage(final Long targets, final String groupName) {
