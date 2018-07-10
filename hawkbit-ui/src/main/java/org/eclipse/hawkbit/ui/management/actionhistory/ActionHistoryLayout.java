@@ -70,9 +70,11 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     }
 
     private String getActionHistoryCaption(final String targetName) {
-        String caption = getI18n().getMessage("caption.action.history");
+        final String caption;
         if (StringUtils.hasText(targetName)) {
-            caption = caption + " for " + HawkbitCommonUtil.getBoldHTMLText(targetName);
+            caption = getI18n().getMessage("caption.action.history.for", HawkbitCommonUtil.getBoldHTMLText(targetName));
+        } else {
+            caption = getI18n().getMessage("caption.action.history");
         }
 
         return HawkbitCommonUtil.DIV_DESCRIPTION_START + caption + HawkbitCommonUtil.DIV_DESCRIPTION_END;
