@@ -699,12 +699,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         if (status.isEmpty()) {
             return 0;
         }
-        // assemble the native query
+        /*
+         * We use a native query here because Spring JPA does not support to
+         * specify a LIMIT clause on a DELETE statement. However, for this
+         * specific use case (action cleanup), we must specify a row limit to
+         * reduce the overall load on the database.
+         */
         final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
                 tenantAware.getCurrentTenant(),
                 status.stream().map(Status::ordinal).map(String::valueOf).collect(Collectors.joining(",")),
                 lastModified);
-        LOG.debug("Action cleanup: Executing the following native query: {}", queryStr);
+        LOG.debug("Action cleanup: Executing the following (native) query: {}", queryStr);
         return entityManager.createNativeQuery(queryStr).executeUpdate();
     }
 
