@@ -616,11 +616,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final JpaProperties properties) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
                 afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, quotaManagement,
-                systemSecurityContext, properties.getDatabase());
+                systemSecurityContext, tenantAware, properties.getDatabase());
     }
 
     /**
@@ -736,17 +737,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link AutoActionCleanup} bean.
      * 
-     * @param actionRepository
-     *            Action repository
+     * @param deploymentManagement
+     *            Deployment management service
      * @param configManagement
      *            Tenant configuration service
      * 
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
-    CleanupTask actionCleanup(final ActionRepository actionRepository,
+    CleanupTask actionCleanup(final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement configManagement) {
-        return new AutoActionCleanup(actionRepository, configManagement);
+        return new AutoActionCleanup(deploymentManagement, configManagement);
     }
 
     /**

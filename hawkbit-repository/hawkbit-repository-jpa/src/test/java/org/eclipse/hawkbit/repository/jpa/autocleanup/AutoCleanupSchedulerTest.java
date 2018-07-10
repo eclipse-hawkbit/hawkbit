@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -30,26 +31,53 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Auto cleanup scheduler")
 public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
 
+    private final AtomicInteger counter = new AtomicInteger();
+
     @Autowired
     private LockRegistry lockRegistry;
+
+    @Before
+    public void setUp() {
+        counter.set(0);
+    }
 
     @Test
     @Description("Verifies that all cleanup handlers are executed regardless if one of them throws an error")
     public void executeHandlerChain() {
 
-        final AtomicInteger counter = new AtomicInteger();
-        final CleanupTask successHandler = () -> {
-            counter.incrementAndGet();
-        };
-        final CleanupTask failingHandler = () -> {
-            counter.incrementAndGet();
-            throw new RuntimeException("cleanup failed");
-        };
-
-        new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry,
-                Arrays.asList(successHandler, successHandler, failingHandler, successHandler)).run();
+        new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, Arrays.asList(
+                new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup())).run();
 
         assertThat(counter.get()).isEqualTo(4);
+
+    }
+
+    private class SuccessfulCleanup implements CleanupTask {
+
+        @Override
+        public void run() {
+            counter.incrementAndGet();
+        }
+
+        @Override
+        public String getId() {
+            return "success";
+        }
+
+    }
+
+    private class FailingCleanup implements CleanupTask {
+
+        @Override
+        public void run() {
+            counter.incrementAndGet();
+            throw new RuntimeException("cleanup failed");
+        }
+
+        @Override
+        public String getId() {
+            return "success";
+        }
 
     }
 

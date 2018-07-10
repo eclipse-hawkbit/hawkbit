@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.autocleanup;
 /**
  * Interface modeling a cleanup task.
  */
-@FunctionalInterface
 public interface CleanupTask extends Runnable {
 
     /**
@@ -19,5 +18,10 @@ public interface CleanupTask extends Runnable {
      */
     @Override
     void run();
+
+    /**
+     * @return The identifier of this cleanup task.
+     */
+    String getId();
 
 }

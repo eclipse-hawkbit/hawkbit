@@ -20,8 +20,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.slf4j.Logger;
@@ -40,22 +40,24 @@ public class AutoActionCleanup implements CleanupTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoActionCleanup.class);
 
+    private static final String ID = "action-cleanup";
     private static final boolean ACTION_CLEANUP_ENABLED_DEFAULT = false;
     private static final long ACTION_CLEANUP_ACTION_EXPIRY_DEFAULT = TimeUnit.DAYS.toMillis(30);
 
-    private final ActionRepository actionRepository;
+    private final DeploymentManagement deploymentMgmt;
     private final TenantConfigurationManagement config;
 
     /**
      * Constructs the action cleanup handler.
      * 
-     * @param actionRepo
-     *            The {@link ActionRepository} to operate on.
+     * @param deploymentMgmt
+     *            The {@link DeploymentManagement} to operate on.
      * @param configMgmt
      *            The {@link TenantConfigurationManagement} service.
      */
-    public AutoActionCleanup(final ActionRepository actionRepo, final TenantConfigurationManagement configMgmt) {
-        this.actionRepository = actionRepo;
+    public AutoActionCleanup(final DeploymentManagement deploymentMgmt,
+            final TenantConfigurationManagement configMgmt) {
+        this.deploymentMgmt = deploymentMgmt;
         this.config = configMgmt;
     }
 
@@ -70,10 +72,15 @@ public class AutoActionCleanup implements CleanupTask {
         final Set<Action.Status> status = getActionStatus();
         if (!status.isEmpty()) {
             final long lastModified = System.currentTimeMillis() - getExpiry();
-            actionRepository.deleteByStatusAndLastModifiedBefore(status, lastModified);
-            LOGGER.debug("Deleted all actions in status {} which have not been modified since {} ({})", status,
-                    Instant.ofEpochMilli(lastModified), lastModified);
+            final int actionsCount = deploymentMgmt.deleteActionsByStatusAndLastModifiedBefore(status, lastModified);
+            LOGGER.debug("Deleted {} actions in status {} which have not been modified since {} ({})", actionsCount,
+                    status, Instant.ofEpochMilli(lastModified), lastModified);
         }
+    }
+
+    @Override
+    public String getId() {
+        return ID;
     }
 
     private long getExpiry() {

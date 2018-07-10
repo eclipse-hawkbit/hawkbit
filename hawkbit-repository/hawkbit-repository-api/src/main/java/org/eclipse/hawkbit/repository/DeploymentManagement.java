@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -457,4 +458,19 @@ public interface DeploymentManagement {
      *             if target with given ID does not exist
      */
     Optional<DistributionSet> getInstalledDistributionSet(@NotEmpty String controllerId);
+
+    /**
+     * Deletes actions which match one of the given action status and which have
+     * not been modified since the given (absolute) time-stamp.
+     * 
+     * @param status
+     *            Set of action status.
+     * @param lastModified
+     *            A time-stamp in milliseconds.
+     * 
+     * @return The number of action entries that were deleted.
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    int deleteActionsByStatusAndLastModifiedBefore(Set<Action.Status> status, long lastModified);
+
 }

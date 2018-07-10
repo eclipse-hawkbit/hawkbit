@@ -25,8 +25,8 @@ public class AutoCleanupScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoCleanupScheduler.class);
 
-    private static final String AUTO_CLEANUP_PREFIX = "autocleanup_";
-
+    private static final String AUTO_CLEANUP = "auto-cleanup";
+    private static final String SEP = ".";
     private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
@@ -90,8 +90,8 @@ public class AutoCleanupScheduler {
     }
 
     private Lock obtainLock(final CleanupTask task, final String tenant) {
-        final String lockId = new StringBuilder().append(task.getClass().getSimpleName()).append("_").append(tenant)
-                .toString();
+        final String lockId = new StringBuilder().append(AUTO_CLEANUP).append(SEP).append(task.getId()).append(SEP)
+                .append(tenant).toString();
         return lockRegistry.obtain(lockId);
     }
 

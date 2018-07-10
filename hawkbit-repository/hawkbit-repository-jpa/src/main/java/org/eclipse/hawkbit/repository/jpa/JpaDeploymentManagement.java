@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -61,6 +62,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +104,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
 
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "SELECT * FROM sp_action WHERE tenant=#tenant AND status IN (#actionStatus) AND last_modified_at<#lastModified LIMIT 1000";
+
     private final EntityManager entityManager;
     private final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
@@ -119,6 +123,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
     private final SystemSecurityContext systemSecurityContext;
+    private final TenantAware tenantAware;
     private final Database database;
 
     JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
@@ -128,7 +133,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final Database database) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -148,6 +153,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.tenantAware = tenantAware;
         this.database = database;
     }
 
@@ -687,6 +693,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return distributionSetRepository.findInstalledAtTarget(controllerId);
+    }
+
+    @Override
+    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
+        if (status.isEmpty()) {
+            return 0;
+        }
+        final Query query = entityManager.createNativeQuery(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED);
+        query.setParameter("tenant", tenantAware.getCurrentTenant());
+        query.setParameter("lastModified", lastModified);
+        query.setParameter("actionStatus",
+                status.stream().map(Status::ordinal).map(String::valueOf).collect(Collectors.joining(",")));
+        return query.executeUpdate();
     }
 
 }
