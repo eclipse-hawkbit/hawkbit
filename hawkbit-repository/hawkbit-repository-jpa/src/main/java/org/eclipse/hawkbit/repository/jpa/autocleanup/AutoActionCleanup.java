@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -92,7 +93,7 @@ public class AutoActionCleanup implements CleanupTask {
         final TenantConfigurationValue<String> statusStr = getConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
             return Arrays.stream(statusStr.getValue().split(";|,")).map(Action.Status::valueOf)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(() -> EnumSet.noneOf(Action.Status.class)));
         }
         return Collections.emptySet();
     }

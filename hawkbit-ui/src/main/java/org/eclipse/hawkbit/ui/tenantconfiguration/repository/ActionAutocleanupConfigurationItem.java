@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -245,7 +246,8 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
     private Set<Status> getActionStatus() {
         final TenantConfigurationValue<String> statusStr = readConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
-            return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf).collect(Collectors.toSet());
+            return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf)
+                    .collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
         return Collections.emptySet();
     }
