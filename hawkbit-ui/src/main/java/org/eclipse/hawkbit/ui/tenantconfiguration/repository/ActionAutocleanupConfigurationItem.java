@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +53,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionAutocleanupConfigurationItem.class);
 
     private static final int MAX_EXPIRY_IN_DAYS = 1000;
+    private static final EnumSet<Status> EMPTY_STATUS_SET = EnumSet.noneOf(Status.class);
 
     private static final String MSG_KEY_PREFIX = "label.configuration.repository.autocleanup.action.prefix";
     private static final String MSG_KEY_BODY = "label.configuration.repository.autocleanup.action.body";
@@ -243,13 +243,13 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
                 .orElse(ACTION_STATUS_OPTIONS.iterator().next());
     }
 
-    private Set<Status> getActionStatus() {
+    private EnumSet<Status> getActionStatus() {
         final TenantConfigurationValue<String> statusStr = readConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
             return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf)
                     .collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
-        return Collections.emptySet();
+        return EMPTY_STATUS_SET;
     }
 
     private <T extends Serializable> TenantConfigurationValue<T> readConfigValue(final String key,
@@ -268,7 +268,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
         private String name;
 
         public ActionStatusOption(final Status... status) {
-            statusSet = Arrays.stream(status).collect(Collectors.toSet());
+            statusSet = Arrays.stream(status).collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
 
         public String getName() {

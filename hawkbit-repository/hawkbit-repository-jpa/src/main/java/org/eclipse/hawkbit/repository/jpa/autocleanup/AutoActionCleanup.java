@@ -15,15 +15,14 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ public class AutoActionCleanup implements CleanupTask {
     private static final String ID = "action-cleanup";
     private static final boolean ACTION_CLEANUP_ENABLED_DEFAULT = false;
     private static final long ACTION_CLEANUP_ACTION_EXPIRY_DEFAULT = TimeUnit.DAYS.toMillis(30);
+    private static final EnumSet<Status> EMPTY_STATUS_SET = EnumSet.noneOf(Status.class);
 
     private final DeploymentManagement deploymentMgmt;
     private final TenantConfigurationManagement config;
@@ -70,7 +70,7 @@ public class AutoActionCleanup implements CleanupTask {
             return;
         }
 
-        final Set<Action.Status> status = getActionStatus();
+        final EnumSet<Status> status = getActionStatus();
         if (!status.isEmpty()) {
             final long lastModified = System.currentTimeMillis() - getExpiry();
             final int actionsCount = deploymentMgmt.deleteActionsByStatusAndLastModifiedBefore(status, lastModified);
@@ -89,13 +89,13 @@ public class AutoActionCleanup implements CleanupTask {
         return expiry != null ? expiry.getValue() : ACTION_CLEANUP_ACTION_EXPIRY_DEFAULT;
     }
 
-    private Set<Action.Status> getActionStatus() {
+    private EnumSet<Status> getActionStatus() {
         final TenantConfigurationValue<String> statusStr = getConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
-            return Arrays.stream(statusStr.getValue().split(";|,")).map(Action.Status::valueOf)
-                    .collect(Collectors.toCollection(() -> EnumSet.noneOf(Action.Status.class)));
+            return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf)
+                    .collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
-        return Collections.emptySet();
+        return EMPTY_STATUS_SET;
     }
 
     private boolean isEnabled() {
