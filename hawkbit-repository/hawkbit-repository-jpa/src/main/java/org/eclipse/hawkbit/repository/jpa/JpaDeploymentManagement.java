@@ -20,7 +20,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -104,7 +103,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
 
-    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "SELECT * FROM sp_action WHERE tenant=#tenant AND status IN (#actionStatus) AND last_modified_at<#lastModified LIMIT 1000";
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "DELETE FROM sp_action WHERE tenant='%s' AND status IN (%s) AND last_modified_at<%d LIMIT 1000";
 
     private final EntityManager entityManager;
     private final ActionRepository actionRepository;
@@ -700,12 +699,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         if (status.isEmpty()) {
             return 0;
         }
-        final Query query = entityManager.createNativeQuery(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED);
-        query.setParameter("tenant", tenantAware.getCurrentTenant());
-        query.setParameter("lastModified", lastModified);
-        query.setParameter("actionStatus",
-                status.stream().map(Status::ordinal).map(String::valueOf).collect(Collectors.joining(",")));
-        return query.executeUpdate();
+        // assemble the native query
+        final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
+                tenantAware.getCurrentTenant(),
+                status.stream().map(Status::ordinal).map(String::valueOf).collect(Collectors.joining(",")),
+                lastModified);
+        LOG.debug("Action cleanup: Executing the following native query: {}", queryStr);
+        return entityManager.createNativeQuery(queryStr).executeUpdate();
     }
 
 }
