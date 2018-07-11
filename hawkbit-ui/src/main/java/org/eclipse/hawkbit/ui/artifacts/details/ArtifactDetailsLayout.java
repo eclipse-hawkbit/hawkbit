@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -266,7 +265,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
                         fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
+                        i18n.getMessage("button.discard"), ValoTheme.BUTTON_TINY + " " + "blueicon", true,
                         FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
                 deleteIcon.setData(itemId);
                 deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));

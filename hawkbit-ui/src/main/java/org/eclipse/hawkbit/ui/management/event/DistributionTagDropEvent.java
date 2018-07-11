@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -41,7 +40,7 @@ import com.vaadin.ui.Table.TableTransferable;
  */
 public class DistributionTagDropEvent implements DropHandler {
 
-    private static final long serialVersionUID = 7338133229709850212L;
+    private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
 
@@ -79,13 +78,12 @@ public class DistributionTagDropEvent implements DropHandler {
             if (source.getId().equals(UIComponentIdProvider.DIST_TABLE_ID)) {
                 processDistributionDrop(event);
             }
-
         }
     }
 
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
-        if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
+        if (tagName.equals(i18n.getMessage("caption.entity.distribution.tag"))) {
             notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
                     new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
@@ -97,7 +95,7 @@ public class DistributionTagDropEvent implements DropHandler {
         final Component compsource = event.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
 
-            notification.displayValidationError(i18n.getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            notification.displayValidationError(i18n.getMessage(getActionNotAllowedMessage()));
             return false;
         } else {
             final Table source = ((TableTransferable) event.getTransferable()).getSourceComponent();
@@ -122,7 +120,7 @@ public class DistributionTagDropEvent implements DropHandler {
 
     private boolean validateIfSourceIsDs(final Table source) {
         if (!source.getId().equals(UIComponentIdProvider.DIST_TABLE_ID)) {
-            notification.displayValidationError(i18n.getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            notification.displayValidationError(i18n.getMessage(getActionNotAllowedMessage()));
             return false;
         }
         return true;
@@ -158,6 +156,9 @@ public class DistributionTagDropEvent implements DropHandler {
     @Override
     public AcceptCriterion getAcceptCriterion() {
         return managementViewClientCriterion;
+    }
 
+    private String getActionNotAllowedMessage() {
+        return i18n.getMessage("message.action.not.allowed");
     }
 }

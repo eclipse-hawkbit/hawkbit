@@ -75,11 +75,11 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     void onEvent(final TargetTableEvent targetUIEvent) {
         final Optional<Long> targetId = managementUIState.getLastSelectedTargetId();
         if (BaseEntityEventType.SELECTED_ENTITY == targetUIEvent.getEventType()) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
+            setData(i18n.getMessage("message.data.available"));
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType() && targetId.isPresent()
                 && targetUIEvent.getEntityIds().contains(targetId.get())) {
-            setData(SPUIDefinitions.NO_DATA);
+            setData(i18n.getMessage("message.no.data"));
             UI.getCurrent().access(this::populateActionHistoryDetails);
         }
     }

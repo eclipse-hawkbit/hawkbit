@@ -444,8 +444,9 @@ public class CommonDialogWindow extends Window {
     }
 
     private void createCancelButton() {
-        cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
+                i18n.getMessage("button.cancel"), "", "", true, FontAwesome.TIMES,
+                SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
         addCloseListenerForCancelButton();
@@ -459,8 +460,8 @@ public class CommonDialogWindow extends Window {
     }
 
     private void createSaveButton() {
-        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
+        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, i18n.getMessage("button.save"),
+                "", "", true, FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
         addCloseListenerForSaveButton();

@@ -184,7 +184,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setContainerDataSource(container);
         final int size = container.size();
         if (size == 0) {
-            setData(SPUIDefinitions.NO_DATA);
+            setData(i18n.getMessage("message.no.data"));
         }
     }
 

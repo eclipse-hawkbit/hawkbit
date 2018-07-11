@@ -91,7 +91,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final Label forceLabel = new Label();
         forceLabel.setStyleName("statusIconPending");
         forceLabel.setIcon(FontAwesome.BOLT);
-        forceLabel.setCaption("Forced");
+        forceLabel.setCaption(i18n.getMessage("label.action.forced"));
         forceLabel.setDescription(i18n.getMessage("tooltip.forced.item"));
         forceLabel.setStyleName("padding-right-style");
         addComponent(forceLabel);
@@ -102,7 +102,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(softItem);
         final Label softLabel = new Label();
         softLabel.setSizeFull();
-        softLabel.setCaption("Soft");
+        softLabel.setCaption(i18n.getMessage("label.action.soft"));
         softLabel.setDescription(i18n.getMessage("tooltip.soft.item"));
         softLabel.setStyleName("padding-right-style");
         addComponent(softLabel);
@@ -115,7 +115,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final Label autoForceLabel = new Label();
         autoForceLabel.setStyleName("statusIconPending");
         autoForceLabel.setIcon(FontAwesome.HISTORY);
-        autoForceLabel.setCaption("Time Forced");
+        autoForceLabel.setCaption(i18n.getMessage("label.action.time.forced"));
         autoForceLabel.setDescription(i18n.getMessage("tooltip.timeforced.item"));
         autoForceLabel.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(autoForceLabel);

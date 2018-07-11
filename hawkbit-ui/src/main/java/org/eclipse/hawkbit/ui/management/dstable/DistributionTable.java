@@ -642,9 +642,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource) {
         final String tagData = wrapperSource.getData().toString();
         if (wrapperSource.getId().startsWith(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)) {
-            return !isNoTagButton(tagData, SPUIDefinitions.DISTRIBUTION_TAG_BUTTON);
+            return !isNoTagButton(tagData, getI18n().getMessage("caption.entity.distribution.tag"));
         } else if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
-            return !isNoTagButton(tagData, SPUIDefinitions.TARGET_TAG_BUTTON);
+            return !isNoTagButton(tagData, getI18n().getMessage("caption.entity.target.tag"));
         }
         getNotification().displayValidationError(notAllowedMsg);
         return false;

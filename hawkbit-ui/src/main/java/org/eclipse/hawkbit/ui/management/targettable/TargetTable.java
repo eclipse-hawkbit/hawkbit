@@ -511,7 +511,7 @@ public class TargetTable extends AbstractTable<Target> {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
-        if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
+        if (tagName.equals(getI18n().getMessage("caption.entity.target.tag"))) {
             getNotification().displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
                     getI18n().getMessage("label.no.tag.assigned")));
             return false;
@@ -719,7 +719,7 @@ public class TargetTable extends AbstractTable<Target> {
         }
 
         if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
+            setData(getI18n().getMessage("message.data.available"));
         }
         getEventBus().publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }

@@ -127,7 +127,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setColumnHeaderNames() {
         getColumn(ProxyMessage.PXY_MSG_ID).setHeaderCaption("##");
-        getColumn(ProxyMessage.PXY_MSG_VALUE).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_MSGS);
+        getColumn(ProxyMessage.PXY_MSG_VALUE).setHeaderCaption(i18n.getMessage("caption.action.messages"));
     }
 
     @Override

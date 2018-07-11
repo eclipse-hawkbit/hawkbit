@@ -128,7 +128,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
 
     private VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
-        final Label dropHereLabel = new Label("Drop Files to upload");
+        final Label dropHereLabel = new Label(i18n.getMessage("label.drop.area.upload"));
         dropHereLabel.setWidth(null);
 
         final Label dropIcon = new Label(FontAwesome.ARROW_DOWN.getHtml(), ContentMode.HTML);

@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.ui.common.event.SoftwareModuleTypeFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -64,7 +63,7 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return SPUILabelDefinitions.TYPE;
+        return getI18n().getMessage("caption.filter.by.type");
     }
 
     @Override

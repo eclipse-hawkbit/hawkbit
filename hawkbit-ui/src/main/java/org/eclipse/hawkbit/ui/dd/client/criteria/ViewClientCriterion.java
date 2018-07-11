@@ -269,8 +269,8 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     private void showErrorNotification(final VDragEvent drag) {
         final VNotification n = VNotification.createNotification(SPUILabelDefinitions.SP_DELAY,
                 drag.getTransferable().getDragSource().getWidget());
-        n.show(getDraggableTemplate().notificationMsg(SPUILabelDefinitions.ACTION_NOT_ALLOWED).asString(),
-                Position.BOTTOM_RIGHT, SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
+        n.show(getDraggableTemplate().notificationMsg("Action not allowed").asString(), Position.BOTTOM_RIGHT,
+                SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
     }
 
     /**

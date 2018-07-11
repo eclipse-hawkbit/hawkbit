@@ -135,7 +135,7 @@ public class DistributionSetSelectTable extends Table {
             refreshTablecontainer();
         }
         if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
+            setData(i18n.getMessage("message.data.available"));
         }
     }
 

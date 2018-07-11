@@ -56,7 +56,8 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
                 managementUIState, managementViewClientCriterion, targetManagement, distributionSetManagement,
                 deploymentManagement, targetTagManagement, uiProperties);
 
-        super.init(new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState), distributionTable,
+        super.init(i18n, new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState),
+                distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
                         dsMetadataPopupLayout, notification, distributionSetTagManagement,
                         distributionAddUpdateWindowLayout));
