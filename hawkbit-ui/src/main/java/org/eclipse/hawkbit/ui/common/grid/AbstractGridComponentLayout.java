@@ -28,7 +28,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private transient EventBus.UIEventBus eventBus;
+    private final transient EventBus.UIEventBus eventBus;
 
     private final VaadinMessageSource i18n;
 
