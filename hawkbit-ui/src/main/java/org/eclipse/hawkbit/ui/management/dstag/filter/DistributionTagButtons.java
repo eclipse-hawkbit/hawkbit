@@ -78,7 +78,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         this.distributionSetTagManagement = distributionSetTagManagement;
 
         if (permChecker.hasReadRepositoryPermission()) {
-            addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+            addNewTag(entityFactory.tag().create().name(getNoTagLabel()).build());
         }
     }
 
@@ -117,7 +117,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        if (NO_TAG.equals(name)) {
+        if (getNoTagLabel().equals(name)) {
             return UIComponentIdProvider.NO_TAG_DISTRIBUTION_SET;
         }
         return name;
@@ -150,7 +150,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         removeUpdateAndDeleteColumn();
-        addNewTag(entityFactory.tag().create().name(NO_TAG).build());
+        addNewTag(entityFactory.tag().create().name(getNoTagLabel()).build());
         addColumn();
     }
 

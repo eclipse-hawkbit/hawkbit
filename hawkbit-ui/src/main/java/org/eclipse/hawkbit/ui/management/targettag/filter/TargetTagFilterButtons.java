@@ -85,7 +85,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         this.entityFactory = entityFactory;
         this.targetTagManagement = targetTagManagement;
 
-        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(getNoTagLabel()).build());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        if (NO_TAG.equals(name)) {
+        if (getNoTagLabel().equals(name)) {
             return UIComponentIdProvider.NO_TAG_TARGET;
         }
         return name;
@@ -258,7 +258,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeUpdateAndDeleteColumn();
-        addNewTargetTag(entityFactory.tag().create().name(NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(getNoTagLabel()).build());
         addColumn();
     }
 

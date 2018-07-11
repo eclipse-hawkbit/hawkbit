@@ -119,7 +119,7 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
         return table;
     }
 
-    private class TableShortCutHandler implements Handler {
+    private final class TableShortCutHandler implements Handler {
 
         private static final long serialVersionUID = 1L;
 
