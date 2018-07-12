@@ -1013,6 +1013,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
+            totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+            groupsLegendLayout.populateTotalTargets(totalTargetsCount);
         } else {
             editRolloutEnabled = true;
             if (rollout.getStatus() != Rollout.RolloutStatus.READY) {
@@ -1043,10 +1045,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             updateGroupsChart(rolloutGroupManagement
                     .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
                     .getContent(), rollout.getTotalTargets());
-        }
 
-        totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
-        groupsLegendLayout.populateTotalTargets(totalTargetsCount);
+            totalTargetsCount = rollout.getTotalTargets();
+            groupsLegendLayout.populateTotalTargets(totalTargetsCount);
+        }
     }
 
     private void disableRequiredFieldsOnEdit() {
