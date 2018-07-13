@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ui.utils;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
- * Interface to provide the unchanged constants.
+ * Class that contains the unique ids of the UI components.
  */
 public final class UIComponentIdProvider {
     /**
@@ -1230,7 +1230,7 @@ public final class UIComponentIdProvider {
     /**
      * ID for the menu bar item to update a tag or type
      */
-    public static final String CONFIG_MENU_BAR_UPDATE = "update";
+    public static final String CONFIG_MENU_BAR_UPDATE = "edit";
 
     /**
      * ID for the menu bar item to delete a tag or type

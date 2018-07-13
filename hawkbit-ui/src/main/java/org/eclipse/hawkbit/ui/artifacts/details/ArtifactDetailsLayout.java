@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
@@ -181,9 +182,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
-                "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
+                "", i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE), null, true, FontAwesome.EXPAND,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
+
     }
 
     private void buildLayout() {
@@ -273,13 +276,15 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 return deleteIcon;
             }
         });
+
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.delete.artifact.confirmbox"),
                 i18n.getMessage("message.delete.artifact", new Object[] { fileName }),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (ok) {
                         artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
@@ -292,6 +297,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void setTableColumnDetails(final Table table) {
+
         table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
         table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
         if (fullWindowMode) {
@@ -351,6 +357,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void maxArtifactDetails() {
         final Boolean flag = (Boolean) maxMinButton.getData();
         if (flag == null || Boolean.FALSE.equals(flag)) {
+            // Clicked on max Button
             maximizedArtifactDetailsView();
         } else {
             minimizedArtifactDetailsView();
@@ -387,6 +394,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void createArtifactDetailsMaxView() {
+
         artifactDetailsTable.setValue(null);
         artifactDetailsTable.setSelectable(false);
         artifactDetailsTable.setMultiSelect(false);
@@ -497,11 +505,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void showMinIcon() {
         maxMinButton.toggleIcon(FontAwesome.COMPRESS);
         maxMinButton.setData(Boolean.TRUE);
+        maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MINIMIZE));
     }
 
     private void showMaxIcon() {
         maxMinButton.toggleIcon(FontAwesome.EXPAND);
         maxMinButton.setData(Boolean.FALSE);
+        maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE));
     }
 
     private boolean isMaximized() {
