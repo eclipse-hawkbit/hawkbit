@@ -163,7 +163,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void createComponents(final String labelSoftwareModule) {
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
-                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule)).buildCaptionLabel();
+                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule, i18n)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
@@ -429,7 +429,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             if (StringUtils.isEmpty(swModuleName)) {
                 setTitleOfLayoutHeader();
             } else {
-                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName));
+                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName, i18n));
                 titleOfArtifactDetails.setContentMode(ContentMode.HTML);
             }
         }
@@ -452,7 +452,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
+        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId("", i18n));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
     }
 
@@ -516,4 +516,5 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private boolean isMaximized() {
         return artifactUploadState.isArtifactDetailsMaximized();
     }
+
 }

@@ -41,6 +41,10 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_TARGET_TAG = "caption.entity.target.tag";
 
+    public static final String CAPTION_ARTIFACT_DETAILS = "caption.artifact.details";
+
+    public static final String CAPTION_ARTIFACT_DETAILS_OF = "caption.artifact.details.of";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
@@ -54,6 +58,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_UPLOAD_ACTION = "upload.action";
 
     public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
+
+    public static final String TOOLTIP_OVERDUE = "tooltip.overdue";
 
     public static final String TOOLTIP_MAXIMIZE = "tooltip.maximize";
 

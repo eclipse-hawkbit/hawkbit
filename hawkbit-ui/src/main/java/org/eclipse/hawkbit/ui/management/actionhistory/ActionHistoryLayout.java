@@ -79,7 +79,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
             caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY);
         }
 
-        return HawkbitCommonUtil.DIV_DESCRIPTION_START + caption + HawkbitCommonUtil.DIV_DESCRIPTION_END;
+        return HawkbitCommonUtil.getCaptionText(caption);
     }
 
     @Override
