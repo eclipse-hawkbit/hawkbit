@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -43,6 +44,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     private transient AbstractGrid<?>.DetailsSupport details;
     private Long masterForDetails;
 
+    private final String actionHistoryCaption;
+
     /**
      * Constructor.
      *
@@ -58,7 +61,23 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
+        actionHistoryCaption = getActionHistoryCaption();
         init();
+    }
+
+    private final String getActionHistoryCaption() {
+        return getActionHistoryCaption(null);
+    }
+
+    private String getActionHistoryCaption(final String targetName) {
+        final String caption;
+        if (StringUtils.hasText(targetName)) {
+            caption = getI18n().getMessage("caption.action.history.for", HawkbitCommonUtil.getBoldHTMLText(targetName));
+        } else {
+            caption = getI18n().getMessage("caption.action.history");
+        }
+
+        return HawkbitCommonUtil.DIV_DESCRIPTION_START + caption + HawkbitCommonUtil.DIV_DESCRIPTION_END;
     }
 
     @Override
@@ -68,18 +87,18 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
 
     @Override
     public ActionHistoryGrid createGrid() {
-        return new ActionHistoryGrid(i18n, deploymentManagement, eventBus, notification, managementUIState);
+        return new ActionHistoryGrid(getI18n(), deploymentManagement, getEventBus(), notification, managementUIState);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final TargetTableEvent targetUIEvent) {
         final Optional<Long> targetId = managementUIState.getLastSelectedTargetId();
         if (BaseEntityEventType.SELECTED_ENTITY == targetUIEvent.getEventType()) {
-            setData(i18n.getMessage("message.data.available"));
+            setData(getI18n().getMessage("message.data.available"));
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType() && targetId.isPresent()
                 && targetUIEvent.getEntityIds().contains(targetId.get())) {
-            setData(i18n.getMessage("message.no.data"));
+            setData(getI18n().getMessage("message.no.data"));
             UI.getCurrent().access(this::populateActionHistoryDetails);
         }
     }
@@ -138,7 +157,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          * @param managementUIState
          */
         ActionHistoryHeader(final ManagementUIState managementUIState) {
-            super(managementUIState);
+            super(managementUIState, actionHistoryCaption, getI18n());
             this.setHeaderMaximizeSupport(
                     new ActionHistoryHeaderMaxSupport(this, SPUIDefinitions.EXPAND_ACTION_HISTORY));
         }
@@ -160,7 +179,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          *            name of the target
          */
         public void updateActionHistoryHeader(final String targetName) {
-            updateTitle(HawkbitCommonUtil.getActionHistoryLabelId(targetName));
+            updateTitle(getActionHistoryCaption(targetName));
         }
 
         /**
@@ -195,12 +214,12 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
         @Override
         protected void maximize() {
             details.populateMasterDataAndRecreateContainer(masterForDetails);
-            eventBus.publish(this, ManagementUIEvent.MAX_ACTION_HISTORY);
+            getEventBus().publish(this, ManagementUIEvent.MAX_ACTION_HISTORY);
         }
 
         @Override
         protected void minimize() {
-            eventBus.publish(this, ManagementUIEvent.MIN_ACTION_HISTORY);
+            getEventBus().publish(this, ManagementUIEvent.MIN_ACTION_HISTORY);
         }
 
         /**
@@ -212,4 +231,5 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
             return abstractGridHeader;
         }
     }
+
 }

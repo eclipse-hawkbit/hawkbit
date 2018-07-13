@@ -382,10 +382,6 @@ public final class SPUIDefinitions {
 
     public static final String DELETE_FILTER_BUTTON_COLUMN = "deleteFilterButton";
 
-    public static final String BUTTON_CANCEL = "button.cancel";
-
-    public static final String BUTTON_OK = "button.ok";
-
     /**
      * /** Constructor.
      */

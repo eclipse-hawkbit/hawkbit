@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyActionStatus;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
@@ -640,6 +641,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * detailed format.
      */
     protected static class TooltipGenerator implements CellDescriptionGenerator {
+
         private static final long serialVersionUID = 1L;
 
         private final VaadinMessageSource i18n;
@@ -668,7 +670,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
 
         private String getFormattedNextMaintenanceWindow(final ZonedDateTime nextAt) {
             final long nextAtMilli = nextAt.toInstant().toEpochMilli();
-            return i18n.getMessage("tooltip.next.maintenancewindow",
+            return i18n.getMessage(UIMessageIdProvider.TOOLTIP_NEXT_MAINTENANCE_WINDOW,
                     SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT));
         }
     }

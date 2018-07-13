@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -201,24 +202,24 @@ public class CreateOrUpdateFilterTable extends Table {
         final Label label = new LabelBuilder().name("").buildLabel();
         label.setContentMode(ContentMode.HTML);
         if (targetStatus == TargetUpdateStatus.PENDING) {
-            label.setDescription("Pending");
+            label.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_STATUS_PENDING));
             label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_YELLOW);
             label.setValue(FontAwesome.ADJUST.getHtml());
         } else if (targetStatus == TargetUpdateStatus.REGISTERED) {
-            label.setDescription("Registered");
+            label.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_STATUS_REGISTERED));
             label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE);
             label.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
         } else if (targetStatus == TargetUpdateStatus.ERROR) {
-            label.setDescription(i18n.getMessage("label.error"));
+            label.setDescription(i18n.getMessage(i18n.getMessage(UIMessageIdProvider.TOOLTIP_STATUS_ERROR)));
             label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_RED);
             label.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.IN_SYNC) {
             label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_GREEN);
-            label.setDescription("In-Synch");
+            label.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_STATUS_INSYNC));
             label.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
         } else if (targetStatus == TargetUpdateStatus.UNKNOWN) {
             label.setStyleName(SPUIStyleDefinitions.STATUS_ICON_BLUE);
-            label.setDescription(i18n.getMessage("label.unknown"));
+            label.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_TARGET_STATUS_UNKNOWN));
             label.setValue(FontAwesome.QUESTION_CIRCLE.getHtml());
         }
         return label;

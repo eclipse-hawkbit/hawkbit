@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
@@ -92,7 +93,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         forceLabel.setStyleName("statusIconPending");
         forceLabel.setIcon(FontAwesome.BOLT);
         forceLabel.setCaption(i18n.getMessage("label.action.forced"));
-        forceLabel.setDescription(i18n.getMessage("tooltip.forced.item"));
+        forceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_FORCED_ITEM));
         forceLabel.setStyleName("padding-right-style");
         addComponent(forceLabel);
 
@@ -103,7 +104,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final Label softLabel = new Label();
         softLabel.setSizeFull();
         softLabel.setCaption(i18n.getMessage("label.action.soft"));
-        softLabel.setDescription(i18n.getMessage("tooltip.soft.item"));
+        softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
         softLabel.setStyleName("padding-right-style");
         addComponent(softLabel);
 
@@ -116,7 +117,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         autoForceLabel.setStyleName("statusIconPending");
         autoForceLabel.setIcon(FontAwesome.HISTORY);
         autoForceLabel.setCaption(i18n.getMessage("label.action.time.forced"));
-        autoForceLabel.setDescription(i18n.getMessage("tooltip.timeforced.item"));
+        autoForceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_ITEM));
         autoForceLabel.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(autoForceLabel);
 

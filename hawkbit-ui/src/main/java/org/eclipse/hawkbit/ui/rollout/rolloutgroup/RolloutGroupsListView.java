@@ -59,12 +59,13 @@ public class RolloutGroupsListView extends AbstractGridComponentLayout {
 
     @Override
     public RolloutGroupsListHeader createGridHeader() {
-        return new RolloutGroupsListHeader(eventBus, rolloutUIState, i18n);
+        return new RolloutGroupsListHeader(getEventBus(), rolloutUIState, getI18n());
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
-        return new RolloutGroupListGrid(i18n, eventBus, rolloutGroupManagement, rolloutUIState, permissionChecker);
+        return new RolloutGroupListGrid(getI18n(), getEventBus(), rolloutGroupManagement, rolloutUIState,
+                permissionChecker);
     }
 
 }

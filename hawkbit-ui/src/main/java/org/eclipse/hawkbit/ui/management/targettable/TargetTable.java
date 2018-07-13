@@ -75,6 +75,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -402,10 +403,12 @@ public class TargetTable extends AbstractTable<Target> {
                 .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
         if (StringUtils.hasText(pollStatusToolTip)) {
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.setDescription(pollStatusToolTip);
         } else {
             statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
+            statusLabel.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_IN_TIME));
         }
-        statusLabel.setDescription(pollStatusToolTip);
+
         return statusLabel;
     }
 
@@ -424,6 +427,7 @@ public class TargetTable extends AbstractTable<Target> {
         pinBtn.setData(pinnedTarget);
         pinBtn.setId(UIComponentIdProvider.TARGET_PIN_ICON + controllerId);
         pinBtn.addClickListener(this::addPinClickListener);
+        pinBtn.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_TARGET_PIN));
         if (isPinned(pinnedTarget)) {
             pinBtn.addStyleName(TARGET_PINNED);
             targetPinned = Boolean.TRUE;
@@ -980,8 +984,8 @@ public class TargetTable extends AbstractTable<Target> {
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
                 getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
-                getI18n().getMessage(SPUIDefinitions.BUTTON_OK), getI18n().getMessage(SPUIDefinitions.BUTTON_CANCEL),
-                ok -> {
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
+                getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
                     } else {

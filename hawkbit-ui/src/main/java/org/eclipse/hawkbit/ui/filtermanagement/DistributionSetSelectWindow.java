@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -273,7 +274,7 @@ public class DistributionSetSelectWindow
             layout.addComponent(buttonsLayout);
 
             okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
-                    i18n.getMessage(SPUIDefinitions.BUTTON_OK), "", "", true, FontAwesome.SAVE,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_OK), "", "", true, FontAwesome.SAVE,
                     SPUIButtonStyleNoBorderWithIcon.class);
             okButton.setSizeUndefined();
             okButton.addStyleName("default-color");
@@ -283,7 +284,7 @@ public class DistributionSetSelectWindow
             buttonsLayout.setExpandRatio(okButton, 1.0F);
 
             final Button cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
-                    i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), "", "", true, FontAwesome.TIMES,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), "", "", true, FontAwesome.TIMES,
                     SPUIButtonStyleNoBorderWithIcon.class);
             cancelButton.setSizeUndefined();
             cancelButton.addStyleName("default-color");
