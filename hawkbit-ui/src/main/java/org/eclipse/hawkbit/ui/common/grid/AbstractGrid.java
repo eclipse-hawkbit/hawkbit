@@ -145,7 +145,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         }
 
         if (indexedContainer != null && indexedContainer.size() == 0) {
-            setData(i18n.getMessage("message.no.data"));
+            setData(i18n.getMessage(UIMessageIdProvider.MESSAGE_NO_DATA));
         }
     }
 
@@ -706,6 +706,6 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
     }
 
     protected String getActionLabeltext() {
-        return i18n.getMessage("upload.action");
+        return i18n.getMessage(UIMessageIdProvider.MESSAGE_UPLOAD_ACTION);
     }
 }

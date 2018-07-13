@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
 import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
@@ -128,7 +129,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
 
     private VerticalLayout createDropAreaLayout() {
         final VerticalLayout dropAreaLayout = new VerticalLayout();
-        final Label dropHereLabel = new Label(i18n.getMessage("label.drop.area.upload"));
+        final Label dropHereLabel = new Label(i18n.getMessage(UIMessageIdProvider.LABEL_DROP_AREA_UPLOAD));
         dropHereLabel.setWidth(null);
 
         final Label dropIcon = new Label(FontAwesome.ARROW_DOWN.getHtml(), ContentMode.HTML);
@@ -210,7 +211,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
             // check if drop is valid.If valid ,check if software module is
             // selected.
             if (!isFilesDropped(event)) {
-                uiNotification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
+                uiNotification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
                 return false;
             }
             return validateSoftwareModuleSelection();

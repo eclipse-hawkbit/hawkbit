@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
@@ -72,9 +73,10 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     private String getActionHistoryCaption(final String targetName) {
         final String caption;
         if (StringUtils.hasText(targetName)) {
-            caption = getI18n().getMessage("caption.action.history.for", HawkbitCommonUtil.getBoldHTMLText(targetName));
+            caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR,
+                    HawkbitCommonUtil.getBoldHTMLText(targetName));
         } else {
-            caption = getI18n().getMessage("caption.action.history");
+            caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY);
         }
 
         return HawkbitCommonUtil.DIV_DESCRIPTION_START + caption + HawkbitCommonUtil.DIV_DESCRIPTION_END;
@@ -94,11 +96,11 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     void onEvent(final TargetTableEvent targetUIEvent) {
         final Optional<Long> targetId = managementUIState.getLastSelectedTargetId();
         if (BaseEntityEventType.SELECTED_ENTITY == targetUIEvent.getEventType()) {
-            setData(getI18n().getMessage("message.data.available"));
+            setData(getI18n().getMessage(UIMessageIdProvider.MESSAGE_DATA_AVAILABLE));
             UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         } else if (BaseEntityEventType.REMOVE_ENTITY == targetUIEvent.getEventType() && targetId.isPresent()
                 && targetUIEvent.getEntityIds().contains(targetId.get())) {
-            setData(getI18n().getMessage("message.no.data"));
+            setData(getI18n().getMessage(UIMessageIdProvider.MESSAGE_NO_DATA));
             UI.getCurrent().access(this::populateActionHistoryDetails);
         }
     }

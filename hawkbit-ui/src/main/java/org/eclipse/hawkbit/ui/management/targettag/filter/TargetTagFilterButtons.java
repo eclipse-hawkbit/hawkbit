@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -288,7 +289,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     private String getTargetTagCaption() {
-        return getI18n().getMessage("caption.entity.target.tag");
+        return getI18n().getMessage(UIMessageIdProvider.CAPTION_TARGET_TAG);
     }
 
     @Override
@@ -322,7 +323,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     private String getActionNotAllowedMessage() {
-        return getI18n().getMessage("message.action.not.allowed");
+        return getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
     }
 
 }

@@ -174,7 +174,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         breadcrumbButton = createBreadcrumbButton();
 
-        headerCaption = new LabelBuilder().name(i18n.getMessage("label.create.filter")).buildCaptionLabel();
+        headerCaption = new LabelBuilder().name(i18n.getMessage(UIMessageIdProvider.LABEL_CREATE_FILTER))
+                .buildCaptionLabel();
 
         nameLabel = new LabelBuilder().name("").buildLabel();
         nameLabel.setId(UIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);

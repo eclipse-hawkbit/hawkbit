@@ -78,7 +78,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
-    protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
+    protected static final String ACTION_NOT_ALLOWED_MSG = UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -185,7 +185,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setContainerDataSource(container);
         final int size = container.size();
         if (size == 0) {
-            setData(i18n.getMessage("message.no.data"));
+            setData(i18n.getMessage(UIMessageIdProvider.MESSAGE_NO_DATA));
         }
     }
 

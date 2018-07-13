@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
@@ -83,7 +84,7 @@ public class DistributionTagDropEvent implements DropHandler {
 
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
-        if (tagName.equals(i18n.getMessage("caption.entity.distribution.tag"))) {
+        if (tagName.equals(i18n.getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG))) {
             notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
                     new Object[] { i18n.getMessage("label.no.tag.assigned") }));
             return false;
@@ -159,6 +160,6 @@ public class DistributionTagDropEvent implements DropHandler {
     }
 
     private String getActionNotAllowedMessage() {
-        return i18n.getMessage("message.action.not.allowed");
+        return i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
     }
 }

@@ -70,7 +70,7 @@ public abstract class AbstractFilterButtons extends Table {
         this.i18n = i18n;
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
-        noTagLabel = i18n.getMessage("label.no.tag");
+        noTagLabel = i18n.getMessage(UIMessageIdProvider.LABEL_NO_TAG);
         if (doSubscribeToEventBus()) {
             eventBus.subscribe(this);
         }

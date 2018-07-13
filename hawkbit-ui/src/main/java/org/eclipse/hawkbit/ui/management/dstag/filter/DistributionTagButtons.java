@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -101,7 +102,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonWrapperData() {
-        return getI18n().getMessage("caption.entity.distribution.tag");
+        return getI18n().getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG);
     }
 
     @Override
@@ -163,7 +164,8 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
-        openConfirmationWindowForDeletion(getEntityId(event), getI18n().getMessage("caption.entity.distribution.tag"),
+        openConfirmationWindowForDeletion(getEntityId(event),
+                getI18n().getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG),
                 new DistributionSetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 

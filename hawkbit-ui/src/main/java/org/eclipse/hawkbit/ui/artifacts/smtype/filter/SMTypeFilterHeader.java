@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
 import org.eclipse.hawkbit.ui.common.event.SoftwareModuleTypeFilterHeaderEvent;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -58,7 +59,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return getI18n().getMessage("caption.filter.by.type");
+        return getI18n().getMessage(UIMessageIdProvider.CAPTION_FILTER_BY_TYPE);
     }
 
     @Override

@@ -268,8 +268,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
                         fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        i18n.getMessage("button.discard"), ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                        FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+                        i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon",
+                        true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
                 deleteIcon.setData(itemId);
                 deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
                 return deleteIcon;
@@ -305,7 +305,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
         table.setColumnHeader(CREATE_MODIFIED_DATE_UPLOAD, i18n.getMessage("upload.last.modified.date"));
         if (!readOnly) {
-            table.setColumnHeader(ACTION, i18n.getMessage("upload.action"));
+            table.setColumnHeader(ACTION, i18n.getMessage(UIMessageIdProvider.MESSAGE_UPLOAD_ACTION));
         }
 
         table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5F);

@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
@@ -360,7 +361,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final Table source = transferable.getSourceComponent();
 
             if (!source.getId().equals(UIComponentIdProvider.DIST_TABLE_ID)) {
-                notification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
+                notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
                 isValid = Boolean.FALSE;
             } else {
                 if (getDropppedDistributionDetails(transferable).size() > 1) {
@@ -369,7 +370,7 @@ public class TargetTableHeader extends AbstractTableHeader {
                 }
             }
         } else {
-            notification.displayValidationError(i18n.getMessage("message.action.not.allowed"));
+            notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
             isValid = Boolean.FALSE;
         }
         return isValid;

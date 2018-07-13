@@ -148,7 +148,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
         this.uiProperties = uiProperties;
-        notAllowedMsg = i18n.getMessage("message.action.not.allowed");
+        notAllowedMsg = i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
 
         addNewContainerDS();
         setColumnProperties();
@@ -643,9 +643,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected boolean validateDragAndDropWrapper(final DragAndDropWrapper wrapperSource) {
         final String tagData = wrapperSource.getData().toString();
         if (wrapperSource.getId().startsWith(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS)) {
-            return !isNoTagButton(tagData, getI18n().getMessage("caption.entity.distribution.tag"));
+            return !isNoTagButton(tagData, getI18n().getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG));
         } else if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
-            return !isNoTagButton(tagData, getI18n().getMessage("caption.entity.target.tag"));
+            return !isNoTagButton(tagData, getI18n().getMessage(UIMessageIdProvider.CAPTION_TARGET_TAG));
         }
         getNotification().displayValidationError(notAllowedMsg);
         return false;

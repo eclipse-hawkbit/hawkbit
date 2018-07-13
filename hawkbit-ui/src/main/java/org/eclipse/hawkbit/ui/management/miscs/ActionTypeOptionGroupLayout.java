@@ -87,12 +87,12 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final FlexibleOptionGroupItemComponent forceItem = actionTypeOptionGroup
                 .getItemComponent(ActionTypeOption.FORCED);
         forceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        forceItem.setId("save.action.radio.forced");
+        forceItem.setId(UIComponentIdProvider.SAVE_ACTION_RADIO_FORCED);
         addComponent(forceItem);
         final Label forceLabel = new Label();
         forceLabel.setStyleName("statusIconPending");
         forceLabel.setIcon(FontAwesome.BOLT);
-        forceLabel.setCaption(i18n.getMessage("label.action.forced"));
+        forceLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED));
         forceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_FORCED_ITEM));
         forceLabel.setStyleName("padding-right-style");
         addComponent(forceLabel);
@@ -103,7 +103,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(softItem);
         final Label softLabel = new Label();
         softLabel.setSizeFull();
-        softLabel.setCaption(i18n.getMessage("label.action.soft"));
+        softLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT));
         softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
         softLabel.setStyleName("padding-right-style");
         addComponent(softLabel);
@@ -116,7 +116,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         final Label autoForceLabel = new Label();
         autoForceLabel.setStyleName("statusIconPending");
         autoForceLabel.setIcon(FontAwesome.HISTORY);
-        autoForceLabel.setCaption(i18n.getMessage("label.action.time.forced"));
+        autoForceLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED));
         autoForceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_ITEM));
         autoForceLabel.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
         addComponent(autoForceLabel);
