@@ -706,7 +706,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
          * reduce the overall load on the database.
          */
         final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
-                tenantAware.getCurrentTenant(),
+                tenantAware.getCurrentTenant().toUpperCase(),
                 status.stream().map(Status::ordinal).map(String::valueOf).collect(Collectors.joining(",")),
                 lastModified);
         LOG.debug("Action cleanup: Executing the following (native) query: {}", queryStr);
