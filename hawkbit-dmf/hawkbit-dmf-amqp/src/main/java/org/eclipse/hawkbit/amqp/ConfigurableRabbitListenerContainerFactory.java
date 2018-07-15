@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpoint;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.util.ErrorHandler;
 
@@ -44,8 +45,9 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
     // Exception squid:UnusedProtectedMethod - called by
     // AbstractRabbitListenerContainerFactory
     @SuppressWarnings("squid:UnusedProtectedMethod")
-    protected void initializeContainer(final SimpleMessageListenerContainer instance) {
-        super.initializeContainer(instance);
+    protected void initializeContainer(final SimpleMessageListenerContainer instance,
+            final RabbitListenerEndpoint endpoint) {
+        super.initializeContainer(instance, endpoint);
         instance.setDeclarationRetries(declarationRetries);
     }
 }

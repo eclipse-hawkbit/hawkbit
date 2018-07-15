@@ -245,7 +245,7 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
             assertThat(targetTagManagement.findByTarget(PAGE, target.getControllerId()).getContent())
                     .doesNotContain(toDelete);
         }
-        assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
+        assertThat(targetTagRepository.findById(toDelete.getId())).as("No tag should be found").isNotPresent();
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(19);
     }
 
@@ -262,9 +262,9 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         // check data
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
-        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getName()).as("wrong target tag is saved")
+        assertThat(targetTagRepository.findById(savedAssigned.getId()).get().getName()).as("wrong target tag is saved")
                 .isEqualTo("test123");
-        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getOptLockRevision())
+        assertThat(targetTagRepository.findById(savedAssigned.getId()).get().getOptLockRevision())
                 .as("wrong target tag is saved").isEqualTo(2);
     }
 

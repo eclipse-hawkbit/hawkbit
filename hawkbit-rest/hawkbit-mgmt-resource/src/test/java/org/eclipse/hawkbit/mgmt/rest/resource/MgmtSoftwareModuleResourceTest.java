@@ -914,7 +914,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // verify that the number of meta data entries has not changed
         // (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, Integer.MAX_VALUE), sm.getId()).getTotalElements())
+                .findMetaDataBySoftwareModuleId(PageRequest.of(0, Integer.MAX_VALUE), sm.getId()).getTotalElements())
                         .isEqualTo(metaData1.length());
 
     }

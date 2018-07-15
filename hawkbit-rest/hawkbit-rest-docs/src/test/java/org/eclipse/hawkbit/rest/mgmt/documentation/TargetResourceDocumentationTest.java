@@ -90,7 +90,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .type("enum").attributes(
                                         key("value").value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                         fieldWithPath("content[].securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
-                        fieldWithPath("content[].requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                        fieldWithPath("content[].requestAttributes")
+                                .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                         fieldWithPath("content[].installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
                         fieldWithPath("content[].lastModifiedAt")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
@@ -142,7 +143,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value")
                                                 .value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                                 fieldWithPath("[]securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
-                                fieldWithPath("[]requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                                fieldWithPath("[]requestAttributes")
+                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 
@@ -183,12 +185,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(
                                 parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(optionalRequestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                                optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                                optionalRequestFieldWithPath("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                optionalRequestFieldWithPath("description")
+                                        .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("controllerId")
+                                        .description(ApiModelPropertiesGeneric.ITEM_ID),
                                 optionalRequestFieldWithPath("address").description(MgmtApiModelProperties.ADDRESS),
                                 optionalRequestFieldWithPath("securityToken")
                                         .description(MgmtApiModelProperties.SECURITY_TOKEN),
-                                optionalRequestFieldWithPath("requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
+                                optionalRequestFieldWithPath("requestAttributes")
+                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
                         getResponseFieldTarget(false)));
     }
 
@@ -488,8 +493,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final long forceTime = System.currentTimeMillis();
         final String body = new JSONObject().put("id", set.getId()).put("type", "timeforced")
-                .put("forcetime", forceTime).put("maintenanceWindow",
-                        getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone()))
+                .put("forcetime", forceTime)
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone()))
                 .toString();
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
@@ -593,7 +599,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
             final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) throws Exception {
-        final PageRequest pageRequest = new PageRequest(0, 1, Direction.ASC, ActionStatusFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 1, Direction.ASC, ActionStatusFields.ID.getFieldName());
 
         createTargetByGivenNameWithAttributes(knownControllerId, inSync, timeforced, createDistributionSet(),
                 maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);

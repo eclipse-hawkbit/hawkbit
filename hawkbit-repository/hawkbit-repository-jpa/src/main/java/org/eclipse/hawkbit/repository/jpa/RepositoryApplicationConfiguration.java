@@ -83,12 +83,14 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.orm.jpa.EntityScan;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -129,13 +131,14 @@ import com.google.common.collect.Maps;
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ RepositoryDefaultConfiguration.class })
+@Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class })
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
-    @Autowired
-    RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties jpaProperties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
-        super(dataSource, jpaProperties, jtaTransactionManagerProvider);
+    protected RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties properties,
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
+            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+        super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
     }
 
     @Bean
@@ -566,7 +569,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 distributionSetManagement, context, eventPublisher, virtualPropertyReplacer, txManager, tenantAware,
                 lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
     }
-
 
     /**
      * {@link DefaultRolloutApprovalStrategy} bean.

@@ -231,10 +231,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
-        final JpaDistributionSet set = distributionSetRepository.findOne(dsID);
-        if (set == null) {
-            throw new EntityNotFoundException(DistributionSet.class, dsID);
-        }
+        final JpaDistributionSet set = distributionSetRepository.findById(dsID)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException(
@@ -295,7 +293,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // set assigned distribution set and TargetUpdateStatus
         final String currentUser;
         if (auditorProvider != null) {
-            currentUser = auditorProvider.getCurrentAuditor();
+            currentUser = auditorProvider.getCurrentAuditor().orElse(null);
         } else {
             currentUser = null;
         }
@@ -310,7 +308,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
         // action history.
-        actionStatusRepository.save(targetIdsToActions.values().stream()
+        actionStatusRepository.saveAll(targetIdsToActions.values().stream()
                 .map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
                 .collect(Collectors.toList()));
 
@@ -448,7 +446,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
             final Long rolloutGroupParentId, final int limit) {
 
-        final PageRequest pageRequest = new PageRequest(0, limit);
+        final PageRequest pageRequest = PageRequest.of(0, limit);
         if (rolloutGroupParentId == null) {
             return actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
                     Action.Status.SCHEDULED);
@@ -522,7 +520,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Optional<Action> findAction(final long actionId) {
-        return Optional.ofNullable(actionRepository.findOne(actionId));
+        return actionRepository.findById(actionId).map(a -> (Action) a);
     }
 
     @Override
@@ -592,7 +590,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long dsId) {
-        if (!distributionSetRepository.exists(dsId)) {
+        if (!distributionSetRepository.existsById(dsId)) {
             throw new EntityNotFoundException(DistributionSet.class, dsId);
         }
     }
@@ -614,7 +612,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
-        if (!actionRepository.exists(actionId)) {
+        if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
 
@@ -638,7 +636,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
         selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
 
-        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult(pageable.getOffset())
+        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize()).getResultList().stream().collect(Collectors.toList());
 
         return new PageImpl<>(result, pageable, totalCount);

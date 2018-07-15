@@ -209,7 +209,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
-    List<JpaTarget> findAll(Iterable<Long> ids);
+    List<JpaTarget> findAllById(Iterable<Long> ids);
 
     /**
      * 

@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -162,7 +163,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
-        final List<String> tenants = findTenants(new PageRequest(0, MAX_TENANTS_QUERY)).getContent();
+        final List<String> tenants = findTenants(PageRequest.of(0, MAX_TENANTS_QUERY)).getContent();
 
         tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
             report.addTenantData(systemStatsManagement.getStatsOfTenant());
@@ -282,7 +283,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public TenantMetaData updateTenantMetadata(final long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
 
-        data.setDefaultDsType(distributionSetTypeRepository.findOne(defaultDsType));
+        data.setDefaultDsType(distributionSetTypeRepository.findById(defaultDsType)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, defaultDsType)));
 
         return tenantMetaDataRepository.save(data);
     }
@@ -318,7 +320,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public TenantMetaData getTenantMetadata(final long tenantId) {
-        return tenantMetaDataRepository.findOne(tenantId);
+        return tenantMetaDataRepository.findById(tenantId)
+                .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
     }
 
     @Override
@@ -326,7 +329,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public void forEachTenant(final Consumer<String> consumer) {
 
         Page<String> tenants;
-        Pageable query = new PageRequest(0, MAX_TENANTS_QUERY);
+        Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
             tenants = findTenants(query);
             tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {

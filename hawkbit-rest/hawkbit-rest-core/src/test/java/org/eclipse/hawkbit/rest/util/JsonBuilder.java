@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +35,7 @@ import org.json.JSONObject;
  */
 public abstract class JsonBuilder {
 
-    public static String ids(final Collection<Long> ids) {
+    public static String ids(final Collection<Long> ids) throws JSONException {
         final JSONArray list = new JSONArray();
         for (final Long smID : ids) {
             list.put(new JSONObject().put("id", smID));
@@ -45,7 +44,7 @@ public abstract class JsonBuilder {
         return list.toString();
     }
 
-    public static String controllerIds(final Collection<String> ids) {
+    public static String controllerIds(final Collection<String> ids) throws JSONException {
         final JSONArray list = new JSONArray();
         for (final String smID : ids) {
             list.put(new JSONObject().put("controllerId", smID));
@@ -73,7 +72,7 @@ public abstract class JsonBuilder {
 
     }
 
-    private static void createTagLine(final StringBuilder builder, final Tag tag) {
+    private static void createTagLine(final StringBuilder builder, final Tag tag) throws JSONException {
         builder.append(new JSONObject().put("name", tag.getName()).put("description", tag.getDescription())
                 .put("colour", tag.getColour()).put("createdAt", "0").put("updatedAt", "0")
                 .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
@@ -232,7 +231,7 @@ public abstract class JsonBuilder {
                                 .put("result",
                                         new JSONObject().put("finished", finished).put("progress",
                                                 new JSONObject().put("cnt", 2).put("of", 5)))
-                                .put("details", messages))
+                                .put("details", new JSONArray(messages)))
                 .toString();
     }
 
@@ -250,10 +249,10 @@ public abstract class JsonBuilder {
      */
     public static String missingResultInFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        final List<String> messages = new ArrayList<>();
-        messages.add(message);
         return new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status", new JSONObject().put("execution", execution).put("details", messages)).toString();
+                .put("status",
+                        new JSONObject().put("execution", execution).put("details", new JSONArray().put(message)))
+                .toString();
     }
 
     /**
@@ -271,124 +270,132 @@ public abstract class JsonBuilder {
      */
     public static String missingFinishedResultInFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        final List<String> messages = new ArrayList<>();
-        messages.add(message);
-        return new JSONObject().put("id", id).put("time", "20140511T121314").put("status",
-                new JSONObject().put("execution", execution).put("result", new JSONObject()).put("details", messages))
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status", new JSONObject().put("execution", execution).put("result", new JSONObject())
+                        .put("details", new JSONArray().put(message)))
                 .toString();
     }
 
-    /**
-     * @param types
-     * @return
-     */
-    public static String distributionSetTypes(final List<DistributionSetType> types) {
-        final StringBuilder builder = new StringBuilder();
+    public static String distributionSetTypes(final List<DistributionSetType> types) throws JSONException {
+        final JSONArray result = new JSONArray();
 
-        builder.append("[");
-        int i = 0;
-        for (final DistributionSetType module : types) {
+        for (final DistributionSetType type : types) {
 
             final JSONArray osmTypes = new JSONArray();
-            module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
+            type.getOptionalModuleTypes().forEach(smt -> {
+                try {
+                    osmTypes.put(new JSONObject().put("id", smt.getId()));
+                } catch (final JSONException e1) {
+                    e1.printStackTrace();
+                }
+            });
 
             final JSONArray msmTypes = new JSONArray();
-            module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
+            type.getMandatoryModuleTypes().forEach(smt -> {
+                try {
+                    msmTypes.put(new JSONObject().put("id", smt.getId()));
+                } catch (final JSONException e) {
+                    e.printStackTrace();
+                }
+            });
 
-            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("id", Long.MAX_VALUE).put("key", module.getKey()).put("createdAt", "0").put("updatedAt", "0")
+            result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
+                    .put("id", Long.MAX_VALUE).put("key", type.getKey()).put("createdAt", "0").put("updatedAt", "0")
                     .put("createdBy", "fghdfkjghdfkjh").put("optionalmodules", osmTypes)
-                    .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh").toString());
+                    .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh"));
 
-            if (++i < types.size()) {
-                builder.append(",");
-            }
         }
 
-        builder.append("]");
-
-        return builder.toString();
+        return result.toString();
     }
 
     public static String distributionSetTypesCreateValidFieldsOnly(final List<DistributionSetType> types) {
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append("[");
-        int i = 0;
+        final JSONArray result = new JSONArray();
         for (final DistributionSetType module : types) {
+            try {
+                final JSONArray osmTypes = new JSONArray();
+                module.getOptionalModuleTypes().forEach(smt -> {
+                    try {
+                        osmTypes.put(new JSONObject().put("id", smt.getId()));
+                    } catch (final JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
 
-            final JSONArray osmTypes = new JSONArray();
-            module.getOptionalModuleTypes().forEach(smt -> osmTypes.put(new JSONObject().put("id", smt.getId())));
+                final JSONArray msmTypes = new JSONArray();
+                module.getMandatoryModuleTypes().forEach(smt -> {
+                    try {
+                        msmTypes.put(new JSONObject().put("id", smt.getId()));
+                    } catch (final JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
 
-            final JSONArray msmTypes = new JSONArray();
-            module.getMandatoryModuleTypes().forEach(smt -> msmTypes.put(new JSONObject().put("id", smt.getId())));
-
-            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("key", module.getKey()).put("optionalmodules", osmTypes).put("mandatorymodules", msmTypes)
-                    .toString());
-
-            if (++i < types.size()) {
-                builder.append(",");
+                result.put(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                        .put("key", module.getKey()).put("optionalmodules", osmTypes)
+                        .put("mandatorymodules", msmTypes));
+            } catch (final JSONException e) {
+                e.printStackTrace();
             }
         }
 
-        builder.append("]");
-
-        return builder.toString();
+        return result.toString();
     }
 
     public static String distributionSets(final List<DistributionSet> sets) throws JSONException {
-        final StringBuilder builder = new StringBuilder();
+        final JSONArray setsJson = new JSONArray();
 
-        builder.append("[");
-        int i = 0;
-        for (final DistributionSet set : sets) {
-            builder.append(distributionSet(set));
-
-            if (++i < sets.size()) {
-                builder.append(",");
+        sets.forEach(set -> {
+            try {
+                setsJson.put(distributionSet(set));
+            } catch (final JSONException e) {
+                e.printStackTrace();
             }
-        }
+        });
 
-        builder.append("]");
-
-        return builder.toString();
+        return setsJson.toString();
 
     }
 
     public static String distributionSetsCreateValidFieldsOnly(final List<DistributionSet> sets) throws JSONException {
-        final StringBuilder builder = new StringBuilder();
+        final JSONArray result = new JSONArray();
 
-        builder.append("[");
-        int i = 0;
         for (final DistributionSet set : sets) {
-            builder.append(distributionSetCreateValidFieldsOnly(set));
-            if (++i < sets.size()) {
-                builder.append(",");
-            }
+            result.put(distributionSetCreateValidFieldsOnly(set));
+
         }
 
-        builder.append("]");
-
-        return builder.toString();
+        return result.toString();
 
     }
 
-    public static String distributionSetCreateValidFieldsOnly(final DistributionSet set) throws JSONException {
+    public static JSONObject distributionSetCreateValidFieldsOnly(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream()
-                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
+        final List<JSONObject> modules = set.getModules().stream().map(module -> {
+            try {
+                return new JSONObject().put("id", module.getId());
+            } catch (final JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("version", set.getVersion())
-                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", modules).toString();
+                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", new JSONArray(modules));
 
     }
 
     public static String distributionSetUpdateValidFieldsOnly(final DistributionSet set) throws JSONException {
 
-        set.getModules().stream()
-                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
+        set.getModules().stream().map(module -> {
+            try {
+                return new JSONObject().put("id", module.getId());
+            } catch (final JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("version", set.getVersion()).put("requiredMigrationStep", set.isRequiredMigrationStep())
@@ -396,20 +403,26 @@ public abstract class JsonBuilder {
 
     }
 
-    public static String distributionSet(final DistributionSet set) throws JSONException {
+    public static JSONObject distributionSet(final DistributionSet set) throws JSONException {
 
-        final List<JSONObject> modules = set.getModules().stream()
-                .map(module -> new JSONObject().put("id", module.getId())).collect(Collectors.toList());
+        final List<JSONObject> modules = set.getModules().stream().map(module -> {
+            try {
+                return new JSONObject().put("id", module.getId());
+            } catch (final JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("id", Long.MAX_VALUE)
                 .put("version", set.getVersion()).put("createdAt", "0").put("updatedAt", "0")
                 .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", modules).toString();
+                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", new JSONArray(modules));
 
     }
 
-    public static String targets(final List<Target> targets, final boolean withToken) {
+    public static String targets(final List<Target> targets, final boolean withToken) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
@@ -443,74 +456,81 @@ public abstract class JsonBuilder {
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final List<RolloutGroup> groups) {
         final JSONObject json = new JSONObject();
-        json.put("name", name);
-        json.put("description", description);
-        json.put("amountGroups", groupSize);
-        json.put("distributionSetId", distributionSetId);
-        json.put("targetFilterQuery", targetFilterQuery);
+        try {
+            json.put("name", name);
+            json.put("description", description);
+            json.put("amountGroups", groupSize);
+            json.put("distributionSetId", distributionSetId);
+            json.put("targetFilterQuery", targetFilterQuery);
 
-        if (conditions != null) {
-            final JSONObject successCondition = new JSONObject();
-            json.put("successCondition", successCondition);
-            successCondition.put("condition", conditions.getSuccessCondition().toString());
-            successCondition.put("expression", conditions.getSuccessConditionExp());
+            if (conditions != null) {
+                final JSONObject successCondition = new JSONObject();
 
-            final JSONObject successAction = new JSONObject();
-            json.put("successAction", successAction);
-            successAction.put("action", conditions.getSuccessAction().toString());
-            successAction.put("expression", conditions.getSuccessActionExp());
+                json.put("successCondition", successCondition);
 
-            final JSONObject errorCondition = new JSONObject();
-            json.put("errorCondition", errorCondition);
-            errorCondition.put("condition", conditions.getErrorCondition().toString());
-            errorCondition.put("expression", conditions.getErrorConditionExp());
+                successCondition.put("condition", conditions.getSuccessCondition().toString());
+                successCondition.put("expression", conditions.getSuccessConditionExp());
 
-            final JSONObject errorAction = new JSONObject();
-            json.put("errorAction", errorAction);
-            errorAction.put("action", conditions.getErrorAction().toString());
-            errorAction.put("expression", conditions.getErrorActionExp());
-        }
+                final JSONObject successAction = new JSONObject();
+                json.put("successAction", successAction);
+                successAction.put("action", conditions.getSuccessAction().toString());
+                successAction.put("expression", conditions.getSuccessActionExp());
 
-        if (groups != null) {
-            final JSONArray jsonGroups = new JSONArray();
+                final JSONObject errorCondition = new JSONObject();
+                json.put("errorCondition", errorCondition);
+                errorCondition.put("condition", conditions.getErrorCondition().toString());
+                errorCondition.put("expression", conditions.getErrorConditionExp());
 
-            for (final RolloutGroup group : groups) {
-                final JSONObject jsonGroup = new JSONObject();
-                jsonGroup.put("name", group.getName());
-                jsonGroup.put("description", group.getDescription());
-                jsonGroup.put("targetFilterQuery", group.getTargetFilterQuery());
-                jsonGroup.put("targetPercentage", group.getTargetPercentage());
-
-                if (group.getSuccessCondition() != null) {
-                    final JSONObject successCondition = new JSONObject();
-                    jsonGroup.put("successCondition", successCondition);
-                    successCondition.put("condition", group.getSuccessCondition().toString());
-                    successCondition.put("expression", group.getSuccessConditionExp());
-                }
-                if (group.getSuccessAction() != null) {
-                    final JSONObject successAction = new JSONObject();
-                    jsonGroup.put("successAction", successAction);
-                    successAction.put("action", group.getSuccessAction().toString());
-                    successAction.put("expression", group.getSuccessActionExp());
-                }
-                if (group.getErrorCondition() != null) {
-                    final JSONObject errorCondition = new JSONObject();
-                    jsonGroup.put("errorCondition", errorCondition);
-                    errorCondition.put("condition", group.getErrorCondition().toString());
-                    errorCondition.put("expression", group.getErrorConditionExp());
-                }
-                if (group.getErrorAction() != null) {
-                    final JSONObject errorAction = new JSONObject();
-                    jsonGroup.put("errorAction", errorAction);
-                    errorAction.put("action", group.getErrorAction().toString());
-                    errorAction.put("expression", group.getErrorActionExp());
-                }
-
-                jsonGroups.put(jsonGroup);
+                final JSONObject errorAction = new JSONObject();
+                json.put("errorAction", errorAction);
+                errorAction.put("action", conditions.getErrorAction().toString());
+                errorAction.put("expression", conditions.getErrorActionExp());
             }
 
-            json.put("groups", jsonGroups);
+            if (groups != null) {
+                final JSONArray jsonGroups = new JSONArray();
 
+                for (final RolloutGroup group : groups) {
+                    final JSONObject jsonGroup = new JSONObject();
+                    jsonGroup.put("name", group.getName());
+                    jsonGroup.put("description", group.getDescription());
+                    jsonGroup.put("targetFilterQuery", group.getTargetFilterQuery());
+                    jsonGroup.put("targetPercentage", group.getTargetPercentage());
+
+                    if (group.getSuccessCondition() != null) {
+                        final JSONObject successCondition = new JSONObject();
+                        jsonGroup.put("successCondition", successCondition);
+                        successCondition.put("condition", group.getSuccessCondition().toString());
+                        successCondition.put("expression", group.getSuccessConditionExp());
+                    }
+                    if (group.getSuccessAction() != null) {
+                        final JSONObject successAction = new JSONObject();
+                        jsonGroup.put("successAction", successAction);
+                        successAction.put("action", group.getSuccessAction().toString());
+                        successAction.put("expression", group.getSuccessActionExp());
+                    }
+                    if (group.getErrorCondition() != null) {
+                        final JSONObject errorCondition = new JSONObject();
+                        jsonGroup.put("errorCondition", errorCondition);
+                        errorCondition.put("condition", group.getErrorCondition().toString());
+                        errorCondition.put("expression", group.getErrorConditionExp());
+                    }
+                    if (group.getErrorAction() != null) {
+                        final JSONObject errorAction = new JSONObject();
+                        jsonGroup.put("errorAction", errorAction);
+                        errorAction.put("action", group.getErrorAction().toString());
+                        errorAction.put("expression", group.getErrorActionExp());
+                    }
+
+                    jsonGroups.put(jsonGroup);
+                }
+
+                json.put("groups", jsonGroups);
+
+            }
+
+        } catch (final JSONException e) {
+            e.printStackTrace();
         }
 
         return json.toString();
@@ -523,33 +543,39 @@ public abstract class JsonBuilder {
 
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        final List<String> messages = new ArrayList<>();
-        messages.add(message);
         return new JSONObject().put("id", id).put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
-                                .put("result", new JSONObject().put("finished", "success")).put("details", messages))
+                                .put("result", new JSONObject().put("finished", "success"))
+                                .put("details", new JSONArray().put(message)))
                 .toString();
 
     }
 
-    public static String configData(final String id, final Map<String, String> attributes, final String execution)
+    public static JSONObject configData(final String id, final Map<String, String> attributes, final String execution)
             throws JSONException {
         return configData(id, attributes, execution, null);
     }
 
-    public static String configData(final String id, final Map<String, String> attributes, final String execution,
+    public static JSONObject configData(final String id, final Map<String, String> attributes, final String execution,
             final String mode) throws JSONException {
+
+        final JSONObject data = new JSONObject();
+        attributes.entrySet().forEach(entry -> {
+            try {
+                data.put(entry.getKey(), entry.getValue());
+            } catch (final JSONException e) {
+                e.printStackTrace();
+            }
+        });
+
         final JSONObject json = new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status",
-                        new JSONObject().put("execution", execution)
-                                .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new ArrayList<String>()))
-                .put("data", attributes);
+                .put("status", new JSONObject().put("execution", execution)
+                        .put("result", new JSONObject().put("finished", "success")).put("details", new JSONArray()))
+                .put("data", data);
         if (mode != null) {
             json.put("mode", mode);
         }
-        return json.toString();
+        return json;
     }
-
 }

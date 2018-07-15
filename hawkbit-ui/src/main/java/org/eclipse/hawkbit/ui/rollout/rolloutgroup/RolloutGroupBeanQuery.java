@@ -105,7 +105,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
                 proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
             } else {
                 proxyRolloutGroupsList = getRolloutGroupManagement()
-                        .findByRolloutWithDetailedStatus(new PageRequest(startIndex / count, count), rolloutId)
+                        .findByRolloutWithDetailedStatus(PageRequest.of(startIndex / count, count), rolloutId)
                         .getContent();
             }
         }
@@ -157,7 +157,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         if (rolloutId != null) {
             try {
                 firstPageRolloutGroupSets = getRolloutGroupManagement().findByRolloutWithDetailedStatus(
-                        new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
+                        PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
                 size = firstPageRolloutGroupSets.getTotalElements();
             } catch (final EntityNotFoundException e) {
                 LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);

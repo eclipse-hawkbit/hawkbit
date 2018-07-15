@@ -114,14 +114,14 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         } else if (null != targetFilterQueryId) {
             targetBeans = getTargetManagement().findByTargetFilterQuery(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     targetFilterQueryId);
         } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement()
-                    .findAll(new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             targetBeans = getTargetManagement().findByFilters(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         }
         for (final Target targ : targetBeans) {

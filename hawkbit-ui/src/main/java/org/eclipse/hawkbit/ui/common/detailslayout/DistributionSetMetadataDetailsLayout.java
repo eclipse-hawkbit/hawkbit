@@ -65,7 +65,7 @@ public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetail
         }
         selectedDistSetId = distributionSet.getId();
         final List<DistributionSetMetadata> dsMetadataList = distributionSetManagement
-                .findMetaDataByDistributionSetId(new PageRequest(0, MAX_METADATA_QUERY), selectedDistSetId)
+                .findMetaDataByDistributionSetId(PageRequest.of(0, MAX_METADATA_QUERY), selectedDistSetId)
                 .getContent();
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(this::setMetadataProperties);

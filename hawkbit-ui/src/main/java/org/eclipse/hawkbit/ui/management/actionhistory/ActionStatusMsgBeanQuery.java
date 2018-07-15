@@ -84,7 +84,7 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
             actionBeans = firstPageMessages;
         } else {
             actionBeans = getDeploymentManagement().findMessagesByActionStatusId(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     currentSelectedActionStatusId);
         }
         return createProxyMessages(actionBeans);
@@ -129,7 +129,7 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
 
         if (currentSelectedActionStatusId != null) {
             firstPageMessages = getDeploymentManagement().findMessagesByActionStatusId(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionStatusId);
+                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionStatusId);
             size = firstPageMessages.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

@@ -140,7 +140,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
-                .findByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
+                .findByTag(PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
                         distributionsetTagId)
                 .getContent()));
     }

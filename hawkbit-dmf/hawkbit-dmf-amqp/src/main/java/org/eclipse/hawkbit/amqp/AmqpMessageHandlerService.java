@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -268,7 +267,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (isCorrelationIdNotEmpty(message)) {
             messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + convertCorrelationId(message));
+                    + message.getMessageProperties().getCorrelationId());
         }
 
         final Status status = mapStatus(message, actionUpdateStatus, action);
@@ -284,8 +283,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private static boolean isCorrelationIdNotEmpty(final Message message) {
-        return message.getMessageProperties().getCorrelationId() != null
-                && message.getMessageProperties().getCorrelationId().length > 0;
+        return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
 
     // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
@@ -336,10 +334,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         logAndThrowMessageError(message,
                 "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
         return null;
-    }
-
-    private static String convertCorrelationId(final Message message) {
-        return new String(message.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8);
     }
 
     private Action getUpdateActionStatus(final Status status, final ActionStatusCreate actionStatus) {

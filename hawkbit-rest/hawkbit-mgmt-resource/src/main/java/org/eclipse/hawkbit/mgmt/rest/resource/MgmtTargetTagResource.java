@@ -131,7 +131,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(targetManagement
-                .findByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
+                .findByTag(PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
                 .getContent()));
     }
 

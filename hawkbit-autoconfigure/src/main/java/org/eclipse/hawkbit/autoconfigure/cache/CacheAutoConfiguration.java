@@ -22,14 +22,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific
@@ -82,12 +82,12 @@ public class CacheAutoConfiguration {
         @Bean(name = "directCacheManager")
         @ConditionalOnMissingBean(name = "directCacheManager")
         public CacheManager directCacheManager() {
-            final GuavaCacheManager cacheManager = new GuavaCacheManager();
+            final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 
             if (cacheProperties.getTtl() > 0) {
-                final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+                final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
                         .expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit());
-                cacheManager.setCacheBuilder(cacheBuilder);
+                cacheManager.setCaffeine(cacheBuilder);
             }
 
             return cacheManager;

@@ -147,7 +147,7 @@ public interface DistributionSetRepository
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")
-    List<JpaDistributionSet> findAll(Iterable<Long> ids);
+    List<JpaDistributionSet> findAllById(Iterable<Long> ids);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

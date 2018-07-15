@@ -76,7 +76,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
 

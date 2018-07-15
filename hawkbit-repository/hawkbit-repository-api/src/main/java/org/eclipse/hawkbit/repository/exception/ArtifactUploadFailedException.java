@@ -22,7 +22,7 @@ public final class ArtifactUploadFailedException extends AbstractServerRtExcepti
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
+     * {@link SpServerError#SP_ARTIFACT_UPLOAD_FAILED} error.
      */
     public ArtifactUploadFailedException() {
         super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED);

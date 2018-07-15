@@ -12,9 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -59,7 +60,8 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -69,7 +71,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
-@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class })
+@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
@@ -214,7 +217,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             });
         }
     }
-    
+
     @Test
     @Description("Verifies that sending update controller attributes event works.")
     public void sendUpdateAttributesRequest() {

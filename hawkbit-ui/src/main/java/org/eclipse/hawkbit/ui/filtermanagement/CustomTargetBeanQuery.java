@@ -89,11 +89,11 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!StringUtils.isEmpty(filterQuery)) {
-            targetBeans = targetManagement.findByRsql(new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+            targetBeans = targetManagement.findByRsql(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     filterQuery);
         } else {
             targetBeans = targetManagement.findAll(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         }
 
         for (final Target targ : targetBeans) {

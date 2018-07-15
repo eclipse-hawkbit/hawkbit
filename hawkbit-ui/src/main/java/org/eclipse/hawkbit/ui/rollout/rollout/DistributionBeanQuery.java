@@ -83,7 +83,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distBeans = firstPageDistributionSets;
         } else {
             distBeans = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(startIndex / count, count, sort), distributionSetFilter);
+                    PageRequest.of(startIndex / count, count, sort), distributionSetFilter);
         }
         return createProxyDistributions(distBeans);
     }
@@ -120,7 +120,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                 .setIsComplete(true).build();
 
         firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+                PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         final long size = firstPageDistributionSets.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;

@@ -114,7 +114,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.FINISHED).message("test"));
 
-        final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
         final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
 
         final ActionStatus status = deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()
@@ -174,13 +174,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)))
                 .andExpect(jsonPath("size", equalTo(2)))
-                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId1 + ")].ipAddress",
+                .andExpect(jsonPath("$.content.[?(@.controllerId=='" + knownControllerId1 + "')].ipAddress",
                         contains("127.0.0.1")))
-                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId2 + ")].ipAddress",
+                .andExpect(jsonPath("$.content.[?(@.controllerId=='" + knownControllerId2 + "')].ipAddress",
                         contains("127.0.0.1")))
-                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId1 + ")].address",
+                .andExpect(jsonPath("$.content.[?(@.controllerId=='" + knownControllerId1 + "')].address",
                         contains(IpUtil.createHttpUri("127.0.0.1").toString())))
-                .andExpect(jsonPath("$.content.[?(@.controllerId==" + knownControllerId2 + ")].address",
+                .andExpect(jsonPath("$.content.[?(@.controllerId=='" + knownControllerId2 + "')].address",
                         contains(IpUtil.createHttpUri("127.0.0.1").toString())));
     }
 
@@ -438,32 +438,32 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(knownTargetAmount)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')]._links.self.href",
                         contains(linksHrefPrefix + idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("registered")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].description", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].controllerId", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].updateStatus", contains("registered")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].lastControllerRequestAt", notNullValue()))
                 // idB
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')]._links.self.href",
                         contains(linksHrefPrefix + idB)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].name", contains(idB)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].description", contains(idB)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].controllerId", contains(idB)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].updateStatus", contains("registered")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].name", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].description", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].controllerId", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].updateStatus", contains("registered")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].lastControllerRequestAt", notNullValue()))
                 // idC
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')]._links.self.href",
                         contains(linksHrefPrefix + idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("registered")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].lastControllerRequestAt", notNullValue()));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].description", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].controllerId", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].updateStatus", contains("registered")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].lastControllerRequestAt", notNullValue()));
     }
 
     @Test
@@ -482,13 +482,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')]._links.self.href",
                         contains(linksHrefPrefix + idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].description", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].controllerId", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].updateStatus", contains("registered")));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].description", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].controllerId", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].updateStatus", contains("registered")));
     }
 
     @Test
@@ -511,29 +511,29 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')]._links.self.href",
                         contains(linksHrefPrefix + idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].description", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].controllerId", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].updateStatus", contains("registered")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].description", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].controllerId", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].updateStatus", contains("registered")))
                 // idB
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')]._links.self.href",
                         contains(linksHrefPrefix + idD)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].name", contains(idD)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].description", contains(idD)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].controllerId", contains(idD)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].updateStatus", contains("registered")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].name", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].description", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].controllerId", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].updateStatus", contains("registered")))
                 // idC
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")]._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')]._links.self.href",
                         contains(linksHrefPrefix + idE)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].name", contains(idE)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].description", contains(idE)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].controllerId", contains(idE)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].createdBy", contains("bumlux")))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].updateStatus", contains("registered")));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].name", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].description", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].controllerId", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].createdBy", contains("bumlux")))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].updateStatus", contains("registered")));
     }
 
     @Test
@@ -612,38 +612,39 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(ds.getName())))
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(ds.getDescription())))
                 // os
-                .andExpect(
-                        jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id", contains(os.getId().intValue())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].name", contains(os.getName())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].description",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].id",
+                        contains(os.getId().intValue())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].name", contains(os.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].description",
                         contains(os.getDescription())))
                 .andExpect(
-                        jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].version", contains(os.getVersion())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].vendor", contains(os.getVendor())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].type", contains("os")))
+                        jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].version", contains(os.getVersion())))
+                .andExpect(
+                        jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].vendor", contains(os.getVendor())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].type", contains("os")))
                 // jvm
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(jvm.getId().intValue())))
                 .andExpect(
-                        jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].name", contains(jvm.getName())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].description",
+                        jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].name", contains(jvm.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].description",
                         contains(jvm.getDescription())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].version",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].version",
                         contains(jvm.getVersion())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].vendor",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].vendor",
                         contains(jvm.getVendor())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].type", contains("runtime")))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].type", contains("runtime")))
                 // baseApp
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(bApp.getId().intValue())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].name", contains(bApp.getName())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].description",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].name", contains(bApp.getName())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].description",
                         contains(bApp.getDescription())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].version",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].version",
                         contains(bApp.getVersion())))
-                .andExpect(
-                        jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].vendor", contains(bApp.getVendor())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].type", contains("application")));
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].vendor",
+                        contains(bApp.getVendor())))
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].type", contains("application")));
 
     }
 
@@ -803,7 +804,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
-        final Slice<Target> findTargetsAll = targetManagement.findAll(new PageRequest(0, 100));
+        final Slice<Target> findTargetsAll = targetManagement.findAll(PageRequest.of(0, 100));
         final Target target = findTargetsAll.getContent().get(0);
         assertThat(targetManagement.count()).isEqualTo(1);
         assertThat(target.getControllerId()).isEqualTo(knownControllerId);
@@ -1343,7 +1344,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
-                .put("maintenanceWindow", getMaintenanceWindow(getTestSchedule(0), "", "")).toString();
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(0))).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1358,7 +1359,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
-                .put("maintenanceWindow", getMaintenanceWindow("", getTestDuration(10), "")).toString();
+                .put("maintenanceWindow", new JSONObject().put("duration", getTestDuration(10))).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content(body).contentType(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print())
@@ -1373,8 +1374,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("forcetime", "0")
-                .put("maintenanceWindow",
-                        getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone()))
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(10))
+                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone()))
                 .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
@@ -1390,9 +1391,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final long nextExecutionStart = System.currentTimeMillis();
 
-        final String body = new JSONObject().put("id", set.getId())
-                .put("maintenanceWindow", getMaintenanceWindowWithNextStart(getTestSchedule(10), getTestDuration(10),
-                        getTestTimeZone(), nextExecutionStart))
+        final String body = new JSONObject().put("id", set.getId()).put("maintenanceWindow",
+                new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(10))
+                        .put("timezone", getTestTimeZone()).put("nextStartAt", String.valueOf(nextExecutionStart)))
                 .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
@@ -1411,8 +1412,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Target target = testdataFactory.createTarget("fsdfsd");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        final String body = new JSONObject().put("id", set.getId()).put("type", "forced").put("maintenanceWindow",
-                getMaintenanceWindow(getTestSchedule(-30), getTestDuration(5), getTestTimeZone())).toString();
+        final String body = new JSONObject().put("id", set.getId()).put("type", "forced")
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(-30))
+                        .put("duration", getTestDuration(5)).put("timezone", getTestTimeZone()))
+                .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
                 .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1564,8 +1567,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("requestAttributes", true).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }
@@ -1575,8 +1578,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("description", "verify attribute can be missing").toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
     }
 
     @Step
@@ -1584,8 +1587,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("requestAttributes", false).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }

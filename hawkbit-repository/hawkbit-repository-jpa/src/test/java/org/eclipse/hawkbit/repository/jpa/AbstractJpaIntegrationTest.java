@@ -26,18 +26,20 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-@SpringApplicationConfiguration(classes = {
-        org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration.class })
+@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 

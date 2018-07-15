@@ -214,7 +214,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 put(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION,
                         tenantAware.getCurrentTenant(), target.getControllerId())
-                                .content(JsonBuilder.configData("", attributes, "closed", "merge"))
+                                .content(JsonBuilder.configData("", attributes, "closed", "merge").toString())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -297,11 +297,11 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['available', 'unavailable']")),
                                 fieldWithPath("deployment.chunks").description(DdiApiModelProperties.CHUNK),
                                 fieldWithPath("deployment.chunks[].metadata")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA).optional(),
                                 fieldWithPath("deployment.chunks[].metadata[].key")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA_KEY),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_KEY).optional(),
                                 fieldWithPath("deployment.chunks[].metadata[].value")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA_VALUE),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_VALUE).optional(),
                                 fieldWithPath("deployment.chunks[].part").description(DdiApiModelProperties.CHUNK_TYPE),
                                 fieldWithPath("deployment.chunks[].name").description(DdiApiModelProperties.CHUNK_NAME),
                                 fieldWithPath("deployment.chunks[].version")

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.integration.listener;
 
 import static org.junit.Assert.fail;
 
-import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +52,7 @@ public class ReplyToListener implements TestRabbitListener {
         }
 
         if (messageType == MessageType.PING_RESPONSE) {
-            final String correlationId = new String(message.getMessageProperties().getCorrelationId(),
-                    StandardCharsets.UTF_8);
-            pingResponseMessages.put(correlationId, message);
+            pingResponseMessages.put(message.getMessageProperties().getCorrelationId(), message);
             return;
         }
 

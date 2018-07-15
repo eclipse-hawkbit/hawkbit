@@ -643,7 +643,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         targetManagement.delete(targetsIdsToDelete);
 
-        final List<Target> targetsLeft = targetManagement.findAll(new PageRequest(0, 200)).getContent();
+        final List<Target> targetsLeft = targetManagement.findAll(PageRequest.of(0, 200)).getContent();
         assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of splited list")
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 

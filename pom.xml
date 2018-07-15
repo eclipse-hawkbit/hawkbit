@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.4.7.RELEASE</version>
+      <version>2.0.3.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -60,9 +60,9 @@
    <developers>
       <developer>
          <id>kaizimmerm</id>
-         <email>kai.zimmermann@bosch-si.com</email>
-         <organization>Bosch Software Innovations GmbH</organization>
-         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <email>kai.zimmermann@microsoft.com</email>
+         <organization>Microsoft</organization>
+         <organizationUrl>https://www.microsoft.com</organizationUrl>
          <roles>
             <role>Lead</role>
             <role>Committer</role>
@@ -107,38 +107,19 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>1.4.7.RELEASE</spring.boot.version>
-      <spring.cloud.version>Camden.SR6</spring.cloud.version>      
+      <spring.boot.version>2.0.3.RELEASE</spring.boot.version>
+      <spring.cloud.version>Finchley.RELEASE</spring.cloud.version>      
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
-      <!-- Deserializer security vulnerability fixed -->
-      <jackson.version>2.8.9</jackson.version>
-      <!-- Performance fixes -->
-      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>      
-      <!-- Java 8 support -->
-      <assertj.version>3.6.2</assertj.version>
-      <!-- Repeatable migrations, Disabling clean etc. -->
-      <flyway.version>4.0.3</flyway.version>
-      <!-- Improved integration test capabilities -->
-      <spring-amqp.version>1.7.6.RELEASE</spring-amqp.version>
-      <!-- Compatability with RabbitMQ >= 3.7.3 -->
-      <rabbitmq.http-client.version>1.3.1.RELEASE</rabbitmq.http-client.version>
       <!-- Older versions needed than defined in Boot -->
-      <!-- Incompatible changes in 2.2 -->
-      <json-path.version>2.0.0</json-path.version>
-      <!-- Otherwise breaks management UI -->
-      <jetty.version>9.3.14.v20161028</jetty.version>
-      <!-- Avoid extra CQs through transitive dependencies -->
-      <jboss-logging.version>3.2.1.Final</jboss-logging.version>
-      <tomcat.version>8.0.28</tomcat.version>
-      
-      <hibernate-validator.version>6.0.7.Final</hibernate-validator.version>
+        <!-- Compatability with PowerMock -->
+        <mockito.version>2.8.9</mockito.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
-      <vaadin.spring.version>1.1.1</vaadin.spring.version>
+      <vaadin.spring.version>1.2.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
       <vaadin.version>7.7.13</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
@@ -159,9 +140,9 @@
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>1.5.4</allure.version>
-      <eclipselink.version>2.7.1</eclipselink.version>
+      <eclipselink.version>2.7.2</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
-      <powermock.version>1.6.5</powermock.version>
+      <powermock.version>1.7.4</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>25.0-jre</guava.version>
       <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
@@ -170,9 +151,8 @@
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
       <jlorem.version>1.1</jlorem.version>
-      <json-simple.version>1.1.1</json-simple.version>
       <commons-lang3.version>3.4</commons-lang3.version>
-      <json.version>20141113</json.version>
+      <commons-io.version>2.5</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
       <io-protostuff.version>1.5.6</io-protostuff.version>
@@ -598,19 +578,6 @@
          </dependency>
 
          <!-- Misc -->
-         
-         <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>http-client</artifactId>
-            <version>${rabbitmq.http-client.version}</version>
-            <scope>compile</scope>
-            <exclusions>
-              <exclusion>
-                <artifactId>spring-web</artifactId>
-                <groupId>org.springframework</groupId>
-              </exclusion>
-            </exclusions>
-         </dependency>
          <dependency>
             <groupId>com.cronutils</groupId>
             <artifactId>cron-utils</artifactId>
@@ -745,21 +712,15 @@
             <version>${rsql-parser.version}</version>
          </dependency>
          <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>${json-simple.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>junit</groupId>
-                  <artifactId>junit</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
          </dependency>
+         <dependency>
+             <groupId>commons-io</groupId>
+             <artifactId>commons-io</artifactId>
+             <version>${commons-io.version}</version>
+          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -770,11 +731,6 @@
                   <artifactId>spring-boot-starter-logging</artifactId>
                </exclusion>
             </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${json.version}</version>
          </dependency>
          <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
@@ -802,7 +758,7 @@
          </dependency>
          <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
          </dependency>

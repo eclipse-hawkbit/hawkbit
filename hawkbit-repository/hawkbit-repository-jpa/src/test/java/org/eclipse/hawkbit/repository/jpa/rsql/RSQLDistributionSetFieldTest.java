@@ -145,7 +145,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<DistributionSet> find = distributionSetManagement.findByRsql(new PageRequest(0, 100), rsqlParam);
+        final Page<DistributionSet> find = distributionSetManagement.findByRsql(PageRequest.of(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
         assertThat(find).as("Founded entity is should not be null").isNotNull();
         assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);

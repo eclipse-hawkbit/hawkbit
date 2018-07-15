@@ -86,5 +86,5 @@ public interface DistributionSetTagRepository
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSetTag d WHERE d.id IN ?1")
-    List<JpaDistributionSetTag> findAll(Iterable<Long> ids);
+    List<JpaDistributionSetTag> findAllById(Iterable<Long> ids);
 }

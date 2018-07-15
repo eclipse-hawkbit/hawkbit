@@ -528,7 +528,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     public void getRolloutDeployGroupWithParameters() throws Exception {
         final Rollout rollout = createRolloutEntity();
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1), rollout.getId()).getContent().get(0);
 
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}",
                 rollout.getId(), firstRolloutGroup.getId()).param("offset", "0").param("limit", "2")
@@ -548,7 +548,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     public void getRolloutDeployGroupTargets() throws Exception {
         final Rollout rollout = createRolloutEntity();
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1), rollout.getId()).getContent().get(0);
 
         mockMvc.perform(
                 get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}/targets",
@@ -596,7 +596,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     public void getRolloutDeployGroupTargetsWithParameters() throws Exception {
         final Rollout rollout = createRolloutEntity();
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1), rollout.getId()).getContent().get(0);
 
         mockMvc.perform(
                 get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}/targets",

@@ -168,29 +168,29 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
-        final List<JpaSoftwareModuleType> setsFound = softwareModuleTypeRepository.findAll(ids);
+        final List<JpaSoftwareModuleType> setsFound = softwareModuleTypeRepository.findAllById(ids);
 
         if (setsFound.size() < ids.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, ids,
                     setsFound.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()));
         }
 
-        softwareModuleTypeRepository.delete(setsFound);
+        softwareModuleTypeRepository.deleteAll(setsFound);
     }
 
     @Override
     public List<SoftwareModuleType> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(softwareModuleTypeRepository.findAll(ids));
+        return Collections.unmodifiableList(softwareModuleTypeRepository.findAllById(ids));
     }
 
     @Override
     public Optional<SoftwareModuleType> get(final long id) {
-        return Optional.ofNullable(softwareModuleTypeRepository.findOne(id));
+        return softwareModuleTypeRepository.findById(id).map(smt -> (SoftwareModuleType) smt);
     }
 
     @Override
     public boolean exists(final long id) {
-        return softwareModuleTypeRepository.exists(id);
+        return softwareModuleTypeRepository.existsById(id);
     }
 
 }

@@ -8,11 +8,16 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.eclipse.hawkbit.rest.RestConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringApplicationConfiguration(classes = { DdiApiConfiguration.class })
+@SpringBootTest(classes = { DdiApiConfiguration.class, RestConfiguration.class,
+        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 

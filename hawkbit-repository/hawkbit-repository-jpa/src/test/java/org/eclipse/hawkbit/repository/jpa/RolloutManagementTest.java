@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -75,9 +76,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -1551,29 +1549,28 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Creating a rollout with approval role or approval engine disabled results in the rollout being in " +
-            "READY state.")
+    @Description("Creating a rollout with approval role or approval engine disabled results in the rollout being in "
+            + "READY state.")
     public void createdRolloutWithApprovalRoleOrApprovalDisabledTransitionsToReadyState() {
         approvalStrategy.setApprovalNeeded(false);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
-                5, successCondition, errorCondition);
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+                errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.READY);
     }
 
     @Test
-    @Description("Creating a rollout without approver role and approval enabled leads to transition to " +
-            "WAITING_FOR_APPROVAL state.")
+    @Description("Creating a rollout without approver role and approval enabled leads to transition to "
+            + "WAITING_FOR_APPROVAL state.")
     public void createdRolloutWithoutApprovalRoleTransitionsToWaitingForApprovalState() {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
-                5, successCondition, errorCondition);
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+                errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
     }
-
 
     @Test
     @Description("Approving a rollout leads to transition to READY state.")
@@ -1581,11 +1578,11 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
-                5, successCondition, errorCondition);
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+                errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
         rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED);
-        final Rollout resultingRollout = rolloutRepository.findOne(rollout.getId());
+        final Rollout resultingRollout = rolloutRepository.findById(rollout.getId()).get();
         assertThat(resultingRollout.getStatus()).isEqualTo(Rollout.RolloutStatus.READY);
     }
 
@@ -1595,11 +1592,11 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10,
-                5, successCondition, errorCondition);
+        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+                errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
         rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.DENIED);
-        final Rollout resultingRollout = rolloutRepository.findOne(rollout.getId());
+        final Rollout resultingRollout = rolloutRepository.findById(rollout.getId()).get();
         assertThat(resultingRollout.getStatus()).isEqualTo(RolloutStatus.APPROVAL_DENIED);
     }
 
@@ -1626,8 +1623,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         // verify
-        final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
-        assertThat(deletedRollout).isNull();
+        final Optional<JpaRollout> deletedRollout = rolloutRepository.findById(createdRollout.getId());
+        assertThat(deletedRollout).isNotPresent();
         assertThat(rolloutGroupRepository.count()).isZero();
         assertThat(rolloutTargetGroupRepository.count()).isZero();
     }
@@ -1667,7 +1664,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.handleRollouts();
 
         // verify
-        final JpaRollout deletedRollout = rolloutRepository.findOne(createdRollout.getId());
+        final JpaRollout deletedRollout = rolloutRepository.findById(createdRollout.getId()).get();
         assertThat(deletedRollout).isNotNull();
 
         assertThat(deletedRollout.getStatus()).isEqualTo(RolloutStatus.DELETED);

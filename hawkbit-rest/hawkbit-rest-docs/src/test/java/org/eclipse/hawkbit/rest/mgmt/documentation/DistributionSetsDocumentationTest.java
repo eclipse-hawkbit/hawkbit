@@ -361,9 +361,9 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
             targetManagement.create(entityFactory.target().create().controllerId(targetId));
-            list.put(new JSONObject().put("id", targetId).put("type", "timeforced").put("forcetime", forceTime).put(
-                    "maintenanceWindow",
-                    getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone())));
+            list.put(new JSONObject().put("id", targetId).put("type", "timeforced").put("forcetime", forceTime)
+                    .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                            .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())));
         }
 
         // assign already one target to DS

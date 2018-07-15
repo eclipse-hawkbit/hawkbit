@@ -300,7 +300,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("providedFilename")
                                         .description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME)))
 
-        );
+                );
     }
 
     @Test
@@ -486,7 +486,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                         requestFields(requestFieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 requestFieldWithPath("[]value").description(MgmtApiModelProperties.META_DATA_VALUE),
                                 requestFieldWithPath("[]targetVisible")
-                                        .description(MgmtApiModelProperties.SM_META_DATA_TARGET_VISIBLE)),
+                                        .description(MgmtApiModelProperties.SM_META_DATA_TARGET_VISIBLE).optional()),
 
                         responseFields(fieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 fieldWithPath("[]value").description(MgmtApiModelProperties.META_DATA_VALUE),
@@ -495,7 +495,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
                         )
 
-        ));
+                ));
     }
 
     @Test

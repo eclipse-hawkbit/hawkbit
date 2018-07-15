@@ -31,8 +31,8 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
@@ -194,7 +194,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> targetIDs) {
-        final List<JpaTarget> targets = targetRepository.findAll(targetIDs);
+        final List<JpaTarget> targets = targetRepository.findAllById(targetIDs);
 
         if (targets.size() < targetIDs.size()) {
             throw new EntityNotFoundException(Target.class, targetIDs,
@@ -217,7 +217,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Target target = targetRepository.findByControllerId(controllerID)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
 
-        targetRepository.delete(target.getId());
+        targetRepository.deleteById(target.getId());
     }
 
     @Override
@@ -245,7 +245,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private void throwEntityNotFoundIfDsDoesNotExist(final Long distributionSetID) {
-        if (!distributionSetRepository.exists(distributionSetID)) {
+        if (!distributionSetRepository.existsById(distributionSetID)) {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetID);
         }
     }
@@ -469,7 +469,7 @@ public class JpaTargetManagement implements TargetManagement {
         // index of the array and
         // the 2nd contains the selectCase int value.
         final int pageSize = pageable.getPageSize();
-        final List<JpaTarget> resultList = entityManager.createQuery(query).setFirstResult(pageable.getOffset())
+        final List<JpaTarget> resultList = entityManager.createQuery(query).setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageSize + 1).getResultList();
         final boolean hasNext = resultList.size() > pageSize;
         return new SliceImpl<>(Collections.unmodifiableList(resultList), pageable, hasNext);
@@ -528,7 +528,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
-        if (!rolloutGroupRepository.exists(group)) {
+        if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
 
@@ -585,7 +585,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private void throwEntityNotFoundExceptionIfTagDoesNotExist(final Long tagId) {
-        if (!targetTagRepository.exists(tagId)) {
+        if (!targetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(TargetTag.class, tagId);
         }
     }
@@ -625,12 +625,12 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Optional<Target> get(final long id) {
-        return Optional.ofNullable(targetRepository.findOne(id));
+        return targetRepository.findById(id).map(t -> (Target) t);
     }
 
     @Override
     public List<Target> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(targetRepository.findAll(ids));
+        return Collections.unmodifiableList(targetRepository.findAllById(ids));
     }
 
     @Override

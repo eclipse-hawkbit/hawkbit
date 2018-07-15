@@ -26,7 +26,7 @@ public class MgmtSoftwareModuleMetadata {
     @JsonProperty
     private String value;
     @JsonProperty
-    private boolean targetVisible;
+    private boolean targetVisible = false;
 
     public String getKey() {
         return key;

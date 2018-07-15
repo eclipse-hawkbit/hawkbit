@@ -24,21 +24,26 @@ import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
+import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.restdocs.payload.SubsectionDescriptor;
 import org.springframework.restdocs.snippet.Snippet;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,7 +59,8 @@ import ru.yandex.qatools.allure.annotations.Features;
  *
  */
 @Features("Documentation Verfication - API")
-@SpringApplicationConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class })
+@SpringBootTest(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
+        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {
 
@@ -93,6 +99,11 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
         myFieldDesc.attributes(key("mandatory").value(mandatory ? "X" : ""));
         // defaults
         myFieldDesc.attributes(key("value").value(""));
+
+        if (!mandatory) {
+            myFieldDesc.optional();
+        }
+
         return myFieldDesc;
     }
 
@@ -104,7 +115,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
         return requestFieldWithPath(path, false);
     }
 
-    public static class MyFieldFieldDesc extends FieldDescriptor {
+    public static class MyFieldFieldDesc extends SubsectionDescriptor {
 
         /**
          * @param path

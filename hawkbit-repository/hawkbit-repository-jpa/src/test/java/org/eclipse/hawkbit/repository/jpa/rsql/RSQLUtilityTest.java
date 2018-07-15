@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -171,7 +171,9 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.get("version")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
+                .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+        when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
 
@@ -189,7 +191,8 @@ public class RSQLUtilityTest {
         final String correctRsql = "name!=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.notLike(any(Expression.class), anyString(), eq('\\')))
+                .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
@@ -210,7 +213,7 @@ public class RSQLUtilityTest {
         final String correctRsql = "name==a%";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
@@ -231,11 +234,11 @@ public class RSQLUtilityTest {
         final String correctRsql = "name==a%";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
-                .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+        when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+                .thenReturn(mock(Predicate.class));
 
         // test
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, Database.SQL_SERVER)
@@ -253,7 +256,7 @@ public class RSQLUtilityTest {
         final String correctRsql = "name=lt=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.lessThan(any(Expression.class), anyString())).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         // test
@@ -271,7 +274,7 @@ public class RSQLUtilityTest {
         final String correctRsql = "testfield==bumlux";
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) TestValueEnum.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.equal(any(Root.class), any(TestValueEnum.class))).thenReturn(mock(Predicate.class));
 
         // test
         RSQLUtility.parse(correctRsql, TestFieldEnum.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
@@ -309,7 +312,9 @@ public class RSQLUtilityTest {
         final String correctRsql = "testfield=le=" + overduePropPlaceholder;
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
-        when(criteriaBuilderMock.equal(any(Root.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
+                .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+        when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> lessThanOrEqualTo(any(Expression.class), eq(overduePropPlaceholder)))
                 .thenReturn(mock(Predicate.class));
 

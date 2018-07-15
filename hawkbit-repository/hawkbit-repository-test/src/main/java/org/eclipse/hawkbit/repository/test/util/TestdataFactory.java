@@ -971,7 +971,7 @@ public class TestdataFactory {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
             final List<Action> findByTarget = deploymentManagement
-                    .findActionsByTarget(target.getControllerId(), new PageRequest(0, 400)).getContent();
+                    .findActionsByTarget(target.getControllerId(), PageRequest.of(0, 400)).getContent();
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, msgs));
             }

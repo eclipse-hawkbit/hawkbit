@@ -102,7 +102,7 @@ public class AutoAssignChecker {
     public void check() {
         LOGGER.debug("Auto assigned check call");
 
-        final PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
+        final PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE);
 
         final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
                 .findWithAutoAssignDS(pageRequest);
@@ -176,7 +176,7 @@ public class AutoAssignChecker {
     private List<TargetWithActionType> getTargetsWithActionType(final String targetFilterQuery, final Long dsId,
             final int count) {
         final Page<Target> targets = targetManagement
-                .findByTargetFilterQueryAndNonDS(new PageRequest(0, count), dsId, targetFilterQuery);
+                .findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId, targetFilterQuery);
 
         return targets.getContent().stream().map(t -> new TargetWithActionType(t.getControllerId(),
                 Action.ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());

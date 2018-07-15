@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.rabbitmq.test;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,14 +23,16 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ConditionFactory;
 
-@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class })
+@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
+        TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)

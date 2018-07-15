@@ -73,11 +73,11 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
                         contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())));
 
         // and finish it

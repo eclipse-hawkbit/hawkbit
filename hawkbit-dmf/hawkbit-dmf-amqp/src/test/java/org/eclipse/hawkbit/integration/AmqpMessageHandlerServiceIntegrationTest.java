@@ -838,7 +838,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
-        messageProperties.setCorrelationId(CORRELATION_ID.getBytes());
+        messageProperties.setCorrelationId(CORRELATION_ID);
 
         return createMessage(payload, messageProperties);
     }

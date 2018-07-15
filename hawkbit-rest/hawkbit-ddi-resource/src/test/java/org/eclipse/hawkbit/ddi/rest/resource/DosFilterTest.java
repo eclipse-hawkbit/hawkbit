@@ -19,7 +19,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.junit.Test;
@@ -28,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.net.HttpHeaders;
@@ -48,13 +46,8 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
-        return MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new DosFilter(null, 10, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                        "X-Forwarded-For"))
-                .addFilter(new ExcludePathAwareShallowETagFilter(
-                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
-                        "/api/v1/downloadserver/**"));
+        return super.createMvcWebAppContext(context).addFilter(new DosFilter(null, 10, 10,
+                "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)", "X-Forwarded-For"));
     }
 
     @Test

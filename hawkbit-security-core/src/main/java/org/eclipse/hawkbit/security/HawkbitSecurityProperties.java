@@ -25,6 +25,19 @@ public class HawkbitSecurityProperties {
      */
     private String contentSecurityPolicy;
 
+    /**
+     * Secure access enforced.
+     */
+    private boolean requireSsl;
+
+    public boolean isRequireSsl() {
+        return requireSsl;
+    }
+
+    public void setRequireSsl(final boolean requireSsl) {
+        this.requireSsl = requireSsl;
+    }
+
     public String getContentSecurityPolicy() {
         return contentSecurityPolicy;
     }

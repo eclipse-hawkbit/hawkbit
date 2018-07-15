@@ -326,13 +326,13 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private void throwExceptionIfTargetDoesNotExist(final Long targetId) {
-        if (!targetRepository.exists(targetId)) {
+        if (!targetRepository.existsById(targetId)) {
             throw new EntityNotFoundException(Target.class, targetId);
         }
     }
 
     private void throwExceptionIfSoftwareModuleDoesNotExist(final Long moduleId) {
-        if (!softwareModuleRepository.exists(moduleId)) {
+        if (!softwareModuleRepository.existsById(moduleId)) {
             throw new EntityNotFoundException(SoftwareModule.class, moduleId);
         }
     }
@@ -374,9 +374,9 @@ public class JpaControllerManagement implements ControllerManagement {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        final JpaTarget target = targetRepository.findOne(spec);
+        final Optional<JpaTarget> target = targetRepository.findOne(spec);
 
-        if (target == null) {
+        if (!target.isPresent()) {
             final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                     .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
@@ -388,7 +388,7 @@ public class JpaControllerManagement implements ControllerManagement {
             return result;
         }
 
-        return updateTargetStatus(target, address);
+        return updateTargetStatus(target.get(), address);
     }
 
     /**
@@ -784,12 +784,12 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<Target> get(final long targetId) {
-        return Optional.ofNullable(targetRepository.findOne(targetId));
+        return targetRepository.findById(targetId).map(t -> (Target) t);
     }
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
-        if (!actionRepository.exists(actionId)) {
+        if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
 
@@ -809,7 +809,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 : messageCount;
 
-        final PageRequest pageable = new PageRequest(0, limit, new Sort(Direction.DESC, "occurredAt"));
+        final PageRequest pageable = PageRequest.of(0, limit, new Sort(Direction.DESC, "occurredAt"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
 
@@ -821,7 +821,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public Optional<SoftwareModule> getSoftwareModule(final long id) {
-        return Optional.ofNullable(softwareModuleRepository.findOne(id));
+        return softwareModuleRepository.findById(id).map(s -> (SoftwareModule) s);
     }
 
     @Override
@@ -829,7 +829,7 @@ public class JpaControllerManagement implements ControllerManagement {
             final Collection<Long> moduleId) {
 
         return softwareModuleMetadataRepository
-                .findBySoftwareModuleIdInAndTargetVisible(new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT),
+                .findBySoftwareModuleIdInAndTargetVisible(PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT),
                         moduleId, true)
                 .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
                         Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));

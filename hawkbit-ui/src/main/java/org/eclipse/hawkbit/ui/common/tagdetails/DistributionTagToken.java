@@ -109,7 +109,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
             distributionSetTagManagement
-                    .findByDistributionSet(new PageRequest(0, MAX_TAG_QUERY), selectedEntity.getId())
+                    .findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
                     .getContent().stream().forEach(tag -> addNewToken(tag.getId()));
         }
     }
@@ -118,7 +118,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        distributionSetTagManagement.findAll(new PageRequest(0, MAX_TAG_QUERY)).getContent().stream()
+        distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
 
     }

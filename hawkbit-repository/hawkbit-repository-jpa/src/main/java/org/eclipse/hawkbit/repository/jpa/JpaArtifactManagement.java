@@ -173,12 +173,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
-        localArtifactRepository.delete(id);
+        localArtifactRepository.deleteById(id);
     }
 
     @Override
     public Optional<Artifact> get(final long id) {
-        return Optional.ofNullable(localArtifactRepository.findOne(id));
+        return Optional.ofNullable(localArtifactRepository.findById(id).orElse(null));
     }
 
     @Override
@@ -206,7 +206,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
-        if (!softwareModuleRepository.exists(swId)) {
+        if (!softwareModuleRepository.existsById(swId)) {
             throw new EntityNotFoundException(SoftwareModule.class, swId);
         }
     }
@@ -245,13 +245,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private SoftwareModule getModuleAndThrowExceptionIfThatFails(final Long moduleId) {
-        final SoftwareModule softwareModule = softwareModuleRepository.findOne(moduleId);
-
-        if (softwareModule == null) {
-            LOG.debug("no software module with ID {} exists", moduleId);
-            throw new EntityNotFoundException(SoftwareModule.class, moduleId);
-        }
-        return softwareModule;
+        return softwareModuleRepository.findById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
     }
 
 }

@@ -99,11 +99,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long targetFilterQueryId) {
-        if (!targetFilterQueryRepository.exists(targetFilterQueryId)) {
+        if (!targetFilterQueryRepository.existsById(targetFilterQueryId)) {
             throw new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId);
         }
 
-        targetFilterQueryRepository.delete(targetFilterQueryId);
+        targetFilterQueryRepository.deleteById(targetFilterQueryId);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Optional<TargetFilterQuery> get(final long targetFilterQueryId) {
-        return Optional.ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId));
+        return targetFilterQueryRepository.findById(targetFilterQueryId).map(tfq -> (TargetFilterQuery) tfq);
     }
 
     @Override

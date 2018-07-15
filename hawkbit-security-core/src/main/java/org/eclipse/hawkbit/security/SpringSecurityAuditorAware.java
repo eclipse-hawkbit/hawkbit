@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,18 +23,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
     @Override
-    public String getCurrentAuditor() {
+    public Optional<String> getCurrentAuditor() {
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (isAuthenticationInvalid(authentication)) {
-            return null;
+            return Optional.empty();
         }
 
-        return getCurrentAuditor(authentication);
+        return Optional.ofNullable(getCurrentAuditor(authentication));
     }
 
-    private String getCurrentAuditor(final Authentication authentication) {
+    private static String getCurrentAuditor(final Authentication authentication) {
         if (authentication.getPrincipal() instanceof UserDetails) {
             return ((UserDetails) authentication.getPrincipal()).getUsername();
         }
