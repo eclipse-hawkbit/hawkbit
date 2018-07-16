@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.tagdetails.TargetTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -32,7 +34,10 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -134,16 +139,18 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     @Override
     protected void populateDetailsWidget() {
         if (getSelectedBaseEntity() != null) {
-            updateAttributesLayout(targetManagement.getControllerAttributes(getSelectedBaseEntity().getControllerId()));
+            final String controllerId = getSelectedBaseEntity().getControllerId();
 
-            updateDetailsLayout(getSelectedBaseEntity().getControllerId(), getSelectedBaseEntity().getAddress(),
+            updateAttributesLayout(controllerId);
+
+            updateDetailsLayout(controllerId, getSelectedBaseEntity().getAddress(),
                     getSelectedBaseEntity().getSecurityToken(),
                     SPDateTimeUtil.getFormattedDate(getSelectedBaseEntity().getLastTargetQuery()));
 
-            populateDistributionDtls(assignedDistLayout, deploymentManagement
-                    .getAssignedDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
-            populateDistributionDtls(installedDistLayout, deploymentManagement
-                    .getInstalledDistributionSet(getSelectedBaseEntity().getControllerId()).orElse(null));
+            populateDistributionDtls(assignedDistLayout,
+                    deploymentManagement.getAssignedDistributionSet(controllerId).orElse(null));
+            populateDistributionDtls(installedDistLayout,
+                    deploymentManagement.getInstalledDistributionSet(controllerId).orElse(null));
         } else {
             updateDetailsLayout(null, null, null, null);
             populateDistributionDtls(installedDistLayout, null);
@@ -220,6 +227,69 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         }
         distributionSet.getModules()
                 .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));
+    }
+
+    private void updateAttributesLayout(final String controllerId) {
+        final VerticalLayout attributesLayout = getAttributesLayout();
+        final boolean isRequestAttributes = targetManagement.isControllerAttributesRequested(controllerId);
+        final Map<String, String> attributes = targetManagement.getControllerAttributes(controllerId);
+
+        if (attributes != null) {
+            attributesLayout.removeAllComponents();
+            attributesLayout.addComponent(buildAttributesUpdateLayout(controllerId, isRequestAttributes));
+            updateAttributesLabelsList(attributesLayout, attributes);
+        } else {
+            attributesLayout.replaceComponent(attributesLayout.getComponent(0),
+                    buildAttributesUpdateLayout(controllerId, isRequestAttributes));
+        }
+    }
+
+    private HorizontalLayout buildAttributesUpdateLayout(final String controllerId, final boolean isRequestAttributes) {
+        final HorizontalLayout attributesUpdateLayout = new HorizontalLayout();
+        attributesUpdateLayout.setWidth("100%");
+
+        final Label attributesUpdateText = new Label();
+        attributesUpdateText.setStyleName(ValoTheme.LABEL_SMALL);
+
+        final Button requestAttributesUpdateButton = SPUIComponentProvider.getButton(
+                UIComponentIdProvider.TARGET_ATTRIBUTES_UPDATE, "", "", "", false, FontAwesome.REFRESH,
+                SPUIButtonStyleNoBorder.class);
+        requestAttributesUpdateButton.addClickListener(e -> targetManagement.requestControllerAttributes(controllerId));
+
+        toggleUpdateAttributesUiState(isRequestAttributes, attributesUpdateText, requestAttributesUpdateButton);
+
+        attributesUpdateLayout.addComponent(attributesUpdateText);
+        attributesUpdateLayout.setExpandRatio(attributesUpdateText, 1.0f);
+        attributesUpdateLayout.addComponent(requestAttributesUpdateButton);
+        attributesUpdateLayout.setComponentAlignment(requestAttributesUpdateButton, Alignment.TOP_RIGHT);
+
+        return attributesUpdateLayout;
+    }
+
+    private void toggleUpdateAttributesUiState(final boolean isRequestAttributes, final Label attributesUpdateText,
+            final Button requestAttributesUpdateButton) {
+        requestAttributesUpdateButton.setEnabled(!isRequestAttributes);
+
+        if (isRequestAttributes) {
+            attributesUpdateText.setValue(getI18n().getMessage("label.target.attributes.update.pending"));
+            requestAttributesUpdateButton
+                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.requested"));
+        } else {
+            attributesUpdateText.setValue(getI18n().getMessage("label.target.attributes.no.update"));
+            requestAttributesUpdateButton
+                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.request"));
+        }
+    }
+
+    private void updateAttributesLabelsList(final VerticalLayout attributesLayout,
+            final Map<String, String> attributes) {
+        for (final Map.Entry<String, String> entry : attributes.entrySet()) {
+            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(entry.getKey().concat("  :  "),
+                    entry.getValue() == null ? "" : entry.getValue());
+            conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
+            conAttributeLabel.addStyleName("label-style");
+            attributesLayout.addComponent(conAttributeLabel);
+        }
     }
 
     /**
