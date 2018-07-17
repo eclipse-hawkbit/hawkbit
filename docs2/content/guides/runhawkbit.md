@@ -10,7 +10,7 @@ In this guide we describe how to run a full featured hawkBit setup based on a pr
 
 
 {{% note %}}
-The update server can in fact be run [stand alone](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server). However, only with an embedded H2, no [Device Management Federation API](../interfaces/dmf-api.html) and no artifact storage.
+The update server can in fact be run stand alone. However, only with an embedded H2, no Device Management Federation API and no artifact storage.
 {{% /note %}}
 
 ## System Architecture
@@ -86,12 +86,12 @@ see [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runti
 
 This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first login into either _Management UI_ or API (which is done by this client).
 
-However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
+However, this is not done by _DMF_ which is in fact used by the device simulator i.e., without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
 
 ### Compile & Run device simulator (optional).
 
 see [device simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator)
 
-# Enjoy hawkBit with a real database, artifact storage and all [interfaces](../interfaces/interfaces.html) available.
+# Enjoy hawkBit with a real database, artifact storage and all [interfaces](../../apis/) available.
 
 ![](../../images/gettingStartedResult.png)

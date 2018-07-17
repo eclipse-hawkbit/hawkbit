@@ -47,7 +47,7 @@ For all requests an `Authorization` header has to be set.
 * Username: `Tenant\username`
 * Password: `password`
 
-Also have a look to the [Security](../security/security.html) chapter.
+Also have a look to the [Security](../../concepts/authentication/) chapter.
 
 In addition, for POST and PUT requests the `Content-Type` header has to be set. Accepted content-types are.
 

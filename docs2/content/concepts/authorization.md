@@ -54,7 +54,7 @@ Use Case                                                                   | Nee
 -------------------------------------------------------------------------- | --------------------------------------------------
 Search _targets_ by installed or assigned _distribution set_               | READ_TARGET, READ_REPOSITORY
 Assign _DS_ to a _target_                                                  | READ_REPOSITORY, UPDATE_TARGET
-Assign DS to target through a _Rollout_, i.e. _Rollout_ creation and start | READ_REPOSITORY, UPDATE_TARGET, ROLLOUT_MANAGEMENT
+Assign DS to target through a _Rollout_ i.e., _Rollout_ creation and start | READ_REPOSITORY, UPDATE_TARGET, ROLLOUT_MANAGEMENT
 Read _Rollout_ status including its _deployment groups_                    | ROLLOUT_MANAGEMENT
 Checks _targets_ inside _Rollout deployment group_                         | READ_TARGET, ROLLOUT_MANAGEMENT
 

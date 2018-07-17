@@ -4,7 +4,7 @@ parent: Concepts
 weight: 55
 ---
 
-A target has a current state which reflects the provisioning status of the device at this point in time. State changes are driven either by the update server by means of starting an update or by the controller on the provisioning target that gives feedback to the update server, e.g. "I am here", "I am working on a provisioning", "I have finished a provisioning".
+A target has a current state which reflects the provisioning status of the device at this point in time. State changes are driven either by the update server by means of starting an update or by the controller on the provisioning target that gives feedback to the update server e.g., "I am here", "I am working on a provisioning", "I have finished a provisioning".
 <!--more-->
 
 ## Defined states

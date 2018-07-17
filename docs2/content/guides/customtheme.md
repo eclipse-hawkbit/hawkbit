@@ -31,7 +31,7 @@ Every custom theme should always refer the base theme and customization can be d
 - Create a **XXXvariables.scss** file under **customstyles** folder, putting all the variables inside the same file. For more details about the variables we recommend to take a look at the [hawkBit defaults](https://github.com/eclipse/hawkbit/blob/master/hawkbit-ui/src/main/resources/VAADIN/themes/hawkbit/customstyles/hawkbitvariables.scss).
 - Create **styles.scss** file under the **"XXXtheme"** folder.
 - Any images should be placed under the sub folder **"images"** folder.
-- Within the **_styles.scss_** file, import **XXXvariables.scss** and the base theme (hawkbit theme as mentioned in previous chapter **Overview** . Please find below the syntax:
+- Within the **_styles.scss_** file, import **XXXvariables.scss** and the base theme (hawkBit theme as mentioned in previous chapter **Overview** . Please find below the syntax:
 
   ```css
   @import "../hawkbit/customstyles/hawkbitvariables";

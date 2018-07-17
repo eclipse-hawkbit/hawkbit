@@ -5,6 +5,7 @@ weight: 51
 ---
 
 A hawkBit update server can be accessed in four different ways:
+
 - _Direct Device Integration (DDI) API_ by **targets**.
 - _Management API_ by 3rd party **applications**.
 - _Device Management Federation (DMF) API_ by 3rd party **applications** through AMQP.
@@ -27,7 +28,7 @@ Host: your.hawkBit.server
 Authorization: TargetToken bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY
 ```
 
-The target security token is provided in [DMF API](../interfaces/dmf-api.html) as part of the update message in order to allow DMF clients to leverage the feature or can it be manually retrieved per target by [Management API](../interfaces/management-api.html) or in the [Management UI](../interfaces/management-ui.html) in the target details.
+The target security token is provided in [DMF API](../../apis/dmf_api/) as part of the update message in order to allow DMF clients to leverage the feature or can it be manually retrieved per target by [Management API](../../apis/management_api/) or in the [Management UI](../../ui) in the target details.
 
 Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method. See [DdiSecurityProperties](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java) for system wide enablement.
 
