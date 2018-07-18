@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -178,7 +179,7 @@ public abstract class AbstractFilterButtons extends Table {
         } else {
             deleteButton.setId(UIComponentIdProvider.DELETE_TAG_ID + itemId.toString());
         }
-        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE));
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }
@@ -317,7 +318,8 @@ public abstract class AbstractFilterButtons extends Table {
                 i18n.getMessage("caption.entity.delete.action.confirmbox"),
                 i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(),
                         entityToDelete.substring(entityToDelete.indexOf('.') + 1), ""),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (ok) {
                         deleteEntity(entityToDelete);
                     } else {

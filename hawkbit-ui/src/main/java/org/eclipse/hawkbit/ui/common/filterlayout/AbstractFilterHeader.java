@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -97,9 +98,10 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         if (isAddTagRequired()) {
             menu = new ConfigMenuBar(permChecker.hasCreateRepositoryPermission(),
                     permChecker.hasUpdateRepositoryPermission(), permChecker.hasDeleteRepositoryPermission(),
-                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId());
+                    getAddButtonCommand(), getUpdateButtonCommand(), getDeleteButtonCommand(), getMenuBarId(), i18n);
         }
-        hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
+        hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLOSE), "", true, FontAwesome.TIMES,
                 SPUIButtonStyleNoBorder.class);
         hideIcon.addClickListener(event -> hideFilterButtonLayout());
     }

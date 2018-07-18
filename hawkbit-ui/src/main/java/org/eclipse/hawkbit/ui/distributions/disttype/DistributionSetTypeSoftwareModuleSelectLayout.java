@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
@@ -151,7 +152,7 @@ public class DistributionSetTypeSoftwareModuleSelectLayout extends VerticalLayou
                 if (DIST_TYPE_NAME.equals(propertyId) && !StringUtils.isEmpty(description)) {
                     return i18n.getMessage("label.description") + description;
                 } else if (DIST_TYPE_MANDATORY.equals(propertyId)) {
-                    return i18n.getMessage("tooltip.check.for.mandatory");
+                    return i18n.getMessage(UIMessageIdProvider.TOOLTIP_CHECK_FOR_MANDATORY);
                 }
                 return null;
             }

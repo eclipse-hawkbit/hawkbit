@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
@@ -115,23 +116,26 @@ public abstract class AbstractGridHeader extends VerticalLayout {
     }
 
     private SPUIButton createSearchResetIcon() {
-        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "", "", null,
-                false, FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_SEARCH), null, false, FontAwesome.SEARCH,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> onSearchResetClick());
         button.setData(Boolean.FALSE);
         return button;
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
+        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_ADD), null, false, FontAwesome.PLUS,
                 SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createCloseButton() {
-        final Button button = SPUIComponentProvider.getButton(getCloseButtonId(), "", "", null, false,
-                FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
+        final Button button = SPUIComponentProvider.getButton(getCloseButtonId(), "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLOSE), null, false, FontAwesome.TIMES,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(this::onClose);
         return button;
     }
@@ -155,6 +159,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
         searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.toggleIcon(FontAwesome.TIMES);
         searchResetIcon.setData(Boolean.TRUE);
+        searchResetIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_RESET));
         searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
         searchField.setVisible(true);
         searchField.focus();
@@ -167,6 +172,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
         searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
         searchResetIcon.toggleIcon(FontAwesome.SEARCH);
         searchResetIcon.setData(Boolean.FALSE);
+        searchResetIcon.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SEARCH));
 
         resetSearchText();
     }

@@ -76,16 +76,16 @@ public class RolloutListView extends AbstractGridComponentLayout {
 
     @Override
     public AbstractOrderedLayout createGridHeader() {
-        return new RolloutListHeader(permissionChecker, rolloutUIState, eventBus, rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement, rolloutGroupManagement,
-                quotaManagement);
+        return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), rolloutManagement,
+                targetManagement, uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
-        return new RolloutListGrid(i18n, eventBus, rolloutManagement, uiNotification, rolloutUIState, permissionChecker,
-                targetManagement, entityFactory, uiProperties, targetFilterQueryManagement, rolloutGroupManagement,
-                quotaManagement, tenantConfigManagement);
+        return new RolloutListGrid(getI18n(), getEventBus(), rolloutManagement, uiNotification, rolloutUIState,
+                permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement,
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
     }
 
 }

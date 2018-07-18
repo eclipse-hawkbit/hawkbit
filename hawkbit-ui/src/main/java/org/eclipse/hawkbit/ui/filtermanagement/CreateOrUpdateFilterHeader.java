@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
@@ -313,8 +314,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private SPUIButton createSearchResetIcon() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(
-                UIComponentIdProvider.CUSTOM_FILTER_CLOSE, "", "", null, false, FontAwesome.TIMES,
-                SPUIButtonStyleNoBorder.class);
+                UIComponentIdProvider.CUSTOM_FILTER_CLOSE, "", i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLOSE), null,
+                false, FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> closeFilterLayout());
         return button;
     }
@@ -329,16 +330,17 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Button createSaveButton() {
         saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON,
-                UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
-                SPUIButtonStyleNoBorder.class);
+                UIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, i18n.getMessage(UIMessageIdProvider.TOOLTIP_SAVE), null,
+                false, FontAwesome.SAVE, SPUIButtonStyleNoBorder.class);
         saveButton.addClickListener(this);
         saveButton.setEnabled(false);
         return saveButton;
     }
 
     private Button createSearchIcon() {
-        searchIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.FILTER_SEARCH_ICON_ID, "", "", null, false,
-                FontAwesome.SEARCH, SPUIButtonStyleNoBorder.class);
+        searchIcon = SPUIComponentProvider.getButton(UIComponentIdProvider.FILTER_SEARCH_ICON_ID, "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_SEARCH), null, false, FontAwesome.SEARCH,
+                SPUIButtonStyleNoBorder.class);
         searchIcon.addClickListener(event -> onSearchIconClick());
         searchIcon.setEnabled(false);
         searchIcon.setData(false);

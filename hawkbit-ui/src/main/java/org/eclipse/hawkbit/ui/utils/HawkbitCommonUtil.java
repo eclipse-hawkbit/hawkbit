@@ -166,18 +166,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get Label for Action History Details.
-     *
-     * @param name
-     * @return ActionHistoryLabelId
-     */
-    public static String getActionHistoryLabelId(final String name) {
-        return new StringBuilder()
-                .append(DIV_DESCRIPTION_START + "Action History For " + getBoldHTMLText(getFormattedName(name)))
-                .append(DIV_DESCRIPTION_END).toString();
-    }
-
-    /**
      * Get tool tip for Poll status.
      *
      * @param pollStatus

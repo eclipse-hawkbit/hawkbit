@@ -43,11 +43,11 @@ public class ActionStatusMsgLayout extends AbstractGridComponentLayout {
 
     @Override
     public DefaultGridHeader createGridHeader() {
-        return new DefaultGridHeader(managementUIState, "Messages").init();
+        return new DefaultGridHeader(managementUIState, "Messages", getI18n()).init();
     }
 
     @Override
     public ActionStatusMsgGrid createGrid() {
-        return new ActionStatusMsgGrid(i18n, eventBus);
+        return new ActionStatusMsgGrid(getI18n(), getEventBus());
     }
 }
