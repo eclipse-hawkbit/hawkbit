@@ -583,11 +583,13 @@ public class TargetTable extends AbstractTable<Target> {
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
-                getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
+                getNotification()
+                        .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
                 return false;
             }
         } else {
-            getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
+            getNotification()
+                    .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
             return false;
         }
 

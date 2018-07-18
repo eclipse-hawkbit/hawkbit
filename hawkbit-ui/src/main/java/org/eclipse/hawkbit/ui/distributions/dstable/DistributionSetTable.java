@@ -223,7 +223,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected boolean isDropValid(final DragAndDropEvent dragEvent) {
         final Component compsource = dragEvent.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
-            getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
+            getNotification()
+                    .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
             return false;
         }
         return super.isDropValid(dragEvent);

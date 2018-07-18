@@ -78,8 +78,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
 
-    protected static final String ACTION_NOT_ALLOWED_MSG = UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED;
-
     private final transient EventBus.UIEventBus eventBus;
 
     private final VaadinMessageSource i18n;
@@ -574,13 +572,13 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             return validateDragAndDropWrapper((DragAndDropWrapper) compsource)
                     && validateDropList(getDraggedTargetList(dragEvent));
         }
-        notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
+        notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
         return false;
     }
 
     private boolean validateTable(final Table compsource) {
         if (!compsource.getId().equals(getDropTableId())) {
-            notification.displayValidationError(ACTION_NOT_ALLOWED_MSG);
+            notification.displayValidationError(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
             return false;
         }
         return true;

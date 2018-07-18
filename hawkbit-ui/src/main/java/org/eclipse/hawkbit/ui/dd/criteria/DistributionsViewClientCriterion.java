@@ -9,6 +9,9 @@
 package org.eclipse.hawkbit.ui.dd.criteria;
 
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -28,8 +31,9 @@ public final class DistributionsViewClientCriterion extends ServerViewClientCrit
     /**
      * Constructor.
      */
-    public DistributionsViewClientCriterion() {
-        super(COMPONENT_CRITERIA);
+    @Autowired
+    public DistributionsViewClientCriterion(final VaadinMessageSource i18n) {
+        super(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED), COMPONENT_CRITERIA);
     }
 
     /**

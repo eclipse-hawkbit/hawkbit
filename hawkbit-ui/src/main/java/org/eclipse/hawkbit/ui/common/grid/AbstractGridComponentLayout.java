@@ -206,7 +206,7 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
         protected abstract Label getFooterMessageLabel();
     }
 
-  protected VaadinMessageSource getI18n() {
+    protected VaadinMessageSource getI18n() {
         return i18n;
     }
 

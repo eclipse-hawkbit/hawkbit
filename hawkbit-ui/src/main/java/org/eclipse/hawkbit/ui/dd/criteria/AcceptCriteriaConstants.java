@@ -77,6 +77,11 @@ public final class AcceptCriteriaConstants {
     public static final String PREFIX_MODE = "p";
 
     /**
+     * Key for the error message to be displayed in error case.
+     */
+    public static final String ERROR_MESSAGE = "errM";
+
+    /**
      * Constants class.
      */
     private AcceptCriteriaConstants() {

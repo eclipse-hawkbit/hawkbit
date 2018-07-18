@@ -123,13 +123,13 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
 
         private static final long serialVersionUID = 1L;
 
-        private final String SELECT_ALL_TEXT;
+        private final String selectAllText;
 
         private final ShortcutAction selectAllAction;
 
         private TableShortCutHandler(final VaadinMessageSource i18n) {
-            SELECT_ALL_TEXT = i18n.getMessage("action.target.table.selectall");
-            selectAllAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
+            selectAllText = i18n.getMessage("action.target.table.selectall");
+            selectAllAction = new ShortcutAction(selectAllText, ShortcutAction.KeyCode.A,
                     new int[] { ShortCutModifierUtils.getCtrlOrMetaModifier() });
         }
 
