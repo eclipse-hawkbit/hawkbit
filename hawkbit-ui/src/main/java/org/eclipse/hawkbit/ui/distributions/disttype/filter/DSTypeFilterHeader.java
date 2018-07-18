@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.disttype.CreateDistributionSetTypeLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -86,7 +86,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getTitle() {
-        return SPUILabelDefinitions.TYPE;
+        return getI18n().getMessage(UIMessageIdProvider.CAPTION_FILTER_BY_TYPE);
     }
 
     @Override

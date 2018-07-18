@@ -621,8 +621,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             description = cell.getProperty().getValue().toString().toLowerCase().replace("_", " ");
-        } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
-            description = SPUILabelDefinitions.ACTION.toLowerCase();
+        } else if (getActionLabeltext().equals(cell.getPropertyId())) {
+            description = getActionLabeltext().toLowerCase();
         } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
             description = ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {

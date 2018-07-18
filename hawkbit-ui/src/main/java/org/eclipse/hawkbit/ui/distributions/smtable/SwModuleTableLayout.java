@@ -51,7 +51,7 @@ public class SwModuleTableLayout extends AbstractTableLayout<SwModuleTable> {
         final ArtifactDetailsLayout artifactDetailsLayout = new ArtifactDetailsLayout(i18n, eventBus,
                 artifactUploadState, uiNotification, artifactManagement, softwareModuleManagement);
 
-        super.init(
+        super.init(i18n,
                 new SwModuleTableHeader(i18n, permChecker, eventBus, manageDistUIState, softwareModuleAddUpdateWindow),
                 swModuleTable, new SwModuleDetails(i18n, eventBus, permChecker, softwareModuleAddUpdateWindow,
                         manageDistUIState, softwareModuleManagement, swMetadataPopupLayout, artifactDetailsLayout));

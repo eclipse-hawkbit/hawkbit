@@ -211,7 +211,8 @@ public final class DashboardMenu extends CustomComponent {
 
         final String logoutUrl = generateLogoutUrl();
 
-        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation(logoutUrl));
+        settingsItem.addItem(i18n.getMessage("label.sign.out"),
+                selectedItem -> Page.getCurrent().setLocation(logoutUrl));
         return settings;
     }
 
@@ -225,7 +226,8 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private Component buildToggleButton() {
-        final Button valoMenuToggleButton = new Button("Menu", new MenuToggleClickListenerMyClickListener());
+        final Button valoMenuToggleButton = new Button(i18n.getMessage("label.menu"),
+                new MenuToggleClickListenerMyClickListener());
         valoMenuToggleButton.setIcon(FontAwesome.LIST);
         valoMenuToggleButton.addStyleName("valo-menu-toggle");
         valoMenuToggleButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);

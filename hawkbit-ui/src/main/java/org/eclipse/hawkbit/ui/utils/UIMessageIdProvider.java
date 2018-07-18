@@ -19,6 +19,48 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_OK = "button.ok";
 
+    public static final String BUTTON_SAVE = "button.save";
+
+    public static final String CAPTION_ACTION_FORCED = "label.action.forced";
+
+    public static final String CAPTION_ACTION_SOFT = "label.action.soft";
+
+    public static final String CAPTION_ACTION_TIME_FORCED = "label.action.time.forced";
+
+    public static final String CAPTION_ACTION_MESSAGES = "caption.action.messages";
+
+    public static final String CAPTION_ACTION_HISTORY = "caption.action.history";
+
+    public static final String CAPTION_ACTION_HISTORY_FOR = "caption.action.history.for";
+
+    public static final String CAPTION_DISCARD = "button.discard";
+
+    public static final String CAPTION_FILTER_BY_TYPE = "caption.filter.by.type";
+
+    public static final String CAPTION_DISTRIBUTION_TAG = "caption.entity.distribution.tag";
+
+    public static final String CAPTION_TARGET_TAG = "caption.entity.target.tag";
+
+    public static final String CAPTION_ARTIFACT_DETAILS = "caption.artifact.details";
+
+    public static final String CAPTION_ARTIFACT_DETAILS_OF = "caption.artifact.details.of";
+
+    public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
+
+    public static final String LABEL_NO_TAG = "label.no.tag";
+
+    public static final String LABEL_CREATE_FILTER = "label.create.filter";
+
+    public static final String MESSAGE_NO_DATA = "message.no.data";
+
+    public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
+
+    public static final String MESSAGE_UPLOAD_ACTION = "upload.action";
+
+    public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
+
+    public static final String TOOLTIP_OVERDUE = "tooltip.overdue";
+
     public static final String TOOLTIP_MAXIMIZE = "tooltip.maximize";
 
     public static final String TOOLTIP_MINIMIZE = "tooltip.minimize";
@@ -84,6 +126,10 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_ROLLOUT_APPROVE = "tooltip.rollout.approve";
 
     public static final String TOOLTIP_IN_TIME = "tooltip.in.time";
+
+    public static final String TOOLTIP_DELETE_CUSTOM_FILTER = "tooltip.delete.custom.filter";
+
+    public static final String TOOLTIP_UPDATE_CUSTOM_FILTER = "tooltip.update.custom.filter";
 
     /**
      * Private Constructor.

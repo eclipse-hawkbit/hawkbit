@@ -33,7 +33,6 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
     private final VaadinMessageSource i18n;
 
     private AbstractOrderedLayout gridHeader;
-
     private Grid grid;
 
     private transient AbstractFooterSupport footerSupport;

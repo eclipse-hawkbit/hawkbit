@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -85,7 +86,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         this.entityFactory = entityFactory;
         this.targetTagManagement = targetTagManagement;
 
-        addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(getNoTagLabel()).build());
     }
 
     @Override
@@ -112,7 +113,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        if (SPUIDefinitions.NO_TAG.equals(name)) {
+        if (getNoTagLabel().equals(name)) {
             return UIComponentIdProvider.NO_TAG_TARGET;
         }
         return name;
@@ -144,7 +145,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
-        if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
+        if (tagName.equals(getTargetTagCaption())) {
             uiNotification.displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
                     getI18n().getMessage("label.no.tag.assigned")));
             return false;
@@ -163,7 +164,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         final Transferable transferable = event.getTransferable();
         final Component compsource = transferable.getSourceComponent();
         if (!(compsource instanceof AbstractTable)) {
-            uiNotification.displayValidationError(getI18n().getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            uiNotification.displayValidationError(getI18n().getMessage(getActionNotAllowedMessage()));
             return false;
         }
 
@@ -242,7 +243,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     private boolean validateIfSourceIsTargetTable(final Table source) {
         if (!source.getId().equals(UIComponentIdProvider.TARGET_TABLE_ID)) {
-            uiNotification.displayValidationError(getI18n().getMessage(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
+            uiNotification.displayValidationError(getI18n().getMessage(getActionNotAllowedMessage()));
             return false;
         }
         return true;
@@ -258,7 +259,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeUpdateAndDeleteColumn();
-        addNewTargetTag(entityFactory.tag().create().name(SPUIDefinitions.NO_TAG).build());
+        addNewTargetTag(entityFactory.tag().create().name(getNoTagLabel()).build());
         addColumn();
     }
 
@@ -284,7 +285,11 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonWrapperData() {
-        return SPUIDefinitions.TARGET_TAG_BUTTON;
+        return getTargetTagCaption();
+    }
+
+    private String getTargetTagCaption() {
+        return getI18n().getMessage(UIMessageIdProvider.CAPTION_TARGET_TAG);
     }
 
     @Override
@@ -297,7 +302,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     protected void addDeleteButtonClickListener(final ClickEvent event) {
         final String entityName = getEntityId(event);
-        openConfirmationWindowForDeletion(entityName, getI18n().getMessage("caption.entity.target.tag"),
+        openConfirmationWindowForDeletion(entityName, getTargetTagCaption(),
                 new TargetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
@@ -315,6 +320,10 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
                         .displaySuccess(getI18n().getMessage("message.delete.success", tagToDelete.get().getName()));
             }
         });
+    }
+
+    private String getActionNotAllowedMessage() {
+        return getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
     }
 
 }
