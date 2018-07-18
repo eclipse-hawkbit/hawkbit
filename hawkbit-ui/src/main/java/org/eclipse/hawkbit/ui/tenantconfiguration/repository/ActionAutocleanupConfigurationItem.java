@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -44,7 +44,7 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * This class represents the UI item for configuring automatic action cleanup in
- * the Repository Configuration view.
+ * the Repository Configuration section of the System Configuration view.
  */
 public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantConfigurationItem {
 
@@ -246,7 +246,7 @@ public class ActionAutocleanupConfigurationItem extends AbstractBooleanTenantCon
     private EnumSet<Status> getActionStatus() {
         final TenantConfigurationValue<String> statusStr = readConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
-            return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf)
+            return Arrays.stream(statusStr.getValue().split("[;,]")).map(Status::valueOf)
                     .collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
         return EMPTY_STATUS_SET;

@@ -128,7 +128,7 @@ public class TenantConfigurationProperties {
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
 
         /**
-         * Switch to enable /disable automatic action cleanup.
+         * Switch to enable/disable automatic action cleanup.
          */
         public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
 

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -454,19 +453,5 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
     void deleteByIdIn(Collection<Long> actionIDs);
-
-    /**
-     * Deletes up to 1000 actions which match one of the given action status and
-     * which have not been modified since the given (absolute) time-stamp.
-     * 
-     * @param status
-     *            Set of action status.
-     * @param lastModified
-     *            A time-stamp in milliseconds.
-     */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM JpaAction a WHERE a.status IN ?1 AND a.lastModifiedAt<?2")
-    void deleteByStatusAndLastModifiedBefore(Set<Action.Status> status, long lastModified);
 
 }

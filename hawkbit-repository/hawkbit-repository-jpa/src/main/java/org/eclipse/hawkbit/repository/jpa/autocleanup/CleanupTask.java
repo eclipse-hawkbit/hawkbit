@@ -20,7 +20,7 @@ public interface CleanupTask extends Runnable {
     void run();
 
     /**
-     * @return The identifier of this cleanup task.
+     * @return The identifier of this cleanup task. Never null.
      */
     String getId();
 

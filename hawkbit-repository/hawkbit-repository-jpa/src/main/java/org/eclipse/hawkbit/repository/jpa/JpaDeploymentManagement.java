@@ -18,8 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -87,6 +89,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
@@ -103,7 +106,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
 
-    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "DELETE FROM sp_action WHERE tenant='%s' AND status IN (%s) AND last_modified_at<%d LIMIT 1000";
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "DELETE FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT 1000";
 
     private final EntityManager entityManager;
     private final ActionRepository actionRepository;
@@ -694,8 +697,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return distributionSetRepository.findInstalledAtTarget(controllerId);
     }
 
-    @Override
-    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
+    @Transactional(readOnly = false)
+    public int old_deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
         if (status.isEmpty()) {
             return 0;
         }
@@ -711,6 +714,43 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 lastModified);
         LOG.debug("Action cleanup: Executing the following (native) query: {}", queryStr);
         return entityManager.createNativeQuery(queryStr).executeUpdate();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
+        if (status.isEmpty()) {
+            return 0;
+        }
+        /*
+         * We use a native query here because Spring JPA does not support to
+         * specify a LIMIT clause on a DELETE statement. However, for this
+         * specific use case (action cleanup), we must specify a row limit to
+         * reduce the overall load on the database.
+         */
+
+        final int statusCount = status.size();
+        final Status[] statusArr = status.toArray(new Status[statusCount]);
+
+        final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
+                formatInClauseWithNumberKeys(statusCount));
+        final Query deleteQuery = entityManager.createNativeQuery(queryStr);
+
+        IntStream.range(0, statusCount)
+                .forEach(i -> deleteQuery.setParameter(String.valueOf(i), statusArr[i].ordinal()));
+        deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
+        deleteQuery.setParameter("last_modified_at", lastModified);
+
+        LOG.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
+        return deleteQuery.executeUpdate();
+    }
+
+    private static String formatInClauseWithNumberKeys(final int count) {
+        return formatInClause(IntStream.range(0, count).mapToObj(String::valueOf).collect(Collectors.toList()));
+    }
+
+    private static String formatInClause(final Collection<String> elements) {
+        return "#" + Joiner.on(",#").join(elements);
     }
 
 }

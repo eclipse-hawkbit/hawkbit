@@ -471,6 +471,6 @@ public interface DeploymentManagement {
      * @return The number of action entries that were deleted.
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    int deleteActionsByStatusAndLastModifiedBefore(Set<Action.Status> status, long lastModified);
+    int deleteActionsByStatusAndLastModifiedBefore(@NotNull Set<Action.Status> status, long lastModified);
 
 }
