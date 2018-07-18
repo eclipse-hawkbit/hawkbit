@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * A cleanup task for {@link Action} entities which can be used to delete
  * actions which are in a certain {@link Action.Status}. It is recommended to
  * only clean up actions which have terminated already (i.e. actions in status
- * CANCELLED, ERROR, or FINISHED).
+ * CANCELLED or ERROR).
  * 
  * The cleanup task can be enabled /disabled and configured on a per tenant
  * basis.
