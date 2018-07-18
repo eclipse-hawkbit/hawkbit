@@ -92,7 +92,7 @@ public class AutoActionCleanup implements CleanupTask {
     private EnumSet<Status> getActionStatus() {
         final TenantConfigurationValue<String> statusStr = getConfigValue(ACTION_CLEANUP_ACTION_STATUS, String.class);
         if (statusStr != null) {
-            return Arrays.stream(statusStr.getValue().split(";|,")).map(Status::valueOf)
+            return Arrays.stream(statusStr.getValue().split("[;,]")).map(Status::valueOf)
                     .collect(Collectors.toCollection(() -> EnumSet.noneOf(Status.class)));
         }
         return EMPTY_STATUS_SET;

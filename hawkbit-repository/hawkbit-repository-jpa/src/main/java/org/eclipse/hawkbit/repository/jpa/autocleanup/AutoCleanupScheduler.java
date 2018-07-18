@@ -57,9 +57,7 @@ public class AutoCleanupScheduler {
     }
 
     /**
-     * Scheduler method which retrieves all tenants from
-     * {@link SystemManagement#findTenants()} and runs all registered auto
-     * cleanup handlers for each of them.
+     * Scheduler method which kicks off the cleanup process.
      */
     @Scheduled(initialDelayString = PROP_AUTO_CLEANUP_INTERVAL, fixedDelayString = PROP_AUTO_CLEANUP_INTERVAL)
     public void run() {
@@ -71,6 +69,9 @@ public class AutoCleanupScheduler {
         }
     }
 
+    /**
+     * Method which executes each registered cleanup task for each tenant.
+     */
     @SuppressWarnings("squid:S3516")
     private Void executeAutoCleanup() {
         systemManagement.forEachTenant(tenant -> cleanupTasks.forEach(task -> {
