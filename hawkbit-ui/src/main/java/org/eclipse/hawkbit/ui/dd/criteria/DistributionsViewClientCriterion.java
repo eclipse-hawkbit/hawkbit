@@ -30,6 +30,9 @@ public final class DistributionsViewClientCriterion extends ServerViewClientCrit
 
     /**
      * Constructor.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
      */
     @Autowired
     public DistributionsViewClientCriterion(final VaadinMessageSource i18n) {

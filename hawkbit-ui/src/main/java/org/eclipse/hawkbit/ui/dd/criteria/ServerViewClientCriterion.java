@@ -53,6 +53,9 @@ public class ServerViewClientCriterion extends Or {
     /**
      * Constructor for the server part of the client-side accept criterion.
      *
+     * @param errorMessage
+     *            the message to display if the drag and drop action is not
+     *            successful
      * @param criteria
      *            elements the composite consists of.
      */

@@ -25,15 +25,15 @@ import com.vaadin.spring.annotation.UIScope;
 @UIScope
 public final class ManagementViewClientCriterion extends ServerViewClientCriterion {
 
-    /**
-     * serialVersionUID.
-     */
     private static final long serialVersionUID = 927303094996626180L;
 
     private static final ServerViewComponentClientCriterion[] COMPONENT_CRITERIA = createViewComponentClientCriteria();
 
     /**
      * Constructor.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
      */
     @Autowired
     public ManagementViewClientCriterion(final VaadinMessageSource i18n) {

@@ -23,15 +23,15 @@ import com.vaadin.spring.annotation.UIScope;
 @UIScope
 public final class UploadViewClientCriterion extends ServerViewClientCriterion {
 
-    /**
-     * serialVersionUID.
-     */
     private static final long serialVersionUID = 6271501901430079353L;
 
     private static final ServerViewComponentClientCriterion[] COMPONENT_CRITERIA = createViewComponentClientCriteria();
 
     /**
      * Constructor.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
      */
     @Autowired
     public UploadViewClientCriterion(final VaadinMessageSource i18n) {
