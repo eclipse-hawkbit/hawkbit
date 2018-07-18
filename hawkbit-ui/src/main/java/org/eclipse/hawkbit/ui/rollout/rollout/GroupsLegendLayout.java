@@ -171,18 +171,26 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
-        showToBeContinueLabel(listOfTargetCountPerGroup);
+        showOrHideToBeContinueLabel(listOfTargetCountPerGroup);
 
         unassignedTargetsLabel.setValue("");
         unassignedTargetsLabel.setVisible(false);
     }
 
-    private void showToBeContinueLabel(final List<?> listOfTargetCountPerGroup) {
-        if (listOfTargetCountPerGroup.size() > MAX_GROUPS_TO_BE_DISPLAYED) {
+    private void showOrHideToBeContinueLabel(final List<?> listOfTargetCountPerGroup) {
+        if (hasMoreGroupsToShowAsLimit(listOfTargetCountPerGroup)) {
             groupsLegend.getComponent(MAX_GROUPS_TO_BE_DISPLAYED).setVisible(true);
-        } else if (groupsLegend.getComponentCount() > listOfTargetCountPerGroup.size()) {
+        } else if (hasLessGroupsToShowAsLimit(listOfTargetCountPerGroup)) {
             groupsLegend.getComponent(groupsLegend.getComponentCount() - 1).setVisible(false);
         }
+    }
+
+    private boolean hasLessGroupsToShowAsLimit(final List<?> listOfTargetCountPerGroup) {
+        return groupsLegend.getComponentCount() > listOfTargetCountPerGroup.size();
+    }
+
+    private static boolean hasMoreGroupsToShowAsLimit(final List<?> listOfTargetCountPerGroup) {
+        return listOfTargetCountPerGroup.size() > MAX_GROUPS_TO_BE_DISPLAYED;
     }
 
     private int getGroupsWithoutToBeContinuedLabel(final int amountOfRolloutGroups) {
@@ -230,7 +238,7 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
-        showToBeContinueLabel(groups);
+        showOrHideToBeContinueLabel(groups);
 
         if (unassigned > 0) {
             unassignedTargetsLabel.setValue(getTargetsInGroupMessage(unassigned, "Unassigned"));
@@ -265,7 +273,7 @@ public class GroupsLegendLayout extends VerticalLayout {
             }
         }
 
-        showToBeContinueLabel(groups);
+        showOrHideToBeContinueLabel(groups);
     }
 
     private String getTargetsInGroupMessage(final Long targets, final String groupName) {
