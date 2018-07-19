@@ -520,6 +520,16 @@ public final class UIComponentIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
+     * Combobox for action types
+     */
+    public static final String SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_TYPES = "system.configuration.autocleanup.action.types";
+
+    /**
+     * Combobox for action expiry in days
+     */
+    public static final String SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_EXPIRY = "system.configuration.autocleanup.action.expiry";
+
+    /**
      * ID for save button in pop-up-windows instance of commonDialogWindow
      */
     public static final String SAVE_BUTTON = "common.dialog.window.save";
@@ -1199,6 +1209,12 @@ public final class UIComponentIdProvider {
      * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
      */
     public static final String REPOSITORY_ACTIONS_AUTOCLOSE_CHECKBOX = "repositoryactionsautoclosecheckbox";
+
+    /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
+     */
+    public static final String REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX = "repositoryactionsautocleanupcheckbox";
 
     /**
      * Configuration checkbox for

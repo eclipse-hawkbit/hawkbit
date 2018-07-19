@@ -144,7 +144,7 @@ public interface RolloutGroupRepository
      *            the page request to sort, limit the result
      * @return a page of found {@link RolloutGroup} or {@code empty}.
      */
-    Page<JpaRolloutGroup> findByRolloutId(final Long rolloutId, Pageable page);
+    Page<JpaRolloutGroup> findByRolloutId(Long rolloutId, Pageable page);
 
     /**
      * Counts all {@link RolloutGroup} for a specific rollout.
@@ -154,7 +154,7 @@ public interface RolloutGroupRepository
      * 
      * @return the amount of found {@link RolloutGroup}s.
      */
-    long countByRolloutId(final Long rolloutId);
+    long countByRolloutId(Long rolloutId);
 
     @Modifying
     @Query("DELETE FROM JpaRolloutGroup g where g.id in :rolloutGroupIds")
