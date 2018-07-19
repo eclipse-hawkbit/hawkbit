@@ -656,7 +656,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 UIComponentIdProvider.ROLLOUT_APPROVAL_REMARK_FIELD_ID, Rollout.APPROVAL_REMARK_MAX_SIZE);
         approvalRemarkField.setWidth(100.0F, Unit.PERCENTAGE);
 
-        HorizontalLayout layout = new HorizontalLayout(approveButtonsGroup, approvalRemarkField);
+        final HorizontalLayout layout = new HorizontalLayout(approveButtonsGroup, approvalRemarkField);
         layout.setWidth(100.0F, Unit.PERCENTAGE);
         layout.setExpandRatio(approvalRemarkField, 1.0F);
         return layout;
@@ -1013,6 +1013,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
+            totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+            groupsLegendLayout.populateTotalTargets(totalTargetsCount);
         } else {
             editRolloutEnabled = true;
             if (rollout.getStatus() != Rollout.RolloutStatus.READY) {
@@ -1043,10 +1045,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             updateGroupsChart(rolloutGroupManagement
                     .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
                     .getContent(), rollout.getTotalTargets());
-        }
 
-        totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
-        groupsLegendLayout.populateTotalTargets(totalTargetsCount);
+            totalTargetsCount = rollout.getTotalTargets();
+            groupsLegendLayout.populateTotalTargets(totalTargetsCount);
+        }
     }
 
     private void disableRequiredFieldsOnEdit() {
