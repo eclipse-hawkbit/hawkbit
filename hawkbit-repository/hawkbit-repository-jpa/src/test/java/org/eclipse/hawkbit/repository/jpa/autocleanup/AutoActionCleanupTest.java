@@ -131,7 +131,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that canceled and failed actions are cleaned up.")
+    @Description("Verifies that canceled actions are cleaned up.")
     public void canceledActionsAreCleanedUp() {
 
         // cleanup config for this test case

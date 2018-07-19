@@ -91,9 +91,7 @@ public class AutoCleanupScheduler {
     }
 
     private Lock obtainLock(final CleanupTask task, final String tenant) {
-        final String lockId = new StringBuilder().append(AUTO_CLEANUP).append(SEP).append(task.getId()).append(SEP)
-                .append(tenant).toString();
-        return lockRegistry.obtain(lockId);
+        return lockRegistry.obtain(AUTO_CLEANUP + SEP + task.getId() + SEP + tenant);
     }
 
 }
