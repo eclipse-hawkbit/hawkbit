@@ -62,12 +62,15 @@ public abstract class AbstractFilterButtons extends Table {
 
     private final VaadinMessageSource i18n;
 
+    private final String noTagLabel;
+
     protected AbstractFilterButtons(final UIEventBus eventBus,
             final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour, final VaadinMessageSource i18n) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
+        noTagLabel = i18n.getMessage(UIMessageIdProvider.LABEL_NO_TAG);
         if (doSubscribeToEventBus()) {
             eventBus.subscribe(this);
         }
@@ -168,7 +171,7 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     private Object addDeleteCell(final Object itemId) {
-        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+        if (itemId instanceof TagIdName && noTagLabel.equals(((TagIdName) itemId).getName())) {
             return null;
         }
 
@@ -185,7 +188,7 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     private Button addUpdateCell(final Object itemId) {
-        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+        if (itemId instanceof TagIdName && noTagLabel.equals(((TagIdName) itemId).getName())) {
             return null;
         }
 
@@ -409,6 +412,10 @@ public abstract class AbstractFilterButtons extends Table {
 
     protected AbstractFilterButtonClickBehaviour getFilterButtonClickBehaviour() {
         return filterButtonClickBehaviour;
+    }
+
+    protected String getNoTagLabel() {
+        return noTagLabel;
     }
 
 }

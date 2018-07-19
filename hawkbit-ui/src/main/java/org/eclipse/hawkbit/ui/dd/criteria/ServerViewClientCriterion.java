@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.dd.criteria;
 
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.ERROR_MESSAGE;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -47,28 +48,35 @@ public class ServerViewClientCriterion extends Or {
 
     private final Set<String> dropAreaHints;
 
+    private final String errorMessage;
+
     /**
      * Constructor for the server part of the client-side accept criterion.
      *
+     * @param errorMessage
+     *            the message to display if the drag and drop action is not
+     *            successful
      * @param criteria
      *            elements the composite consists of.
      */
-    public ServerViewClientCriterion(ServerViewComponentClientCriterion... criteria) {
+    public ServerViewClientCriterion(final String errorMessage, final ServerViewComponentClientCriterion... criteria) {
         super(criteria);
+        this.errorMessage = errorMessage;
         dropAreaHints = Sets.newHashSet();
-        for (ServerViewComponentClientCriterion criterion : criteria) {
+        for (final ServerViewComponentClientCriterion criterion : criteria) {
             dropAreaHints.addAll(Arrays.asList(criterion.getValidDropAreaIds()));
         }
     }
 
     @Override
-    public void paintContent(PaintTarget target) throws PaintException {
+    public void paintContent(final PaintTarget target) throws PaintException {
         int dropAreaStylesConfigCount = 0;
-        for (String dropAreaEntry : dropAreaHints) {
+        for (final String dropAreaEntry : dropAreaHints) {
             target.addAttribute(DROP_AREA_CONFIG + dropAreaStylesConfigCount, dropAreaEntry);
             dropAreaStylesConfigCount++;
         }
         target.addAttribute(DROP_AREA_CONFIG_COUNT, dropAreaStylesConfigCount);
+        target.addAttribute(ERROR_MESSAGE, errorMessage);
 
         super.paintContent(target);
     }

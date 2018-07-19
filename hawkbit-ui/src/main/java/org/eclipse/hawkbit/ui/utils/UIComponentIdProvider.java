@@ -1247,6 +1247,8 @@ public final class UIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
 
+    public static final String SAVE_ACTION_RADIO_FORCED = "save.action.radio.forced";
+
     /**
      * /* Private Constructor.
      */

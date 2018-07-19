@@ -54,7 +54,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
         final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
 
-        super.init(
+        super.init(i18n,
                 new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
                         distributionAddUpdateWindowLayout),
                 distributionSetTable,

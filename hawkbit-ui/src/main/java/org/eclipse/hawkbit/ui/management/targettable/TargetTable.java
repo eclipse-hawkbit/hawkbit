@@ -515,7 +515,7 @@ public class TargetTable extends AbstractTable<Target> {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
-        if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
+        if (tagName.equals(getI18n().getMessage(UIMessageIdProvider.CAPTION_TARGET_TAG))) {
             getNotification().displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
                     getI18n().getMessage("label.no.tag.assigned")));
             return false;
@@ -583,11 +583,13 @@ public class TargetTable extends AbstractTable<Target> {
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
-                getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
+                getNotification()
+                        .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
                 return false;
             }
         } else {
-            getNotification().displayValidationError(getI18n().getMessage(ACTION_NOT_ALLOWED_MSG));
+            getNotification()
+                    .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
             return false;
         }
 
@@ -723,7 +725,7 @@ public class TargetTable extends AbstractTable<Target> {
         }
 
         if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
+            setData(getI18n().getMessage(UIMessageIdProvider.MESSAGE_DATA_AVAILABLE));
         }
         getEventBus().publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }

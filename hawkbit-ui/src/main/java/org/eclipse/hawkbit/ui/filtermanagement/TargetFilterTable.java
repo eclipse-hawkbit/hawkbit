@@ -172,8 +172,8 @@ public class TargetFilterTable extends Table {
         final Item row = getItem(itemId);
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
-                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE_CUSTOM_FILTER),
+                ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
         return deleteIcon;
@@ -225,7 +225,8 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row1.getItemProperty(SPUILabelDefinitions.NAME).getValue();
 
         final Button updateIcon = SPUIComponentProvider.getButton(getDetailLinkId(tfName), tfName,
-                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_UPDATE_CUSTOM_FILTER), null, false, null,
+                SPUIButtonStyleNoBorder.class);
         updateIcon.setData(tfName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
         updateIcon.addClickListener(this::onClickOfDetailButton);

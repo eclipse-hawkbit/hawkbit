@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.grid.DefaultGridHeader;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -43,7 +44,8 @@ public class ActionStatusMsgLayout extends AbstractGridComponentLayout {
 
     @Override
     public DefaultGridHeader createGridHeader() {
-        return new DefaultGridHeader(managementUIState, "Messages", getI18n()).init();
+        return new DefaultGridHeader(managementUIState,
+                getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_MESSAGES), getI18n()).init();
     }
 
     @Override

@@ -97,7 +97,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     private void showArtifactDetailsWindow(final SoftwareModule softwareModule) {
         final Window artifactDtlsWindow = new Window();
         artifactDtlsWindow.setCaption(HawkbitCommonUtil
-                .getArtifactoryDetailsLabelId(softwareModule.getName() + "." + softwareModule.getVersion()));
+                .getArtifactoryDetailsLabelId(softwareModule.getName() + "." + softwareModule.getVersion(), getI18n()));
         artifactDtlsWindow.setCaptionAsHtml(true);
         artifactDtlsWindow.setClosable(true);
         artifactDtlsWindow.setResizable(true);

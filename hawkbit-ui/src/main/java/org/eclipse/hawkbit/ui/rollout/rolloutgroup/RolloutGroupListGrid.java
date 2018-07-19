@@ -53,7 +53,8 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  * Rollout group list grid component.
  */
 public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
-    private static final long serialVersionUID = 4060904914954370524L;
+
+    private static final long serialVersionUID = 1L;
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
@@ -264,8 +265,8 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
     private String getDescription(final CellReference cell) {
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             return cell.getProperty().getValue().toString().toLowerCase();
-        } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
-            return SPUILabelDefinitions.ACTION.toLowerCase();
+        } else if (getActionLabeltext().equals(cell.getPropertyId())) {
+            return getActionLabeltext().toLowerCase();
         } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
             return ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
