@@ -26,6 +26,14 @@ public enum DistributionSetFields implements FieldNameProvider {
      */
     DESCRIPTION("description"),
     /**
+     * The createdAt field.
+     */
+    CREATEDAT("createdAt"),
+    /**
+     * The lastModifiedAt field.
+     */
+    LASTMODIFIEDAT("lastModifiedAt"),
+    /**
      * The version field.
      */
     VERSION("version"),
