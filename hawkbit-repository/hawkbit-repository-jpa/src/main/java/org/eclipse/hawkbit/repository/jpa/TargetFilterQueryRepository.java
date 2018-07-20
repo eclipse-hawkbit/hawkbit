@@ -36,7 +36,7 @@ public interface TargetFilterQueryRepository
      * @param name
      * @return custom target filter
      */
-    Optional<TargetFilterQuery> findByName(final String name);
+    Optional<TargetFilterQuery> findByName(String name);
 
     /**
      * Find list of all custom target filters.

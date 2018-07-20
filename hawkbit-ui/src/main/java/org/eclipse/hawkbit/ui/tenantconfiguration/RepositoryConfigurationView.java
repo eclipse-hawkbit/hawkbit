@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.generic.BooleanConfigurationItem;
+import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutocleanupConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutocloseConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -37,12 +38,18 @@ public class RepositoryConfigurationView extends BaseConfigurationView
 
     private final ActionAutocloseConfigurationItem actionAutocloseConfigurationItem;
 
+    private final ActionAutocleanupConfigurationItem actionAutocleanupConfigurationItem;
+
     private CheckBox actionAutocloseCheckBox;
+
+    private CheckBox actionAutocleanupCheckBox;
 
     RepositoryConfigurationView(final VaadinMessageSource i18n,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.i18n = i18n;
         this.actionAutocloseConfigurationItem = new ActionAutocloseConfigurationItem(tenantConfigurationManagement,
+                i18n);
+        this.actionAutocleanupConfigurationItem = new ActionAutocleanupConfigurationItem(tenantConfigurationManagement,
                 i18n);
 
         init();
@@ -59,11 +66,11 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
-        final Label headerDisSetType = new Label(i18n.getMessage("configuration.repository.title"));
-        headerDisSetType.addStyleName("config-panel-header");
-        vLayout.addComponent(headerDisSetType);
+        final Label header = new Label(i18n.getMessage("configuration.repository.title"));
+        header.addStyleName("config-panel-header");
+        vLayout.addComponent(header);
 
-        final GridLayout gridLayout = new GridLayout(2, 1);
+        final GridLayout gridLayout = new GridLayout(2, 2);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
@@ -77,6 +84,14 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         gridLayout.addComponent(actionAutocloseCheckBox, 0, 0);
         gridLayout.addComponent(actionAutocloseConfigurationItem, 1, 0);
 
+        actionAutocleanupCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
+        actionAutocleanupCheckBox.setId(UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX);
+        actionAutocleanupCheckBox.setValue(actionAutocleanupConfigurationItem.isConfigEnabled());
+        actionAutocleanupCheckBox.addValueChangeListener(this);
+        actionAutocleanupConfigurationItem.addChangeListener(this);
+        gridLayout.addComponent(actionAutocleanupCheckBox, 0, 1);
+        gridLayout.addComponent(actionAutocleanupConfigurationItem, 1, 1);
+
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
@@ -85,12 +100,21 @@ public class RepositoryConfigurationView extends BaseConfigurationView
     @Override
     public void save() {
         actionAutocloseConfigurationItem.save();
+        actionAutocleanupConfigurationItem.save();
+    }
+
+    @Override
+    public boolean isUserInputValid() {
+        return actionAutocloseConfigurationItem.isUserInputValid()
+                && actionAutocleanupConfigurationItem.isUserInputValid();
     }
 
     @Override
     public void undo() {
         actionAutocloseConfigurationItem.undo();
         actionAutocloseCheckBox.setValue(actionAutocloseConfigurationItem.isConfigEnabled());
+        actionAutocleanupConfigurationItem.undo();
+        actionAutocleanupCheckBox.setValue(actionAutocleanupConfigurationItem.isConfigEnabled());
     }
 
     @Override
@@ -112,6 +136,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView
 
         if (actionAutocloseCheckBox.equals(checkBox)) {
             configurationItem = actionAutocloseConfigurationItem;
+        } else if (actionAutocleanupCheckBox.equals(checkBox)) {
+            configurationItem = actionAutocleanupConfigurationItem;
         } else {
             return;
         }

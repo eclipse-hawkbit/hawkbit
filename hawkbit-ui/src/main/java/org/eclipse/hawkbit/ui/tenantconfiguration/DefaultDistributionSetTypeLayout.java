@@ -13,13 +13,13 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -62,22 +62,21 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         final VerticalLayout vlayout = new VerticalLayout();
         vlayout.setMargin(true);
         vlayout.setSizeFull();
-        final String disSetTypeTitle = i18n.getMessage("configuration.defaultdistributionset.title");
 
-        final Label headerDisSetType = new Label(disSetTypeTitle);
-        headerDisSetType.addStyleName("config-panel-header");
-        vlayout.addComponent(headerDisSetType);
+        final Label header = new Label(i18n.getMessage("configuration.defaultdistributionset.title"));
+        header.addStyleName("config-panel-header");
+        vlayout.addComponent(header);
+
         final DistributionSetType currentDistributionSetType = getCurrentDistributionSetType();
         currentDefaultDisSetType = currentDistributionSetType.getId();
 
         final HorizontalLayout hlayout = new HorizontalLayout();
         hlayout.setSpacing(true);
-        hlayout.setStyleName("config-h-panel");
+        hlayout.setImmediate(true);
 
-        final Label configurationLabel = new Label(
-                i18n.getMessage("configuration.defaultdistributionset.select.label"));
+        final Label configurationLabel = new LabelBuilder()
+                .name(i18n.getMessage("configuration.defaultdistributionset.select.label")).buildLabel();
         hlayout.addComponent(configurationLabel);
-        hlayout.setComponentAlignment(configurationLabel, Alignment.MIDDLE_LEFT);
 
         final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetTypeManagement
                 .findAll(new PageRequest(0, 100));
