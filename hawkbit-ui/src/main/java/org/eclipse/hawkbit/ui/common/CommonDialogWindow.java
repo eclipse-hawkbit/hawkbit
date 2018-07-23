@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -444,8 +445,9 @@ public class CommonDialogWindow extends Window {
     }
 
     private void createCancelButton() {
-        cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleNoBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), "", "", true, FontAwesome.TIMES,
+                SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
         addCloseListenerForCancelButton();
@@ -459,8 +461,9 @@ public class CommonDialogWindow extends Window {
     }
 
     private void createSaveButton() {
-        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleNoBorderWithIcon.class);
+        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
+                i18n.getMessage(UIMessageIdProvider.BUTTON_SAVE), "", "", true, FontAwesome.SAVE,
+                SPUIButtonStyleNoBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
         addCloseListenerForSaveButton();

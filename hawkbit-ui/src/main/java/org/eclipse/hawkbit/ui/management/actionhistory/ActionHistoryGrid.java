@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -304,7 +305,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.force.action.confirmbox"), i18n.getMessage("message.force.action.confirm"),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (!ok) {
                         return;
                     }
@@ -327,8 +329,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.forcequit.action.confirmbox"),
-                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
-                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (!ok) {
                         return;
                     }
@@ -358,7 +360,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.cancel.action.confirmbox"), i18n.getMessage("message.cancel.action.confirm"),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (!ok) {
                         return;
                     }
@@ -450,18 +453,20 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnHeaderNames() {
         final HeaderRow newHeaderRow = resetHeaderDefaultRow();
 
-        getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE);
-        getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DIST);
-        getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);
-        getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_STATUS);
+        getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setHeaderCaption(i18n.getMessage("label.active"));
+        getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION)
+                .setHeaderCaption(i18n.getMessage("distribution.details.header"));
+        getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT)
+                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
+        getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
                 .setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_MAINTENANCE_WINDOW);
         getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 
-        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(SPUIDefinitions.ACTION_HIS_TBL_FORCED);
+        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.forced"));
         newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
-                .setText(SPUIDefinitions.ACTIONS_COLUMN);
+                .setText(i18n.getMessage("header.action"));
     }
 
     @Override
@@ -593,9 +598,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
          */
         @Override
         protected void setMaximizedHeaders() {
-            getColumn(ProxyAction.PXY_ACTION_ID).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID);
-            getColumn(ProxyAction.PXY_ACTION_ROLLOUT_NAME)
-                    .setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME);
+            getColumn(ProxyAction.PXY_ACTION_ID).setHeaderCaption(i18n.getMessage("label.action.id"));
+            getColumn(ProxyAction.PXY_ACTION_ROLLOUT_NAME).setHeaderCaption(i18n.getMessage("caption.rollout.name"));
         }
 
         /**

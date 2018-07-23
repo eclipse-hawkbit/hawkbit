@@ -32,8 +32,8 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
@@ -163,7 +163,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void createComponents(final String labelSoftwareModule) {
         titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
-                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule)).buildCaptionLabel();
+                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule, i18n)).buildCaptionLabel();
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
@@ -181,9 +181,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private SPUIButton createMaxMinButton() {
         final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(SPUIDefinitions.EXPAND_ACTION_HISTORY,
-                "", "", null, true, FontAwesome.EXPAND, SPUIButtonStyleNoBorder.class);
+                "", i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE), null, true, FontAwesome.EXPAND,
+                SPUIButtonStyleNoBorder.class);
         button.addClickListener(event -> maxArtifactDetails());
         return button;
+
     }
 
     private void buildLayout() {
@@ -266,20 +268,22 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
                         fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                        FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+                        i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon",
+                        true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
                 deleteIcon.setData(itemId);
                 deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
                 return deleteIcon;
             }
         });
+
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.delete.artifact.confirmbox"),
                 i18n.getMessage("message.delete.artifact", new Object[] { fileName }),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (ok) {
                         artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
@@ -292,6 +296,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void setTableColumnDetails(final Table table) {
+
         table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
         table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
         if (fullWindowMode) {
@@ -300,7 +305,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         }
         table.setColumnHeader(CREATE_MODIFIED_DATE_UPLOAD, i18n.getMessage("upload.last.modified.date"));
         if (!readOnly) {
-            table.setColumnHeader(ACTION, i18n.getMessage("upload.action"));
+            table.setColumnHeader(ACTION, i18n.getMessage(UIMessageIdProvider.MESSAGE_UPLOAD_ACTION));
         }
 
         table.setColumnExpandRatio(PROVIDED_FILE_NAME, 3.5F);
@@ -351,6 +356,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void maxArtifactDetails() {
         final Boolean flag = (Boolean) maxMinButton.getData();
         if (flag == null || Boolean.FALSE.equals(flag)) {
+            // Clicked on max Button
             maximizedArtifactDetailsView();
         } else {
             minimizedArtifactDetailsView();
@@ -387,6 +393,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void createArtifactDetailsMaxView() {
+
         artifactDetailsTable.setValue(null);
         artifactDetailsTable.setSelectable(false);
         artifactDetailsTable.setMultiSelect(false);
@@ -422,7 +429,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             if (StringUtils.isEmpty(swModuleName)) {
                 setTitleOfLayoutHeader();
             } else {
-                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName));
+                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName, i18n));
                 titleOfArtifactDetails.setContentMode(ContentMode.HTML);
             }
         }
@@ -445,7 +452,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(""));
+        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId("", i18n));
         titleOfArtifactDetails.setContentMode(ContentMode.HTML);
     }
 
@@ -497,14 +504,17 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void showMinIcon() {
         maxMinButton.toggleIcon(FontAwesome.COMPRESS);
         maxMinButton.setData(Boolean.TRUE);
+        maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MINIMIZE));
     }
 
     private void showMaxIcon() {
         maxMinButton.toggleIcon(FontAwesome.EXPAND);
         maxMinButton.setData(Boolean.FALSE);
+        maxMinButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_MAXIMIZE));
     }
 
     private boolean isMaximized() {
         return artifactUploadState.isArtifactDetailsMaximized();
     }
+
 }

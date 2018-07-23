@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -63,7 +62,7 @@ public class RolloutListHeader extends AbstractGridHeader {
     }
 
     protected String getHeaderCaption() {
-        return SPUIDefinitions.ROLLOUT_LIST_HEADER_CAPTION;
+        return i18n.getMessage("message.rollouts");
     }
 
     @Override

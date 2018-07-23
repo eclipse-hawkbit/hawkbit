@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -171,8 +172,8 @@ public class TargetFilterTable extends Table {
         final Item row = getItem(itemId);
         final String tfName = (String) row.getItemProperty(SPUILabelDefinitions.NAME).getValue();
         final Button deleteIcon = SPUIComponentProvider.getButton(getDeleteIconId(tfName), "",
-                SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "blueicon", true,
-                FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE_CUSTOM_FILTER),
+                ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
         deleteIcon.setData(itemId);
         deleteIcon.addClickListener(this::onDelete);
         return deleteIcon;
@@ -187,8 +188,8 @@ public class TargetFilterTable extends Table {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox"),
-                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
-                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage("message.delete.filter.confirm"), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         final Long rowId = (Long) ((Button) event.getComponent()).getData();
                         final String deletedFilterName = targetFilterQueryManagement.get(rowId).get().getName();
@@ -224,7 +225,8 @@ public class TargetFilterTable extends Table {
         final String tfName = (String) row1.getItemProperty(SPUILabelDefinitions.NAME).getValue();
 
         final Button updateIcon = SPUIComponentProvider.getButton(getDetailLinkId(tfName), tfName,
-                SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleNoBorder.class);
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_UPDATE_CUSTOM_FILTER), null, false, null,
+                SPUIButtonStyleNoBorder.class);
         updateIcon.setData(tfName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
         updateIcon.addClickListener(this::onClickOfDetailButton);

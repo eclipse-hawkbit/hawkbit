@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common.table;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.utils.ShortCutModifierUtils;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -37,8 +38,11 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
 
     private AbstractTableDetailsLayout<?> detailsLayout;
 
-    protected void init(final AbstractTableHeader tableHeader, final T table,
+    private VaadinMessageSource i18n;
+
+    protected void init(final VaadinMessageSource i18n, final AbstractTableHeader tableHeader, final T table,
             final AbstractTableDetailsLayout<?> detailsLayout) {
+        this.i18n = i18n;
         this.tableHeader = tableHeader;
         this.table = table;
         this.detailsLayout = detailsLayout;
@@ -66,7 +70,7 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
             tablePanel.setStyleName("table-panel");
             tablePanel.setHeight(100.0F, Unit.PERCENTAGE);
             tablePanel.setContent(table);
-            tablePanel.addActionHandler(getShortCutKeysHandler());
+            tablePanel.addActionHandler(getShortCutKeysHandler(i18n));
             tablePanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
             tableHeaderLayout.addComponent(tablePanel);
             tableHeaderLayout.setComponentAlignment(tablePanel, Alignment.TOP_CENTER);
@@ -99,8 +103,8 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
      * @return reference of {@link Handler} to handler the short cut keys.
      *         Default is null.
      */
-    protected Handler getShortCutKeysHandler() {
-        return new TableShortCutHandler();
+    protected Handler getShortCutKeysHandler(final VaadinMessageSource i18n) {
+        return new TableShortCutHandler(i18n);
     }
 
     protected void publishEvent() {
@@ -115,13 +119,19 @@ public abstract class AbstractTableLayout<T extends AbstractTable<?>> extends Ve
         return table;
     }
 
-    private class TableShortCutHandler implements Handler {
-
-        private static final String SELECT_ALL_TEXT = "Select All";
-        private final ShortcutAction selectAllAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
-                new int[] { ShortCutModifierUtils.getCtrlOrMetaModifier() });
+    private final class TableShortCutHandler implements Handler {
 
         private static final long serialVersionUID = 1L;
+
+        private final String selectAllText;
+
+        private final ShortcutAction selectAllAction;
+
+        private TableShortCutHandler(final VaadinMessageSource i18n) {
+            selectAllText = i18n.getMessage("action.target.table.selectall");
+            selectAllAction = new ShortcutAction(selectAllText, ShortcutAction.KeyCode.A,
+                    new int[] { ShortCutModifierUtils.getCtrlOrMetaModifier() });
+        }
 
         @Override
         public void handleAction(final Action action, final Object sender, final Object target) {

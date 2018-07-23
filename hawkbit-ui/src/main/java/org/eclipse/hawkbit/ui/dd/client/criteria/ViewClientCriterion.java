@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.dd.client.criteria;
 
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG;
 import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.DROP_AREA_CONFIG_COUNT;
+import static org.eclipse.hawkbit.ui.dd.criteria.AcceptCriteriaConstants.ERROR_MESSAGE;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +70,8 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     private VDragEvent previousDragEvent;
 
     private HandlerRegistration nativeEventHandlerRegistration;
+
+    private String errorMessage;
 
     /**
      * This interface is used to compile string templates in the GWT context (as
@@ -153,6 +156,8 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
         if (Event.ONMOUSEUP == Event.getTypeInt(drag.getCurrentGwtEvent().getType())) {
             showErrorNotification(drag);
         }
+
+        errorMessage = configuration.getStringAttribute(ERROR_MESSAGE);
     }
 
     @Override
@@ -269,8 +274,8 @@ public final class ViewClientCriterion extends VAcceptCriterion implements VAcce
     private void showErrorNotification(final VDragEvent drag) {
         final VNotification n = VNotification.createNotification(SPUILabelDefinitions.SP_DELAY,
                 drag.getTransferable().getDragSource().getWidget());
-        n.show(getDraggableTemplate().notificationMsg(SPUILabelDefinitions.ACTION_NOT_ALLOWED).asString(),
-                Position.BOTTOM_RIGHT, SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
+        n.show(getDraggableTemplate().notificationMsg(errorMessage).asString(), Position.BOTTOM_RIGHT,
+                SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
     }
 
     /**

@@ -40,7 +40,7 @@ public interface DistributionSetTagRepository
      */
     @Modifying
     @Transactional
-    Long deleteByName(final String tagName);
+    Long deleteByName(String tagName);
 
     /**
      * find {@link DistributionSetTag} by its name.
@@ -49,7 +49,7 @@ public interface DistributionSetTagRepository
      *            to filter on
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
-    Optional<DistributionSetTag> findByNameEquals(final String tagName);
+    Optional<DistributionSetTag> findByNameEquals(String tagName);
 
     /**
      * Checks if tag with given name exists.

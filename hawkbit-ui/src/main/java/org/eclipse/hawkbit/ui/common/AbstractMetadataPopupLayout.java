@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
@@ -281,8 +282,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.entity.delete.action.confirmbox"),
-                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage(SPUIDefinitions.BUTTON_OK),
-                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage("message.confirm.delete.metadata", key), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDeleteMetadata(event, key);
                     }

@@ -54,7 +54,7 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiProperties,
                 entityFactory, uiNotification, tagManagement, distributionSetManagement, uiExecutor, targetTable);
 
-        super.init(targetTableHeader, targetTable, targetDetails);
+        super.init(i18n, targetTableHeader, targetTable, targetDetails);
     }
 
     @Override

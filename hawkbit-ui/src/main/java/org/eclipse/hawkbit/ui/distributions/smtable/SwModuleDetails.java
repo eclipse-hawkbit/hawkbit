@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -88,7 +89,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     private Button createShowArtifactDetailsButton() {
         artifactDetailsButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.FILE_O,
                 SPUIButtonStyleNoBorder.class);
-        artifactDetailsButton.setDescription(getI18n().getMessage("tooltip.artifact.icon"));
+        artifactDetailsButton.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_ARTIFACT_ICON));
         artifactDetailsButton.addClickListener(event -> showArtifactDetailsWindow(getSelectedBaseEntity()));
         return artifactDetailsButton;
     }
@@ -96,7 +97,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     private void showArtifactDetailsWindow(final SoftwareModule softwareModule) {
         final Window artifactDtlsWindow = new Window();
         artifactDtlsWindow.setCaption(HawkbitCommonUtil
-                .getArtifactoryDetailsLabelId(softwareModule.getName() + "." + softwareModule.getVersion()));
+                .getArtifactoryDetailsLabelId(softwareModule.getName() + "." + softwareModule.getVersion(), getI18n()));
         artifactDtlsWindow.setCaptionAsHtml(true);
         artifactDtlsWindow.setClosable(true);
         artifactDtlsWindow.setResizable(true);

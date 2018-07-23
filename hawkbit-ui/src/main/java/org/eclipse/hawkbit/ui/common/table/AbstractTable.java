@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -76,8 +77,6 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     protected static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES = "message.confirm.assign.multiple.entities";
 
     private static final float DEFAULT_COLUMN_NAME_MIN_SIZE = 0.8F;
-
-    protected static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -184,7 +183,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
         setContainerDataSource(container);
         final int size = container.size();
         if (size == 0) {
-            setData(SPUIDefinitions.NO_DATA);
+            setData(i18n.getMessage(UIMessageIdProvider.MESSAGE_NO_DATA));
         }
     }
 
@@ -364,7 +363,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
                 SPUIButtonStyleNoBorderWithIcon.class);
         final String id = getEntityId(itemId);
         deleteButton.setId("delete.entity." + id);
-        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE));
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }
@@ -401,8 +400,8 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     private ConfirmationDialog createConfirmationWindowForDeletion(final List<Long> entitiesToBeDeleted,
             final String confirmationQuestion) {
         return new ConfirmationDialog(i18n.getMessage("caption.entity.delete.action.confirmbox", getEntityType()),
-                confirmationQuestion, i18n.getMessage(SPUIDefinitions.BUTTON_OK),
-                i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                confirmationQuestion, i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         handleOkDelete(entitiesToBeDeleted);
                     }
@@ -573,13 +572,13 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
             return validateDragAndDropWrapper((DragAndDropWrapper) compsource)
                     && validateDropList(getDraggedTargetList(dragEvent));
         }
-        notification.displayValidationError(i18n.getMessage(ACTION_NOT_ALLOWED_MSG));
+        notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
         return false;
     }
 
     private boolean validateTable(final Table compsource) {
         if (!compsource.getId().equals(getDropTableId())) {
-            notification.displayValidationError(ACTION_NOT_ALLOWED_MSG);
+            notification.displayValidationError(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
             return false;
         }
         return true;

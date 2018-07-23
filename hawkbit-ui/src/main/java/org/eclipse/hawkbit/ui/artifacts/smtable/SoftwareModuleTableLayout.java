@@ -44,7 +44,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout<SoftwareModul
                 uiNotification, eventBus, softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
                 softwareModuleTable);
 
-        super.init(
+        super.init(i18n,
                 new SoftwareModuleTableHeader(i18n, permChecker, eventBus, artifactUploadState,
                         softwareModuleAddUpdateWindow),
                 softwareModuleTable,

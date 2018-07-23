@@ -61,6 +61,7 @@ public class TenantConfigurationProperties {
      *
      */
     public static class TenantConfigurationKey {
+
         /**
          * Header based authentication enabled.
          */
@@ -70,6 +71,7 @@ public class TenantConfigurationProperties {
          * Header based authentication authority name.
          */
         public static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
+
         /**
          * Target token based authentication enabled.
          */
@@ -124,6 +126,21 @@ public class TenantConfigurationProperties {
          * assignment over active actions.
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
+
+        /**
+         * Switch to enable/disable automatic action cleanup.
+         */
+        public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
+
+        /**
+         * Specifies the action expiry in milli-seconds.
+         */
+        public static final String ACTION_CLEANUP_ACTION_EXPIRY = "action.cleanup.actionExpiry";
+
+        /**
+         * Specifies the action status.
+         */
+        public static final String ACTION_CLEANUP_ACTION_STATUS = "action.cleanup.actionStatus";
 
         private String keyName;
         private String defaultValue = "";

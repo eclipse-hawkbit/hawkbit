@@ -90,6 +90,6 @@ public interface ActionStatusRepository
      * @return Page with found status messages.
      */
     @Query("SELECT message FROM JpaActionStatus actionstatus JOIN actionstatus.messages message WHERE actionstatus.action.id = :actionId AND message NOT LIKE :filter")
-    Page<String> findMessagesByActionIdAndMessageNotLike(final Pageable pageable, @Param("actionId") Long actionId,
+    Page<String> findMessagesByActionIdAndMessageNotLike(Pageable pageable, @Param("actionId") Long actionId,
             @Param("filter") String filter);
 }
