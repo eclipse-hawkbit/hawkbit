@@ -36,7 +36,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -152,6 +151,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             populateDistributionDtls(installedDistLayout,
                     deploymentManagement.getInstalledDistributionSet(controllerId).orElse(null));
         } else {
+            updateAttributesLayout(null);
             updateDetailsLayout(null, null, null, null);
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
@@ -231,54 +231,15 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void updateAttributesLayout(final String controllerId) {
         final VerticalLayout attributesLayout = getAttributesLayout();
-        final boolean isRequestAttributes = targetManagement.isControllerAttributesRequested(controllerId);
+        attributesLayout.removeAllComponents();
+
+        if (controllerId == null) {
+            return;
+        }
+
         final Map<String, String> attributes = targetManagement.getControllerAttributes(controllerId);
-
-        if (attributes != null) {
-            attributesLayout.removeAllComponents();
-            attributesLayout.addComponent(buildAttributesUpdateLayout(controllerId, isRequestAttributes));
-            updateAttributesLabelsList(attributesLayout, attributes);
-        } else {
-            attributesLayout.replaceComponent(attributesLayout.getComponent(0),
-                    buildAttributesUpdateLayout(controllerId, isRequestAttributes));
-        }
-    }
-
-    private HorizontalLayout buildAttributesUpdateLayout(final String controllerId, final boolean isRequestAttributes) {
-        final HorizontalLayout attributesUpdateLayout = new HorizontalLayout();
-        attributesUpdateLayout.setWidth("100%");
-
-        final Label attributesUpdateText = new Label();
-        attributesUpdateText.setStyleName(ValoTheme.LABEL_SMALL);
-
-        final Button requestAttributesUpdateButton = SPUIComponentProvider.getButton(
-                UIComponentIdProvider.TARGET_ATTRIBUTES_UPDATE, "", "", "", false, FontAwesome.REFRESH,
-                SPUIButtonStyleNoBorder.class);
-        requestAttributesUpdateButton.addClickListener(e -> targetManagement.requestControllerAttributes(controllerId));
-
-        toggleUpdateAttributesUiState(isRequestAttributes, attributesUpdateText, requestAttributesUpdateButton);
-
-        attributesUpdateLayout.addComponent(attributesUpdateText);
-        attributesUpdateLayout.setExpandRatio(attributesUpdateText, 1.0f);
-        attributesUpdateLayout.addComponent(requestAttributesUpdateButton);
-        attributesUpdateLayout.setComponentAlignment(requestAttributesUpdateButton, Alignment.TOP_RIGHT);
-
-        return attributesUpdateLayout;
-    }
-
-    private void toggleUpdateAttributesUiState(final boolean isRequestAttributes, final Label attributesUpdateText,
-            final Button requestAttributesUpdateButton) {
-        requestAttributesUpdateButton.setEnabled(!isRequestAttributes);
-
-        if (isRequestAttributes) {
-            attributesUpdateText.setValue(getI18n().getMessage("label.target.attributes.update.pending"));
-            requestAttributesUpdateButton
-                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.requested"));
-        } else {
-            attributesUpdateText.setValue(getI18n().getMessage("label.target.attributes.no.update"));
-            requestAttributesUpdateButton
-                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.request"));
-        }
+        updateAttributesLabelsList(attributesLayout, attributes);
+        updateAttributesUpdateComponents(attributesLayout, controllerId);
     }
 
     private void updateAttributesLabelsList(final VerticalLayout attributesLayout,
@@ -290,6 +251,44 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             conAttributeLabel.addStyleName("label-style");
             attributesLayout.addComponent(conAttributeLabel);
         }
+    }
+
+    private void updateAttributesUpdateComponents(final VerticalLayout attributesLayout, final String controllerId) {
+        final boolean isRequestAttributes = targetManagement.isControllerAttributesRequested(controllerId);
+
+        if (isRequestAttributes) {
+            attributesLayout.addComponent(buildAttributesUpdateLabel(), 0);
+        }
+
+        attributesLayout.addComponent(buildRequestAttributesUpdateButton(controllerId, isRequestAttributes));
+    }
+
+    private Label buildAttributesUpdateLabel() {
+        final Label attributesUpdateLabel = new Label();
+        attributesUpdateLabel.setStyleName(ValoTheme.LABEL_SMALL);
+        attributesUpdateLabel.setValue(getI18n().getMessage("label.target.attributes.update.pending"));
+
+        return attributesUpdateLabel;
+    }
+
+    private Button buildRequestAttributesUpdateButton(final String controllerId, final boolean isRequestAttributes) {
+        final Button requestAttributesUpdateButton = SPUIComponentProvider.getButton(
+                UIComponentIdProvider.TARGET_ATTRIBUTES_UPDATE, "", "", "", false, FontAwesome.REFRESH,
+                SPUIButtonStyleNoBorder.class);
+
+        requestAttributesUpdateButton.addClickListener(e -> targetManagement.requestControllerAttributes(controllerId));
+
+        if (isRequestAttributes) {
+            requestAttributesUpdateButton
+                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.requested"));
+            requestAttributesUpdateButton.setEnabled(false);
+        } else {
+            requestAttributesUpdateButton
+                    .setDescription(getI18n().getMessage("tooltip.target.attributes.update.request"));
+            requestAttributesUpdateButton.setEnabled(true);
+        }
+
+        return requestAttributesUpdateButton;
     }
 
     /**

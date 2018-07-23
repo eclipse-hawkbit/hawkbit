@@ -293,8 +293,8 @@
     background-repeat: no-repeat;
    }
    
-   .app-loading:before {
-   	  background: none;
+  .app-loading:before {
+    background: none;
     height: 20px !important;
     width: 20px !important;
     -webkit-box-sizing: border-box;
@@ -313,5 +313,11 @@
     position: fixed;
     margin-top: 12px;
     margin-left: -10px;
-   }
+  }
+
+  #target\.attributes\.update {
+    position: absolute;
+    top: 12px;
+    right: 6px;
+  }
 }
