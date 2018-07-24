@@ -8,7 +8,6 @@ name: Jeroen Laverman
 id: laverman
 ---
 {% include base.html %}
-First release available on <a href="https://mvnrepository.com/artifact/org.eclipse.hawkbit">Maven Central</a>
 
 # Eclipse hawkBit 0.2.0 - First Release
 
@@ -17,7 +16,7 @@ as more powerful controllers and gateways connected to IP based networking infra
 since 2015 and with _0.2.0_ a first release is available.
 
 In this article, we want to give an overview over the latest highlights of hawkBit and let you know how you can get 
-tarted in seconds.
+started in seconds.
 
 ## Finally, it is here! 
 
@@ -37,7 +36,7 @@ which are accessible via the following interfaces:
 * Direct Device Integration (DDI) API
 * Device Management Federation (DMF) API
 
-![hawkBit Overview](hawkBit_overview.jpeg)
+![hawkBit Overview](../img/hawkBit_overview.jpeg)
 
 
 ## What's new?
@@ -56,7 +55,7 @@ the deletion. Now, an item can be easily removed by clicking on its remove icon 
 only faster and more intuitive, it also saves a lot of display real estate which can now be used to focus on what is 
 important. We hope you like this change as much as we do! _(Requires: hawkBit > 0.2.2)_
 
-![Screenshot of improved UI](hawkbit_ui.png)
+![Screenshot of improved UI](../img/hawkbit_ui.png)
 
 ### MS SQL Server
 
@@ -71,7 +70,8 @@ In order to enable interested parties to get started with hawkBit convenitely, w
 in two flavors: the default image uses the internal H2 database, while the images with `-mysql` suffix contain the MySQL 
 driver to allow connecting a MySQL database. In addition to the Docker image, the hawkBit repository contains a 
 [docker-compose.yml](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/docker/docker-compose.yml) 
-that not only starts the Update Server, but futher includes a MySQL database and a RabbitMQ message queue. 
+that not only starts the Update Server, but futher includes a MySQL database and a  RabbitMQ message broker so you're 
+able to use Device Management Federation (DMF) as well. 
 
 To start the hawkBit Update Server image, open a terminal and run: 
 
@@ -80,7 +80,7 @@ $ docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
 ```
 > _Note: This requires a running [Docker deamon](https://docs.docker.com/install/) on your system._
 
-Now, browse to [http://localhost:8080](http://localhost:8080) and log-in with `admin:admin` to 
+Now, browse to [http://localhost:8080](http://localhost:8080) and log-in with `admin:admin`.
 
 ## Community updates
 
@@ -91,6 +91,7 @@ the community. As of July 2018, there have been:
 * Forks: 54
 * Stars: 137
 * Gitter Chat members: 119
+* Contributors: 25
 
 ### New project lead and committers
 
