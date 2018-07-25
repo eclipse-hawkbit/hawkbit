@@ -115,5 +115,5 @@ Looking ahead, there are two major topics that we want to tackle next: First, th
 7 to Vaadin 8, since Vaadin announced the end-of-life for our current version. Another big topic will be the update
 to Spring Boot 2. On the community-side, we are in the final stage of updating our [website](https://www.eclipse.org/hawkbit/)
 with a new design, so make sure you stop by in a couple of days to check it out. Finally, the hawkBit team will be 
-present at EclipseCon Europe 2018, so if you are interested in meeting us, that would be a good place. 
+present at EclipseCon Europe 2018, so if you are interested in meeting us, that is the place to be. 
 
