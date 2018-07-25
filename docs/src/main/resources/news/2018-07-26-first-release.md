@@ -65,10 +65,9 @@ Microsoft's SQL Server which is also available in production grade, as well as, 
 
 ### Open Sourced REST docs
 
-A huge benefit for the community are the recently open sourced REST docs of hawkBit. This has been a [open request](https://github.com/eclipse/hawkbit/issues/480) 
-for some, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs)
-, based on unit-tests. Theses tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse/hawkbit/pull/688).
- Furthermore, the API documentation will be hosted on our new [website](https://www.eclipse.org/hawkbit/). 
+A huge benefit for the community are the recently open sourced REST docs of hawkBit. This has been an [open request](https://github.com/eclipse/hawkbit/issues/480) 
+for some, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs), based on unit-tests. Theses tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse/hawkbit/pull/688).
+ Furthermore, the API documentation will be hosted on our new [website](https://www.eclipse.org/hawkbit/) (comming soon). 
 
 
 ### Docker Images
