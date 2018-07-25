@@ -35,7 +35,7 @@ The features are accessible via the following interfaces:
 * Direct Device Integration (DDI) API
 * Device Management Federation (DMF) API
 
-![hawkBit Overview](../img/hawkBit_overview.jpeg)
+![hawkBit Overview](../img/hawkBit_overview.jpeg){:width="60%" .image-center}
 
 
 ## What's new?
@@ -55,7 +55,7 @@ multiple (or all `CTRL` + `A`) items can be selected and removed at once using t
 faster and more intuitive, it also saves a lot of display real estate which can now be used to focus on what is important. 
 We hope you like this change as much as we do! _(Requires: hawkBit > 0.2.2)_
 
-![Screenshot of improved UI](../img/hawkbit_ui.png)
+![Screenshot of improved UI](../img/hawkbit_ui.png){:width="60%" .image-center}
 
 ### MS SQL Server
 
