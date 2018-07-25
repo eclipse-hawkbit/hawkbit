@@ -10,11 +10,11 @@ id: laverman
 
 # Eclipse hawkBit 0.2.0 - First Release
 
-hawkBit is a domain independent back-end framework for rolling out software updates to constrained edge devices as well 
+hawkBit is a domain-independent back-end framework for rolling out software updates to constrained edge devices as well 
 as more powerful controllers and gateways connected to IP based networking infrastructure. It is part of the Eclipse IoT 
 since 2015 and with version _0.2.0_ a first release is available.
 
-In this article, we want to give an overview over the latest highlights of hawkBit and let you know how you can get 
+In this article, we want to give an overview of the latest highlights of hawkBit and let you know how you can get 
 started in seconds.
 
 ## Finally, it is here! 
@@ -59,15 +59,15 @@ We hope you like this change as much as we do! _(Requires: hawkBit > 0.2.2)_
 
 ### MS SQL Server
 
-Eclipse hawkBit supports a range of different SQL databases. Up to now these have been the internal H2 database (which can be 
-used for testing, development, or trial) and MySQL/MariaDB for production grade usage. This list is now extended by 
+Eclipse hawkBit supports a range of different SQL databases. Up to now, these have been the internal H2 database (which can be 
+used for testing, development, or trial) and MySQL/MariaDB for production-grade usage. This list is now extended by 
 Microsoft's SQL Server which is also available in production grade, as well as, IBM's DB2 for testing and development.
 
 ### Open Sourced REST docs
 
-A huge benefit for the community are the recently open sourced REST docs of hawkBit. This has been an [open request](https://github.com/eclipse/hawkbit/issues/480) 
-for some time, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs), based on unit-tests. Theses tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse/hawkbit/pull/688).
- Furthermore, the API documentation will be hosted on our new [website](https://www.eclipse.org/hawkbit/) (comming soon). 
+A huge benefit for the community is the recently open sourced REST docs of hawkBit. This has been an [open request](https://github.com/eclipse/hawkbit/issues/480) 
+for some time, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs), based on unit-tests. These tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse/hawkbit/pull/688).
+ Furthermore, the API documentation will be hosted on our new [website](https://www.eclipse.org/hawkbit/) (coming soon). 
 
 
 ### Docker Images
@@ -91,7 +91,7 @@ Now, browse to [http://localhost:8080](http://localhost:8080) and log-in with `a
 
 ## Community Updates
 
-Although features and functionality play a major role in the hawkBit project, there are also some interesting news from 
+Although features and functionality play a major role in the hawkBit project, there is also some interesting news from 
 the community. As of July 2018, there have been:
 
 * Pull Requests: 587
@@ -112,7 +112,7 @@ Moreover, with [Stefan Behl](https://projects.eclipse.org/user/10842) and Jeroen
 
 Looking ahead, there are two major topics that we want to tackle next: First, there is the migration of our UI from Vaadin 
 7 to Vaadin 8, since Vaadin announced the end-of-life for our current version. Another big topic will be the update
-to Spring Boot 2. On the community-side, we are in the final stage of updating our [website](https://www.eclipse.org/hawkbit/)
+to Spring Boot 2. On the community side, we are in the final stage of updating our [website](https://www.eclipse.org/hawkbit/)
 with a new design, so make sure you stop by in a couple of days to check it out. Finally, the hawkBit team will be 
 present at EclipseCon Europe 2018, so if you are interested in meeting us, that is the place to be. 
 
