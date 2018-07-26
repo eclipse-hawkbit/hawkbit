@@ -1,23 +1,24 @@
 # Eclipse hawkBit Documentation
+The hawkBit documentation is based on [Hugo](https://gohugo.io). Compiling the documentation is not included within the regular Maven build.
 
-The hawkBit documentation is based on [Jekyll](http://jekyllrb.com/). Jekyll is a Ruby gem and thus requires a Ruby runtime to be executed. Compiling the documentation is not included within the regular Maven build.
+## Prerequisites
+1. **Install Hugo**: see [installing Hugo](https://gohugo.io/getting-started/installing/) documentation on how to install Hugo.
+2. **Install hawkBit**: run `mvn install` in the parent directory to generate the latest REST docs for hawkBit.
+
 
 ## Build and Serve documentation
+The following Maven targets are available in order to build and serve the documentation:
 
-### Unix / Mac
+* `mvn install`: (1) Copies the generated REST docs to `content/rest-api/` and (2) downloads the required Hugo theme.
+* `mvn site`: Serve the documentation on [localhost:1313/hawkbit/](localhost:1313/hawkbit/)
+* `mvn clean`: Delete generated artifacts (REST docs, Hugo theme)
 
-On a unix or mac you don't need to extra install Jekyll. The Maven build is downloading the ruby runtime and the necessary ruby-gems via the Maven rubygems-proxy repository. The Ruby runtime is downloaded into the `target` folder and executed during the build.
+_Note: Currently, **only** Unix/macOS is supported!_
 
-To serve the current documentation you only need to call `mvn install gem:exec@jekyll-serve` (within the `docs` folder). It automatically monitors the filesystem and every local changes are generated on-demand on the local server [http://127.0.0.1:4000/hawkbit/](http://127.0.0.1:4000/hawkbit/).
 
-### Windows
+## Generate /public folder
+In order to generate the `/public` folder, which can be put on a web-server, run the following command:
 
-On a Windows operating system you'll need to install Jekyll manually. If you don't have installed Jekyll on your machine you can use the [PortableJekyll](https://github.com/madhur/PortableJekyll) project. Just clone the Github repository and start the `setpath.cmd` which setups the necessary path entries into the CMD (don't forget to copy them into the environment path variable to have the path set for every command prompt).
-
-The Maven build on windows just executes the `Jekyll` process using the maven-exec plugin. This allows to use Maven to build and serve the documentation on a windows machine as well.
-
-To serve the current documentation you only need to call `mvn exec:exec@jekyll-serve`. It automatically monitors the filesystem and every local changes are generated on-demand on the local server [http://127.0.0.1:4000/hawkbit/](http://127.0.0.1:4000/hawkbit/).
-
-## Test API docs integration
-
-In order to verify the hawkbit-rest-docs integration you have to run the serve command above and when running call `mvn install`in parallel to include the generated rest docs into the serve run.
+```bash
+$ hugo
+``` 

@@ -55,3 +55,9 @@ maven.properties
 
 # Test Files
 *.tmp
+
+# Documentation
+docs/themes
+docs/public
+docs/content/rest-api/*.html
+*.gitmodules
