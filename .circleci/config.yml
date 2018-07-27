@@ -14,7 +14,7 @@ jobs: # a collection of steps
     working_directory: ~/hawkBit # directory where steps will run
 
     docker: # run the steps with Docker
-    - image: circleci/openjdk:8-jdk-browsers # ...with this image as the primary container; this is where all `steps` will run
+    - image: circleci/openjdk:8-jdk-browsers
       environment:
         _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
@@ -34,11 +34,6 @@ jobs: # a collection of steps
        name: Install without testing
        command: mvn install --batch-mode -DskipTests # gets the project dependencies
 
-    - save_cache: # saves the project dependencies
-        paths:
-        - ~/.m2
-        key: circleci-hawkbit-{{ checksum "pom.xml" }}
-
     # Run tests
     - run:
         name: Test incl. license verification
@@ -53,6 +48,11 @@ jobs: # a collection of steps
 
     - store_artifacts:
         path: pom.xml
+
+    - save_cache: # saves the project dependencies
+        paths:
+        - ~/.m2
+        key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
 notify:
   webhooks:
