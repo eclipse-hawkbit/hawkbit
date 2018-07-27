@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Copyright (c) 2018 Bosch Software Innovations GmbH and others.
 #
@@ -10,6 +8,9 @@
 #
 
 # This script checks if 'hugo' is installed. Afterwards, the Hugo theme is downloaded.
+
+#!/bin/bash
+
 
 hugo version
 if [ $? != 0 ]

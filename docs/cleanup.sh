@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Copyright (c) 2018 Bosch Software Innovations GmbH and others.
 #
@@ -10,6 +8,9 @@
 #
 
 # This script is used to clean up the previously generated or downloaded files.
+
+#!/bin/bash
+
 
 echo "[INFO] Remove Hugo Theme"
 rm -rf themes resources public
