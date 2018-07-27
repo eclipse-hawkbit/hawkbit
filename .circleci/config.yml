@@ -1,0 +1,56 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+version: 2 # use CircleCI 2.0
+jobs: # a collection of steps
+  build: # runs not using Workflows must have a `build` job as entry point
+
+    working_directory: ~/hawkBit # directory where steps will run
+
+    docker: # run the steps with Docker
+    - image: circleci/openjdk:8-jdk-browsers # ...with this image as the primary container; this is where all `steps` will run
+      environment:
+        JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+
+    steps: # a collection of executable commands
+
+    - checkout # check out source code to working directory
+
+    - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
+        key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+
+    # Install dependencies
+    - run:
+       name: Install without testing
+       command: mvn install -DskipTests # gets the project dependencies
+
+    - save_cache: # saves the project dependencies
+        paths:
+        - ~/.m2
+        key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+
+    # Run tests
+    - run:
+        name: Test incl. license verification
+        command: mvn verify license:check
+
+    # Record test results
+    - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+    - store_test_results:
+        path: $CIRCLE_TEST_REPORTS/junit/
+
+    - store_artifacts:
+        path: pom.xml
+
+notify:
+  webhooks:
+  # gitter hook
+  - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39
