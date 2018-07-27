@@ -16,36 +16,36 @@ jobs: # a collection of steps
     docker: # run the steps with Docker
     - image: circleci/openjdk:8-jdk-browsers # ...with this image as the primary container; this is where all `steps` will run
       environment:
-        JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+        _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
     steps: # a collection of executable commands
 
     - checkout # check out source code to working directory
 
     - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
-        key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+        key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
     # Install dependencies
     - run:
        name: Install without testing
-       command: mvn install -DskipTests # gets the project dependencies
+       command: mvn install --batch-mode -DskipTests # gets the project dependencies
 
     - save_cache: # saves the project dependencies
         paths:
         - ~/.m2
-        key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+        key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
     # Run tests
     - run:
         name: Test incl. license verification
-        command: mvn verify license:check
+        command: mvn verify license:check --batch-mode
 
     # Record test results
-    - run: mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - run: mkdir -p testresults/junit/
+    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/junit/ \;
 
     - store_test_results:
-        path: $CIRCLE_TEST_REPORTS/junit/
+        path: testresults/junit/
 
     - store_artifacts:
         path: pom.xml
