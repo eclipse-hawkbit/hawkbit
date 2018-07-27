@@ -1,5 +1,6 @@
 # Eclipse hawkBit Documentation
-The hawkBit documentation is based on [Hugo](https://gohugo.io). Compiling the documentation is not included within the regular Maven build.
+The hawkBit documentation is built with [Hugo](https://www.gohugo.io/) using the [Material](http://github.com/digitalcraftsman/hugo-material-docs) 
+theme. Compiling the documentation is not included within the regular Maven build.
 
 ## Prerequisites
 1. **Install Hugo**: see [installing Hugo](https://gohugo.io/getting-started/installing/) documentation on how to install Hugo.
