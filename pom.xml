@@ -43,7 +43,7 @@
       <module>hawkbit-dmf</module>
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
-      <module>hawkbit-starters</module> 
+      <module>hawkbit-starters</module>
    </modules>
 
    <scm>
@@ -60,7 +60,14 @@
    <developers>
       <developer>
          <id>kaizimmerm</id>
-         <email>kai.zimmermann@bosch-si.com</email>
+         <roles>
+            <role>Lead</role>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
+         <id>laverman</id>
+         <email>Jeroen.Laverman@bosch-si.com</email>
          <organization>Bosch Software Innovations GmbH</organization>
          <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>
@@ -77,6 +84,15 @@
       <developer>
          <id>schabdo</id>
          <email>Dominic.Schabel@bosch-si.com</email>
+         <organization>Bosch Software Innovations GmbH</organization>
+         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <roles>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
+         <id>stefbehl</id>
+         <email>Stefan.Behl@bosch-si.com</email>
          <organization>Bosch Software Innovations GmbH</organization>
          <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>
@@ -108,7 +124,7 @@
    <properties>
       <java.version>1.8</java.version>
       <spring.boot.version>1.4.7.RELEASE</spring.boot.version>
-      <spring.cloud.version>Camden.SR6</spring.cloud.version>      
+      <spring.cloud.version>Camden.SR6</spring.cloud.version>
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
@@ -116,7 +132,7 @@
       <!-- Deserializer security vulnerability fixed -->
       <jackson.version>2.8.9</jackson.version>
       <!-- Performance fixes -->
-      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>      
+      <spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
       <!-- Java 8 support -->
       <assertj.version>3.6.2</assertj.version>
       <!-- Repeatable migrations, Disabling clean etc. -->
@@ -133,7 +149,7 @@
       <!-- Avoid extra CQs through transitive dependencies -->
       <jboss-logging.version>3.2.1.Final</jboss-logging.version>
       <tomcat.version>8.0.28</tomcat.version>
-      
+
       <hibernate-validator.version>6.0.7.Final</hibernate-validator.version>
       <!-- Spring boot version overrides - END -->
 
@@ -197,7 +213,7 @@
       <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
       <sonar.jacoco.reportPaths>${jacoco.reportPath},${jacoco.itReportPath}</sonar.jacoco.reportPaths>
       <!-- Sonar - END -->
-      
+
       <!-- ************************ -->
       <!-- Maven Surefire settings  -->
       <!-- ************************ -->
@@ -450,7 +466,7 @@
         <id>jdk-8</id>
         <activation>
             <jdk>1.8</jdk>
-        </activation>   
+        </activation>
         <build>
             <pluginManagement>
                 <plugins>
@@ -598,7 +614,7 @@
          </dependency>
 
          <!-- Misc -->
-         
+
          <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>http-client</artifactId>
