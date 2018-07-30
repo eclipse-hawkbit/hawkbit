@@ -86,7 +86,7 @@ see [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runti
 
 This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first login into either _Management UI_ or API (which is done by this client).
 
-However, this is not done by _DMF_ which is in fact used by the device simulator i.e., without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
+However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
 
 ### Compile & Run device simulator (optional).
 

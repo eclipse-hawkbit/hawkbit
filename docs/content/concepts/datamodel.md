@@ -7,7 +7,7 @@ weight: 53
 The hawkBit data model was designed to have enough flexibility to define complex software structures (e.g. operating system, runtimes, apps, different kind of artifacts) on one side and simplicity compared to the capabilities of a full blown configuration management on the other.
 <!--more-->
 
-It does define a hierarchy of software that starts with a distribution, which can have (sub-)modules and these may have multiple artifacts. However, it does not consider any kind of dependency definitions between modules or artifacts. As a result dependency checks if necessary have to be done outside hawkBit i.e., on the device itself or before the entity creation in hawkBit by the origin.
+It does define a hierarchy of software that starts with a distribution, which can have (sub-)modules and these may have multiple artifacts. However, it does not consider any kind of dependency definitions between modules or artifacts. As a result dependency checks if necessary have to be done outside hawkBit, i.e. on the device itself or before the entity creation in hawkBit by the origin.
 
 ## Provisioning Target Definition
 
@@ -45,5 +45,5 @@ The delete process which is performed, when there are historical connections to 
 Just in case there are no connections to Distribution Sets and targets the server will perform a HardDelete. This process deletes all stored data, including all meta information.
 
 {{% note %}}
-In case of of a SoftDelete the unique constraints are still in place i.e., you cannot create an entity with the same name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he does not see the soft deleted module but cannot create a new one).
+In case of of a SoftDelete the unique constraints are still in place, i.e. you cannot create an entity with the same name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he does not see the soft deleted module but cannot create a new one).
 {{% /note %}}

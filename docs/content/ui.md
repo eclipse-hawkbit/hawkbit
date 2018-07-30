@@ -52,7 +52,7 @@ Controller_id_2,targetName2
 
 ### Purpose
 
-Distribution Set view to manage software repository metadata i.e., Distribution Sets, their Software Modules and the respective types.
+Distribution Set view to manage software repository metadata, i.e. Distribution Sets, their Software Modules and the respective types.
 
 ### Features explained
 - Browse, create, delete and update Distribution Sets.
