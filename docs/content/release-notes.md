@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:50:37+08:00
 title: Release Notes
 weight: 100
 ---

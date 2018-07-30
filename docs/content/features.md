@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:10:37+08:00
 title: Features
 weight: 40
 ---

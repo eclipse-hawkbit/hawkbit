@@ -1,6 +1,5 @@
 ---
 title: Eclipse hawkBit 0.2.0 - First Release
-date: 2018-07-26 08:00:00
 weight: -200
 ---
 

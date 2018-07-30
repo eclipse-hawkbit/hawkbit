@@ -32,7 +32,7 @@
                   a.setAttribute("title", headers[i].innerHTML);
                   a.innerHTML = headers[i].innerHTML;
 
-                  li.appendChild(a)
+                  li.appendChild(a);
                   scrollspy.appendChild(li);
               }
           } else {
@@ -41,13 +41,13 @@
 
 
         {{ "/* Add permanent link next to the headers */" | safeJS }}
-        var headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+          var headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
 
-        for(var i = 0; i < headers.length; i++) {
+        for(i = 0; i < headers.length; i++) {
             var a = document.createElement("a");
             a.setAttribute("class", "headerlink");
             a.setAttribute("href", "#" + headers[i].id);
-            a.setAttribute("title", "Permanent link")
+            a.setAttribute("title", "Permanent link");
             a.innerHTML = {{ or .Site.Params.permalink "¶" }};
             headers[i].appendChild(a);
         }

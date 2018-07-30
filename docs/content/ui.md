@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:30:37+08:00
 title: Management UI
 weight: 70
 ---

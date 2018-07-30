@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:01:37+08:00
 title: Feign Client
 parent: Guides
 weight: 32

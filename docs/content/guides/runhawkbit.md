@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:02:37+08:00
 title: Run hawkBit
 parent: Guides
 weight: 31

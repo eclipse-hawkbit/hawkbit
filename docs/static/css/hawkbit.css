@@ -1,71 +1,53 @@
+
 .copyright {
-  margin-top: 5em;
-  margin-bottom: 1em;
-  overflow: auto;
+    margin-top: 5em;
+    margin-bottom: 1em;
+    overflow: auto;
 }
 
 .copyright a {
-  border-bottom-style: none;
+    border-bottom-style: none;
 }
 
 .copyright p {
-  margin-top: 0;
+    margin-top: 0;
 }
 
 .copyright div.logo {
-  float: right;
-  width: 20%;
-  padding-bottom: 2%;
+    float: right;
+    width: 20%;
+    padding-bottom: 2%;
 }
 
 .copyright .quickLinks a {
-  float: left;
-  padding-right: 2em;
+    float: left;
+    padding-right: 2em;
 }
 
-div.hawkbit {
-  max-width: 50%;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.palette-primary-blue .footer, .palette-primary-blue .header {
-	background: #7e57c2
-}
-
-div.home {
-  display: block;
-  max-width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-bottom: 5%;
-}
-
-.punchline {
-  color: #7e57c2;
-  text-align: center;
-  font-size: 2em;
-  font-variant: small-caps;
-  padding-bottom: 5%;
+.jumbotron {
+    padding-bottom: 1em;
+    padding-top: 2em;
+    text-align: center;
+    font-size: xx-large;
+    color: #734dba;
 }
 
 .banner div.drawerlogo {
-  background: white;
-  border-radius: 100%;
-  width: 64px;
-  height: 64px;
-  transition: box-shadow .4s;
+    background: white;
+    border-radius: 100%;
+    width: 64px;
+    height: 64px;
+    transition: box-shadow .4s;
 }
 
 .banner div.drawerlogo:hover {
-  box-shadow:0 4px 7px rgba(0,0,0,.23),0 8px 25px rgba(0,0,0,.05);
+    box-shadow: 0 4px 7px rgba(0, 0, 0, .23), 0 8px 25px rgba(0, 0, 0, .05);
 }
 
 .banner .drawerlogo img {
-  height: 100%;
-  width: 100%;
-  padding: 15%;
-  position: relative;
-  top: -3px
+    height: 100%;
+    width: 100%;
+    padding: 15%;
+    position: relative;
+    top: -3px
 }

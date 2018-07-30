@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T10:57:37+08:00
 title: What is hawkBit?
 weight: 10
 ---

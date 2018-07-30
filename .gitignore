@@ -61,7 +61,7 @@ maven.properties
 *.tmp
 
 # Documentation
-docs/themes
-docs/public
+docs/themes/**
+docs/public/**
 docs/content/rest-api/*.html
-*.gitmodules
+.gitmodules

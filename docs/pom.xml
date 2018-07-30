@@ -20,6 +20,9 @@
    <name>hawkBit :: Documentation</name>
    <description>Documentation for hawkBit</description>
 
+   <properties>
+      <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+   </properties>
 
    <build>
       <plugins>
@@ -52,7 +55,7 @@
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.6.0</version>
+            <version>${exec-maven-plugin.version}</version>
             <executions>
                <execution>
                   <id>install-hugo-theme</id>

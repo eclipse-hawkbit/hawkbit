@@ -1,6 +1,5 @@
 ---
-title: "Community"
-date: 2018-07-16T11:40:37+08:00
+title: Community
 weight: 90
 ---
 

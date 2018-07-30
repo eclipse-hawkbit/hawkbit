@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T11:00:37+08:00
 title: Custom Theme
 parent: Guides
 weight: 34

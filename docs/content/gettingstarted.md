@@ -1,6 +1,5 @@
 ---
-title: "Getting Started"
-date: 2018-07-16T10:58:37+08:00
+title: Getting Started
 weight: 20
 ---
 

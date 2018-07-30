@@ -22,6 +22,18 @@
       <a href="https://github.com/{{ . }}" title="@{{ . }} on GitHub" target="_blank" class="toggle-button icon icon-github"></a>
     </div>
     {{ end }}
+
+    {{ with .Site.Social.gitter }}
+    <div class="button button-github" role="button" aria-label="Gitter">
+      <a href="https://gitter.im/{{ . }}" title="@{{ . }} on Gitter" target="_blank" class="toggle-button icon fab fa-gitter"></a>
+    </div>
+    {{ end }}
+
+    {{ with .Site.Social.docker }}
+    <div class="button button-github" role="button" aria-label="Docker">
+      <a href="https://hub.docker.com/u/{{ . }}" title="{{ . }} on Docker Hub" target="_blank" class="toggle-button icon fab fa-docker"></a>
+    </div>
+    {{ end }}
     
     <!-- TODO: disabled until Hugo supports the generation of a content index natively 
     <div class="button button-search" role="button" aria-label="Search">

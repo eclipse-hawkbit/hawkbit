@@ -1,5 +1,4 @@
 ---
-date: 2018-07-16T10:59:37+08:00
 title: Clustering
 parent: Guides
 weight: 33

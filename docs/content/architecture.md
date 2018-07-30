@@ -1,6 +1,5 @@
 ---
-date: 2018-07-16T11:20:37+08:00
-title: "Architecture"
+title: Architecture
 weight: 60
 ---
 
