@@ -10,11 +10,11 @@ theme. Compiling the documentation is not included within the regular Maven buil
 ## Build and Serve documentation
 The following Maven targets are available in order to build and serve the documentation:
 
-* `mvn install`: (1) Copies the generated REST docs to `content/rest-api/` and (2) downloads the required Hugo theme.
+* `mvn install`: (1) Copies the generated REST docs to `content/rest-api/` and (2) downloads the required Hugo theme
 * `mvn site`: Serve the documentation on [localhost:1313/hawkbit/](localhost:1313/hawkbit/)
 * `mvn clean`: Delete generated artifacts (REST docs, Hugo theme)
 
-_Note: Currently, **only** Unix/macOS is supported!_
+_Note: Currently, **only** Unix/macOS is supported! For Windows, use the hugo commands in CMD._
 
 
 ## Generate /public folder
