@@ -20,8 +20,8 @@ canonifyurls = false
 	description = "IoT. Update. Device."
 	copyright = "The Eclipse hawkBit Project"
 	version = ""
-  	logo = "images/hawkbit_icon.png"
-  	favicon = "images/favicon.ico"
+	logo = "images/hawkbit_icon.png"
+	favicon = "images/favicon.ico"
 
 	# Repository
 	provider = "GitHub"
@@ -39,12 +39,12 @@ canonifyurls = false
 	highlight_css  = ""
 
 	[params.palette]
-    	primary = "deep-purple"
-    	accent  = "light-green"
+		primary = "deep-purple"
+		accent  = "light-green"
 
-    [params.font]
-    	text = "Ubuntu"
-    	code = "Ubuntu Mono"
+	[params.font]
+		text = "Ubuntu"
+		code = "Ubuntu Mono"
 
 
 [social]
