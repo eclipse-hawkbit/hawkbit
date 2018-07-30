@@ -7,13 +7,13 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-version: 2 # use CircleCI 2.0
-jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
+version: 2
+jobs:
+  build:
 
-    working_directory: ~/hawkBit # directory where steps will run
+    working_directory: ~/hawkBit
 
-    docker: # run the steps with Docker
+    docker:
     - image: circleci/openjdk:8-jdk-browsers
       environment:
         _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
@@ -22,17 +22,17 @@ jobs: # a collection of steps
       environment:
         RABBITMQ_DEFAULT_VHOST: "/"
 
-    steps: # a collection of executable commands
+    steps:
 
-    - checkout # check out source code to working directory
+    - checkout
 
-    - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
+    - restore_cache:
         key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
     # Install dependencies
     - run:
        name: Install without testing
-       command: mvn install --batch-mode -DskipTests # gets the project dependencies
+       command: mvn install --batch-mode -DskipTests
 
     # Run tests
     - run:
@@ -49,7 +49,7 @@ jobs: # a collection of steps
     - store_artifacts:
         path: pom.xml
 
-    - save_cache: # saves the project dependencies
+    - save_cache:
         paths:
         - ~/.m2
         key: circleci-hawkbit-{{ checksum "pom.xml" }}
