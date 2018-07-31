@@ -250,8 +250,19 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        if (attributeUpdate.getAttributes().entrySet().stream()
+                .anyMatch(e -> !AmqpMessageHandlerService.isAttributeEntryValid(e))) {
+            throw new MessageConversionException(
+                    "The received UPDATE_ATTRIBUTES message contains attribute entries which violate the existing length constraints (keys must not exceed 32 characters, values must not exceed 128 characters).");
+        }
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));
+    }
+
+    private static boolean isAttributeEntryValid(final Entry<String, String> e) {
+        if (e == null) return true;
+        return e.getKey() != null && e.getKey().length() <= 32 && (e.getValue() == null || (e.getValue() != null
+                && e.getValue().length() <= 128));
     }
 
     /**
