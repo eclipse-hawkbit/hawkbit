@@ -93,4 +93,4 @@ see [device simulator](https://github.com/eclipse/hawkbit-examples/tree/master/h
 
 # Enjoy hawkBit with a real database, artifact storage and all [interfaces](../../apis/) available.
 
-![](../../images/gettingStartedResult.png)
+![](../../images/hawkbit_ui.png)
