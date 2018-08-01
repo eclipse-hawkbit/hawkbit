@@ -672,12 +672,12 @@ public class JpaControllerManagement implements ControllerManagement {
         case REPLACE:
             // clear the attributes before adding the new attributes
             controllerAttributes.clear();
-            controllerAttributes.putAll(data);
+            copyNonNull(data, controllerAttributes);
             target.setRequestControllerAttributes(false);
             break;
         case MERGE:
             // just merge the attributes in
-            controllerAttributes.putAll(data);
+            copyNonNull(data, controllerAttributes);
             target.setRequestControllerAttributes(false);
             break;
         default:
@@ -687,6 +687,13 @@ public class JpaControllerManagement implements ControllerManagement {
         assertTargetAttributesQuota(target);
 
         return targetRepository.save(target);
+    }
+
+    private static void copyNonNull(final Map<String, String> src, final Map<String, String> trg) {
+        if (src == null || src.isEmpty()) {
+            return;
+        }
+        src.entrySet().stream().filter(e -> e.getValue() != null).forEach(e -> trg.put(e.getKey(), e.getValue()));
     }
 
     private void assertTargetAttributesQuota(final JpaTarget target) {
