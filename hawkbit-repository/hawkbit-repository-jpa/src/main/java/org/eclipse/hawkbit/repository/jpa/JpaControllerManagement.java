@@ -693,7 +693,7 @@ public class JpaControllerManagement implements ControllerManagement {
         if (src == null || src.isEmpty()) {
             return;
         }
-        src.entrySet().stream().forEach(e -> {
+        src.entrySet().forEach(e -> {
             if (e.getValue() != null) {
                 trg.put(e.getKey(), e.getValue());
             } else {
