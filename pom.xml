@@ -344,7 +344,10 @@
                      <exclude>**/Dockerfile</exclude>
                      <exclude>**/docker-compose.yml</exclude>
                      <exclude>**/.sonar/**</exclude>
-                     <exclude>docs/src/main/resources/**</exclude>
+                     <exclude>docs/content/**</exclude>
+                     <exclude>docs/layouts/**</exclude>
+                     <exclude>docs/static/**</exclude>
+                     <exclude>docs/*.toml</exclude>
                      <exclude>**/LICENSE*</exclude>
                   </excludes>
                   <mapping>
