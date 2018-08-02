@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import java.util.Map;
-
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -184,22 +182,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descLabel.removeStyleName("label-style");
         descLabel.setId(UIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
         descriptionLayout.addComponent(descLabel);
-    }
-
-    /*
-     * display Attributes details in Target details.
-     */
-    protected void updateAttributesLayout(final Map<String, String> attributes) {
-        if (null != attributes) {
-            attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
-                final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "), entry.getValue() == null ? "" : entry.getValue());
-                conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
-                conAttributeLabel.addStyleName("label-style");
-                attributesLayout.addComponent(conAttributeLabel);
-            }
-        }
     }
 
     protected VerticalLayout getLogLayout() {

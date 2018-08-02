@@ -58,7 +58,7 @@ public class DdiResult {
         /**
          * Execution was successful.
          */
-        SUCESS("success"),
+        SUCCESS("success"),
 
         /**
          * Execution terminated with errors or without the expected result.

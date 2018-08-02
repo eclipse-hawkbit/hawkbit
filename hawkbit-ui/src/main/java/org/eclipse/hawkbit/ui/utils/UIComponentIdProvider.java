@@ -640,6 +640,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_SECURITY_TOKEN = "target.security.token";
 
     /**
+     * Id of attributes update button in target details.
+     */
+    public static final String TARGET_ATTRIBUTES_UPDATE = "target.attributes.update";
+
+    /**
      * Id of maximize/minimize icon of table - Software module table.
      */
     public static final String TARGET_MAX_MIN_TABLE_ICON = "target.max.min.table.icon";
