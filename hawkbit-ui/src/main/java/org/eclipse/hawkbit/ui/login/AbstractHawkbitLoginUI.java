@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
 
+import com.vaadin.shared.ui.label.ContentMode;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -213,6 +214,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         loginPanel.addStyleName("login-panel");
         Responsive.makeResponsive(loginPanel);
         loginPanel.addComponent(buildFields());
+        if (!uiProperties.getDemo().getDisclaimer().isEmpty()) {
+            loginPanel.addComponent(buildDisclaimer());
+        }
         loginPanel.addComponent(buildLinks());
 
         checkBrowserSupport(loginPanel);
@@ -248,6 +252,23 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return fields;
     }
 
+    private Component buildDisclaimer() {
+        final HorizontalLayout fields = new HorizontalLayout();
+        fields.setSpacing(true);
+        fields.addStyleName("disclaimer");
+
+        final Label disclaimer = new Label("<small>" + uiProperties.getDemo().getDisclaimer() + "</small>",
+                ContentMode.HTML);
+        disclaimer.setCaption(i18n.getMessage("label.login.disclaimer"));
+        disclaimer.setIcon(FontAwesome.EXCLAMATION_CIRCLE);
+        disclaimer.setId("login-disclaimer");
+        disclaimer.setWidth("550px");
+
+        fields.addComponent(disclaimer);
+
+        return fields;
+    }
+
     private void handleLogin() {
         if (multiTenancyIndicator.isMultiTenancySupported()) {
             final boolean textFieldsNotEmtpy = hasTenantFieldText() && hasUserFieldText() && hashPasswordFieldText();
@@ -272,7 +293,11 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void buildSignInButton() {
-        signin = new Button(i18n.getMessage("button.login.signin"));
+        final String caption = uiProperties.getDemo().getDisclaimer().isEmpty()
+                ? i18n.getMessage("button.login.signin")
+                : i18n.getMessage("button.login.agreeandsignin");
+
+        signin = new Button(caption);
         signin.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
         signin.setClickShortcut(KeyCode.ENTER);
         signin.focus();
@@ -321,7 +346,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
             docuLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
-        if (!uiProperties.getDemo().getUser().isEmpty()) {
+        if (!uiProperties.getDemo().getUser().isEmpty() && uiProperties.getDemo().getDisclaimer().isEmpty()) {
             final Link demoLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DEMO,
                     i18n.getMessage("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
             links.addComponent(demoLink);

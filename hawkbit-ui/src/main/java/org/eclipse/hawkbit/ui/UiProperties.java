@@ -62,6 +62,8 @@ public class UiProperties implements Serializable {
         @SuppressWarnings({ "squid:S2068" })
         private String password = "";
 
+        private String disclaimer = "";
+
         public String getPassword() {
             return password;
         }
@@ -86,6 +88,13 @@ public class UiProperties implements Serializable {
             this.user = user;
         }
 
+        public String getDisclaimer() {
+            return disclaimer;
+        }
+
+        public void setDisclaimer(final String disclaimer) {
+            this.disclaimer = disclaimer;
+        }
     }
 
     /**
