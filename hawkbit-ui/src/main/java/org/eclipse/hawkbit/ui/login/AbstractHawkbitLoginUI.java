@@ -289,7 +289,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void buildSignInButton() {
-        final String caption = isDemo ? i18n.getMessage("button.login.agreeandsignin") : i18n.getMessage("button.login.signin");
+        final String caption = isDemo
+                ? i18n.getMessage("button.login.agreeandsignin")
+                : i18n.getMessage("button.login.signin");
 
         signIn = new Button(caption);
         signIn.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
