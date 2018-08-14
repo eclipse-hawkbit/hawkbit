@@ -306,6 +306,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         password.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         password.setId("login-password");
+        if(isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
+            password.setValue(uiProperties.getDemo().getPassword());
+        }
     }
 
     private void buildUserField() {
@@ -314,6 +317,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         username.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         username.setId("login-username");
+        if(isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
+            username.setValue(uiProperties.getDemo().getUser());
+        }
     }
 
     private void buildTenantField() {
