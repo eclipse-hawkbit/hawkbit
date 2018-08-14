@@ -111,13 +111,13 @@ Custom target filter overview and filter management.
 
 ### How to Filter
 The basic syntax to filter is: `field<basic_operator>value <composite_operator> field<basic_operator>value <...>`
+
 - `field`: is the name of the resource field.
 - `value`: is the value of the target field
 - `<basic_operator>`: Are operators to do simple queries. Supported basic operators are:
   - `==` : equal
   - `!=` : not equal
   - Use `=IN=` for 'in' parameter.(Example: name=IN=(target1,target2).
-
 - `<composite_operator>`: Are operators to join simple queries: Supported composite operators are:
   - `and`
   - `or`
