@@ -22,15 +22,14 @@ public abstract class MockMvcResultPrinter {
     }
 
     /**
-     * Print {@link MvcResult} details to the "standard" output stream.
+     * Print {@link MvcResult} details to logger.
      */
     public static ResultHandler print() {
         return new ConsolePrintingResultHandler();
     }
 
     /**
-     * An {@link PrintingResultHandler} that writes to the "standard" output
-     * stream
+     * An {@link PrintingResultHandler} that writes to logger
      */
     private static class ConsolePrintingResultHandler extends PrintingResultHandler {
 
