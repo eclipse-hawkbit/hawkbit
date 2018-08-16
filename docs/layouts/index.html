@@ -1,0 +1,101 @@
+{{ partial "head" . }}
+
+{{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
+	{{ $repo_id := replace .Site.Params.repo_url "https://github.com/" ""}}
+	{{ .Scratch.Set "repo_id" $repo_id }}
+{{ end }}
+
+<div class="backdrop">
+    <div class="backdrop-paper"></div>
+</div>
+
+<input class="toggle" type="checkbox" id="toggle-drawer">
+<input class="toggle" type="checkbox" id="toggle-search">
+<label class="toggle-button overlay" for="toggle-drawer"></label>
+
+<header class="header">
+    {{ partial "header" . }}
+</header>
+
+<main class="main">
+    <div class="drawer">
+        {{ partial "drawer" . }}
+    </div>
+
+    <article class="article">
+        <div class="wrapper">
+
+            <div class="jumbotron">IoT. Update. Device.</div>
+
+            <div>
+                <p>
+                    Eclipse hawkBit&trade; is a domain independent back-end framework for rolling out software updates
+                    to constrained
+                    edge devices as well as more powerful controllers and gateways connected to IP based networking
+                    infrastructure.
+                </p>
+                <img src="images/hawkBit_overview.jpeg" />
+                <h2>Interfaces</h2>
+                <p>
+                    hawkBit offers a direct device integration via HTTP or a device management federation API
+                    which allows to connect devices with different protocol adapter. Users can make use of the graphical
+                    user interface
+                    and other service can interact with hawkBit through the RESTful management API.
+                </p>
+
+                <h2>Rollout</h2>
+                <div style="width: 100%; overflow: hidden;">
+                    <div style="width: 50%; float: left;">
+                        <p>
+                            hawkBit supports an easy and flexible rollout management which allows you to update a large
+                            amount of devices in separated groups.
+                        </p>
+                        <ul>
+                            <li>Cascading start of the deployment groups based on installation status of the previous
+                                group.
+                            </li>
+                            <li>Emergency shutdown of the rollout in case a group exceeds the defined error threshold.
+                            </li>
+                            <li>Rollout progress monitoring for the entire rollout and the individual groups.</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-left: 50%;">
+                        <br/>
+                        <br/>
+                        <img src="images/rollout.png" />
+                    </div>
+                </div>
+
+                <h2>Package Model</h2>
+                <div style="width: 100%; overflow: hidden;">
+                    <div style="width: 50%; float: left;">
+                        <br/>
+                        <img src="images/packagemodel.png" />
+                    </div>
+
+                    <div style="margin-left: 55%;">
+                        <p>
+                            A software update does not always contain only a single file. The hawkBit meta model allows
+                            you to configure your files in virtual software and distribution packages.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{ partial "copyright.html" . }}
+
+        </div>
+    </article>
+
+    <div class="results" role="status" aria-live="polite">
+        <div class="scrollable">
+            <div class="wrapper">
+                <div class="meta"></div>
+                <div class="list"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{{ partial "footer_js" . }}

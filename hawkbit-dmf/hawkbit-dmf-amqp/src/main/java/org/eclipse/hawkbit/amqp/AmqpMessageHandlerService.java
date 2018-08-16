@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -249,8 +251,29 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        // reject messages with invalid attributes
+        if (attributeUpdate.getAttributes().entrySet().stream()
+                .anyMatch(e -> !AmqpMessageHandlerService.isAttributeEntryValid(e))) {
+            throw new MessageConversionException(
+                    "The received UPDATE_ATTRIBUTES message contains attribute entries which violate the existing length constraints (keys must not exceed 32 characters, values must not exceed 128 characters).");
+        }
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));
+    }
+
+    private static boolean isAttributeEntryValid(final Entry<String, String> e) {
+        if (e == null) {
+            return true;
+        }
+        return isAttributeKeyValid(e.getKey()) && isAttributeValueValid(e.getValue());
+    }
+
+    private static boolean isAttributeKeyValid(final String key) {
+        return key != null && key.length() <= 32;
+    }
+
+    private static boolean isAttributeValueValid(final String value) {
+        return value == null || value.length() <= 128;
     }
 
     /**

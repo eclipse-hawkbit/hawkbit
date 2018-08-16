@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
 
+import com.vaadin.shared.ui.label.ContentMode;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -76,7 +77,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     private static final String USER_PARAMETER = "user";
     private static final String TENANT_PARAMETER = "tenant";
-    private static final String DEMO_PARAMETER = "demo";
     private static final int HUNDRED_DAYS_IN_SECONDS = Math.toIntExact(TimeUnit.DAYS.toSeconds(100));
     private static final String LOGIN_TEXTFIELD = "login-textfield";
 
@@ -94,12 +94,14 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     private final transient MultitenancyIndicator multiTenancyIndicator;
 
+    private final boolean isDemo;
+
     private boolean useCookie = true;
 
     private TextField username;
     private TextField tenant;
     private PasswordField password;
-    private Button signin;
+    private Button signIn;
 
     private MultiValueMap<String, String> params;
 
@@ -112,6 +114,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.multiTenancyIndicator = multiTenancyIndicator;
+        this.isDemo = !uiProperties.getDemo().getDisclaimer().isEmpty();
     }
 
     @Override
@@ -120,14 +123,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
         params = UriComponentsBuilder.fromUri(Page.getCurrent().getLocation()).build().getQueryParams();
 
-        if (params.containsKey(DEMO_PARAMETER)) {
-            login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
-                    uiProperties.getDemo().getPassword(), false);
-        }
-
         setContent(buildContent());
 
-        filloutUsernameTenantFields();
+        fillOutUsernameTenantFields();
         readCookie();
     }
 
@@ -155,7 +153,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         final Resource resource = context
                 .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
 
-        try (InputStream resourceStream = resource.getInputStream()) {
+        try (final InputStream resourceStream = resource.getInputStream()) {
             final CustomLayout customLayout = new CustomLayout(resourceStream);
             customLayout.setSizeUndefined();
             rootLayout.addComponent(customLayout);
@@ -192,7 +190,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         notification.show(Page.getCurrent());
     }
 
-    private void filloutUsernameTenantFields() {
+    private void fillOutUsernameTenantFields() {
         if (tenant != null && params.containsKey(TENANT_PARAMETER) && !params.get(TENANT_PARAMETER).isEmpty()) {
             tenant.setValue(params.get(TENANT_PARAMETER).get(0));
             tenant.setVisible(false);
@@ -213,6 +211,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         loginPanel.addStyleName("login-panel");
         Responsive.makeResponsive(loginPanel);
         loginPanel.addComponent(buildFields());
+        if (isDemo) {
+            loginPanel.addComponent(buildDisclaimer());
+        }
         loginPanel.addComponent(buildLinks());
 
         checkBrowserSupport(loginPanel);
@@ -224,7 +225,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         // Check if IE browser is not supported ( < IE11 )
         if (isUnsupportedBrowser()) {
             // Disable sign-in button and display a message
-            signin.setEnabled(Boolean.FALSE);
+            signIn.setEnabled(Boolean.FALSE);
             loginPanel.addComponent(buildUnsupportedMessage());
         }
     }
@@ -238,20 +239,36 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         buildPasswordField();
         buildSignInButton();
         if (multiTenancyIndicator.isMultiTenancySupported()) {
-            fields.addComponents(tenant, username, password, signin);
+            fields.addComponents(tenant, username, password, signIn);
         } else {
-            fields.addComponents(username, password, signin);
+            fields.addComponents(username, password, signIn);
         }
-        fields.setComponentAlignment(signin, Alignment.BOTTOM_LEFT);
-        signin.addClickListener(event -> handleLogin());
+        fields.setComponentAlignment(signIn, Alignment.BOTTOM_LEFT);
+        signIn.addClickListener(event -> handleLogin());
+
+        return fields;
+    }
+
+    private Component buildDisclaimer() {
+        final HorizontalLayout fields = new HorizontalLayout();
+        fields.setSpacing(true);
+        fields.addStyleName("disclaimer");
+
+        final Label disclaimer = new Label(uiProperties.getDemo().getDisclaimer(), ContentMode.HTML);
+        disclaimer.setCaption(i18n.getMessage("label.login.disclaimer"));
+        disclaimer.setIcon(FontAwesome.EXCLAMATION_CIRCLE);
+        disclaimer.setId("login-disclaimer");
+        disclaimer.setWidth("525px");
+
+        fields.addComponent(disclaimer);
 
         return fields;
     }
 
     private void handleLogin() {
         if (multiTenancyIndicator.isMultiTenancySupported()) {
-            final boolean textFieldsNotEmtpy = hasTenantFieldText() && hasUserFieldText() && hashPasswordFieldText();
-            if (textFieldsNotEmtpy) {
+            final boolean textFieldsNotEmpty = hasTenantFieldText() && hasUserFieldText() && hashPasswordFieldText();
+            if (textFieldsNotEmpty) {
                 login(tenant.getValue(), username.getValue(), password.getValue(), true);
             }
         } else if (!multiTenancyIndicator.isMultiTenancySupported() && hasUserFieldText() && hashPasswordFieldText()) {
@@ -272,11 +289,15 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void buildSignInButton() {
-        signin = new Button(i18n.getMessage("button.login.signin"));
-        signin.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
-        signin.setClickShortcut(KeyCode.ENTER);
-        signin.focus();
-        signin.setId("login-signin");
+        final String caption = isDemo
+                ? i18n.getMessage("button.login.agreeandsignin")
+                : i18n.getMessage("button.login.signin");
+
+        signIn = new Button(caption);
+        signIn.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
+        signIn.setClickShortcut(KeyCode.ENTER);
+        signIn.focus();
+        signIn.setId("login-signIn");
     }
 
     private void buildPasswordField() {
@@ -285,6 +306,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         password.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         password.setId("login-password");
+        if(isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
+            password.setValue(uiProperties.getDemo().getPassword());
+        }
     }
 
     private void buildUserField() {
@@ -293,6 +317,9 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         username.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         username.setId("login-username");
+        if(isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
+            username.setValue(uiProperties.getDemo().getUser());
+        }
     }
 
     private void buildTenantField() {
@@ -319,13 +346,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
             links.addComponent(docuLink);
             docuLink.addStyleName(ValoTheme.LINK_SMALL);
-        }
-
-        if (!uiProperties.getDemo().getUser().isEmpty()) {
-            final Link demoLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DEMO,
-                    i18n.getMessage("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle);
-            links.addComponent(demoLink);
-            demoLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
@@ -429,10 +449,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return null;
     }
 
-    private void login(final String tentant, final String user, final String password, final boolean setCookies) {
+    private void login(final String tenant, final String user, final String password, final boolean setCookies) {
         try {
             if (multiTenancyIndicator.isMultiTenancySupported()) {
-                vaadinSecurity.login(new TenantUserPasswordAuthenticationToken(tentant, user, password));
+                vaadinSecurity.login(new TenantUserPasswordAuthenticationToken(tenant, user, password));
             } else {
                 vaadinSecurity.login(new UsernamePasswordAuthenticationToken(user, password));
             }

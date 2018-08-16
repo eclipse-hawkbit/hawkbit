@@ -115,8 +115,9 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_STATUS);
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);
+        getColumn(ProxyActionStatus.PXY_AS_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
+        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT)
+                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
     }
 
     @Override

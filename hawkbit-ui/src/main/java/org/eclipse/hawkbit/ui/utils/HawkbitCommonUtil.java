@@ -140,19 +140,6 @@ public final class HawkbitCommonUtil {
     /**
      * Get Label for Artifact Details.
      *
-     * @param name
-     *            artifact name
-     * @return ArtifactoryDetailsLabelId
-     */
-    public static String getArtifactoryDetailsLabelId(final String name) {
-        return new StringBuilder()
-                .append(DIV_DESCRIPTION_START + "Artifact Details of " + getBoldHTMLText(getFormattedName(name)))
-                .append(DIV_DESCRIPTION_END).toString();
-    }
-
-    /**
-     * Get Label for Artifact Details.
-     *
      * @param caption
      *            as caption of the details
      * @param name
@@ -166,18 +153,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get Label for Action History Details.
-     *
-     * @param name
-     * @return ActionHistoryLabelId
-     */
-    public static String getActionHistoryLabelId(final String name) {
-        return new StringBuilder()
-                .append(DIV_DESCRIPTION_START + "Action History For " + getBoldHTMLText(getFormattedName(name)))
-                .append(DIV_DESCRIPTION_END).toString();
-    }
-
-    /**
      * Get tool tip for Poll status.
      *
      * @param pollStatus
@@ -187,10 +162,10 @@ public final class HawkbitCommonUtil {
     public static String getPollStatusToolTip(final PollStatus pollStatus, final VaadinMessageSource i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
             final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-            return "Overdue for " + SPDateTimeUtil.getDurationFormattedString(
+            return i18N.getMessage(UIMessageIdProvider.TOOLTIP_OVERDUE, SPDateTimeUtil.getDurationFormattedString(
                     pollStatus.getOverdueDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
                     pollStatus.getCurrentDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
-                    i18N);
+                    i18N));
         }
         return null;
     }
@@ -546,4 +521,35 @@ public final class HawkbitCommonUtil {
         final UI currentUI = UI.getCurrent();
         return currentUI == null ? Locale.getDefault() : currentUI.getLocale();
     }
+
+    /**
+     * Creates caption for table headers
+     * 
+     * @param caption
+     * @return formatted text for table caption
+     */
+    public static String getCaptionText(final String caption) {
+        return DIV_DESCRIPTION_START + caption + DIV_DESCRIPTION_END;
+    }
+
+    /**
+     * Creates the caption of the Artifact Details table
+     * 
+     * @param name
+     *            name of the software module, if one is selected
+     * @param i18n
+     *            VaadinMessageSource
+     * @return complete caption text of the table
+     */
+    public static String getArtifactoryDetailsLabelId(final String name, final VaadinMessageSource i18n) {
+        String caption;
+        if (StringUtils.hasText(name)) {
+            caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF,
+                    HawkbitCommonUtil.getBoldHTMLText(name));
+        } else {
+            caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS);
+        }
+        return getCaptionText(caption);
+    }
+
 }

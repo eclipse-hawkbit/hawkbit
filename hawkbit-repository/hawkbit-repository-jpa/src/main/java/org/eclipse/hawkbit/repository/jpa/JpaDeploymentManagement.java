@@ -18,8 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -61,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +89,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
@@ -101,6 +105,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      * Maximum amount of Actions that are started at once.
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
+
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "DELETE FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT 1000";
 
     private final EntityManager entityManager;
     private final ActionRepository actionRepository;
@@ -119,6 +125,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
     private final SystemSecurityContext systemSecurityContext;
+    private final TenantAware tenantAware;
     private final Database database;
 
     JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
@@ -128,7 +135,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final Database database) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
         this.entityManager = entityManager;
         this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -148,6 +155,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.tenantAware = tenantAware;
         this.database = database;
     }
 
@@ -386,7 +394,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
         }
 
-        LOG.warn("action ({}) was still activ and has been force quite.", action);
+        LOG.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
@@ -685,6 +693,43 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return distributionSetRepository.findInstalledAtTarget(controllerId);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
+        if (status.isEmpty()) {
+            return 0;
+        }
+        /*
+         * We use a native query here because Spring JPA does not support to
+         * specify a LIMIT clause on a DELETE statement. However, for this
+         * specific use case (action cleanup), we must specify a row limit to
+         * reduce the overall load on the database.
+         */
+
+        final int statusCount = status.size();
+        final Status[] statusArr = status.toArray(new Status[statusCount]);
+
+        final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
+                formatInClauseWithNumberKeys(statusCount));
+        final Query deleteQuery = entityManager.createNativeQuery(queryStr);
+
+        IntStream.range(0, statusCount)
+                .forEach(i -> deleteQuery.setParameter(String.valueOf(i), statusArr[i].ordinal()));
+        deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
+        deleteQuery.setParameter("last_modified_at", lastModified);
+
+        LOG.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
+        return deleteQuery.executeUpdate();
+    }
+
+    private static String formatInClauseWithNumberKeys(final int count) {
+        return formatInClause(IntStream.range(0, count).mapToObj(String::valueOf).collect(Collectors.toList()));
+    }
+
+    private static String formatInClause(final Collection<String> elements) {
+        return "#" + Joiner.on(",#").join(elements);
     }
 
 }

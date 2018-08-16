@@ -1,0 +1,60 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+version: 2
+jobs:
+  build:
+
+    working_directory: ~/hawkBit
+
+    docker:
+    - image: circleci/openjdk:8-jdk-browsers
+      environment:
+        _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+
+    - image: rabbitmq:3-management
+      environment:
+        RABBITMQ_DEFAULT_VHOST: "/"
+
+    steps:
+
+    - checkout
+
+    - restore_cache:
+        key: circleci-hawkbit-{{ checksum "pom.xml" }}
+
+    # Install dependencies
+    - run:
+       name: Install without testing
+       command: mvn install --batch-mode -DskipTests
+
+    # Run tests
+    - run:
+        name: Test incl. license verification
+        command: mvn verify license:check --batch-mode
+
+    # Record test results
+    - run: mkdir -p testresults/junit/
+    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/junit/ \;
+
+    - store_test_results:
+        path: testresults/junit/
+
+    - store_artifacts:
+        path: pom.xml
+
+    - save_cache:
+        paths:
+        - ~/.m2
+        key: circleci-hawkbit-{{ checksum "pom.xml" }}
+
+notify:
+  webhooks:
+  # gitter hook
+  - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import java.util.Map;
-
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -23,6 +21,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -185,22 +184,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout.addComponent(descLabel);
     }
 
-    /*
-     * display Attributes details in Target details.
-     */
-    protected void updateAttributesLayout(final Map<String, String> attributes) {
-        if (null != attributes) {
-            attributesLayout.removeAllComponents();
-            for (final Map.Entry<String, String> entry : attributes.entrySet()) {
-                final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(
-                        entry.getKey().concat("  :  "), entry.getValue() == null ? "" : entry.getValue());
-                conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
-                conAttributeLabel.addStyleName("label-style");
-                attributesLayout.addComponent(conAttributeLabel);
-            }
-        }
-    }
-
     protected VerticalLayout getLogLayout() {
         return logLayout;
     }
@@ -235,16 +218,17 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         caption.setContentMode(ContentMode.HTML);
         caption.setId(getDetailsHeaderCaptionId());
 
-        editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
-                SPUIButtonStyleNoBorder.class);
+        editButton = SPUIComponentProvider.getButton("", "", i18n.getMessage(UIMessageIdProvider.TOOLTIP_UPDATE), null,
+                false, FontAwesome.PENCIL_SQUARE_O, SPUIButtonStyleNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
         editButton.setEnabled(false);
 
-        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.LIST_ALT,
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_METADATA_ICON), null, false, FontAwesome.LIST_ALT,
                 SPUIButtonStyleNoBorder.class);
         manageMetadataBtn.setId(getMetadataButtonId());
-        manageMetadataBtn.setDescription(i18n.getMessage("tooltip.metadata.icon"));
+        manageMetadataBtn.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_METADATA_ICON));
         manageMetadataBtn.addClickListener(this::showMetadata);
         manageMetadataBtn.setEnabled(false);
 

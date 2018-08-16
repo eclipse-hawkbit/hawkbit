@@ -67,9 +67,9 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL,
                 "the period of time after the SP server will recognize a target, which is not performing pull requests anymore.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                "the time intervall between two poll requests of a target.");
+                "the time interval between two poll requests of a target.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL,
-                "the smallest time intervallpermittet  between two poll requests of a target.");
+                "the smallest time interval permitted between two poll requests of a target.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT,
                 "the polling interval so that controller tries to poll at least these many times between the last "
                         + "polling and before start of maintenance window. The polling interval is"
@@ -82,6 +82,12 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                 "if autoclose running actions with new Distribution Set assignment is enabled.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED,
                 "if approval mode for Rollout Management is enabled.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ACTION_CLEANUP_ENABLED,
+                "if automatic cleanup of deployment actions is enabled.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ACTION_CLEANUP_ACTION_STATUS,
+                "the list of action status that should be taken into account for the cleanup.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
+                "the expiry time in milliseconds that needs to elapse before an action may be cleaned up.");
     }
 
     @Autowired

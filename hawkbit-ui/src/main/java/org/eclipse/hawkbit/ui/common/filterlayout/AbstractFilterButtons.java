@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -61,12 +62,15 @@ public abstract class AbstractFilterButtons extends Table {
 
     private final VaadinMessageSource i18n;
 
+    private final String noTagLabel;
+
     protected AbstractFilterButtons(final UIEventBus eventBus,
             final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour, final VaadinMessageSource i18n) {
         this.eventBus = eventBus;
         this.i18n = i18n;
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
+        noTagLabel = i18n.getMessage(UIMessageIdProvider.LABEL_NO_TAG);
         if (doSubscribeToEventBus()) {
             eventBus.subscribe(this);
         }
@@ -167,7 +171,7 @@ public abstract class AbstractFilterButtons extends Table {
     }
 
     private Object addDeleteCell(final Object itemId) {
-        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+        if (itemId instanceof TagIdName && noTagLabel.equals(((TagIdName) itemId).getName())) {
             return null;
         }
 
@@ -178,13 +182,13 @@ public abstract class AbstractFilterButtons extends Table {
         } else {
             deleteButton.setId(UIComponentIdProvider.DELETE_TAG_ID + itemId.toString());
         }
-        deleteButton.setDescription(SPUIDefinitions.DELETE);
+        deleteButton.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE));
         deleteButton.addClickListener(this::addDeleteButtonClickListener);
         return deleteButton;
     }
 
     private Button addUpdateCell(final Object itemId) {
-        if (itemId instanceof TagIdName && SPUIDefinitions.NO_TAG.equals(((TagIdName) itemId).getName())) {
+        if (itemId instanceof TagIdName && noTagLabel.equals(((TagIdName) itemId).getName())) {
             return null;
         }
 
@@ -317,7 +321,8 @@ public abstract class AbstractFilterButtons extends Table {
                 i18n.getMessage("caption.entity.delete.action.confirmbox"),
                 i18n.getMessage("message.confirm.delete.entity", entityName.toLowerCase(),
                         entityToDelete.substring(entityToDelete.indexOf('.') + 1), ""),
-                i18n.getMessage(SPUIDefinitions.BUTTON_OK), i18n.getMessage(SPUIDefinitions.BUTTON_CANCEL), ok -> {
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
                     if (ok) {
                         deleteEntity(entityToDelete);
                     } else {
@@ -407,6 +412,10 @@ public abstract class AbstractFilterButtons extends Table {
 
     protected AbstractFilterButtonClickBehaviour getFilterButtonClickBehaviour() {
         return filterButtonClickBehaviour;
+    }
+
+    protected String getNoTagLabel() {
+        return noTagLabel;
     }
 
 }

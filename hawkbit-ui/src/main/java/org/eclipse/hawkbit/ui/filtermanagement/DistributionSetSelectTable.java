@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -135,7 +136,7 @@ public class DistributionSetSelectTable extends Table {
             refreshTablecontainer();
         }
         if (size != 0) {
-            setData(SPUIDefinitions.DATA_AVAILABLE);
+            setData(i18n.getMessage(UIMessageIdProvider.MESSAGE_DATA_AVAILABLE));
         }
     }
 

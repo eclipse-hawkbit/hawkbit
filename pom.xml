@@ -43,7 +43,7 @@
       <module>hawkbit-dmf</module>
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
-      <module>hawkbit-starters</module> 
+      <module>hawkbit-starters</module>
    </modules>
 
    <scm>
@@ -69,6 +69,16 @@
          </roles>
       </developer>
       <developer>
+         <id>laverman</id>
+         <email>Jeroen.Laverman@bosch-si.com</email>
+         <organization>Bosch Software Innovations GmbH</organization>
+         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <roles>
+            <role>Lead</role>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
          <id>michahirsch</id>
          <roles>
             <role>Committer</role>
@@ -77,6 +87,15 @@
       <developer>
          <id>schabdo</id>
          <email>Dominic.Schabel@bosch-si.com</email>
+         <organization>Bosch Software Innovations GmbH</organization>
+         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <roles>
+            <role>Committer</role>
+         </roles>
+      </developer>
+      <developer>
+         <id>stefbehl</id>
+         <email>Stefan.Behl@bosch-si.com</email>
          <organization>Bosch Software Innovations GmbH</organization>
          <organizationUrl>https://www.bosch-si.com</organizationUrl>
          <roles>
@@ -177,7 +196,7 @@
       <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
       <sonar.jacoco.reportPaths>${jacoco.reportPath},${jacoco.itReportPath}</sonar.jacoco.reportPaths>
       <!-- Sonar - END -->
-      
+
       <!-- ************************ -->
       <!-- Maven Surefire settings  -->
       <!-- ************************ -->
@@ -308,7 +327,10 @@
                      <exclude>**/Dockerfile</exclude>
                      <exclude>**/docker-compose.yml</exclude>
                      <exclude>**/.sonar/**</exclude>
-                     <exclude>docs/src/main/resources/**</exclude>
+                     <exclude>docs/content/**</exclude>
+                     <exclude>docs/layouts/**</exclude>
+                     <exclude>docs/static/**</exclude>
+                     <exclude>docs/*.toml</exclude>
                      <exclude>**/LICENSE*</exclude>
                   </excludes>
                   <mapping>
@@ -430,7 +452,7 @@
         <id>jdk-8</id>
         <activation>
             <jdk>1.8</jdk>
-        </activation>   
+        </activation>
         <build>
             <pluginManagement>
                 <plugins>

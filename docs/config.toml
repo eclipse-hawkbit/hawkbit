@@ -1,0 +1,107 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+baseurl = "https://www.eclipse.org/hawkbit/"
+languageCode = "en-us"
+title = "Eclipse hawkBit"
+theme = "hugo-material-docs"
+metadataformat = "toml"
+canonifyurls = false
+
+[params]
+	# General information
+	author = "The Eclipse hawkBit Project"
+	description = "IoT. Update. Device."
+	copyright = "The Eclipse hawkBit Project"
+	logo = "images/hawkbit_icon.png"
+	favicon = "images/favicon.ico"
+
+	# Repository
+	provider = "GitHub"
+	repo_url = "https://github.com/eclipse/hawkbit"
+
+	permalink = "#"
+
+	# Custom assets
+	custom_css = ["css/hawkbit.css","//www.eclipse.org/eclipse.org-common/themes/solstice/public/stylesheets/vendor/cookieconsent/cookieconsent.min.css"]
+	custom_js  = []
+
+	# Syntax highlighting theme
+	highlight_css  = ""
+
+[params.palette]
+	primary = "deep-purple"
+	accent  = "light-green"
+
+[params.font]
+	text = "Ubuntu"
+	code = "Ubuntu Mono"
+
+
+[social]
+	github  = "eclipse/hawkbit"
+	gitter  = "eclipse/hawkbit"
+	docker  = "hawkbit"
+
+
+[[menu.main]]
+	name   = "What is hawkBit"
+	url    = "/whatishawkbit/"
+	weight = 10
+
+[[menu.main]]
+	name   = "Getting started"
+	url    = "/gettingstarted/"
+	weight = 20
+
+[[menu.main]]
+	name   = "Guides"
+	url    = "/guides/"
+	weight = 30
+
+[[menu.main]]
+	name   = "Features"
+	url    = "/features/"
+	weight = 40
+
+[[menu.main]]
+	name   = "Concepts"
+	url    = "/concepts/"
+	weight = 50
+
+[[menu.main]]
+	name   = "Architecture"
+	url    = "/architecture/"
+	weight = 60
+
+[[menu.main]]
+	name   = "Management UI"
+	url    = "/ui/"
+	weight = 70
+
+[[menu.main]]
+	name   = "APIs"
+	url    = "/apis/"
+	weight = 80
+
+[[menu.main]]
+	name   = "Community"
+	url    = "/community/"
+	weight = 90
+
+[[menu.main]]
+	name   = "Release Notes"
+	url    = "/release-notes/"
+	weight = 100
+
+[blackfriday]
+	smartypants	= true
+	fractions = true
+	smartDashes = true
+	plainIDAnchors = true

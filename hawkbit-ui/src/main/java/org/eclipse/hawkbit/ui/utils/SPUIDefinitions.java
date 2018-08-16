@@ -42,25 +42,10 @@ public final class SPUIDefinitions {
     public static final int DIST_TYPE_SIZE = 8;
 
     /**
-     * Action history active column.
-     */
-    public static final String ACTION_HIS_TBL_ACTIVE = "Active";
-
-    /**
-     * Action history action id column.
-     */
-    public static final String ACTION_HIS_TBL_ACTION_ID = "Action Id";
-
-    /**
      * Action history active hidden column. This is using to generate active
      * icons under active column.
      */
     public static final String ACTION_HIS_TBL_ACTIVE_HIDDEN = "Active_Hidden";
-
-    /**
-     * Action history distribution set column.
-     */
-    public static final String ACTION_HIS_TBL_DIST = "Distribution set";
 
     /**
      * Action history Action Id hidden column.
@@ -68,79 +53,15 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_ACTION_ID_HIDDEN = "DistributionsetId";
 
     /**
-     * Action history date & time column.
-     */
-    public static final String ACTION_HIS_TBL_DATETIME = "Date and time";
-
-    /**
-     * Action history status column.
-     */
-    public static final String ACTION_HIS_TBL_STATUS = "Status";
-
-    /**
-     * Actions column.
-     */
-    public static final String ACTIONS_COLUMN = "Actions";
-
-    /**
-     * Action history messages of particular action update.
-     */
-    public static final String ACTION_HIS_TBL_MSGS = "Messages";
-
-    /**
      * Action history hidden column of messages of particular action update.
      */
     public static final String ACTION_HIS_TBL_MSGS_HIDDEN = "Messages_Hidden";
-
-    /**
-     * Action history layout - rollout name column.
-     */
-    public static final String ACTION_HIS_TBL_ROLLOUT_NAME = "Rollout name";
 
     /**
      * /** Action history status hidden column. This is using to generate status
      * icons under status coloumn.
      */
     public static final String ACTION_HIS_TBL_STATUS_HIDDEN = "Status_Hidden";
-
-    /**
-     * Action history action type column.
-     */
-    public static final String ACTION_HIS_TBL_FORCED = "Forced";
-
-    /**
-     * Action history action type column.
-     */
-    public static final String ACTION_HIS_TBL_TIMEFORCED = "Time-Forced";
-
-    /**
-     * Action history helping constant.
-     */
-    public static final String ACTIVE = "active";
-
-    /**
-     * Action history helping constant.
-     */
-    public static final String IN_ACTIVE = "inactive";
-
-    /**
-     * Action history helping constant.
-     */
-    public static final String SCHEDULED = "scheduled";
-
-    public static final String TARGET_TAG_BUTTON = "Target Tag";
-
-    public static final String DISTRIBUTION_TAG_BUTTON = "Distribution Tag";
-
-    /**
-     * No data.
-     */
-    public static final String NO_DATA = "No Data";
-
-    /**
-     * No Available.
-     */
-    public static final String DATA_AVAILABLE = "Data available";
 
     /**
      * Filter by status key.
@@ -446,11 +367,6 @@ public final class SPUIDefinitions {
     public static final Direction TARGET_TABLE_CREATE_AT_SORT_ORDER = Direction.ASC;
 
     /**
-     * Rollout list view - header caption .
-     */
-    public static final String ROLLOUT_LIST_HEADER_CAPTION = "Rollouts";
-
-    /**
      * BUTTON- STATUS.
      */
     public static final String SP_BUTTON_STATUS_STYLE = "targetStatusBtn";
@@ -465,12 +381,6 @@ public final class SPUIDefinitions {
     public static final String UPDATE_FILTER_BUTTON_COLUMN = "updateFilterButton";
 
     public static final String DELETE_FILTER_BUTTON_COLUMN = "deleteFilterButton";
-
-    public static final String NO_TAG = "NO TAG";
-
-    public static final String BUTTON_CANCEL = "button.cancel";
-
-    public static final String BUTTON_OK = "button.ok";
 
     /**
      * /** Constructor.

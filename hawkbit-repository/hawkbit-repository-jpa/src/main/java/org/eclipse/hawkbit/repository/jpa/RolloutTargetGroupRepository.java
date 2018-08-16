@@ -30,5 +30,5 @@ public interface RolloutTargetGroupRepository
      *            the group to filter for
      * @return count of targets in the group
      */
-    Long countByRolloutGroup(final JpaRolloutGroup rolloutGroup);
+    Long countByRolloutGroup(JpaRolloutGroup rolloutGroup);
 }

@@ -43,12 +43,12 @@ public class ActionStatusLayout extends AbstractGridComponentLayout {
 
     @Override
     public DefaultGridHeader createGridHeader() {
-        return new DefaultGridHeader(managementUIState, "Action States").init();
+        return new DefaultGridHeader(managementUIState, getI18n().getMessage("caption.action.states"), getI18n()).init();
     }
 
     @Override
     public ActionStatusGrid createGrid() {
-        return new ActionStatusGrid(i18n, eventBus);
+        return new ActionStatusGrid(getI18n(), getEventBus());
     }
 
 }

@@ -11,6 +11,7 @@ target
 .springbeans
 .metadata
 .project
+.idea
 
 # Windows image file caches
 Thumbs.db
@@ -50,8 +51,17 @@ classpath-data.json
 # Eclipse IDE
 *.pydevproject
 
+# Intellij
+*.iml
+
 # Maven
 maven.properties
 
 # Test Files
 *.tmp
+
+# Documentation
+docs/themes/**
+docs/public/**
+docs/content/rest-api/*.html
+.gitmodules

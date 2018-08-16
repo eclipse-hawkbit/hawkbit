@@ -219,11 +219,10 @@ public final class MgmtTargetMapper {
         if (action.isCancelingOrCanceled()) {
             result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
                     .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
-        } else {
-            result.add(linkTo(
-                    methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
-                            .withRel("distributionset"));
         }
+        result.add(linkTo(
+                methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
+                        .withRel("distributionset"));
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,

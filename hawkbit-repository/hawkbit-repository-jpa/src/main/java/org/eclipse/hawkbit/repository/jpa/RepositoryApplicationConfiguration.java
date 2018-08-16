@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -51,6 +52,9 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
@@ -615,11 +619,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final JpaProperties properties) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, targetManagement, auditorProvider, eventPublisher, applicationContext,
                 afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement, quotaManagement,
-                systemSecurityContext, properties.getDatabase());
+                systemSecurityContext, tenantAware, properties.getDatabase());
     }
 
     /**
@@ -730,6 +735,46 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
             final LockRegistry lockRegistry) {
         return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignChecker, lockRegistry);
+    }
+
+    /**
+     * {@link AutoActionCleanup} bean.
+     * 
+     * @param deploymentManagement
+     *            Deployment management service
+     * @param configManagement
+     *            Tenant configuration service
+     * 
+     * @return a new {@link AutoActionCleanup} bean
+     */
+    @Bean
+    CleanupTask actionCleanup(final DeploymentManagement deploymentManagement,
+            final TenantConfigurationManagement configManagement) {
+        return new AutoActionCleanup(deploymentManagement, configManagement);
+    }
+
+    /**
+     * {@link AutoCleanupScheduler} bean.
+     * 
+     * @param systemManagement
+     *            to find all tenants
+     * @param systemSecurityContext
+     *            to run as system
+     * @param lockRegistry
+     *            to lock the tenant for auto assignment
+     * @param cleanupTasks
+     *            a list of cleanup tasks
+     * 
+     * @return a new {@link AutoCleanupScheduler} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @Profile("!test")
+    @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
+    AutoCleanupScheduler autoCleanupScheduler(final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
+            final List<CleanupTask> cleanupTasks) {
+        return new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, cleanupTasks);
     }
 
     /**

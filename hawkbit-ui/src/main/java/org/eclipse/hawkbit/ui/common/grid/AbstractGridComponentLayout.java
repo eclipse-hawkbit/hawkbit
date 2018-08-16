@@ -25,10 +25,12 @@ import com.vaadin.ui.VerticalLayout;
  * and grid header {@link DefaultGridHeader}.
  */
 public abstract class AbstractGridComponentLayout extends VerticalLayout {
-    private static final long serialVersionUID = -3766179797384539821L;
 
-    protected final transient EventBus.UIEventBus eventBus;
-    protected final VaadinMessageSource i18n;
+    private static final long serialVersionUID = 1L;
+
+    private final transient EventBus.UIEventBus eventBus;
+
+    private final VaadinMessageSource i18n;
 
     private AbstractOrderedLayout gridHeader;
     private Grid grid;
@@ -203,4 +205,13 @@ public abstract class AbstractGridComponentLayout extends VerticalLayout {
          */
         protected abstract Label getFooterMessageLabel();
     }
+
+    protected VaadinMessageSource getI18n() {
+        return i18n;
+    }
+
+    protected EventBus.UIEventBus getEventBus() {
+        return eventBus;
+    }
+
 }

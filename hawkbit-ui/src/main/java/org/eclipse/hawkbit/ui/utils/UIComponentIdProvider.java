@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ui.utils;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
- * Interface to provide the unchanged constants.
+ * Class that contains the unique ids of the UI components.
  */
 public final class UIComponentIdProvider {
     /**
@@ -520,6 +520,16 @@ public final class UIComponentIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
+     * Combobox for action types
+     */
+    public static final String SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_TYPES = "system.configuration.autocleanup.action.types";
+
+    /**
+     * Combobox for action expiry in days
+     */
+    public static final String SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_EXPIRY = "system.configuration.autocleanup.action.expiry";
+
+    /**
      * ID for save button in pop-up-windows instance of commonDialogWindow
      */
     public static final String SAVE_BUTTON = "common.dialog.window.save";
@@ -628,6 +638,11 @@ public final class UIComponentIdProvider {
      * Id of security token label in target details.
      */
     public static final String TARGET_SECURITY_TOKEN = "target.security.token";
+
+    /**
+     * Id of attributes update button in target details.
+     */
+    public static final String TARGET_ATTRIBUTES_UPDATE = "target.attributes.update";
 
     /**
      * Id of maximize/minimize icon of table - Software module table.
@@ -1202,6 +1217,12 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration checkbox for
+     * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
+     */
+    public static final String REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX = "repositoryactionsautocleanupcheckbox";
+
+    /**
+     * Configuration checkbox for
      * {@link TenantConfigurationKey#ROLLOUT_APPROVAL_ENABLED}
      */
     public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
@@ -1214,7 +1235,7 @@ public final class UIComponentIdProvider {
     /**
      * ID for the menu bar item to update a tag or type
      */
-    public static final String CONFIG_MENU_BAR_UPDATE = "update";
+    public static final String CONFIG_MENU_BAR_UPDATE = "edit";
 
     /**
      * ID for the menu bar item to delete a tag or type
@@ -1230,6 +1251,8 @@ public final class UIComponentIdProvider {
      * Artifact upload status popup - minimize button id.
      */
     public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
+
+    public static final String SAVE_ACTION_RADIO_FORCED = "save.action.radio.forced";
 
     /**
      * /* Private Constructor.

@@ -48,7 +48,7 @@ public interface DistributionSetRepository
      * @return list of found {@link DistributionSet}s
      */
     @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag and ds.deleted = 0")
-    Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") final Long tagId);
+    Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") Long tagId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

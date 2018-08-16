@@ -130,7 +130,7 @@ public class BulkUploadHandler extends CustomComponent
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         upload = new Upload();
         upload.setEnabled(false);
-        upload.setButtonCaption("Bulk Upload");
+        upload.setButtonCaption(i18n.getMessage("caption.bulk.upload"));
         upload.setReceiver(this);
         upload.setImmediate(true);
         upload.setWidthUndefined();
