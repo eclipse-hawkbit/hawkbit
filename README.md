@@ -72,7 +72,7 @@ Open the update server in your browser:
 
 [localhost:8080](http://localhost:8080)
 
-See below for how to build and run the update server on your own. In addition we have a [guide](https://www.eclipse.org/hawkbit/gettingstarted/) for setting up a complete landscape.
+See below for how to build and run the update server on your own. In addition we have a [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) for setting up a complete landscape.
 
 # hawkBit (Spring boot) starters
 
