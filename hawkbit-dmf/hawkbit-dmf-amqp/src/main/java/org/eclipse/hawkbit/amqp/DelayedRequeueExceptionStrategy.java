@@ -82,7 +82,6 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
 
     private static boolean invalidContent(final Throwable cause) {
         return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException
-                || cause instanceof MessageConversionException || cause instanceof MessageHandlingException
-                || cause instanceof EntityAlreadyExistsException || cause instanceof InsufficientPermissionException;
+                || cause instanceof MessageConversionException || cause instanceof MessageHandlingException;
     }
 }
