@@ -159,7 +159,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @MapKeyColumn(name = "attribute_key", nullable = false, length = 32)
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
             @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
-    private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
+    private final Map<@NotNull @Size(max = 32) String, @Size(max = 128) String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
 
     // set default request controller attributes to true, because we want to
     // request them the first

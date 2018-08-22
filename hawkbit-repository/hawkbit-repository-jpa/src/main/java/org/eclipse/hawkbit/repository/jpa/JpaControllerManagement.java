@@ -693,11 +693,16 @@ public class JpaControllerManagement implements ControllerManagement {
         if (src == null || src.isEmpty()) {
             return;
         }
-        src.entrySet().forEach(e -> {
-            if (e.getValue() != null) {
-                trg.put(e.getKey(), e.getValue());
+
+        src.forEach((key, value) -> {
+            if (key != null) {
+                if (value != null) {
+                    trg.put(key, value);
+                } else {
+                    trg.remove(key);
+                }
             } else {
-                trg.remove(e.getKey());
+                throw new IllegalArgumentException("The attribute key must not be null.");
             }
         });
     }

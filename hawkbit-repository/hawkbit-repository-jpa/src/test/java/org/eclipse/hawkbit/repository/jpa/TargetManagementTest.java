@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -426,7 +427,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Finds a target by given ID and checks if all data is in the reponse (including the data defined as lazy).")
+    @Description("Finds a target by given ID and checks if all data is in the response (including the data defined as lazy).")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
@@ -498,6 +499,39 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             fail("Target already exists");
         } catch (final EntityAlreadyExistsException e) {
         }
+    }
+
+    @Test
+    @Description("Checks if vales of attribute-key and attribute-value are handled correctly")
+    public void createTargetAttributes() {
+        final String keyTooLong = "123456789012345678901234567890123";
+        final String keyValid = "12345678901234567890123456789012";
+        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+        final String keyNull = null;
+
+        final Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
+        final String controllerId = target.getControllerId();
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueValid), null))
+                .as("Attribute with key too long should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueTooLong), null))
+                .as("Attribute with key too long and value too long should not be created");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyValid, valueTooLong), null))
+                .as("Attribute with value too long should not be created");
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyNull, valueValid), null))
+                .as("Attribute with key NULL should not be created");
     }
 
     /**

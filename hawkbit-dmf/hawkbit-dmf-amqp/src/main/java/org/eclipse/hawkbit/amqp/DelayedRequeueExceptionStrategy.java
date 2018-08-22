@@ -13,7 +13,9 @@ import java.util.concurrent.TimeUnit;
 import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
