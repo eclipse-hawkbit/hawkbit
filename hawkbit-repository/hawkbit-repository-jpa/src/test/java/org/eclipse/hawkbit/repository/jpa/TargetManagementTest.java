@@ -509,42 +509,29 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
         final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
         final String keyNull = null;
-        final String valueNull = null;
 
-        Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
-
-        /* v */
+        final Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
+        final String controllerId = target.getControllerId();
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(target.getControllerId(),
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyTooLong, valueValid), null))
                 .as("Attribute with key too long should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(target.getControllerId(),
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyTooLong, valueTooLong), null))
                 .as("Attribute with key too long and value too long should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(target.getControllerId(),
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyValid, valueTooLong), null))
                 .as("Attribute with value too long should not be created");
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(target.getControllerId(),
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyNull, valueValid), null))
                 .as("Attribute with key NULL should not be created");
-
-        Map<String, String> testData = Collections.singletonMap(keyValid, valueValid);
-        controllerManagement.updateControllerAttributes(target.getControllerId(), testData, null);
-        assertThat(targetManagement.getControllerAttributes(target.getControllerId()))
-                .as("Controller Attributes are wrong").isEqualTo(testData);
-
-        Map<String, String> testData2 = Collections.singletonMap(keyValid, null);
-        controllerManagement.updateControllerAttributes(target.getControllerId(), testData2, null);
-        assertThat(targetManagement.getControllerAttributes(target.getControllerId()))
-                .as("Attribute has not been deleted").isEmpty();
-
     }
 
     /**
