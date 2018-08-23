@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     private static final String WHITESPACE_ERROR = "target with whitespaces in controller id should not be created";
 
     @Test
-    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+    @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
@@ -78,7 +79,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+    @Description("Verifies that management queries react as specified on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetTagCreatedEvent.class, count = 1) })
@@ -87,8 +88,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Arrays.asList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.assignTag(Arrays.asList(NOT_EXIST_ID), tag.getId()), "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
@@ -103,7 +104,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.deleteByControllerID(NOT_EXIST_ID), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.delete(Arrays.asList(NOT_EXIST_IDL)), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTargetFilterQueryAndNonDS(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
@@ -122,9 +123,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> targetManagement.toggleTagAssignment(Arrays.asList(target.getControllerId()), NOT_EXIST_ID),
+                () -> targetManagement.toggleTagAssignment(Collections.singletonList(target.getControllerId()), NOT_EXIST_ID),
                 "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.toggleTagAssignment(Arrays.asList(NOT_EXIST_ID), tag.getName()),
+        verifyThrownExceptionBy(() -> targetManagement.toggleTagAssignment(Collections.singletonList(NOT_EXIST_ID), tag.getName()),
                 "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
@@ -142,20 +143,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
         final String securityTokenWithReadPermission = securityRule.runAs(WithSpringAuthorityRule
-                .withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN.toString()), () -> {
-                    return createdTarget.getSecurityToken();
-                });
+                .withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN), createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
-        final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(() -> {
-            return createdTarget.getSecurityToken();
-        });
+        final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
 
         // retrieve security token without any permissions
         final String securityTokenWithoutPermission = securityRule
-                .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), () -> {
-                    return createdTarget.getSecurityToken();
-                });
+                .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), createdTarget::getSecurityToken);
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();
@@ -237,7 +232,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement
                         .create(entityFactory.target().create().controllerId("a").name(INVALID_TEXT_HTML)))
-                .as("target with invalidname should not be created");
+                .as("target with invalid name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
@@ -394,12 +389,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     public void deleteAndCreateTargets() {
         Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
-        targetManagement.delete(Arrays.asList(target.getId()));
+        targetManagement.delete(Collections.singletonList(target.getId()));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
-        targetManagement.delete(Arrays.asList(target.getId()));
+        targetManagement.delete(Collections.singletonList(target.getId()));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
 
         final List<Long> targets = new ArrayList<>();
@@ -426,7 +421,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Finds a target by given ID and checks if all data is in the reponse (including the data defined as lazy).")
+    @Description("Finds a target by given ID and checks if all data is in the response (including the data defined as lazy).")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
@@ -500,6 +495,39 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
+    @Test
+    @Description("Checks if vales of attribute-key and attribute-value are handled correctly")
+    public void createTargetAttributes() {
+        final String keyTooLong = "123456789012345678901234567890123";
+        final String keyValid = "12345678901234567890123456789012";
+        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+        final String keyNull = null;
+
+        final Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
+        final String controllerId = target.getControllerId();
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueValid), null))
+                .as("Attribute with key too long should not be created");
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueTooLong), null))
+                .as("Attribute with key too long and value too long should not be created");
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyValid, valueTooLong), null))
+                .as("Attribute with value too long should not be created");
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyNull, valueValid), null))
+                .as("Attribute with key NULL should not be created");
+    }
+
     /**
      * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted
      * that the target have additional tags assigned to them which are not
@@ -561,8 +589,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Long modifiedAt = savedTarget.getLastModifiedAt();
 
         assertThat(createdAt).as("CreatedAt compared with modifiedAt").isEqualTo(modifiedAt);
-        assertNotNull("The createdAt attribut of the target should no be null", savedTarget.getCreatedAt());
-        assertNotNull("The lastModifiedAt attribut of the target should no be null", savedTarget.getLastModifiedAt());
+        assertNotNull("The createdAt attribute of the target should no be null", savedTarget.getCreatedAt());
+        assertNotNull("The lastModifiedAt attribute of the target should no be null", savedTarget.getLastModifiedAt());
 
         Thread.sleep(1);
         savedTarget = targetManagement.update(
@@ -586,7 +614,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @WithUser(allSpPermissions = true)
-    @Description("Create multiple tragets as bulk operation and delete them in bulk.")
+    @Description("Create multiple targets as bulk operation and delete them in bulk.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 101),
             @Expect(type = TargetUpdatedEvent.class, count = 100),
             @Expect(type = TargetDeletedEvent.class, count = 51) })
@@ -644,14 +672,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.delete(targetsIdsToDelete);
 
         final List<Target> targetsLeft = targetManagement.findAll(new PageRequest(0, 200)).getContent();
-        assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of splited list")
+        assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of split list")
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 
         assertThat(targetsLeft).as("Not all undeleted found").doesNotContain(deletedTargets);
     }
 
     @Test
-    @Description("Tests the assigment of tags to the a single target.")
+    @Description("Tests the assignment of tags to the a single target.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetTagCreatedEvent.class, count = 7),
             @Expect(type = TargetUpdatedEvent.class, count = 7) })
@@ -661,11 +689,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final int noT1Tags = 3;
         final List<TargetTag> t1Tags = testdataFactory.createTargetTags(noT1Tags, "tag1");
 
-        t1Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t1.getControllerId()), tag.getId()));
+        t1Tags.forEach(tag -> targetManagement.assignTag(Collections.singletonList(t1.getControllerId()), tag.getId()));
 
         final Target t2 = testdataFactory.createTarget("id-2");
         final List<TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
-        t2Tags.forEach(tag -> targetManagement.assignTag(Arrays.asList(t2.getControllerId()), tag.getId()));
+        t2Tags.forEach(tag -> targetManagement.assignTag(Collections.singletonList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.getByControllerID(t1.getControllerId()).get();
         assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
@@ -681,7 +709,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests the assigment of tags to multiple targets.")
+    @Description("Tests the assignment of tags to multiple targets.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 50),
             @Expect(type = TargetTagCreatedEvent.class, count = 4),
             @Expect(type = TargetUpdatedEvent.class, count = 80) })

@@ -657,6 +657,16 @@ public class JpaControllerManagement implements ControllerManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
             final UpdateMode mode) {
+
+        /*
+            Constraint is not validated by EclipseLink. Therefore, constraints have to be checked here.
+         */
+        if (data.entrySet().stream()
+                .anyMatch(e -> !JpaControllerManagement.isAttributeEntryValid(e))) {
+            throw new IllegalArgumentException(
+                    "The received controller attributes contain entries which violate the existing length constraints (keys must not exceed 32 characters, values must not exceed 128 characters).");
+        }
+
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
@@ -689,15 +699,30 @@ public class JpaControllerManagement implements ControllerManagement {
         return targetRepository.save(target);
     }
 
+    private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {
+        if (e == null) {
+            return true;
+        }
+        return isAttributeKeyValid(e.getKey()) && isAttributeValueValid(e.getValue());
+    }
+
+    private static boolean isAttributeKeyValid(final String key) {
+        return key != null && key.length() <= 32;
+    }
+
+    private static boolean isAttributeValueValid(final String value) {
+        return value == null || value.length() <= 128;
+    }
+
     private static void copy(final Map<String, String> src, final Map<String, String> trg) {
         if (src == null || src.isEmpty()) {
             return;
         }
-        src.entrySet().forEach(e -> {
-            if (e.getValue() != null) {
-                trg.put(e.getKey(), e.getValue());
+        src.forEach((key, value) -> {
+            if (value != null) {
+                trg.put(key, value);
             } else {
-                trg.remove(e.getKey());
+                trg.remove(key);
             }
         });
     }
