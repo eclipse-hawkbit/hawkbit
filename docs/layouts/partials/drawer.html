@@ -21,12 +21,12 @@
       {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
         <ul class="repo">
           <li class="repo-download">
-            <a href="https://hub.docker.com/u/hawkbit/" target="_blank" title="hawkBit on DockerHub" data-action="docker">
-              <i class="icon icon-search"></i> Dockerhub
+            <a href="https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/UI/login/#/" target="_blank" title="hawkBit Sandbox" data-action="sandbox">
+              <i class="fas fa-desktop"></i> &nbsp; Sandbox
             </a>
           </li>
           <li class="repo-stars">
-            <a href="{{ .Site.Params.repo_url }}" target="_blank" title="hawkBit on GitHub" data-action="star">
+            <a href="{{ .Site.Params.repo_url }}/stargazers" target="_blank" title="Stargazers" data-action="star">
               <i class="icon icon-star"></i> Stars
               <span class="count">&ndash;</span>
             </a>
@@ -66,7 +66,6 @@
               <img src="https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg" />
             </a>
           </li>
-        </ul>
         </ul>
         {{ end }}
       </div>

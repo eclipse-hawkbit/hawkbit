@@ -4,9 +4,9 @@ parent: APIs
 weight: 82
 ---
 
-This API is based on HTTP standards and based on a polling mechanism.
-
 The hawkBit [update server](https://github.com/eclipse/hawkbit) provides REST resources which are consumed by the device to retrieve software update tasks.
+This API is based on HTTP standards and a polling mechanism.
+<!--more-->
 
 {{% note %}}
 In DDI the target is identified using a  **controllerId**. Controller is used as a term for the actual service/client on the device. That allows users to have in some cases even multiple clients on the same target for different tasks, e.g. Firmware update and App management.
