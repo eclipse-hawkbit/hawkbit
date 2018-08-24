@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributesException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -666,8 +667,7 @@ public class JpaControllerManagement implements ControllerManagement {
          */
         if (data.entrySet().stream()
                 .anyMatch(e -> !JpaControllerManagement.isAttributeEntryValid(e))) {
-            throw new IllegalArgumentException(
-                    "The received controller attributes contain entries which violate the existing length constraints (keys must not exceed 32 characters, values must not exceed 128 characters).");
+            throw new InvalidTargetAttributesException();
         }
 
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
