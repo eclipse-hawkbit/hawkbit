@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributesException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -198,7 +198,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributesException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
@@ -210,7 +210,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributesException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
