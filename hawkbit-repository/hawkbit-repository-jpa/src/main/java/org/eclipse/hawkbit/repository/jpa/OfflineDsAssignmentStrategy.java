@@ -89,6 +89,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final JpaTarget target, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
         result.setStatus(Status.FINISHED);
+        result.setActive(Boolean.FALSE);
         return result;
     }
 

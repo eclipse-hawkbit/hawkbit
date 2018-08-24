@@ -484,7 +484,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
                 .getAssignedEntity();
         assertThat(actionRepository.count()).isEqualTo(20);
-
+        assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId()))
+				.as("Offline actions are not active").allMatch(action -> !action.isActive());
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent()).containsAll(targets)
                 .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
