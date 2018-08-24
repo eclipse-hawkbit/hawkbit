@@ -21,7 +21,7 @@
 | com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.github.gwtd3                     | gwt-d3-js                      | sources        | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.google.guava                     | guava                          | 25.0-jre       | [CQ16201](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=16201) |
-| com.h2database                       | h2                             | 1.4.197        | []()                                                             |
+| com.h2database                       | h2                             | 1.4.197        | [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |                                                             |
 | com.microsoft.sqlserver              | mssql-jdbc                     | 6.4.0          | [CQ15896](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15896) |
 | commons-io                           | commons-io                     | 2.5            | []()                                                             |
 | com.rabbitmq                         | amqp-client                    | 5.1.2          | []()                                                             |
