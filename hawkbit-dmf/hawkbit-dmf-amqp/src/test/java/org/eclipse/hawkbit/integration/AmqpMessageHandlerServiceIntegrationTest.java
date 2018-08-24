@@ -785,6 +785,33 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyOneDeadLetterMessage();
     }
 
+    @Test
+    @Description("Verifies that sending an UPDATE_ATTRIBUTES message with invalid attributes is handled correctly.")
+    public void updateAttributesWithInvalidValues() {
+        // setup
+        final String target = "ControllerAttributeTestTarget";
+        registerAndAssertTargetWithExistingTenant(target);
+        final String keyTooLong = "123456789012345678901234567890123";
+        final String keyValid = "12345678901234567890123456789012";
+        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+
+        sendUpdateAttributesMessageWithGivenAttributes(target, keyTooLong, valueValid);
+
+        sendUpdateAttributesMessageWithGivenAttributes(target, keyTooLong, valueTooLong);
+
+        sendUpdateAttributesMessageWithGivenAttributes(target, keyValid, valueTooLong);
+
+        verifyNumberOfDeadLetterMessages(3);
+    }
+
+    private void sendUpdateAttributesMessageWithGivenAttributes(String target, String key, String value) {
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
+        controllerAttribute.getAttributes().put(key, value);
+        final Message message = createUpdateAttributesMessage(target, TENANT_EXIST, controllerAttribute);
+        getDmfClient().send(message);
+    }
+
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final Long actionId = assignmentResult.getActions().get(0);
@@ -859,8 +886,12 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void verifyOneDeadLetterMessage() {
+        verifyNumberOfDeadLetterMessages(1);
+    }
+
+    private void verifyNumberOfDeadLetterMessages(int numberOfInvocations) {
         assertEmptyReceiverQueueCount();
         createConditionFactory()
-                .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(1)).handleMessage(Mockito.any()));
+                .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
     }
 }

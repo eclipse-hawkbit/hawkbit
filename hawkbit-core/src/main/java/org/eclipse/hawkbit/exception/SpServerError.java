@@ -47,6 +47,11 @@ public enum SpServerError {
     /**
      *
      */
+    SP_TARGET_ATTRIBUTES_INVALID("hawkbit.server.error.repo.invalidTargetAttributes", "The given target attributes are invalid"),
+
+    /**
+     *
+     */
     SP_REST_SORT_PARAM_SYNTAX("hawkbit.server.error.rest.param.sortParamSyntax", "The given sort paramter is not well formed"),
 
     /**

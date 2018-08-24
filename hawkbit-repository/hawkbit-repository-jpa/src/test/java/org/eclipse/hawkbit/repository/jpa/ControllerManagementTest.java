@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributesException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -848,22 +849,22 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "targetId123";
         testdataFactory.createTarget(controllerId);
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(InvalidTargetAttributesException.class)
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyTooLong, valueValid), null))
                 .as("Attribute with key too long should not be created");
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(InvalidTargetAttributesException.class)
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyTooLong, valueTooLong), null))
                 .as("Attribute with key too long and value too long should not be created");
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(InvalidTargetAttributesException.class)
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyValid, valueTooLong), null))
                 .as("Attribute with value too long should not be created");
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(InvalidTargetAttributesException.class)
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
                         Collections.singletonMap(keyNull, valueValid), null))
                 .as("Attribute with key NULL should not be created");
