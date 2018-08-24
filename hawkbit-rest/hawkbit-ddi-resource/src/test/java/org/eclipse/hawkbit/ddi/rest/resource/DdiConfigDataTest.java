@@ -185,13 +185,13 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createTarget(controllerId);
         final String configDataPath = "/{tenant}/controller/v1/" + controllerId + "/configData";
 
-        putConfigDataWithKeyTooLong(configDataPath);
+        putAndVerifyConfigDataWithKeyTooLong(configDataPath);
 
-        putConfigDataWithValueTooLong(configDataPath);
+        putAndVerifyConfigDataWithValueTooLong(configDataPath);
     }
 
     @Step
-    private void putConfigDataWithKeyTooLong(final String configDataPath) throws Exception {
+    private void putAndVerifyConfigDataWithKeyTooLong(final String configDataPath) throws Exception {
 
         final Map<String, String> attributes = Collections.singletonMap(KEY_TOO_LONG, VALUE_VALID);
 
@@ -203,7 +203,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Step
-    private void putConfigDataWithValueTooLong(final String configDataPath) throws Exception {
+    private void putAndVerifyConfigDataWithValueTooLong(final String configDataPath) throws Exception {
 
         final Map<String, String> attributes = Collections.singletonMap(KEY_VALID, VALUE_TOO_LONG);
 
