@@ -21,7 +21,7 @@
 | com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.github.gwtd3                     | gwt-d3-js                      | sources        | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.google.guava                     | guava                          | 25.0-jre       | [CQ16201](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=16201) |
-| com.h2database                       | h2                             | 1.4.197        | [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |                                                             |
+| com.h2database                       | h2                             | 1.4.197        | [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |  |
 | com.microsoft.sqlserver              | mssql-jdbc                     | 6.4.0          | [CQ15896](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15896) |
 | commons-io                           | commons-io                     | 2.5            | []()                                                             |
 | com.rabbitmq                         | amqp-client                    | 5.1.2          | []()                                                             |
@@ -58,8 +58,8 @@
 | org.aspectj                          | aspectjweaver                  | 1.8.13         | []()                                                             |
 | org.flywaydb                         | flyway-core                    | 5.0.7          | []()                                                             |
 | org.glassfish                        | javax.json                     | 1.0.4          | [CQ10619](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10619) |
-| org.hibernate.validator              | hibernate-validator            | 6.0.10.Final   | []()                                                             |
-| org.jboss.logging                    | jboss-logging                  | 3.3.2.Final    | []()                                                             |
+| org.hibernate.validator              | hibernate-validator            | 6.0.10.Final   | [CQ15540](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15540) |
+| org.jboss.logging                    | jboss-logging                  | 3.3.2.Final    | [CQ10621](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10621) |
 | org.jsoup                            | jsoup                          | 1.8.3          | [CQ12936](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12936) |
 | org.mortbay.jasper                   | apache-el                      | 8.5.24.2       | []()                                                             |
 | org.objenesis                        | objenesis                      | 2.5            | []()                                                             |
