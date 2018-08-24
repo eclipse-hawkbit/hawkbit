@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.exception;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
-public class InvalidTargetAttributesException extends AbstractServerRtException {
+public class InvalidTargetAttributeException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_TARGET_ATTRIBUTES_INVALID;
@@ -20,7 +20,7 @@ public class InvalidTargetAttributesException extends AbstractServerRtException 
     /**
      * Default constructor.
      */
-    public InvalidTargetAttributesException() {
+    public InvalidTargetAttributeException() {
         super(THIS_ERROR);
     }
 }
