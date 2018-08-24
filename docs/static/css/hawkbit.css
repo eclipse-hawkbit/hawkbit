@@ -13,6 +13,10 @@
     margin-top: 0;
 }
 
+.copyright p.notice {
+    margin-top: 27px;
+}
+
 .copyright div.logo {
     float: right;
     width: 20%;

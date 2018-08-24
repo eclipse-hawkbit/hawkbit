@@ -4,7 +4,8 @@ parent: API
 weight: 83
 ---
 
-Currently bodies of messages are based on JSON. The DMF API provides java classes which allows that the message body can be deserialized at runtime into a java object. Also java classes can be used to serialize java objects into JSON bodies to send a message to hawkBit.
+The DMF API provides Java classes which allows that the message body can be deserialized at runtime into a Java object. Also Java classes can be used to serialize Java objects into JSON bodies to send a message to hawkBit.
+Currently, bodies of messages are based on JSON. 
 <!--more-->
 
 ## Basics

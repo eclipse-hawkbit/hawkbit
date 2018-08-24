@@ -11,7 +11,7 @@ Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/
 
 # Documentation
 
-see [hawkBit Documentation](https://www.eclipse.org/hawkbit/documentation/overview/introduction.html)
+see [hawkBit Documentation](https://www.eclipse.org/hawkbit/)
 
 # Contact us
 
@@ -35,7 +35,7 @@ In addition the following vendors offer free trial accounts for their hawkBit co
 
 # Device Integration
 
-hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](http://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html) is HTTP/JSon based which should allow any update client to integrate quite easily.
+hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) is HTTP/JSon based which should allow any update client to integrate quite easily.
 
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
@@ -72,7 +72,7 @@ Open the update server in your browser:
 
 [localhost:8080](http://localhost:8080)
 
-See below for how to build and run the update server on your own. In addition we have a [guide](http://www.eclipse.org/hawkbit/documentation/guide/runhawkbit.html) for setting up a complete landscape.
+See below for how to build and run the update server on your own. In addition we have a [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) for setting up a complete landscape.
 
 # hawkBit (Spring boot) starters
 
@@ -111,6 +111,6 @@ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator
 
 hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
 
-However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
+However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-rest/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
 
-Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
+Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-rest/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
