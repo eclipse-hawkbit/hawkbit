@@ -1,0 +1,217 @@
+# 3rd party dependencies for Release 0.3.0
+
+## Eclipse CQs - Provided/compile
+
+| Group ID                             | Artifact ID                    | Version        | CQ                                                               |
+| ------------------------------------ | ------------------------------ | -------------- | ---------------------------------------------------------------- |
+| ch.qos.logback                       | logback-classic                | 1.2.3          | []()                                                             |
+| ch.qos.logback                       | logback-core                   | 1.2.3          | []()                                                             |
+| com.cronutils                        | cron-utils                     | 5.0.5          | [CQ15762](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15762) |
+| com.esotericsoftware                 | kryo-shaded                    | 3.0.3          | []()                                                             |
+| com.esotericsoftware                 | minlog                         | 1.3.0          | []()                                                             |
+| com.fasterxml                        | classmate                      | 1.3.4          | []()                                                             |
+| com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | []()                                                             |
+| com.fasterxml.jackson.core           | jackson-core                   | 2.9.6          | []()                                                             |
+| com.fasterxml.jackson.core           | jackson-databind               | 2.9.6          | []()                                                             |
+| com.fasterxml.jackson.datatype       | jackson-datatype-jdk8          | 2.9.6          | []()                                                             |
+| com.fasterxml.jackson.datatype       | jackson-datatype-jsr310        | 2.9.6          | []()                                                             |
+| com.fasterxml.jackson.module         | jackson-module-parameter-names | 2.9.6          | []()                                                             |
+| com.github.ben-manes.caffeine        | caffeine                       | 2.6.2          | []()                                                             |
+| com.github.gwtd3                     | gwt-d3-api                     | 1.2.0          | [CQ13029](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13029) |
+| com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
+| com.github.gwtd3                     | gwt-d3-js                      | sources        | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
+| com.google.guava                     | guava                          | 25.0-jre       | [CQ16201](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=16201) |
+| com.h2database                       | h2                             | 1.4.197        | []()                                                             |
+| com.microsoft.sqlserver              | mssql-jdbc                     | 6.4.0          | [CQ15896](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15896) |
+| commons-io                           | commons-io                     | 2.5            | []()                                                             |
+| com.rabbitmq                         | amqp-client                    | 5.1.2          | []()                                                             |
+| com.vaadin.external.atmosphere       | atmosphere-runtime             | 2.2.9.vaadin2  | [CQ10714](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10714) |
+| com.vaadin.external.flute            | flute                          | 1.3.0.gg2      | [CQ11039](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11039) |
+| com.vaadin.external.gwt              | gwt-elemental                  | 2.7.0.vaadin4  | [CQ13031](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13031) |
+| com.vaadin.external.gwt              | gwt-user                       | 2.7.0.vaadin4  | [CQ13033](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13033) |
+| com.vaadin.external.slf4j            | vaadin-slf4j-jdk14             | 1.6.1          | [CQ10715](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10715) |
+| com.vaadin                           | vaadin-client                  | 7.7.7          | [CQ12956](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12956) |
+| com.vaadin                           | vaadin-push                    | 7.7.7          | [CQ12957](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12957) |
+| com.vaadin                           | vaadin-sass-compiler           | 0.9.12         | [CQ12958](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12958) |
+| com.vaadin                           | vaadin-server                  | 7.7.7          | [CQ12959](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12959) |
+| com.vaadin                           | vaadin-shared                  | 7.7.7          | [CQ12960](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12960) |
+| com.vaadin                           | vaadin-spring-boot             | 1.2.0          | []()                                                             |
+| com.vaadin                           | vaadin-spring                  | 1.2.0          | []()                                                             |
+| com.vaadin                           | vaadin-themes                  | 7.7.7          | [CQ12961](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12961) |
+| com.zaxxer                           | HikariCP                       | 2.7.9          | []()                                                             |
+| cz.jirutka.rsql                      | rsql-parser                    | 2.1.0          | [CQ12964](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12964) |
+| io.projectreactor                    | reactor-core                   | 3.1.8.RELEASE  | []()                                                             |
+| io.protostuff                        | protostuff-api                 | 1.5.6          | [CQ12965](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12965) |
+| io.protostuff                        | protostuff-collectionschema    | 1.5.6          | [CQ12966](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12966) |
+| io.protostuff                        | protostuff-core                | 1.5.6          | [CQ12967](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12967) |
+| io.protostuff                        | protostuff-runtime             | 1.5.6          | [CQ12968](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12968) |
+| javax.annotation                     | javax.annotation-api           | 1.3.2          | []()                                                             |
+| javax.servlet                        | javax.servlet-api              | 3.1.0          | [CQ10362](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10362) |
+| javax.transaction                    | javax.transaction-api          | 1.2            | [CQ10363](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10363) |
+| javax.validation                     | validation-api                 | 1.1.0.Final    | [CQ10364](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10364) |
+| javax.validation                     | validation-api                 | sources        | [CQ10364](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10364) |
+| javax.websocket                      | javax.websocket-api            | 1.0            | [CQ12943](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12943) |
+| org.apache.commons                   | commons-lang3                  | 3.4            | [CQ10356](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10356) |
+| org.apache.logging.log4j             | log4j-api                      | 2.10.0         | []()                                                             |
+| org.apache.logging.log4j             | log4j-to-slf4j                 | 2.10.0         | []()                                                             |
+| org.apache.tomcat.embed              | tomcat-embed-el                | 8.5.31         | []()                                                             |
+| org.aspectj                          | aspectjweaver                  | 1.8.13         | []()                                                             |
+| org.flywaydb                         | flyway-core                    | 5.0.7          | []()                                                             |
+| org.glassfish                        | javax.json                     | 1.0.4          | [CQ10619](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10619) |
+| org.hibernate.validator              | hibernate-validator            | 6.0.10.Final   | []()                                                             |
+| org.jboss.logging                    | jboss-logging                  | 3.3.2.Final    | []()                                                             |
+| org.jsoup                            | jsoup                          | 1.8.3          | [CQ12936](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12936) |
+| org.mortbay.jasper                   | apache-el                      | 8.5.24.2       | []()                                                             |
+| org.objenesis                        | objenesis                      | 2.5            | []()                                                             |
+| org.ow2.asm                          | asm-analysis                   | 6.2            | []()                                                             |
+| org.ow2.asm                          | asm-commons                    | 6.2            | []()                                                             |
+| org.ow2.asm                          | asm                            | 6.2            | []()                                                             |
+| org.ow2.asm                          | asm-tree                       | 6.2            | []()                                                             |
+| org.reactivestreams                  | reactive-streams               | 1.0.2          | []()                                                             |
+| org.slf4j                            | jul-to-slf4j                   | 1.7.25         | [CQ12937](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12937) |
+| org.slf4j                            | slf4j-api                      | 1.7.25         | [CQ12940](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12940) |
+| org.springframework.amqp             | spring-amqp                    | 2.0.4.RELEASE  | []()                                                             |
+| org.springframework.amqp             | spring-rabbit                  | 2.0.4.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-autoconfigure      | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot                    | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-aop        | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-data-jpa   | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter            | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-jdbc       | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-jetty      | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-json       | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-logging    | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-validation | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.boot             | spring-boot-starter-web        | 2.0.3.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-bus               | 2.0.0.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-commons           | 2.0.0.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-context           | 2.0.0.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-starter           | 2.0.0.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-stream            | 2.0.0.RELEASE  | []()                                                             |
+| org.springframework.data             | spring-data-commons            | 2.0.8.RELEASE  | []()                                                             |
+| org.springframework.data             | spring-data-jpa                | 2.0.8.RELEASE  | []()                                                             |
+| org.springframework.hateoas          | spring-hateoas                 | 0.24.0.RELEASE | []()                                                             |
+| org.springframework.integration      | spring-integration-core        | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.integration      | spring-integration-jmx         | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.integration      | spring-integration-tuple       | 1.0.0.RELEASE  | [CQ12996](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12996) |
+| org.springframework.plugin           | spring-plugin-core             | 1.2.0.RELEASE  | [CQ12997](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12997) |
+| org.springframework.retry            | spring-retry                   | 1.2.2.RELEASE  | []()                                                             |
+| org.springframework.security         | spring-security-aspects        | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.security         | spring-security-config         | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.security         | spring-security-core           | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.security         | spring-security-crypto         | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework.security         | spring-security-web            | 5.0.6.RELEASE  | []()                                                             |
+| org.springframework                  | spring-aop                     | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-aspects                 | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-beans                   | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-context                 | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-context-support         | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-core                    | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-expression              | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-jcl                     | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-jdbc                    | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-messaging               | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-orm                     | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-tuple                   | 1.0.0.RELEASE  | [CQ12998](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12998) |
+| org.springframework                  | spring-tx                      | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-web                     | 5.0.7.RELEASE  | []()                                                             |
+| org.springframework                  | spring-webmvc                  | 5.0.7.RELEASE  | []()                                                             |
+| org.vaadin.addons.lazyquerycontainer | vaadin-lazyquerycontainer      | 7.6.1.3        | [CQ13025](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13025) |
+| org.vaadin.addons                    | flexibleoptiongroup            | 2.2.0          | [CQ11050](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11050) |
+| org.vaadin.addons                    | tokenfield                     | 7.0.1          | [CQ11051](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11051) |
+| org.vaadin.alump.distributionbar     | dbar-addon                     | 2.0.0          | [CQ13026](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13026) |
+| org.vaadin.spring.addons             | vaadin-spring-addon-eventbus   | 0.0.6.RELEASE  | [CQ11047](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11047) |
+| org.vaadin.spring.extensions         | vaadin-spring-ext-core         | 0.0.6.RELEASE  | [CQ11048](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11048) |
+| org.vaadin.spring.extensions         | vaadin-spring-ext-security     | 0.0.6.RELEASE  | [CQ11049](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11049) |
+| org.w3c.css                          | sac                            | 1.3            | [CQ11052](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11052) |
+| javax.servlet                        | javax.servlet-api              | 3.1.0          | [CQ10362](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10362) |
+
+## Test and build dependencies
+
+CQ:
+
+| Group ID                        | Artifact ID                      | Version              |
+| ------------------------------- | -------------------------------- | -------------------- |
+| ant                             | ant                              | 1.6.5                |
+| cglib                           | cglib-nodep                      | 3.1                  |
+| colt                            | colt                             | 1.2.0                |
+| com.google.code.gson            | gson                             | 2.8.5                |
+| com.google.gwt                  | gwt-dev                          | 2.8.0                |
+| com.google.gwt.gwtmockito       | gwtmockito                       | 1.1.8                |
+| com.google.gwt                  | gwt-user                         | 2.8.0                |
+| com.google.jsinterop            | jsinterop-annotations            | 1.0.1                |
+| com.google.jsinterop            | jsinterop-annotations            | sources              |
+| com.ibm.icu                     | icu4j                            | 50.1.1               |
+| com.jayway.awaitility           | awaitility                       | 1.7.0                |
+| com.jayway.jsonpath             | json-path                        | 2.4.0                |
+| commons-codec                   | commons-codec                    | 1.11                 |
+| commons-collections             | commons-collections              | 3.2.2                |
+| commons-net                     | commons-net                      | 3.6                  |
+| com.rabbitmq                    | http-client                      | 2.1.0.RELEASE        |
+| com.vaadin.external.google      | android-json                     | 0.0.20131108.vaadin1 |
+| javax.el                        | javax.el-api                     | 2.2.4                |
+| junit                           | junit                            | 4.12                 |
+| net.\_01001111                  | jlorem                           | 1.1                  |
+| net.bytebuddy                   | byte-buddy-agent                 | 1.7.11               |
+| net.bytebuddy                   | byte-buddy                       | 1.7.11               |
+| net.minidev                     | accessors-smart                  | 1.2                  |
+| net.minidev                     | json-smart                       | 2.3                  |
+| net.sourceforge.cssparser       | cssparser                        | 0.9.24               |
+| net.sourceforge.htmlunit        | htmlunit-core-js                 | 2.28                 |
+| net.sourceforge.htmlunit        | htmlunit                         | 2.29                 |
+| net.sourceforge.htmlunit        | neko-htmlunit                    | 2.28                 |
+| org.apache.commons              | commons-text                     | 1.2                  |
+| org.apache.httpcomponents       | httpclient                       | 4.5.5                |
+| org.apache.httpcomponents       | httpcore                         | 4.4.9                |
+| org.apache.httpcomponents       | httpmime                         | 4.5.5                |
+| org.apache.tika                 | tika-core                        | 1.7                  |
+| org.aspectj                     | aspectjrt                        | 1.8.13               |
+| org.assertj                     | assertj-core                     | 3.9.1                |
+| org.hamcrest                    | hamcrest-all                     | 1.3                  |
+| org.hamcrest                    | hamcrest-core                    | 1.3                  |
+| org.hamcrest                    | hamcrest-library                 | 1.3                  |
+| org.javassist                   | javassist                        | 3.21.0-GA            |
+| org.javassist                   | javassist                        | 3.22.0-GA            |
+| org.jvnet.jaxb2_commons         | jaxb2-basics-runtime             | 0.9.3                |
+| org.mariadb.jdbc                | mariadb-java-client              | 2.0.2                |
+| org.mockito                     | mockito-core                     | 2.8.9                |
+| org.mortbay.jasper              | apache-jsp                       | 8.5.24.2             |
+| org.ow2.asm                     | asm-commons                      | 5.0.3                |
+| org.ow2.asm                     | asm                              | 5.0.3                |
+| org.ow2.asm                     | asm                              | 5.0.4                |
+| org.ow2.asm                     | asm-tree                         | 5.0.3                |
+| org.ow2.asm                     | asm-util                         | 5.0.3                |
+| org.powermock                   | powermock-api-mockito2           | 1.7.4                |
+| org.powermock                   | powermock-api-mockito-common     | 1.7.4                |
+| org.powermock                   | powermock-api-support            | 1.7.4                |
+| org.powermock                   | powermock-core                   | 1.7.4                |
+| org.powermock                   | powermock-module-junit4-common   | 1.7.4                |
+| org.powermock                   | powermock-module-junit4          | 1.7.4                |
+| org.powermock                   | powermock-reflect                | 1.7.4                |
+| org.skyscreamer                 | jsonassert                       | 1.5.0                |
+| org.springframework.amqp        | spring-rabbit-junit              | 2.0.4.RELEASE        |
+| org.springframework.amqp        | spring-rabbit-test               | 2.0.4.RELEASE        |
+| org.springframework.boot        | spring-boot-starter-test         | 2.0.3.RELEASE        |
+| org.springframework.boot        | spring-boot-test-autoconfigure   | 2.0.3.RELEASE        |
+| org.springframework.boot        | spring-boot-test                 | 2.0.3.RELEASE        |
+| org.springframework.cloud       | spring-cloud-stream-binder-test  | 2.0.0.RELEASE        |
+| org.springframework.cloud       | spring-cloud-stream-test-support | 2.0.0.RELEASE        |
+| org.springframework.integration | spring-integration-test          | 5.0.6.RELEASE        |
+| org.springframework.integration | spring-integration-test-support  | 5.0.6.RELEASE        |
+| org.springframework.restdocs    | spring-restdocs-core             | 2.0.1.RELEASE        |
+| org.springframework.restdocs    | spring-restdocs-mockmvc          | 2.0.1.RELEASE        |
+| org.springframework             | spring-test                      | 5.0.7.RELEASE        |
+| org.springframework             | spring-webflux                   | 5.0.7.RELEASE        |
+| org.xmlunit                     | xmlunit-core                     | 2.5.1                |
+| org.yaml                        | snakeyaml                        | 1.19                 |
+| ru.qatools.commons              | properties                       | 2.0.RC5              |
+| ru.yandex.qatools.allure        | allure-java-adaptor-api          | 1.5.4                |
+| ru.yandex.qatools.allure        | allure-java-annotations          | 1.5.4                |
+| ru.yandex.qatools.allure        | allure-java-aspects              | 1.5.4                |
+| ru.yandex.qatools.allure        | allure-junit-adaptor             | 1.5.4                |
+| ru.yandex.qatools.allure        | allure-model                     | 1.5.4                |
+| tapestry                        | tapestry                         | 4.0.2                |
+| xalan                           | serializer                       | 2.7.2                |
+| xalan                           | xalan                            | 2.7.2                |
+| xerces                          | xercesImpl                       | 2.11.0               |
+| xml-apis                        | xml-apis                         | 1.4.01               |

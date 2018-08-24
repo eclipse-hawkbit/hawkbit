@@ -41,6 +41,14 @@
                <groupId>org.springframework.boot</groupId>
                <artifactId>spring-boot-starter-tomcat</artifactId>
             </exclusion>
+            <exclusion>
+               <groupId>org.springframework.security</groupId>
+               <artifactId>spring-security-rsa</artifactId>
+            </exclusion>
+            <exclusion>
+               	<groupId>org.objenesis</groupId>
+      			<artifactId>objenesis</artifactId>
+            </exclusion>
          </exclusions>
       </dependency>
       <dependency>

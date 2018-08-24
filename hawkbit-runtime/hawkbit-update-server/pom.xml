@@ -56,19 +56,10 @@
    </build>
 
    <dependencies>
-    <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-properties-migrator</artifactId>
-    <scope>runtime</scope>
-</dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-boot-starter</artifactId>
          <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-actuator</artifactId>
       </dependency>
       <dependency>
          <groupId>com.h2database</groupId>
@@ -78,7 +69,6 @@
          <groupId>com.microsoft.sqlserver</groupId>
          <artifactId>mssql-jdbc</artifactId>
       </dependency>
-
    </dependencies>
 
 </project>
