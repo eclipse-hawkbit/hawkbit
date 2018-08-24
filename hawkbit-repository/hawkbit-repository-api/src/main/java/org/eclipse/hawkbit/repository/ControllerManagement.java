@@ -334,7 +334,9 @@ public interface ControllerManagement {
      * @throws EntityNotFoundException
      *             if target that has to be updated could not be found
      * @throws QuotaExceededException
-     *             if maximum number of attribzes per target is exceeded
+     *             if maximum number of attributes per target is exceeded
+     * @throws IllegalArgumentException
+     *             if attributes violate constraints
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,

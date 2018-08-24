@@ -495,39 +495,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Checks if vales of attribute-key and attribute-value are handled correctly")
-    public void createTargetAttributes() {
-        final String keyTooLong = "123456789012345678901234567890123";
-        final String keyValid = "12345678901234567890123456789012";
-        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
-        final String keyNull = null;
-
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
-        final String controllerId = target.getControllerId();
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyTooLong, valueValid), null))
-                .as("Attribute with key too long should not be created");
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyTooLong, valueTooLong), null))
-                .as("Attribute with key too long and value too long should not be created");
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyValid, valueTooLong), null))
-                .as("Attribute with value too long should not be created");
-
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyNull, valueValid), null))
-                .as("Attribute with key NULL should not be created");
-    }
-
     /**
      * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted
      * that the target have additional tags assigned to them which are not
