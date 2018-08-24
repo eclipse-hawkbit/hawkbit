@@ -96,6 +96,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+
 /**
  * JPA based {@link ControllerManagement} implementation.
  *
@@ -659,7 +662,7 @@ public class JpaControllerManagement implements ControllerManagement {
             final UpdateMode mode) {
 
         /*
-            Constraint is not validated by EclipseLink. Therefore, constraints have to be checked here.
+            Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
          */
         if (data.entrySet().stream()
                 .anyMatch(e -> !JpaControllerManagement.isAttributeEntryValid(e))) {
@@ -700,18 +703,15 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {
-        if (e == null) {
-            return true;
-        }
         return isAttributeKeyValid(e.getKey()) && isAttributeValueValid(e.getValue());
     }
 
     private static boolean isAttributeKeyValid(final String key) {
-        return key != null && key.length() <= 32;
+        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_KEY_SIZE;
     }
 
     private static boolean isAttributeValueValid(final String value) {
-        return value == null || value.length() <= 128;
+        return value == null || value.length() <= CONTROLLER_ATTRIBUTE_VALUE_SIZE;
     }
 
     private static void copy(final Map<String, String> src, final Map<String, String> trg) {
