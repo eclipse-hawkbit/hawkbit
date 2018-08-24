@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -106,7 +107,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
 
-    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = "DELETE FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT 1000";
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT = "DELETE FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT "
+            + ACTION_PAGE_LIMIT;
+
+    private static final EnumMap<Database, String> QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED;
+
+    static {
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.SQL_SERVER, "DELETE TOP (" + ACTION_PAGE_LIMIT
+                + ") FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at ");
+    }
 
     private final EntityManager entityManager;
     private final ActionRepository actionRepository;
@@ -713,7 +723,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final int statusCount = status.size();
         final Status[] statusArr = status.toArray(new Status[statusCount]);
 
-        final String queryStr = String.format(QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED,
+        final String queryStr = String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
                 formatInClauseWithNumberKeys(statusCount));
         final Query deleteQuery = entityManager.createNativeQuery(queryStr);
 
@@ -724,6 +734,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         LOG.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
         return deleteQuery.executeUpdate();
+    }
+
+    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(Database database) {
+        return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
+                QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
     }
 
     private static String formatInClauseWithNumberKeys(final int count) {
