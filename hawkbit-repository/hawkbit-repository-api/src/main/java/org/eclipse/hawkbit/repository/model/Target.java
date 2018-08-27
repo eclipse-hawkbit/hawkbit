@@ -43,7 +43,7 @@ public interface Target extends NamedEntity {
     /**
      * Maximum length of value of controller attribute
      */
-    int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 32;
+    int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 128;
 
     /**
      * @return business identifier of the {@link Target}
