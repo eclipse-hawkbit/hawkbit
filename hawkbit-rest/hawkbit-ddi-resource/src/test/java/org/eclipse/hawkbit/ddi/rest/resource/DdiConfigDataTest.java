@@ -52,7 +52,6 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     private static final String KEY_VALID = "12345678901234567890123456789012";
     private static final String VALUE_TOO_LONG = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
     private static final String VALUE_VALID = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
-    private static final String KEY_NULLL = null;
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
@@ -102,7 +101,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // initial
         final Map<String, String> attributes = new HashMap<>();
-        attributes.put("dsafsdf", "sdsds");
+        attributes.put(KEY_VALID, VALUE_VALID);
 
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
