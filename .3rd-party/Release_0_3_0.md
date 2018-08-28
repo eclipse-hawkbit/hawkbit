@@ -4,26 +4,26 @@
 
 | Group ID                             | Artifact ID                    | Version        | CQ                                                               |
 | ------------------------------------ | ------------------------------ | -------------- | ---------------------------------------------------------------- |
-| ch.qos.logback                       | logback-classic                | 1.2.3          | []()                                                             |
-| ch.qos.logback                       | logback-core                   | 1.2.3          | []()                                                             |
+| ch.qos.logback                       | logback-classic                | 1.2.3          | [CQ17369](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17369) |
+| ch.qos.logback                       | logback-core                   | 1.2.3          | [CQ17370](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17370) |
 | com.cronutils                        | cron-utils                     | 5.0.5          | [CQ15762](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15762) |
-| com.esotericsoftware                 | kryo-shaded                    | 3.0.3          | []()                                                             |
-| com.esotericsoftware                 | minlog                         | 1.3.0          | []()                                                             |
-| com.fasterxml                        | classmate                      | 1.3.4          | []()                                                             |
+| com.esotericsoftware                 | kryo-shaded                    | 3.0.3          | [CQ17372](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17372) |
+| com.esotericsoftware                 | minlog                         | 1.3.0          | [CQ17371](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17371) |
+| com.fasterxml                        | classmate                      | 1.3.4          | [CQ17373](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17373) |
 | com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | []()                                                             |
 | com.fasterxml.jackson.core           | jackson-core                   | 2.9.6          | []()                                                             |
 | com.fasterxml.jackson.core           | jackson-databind               | 2.9.6          | []()                                                             |
 | com.fasterxml.jackson.datatype       | jackson-datatype-jdk8          | 2.9.6          | []()                                                             |
 | com.fasterxml.jackson.datatype       | jackson-datatype-jsr310        | 2.9.6          | []()                                                             |
 | com.fasterxml.jackson.module         | jackson-module-parameter-names | 2.9.6          | []()                                                             |
-| com.github.ben-manes.caffeine        | caffeine                       | 2.6.2          | []()                                                             |
+| com.github.ben-manes.caffeine        | caffeine                       | 2.6.2          | [CQ17377](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17377) |
 | com.github.gwtd3                     | gwt-d3-api                     | 1.2.0          | [CQ13029](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13029) |
 | com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.github.gwtd3                     | gwt-d3-js                      | sources        | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
 | com.google.guava                     | guava                          | 25.0-jre       | [CQ16201](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=16201) |
 | com.h2database                       | h2                             | 1.4.197        | [CQ10365](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10365) |  |
 | com.microsoft.sqlserver              | mssql-jdbc                     | 6.4.0          | [CQ15896](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15896) |
-| commons-io                           | commons-io                     | 2.5            | []()                                                             |
+| commons-io                           | commons-io                     | 2.5            | [CQ17374](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17374) |
 | com.rabbitmq                         | amqp-client                    | 5.1.2          | []()                                                             |
 | com.vaadin.external.atmosphere       | atmosphere-runtime             | 2.2.9.vaadin2  | [CQ10714](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10714) |
 | com.vaadin.external.flute            | flute                          | 1.3.0.gg2      | [CQ11039](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=11039) |
@@ -45,7 +45,7 @@
 | io.protostuff                        | protostuff-collectionschema    | 1.5.6          | [CQ12966](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12966) |
 | io.protostuff                        | protostuff-core                | 1.5.6          | [CQ12967](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12967) |
 | io.protostuff                        | protostuff-runtime             | 1.5.6          | [CQ12968](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12968) |
-| javax.annotation                     | javax.annotation-api           | 1.3.2          | []()                                                             |
+| javax.annotation                     | javax.annotation-api           | 1.3.2          | [CQ17375](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17375) |
 | javax.servlet                        | javax.servlet-api              | 3.1.0          | [CQ10362](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10362) |
 | javax.transaction                    | javax.transaction-api          | 1.2            | [CQ10363](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10363) |
 | javax.validation                     | validation-api                 | 1.1.0.Final    | [CQ10364](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10364) |
@@ -54,7 +54,7 @@
 | org.apache.commons                   | commons-lang3                  | 3.4            | [CQ10356](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10356) |
 | org.apache.logging.log4j             | log4j-api                      | 2.10.0         | []()                                                             |
 | org.apache.logging.log4j             | log4j-to-slf4j                 | 2.10.0         | []()                                                             |
-| org.apache.tomcat.embed              | tomcat-embed-el                | 8.5.31         | []()                                                             |
+| org.apache.tomcat.embed              | tomcat-embed-el                | 8.5.31         | [CQ17376](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17376) |
 | org.aspectj                          | aspectjweaver                  | 1.8.13         | []()                                                             |
 | org.flywaydb                         | flyway-core                    | 5.0.7          | []()                                                             |
 | org.glassfish                        | javax.json                     | 1.0.4          | [CQ10619](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10619) |
@@ -62,7 +62,6 @@
 | org.jboss.logging                    | jboss-logging                  | 3.3.2.Final    | [CQ10621](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10621) |
 | org.jsoup                            | jsoup                          | 1.8.3          | [CQ12936](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12936) |
 | org.mortbay.jasper                   | apache-el                      | 8.5.24.2       | []()                                                             |
-| org.objenesis                        | objenesis                      | 2.5            | []()                                                             |
 | org.ow2.asm                          | asm-analysis                   | 6.2            | []()                                                             |
 | org.ow2.asm                          | asm-commons                    | 6.2            | []()                                                             |
 | org.ow2.asm                          | asm                            | 6.2            | []()                                                             |
@@ -215,3 +214,4 @@ CQ:
 | xalan                           | xalan                            | 2.7.2                |
 | xerces                          | xercesImpl                       | 2.11.0               |
 | xml-apis                        | xml-apis                         | 1.4.01               |
+| org.objenesis                   | objenesis                        | 2.5                  |

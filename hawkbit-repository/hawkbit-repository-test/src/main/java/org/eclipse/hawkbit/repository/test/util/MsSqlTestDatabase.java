@@ -38,7 +38,7 @@ public class MsSqlTestDatabase extends AbstractTestExecutionListener {
             LOG.info("Setting up mysql schema for test class {}", testContext.getTestClass().getName());
             this.username = System.getProperty("spring.datasource.username");
             this.password = System.getProperty("spring.datasource.password");
-            this.uri = System.getProperty("spring.datasource.jdbc-url");
+            this.uri = System.getProperty("spring.datasource.url");
             createSchemaUri();
             createSchema();
         }
@@ -55,7 +55,7 @@ public class MsSqlTestDatabase extends AbstractTestExecutionListener {
         schemaName = "SP" + RandomStringUtils.randomAlphanumeric(10);
         this.uri = this.uri.substring(0, uri.indexOf(';'));
 
-        System.setProperty("spring.datasource.jdbc-url", uri + ";database=" + schemaName);
+        System.setProperty("spring.datasource.url", uri + ";database=" + schemaName);
     }
 
     private static boolean isRunningWithMsSql() {
