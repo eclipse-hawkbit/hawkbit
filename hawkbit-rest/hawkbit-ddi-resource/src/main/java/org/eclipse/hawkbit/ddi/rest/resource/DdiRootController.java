@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
@@ -94,7 +95,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private BusProperties bus;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -196,7 +197,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         requestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> eventPublisher
                                 .publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId,
-                                        shippedSinceLastEvent, applicationContext.getId())));
+                                        shippedSinceLastEvent, bus.getId())));
 
             }
         }

@@ -70,7 +70,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -138,7 +138,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private BusProperties bus;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -382,8 +382,7 @@ public class JpaControllerManagement implements ControllerManagement {
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                     .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(result, applicationContext.getId())));
+            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
 
             return result;
         }
@@ -434,8 +433,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         pollChunks.forEach(chunk -> {
             setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
-            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> eventPublisher
-                    .publishEvent(new TargetPollEvent(controllerId, tenant, applicationContext.getId()))));
+            chunk.forEach(controllerId -> afterCommit.afterCommit(
+                    () -> eventPublisher.publishEvent(new TargetPollEvent(controllerId, tenant, bus.getId()))));
         });
 
         return null;
@@ -489,8 +488,7 @@ public class JpaControllerManagement implements ControllerManagement {
             toUpdate.setAddress(address.toString());
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
-            afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, applicationContext.getId())));
+            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, bus.getId())));
 
             return targetRepository.save(toUpdate);
         }
@@ -954,7 +952,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
     }
 }

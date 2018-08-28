@@ -57,7 +57,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -105,7 +105,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final ApplicationContext applicationContext;
+    private final BusProperties bus;
 
     private final TenantAware tenantAware;
 
@@ -126,7 +126,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
-            final ApplicationContext applicationContext, final TenantAware tenantAware,
+            final BusProperties bus, final TenantAware tenantAware,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
@@ -142,7 +142,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.actionRepository = actionRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisher = eventPublisher;
-        this.applicationContext = applicationContext;
+        this.bus = bus;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -283,7 +283,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         afterCommit.afterCommit(() -> distributionSetIDs.forEach(
                 dsId -> eventPublisher.publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(),
-                        dsId, JpaDistributionSet.class.getName(), applicationContext.getId()))));
+                        dsId, JpaDistributionSet.class.getName(), bus.getId()))));
     }
 
     @Override

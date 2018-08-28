@@ -76,6 +76,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -148,20 +149,21 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final BusProperties bus;
 
     private final Database database;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
+            final RolloutApprovalStrategy rolloutApprovalStrategy) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
                 eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
         this.database = database;
+        this.bus = bus;
     }
 
     @Override
@@ -945,7 +947,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), applicationContext.getId()))));
+                        JpaRolloutGroup.class.getName(), bus.getId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {

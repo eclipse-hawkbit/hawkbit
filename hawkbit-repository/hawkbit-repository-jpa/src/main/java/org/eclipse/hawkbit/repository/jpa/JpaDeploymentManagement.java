@@ -68,7 +68,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
@@ -126,7 +126,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TargetManagement targetManagement;
     private final AuditorAware<String> auditorProvider;
     private final ApplicationEventPublisher eventPublisher;
-    private final ApplicationContext applicationContext;
+    private final BusProperties bus;
     private final AfterTransactionCommitExecutor afterCommit;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
@@ -142,7 +142,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
-            final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
+            final BusProperties bus, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
@@ -154,14 +154,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.targetManagement = targetManagement;
         this.auditorProvider = auditorProvider;
         this.eventPublisher = eventPublisher;
-        this.applicationContext = applicationContext;
+        this.bus = bus;
         this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
-        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher, bus,
+                actionRepository, actionStatusRepository, quotaManagement);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
+                bus, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -454,7 +454,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                        distributionSetId, targetAssignments, applicationContext.getId(), maintenanceWindowAvailable)));
+                        distributionSetId, targetAssignments, bus.getId(), maintenanceWindowAvailable)));
             }
 
             return rolloutGroupActions.getTotalElements();
@@ -734,7 +734,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return deleteQuery.executeUpdate();
     }
 
-    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(Database database) {
+    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
         return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
                 QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
     }
