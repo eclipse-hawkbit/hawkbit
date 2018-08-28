@@ -126,8 +126,8 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>2.0.3.RELEASE</spring.boot.version>
-      <spring.cloud.version>Finchley.RELEASE</spring.cloud.version>      
+      <spring.boot.version>2.0.4.RELEASE</spring.boot.version>
+      <spring.cloud.version>Finchley.SR1</spring.cloud.version>      
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->

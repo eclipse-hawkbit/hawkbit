@@ -56,8 +56,6 @@
    org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile
    org.jsoup:jsoup:jar:1.8.3:compile
    org.mortbay.jasper:apache-el:jar:8.5.24.2:compile
-   org.objenesis:objenesis:jar:2.1:compile
-   org.objenesis:objenesis:jar:2.5:compile
    org.ow2.asm:asm-analysis:jar:6.2:compile
    org.ow2.asm:asm-commons:jar:6.2:compile
    org.ow2.asm:asm:jar:6.2:compile
@@ -69,20 +67,20 @@
    org.springframework.amqp:spring-rabbit:jar:2.0.4.RELEASE:compile
    org.springframework.boot:spring-boot-autoconfigure:jar:2.0.3.RELEASE:compile
    org.springframework.boot:spring-boot:jar:2.0.3.RELEASE:compile
-   org.springframework.boot:spring-boot-starter-aop:jar:2.0.3.RELEASE:compile
-   org.springframework.boot:spring-boot-starter-data-jpa:jar:2.0.3.RELEASE:compile
-   org.springframework.boot:spring-boot-starter:jar:2.0.3.RELEASE:compile
+   org.springframework.boot:spring-boot-starter-aop:jar:2.0.4.RELEASE:compile
+   org.springframework.boot:spring-boot-starter-data-jpa:jar:2.0.4.RELEASE:compile
+   org.springframework.boot:spring-boot-starter:jar:2.0.4.RELEASE:compile
    org.springframework.boot:spring-boot-starter-jdbc:jar:2.0.3.RELEASE:compile
    org.springframework.boot:spring-boot-starter-jetty:jar:2.0.3.RELEASE:compile
    org.springframework.boot:spring-boot-starter-json:jar:2.0.3.RELEASE:compile
    org.springframework.boot:spring-boot-starter-logging:jar:2.0.3.RELEASE:compile
    org.springframework.boot:spring-boot-starter-validation:jar:2.0.3.RELEASE:compile
-   org.springframework.boot:spring-boot-starter-web:jar:2.0.3.RELEASE:compile
+   org.springframework.boot:spring-boot-starter-web:jar:2.0.4.RELEASE:compile
    org.springframework.cloud:spring-cloud-bus:jar:2.0.0.RELEASE:compile
-   org.springframework.cloud:spring-cloud-commons:jar:2.0.0.RELEASE:compile
-   org.springframework.cloud:spring-cloud-context:jar:2.0.0.RELEASE:compile
-   org.springframework.cloud:spring-cloud-starter:jar:2.0.0.RELEASE:compile
-   org.springframework.cloud:spring-cloud-stream:jar:2.0.0.RELEASE:compile
+   org.springframework.cloud:spring-cloud-commons:jar:2.0.1.RELEASE:compile
+   org.springframework.cloud:spring-cloud-context:jar:2.0.1.RELEASE:compile
+   org.springframework.cloud:spring-cloud-starter:jar:2.0.1.RELEASE:compile
+   org.springframework.cloud:spring-cloud-stream:jar:2.0.1.RELEASE:compile
    org.springframework.data:spring-data-commons:jar:2.0.8.RELEASE:compile
    org.springframework.data:spring-data-jpa:jar:2.0.8.RELEASE:compile
    org.springframework.hateoas:spring-hateoas:jar:0.24.0.RELEASE:compile

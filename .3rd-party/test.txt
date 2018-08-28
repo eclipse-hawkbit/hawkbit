@@ -42,6 +42,8 @@
    org.mariadb.jdbc:mariadb-java-client:jar:2.0.2:test
    org.mockito:mockito-core:jar:2.8.9:test
    org.mortbay.jasper:apache-jsp:jar:8.5.24.2:test
+   org.objenesis:objenesis:jar:2.1:test
+   org.objenesis:objenesis:jar:2.5:test
    org.ow2.asm:asm-commons:jar:5.0.3:test
    org.ow2.asm:asm:jar:5.0.3:test
    org.ow2.asm:asm:jar:5.0.4:test
@@ -57,11 +59,11 @@
    org.skyscreamer:jsonassert:jar:1.5.0:test
    org.springframework.amqp:spring-rabbit-junit:jar:2.0.4.RELEASE:test
    org.springframework.amqp:spring-rabbit-test:jar:2.0.4.RELEASE:test
-   org.springframework.boot:spring-boot-starter-test:jar:2.0.3.RELEASE:test
+   org.springframework.boot:spring-boot-starter-test:jar:2.0.4.RELEASE:test
    org.springframework.boot:spring-boot-test-autoconfigure:jar:2.0.3.RELEASE:test
    org.springframework.boot:spring-boot-test:jar:2.0.3.RELEASE:test
-   org.springframework.cloud:spring-cloud-stream-binder-test:jar:2.0.0.RELEASE:test
-   org.springframework.cloud:spring-cloud-stream-test-support:jar:2.0.0.RELEASE:test
+   org.springframework.cloud:spring-cloud-stream-binder-test:jar:2.0.1.RELEASE:test
+   org.springframework.cloud:spring-cloud-stream-test-support:jar:2.0.1.RELEASE:test
    org.springframework.integration:spring-integration-test:jar:5.0.6.RELEASE:test
    org.springframework.integration:spring-integration-test-support:jar:5.0.6.RELEASE:test
    org.springframework.restdocs:spring-restdocs-core:jar:2.0.1.RELEASE:test
