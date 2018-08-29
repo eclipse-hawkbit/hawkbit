@@ -200,6 +200,12 @@ public class ResponseExceptionHandler {
 
         final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
         final Throwable responseCause = Iterables.getLast(throwables);
+
+        if (responseCause.getMessage().isEmpty()) {
+            LOG.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(),
+                    ex.getStackTrace());
+        }
+
         final ExceptionInfo response = createExceptionInfo(new MultiPartFileUploadException(responseCause));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
