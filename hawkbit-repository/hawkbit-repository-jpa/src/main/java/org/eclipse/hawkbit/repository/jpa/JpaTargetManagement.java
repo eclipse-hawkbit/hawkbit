@@ -316,7 +316,7 @@ public class JpaTargetManagement implements TargetManagement {
                     .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
         if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
-            specList.add(TargetSpecifications.likeIdOrNameOrDescription(filterParams.getFilterBySearchText()));
+            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
         }
         if (isHasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
