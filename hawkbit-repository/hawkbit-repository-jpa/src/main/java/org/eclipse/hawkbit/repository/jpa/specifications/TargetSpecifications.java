@@ -18,6 +18,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
+import javax.persistence.criteria.MapJoin;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -145,6 +146,24 @@ public final class TargetSpecifications {
             return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
                     cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower),
                     cb.like(cb.lower(targetRoot.get(JpaTarget_.description)), searchTextToLower));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by "like attribute
+     * value".
+     *
+     * @param searchText
+     *            to be filtered on
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> likeAttributeValue(final String searchText) {
+        return (targetRoot, query, cb) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            final MapJoin<JpaTarget, String, String> attributeMap = targetRoot.join(JpaTarget_.controllerAttributes,
+                    JoinType.LEFT);
+            query.distinct(true);
+            return cb.like(cb.lower(attributeMap.value()), searchTextToLower);
         };
     }
 
