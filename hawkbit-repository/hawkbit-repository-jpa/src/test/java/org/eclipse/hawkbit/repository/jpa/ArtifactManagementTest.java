@@ -191,7 +191,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         // create as many artifacts as possible w/o violating the storage quota
         final long maxBytes = quotaManagement.getMaxArtifactSizeTotal();
         final List<Long> artifactIds = Lists.newArrayList();
-        final int artifactSize = 256 * 1024;
+        final int artifactSize = 320 * 1024;
         final int numArtifacts = Math.toIntExact(maxBytes / artifactSize);
         for (int i = 0; i < numArtifacts; ++i) {
             final byte[] randomBytes = randomBytes(artifactSize);
