@@ -650,6 +650,8 @@ public class JpaControllerManagement implements ControllerManagement {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         }
 
+        target.setRequestControllerAttributes(true);
+
         targetRepository.save(target);
 
         entityManager.detach(ds);
