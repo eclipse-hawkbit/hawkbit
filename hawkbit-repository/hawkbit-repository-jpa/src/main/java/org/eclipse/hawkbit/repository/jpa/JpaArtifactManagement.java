@@ -54,6 +54,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
 
+    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) cannot be uploaded. The maximum total artifact storage of %s bytes is exceeded.";
+
     private final LocalArtifactRepository localArtifactRepository;
 
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -104,6 +106,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, filesize);
+        assertMaxArtifactSizeTotalQuota(filename, filesize);
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
@@ -136,6 +139,21 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
         if (artifactSize > maxArtifactSize) {
             final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename, artifactSize, id, maxArtifactSize);
+            LOG.warn(msg);
+            throw new QuotaExceededException(msg);
+        }
+    }
+
+    private void assertMaxArtifactSizeTotalQuota(final String filename, final long artifactSize) {
+        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactSizeTotal();
+        if (maxArtifactSizeTotal <= 0) {
+            return;
+        }
+
+        final Optional<Long> currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize();
+        if (currentlyUsed.isPresent() && currentlyUsed.get() + artifactSize > maxArtifactSizeTotal) {
+            final String msg = String.format(MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED, filename, artifactSize,
+                    maxArtifactSizeTotal);
             LOG.warn(msg);
             throw new QuotaExceededException(msg);
         }
