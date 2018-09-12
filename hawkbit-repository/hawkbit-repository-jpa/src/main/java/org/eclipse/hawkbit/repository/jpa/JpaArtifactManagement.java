@@ -54,7 +54,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
 
-    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) cannot be uploaded. The maximum total artifact storage of %s bytes is exceeded.";
+    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) cannot be uploaded. The maximum total artifact storage of %s bytes would be exceeded.";
 
     private final LocalArtifactRepository localArtifactRepository;
 
