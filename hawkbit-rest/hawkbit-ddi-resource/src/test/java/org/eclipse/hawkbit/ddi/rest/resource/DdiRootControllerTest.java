@@ -27,6 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+import java.util.Map;
+
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus.ExecutionStatus;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -262,7 +266,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = testdataFactory.createTarget("4711");
+        testdataFactory.createTarget("4711");
 
         assertThat(targetManagement.getByControllerID("4711").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -360,6 +364,56 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                         JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
+    }
+
+    @Test
+    @Description("Controller sends attribute update request after device successfully closed software update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = TargetPollEvent.class, count = 4),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void testAttributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
+        final String targetControllerId = "922";
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget(targetControllerId);
+        final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeVlue");
+        JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName());
+
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$._links.configData.href").isNotEmpty()).andExpect(status().isOk());
+
+        mvc.perform(put("/{tenant}/controller/v1/{controllerId}/configData", tenantAware.getCurrentTenant(),
+                targetControllerId).content(
+                        JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("$._links.configData").doesNotExist())
+                .andExpect(status().isOk());
+
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
+                tenantAware.getCurrentTenant(), targetControllerId, savedAction.getId())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("$._links.configData").doesNotExist());
+
+        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
+                tenantAware.getCurrentTenant(), targetControllerId, savedAction.getId())
+                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$._links.configData.href").isNotEmpty());
     }
 
     @Test
