@@ -99,6 +99,6 @@ public interface QuotaManagement {
     /**
      * @return the accumulated maximum size of all software artifacts in bytes
      */
-    long getMaxArtifactSizeTotal();
+    long getMaxArtifactStorage();
 
 }

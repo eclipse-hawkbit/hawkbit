@@ -145,7 +145,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private void assertMaxArtifactSizeTotalQuota(final String filename, final long artifactSize) {
-        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactSizeTotal();
+        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
         if (maxArtifactSizeTotal <= 0) {
             return;
         }

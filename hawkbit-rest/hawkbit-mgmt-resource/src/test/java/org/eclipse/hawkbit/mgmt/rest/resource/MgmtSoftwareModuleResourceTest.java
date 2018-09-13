@@ -378,7 +378,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
         
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        final long storageLimit = quotaManagement.getMaxArtifactSizeTotal();
+        final long storageLimit = quotaManagement.getMaxArtifactStorage();
 
         final int artifactSize = 64 * 1024;
         final int numArtifacts = Math.toIntExact(storageLimit / artifactSize);

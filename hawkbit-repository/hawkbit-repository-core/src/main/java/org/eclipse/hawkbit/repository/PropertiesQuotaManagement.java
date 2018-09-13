@@ -99,8 +99,8 @@ public class PropertiesQuotaManagement implements QuotaManagement {
     }
 
     @Override
-    public long getMaxArtifactSizeTotal() {
-        return securityProperties.getDos().getMaxArtifactSizeTotal();
+    public long getMaxArtifactStorage() {
+        return securityProperties.getDos().getMaxArtifactStorage();
     }
 
 }
