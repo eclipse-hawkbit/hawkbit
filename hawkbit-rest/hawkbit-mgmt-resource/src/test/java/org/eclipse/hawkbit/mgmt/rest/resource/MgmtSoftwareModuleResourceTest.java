@@ -70,7 +70,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Management API")
 @Stories("Software Module Resource")
 @TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000",
-        "hawkbit.server.security.dos.maxArtifactSizeTotal=500000" })
+        "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Before
@@ -377,7 +377,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("Verifies that artifacts can only be added as long as the artifact storage quota is not exceeded.")
     public void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
         
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         final long storageLimit = quotaManagement.getMaxArtifactStorage();
 
         final int artifactSize = 64 * 1024;
@@ -391,6 +390,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
             final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
 
             // upload
+            final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("sm" + i);
             mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                     .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isCreated())
@@ -408,6 +408,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("sm" + numArtifacts);
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
