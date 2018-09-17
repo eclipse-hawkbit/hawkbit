@@ -666,7 +666,7 @@ public class JpaControllerManagement implements ControllerManagement {
             Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
          */
         if (data.entrySet().stream()
-                .anyMatch(e -> !JpaControllerManagement.isAttributeEntryValid(e))) {
+                .anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
         }
 
