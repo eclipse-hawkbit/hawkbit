@@ -135,6 +135,23 @@ public class SecurityManagedConfiguration {
 
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter(
+            final DdiSecurityProperties ddiSecurityConfiguration,
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext, final AuthenticationManager authenticationManager)
+            throws Exception {
+        final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
+                ddiSecurityConfiguration.getRp().getCnHeader(),
+                ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement, tenantAware,
+                systemSecurityContext);
+        securityHeaderFilter.setAuthenticationManager(authenticationManager);
+        securityHeaderFilter.setCheckForPrincipalChanges(true);
+        securityHeaderFilter.setAuthenticationDetailsSource(new ControllerTenantAwareAuthenticationDetailsSource());
+        return securityHeaderFilter;
+    }
+
     /**
      * {@link WebSecurityConfigurer} for the hawkBit server DDI interface.
      */
@@ -156,18 +173,21 @@ public class SecurityManagedConfiguration {
         private final DdiSecurityProperties ddiSecurityConfiguration;
         private final SecurityProperties springSecurityProperties;
         private final SystemSecurityContext systemSecurityContext;
+        private final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter;
 
         @Autowired
         ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
                 final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
-                final SystemSecurityContext systemSecurityContext) {
+                final SystemSecurityContext systemSecurityContext,
+                final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
             this.springSecurityProperties = springSecurityProperties;
             this.systemSecurityContext = systemSecurityContext;
+            this.securityHeaderFilter = securityHeaderFilter;
         }
 
         /**
@@ -197,13 +217,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
-            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(),
-                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
-            securityHeaderFilter.setCheckForPrincipalChanges(true);
-            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
@@ -272,18 +286,21 @@ public class SecurityManagedConfiguration {
         private final DdiSecurityProperties ddiSecurityConfiguration;
         private final SecurityProperties springSecurityProperties;
         private final SystemSecurityContext systemSecurityContext;
+        private final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter;
 
         @Autowired
         ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
                 final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
-                final SystemSecurityContext systemSecurityContext) {
+                final SystemSecurityContext systemSecurityContext,
+                final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
             this.springSecurityProperties = springSecurityProperties;
             this.systemSecurityContext = systemSecurityContext;
+            this.securityHeaderFilter = securityHeaderFilter;
         }
 
         /**
@@ -313,13 +330,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
-            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(),
-                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
-            securityHeaderFilter.setCheckForPrincipalChanges(true);
-            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
