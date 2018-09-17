@@ -140,8 +140,8 @@ public class SecurityManagedConfiguration {
     public HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter(
             final DdiSecurityProperties ddiSecurityConfiguration,
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final SystemSecurityContext systemSecurityContext, final AuthenticationManager authenticationManager)
-            throws Exception {
+            final SystemSecurityContext systemSecurityContext, final AuthenticationManager authenticationManager){
+              
         final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
                 ddiSecurityConfiguration.getRp().getCnHeader(),
                 ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement, tenantAware,
@@ -193,7 +193,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI interface against to many
          * requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -306,7 +306,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI download interface against
          * to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -390,7 +390,7 @@ public class SecurityManagedConfiguration {
     /**
      * Filter to protect the hawkBit server system management interface against
      * to many requests.
-     * 
+     *
      * @param securityProperties
      *            for filter configuration
      *
@@ -484,7 +484,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -564,7 +564,7 @@ public class SecurityManagedConfiguration {
 
         /**
          * Filter to protect the hawkBit management UI against to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
