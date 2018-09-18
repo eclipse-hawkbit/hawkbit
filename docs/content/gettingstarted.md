@@ -6,10 +6,12 @@ weight: 20
 ## On Sandbox
 
 We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](/hawkbit/ui/), 
-[Management API](/hawkbit/apis/management_api/), and [Direct Device Integration API](/hawkbit/apis/ddi_api/).
+[Management API](/hawkbit/apis/management_api/), and [Direct Device Integration API](/hawkbit/apis/ddi_api/): &nbsp;
+**[<i class="fas fa-desktop">&nbsp;</i> https://hawkbit.eclipse.org](https://hawkbit.eclipse.org/UI/)**
 
 {{% warning %}}
-The hawkBit sandbox is currently unavailable. [More infos ...](/hawkbit/sandbox/sandboxunavailable/)
+The sandbox is a shared installation that will be reset from time to time. Therefore, it is not allowed to upload
+any personal data.
 {{% /warning %}}
 
 In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
