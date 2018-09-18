@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2018 Bosch Software Innovations GmbH and others.
 #
 # All rights reserved. This program and the accompanying materials
