@@ -43,15 +43,6 @@
          <resource>
             <directory>src/main/resources</directory>
          </resource>
-         <resource>
-            <directory>cf</directory>
-            <filtering>true</filtering>
-            <targetPath>${project.build.directory}</targetPath>
-            <includes>
-               <include>manifest.yml</include>
-               <include>manifest-simple.yml</include>
-            </includes>
-         </resource>
       </resources>
    </build>
 
@@ -73,7 +64,6 @@
          <groupId>com.microsoft.sqlserver</groupId>
          <artifactId>mssql-jdbc</artifactId>
       </dependency>
-
    </dependencies>
 
 </project>
