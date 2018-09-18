@@ -1,11 +1,11 @@
 hawkBit Sandbox
 ===
 
-We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](https://eclipse.org/hawkbit/ui/), 
-[Management API](https://eclipse.org/hawkbit/apis/management_api/), and [Direct Device Integration API](https://eclipse.org/hawkbit/apis/ddi_api/).
+## Try out the update server in our hawkBit sandbox
 
-* URL: [https://hawkbit.eclipse.org/](https://hawkbit.eclipse.org/)
-* Bugzilla: [Bugzilla ID: 535953](https://bugs.eclipse.org/bugs/show_bug.cgi?id=535953)
+- try out Management UI https://hawkbit.eclipse.org/UI (username: admin, passwd: admin)
+- try out Management API https://hawkbit.eclipse.org/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
+- try out DDI API https://hawkbit.eclipse.org/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
 
 
 ## Disclaimer

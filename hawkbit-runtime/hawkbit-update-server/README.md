@@ -2,12 +2,6 @@
 
 The hawkBit Update Server is a standalone spring-boot application with an embedded servlet container .
 
-## Try out the update server in our hawkBit sandbox on Bluemix
-
-- try out Management UI https://hawkbit.eclipse.org/UI (username: admin, passwd: admin)
-- try out Management API https://hawkbit.eclipse.org/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
-- try out DDI API https://hawkbit.eclipse.org/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
-
 ## On your own workstation
 
 ### Run
