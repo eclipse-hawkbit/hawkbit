@@ -49,16 +49,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
 import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Story;
 
 /**
  * Tests for covering the {@link MgmtRolloutResource}.
  */
-@Features("Component Tests - Management API")
-@Stories("Rollout Resource")
+@Feature("Component Tests - Management API")
+@Story("Rollout Resource")
 public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";

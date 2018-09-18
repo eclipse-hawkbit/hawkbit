@@ -21,15 +21,15 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test the remote entity events.
  */
-@Features("Component Tests - Repository")
-@Stories("Test ActionCreatedEvent and ActionUpdatedEvent")
+@Feature("Component Tests - Repository")
+@Story("Test ActionCreatedEvent and ActionUpdatedEvent")
 public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
 
     @Test

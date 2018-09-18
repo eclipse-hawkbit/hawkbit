@@ -33,17 +33,17 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.google.common.collect.Maps;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
 import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Story;
 
 /**
  * Test config data from the controller.
  */
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Direct Device Integration API")
-@Stories("Config Data Resource")
+@Feature("Component Tests - Direct Device Integration API")
+@Story("Config Data Resource")
 public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test

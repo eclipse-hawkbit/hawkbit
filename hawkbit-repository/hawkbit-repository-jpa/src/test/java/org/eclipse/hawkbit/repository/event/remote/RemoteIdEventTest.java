@@ -16,15 +16,15 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test the remote entity events.
  */
-@Features("Component Tests - Repository")
-@Stories("Entity Id Events")
+@Feature("Component Tests - Repository")
+@Story("Entity Id Events")
 public class RemoteIdEventTest extends AbstractRemoteEventTest {
 
     private static final long ENTITY_ID = 1L;

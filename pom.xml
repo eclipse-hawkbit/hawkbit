@@ -802,6 +802,12 @@
             <scope>test</scope>
          </dependency>
          <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit4</artifactId>
+            <version>2.7.0</version>
+            <scope>test</scope>
+	     </dependency>
+         <dependency>
             <groupId>pl.pragmatists</groupId>
             <artifactId>JUnitParams</artifactId>
             <version>${pl.pragmatists.version}</version>

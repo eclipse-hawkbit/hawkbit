@@ -27,17 +27,17 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
 import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Story;
 
 /**
  * Test class for {@link AutoAssignChecker}.
  *
  */
-@Features("Component Tests - Repository")
-@Stories("Auto assign checker")
+@Feature("Component Tests - Repository")
+@Story("Auto assign checker")
 public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Autowired

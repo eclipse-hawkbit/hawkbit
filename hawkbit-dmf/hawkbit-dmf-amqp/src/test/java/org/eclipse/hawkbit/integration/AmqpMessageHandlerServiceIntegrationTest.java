@@ -50,13 +50,13 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
 import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Device Management Federation API")
-@Stories("Amqp Message Handler Service")
+@Feature("Component Tests - Device Management Federation API")
+@Story("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
     private static final String CORRELATION_ID = UUID.randomUUID().toString();
     private static final String TARGET_PREFIX = "Dmf_hand_";
