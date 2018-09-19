@@ -398,6 +398,12 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${maven.surefire.plugin.version}</version>
                <configuration>
+                  <systemProperties>
+	                 <property>
+                        <name>allure.results.directory</name>
+                        <value>${project.build.directory}/allure-results</value>
+	                 </property>
+	              </systemProperties>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
