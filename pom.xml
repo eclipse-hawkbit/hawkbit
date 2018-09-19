@@ -174,7 +174,7 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
-      <allure.version>1.5.4</allure.version>
+      <allure.version>2.7.0</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.6.5</powermock.version>
@@ -406,7 +406,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                   <includes>
@@ -429,7 +429,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                </configuration>
@@ -796,17 +796,11 @@
             <version>${json.version}</version>
          </dependency>
          <dependency>
-            <groupId>ru.yandex.qatools.allure</groupId>
-            <artifactId>allure-junit-adaptor</artifactId>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit4</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>
-         <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit4</artifactId>
-            <version>2.7.0</version>
-            <scope>test</scope>
-	     </dependency>
          <dependency>
             <groupId>pl.pragmatists</groupId>
             <artifactId>JUnitParams</artifactId>

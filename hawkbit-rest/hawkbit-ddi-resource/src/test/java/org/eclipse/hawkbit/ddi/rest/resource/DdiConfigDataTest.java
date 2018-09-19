@@ -35,7 +35,7 @@ import com.google.common.collect.Maps;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
-import ru.yandex.qatools.allure.annotations.Step;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 
 /**
