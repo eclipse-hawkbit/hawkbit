@@ -25,7 +25,7 @@ Copy the files to the respective location on the VM.
   |      +-docker-compose-stack.yml  
   +- scripts
      +-intialize-cronjobs.sh
-     +-weekly-sandbox-cleanup.sh 
+     +-sandbox-cleanup.sh 
 ```
 
 **2. Initialize Cronjobs**

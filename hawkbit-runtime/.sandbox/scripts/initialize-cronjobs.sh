@@ -11,7 +11,7 @@ SCRIPT_DIR="/.sandbox/scripts"
 LOGFILE_DIR="/.sandbox/logs"
 
 #                    m  h dom mon dow user  command
-SANDBOX_CLEANUP_JOB="0  0    * * 0   root  ${SCRIPT_DIR}/weekly-sandbox-cleanup.sh >> ${LOGFILE_DIR}/\$(date +\%F)-hawkbit 2>&1"
+SANDBOX_CLEANUP_JOB="0  0    * * 0   root  ${SCRIPT_DIR}/sandbox-cleanup.sh >> ${LOGFILE_DIR}/\$(date +\%F)-hawkbit 2>&1"
 LOGFILE_CLEANUP_JOB="0  0    0 * *   root  find ${LOGFILE_DIR}* -mtime +182 -exec rm {} \; >/dev/null 2>&1"
 
 CRONTAB_FILE="/etc/crontab"
