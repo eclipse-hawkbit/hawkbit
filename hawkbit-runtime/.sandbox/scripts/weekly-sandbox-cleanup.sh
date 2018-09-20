@@ -31,7 +31,7 @@ echo "+-- Verify Docker Volumes:"
 docker volume ls
 echo "|"
 echo "+-- Restart Docker Stack:"
-docker stack deploy -c /stacks/sandbox/docker-compose-stack.yml $STACK_NAME
+docker stack deploy -c /.sandbox/stacks/sandbox/docker-compose-stack.yml $STACK_NAME
 echo "|"
 # Value is based on trial and error
 echo "+-- Wait for hawkBit to start (320s):"
@@ -41,6 +41,8 @@ echo "|"
 echo "+-- Restart Device Simulator:"
 docker service update --force hawkbit_simulator
 echo "|"
+# Images used by a container are not deleted. Therefore, we run this after the stacks
+# are started. Only unused images will be deleted.
 echo "+-- Clean up Docker:"
 docker system prune --force
 echo "+------------------------------------------------------------------------------"

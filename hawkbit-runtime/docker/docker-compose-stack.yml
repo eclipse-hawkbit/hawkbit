@@ -14,7 +14,7 @@ services:
   # hawkBit service
   # ---------------------
   hawkbit:
-    image: "hawkbit/hawkbit-update-server:0.2.1-mysql"
+    image: "hawkbit/hawkbit-update-server:0.2.2-mysql"
     networks:
     - hawknet
     ports:
@@ -23,7 +23,7 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-    - 'SPRING_PROFILES_ACTIVE=amqp,sandbox'
+    - 'SPRING_PROFILES_ACTIVE=cloudsandbox'
     - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
     - 'SPRING_RABBITMQ_HOST=rabbitmq'
     - 'SPRING_RABBITMQ_USERNAME=guest'

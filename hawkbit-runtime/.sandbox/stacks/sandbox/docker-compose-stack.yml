@@ -33,7 +33,7 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-    - 'SPRING_PROFILES_ACTIVE=cloudsandbox,amqp'
+    - 'SPRING_PROFILES_ACTIVE=cloudsandbox'
     - 'SPRING_RABBITMQ_HOST=rabbitmq'
     - 'SPRING_RABBITMQ_USERNAME=guest'
     - 'SPRING_RABBITMQ_PASSWORD=guest'

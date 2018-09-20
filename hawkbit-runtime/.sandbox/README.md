@@ -3,15 +3,9 @@ hawkBit Sandbox
 
 ## Try out the update server in our hawkBit sandbox
 
-- try out Management UI https://hawkbit.eclipse.org/UI (username: demo, passwd: demo)
+- try out Management UI https://hawkbit.eclipse.org/ (username: demo, passwd: demo)
 - try out Management API https://hawkbit.eclipse.org/rest/v1/targets (don't forget basic auth header; username: demo, passwd: demo)
 - try out DDI API https://hawkbit.eclipse.org/DEFAULT/controller/v1/MYTESTDEVICE 
-
-
-## Disclaimer
-
-The sandbox is a shared installation that will be reset from time to time. Therefore, it is not allowed to upload
-any personal data. 
 
 
 ## Sandbox Setup
@@ -22,24 +16,26 @@ Copy the files to the respective location on the VM.
 
 ```
 /
-+-stacks
-|  +-sandbox
-|  |   +-docker-compose-stack.yml
-|  +-proxy
-|      +-docker-compose-stack.yml  
-+- opt
-   +-crontab
-       +-hawkbit-sandbox-cleanup-task.sh      
++.sandbox
+  |
+  +-stacks
+  |  +-sandbox
+  |  |   +-docker-compose-stack.yml
+  |  +-proxy
+  |      +-docker-compose-stack.yml  
+  +- scripts
+     +-intialize-cronjobs.sh
+     +-weekly-sandbox-cleanup.sh 
 ```
 
-**2. Weekly Reset**
+**2. Initialize Cronjobs**
 
 Reset the Sandbox once a week with a cron-job and log its output.
 
 ```
-$ sudo crontab -e
-0 0 * * 0 /opt/crontab/hawkbit-sandbox-cleanup-task.sh >> /var/log/hawkbit.log 2>&1
+$ sudo /.sandbox/scripts/initialize-cronjobs.sh
 ```
+
 
 **3. Nginx Reverse Proxy**
 
@@ -47,8 +43,7 @@ Start the stack for the Nginx reverse proxy with Let's Encrypt support. Thanks t
  and instructions with his [Docker-Letsencrypt-Nginx-Companion](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion).
 
 ```
-$ cd /stacks/proxy/
-$ docker stack deploy -c docker-compose-stack.yml proxy
+$ docker stack deploy -c /.sandbox/stacks/sandbox/docker-compose-stack.yml proxy
 ```
 
 **4. hawkBit**
@@ -56,6 +51,5 @@ $ docker stack deploy -c docker-compose-stack.yml proxy
 Start the hawkBit stack.
 
 ```
-$ cd /stacks/sandbox/
-$ docker stack deploy -c docker-compose-stack.yml hawkbit
+$ docker stack deploy -c /.sandbox/stacks/sandbox/docker-compose-stack.yml hawkbit
 ```
