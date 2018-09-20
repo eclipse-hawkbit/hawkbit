@@ -80,8 +80,15 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private static boolean invalidContent(final Throwable cause) {
-        return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAddressException
-                || cause instanceof MessageConversionException || cause instanceof MessageHandlingException
-                || cause instanceof InvalidTargetAttributeException;
+        return isRepositoryException(cause) || isMessageException(cause);
+    }
+
+    private static boolean isRepositoryException(final Throwable cause) {
+        return cause instanceof ConstraintViolationException || cause instanceof InvalidTargetAttributeException;
+    }
+
+    private static boolean isMessageException(final Throwable cause) {
+        return cause instanceof InvalidTargetAddressException || cause instanceof MessageConversionException
+                || cause instanceof MessageHandlingException;
     }
 }
