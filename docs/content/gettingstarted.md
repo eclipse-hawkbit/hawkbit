@@ -21,22 +21,43 @@ In addition, the following vendors offer free trial accounts for their Eclipse h
 
 ## From Docker Image
 
-### Update server only
+### Overview
 
-```sh
-$ docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
+| Service / Container | A | B | C |
+|---|---|---|---|
+| hawkBit Update Server |  &#10003; | &#10003; | &#10003; | 
+| hawkBit Device Simulator |   |  | &#10003; | 
+| MySQL |  | &#10003; | &#10003; | 
+| RabbitMQ |  | &#10003; | &#10003; | 
+
+### A: Run hawkBit Update Server as Docker Container
+
+Start the hawkBit Update Server as a single container
+
+```bash
+$ docker run -p 8080:8080 hawkbit/hawkbit-update-server:latest
 ```
 
-### Updates server + MySql + RabbitMq
+### B: Run hawkBit Update Server with services as Docker Compose
 
-```sh
+Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
+
+```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/hawkbit-update-server/docker
 $ docker-compose up -d
 ```
-{{% note %}}
-Requires Docker-Compose installed.
-{{% /note %}}
+
+### C: Run hawkBit Update Server with services as Docker Stack
+
+Start the hawkBit Update Server and Device Simulator together with an MySQL and RabbitMQ instance as services within a swarm
+
+```bash
+$ git clone https://github.com/eclipse/hawkbit.git
+$ cd hawkbit/hawkbit-runtime/hawkbit-update-server/docker
+$ docker stack init
+$ docker stack deploy -c docker-compose-stack.yml hawkbit
+```
 
 ## From Sources
 
