@@ -34,8 +34,8 @@ echo "+-- Restart Docker Stack:"
 docker stack deploy -c /.sandbox/stacks/sandbox/docker-compose-stack.yml $STACK_NAME
 echo "|"
 # Value is based on trial and error
-echo "+-- Wait for hawkBit to start (320s):"
-sleep 320
+echo "+-- Wait for hawkBit to start (160s):"
+sleep 160
 echo "|"
 # Device Simulator has to be restarted, since hawkBit takes too long to start
 echo "+-- Restart Device Simulator:"
