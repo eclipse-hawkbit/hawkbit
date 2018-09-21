@@ -13,7 +13,7 @@ weight: 100
 
 **Release Date:** Friday, July 6, 2018 <br />
 [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.2.1) / 
-[Release](https://github.com/eclipse/hawkbit/milestone/?closed=1)
+[Release](https://github.com/eclipse/hawkbit/milestone/9?closed=1)
 
 
 ## 0.2.0
