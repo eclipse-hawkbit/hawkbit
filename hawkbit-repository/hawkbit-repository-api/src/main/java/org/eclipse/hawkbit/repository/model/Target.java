@@ -36,6 +36,16 @@ public interface Target extends NamedEntity {
     int ADDRESS_MAX_SIZE = 512;
 
     /**
+     * Maximum length of key of controller attribute
+     */
+    int CONTROLLER_ATTRIBUTE_KEY_SIZE = 32;
+
+    /**
+     * Maximum length of value of controller attribute
+     */
+    int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 128;
+
+    /**
      * @return business identifier of the {@link Target}
      */
     String getControllerId();

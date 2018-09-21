@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -334,7 +335,9 @@ public interface ControllerManagement {
      * @throws EntityNotFoundException
      *             if target that has to be updated could not be found
      * @throws QuotaExceededException
-     *             if maximum number of attribzes per target is exceeded
+     *             if maximum number of attributes per target is exceeded
+     * @throws InvalidTargetAttributeException
+     *             if attributes violate constraints
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,
