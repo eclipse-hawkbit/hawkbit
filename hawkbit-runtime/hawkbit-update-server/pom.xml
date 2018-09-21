@@ -31,7 +31,6 @@
                   </goals>
                   <configuration>
                      <outputDirectory>${baseDir}</outputDirectory>
-                     <addResources>false</addResources>
                      <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
                      <layout>JAR</layout>
                   </configuration>
