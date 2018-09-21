@@ -44,7 +44,7 @@ Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as 
 
 ```bash
 $ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit/hawkbit-runtime/hawkbit-update-server/docker
+$ cd hawkbit/hawkbit-runtime/docker
 $ docker-compose up -d
 ```
 
@@ -54,7 +54,7 @@ Start the hawkBit Update Server and Device Simulator together with an MySQL and 
 
 ```bash
 $ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit/hawkbit-runtime/hawkbit-update-server/docker
+$ cd hawkbit/hawkbit-runtime/docker
 $ docker stack init
 $ docker stack deploy -c docker-compose-stack.yml hawkbit
 ```
