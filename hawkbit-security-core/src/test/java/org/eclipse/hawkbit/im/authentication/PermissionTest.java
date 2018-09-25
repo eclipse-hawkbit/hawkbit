@@ -28,17 +28,16 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Permission Test")
 public final class PermissionTest {
 
-    @Test
-    @Description("Verify the get permission function")
-    public void testGetPermissions() {
-        final int allPermission = 18;
-        final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
-        final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
-        assertThat(allAuthorities).hasSize(allPermission);
-        // times 2 because we add also all authorities as prefix 'ROLE_';
-        assertThat(allAuthoritiesList).hasSize(allPermission * 2);
-        assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
-                .containsAll(allAuthorities);
+	@Test
+	@Description("Verify the get permission function")
+	public void testGetPermissions() {
+		final int allPermission = 18;
+		final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
+		final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
+		assertThat(allAuthorities).hasSize(allPermission);
+		assertThat(allAuthoritiesList).hasSize(allPermission);
+		assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsAll(allAuthorities);
 
-    }
+	}
 }
