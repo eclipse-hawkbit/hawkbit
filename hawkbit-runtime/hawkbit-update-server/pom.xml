@@ -31,7 +31,6 @@
                   </goals>
                   <configuration>
                      <outputDirectory>${baseDir}</outputDirectory>
-                     <addResources>false</addResources>
                      <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
                      <layout>JAR</layout>
                   </configuration>
@@ -42,15 +41,6 @@
       <resources>
          <resource>
             <directory>src/main/resources</directory>
-         </resource>
-         <resource>
-            <directory>cf</directory>
-            <filtering>true</filtering>
-            <targetPath>${project.build.directory}</targetPath>
-            <includes>
-               <include>manifest.yml</include>
-               <include>manifest-simple.yml</include>
-            </includes>
          </resource>
       </resources>
    </build>

@@ -1,6 +1,6 @@
-FROM hawkbit/hawkbit-update-server:0.2.1
+FROM hawkbit/hawkbit-update-server:0.2.2
 
-ENV MARIADB_DRIVER_VERSION=2.2.4
+ENV MARIADB_DRIVER_VERSION=2.2.6
 
 COPY KEYS .
 
@@ -12,4 +12,4 @@ RUN set -x \
     && gpg --verify --batch $JAVA_HOME/lib/ext/mariadb-java-client.jar.asc $JAVA_HOME/lib/ext/mariadb-java-client.jar \
     && apk del build-dependencies
 
-ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","--spring.profiles.active=mysql","-Xmx768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
+ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","--spring.profiles.active=mysql","-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]

@@ -75,6 +75,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, HttpStatus.GONE);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_ATTRIBUTES_INVALID, HttpStatus.BAD_REQUEST);
 
     }
 
@@ -200,6 +201,12 @@ public class ResponseExceptionHandler {
 
         final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
         final Throwable responseCause = Iterables.getLast(throwables);
+
+        if (responseCause.getMessage().isEmpty()) {
+            LOG.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(),
+                    ex.getStackTrace());
+        }
+
         final ExceptionInfo response = createExceptionInfo(new MultiPartFileUploadException(responseCause));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

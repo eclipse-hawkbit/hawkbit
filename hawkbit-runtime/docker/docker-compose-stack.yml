@@ -1,0 +1,93 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+version: '3.7'
+
+services:
+
+  # ---------------------
+  # hawkBit service
+  # ---------------------
+  hawkbit:
+    image: "hawkbit/hawkbit-update-server:0.2.2-mysql"
+    networks:
+    - hawknet
+    ports:
+    - "8080:8080"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+    - 'SPRING_PROFILES_ACTIVE=cloudsandbox'
+    - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
+    - 'SPRING_RABBITMQ_HOST=rabbitmq'
+    - 'SPRING_RABBITMQ_USERNAME=guest'
+    - 'SPRING_RABBITMQ_PASSWORD=guest'
+    - 'SPRING_DATASOURCE_USERNAME=root'
+
+  # ---------------------
+  # hawkBit simulator
+  # ---------------------
+  simulator:
+    image: "hawkbit/hawkbit-device-simulator:latest"
+    networks:
+    - hawknet
+    ports:
+    - "8083:8083"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+    - 'SPRING_RABBITMQ_VIRTUALHOST=/'
+    - 'SPRING_RABBITMQ_HOST=rabbitmq'
+    - 'SPRING_RABBITMQ_PORT=5672'
+    - 'SPRING_RABBITMQ_USERNAME=guest'
+    - 'SPRING_RABBITMQ_PASSWORD=guest'
+    - 'SPRING_RABBITMQ_SSL_ENABLED=false'
+    - 'HAWKBIT_DEVICES_SIMULATOR_AMQP_RECEIVERCONNECTORQUEUEFROMSP=sp_direct_queue'
+    - 'HAWKBIT_DEVICES_SIMULATOR_AMQP_SENDERFORSPEXCHANGE=sp.direct.exchange'
+    - 'HAWKBIT_DEVICES_SIMULATOR_AMQP_DEADLETTERQUEUE=sp_direct_queue_deadletter_ttl'
+    - 'HAWKBIT_DEVICES_SIMULATOR_AMQP_DEADLETTEREXCHANGE=sp.direct.exchange.deadletter'
+
+  # ---------------------
+  # RabbitMQ service
+  # ---------------------
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    networks:
+    - hawknet
+    ports:
+    - "15672:15672"
+    - "5672:5672"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      RABBITMQ_DEFAULT_VHOST: "/"
+
+  # ---------------------
+  # MySQL service
+  # ---------------------
+  mysql:
+    image: "mysql:5.7"
+    networks:
+    - hawknet
+    ports:
+    - "3306:3306"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      MYSQL_DATABASE: "hawkbit"
+      MYSQL_USER: "root"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
+
+networks:
+  hawknet:
+    driver: overlay

@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -143,8 +144,9 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void rootRsPlugAndPlay() throws Exception {
 
         final long current = System.currentTimeMillis();
+
         mvc.perform(get("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
         assertThat(targetManagement.getByControllerID("4711").get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
@@ -178,7 +180,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                    .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                     .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
             return null;
         });
@@ -196,7 +198,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00"))).andReturn().getResponse()
                 .getHeader("ETag");
 
@@ -270,7 +272,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
 
         assertThat(targetManagement.getByControllerID("4711").get().getLastTargetQuery())

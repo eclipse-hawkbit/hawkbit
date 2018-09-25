@@ -287,7 +287,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             } catch (final EntityNotFoundException | EntityReadOnlyException e) {
                 LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
                 uiNotification.displayWarning(
-                        "Rollout with name " + rolloutName.getValue() + " was deleted. Update is not poosible");
+                        "Rollout with name " + rolloutName.getValue() + " was deleted. Update is not possible");
                 eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
                 return;
             }

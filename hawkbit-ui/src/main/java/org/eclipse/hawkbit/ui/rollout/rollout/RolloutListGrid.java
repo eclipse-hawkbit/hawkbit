@@ -556,7 +556,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private void approveRollout(final Long rolloutId) {
         final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow(rolloutId, false);
-        addTargetWindow.setCaption(i18n.getMessage("caption.approve.rollout"));
+        addTargetWindow.setCaption(i18n.getMessage("caption.rollout.approve"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
     }

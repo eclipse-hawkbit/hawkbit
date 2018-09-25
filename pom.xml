@@ -126,7 +126,7 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>2.0.4.RELEASE</spring.boot.version>
+      <spring.boot.version>2.0.3.RELEASE</spring.boot.version>
       <spring.cloud.version>Finchley.SR1</spring.cloud.version>      
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
@@ -328,6 +328,7 @@
                      <exclude>.sonar</exclude>
                      <exclude>**/Dockerfile</exclude>
                      <exclude>**/docker-compose.yml</exclude>
+                     <exclude>**/docker-compose-stack.yml</exclude>
                      <exclude>**/.sonar/**</exclude>
                      <exclude>docs/content/**</exclude>
                      <exclude>docs/layouts/**</exclude>

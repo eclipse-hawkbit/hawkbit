@@ -134,6 +134,23 @@ public class SecurityManagedConfiguration {
 
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter(
+            final DdiSecurityProperties ddiSecurityConfiguration,
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext, final AuthenticationManager authenticationManager){
+              
+        final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
+                ddiSecurityConfiguration.getRp().getCnHeader(),
+                ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement, tenantAware,
+                systemSecurityContext);
+        securityHeaderFilter.setAuthenticationManager(authenticationManager);
+        securityHeaderFilter.setCheckForPrincipalChanges(true);
+        securityHeaderFilter.setAuthenticationDetailsSource(new ControllerTenantAwareAuthenticationDetailsSource());
+        return securityHeaderFilter;
+    }
+
     /**
      * {@link WebSecurityConfigurer} for the hawkBit server DDI interface.
      */
@@ -155,24 +172,27 @@ public class SecurityManagedConfiguration {
         private final DdiSecurityProperties ddiSecurityConfiguration;
         private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
+        private final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter;
 
         @Autowired
         ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
                 final DdiSecurityProperties ddiSecurityConfiguration,
-                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
+                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext,
+                final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
             this.securityProperties = securityProperties;
             this.systemSecurityContext = systemSecurityContext;
+            this.securityHeaderFilter = securityHeaderFilter;
         }
 
         /**
          * Filter to protect the hawkBit server DDI interface against to many
          * requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -196,13 +216,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
-            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(),
-                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
-            securityHeaderFilter.setCheckForPrincipalChanges(true);
-            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
@@ -271,24 +285,27 @@ public class SecurityManagedConfiguration {
         private final DdiSecurityProperties ddiSecurityConfiguration;
         private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
+        private final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter;
 
         @Autowired
         ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
                 final DdiSecurityProperties ddiSecurityConfiguration,
-                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
+                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext,
+                final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
             this.securityProperties = securityProperties;
             this.systemSecurityContext = systemSecurityContext;
+            this.securityHeaderFilter = securityHeaderFilter;
         }
 
         /**
          * Filter to protect the hawkBit server DDI download interface against
          * to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -312,13 +329,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
-            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(),
-                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
-            securityHeaderFilter.setCheckForPrincipalChanges(true);
-            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
@@ -378,7 +389,7 @@ public class SecurityManagedConfiguration {
     /**
      * Filter to protect the hawkBit server system management interface against
      * to many requests.
-     * 
+     *
      * @param securityProperties
      *            for filter configuration
      *
@@ -472,7 +483,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -552,7 +563,7 @@ public class SecurityManagedConfiguration {
 
         /**
          * Filter to protect the hawkBit management UI against to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
