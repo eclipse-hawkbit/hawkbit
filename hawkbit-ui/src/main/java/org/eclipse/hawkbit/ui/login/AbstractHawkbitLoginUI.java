@@ -297,7 +297,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         signIn.addStyleName(ValoTheme.BUTTON_PRIMARY + " " + ValoTheme.BUTTON_SMALL + " " + "login-button");
         signIn.setClickShortcut(KeyCode.ENTER);
         signIn.focus();
-        signIn.setId("login-signIn");
+        signIn.setId("login-signin");
     }
 
     private void buildPasswordField() {
