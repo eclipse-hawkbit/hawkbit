@@ -2,12 +2,6 @@
 
 The hawkBit Update Server is a standalone spring-boot application with an embedded servlet container .
 
-## Try out the update server in our hawkBit sandbox on Bluemix
-
-- try out Management UI https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/UI (username: admin, passwd: admin)
-- try out Management API https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
-- try out DDI API https://hawkbit-demo-sandbox.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
-
 ## On your own workstation
 
 ### Run
@@ -28,14 +22,6 @@ run org.eclipse.hawkbit.app.Start
 
 The Management UI can be accessed via http://localhost:8080/UI
 The Management API can be accessed via http://localhost:8080/rest/v1
-
-## Deploy example app to Cloud Foundry
-
-- Go to ```target``` subfolder.
-- Select one of the two manifests
-  - **manifest-simple.yml** for a standalone hawkBit installation with embedded H2.
-  - **manifest.yml**  for a standalone hawkBit installation with embedded H2 and RabbitMQ service binding for DMF integration (note: this manifest is used for the sandbox above).
-- Run ```cf push``` against you cloud foundry environment.
 
 ## Enable Clustering (experimental)
 

@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -95,6 +96,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -657,6 +661,15 @@ public class JpaControllerManagement implements ControllerManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
             final UpdateMode mode) {
+
+        /*
+            Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
+         */
+        if (data.entrySet().stream()
+                .anyMatch(e -> !isAttributeEntryValid(e))) {
+            throw new InvalidTargetAttributeException();
+        }
+
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
@@ -689,15 +702,27 @@ public class JpaControllerManagement implements ControllerManagement {
         return targetRepository.save(target);
     }
 
+    private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {
+        return isAttributeKeyValid(e.getKey()) && isAttributeValueValid(e.getValue());
+    }
+
+    private static boolean isAttributeKeyValid(final String key) {
+        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_KEY_SIZE;
+    }
+
+    private static boolean isAttributeValueValid(final String value) {
+        return value == null || value.length() <= CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+    }
+
     private static void copy(final Map<String, String> src, final Map<String, String> trg) {
         if (src == null || src.isEmpty()) {
             return;
         }
-        src.entrySet().forEach(e -> {
-            if (e.getValue() != null) {
-                trg.put(e.getKey(), e.getValue());
+        src.forEach((key, value) -> {
+            if (value != null) {
+                trg.put(key, value);
             } else {
-                trg.remove(e.getKey());
+                trg.remove(key);
             }
         });
     }

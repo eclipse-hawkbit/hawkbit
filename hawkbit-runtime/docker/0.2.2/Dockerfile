@@ -1,8 +1,6 @@
-FROM openjdk:8u151-jre-alpine
+FROM openjdk:8u171-jre-alpine
 
-MAINTAINER Kai Zimmermann <kai.zimmermann@bosch-si.com>
-
-ENV HAWKBIT_VERSION=0.2.0M9 \
+ENV HAWKBIT_VERSION=0.2.2 \
     HAWKBIT_HOME=/opt/hawkbit
 
 EXPOSE 8080
@@ -22,4 +20,4 @@ RUN set -x \
 VOLUME "$HAWKBIT_HOME/data"
 
 WORKDIR $HAWKBIT_HOME
-ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","-Xmx768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
+ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
