@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import javax.servlet.MultipartConfigElement;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -179,39 +178,29 @@ public class UploadDropAreaLayout extends AbstractComponent {
         private void uploadFilesForSoftwareModule(final Html5File[] files, final Long softwareModuleId) {
             final SoftwareModule softwareModule = softwareManagement.get(softwareModuleId).orElse(null);
 
-            boolean isDirectory = false;
             boolean isDuplicate = false;
 
             for (final Html5File file : files) {
 
-                isDirectory = isDirectory(file);
                 isDuplicate = artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule);
 
-                if (!isDirectory && !isDuplicate) {
+                if (!isDuplicate) {
                     file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(),
                             multipartConfigElement.getMaxFileSize(), file.getType(), softwareModule, artifactManagement,
                             i18n));
                 }
             }
-            if (isDirectory && isDuplicate) {
-                uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles") + "<br>"
-                        + i18n.getMessage("message.no.directory.upload"));
-            } else if (isDirectory) {
-                uiNotification.displayValidationError(i18n.getMessage("message.no.directory.upload"));
-            } else if (isDuplicate) {
-                uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles"));
+            if (isDuplicate) {
+                uiNotification.displayValidationError(
+                        i18n.getMessage("message.no.duplicateFiles"));
             }
-        }
-
-        private boolean isDirectory(final Html5File file) {
-            return StringUtils.isBlank(file.getType()) && file.getFileSize() % 4096 == 0;
         }
 
         private boolean validate(final DragAndDropEvent event) {
             // check if drop is valid.If valid ,check if software module is
             // selected.
             if (!isFilesDropped(event)) {
-                uiNotification.displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
+                uiNotification.displayValidationError(i18n.getMessage("message.drop.onlyFiles"));
                 return false;
             }
             return validateSoftwareModuleSelection();
