@@ -8,16 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -30,10 +29,11 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.google.common.io.ByteStreams;
 
 /**
  * Abstract base class for transferring files from the browser to the
@@ -49,7 +49,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private volatile boolean uploadInterrupted;
 
-    private volatile String tempFilePath;
+    private volatile boolean uploadFailed;
 
     private volatile String failureReason;
 
@@ -99,6 +99,16 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         return i18n;
     }
 
+    protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
+            final String mimeType) {
+        final TransferArtifactToRepositoryRunnable runnable = new TransferArtifactToRepositoryRunnable(inputStream,
+                fileUploadId, mimeType);
+        final SecurityContext context = SecurityContextHolder.getContext();
+        final DelegatingSecurityContextRunnable runnableWithSecurityContext = new DelegatingSecurityContextRunnable(
+                runnable, context);
+        new Thread(runnableWithSecurityContext).start();
+    }
+
     private void setFailureReason(final String failureReason) {
         this.failureReason = failureReason;
     }
@@ -131,22 +141,13 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
-            final long fileSize, final String tempFilePath) {
+            final long fileSize) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Upload in progress for file {} - {}%", fileUploadId,
                     String.format("%.0f", (double) bytesReceived / (double) fileSize * 100));
         }
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
-                FileUploadStatus.UPLOAD_IN_PROGRESS, bytesReceived, fileSize, tempFilePath);
-        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
-    }
-
-    private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize,
-            final String tempFilePath) {
-        LOG.info("Upload succeeded for file {}", fileUploadId);
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
-                FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize, tempFilePath);
+                FileUploadStatus.UPLOAD_IN_PROGRESS, bytesReceived, fileSize);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, fileUploadProgress);
     }
@@ -162,6 +163,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             final Exception uploadException) {
         LOG.info("Upload failed for file {} due to {}", fileUploadId,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
+        uploadFailed = true;
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
@@ -180,59 +182,73 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         }
     }
 
-    protected OutputStream createOutputStreamForTempFile() throws IOException {
+    private final class TransferArtifactToRepositoryRunnable implements Runnable {
+        private final InputStream inputStream;
+        private final FileUploadId fileUploadId;
+        private final String mimeType;
 
-        if (isUploadInterrupted()) {
-            return ByteStreams.nullOutputStream();
+        public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
+                final String mimeType) {
+            this.inputStream = inputStream;
+            this.fileUploadId = fileUploadId;
+            this.mimeType = mimeType;
         }
 
-        final File tempFile = File.createTempFile("spUiArtifactUpload", null);
-
-        // we return the outputstream so we cannot close it here
-        @SuppressWarnings("squid:S2095")
-        final OutputStream out = new FileOutputStream(tempFile);
-
-        tempFilePath = tempFile.getAbsolutePath();
-
-        return out;
-    }
-
-    protected String getTempFilePath() {
-        return tempFilePath;
-    }
-
-    // Exception squid:S3655 - Optional access is checked in
-    // checkIfArtifactDetailsDispalyed subroutine
-    @SuppressWarnings("squid:S3655")
-    protected void transferArtifactToRepository(final FileUploadId fileUploadId, final long fileSize,
-            final String mimeType, final String tempFilePath) {
-
-        final File newFile = new File(tempFilePath);
-
-        final String filename = fileUploadId.getFilename();
-        LOG.info("Transfering tempfile {} - {} to repository", filename, tempFilePath);
-        try (FileInputStream fis = new FileInputStream(newFile)) {
-
-            artifactManagement.create(fis, fileUploadId.getSoftwareModuleId(), filename, null, null, true, mimeType,
-                    fileSize);
-
-            publishUploadSucceeded(fileUploadId, fileSize, tempFilePath);
-
-            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
-                    fileUploadId.getSoftwareModuleId()));
-
-        } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException
-                | IOException e) {
-            publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
-            LOG.error("Failed to transfer file to repository", e);
-        } finally {
-            LOG.debug("Deleting tempfile {} - {}", filename, newFile.getAbsolutePath());
-            if (newFile.exists() && !newFile.delete()) {
-                LOG.error("Could not delete temporary file: {}", newFile.getAbsolutePath());
+        @Override
+        public void run() {
+            try {
+                streamToRepository();
+            } catch (final ArtifactUploadFailedException e) {
+                publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
+                LOG.error("Failed to transfer file to repository", e);
             }
         }
 
-        publishUploadFinishedEvent(fileUploadId);
+        private void streamToRepository() {
+            if (fileUploadId == null) {
+                throw new ArtifactUploadFailedException();
+            }
+
+            final String filename = fileUploadId.getFilename();
+            LOG.info("Transfering file {} directly to repository", filename);
+            final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
+            if (isUploadInterrupted() || uploadFailed) {
+                handleUploadFailure(artifact);
+                return;
+            }
+            final long fileSize = artifact.getSize();
+            publishUploadSucceeded(fileUploadId, fileSize);
+            publishUploadFinishedEvent(fileUploadId);
+            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
+                        fileUploadId.getSoftwareModuleId()));
+        }
+
+        private Optional<Artifact> uploadArtifact(final String filename) {
+            try {
+                return Optional.ofNullable(artifactManagement.create(inputStream, fileUploadId.getSoftwareModuleId(),
+                        filename, null, null, true, mimeType, -1));
+            } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
+                LOG.error("Failed to transfer file to repository", e);
+                return Optional.empty();
+            }
+        }
+
+        private void handleUploadFailure(final Artifact artifact) {
+            try {
+                artifactManagement.delete(artifact.getId());
+            } catch (final ArtifactDeleteFailedException | EntityNotFoundException e) {
+                LOG.error("Failed to delete artifact from repository after upload was interrupted", e);
+            }
+        }
+
+        private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize) {
+            LOG.info("Upload succeeded for file {}", fileUploadId);
+            final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                    FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize);
+            artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+            eventBus.publish(this, fileUploadProgress);
+        }
+
     }
 
 }
