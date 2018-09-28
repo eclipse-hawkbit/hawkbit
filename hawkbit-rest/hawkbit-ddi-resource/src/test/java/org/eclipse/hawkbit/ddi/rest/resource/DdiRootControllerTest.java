@@ -33,6 +33,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus.ExecutionStatus;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -58,6 +59,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -369,51 +371,64 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Controller sends attribute update request after device successfully closed software update.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = TargetPollEvent.class, count = 4),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 6), @Expect(type = TargetPollEvent.class, count = 4),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     public void testAttributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
         final String targetControllerId = "922";
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
         Target savedTarget = testdataFactory.createTarget(targetControllerId);
         final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeVlue");
         JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName());
-
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$._links.configData.href").isNotEmpty()).andExpect(status().isOk());
+        assertAttributesRequestStatus(targetControllerId, true);
 
         mvc.perform(put("/{tenant}/controller/v1/{controllerId}/configData", tenantAware.getCurrentTenant(),
                 targetControllerId).content(
                         JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("$._links.configData").doesNotExist())
-                .andExpect(status().isOk());
+        assertAttributesRequestStatus(targetControllerId, false);
 
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+        savedTarget = assignDistributionSet(ds1.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
-                .getContent().get(0);
-        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), targetControllerId, savedAction.getId())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("$._links.configData").doesNotExist());
+        final Action deploymentAction1 = deploymentManagement
+                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        sendDeploymentActionFeedback(targetControllerId, deploymentAction1.getId(),
+                JsonBuilder.deploymentActionFeedback(deploymentAction1.getId().toString(), "closed", "failure", ""));
+        assertAttributesRequestStatus(targetControllerId, false);
 
+        savedTarget = assignDistributionSet(ds2.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+                .next();
+        final Action deploymentAction2 = deploymentManagement
+                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        sendDeploymentActionFeedback(targetControllerId, deploymentAction2.getId(),
+                JsonBuilder.deploymentActionFeedback(deploymentAction2.getId().toString(), "closed"));
+        assertAttributesRequestStatus(targetControllerId, true);
+    }
+
+    private void assertAttributesRequestStatus(final String targetControllerId, final boolean isRequested)
+            throws Exception {
+        final ResultActions resultActions = mvc.perform(
+                get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        if (isRequested) {
+            resultActions.andExpect(jsonPath("$._links.configData.href").isNotEmpty());
+        } else {
+            resultActions.andExpect(jsonPath("$._links.configData").doesNotExist());
+        }
+    }
+
+    private void sendDeploymentActionFeedback(final String targetControllerId, final long actionID,
+            final String feedback) throws Exception {
         mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), targetControllerId, savedAction.getId())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed"))
+                tenantAware.getCurrentTenant(), targetControllerId, actionID).content(feedback)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$._links.configData.href").isNotEmpty());
     }
 
     @Test
