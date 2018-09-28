@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
@@ -119,6 +120,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TargetRepository targetRepository;
+
+    @Autowired
+    private TargetManagement targetManagement;
 
     @Autowired
     private SoftwareModuleRepository softwareModuleRepository;
@@ -650,7 +654,7 @@ public class JpaControllerManagement implements ControllerManagement {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         }
 
-        target.setRequestControllerAttributes(true);
+        targetManagement.requestControllerAttributes(target.getControllerId());
 
         targetRepository.save(target);
 
