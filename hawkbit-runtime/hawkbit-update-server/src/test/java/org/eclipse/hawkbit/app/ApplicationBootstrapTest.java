@@ -36,7 +36,7 @@ public class ApplicationBootstrapTest {
 
     @Test
     @Description("Verifies that runtime starts successfully")
-    public void startupSuccessful() throws Exception {
+    public void startupSuccessful() {
 
         final ResponseEntity<String> response = restTemplate.getForEntity("/info", String.class);
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
