@@ -8,18 +8,18 @@
  */
 package org.eclipse.hawkbit.app;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -28,18 +28,17 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Smoke test")
 @Stories("HawkBit Update Server")
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@WebAppConfiguration
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ApplicationBootstrapTest {
 
     @Autowired
-    private MockMvc mvc;
+    private TestRestTemplate restTemplate;
 
     @Test
     @Description("Verifies that runtime starts successfully")
     public void startupSuccessful() throws Exception {
 
-        mvc.perform(get("/info").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+        final ResponseEntity<String> response = restTemplate.getForEntity("/info", String.class);
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
 }
