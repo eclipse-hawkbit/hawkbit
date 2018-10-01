@@ -14,7 +14,7 @@ services:
   # hawkBit service
   # ---------------------
   hawkbit:
-    image: "hawkbit/hawkbit-update-server:0.2.2-mysql"
+    image: "hawkbit/hawkbit-update-server:0.2.3-mysql"
     networks:
     - hawknet
     ports:
