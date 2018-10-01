@@ -106,7 +106,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, filesize);
-        assertMaxArtifactSizeTotalQuota(filename, filesize);
+        assertMaxArtifactStorageQuota(filename, filesize);
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
@@ -144,14 +144,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
     }
 
-    private void assertMaxArtifactSizeTotalQuota(final String filename, final long artifactSize) {
+    private void assertMaxArtifactStorageQuota(final String filename, final long artifactSize) {
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
         if (maxArtifactSizeTotal <= 0) {
             return;
         }
 
-        final Optional<Long> currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize();
-        if (currentlyUsed.isPresent() && currentlyUsed.get() + artifactSize > maxArtifactSizeTotal) {
+        final Long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
+        if (currentlyUsed + artifactSize > maxArtifactSizeTotal) {
             final String msg = String.format(MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED, filename, artifactSize,
                     maxArtifactSizeTotal);
             LOG.warn(msg);
