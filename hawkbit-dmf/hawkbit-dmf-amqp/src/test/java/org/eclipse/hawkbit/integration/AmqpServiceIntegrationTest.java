@@ -23,6 +23,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
@@ -147,6 +149,14 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.THING_DELETED.toString());
     }
 
+    protected void assertRequestAttributesUpdateMessage(final String target) {
+        assertReplyMessageHeader(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
+    }
+    
+    protected void assertRequestAttributesUpdateMessageAbsent(final String target) {
+        assertReplyMessageHeaderAbsent(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
+    }
+
     protected void assertPingReplyMessage(final String correlationId) {
 
         verifyReplyToListener();
@@ -235,6 +245,12 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         return replyMessage;
     }
 
+    private void assertReplyMessageHeaderAbsent(final EventTopic eventTopic, final String controllerId) {
+        verifyReplyToListener();
+        final Message replyMessage = replyToListener.getEventTopicMessages().get(eventTopic);
+        assertThat(replyMessage).isNull();
+    }
+
     @Step
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId) {
         registerAndAssertTargetWithExistingTenant(controllerId, 1);
@@ -300,6 +316,18 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
 
         return createMessage(null, messageProperties);
+    }
+
+    protected Message createActionStatusUpdateMessage(final String target, final String tenant, final long actionId,
+            final DmfActionStatus status) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
+        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.toString());
+
+        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
+        dmfActionUpdateStatus.setSoftwareModuleId(2L);
+        return createMessage(dmfActionUpdateStatus, messageProperties);
     }
 
     protected MessageProperties createMessagePropertiesWithTenant(final String tenant) {

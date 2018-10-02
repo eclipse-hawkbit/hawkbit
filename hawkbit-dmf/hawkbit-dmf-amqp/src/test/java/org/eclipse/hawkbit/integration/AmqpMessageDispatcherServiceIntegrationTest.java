@@ -12,7 +12,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
+import org.springframework.amqp.core.Message;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -157,6 +160,38 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         registerAndAssertTargetWithExistingTenant(controllerId);
         targetManagement.deleteByControllerID(controllerId);
         assertDeleteMessage(controllerId);
+    }
+
+
+    @Test
+    @Description("Verify that attribute update is requested after device successfully closed software update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = ActionUpdatedEvent.class, count = 2), @Expect(type = ActionCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    public void attributeRequestAfterSuccessfulUpdate() {
+        final String controllerId = TARGET_PREFIX + "attributeUpdateRequest";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final Target target = controllerManagement.getByControllerId(controllerId).get();
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+
+        final DistributionSetAssignmentResult assignmentResult1 = assignDistributionSet(distributionSet, target);
+        waitUntilTargetStatusIsPending(controllerId);
+        final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
+                assignmentResult1.getActions().get(0), DmfActionStatus.ERROR);
+        getDmfClient().send(messageError);
+        assertRequestAttributesUpdateMessageAbsent(controllerId);
+
+        final DistributionSetAssignmentResult assignmentResult2 = assignDistributionSet(distributionSet, target);
+        waitUntilTargetStatusIsPending(controllerId);
+        final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
+                assignmentResult2.getActions().get(0), DmfActionStatus.FINISHED);
+        getDmfClient().send(messageFin);
+        assertRequestAttributesUpdateMessage(controllerId);
     }
 
     private void waitUntilTargetStatusIsPending(final String controllerId) {
