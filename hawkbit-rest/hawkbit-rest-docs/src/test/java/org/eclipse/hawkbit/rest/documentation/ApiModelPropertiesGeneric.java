@@ -22,9 +22,9 @@ public final class ApiModelPropertiesGeneric {
     public static final String COLOUR = "The colour" + ENDING;
     public static final String DELETED = "Deleted flag, used for soft deleted entities";
 
-    public static final String CREATED_BY = "Entity was originally created by Bosch IoT Permission user (IM: + UUID), Rollout cloud user (CLD: + UUID), AMQP-Controller, anonymous etc.)";
+    public static final String CREATED_BY = "Entity was originally created by User, AMQP-Controller, anonymous etc.)";
     public static final String CREATED_AT = "Entity was originally created at (timestamp UTC in milliseconds)";
-    public static final String LAST_MODIFIED_BY = "Entity was last modified by Bosch IoT Permission user (IM: + UUID), Rollout cloud user (CLD: + UUID), AMQP-Controller, anonymous etc.)";
+    public static final String LAST_MODIFIED_BY = "Entity was last modified by User, AMQP-Controller, anonymous etc.)";
     public static final String LAST_MODIFIED_AT = "Entity was last modified at (timestamp UTC in milliseconds)";
 
     // Paging elements
@@ -42,7 +42,7 @@ public final class ApiModelPropertiesGeneric {
     public static final String SORT = "The query parameter sort allows to define the sort order for the result of a query. "
             + "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending). "
             + "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.";
-    public static final String FIQL = "Query fields based on the Feed Item Query Language (FIQL). See link:../developerguide/apispecifications/managementapi/queryparameters.html[FIQL search syntax, window=\"_parent\"].";
+    public static final String FIQL = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.";
 
     // Error/exception handling
     public static final String EXCEPTION_CLASS = "The exception class name.";
