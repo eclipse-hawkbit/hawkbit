@@ -376,10 +376,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verifies that artifacts can only be added as long as the artifact storage quota is not exceeded.")
     public void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
-        
+
         final long storageLimit = quotaManagement.getMaxArtifactStorage();
 
-        final int artifactSize = 64 * 1024;
+        // choose an artifact size which does not violate the max file size
+        final int artifactSize = Math.toIntExact(quotaManagement.getMaxArtifactSize() / 10);
         final int numArtifacts = Math.toIntExact(storageLimit / artifactSize);
 
         for (int i = 0; i < numArtifacts; ++i) {
