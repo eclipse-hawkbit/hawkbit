@@ -54,6 +54,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
 
+    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) cannot be uploaded. The maximum total artifact storage of %s bytes would be exceeded.";
+
     private final LocalArtifactRepository localArtifactRepository;
 
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -104,6 +106,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, filesize);
+        assertMaxArtifactStorageQuota(filename, filesize);
 
         try {
             result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
@@ -136,6 +139,21 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
         if (artifactSize > maxArtifactSize) {
             final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename, artifactSize, id, maxArtifactSize);
+            LOG.warn(msg);
+            throw new QuotaExceededException(msg);
+        }
+    }
+
+    private void assertMaxArtifactStorageQuota(final String filename, final long artifactSize) {
+        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
+        if (maxArtifactSizeTotal <= 0) {
+            return;
+        }
+
+        final Long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
+        if (currentlyUsed + artifactSize > maxArtifactSizeTotal) {
+            final String msg = String.format(MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED, filename, artifactSize,
+                    maxArtifactSizeTotal);
             LOG.warn(msg);
             throw new QuotaExceededException(msg);
         }
