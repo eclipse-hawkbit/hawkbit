@@ -149,7 +149,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     @Bean
-    PropertiesQuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
+    @ConditionalOnMissingBean
+    QuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
         return new PropertiesQuotaManagement(securityProperties);
     }
 
