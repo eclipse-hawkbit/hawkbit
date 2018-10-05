@@ -26,7 +26,7 @@ $ docker-compose up -d
 Start the hawkBit Update Server and Device Simulator together with an MySQL and RabbitMQ instance as services within a swarm
 
 ```bash
-$ docker stack init
+$ docker swarm init
 $ docker stack deploy -c docker-compose-stack.yml hawkbit
 ```
 
