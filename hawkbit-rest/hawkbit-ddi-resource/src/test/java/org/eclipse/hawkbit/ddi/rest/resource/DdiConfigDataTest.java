@@ -18,10 +18,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -45,6 +47,11 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Config Data Resource")
 public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
+
+    private static final String KEY_TOO_LONG = "123456789012345678901234567890123";
+    private static final String KEY_VALID = "12345678901234567890123456789012";
+    private static final String VALUE_TOO_LONG = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    private static final String VALUE_VALID = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
@@ -94,7 +101,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // initial
         final Map<String, String> attributes = new HashMap<>();
-        attributes.put("dsafsdf", "sdsds");
+        attributes.put(KEY_VALID, VALUE_VALID);
 
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
@@ -136,7 +143,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
-            + "resource behaves as exptected in cae of invalid request attempts.")
+            + "resource behaves as expected in case of invalid request attempts.")
     public void badConfigData() throws Exception {
         testdataFactory.createTarget("4712");
 
@@ -167,6 +174,43 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(put("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant())
                 .content("{\"id\": \"51659181\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Verifies that invalid config data attributes are handled correctly.")
+    public void putConfigDataWithInvalidAttributes() throws Exception {
+        // create a target
+        final String controllerId = "4718";
+        testdataFactory.createTarget(controllerId);
+        final String configDataPath = "/{tenant}/controller/v1/" + controllerId + "/configData";
+
+        putAndVerifyConfigDataWithKeyTooLong(configDataPath);
+
+        putAndVerifyConfigDataWithValueTooLong(configDataPath);
+    }
+
+    @Step
+    private void putAndVerifyConfigDataWithKeyTooLong(final String configDataPath) throws Exception {
+
+        final Map<String, String> attributes = Collections.singletonMap(KEY_TOO_LONG, VALUE_VALID);
+
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
+    }
+
+    @Step
+    private void putAndVerifyConfigDataWithValueTooLong(final String configDataPath) throws Exception {
+
+        final Map<String, String> attributes = Collections.singletonMap(KEY_VALID, VALUE_TOO_LONG);
+
+        mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
+                .content(JsonBuilder.configData("", attributes, "closed")).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
     @Test

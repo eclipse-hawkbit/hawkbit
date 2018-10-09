@@ -280,7 +280,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement.get(unassignedModule.getId())).isNotPresent();
 
         // verify: binary data of artifact is deleted
-        assertArtfiactNull(artifact1, artifact2);
+        assertArtifactNull(artifact1, artifact2);
 
         // verify: meta data of artifact is deleted
         assertThat(artifactRepository.findOne(artifact1.getId())).isNull();
@@ -311,7 +311,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Iterator<Artifact> artifactsIt = assignedModule.getArtifacts().iterator();
         final Artifact artifact1 = artifactsIt.next();
         final Artifact artifact2 = artifactsIt.next();
-        assertArtfiactNull(artifact1, artifact2);
+        assertArtifactNull(artifact1, artifact2);
 
         // verify: artifact meta data is still available
         assertThat(artifactRepository.findOne(artifact1.getId())).isNotNull();
@@ -351,7 +351,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Iterator<Artifact> artifactsIt = assignedModule.getArtifacts().iterator();
         final Artifact artifact1 = artifactsIt.next();
         final Artifact artifact2 = artifactsIt.next();
-        assertArtfiactNull(artifact1, artifact2);
+        assertArtifactNull(artifact1, artifact2);
 
         // verify: artifact meta data is still available
         assertThat(artifactRepository.findOne(artifact1.getId())).isNotNull();
@@ -392,7 +392,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement.get(moduleY.getId())).isPresent();
 
         // verify: binary data of artifact is not deleted
-        assertArtfiactNotNull(artifactY);
+        assertArtifactNotNull(artifactY);
 
         // verify: meta data of artifactX is deleted
         assertThat(artifactRepository.findOne(artifactX.getId())).isNull();
@@ -451,7 +451,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleRepository.findAll()).hasSize(2);
 
         // verify: binary data of artifact is deleted
-        assertArtfiactNull(artifactX, artifactY);
+        assertArtifactNull(artifactX, artifactY);
 
         // verify: meta data of artifactX and artifactY is not deleted
         assertThat(artifactRepository.findOne(artifactY.getId())).isNotNull();
@@ -480,14 +480,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(artifacts).hasSize(numberArtifacts);
         if (numberArtifacts != 0) {
-            assertArtfiactNotNull(artifacts.toArray(new Artifact[artifacts.size()]));
+            assertArtifactNotNull(artifacts.toArray(new Artifact[artifacts.size()]));
         }
 
         artifacts.forEach(artifact -> assertThat(artifactRepository.findOne(artifact.getId())).isNotNull());
         return softwareModule;
     }
 
-    private void assertArtfiactNotNull(final Artifact... results) {
+    private void assertArtifactNotNull(final Artifact... results) {
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
@@ -496,7 +496,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private void assertArtfiactNull(final Artifact... results) {
+    private void assertArtifactNull(final Artifact... results) {
         for (final Artifact result : results) {
             assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
                     .isNull();

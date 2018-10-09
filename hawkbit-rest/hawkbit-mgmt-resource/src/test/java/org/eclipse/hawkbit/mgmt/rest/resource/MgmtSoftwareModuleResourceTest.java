@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -70,7 +69,8 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Management API")
 @Story("Software Module Resource")
-@TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000" })
+@TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000",
+        "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Before
@@ -157,7 +157,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         // create test file
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
@@ -195,8 +195,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
         // create a file which exceeds the configured maximum size
-        final byte[] randomBytes = new byte[Math.toIntExact(maxSize) + 1024];
-        new Random().nextBytes(randomBytes);
+        final byte[] randomBytes = randomBytes(Math.toIntExact(maxSize) + 1024);
 
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, randomBytes);
 
@@ -251,7 +250,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void duplicateUploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
@@ -274,7 +273,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.count()).isEqualTo(0);
 
         // create test file
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final byte random[] = randomBytes(5 * 1024);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
@@ -299,7 +298,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.count()).isEqualTo(0);
 
         // create test file
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
@@ -343,7 +342,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         for (int i = 0; i < maxArtifacts; ++i) {
             // create test file
-            final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+            final byte random[] = randomBytes(5 * 1024);
             final String md5sum = HashGeneratorUtils.generateMD5(random);
             final String sha1sum = HashGeneratorUtils.generateSHA1(random);
             final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
@@ -360,7 +359,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         }
 
         // upload one more file to cause the quota to be exceeded
-        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final byte random[] = randomBytes(5 * 1024);
         HashGeneratorUtils.generateMD5(random);
         HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
@@ -375,12 +374,57 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
+    @Description("Verifies that artifacts can only be added as long as the artifact storage quota is not exceeded.")
+    public void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
+
+        final long storageLimit = quotaManagement.getMaxArtifactStorage();
+
+        // choose an artifact size which does not violate the max file size
+        final int artifactSize = Math.toIntExact(quotaManagement.getMaxArtifactSize() / 10);
+        final int numArtifacts = Math.toIntExact(storageLimit / artifactSize);
+
+        for (int i = 0; i < numArtifacts; ++i) {
+            // create test file
+            final byte random[] = randomBytes(artifactSize);
+            final String md5sum = HashGeneratorUtils.generateMD5(random);
+            final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+            final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
+
+            // upload
+            final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("sm" + i);
+            mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                    .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
+                    .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                    .andExpect(jsonPath("$.size", equalTo(random.length)))
+                    .andExpect(jsonPath("$.providedFilename", equalTo("origFilename" + i))).andReturn();
+        }
+
+        // upload one more file to cause the quota to be exceeded
+        final byte random[] = randomBytes(artifactSize);
+        HashGeneratorUtils.generateMD5(random);
+        HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
+
+        // upload
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("sm" + numArtifacts);
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+
+    }
+
+    @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
     public void downloadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte random[] = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
                 false, artifactSize);
@@ -412,7 +456,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte random[] = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
                 false, artifactSize);
@@ -439,7 +483,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte random[] = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
                 false, artifactSize);
@@ -470,7 +514,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     public void invalidRequestsOnArtifactResource() throws Exception {
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte random[] = randomBytes(artifactSize);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -1019,6 +1063,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                     .description(str).vendor(str).version(str));
             character++;
         }
+    }
+
+    private static byte[] randomBytes(final int len) {
+        return RandomStringUtils.randomAlphanumeric(len).getBytes();
     }
 
 }

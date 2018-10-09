@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -833,6 +835,39 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             testData.put(keyPrefix + i, valuePrefix);
         }
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
+    }
+
+    @Test
+    @Description("Checks if invalid values of attribute-key and attribute-value are handled correctly")
+    public void updateTargetAttributesFailsForInvalidAttributes() {
+        final String keyTooLong = "123456789012345678901234567890123";
+        final String keyValid = "12345678901234567890123456789012";
+        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+        final String keyNull = null;
+
+        final String controllerId = "targetId123";
+        testdataFactory.createTarget(controllerId);
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueValid), null))
+                .as("Attribute with key too long should not be created");
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyTooLong, valueTooLong), null))
+                .as("Attribute with key too long and value too long should not be created");
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyValid, valueTooLong), null))
+                .as("Attribute with value too long should not be created");
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(keyNull, valueValid), null))
+                .as("Attribute with key NULL should not be created");
     }
 
     @Test

@@ -1,0 +1,60 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+version: '3.7'
+
+volumes:
+  vhost:
+  challange:
+  certificates:
+
+networks:
+  proxy:
+    driver: overlay
+
+services:
+
+  # ---------------------
+  # nginx reverse proxy
+  # ---------------------
+  nginx:
+    image: "jwilder/nginx-proxy"
+    ports:
+    - 80:80
+    - 443:443
+    networks:
+    - proxy
+    volumes:
+    - certificates:/etc/nginx/certs:ro
+    - vhost:/etc/nginx/vhost.d
+    - challange:/usr/share/nginx/html
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    labels:
+    - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
+
+  # ---------------------
+  # lets encrypt nginx-proxy companion
+  # ---------------------
+  letsencrypt:
+    image: "jrcs/letsencrypt-nginx-proxy-companion"
+    networks:
+    - proxy
+    volumes:
+    - certificates:/etc/nginx/certs:rw
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - vhost:/etc/nginx/vhost.d
+    - challange:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure

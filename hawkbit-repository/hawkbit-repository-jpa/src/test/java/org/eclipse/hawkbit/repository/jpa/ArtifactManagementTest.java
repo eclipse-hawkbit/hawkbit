@@ -104,30 +104,30 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleRepository.save(new JpaSoftwareModule(osType, "name 3", "version 3", null, null));
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte[] randomBytes = randomBytes(artifactSize);
 
-        try (final InputStream inputStream1 = new ByteArrayInputStream(random);
-                final InputStream inputStream2 = new ByteArrayInputStream(random);
-                final InputStream inputStream3 = new ByteArrayInputStream(random);
-                final InputStream inputStream4 = new ByteArrayInputStream(random);) {
+        try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
+                final InputStream inputStream2 = new ByteArrayInputStream(randomBytes);
+                final InputStream inputStream3 = new ByteArrayInputStream(randomBytes);
+                final InputStream inputStream4 = new ByteArrayInputStream(randomBytes);) {
 
-            final Artifact result = artifactManagement.create(inputStream1, sm.getId(), "file1", false, artifactSize);
-            artifactManagement.create(inputStream2, sm.getId(), "file11", false, artifactSize);
-            artifactManagement.create(inputStream3, sm.getId(), "file12", false, artifactSize);
-            final Artifact result2 = artifactManagement.create(inputStream4, sm2.getId(), "file2", false, artifactSize);
+            final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
+            createArtifactForSoftwareModule("file11", sm.getId(), artifactSize, inputStream2);
+            createArtifactForSoftwareModule("file12", sm.getId(), artifactSize, inputStream3);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream4);
 
-            assertThat(result).isInstanceOf(Artifact.class);
-            assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
-            assertThat(result2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
-            assertThat(((JpaArtifact) result).getFilename()).isEqualTo("file1");
-            assertThat(((JpaArtifact) result).getSha1Hash()).isNotNull();
-            assertThat(result).isNotEqualTo(result2);
-            assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
+            assertThat(artifact1).isInstanceOf(Artifact.class);
+            assertThat(artifact1.getSoftwareModule().getId()).isEqualTo(sm.getId());
+            assertThat(artifact2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
+            assertThat(((JpaArtifact) artifact1).getFilename()).isEqualTo("file1");
+            assertThat(((JpaArtifact) artifact1).getSha1Hash()).isNotNull();
+            assertThat(artifact1).isNotEqualTo(artifact2);
+            assertThat(((JpaArtifact) artifact1).getSha1Hash()).isEqualTo(((JpaArtifact) artifact2).getSha1Hash());
 
             assertThat(artifactManagement.getByFilename("file1").get().getSha1Hash())
-                    .isEqualTo(HashGeneratorUtils.generateSHA1(random));
+                    .isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
             assertThat(artifactManagement.getByFilename("file1").get().getMd5Hash())
-                    .isEqualTo(HashGeneratorUtils.generateMD5(random));
+                    .isEqualTo(HashGeneratorUtils.generateMD5(randomBytes));
 
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);
@@ -142,43 +142,73 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void createArtifactsUntilQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
 
         // create a software module
-        final JpaSoftwareModule sm1 = softwareModuleRepository
-                .save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null));
+        final long smId = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null))
+                .getId();
 
         // now create artifacts for this module until the quota is exceeded
         final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
         final List<Long> artifactIds = Lists.newArrayList();
         final int artifactSize = 5 * 1024;
         for (int i = 0; i < maxArtifacts; ++i) {
-            final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-            try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-                artifactIds.add(
-                        artifactManagement.create(inputStream, sm1.getId(), "file" + i, false, artifactSize).getId());
-            }
+            artifactIds.add(createArtifactForSoftwareModule("file" + i, smId, artifactSize).getId());
         }
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
-                .isEqualTo(maxArtifacts);
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
 
         // create one mode to trigger the quota exceeded error
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> {
-            final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-            try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-                artifactManagement.create(inputStream, sm1.getId(), "file" + maxArtifacts, false, artifactSize);
-            }
-        });
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> createArtifactForSoftwareModule("file" + maxArtifacts, smId, artifactSize));
 
         // delete one of the artifacts
         artifactManagement.delete(artifactIds.get(0));
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements())
                 .isEqualTo(maxArtifacts - 1);
 
         // now we should be able to create an artifact again
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-        try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-            artifactManagement.create(inputStream, sm1.getId(), "fileXYZ", false, artifactSize);
-            assertThat(artifactRepository.findBySoftwareModuleId(PAGE, sm1.getId()).getTotalElements())
-                    .isEqualTo(maxArtifacts);
+        createArtifactForSoftwareModule("fileXYZ", smId, artifactSize);
+        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
+    public void createArtifactsUntilStorageQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
+
+        // create as many small artifacts as possible w/o violating the storage
+        // quota
+        final long maxBytes = quotaManagement.getMaxArtifactStorage();
+        final List<Long> artifactIds = Lists.newArrayList();
+
+        // choose an artifact size which does not violate the max file size
+        final int artifactSize = Math.toIntExact(quotaManagement.getMaxArtifactSize() / 10);
+        final int numArtifacts = Math.toIntExact(maxBytes / artifactSize);
+        for (int i = 0; i < numArtifacts; ++i) {
+            final JpaSoftwareModule sm = softwareModuleRepository
+                    .save(new JpaSoftwareModule(osType, "smd" + i, "1.0", null, null));
+            artifactIds.add(createArtifactForSoftwareModule("file" + i, sm.getId(), artifactSize).getId());
         }
+
+        // upload one more artifact to trigger the quota exceeded error
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "smd" + numArtifacts, "1.0", null, null));
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> createArtifactForSoftwareModule("file" + numArtifacts, sm.getId(), artifactSize));
+
+        // delete one of the artifacts
+        artifactManagement.delete(artifactIds.get(0));
+
+        // now we should be able to create an artifact again
+        createArtifactForSoftwareModule("fileXYZ", sm.getId(), artifactSize);
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
+    public void createArtifactWhichExceedsMaxStorage() throws NoSuchAlgorithmException, IOException {
+
+        // create one artifact which exceeds the storage quota at once
+        final long maxBytes = quotaManagement.getMaxArtifactStorage();
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "smd345", "1.0", null, null));
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
+                () -> createArtifactForSoftwareModule("file345", sm.getId(), Math.toIntExact(maxBytes) + 128));
     }
 
     @Test
@@ -191,12 +221,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // create an artifact that exceeds the configured quota
         final long maxSize = quotaManagement.getMaxArtifactSize();
-        final int artifactSize = Math.toIntExact(maxSize) + 8;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-        try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-            assertThatExceptionOfType(QuotaExceededException.class)
-                    .isThrownBy(() -> artifactManagement.create(inputStream, sm1.getId(), "file", false, artifactSize));
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> createArtifactForSoftwareModule("file", sm1.getId(), Math.toIntExact(maxSize) + 8));
     }
 
     @Test
@@ -205,15 +231,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
-        final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-        try (final InputStream inputStream = new ByteArrayInputStream(random)) {
-            artifactManagement.create(inputStream, sm.getId(), "file1", false, artifactSize);
-            assertThat(artifactRepository.findAll()).hasSize(1);
 
-            softwareModuleRepository.deleteAll();
-            assertThat(artifactRepository.findAll()).hasSize(0);
-        }
+        createArtifactForSoftwareModule("file1", sm.getId(), 5 * 1024);
+        assertThat(artifactRepository.findAll()).hasSize(1);
+
+        softwareModuleRepository.deleteAll();
+        assertThat(artifactRepository.findAll()).hasSize(0);
     }
 
     /**
@@ -239,32 +262,32 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream1 = new RandomGeneratedInputStream(artifactSize);
                 final InputStream inputStream2 = new RandomGeneratedInputStream(artifactSize)) {
 
-            final Artifact result = artifactManagement.create(inputStream1, sm.getId(), "file1", false, artifactSize);
-            final Artifact result2 = artifactManagement.create(inputStream2, sm2.getId(), "file2", false, artifactSize);
+            final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
 
-            assertThat(result.getId()).isNotNull();
-            assertThat(result2.getId()).isNotNull();
-            assertThat(((JpaArtifact) result).getSha1Hash()).isNotEqualTo(((JpaArtifact) result2).getSha1Hash());
+            assertThat(artifact1.getId()).isNotNull();
+            assertThat(artifact2.getId()).isNotNull();
+            assertThat(((JpaArtifact) artifact1).getSha1Hash()).isNotEqualTo(((JpaArtifact) artifact2).getSha1Hash());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                     .isNotNull();
             assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
                             .isNotNull();
 
-            artifactManagement.delete(result.getId());
+            artifactManagement.delete(artifact1.getId());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                     .isNull();
             assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
                             .isNotNull();
 
-            artifactManagement.delete(result2.getId());
+            artifactManagement.delete(artifact2.getId());
             assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result2.getSha1Hash()))
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
                             .isNull();
 
             assertThat(artifactRepository.findAll()).hasSize(0);
@@ -282,26 +305,26 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                 .save(new JpaSoftwareModule(osType, "name 2", "version 2", null, null));
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+        final byte[] randomBytes = randomBytes(artifactSize);
 
-        try (final InputStream inputStream1 = new ByteArrayInputStream(random);
-                final InputStream inputStream2 = new ByteArrayInputStream(random)) {
-            final Artifact result = artifactManagement.create(inputStream1, sm.getId(), "file1", false, artifactSize);
-            final Artifact result2 = artifactManagement.create(inputStream2, sm2.getId(), "file2", false, artifactSize);
+        try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
+                final InputStream inputStream2 = new ByteArrayInputStream(randomBytes)) {
+            final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
-            assertThat(result.getId()).isNotNull();
-            assertThat(result2.getId()).isNotNull();
-            assertThat(((JpaArtifact) result).getSha1Hash()).isEqualTo(((JpaArtifact) result2).getSha1Hash());
+            assertThat(artifact1.getId()).isNotNull();
+            assertThat(artifact2.getId()).isNotNull();
+            assertThat(((JpaArtifact) artifact1).getSha1Hash()).isEqualTo(((JpaArtifact) artifact2).getSha1Hash());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                     .isNotNull();
-            artifactManagement.delete(result.getId());
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            artifactManagement.delete(artifact1.getId());
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                     .isNotNull();
 
-            artifactManagement.delete(result2.getId());
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            artifactManagement.delete(artifact2.getId());
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                     .isNull();
         }
     }
@@ -311,9 +334,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findArtifact() throws NoSuchAlgorithmException, IOException {
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream = new RandomGeneratedInputStream(artifactSize)) {
-            final Artifact result = artifactManagement.create(inputStream,
-                    testdataFactory.createSoftwareModuleOs().getId(), "file1", false, artifactSize);
-            assertThat(artifactManagement.get(result.getId()).get()).isEqualTo(result);
+            final Artifact artifact = createArtifactForSoftwareModule("file1",
+                    testdataFactory.createSoftwareModuleOs().getId(), artifactSize, inputStream);
+            assertThat(artifactManagement.get(artifact.getId()).get()).isEqualTo(artifact);
         }
     }
 
@@ -321,14 +344,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Loads an artifact binary based on given ID.")
     public void loadStreamOfArtifact() throws NoSuchAlgorithmException, IOException {
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-        try (final InputStream input = new ByteArrayInputStream(random)) {
-            final Artifact result = artifactManagement.create(input, testdataFactory.createSoftwareModuleOs().getId(),
-                    "file1", false, artifactSize);
-            try (final InputStream inputStream = artifactManagement.loadArtifactBinary(result.getSha1Hash()).get()
+        final byte[] randomBytes = randomBytes(artifactSize);
+        try (final InputStream input = new ByteArrayInputStream(randomBytes)) {
+            final Artifact artifact = createArtifactForSoftwareModule("file1",
+                    testdataFactory.createSoftwareModuleOs().getId(), artifactSize, input);
+            try (final InputStream inputStream = artifactManagement.loadArtifactBinary(artifact.getSha1Hash()).get()
                     .getFileInputStream()) {
                 assertTrue("The stored binary matches the given binary",
-                        IOUtils.contentEquals(new ByteArrayInputStream(random), inputStream));
+                        IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream));
             }
         }
     }
@@ -353,7 +376,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         try (final InputStream input = new RandomGeneratedInputStream(artifactSize)) {
-            artifactManagement.create(input, sm.getId(), "file1", false, artifactSize);
+            createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, input);
             assertThat(artifactManagement.findBySoftwareModule(PAGE, sm.getId())).hasSize(1);
         }
     }
@@ -368,10 +391,27 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream1 = new RandomGeneratedInputStream(artifactSize);
                 final InputStream inputStream2 = new RandomGeneratedInputStream(artifactSize)) {
-            artifactManagement.create(inputStream1, sm.getId(), "file1", false, artifactSize);
-            artifactManagement.create(inputStream2, sm.getId(), "file2", false, artifactSize);
+            createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
+            createArtifactForSoftwareModule("file2", sm.getId(), artifactSize, inputStream2);
             assertThat(artifactManagement.getByFilenameAndSoftwareModule("file1", sm.getId())).isPresent();
         }
 
+    }
+
+    private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize)
+            throws IOException {
+        final byte[] randomBytes = randomBytes(artifactSize);
+        try (final InputStream inputStream = new ByteArrayInputStream(randomBytes)) {
+            return createArtifactForSoftwareModule(filename, moduleId, artifactSize, inputStream);
+        }
+    }
+
+    private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize,
+            final InputStream inputStream) throws IOException {
+        return artifactManagement.create(inputStream, moduleId, filename, false, artifactSize);
+    }
+
+    private static byte[] randomBytes(final int len) {
+        return RandomStringUtils.randomAlphanumeric(len).getBytes();
     }
 }
