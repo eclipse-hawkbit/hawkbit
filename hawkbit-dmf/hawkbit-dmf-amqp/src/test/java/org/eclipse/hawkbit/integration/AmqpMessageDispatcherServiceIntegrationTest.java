@@ -179,17 +179,17 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Target target = controllerManagement.getByControllerId(controllerId).get();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final DistributionSetAssignmentResult assignmentResult1 = assignDistributionSet(distributionSet, target);
+        final long actionId1 = assignDistributionSet(distributionSet, target).getActions().get(0);
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                assignmentResult1.getActions().get(0), DmfActionStatus.ERROR);
+                actionId1, DmfActionStatus.ERROR);
         getDmfClient().send(messageError);
         assertRequestAttributesUpdateMessageAbsent(controllerId);
 
-        final DistributionSetAssignmentResult assignmentResult2 = assignDistributionSet(distributionSet, target);
+        final long actionId2 = assignDistributionSet(distributionSet, target).getActions().get(0);
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                assignmentResult2.getActions().get(0), DmfActionStatus.FINISHED);
+                actionId2, DmfActionStatus.FINISHED);
         getDmfClient().send(messageFin);
         assertRequestAttributesUpdateMessage(controllerId);
     }

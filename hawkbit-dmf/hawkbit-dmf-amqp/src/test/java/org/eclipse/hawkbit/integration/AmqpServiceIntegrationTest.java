@@ -326,7 +326,6 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.toString());
 
         final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
-        dmfActionUpdateStatus.setSoftwareModuleId(2L);
         return createMessage(dmfActionUpdateStatus, messageProperties);
     }
 

@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+
 import java.net.URI;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -97,9 +100,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -654,9 +654,9 @@ public class JpaControllerManagement implements ControllerManagement {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         }
 
-        targetManagement.requestControllerAttributes(target.getControllerId());
-
         targetRepository.save(target);
+
+        targetManagement.requestControllerAttributes(target.getControllerId());
 
         entityManager.detach(ds);
     }

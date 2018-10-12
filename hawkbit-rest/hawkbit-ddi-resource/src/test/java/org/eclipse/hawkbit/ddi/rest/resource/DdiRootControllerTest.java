@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.Map;
 
-import org.eclipse.hawkbit.ddi.json.model.DdiStatus.ExecutionStatus;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -234,11 +233,9 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 etagWithFirstUpdate)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // now lets finish the update
-        mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + updateAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(updateAction.getId().toString(), "closed"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(target.getControllerId(), updateAction.getId(),
+                JsonBuilder.deploymentActionFeedback(updateAction.getId().toString(), "closed"))
+                        .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // we are again at the original state
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()).header("If-None-Match", etag))
@@ -351,86 +348,79 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))
+                        .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant()).content(
-                        JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "failure"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "failure"))
+                        .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant()).content(
-                        JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success"))
+                        .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
     }
 
     @Test
     @Description("Controller sends attribute update request after device successfully closed software update.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 6), @Expect(type = TargetPollEvent.class, count = 4),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     public void testAttributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
-        final String targetControllerId = "922";
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
-        Target savedTarget = testdataFactory.createTarget(targetControllerId);
-        final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeVlue");
-        JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName());
-        assertAttributesRequestStatus(targetControllerId, true);
+        final DistributionSet ds = testdataFactory.createDistributionSet("1");
+        Target savedTarget = testdataFactory.createTarget("922");
+        final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeValue");
+        assertThatAttributesUpdateIsRequested(savedTarget.getControllerId());
 
         mvc.perform(put("/{tenant}/controller/v1/{controllerId}/configData", tenantAware.getCurrentTenant(),
-                targetControllerId).content(
-                        JsonBuilder.configData(targetControllerId, attributes, ExecutionStatus.CLOSED.getName()))
+                savedTarget.getControllerId())
+                        .content(JsonBuilder.configData(savedTarget.getControllerId(), attributes, "closed"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        assertAttributesRequestStatus(targetControllerId, false);
+        assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());
 
-        savedTarget = assignDistributionSet(ds1.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final Action deploymentAction1 = deploymentManagement
-                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
-        sendDeploymentActionFeedback(targetControllerId, deploymentAction1.getId(),
-                JsonBuilder.deploymentActionFeedback(deploymentAction1.getId().toString(), "closed", "failure", ""));
-        assertAttributesRequestStatus(targetControllerId, false);
+        final long actionId1 = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0).getId();
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), actionId1,
+                JsonBuilder.deploymentActionFeedback(Long.toString(actionId1), "closed", "failure", ""))
+                        .andExpect(status().isOk());
+        assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());
 
-        savedTarget = assignDistributionSet(ds2.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
                 .next();
-        final Action deploymentAction2 = deploymentManagement
-                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
-        sendDeploymentActionFeedback(targetControllerId, deploymentAction2.getId(),
-                JsonBuilder.deploymentActionFeedback(deploymentAction2.getId().toString(), "closed"));
-        assertAttributesRequestStatus(targetControllerId, true);
+        final long actionId2 = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0).getId();
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), actionId2,
+                JsonBuilder.deploymentActionFeedback(Long.toString(actionId2), "closed"))
+                        .andExpect(status().isOk());
+        assertThatAttributesUpdateIsRequested(savedTarget.getControllerId());
     }
 
-    private void assertAttributesRequestStatus(final String targetControllerId, final boolean isRequested)
+    private void assertThatAttributesUpdateIsRequested(final String targetControllerId)
             throws Exception {
-        final ResultActions resultActions = mvc.perform(
+        mvc.perform(
                 get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        if (isRequested) {
-            resultActions.andExpect(jsonPath("$._links.configData.href").isNotEmpty());
-        } else {
-            resultActions.andExpect(jsonPath("$._links.configData").doesNotExist());
-        }
+                .andExpect(status().isOk()).andExpect(jsonPath("$._links.configData.href").isNotEmpty());
     }
 
-    private void sendDeploymentActionFeedback(final String targetControllerId, final long actionID,
+    private void assertThatAttributesUpdateIsNotRequested(final String targetControllerId) throws Exception {
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+                .andExpect(jsonPath("$._links.configData").doesNotExist());
+    }
+
+    private ResultActions sendDeploymentActionFeedback(final String targetControllerId, final long actionID,
             final String feedback) throws Exception {
-        mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
+        return mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), targetControllerId, actionID).content(feedback)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                        .contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -450,26 +440,20 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
-                                TARGET_SCHEDULED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                        TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
-                                TARGET_PROCEEDING_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                        TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
-                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
+                        TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=3",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
@@ -498,26 +482,20 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
-                                TARGET_SCHEDULED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                        TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
-                                TARGET_PROCEEDING_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                        TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
-                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
+                        TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-2",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
@@ -542,26 +520,20 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
-                                TARGET_SCHEDULED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
+                        TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
-                                TARGET_PROCEEDING_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
+                        TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
-        mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
-                tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed",
-                                "success", TARGET_COMPLETED_INSTALLATION_MSG))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
+                        TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
+                                .andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-1",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
