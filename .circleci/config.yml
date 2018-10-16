@@ -12,7 +12,6 @@ jobs:
   build:
 
     working_directory: ~/hawkBit
-    parallelism: 4
 
     docker:
     - image: circleci/openjdk:8-jdk-browsers
