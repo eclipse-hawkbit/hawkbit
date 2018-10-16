@@ -37,7 +37,7 @@ jobs:
     # Run tests
     - run:
         name: Test incl. license verification
-        command: sh sonarCircleCi.sh
+        command: mvn verify license:check
 
     # Record test results
     - run: mkdir -p testresults/junit/
