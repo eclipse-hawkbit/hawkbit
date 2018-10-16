@@ -37,8 +37,7 @@ jobs:
     # Run tests
     - run:
         name: Test incl. license verification
-        #command: './.circleci/sonarCircleCi.sh'
-        command: mvn verify license:check sonar:sonar -Dsonar.login=$SONAR_ACCESS_TOKEN --batch-mode
+        command: './.circleci/sonarCircleCi.sh'
 
     # Record test results
     - run: mkdir -p testresults/junit/
