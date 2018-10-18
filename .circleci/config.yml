@@ -29,15 +29,13 @@ jobs:
     - restore_cache:
         key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
-    # Install dependencies
     - run:
-       name: Install without testing
+       name: Install dependencies without testing
        command: mvn install --batch-mode -DskipTests
 
-    # Run tests
     - run:
-        name: Test incl. license verification
-        command: mvn verify license:check --batch-mode
+        name: Run tests incl. license check
+        command: './.circleci/run-qa.sh'
 
     # Record test results
     - run: mkdir -p testresults/junit/
@@ -45,9 +43,11 @@ jobs:
 
     - store_test_results:
         path: testresults/junit/
+        destination: test-reports
 
     - store_artifacts:
         path: pom.xml
+        destination: pom
 
     - save_cache:
         paths:
@@ -56,5 +56,5 @@ jobs:
 
 notify:
   webhooks:
-  # gitter hook
+  # Gitter hook
   - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39
