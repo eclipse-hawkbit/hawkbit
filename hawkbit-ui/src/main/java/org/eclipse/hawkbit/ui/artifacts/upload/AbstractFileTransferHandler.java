@@ -8,15 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -26,14 +27,14 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModule
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+
+import com.vaadin.ui.UI;
 
 /**
  * Abstract base class for transferring files from the browser to the
@@ -61,11 +62,14 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private final VaadinMessageSource i18n;
 
+    protected final UINotification uiNotification;
+
     AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
+        this.uiNotification = SpringContextHelper.getBean(UINotification.class);
     }
 
     protected boolean isDuplicateFile() {
@@ -101,12 +105,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        final TransferArtifactToRepositoryRunnable runnable = new TransferArtifactToRepositoryRunnable(inputStream,
-                fileUploadId, mimeType);
-        final SecurityContext context = SecurityContextHolder.getContext();
-        final DelegatingSecurityContextRunnable runnableWithSecurityContext = new DelegatingSecurityContextRunnable(
-                runnable, context);
-        new Thread(runnableWithSecurityContext).start();
+        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class)
+                .execute(
+                        new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent()));
     }
 
     private void setFailureReason(final String failureReason) {
@@ -159,11 +160,23 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         eventBus.publish(this, fileUploadProgress);
     }
 
+    protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize) {
+        LOG.info("Upload succeeded for file {}", fileUploadId);
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize);
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
+    }
+
+    protected void publishArtifactsChanged(final FileUploadId fileUploadId) {
+        eventBus.publish(this,
+                new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, fileUploadId.getSoftwareModuleId()));
+    }
+
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
             final Exception uploadException) {
         LOG.info("Upload failed for file {} due to {}", fileUploadId,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
-        uploadFailed = true;
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
@@ -182,24 +195,44 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         }
     }
 
+    protected static void tryToCloseIOStream(final OutputStream outputStream) {
+        try {
+            outputStream.close();
+        } catch (final IOException e1) {
+            LOG.error("Closing output stream caused an exception {}", e1);
+        }
+    }
+
+    protected static void tryToCloseIOStream(final InputStream inputStream) {
+        try {
+            inputStream.close();
+        } catch (final IOException e1) {
+            LOG.error("Closing input stream caused an exception {}", e1);
+        }
+    }
+
     private final class TransferArtifactToRepositoryRunnable implements Runnable {
         private final InputStream inputStream;
         private final FileUploadId fileUploadId;
         private final String mimeType;
+        private final UI vaadinUi;
 
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
-                final String mimeType) {
+                final String mimeType, final UI vaadinUi) {
             this.inputStream = inputStream;
             this.fileUploadId = fileUploadId;
             this.mimeType = mimeType;
+            this.vaadinUi = vaadinUi;
         }
 
         @Override
         public void run() {
             try {
+                UI.setCurrent(vaadinUi);
                 streamToRepository();
-            } catch (final ArtifactUploadFailedException e) {
+            } catch (final Exception e) {
                 publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
+                tryToCloseIOStream(inputStream);
                 LOG.error("Failed to transfer file to repository", e);
             }
         }
@@ -212,15 +245,13 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             final String filename = fileUploadId.getFilename();
             LOG.info("Transfering file {} directly to repository", filename);
             final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
-            if (isUploadInterrupted() || uploadFailed) {
+            if (isUploadInterrupted()) {
                 handleUploadFailure(artifact);
                 return;
             }
-            final long fileSize = artifact.getSize();
-            publishUploadSucceeded(fileUploadId, fileSize);
+            publishUploadSucceeded(fileUploadId, artifact.getSize());
             publishUploadFinishedEvent(fileUploadId);
-            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
-                        fileUploadId.getSoftwareModuleId()));
+            publishArtifactsChanged(fileUploadId);
         }
 
         private Optional<Artifact> uploadArtifact(final String filename) {
@@ -234,21 +265,19 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         }
 
         private void handleUploadFailure(final Artifact artifact) {
-            try {
-                artifactManagement.delete(artifact.getId());
-            } catch (final ArtifactDeleteFailedException | EntityNotFoundException e) {
-                LOG.error("Failed to delete artifact from repository after upload was interrupted", e);
-            }
+            Exception exception;
+            int tries = 0;
+            do {
+                try {
+                    artifactManagement.delete(artifact.getId());
+                    return;
+                } catch (final Exception e) {
+                    exception = e;
+                    tries++;
+                }
+            } while (tries < 5);
+            LOG.error("Failed to delete artifact from repository after upload was interrupted", exception);
         }
-
-        private void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize) {
-            LOG.info("Upload succeeded for file {}", fileUploadId);
-            final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
-                    FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize);
-            artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-            eventBus.publish(this, fileUploadProgress);
-        }
-
     }
 
 }

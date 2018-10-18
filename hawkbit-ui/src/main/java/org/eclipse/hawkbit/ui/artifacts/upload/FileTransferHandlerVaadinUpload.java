@@ -77,7 +77,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
         assertThatOneSoftwareModuleIsSelected();
 
-        // selected software module at the time of this callback is considered
+        // selected software module at the time of this callback is
+        // considered
         SoftwareModule softwareModule = null;
         final Optional<Long> selectedSoftwareModuleId = getUploadState().getSelectedBaseSwModuleId();
         final Long softwareModuleId = selectedSoftwareModuleId.orElse(null);
@@ -134,20 +135,25 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
+        Optional<PipedInputStream> inputStream = Optional.empty();
         try {
             this.mimeType = mimeType;
+            inputStream = Optional.of(new PipedInputStream(outputStream));
             publishUploadProgressEvent(fileUploadId, 0, 0);
-            final PipedInputStream inputStream = new PipedInputStream(outputStream);
-            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
+            startTransferToRepositoryThread(inputStream.get(), fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
-            try {
-                outputStream.close();
-            } catch (final IOException e1) {
-                LOG.error("Closing output stream caused an exception {}", e1);
-            }
             setFailureReasonUploadFailed();
             setUploadInterrupted();
+            tryToCloseIOStream(outputStream);
+            inputStream.ifPresent(AbstractFileTransferHandler::tryToCloseIOStream);
+            getUploadState().updateFileUploadProgress(fileUploadId,
+                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
+            // uiNotification.displayWarning(getI18n().getMessage("message.delete.success",
+            // entitiesToDelete.size() + " " +
+            // getI18n().getMessage("caption.software.module") + "(s)"));
+            uiNotification.displayWarning("try again");
+            return ByteStreams.nullOutputStream();
         }
         return outputStream;
     }
@@ -216,6 +222,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         } else {
             publishUploadFailedEvent(fileUploadId, event.getReason());
         }
+        setUploadInterrupted();
         publishUploadFinishedEvent(fileUploadId);
     }
 

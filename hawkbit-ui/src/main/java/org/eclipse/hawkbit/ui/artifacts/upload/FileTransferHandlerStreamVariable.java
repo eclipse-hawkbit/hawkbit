@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.ByteStreams;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.SucceededEvent;
@@ -73,28 +75,28 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     @Override
     public final OutputStream getOutputStream() {
+        if (isUploadInterrupted()) {
+            return ByteStreams.nullOutputStream();
+        }
 
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
+        Optional<PipedInputStream> inputStream = Optional.empty();
         try {
-            publishUploadProgressEvent(fileUploadId, 0, 0);
-            final PipedInputStream inputStream = new PipedInputStream(outputStream);
-            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
+            inputStream = Optional.of(new PipedInputStream(outputStream));
             publishUploadProgressEvent(fileUploadId, 0, fileSize);
-
+            startTransferToRepositoryThread(inputStream.get(), fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
-            try {
-                outputStream.close();
-            } catch (final IOException e1) {
-                LOG.error("Closing output stream caused an exception {}", e1);
-            }
-
             setFailureReasonUploadFailed();
             setUploadInterrupted();
+            tryToCloseIOStream(outputStream);
+            inputStream.ifPresent(AbstractFileTransferHandler::tryToCloseIOStream);
+            getUploadState().updateFileUploadProgress(fileUploadId,
+                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
+            return ByteStreams.nullOutputStream();
         }
-
         return outputStream;
     }
 
@@ -158,6 +160,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         } else {
             publishUploadFailedEvent(fileUploadId, event.getException());
         }
+        setUploadInterrupted();
         publishUploadFinishedEvent(fileUploadId);
     }
 
