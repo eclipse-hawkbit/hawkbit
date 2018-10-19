@@ -26,13 +26,16 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetMetadataFields;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
@@ -40,15 +43,21 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -83,7 +92,11 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
 
+    private final QuotaManagement quotaManagement;
+
     private final TargetRepository targetRepository;
+
+    private final TargetMetadataRepository targetMetadataRepository;
 
     private final RolloutGroupRepository rolloutGroupRepository;
 
@@ -107,7 +120,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final Database database;
 
-    JpaTargetManagement(final EntityManager entityManager, final TargetRepository targetRepository,
+    JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
+            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -116,7 +130,9 @@ public class JpaTargetManagement implements TargetManagement {
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
+        this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
+        this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
@@ -144,6 +160,124 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long count() {
         return targetRepository.count();
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<TargetMetadata> createMetaData(final long targetId, final Collection<MetaData> md) {
+
+        md.forEach(meta -> checkAndThrowIfTargetMetadataAlreadyExists(
+                new TargetMetadataCompositeKey(targetId, meta.getKey())));
+
+        assertMetaDataQuota(targetId, md.size());
+
+        final JpaTarget target = touch(targetId);
+
+        return Collections.unmodifiableList(md.stream().map(
+                meta -> targetMetadataRepository.save(new JpaTargetMetadata(meta.getKey(), target, meta.getValue())))
+                .collect(Collectors.toList()));
+    }
+
+    private void checkAndThrowIfTargetMetadataAlreadyExists(final TargetMetadataCompositeKey metadataId) {
+        if (targetMetadataRepository.exists(metadataId)) {
+            throw new EntityAlreadyExistsException(
+                    "Metadata entry with key '" + metadataId.getKey() + "' already exists");
+        }
+    }
+
+    private void assertMetaDataQuota(final Long targetId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(targetId, requested, quotaManagement.getMaxMetaDataEntriesPerTarget(),
+                TargetMetadata.class, Target.class, targetMetadataRepository::countByTargetId);
+    }
+
+    private JpaTarget touch(final Target target) {
+
+        // merge base target so optLockRevision gets updated and audit
+        // log written because modifying metadata is modifying the base
+        // target itself for auditing purposes.
+        final JpaTarget result = entityManager.merge((JpaTarget) target);
+        result.setLastModifiedAt(0L);
+
+        return targetRepository.save(result);
+    }
+
+    private JpaTarget touch(final Long targetId) {
+        return touch(get(targetId).orElseThrow(() -> new EntityNotFoundException(Target.class, targetId)));
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetMetadata updateMetaData(final long targetId, final MetaData md) {
+
+        // check if exists otherwise throw entity not found exception
+        final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByTargetId(targetId, md.getKey())
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, md.getKey()));
+        toUpdate.setValue(md.getValue());
+        // touch it to update the lock revision because we are modifying the
+        // target indirectly
+        touch(targetId);
+        return targetMetadataRepository.save(toUpdate);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void deleteMetaData(final long targetId, final String key) {
+        final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByTargetId(targetId, key)
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, key));
+
+        touch(metadata.getTarget());
+        targetMetadataRepository.delete(metadata.getId());
+    }
+
+    @Override
+    public Page<TargetMetadata> findMetaDataByTargetId(final Pageable pageable, final long targetId) {
+        throwExceptionIfTargetDoesNotExist(targetId);
+
+        return convertMdPage(
+                targetMetadataRepository
+                        .findAll(
+                                (Specification<JpaTargetMetadata>) (root, query, cb) -> cb
+                                        .equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId),
+                                pageable),
+                pageable);
+    }
+
+    private void throwExceptionIfTargetDoesNotExist(final Long targetId) {
+        if (!targetRepository.exists(targetId)) {
+            throw new EntityNotFoundException(Target.class, targetId);
+        }
+    }
+
+    private static Page<TargetMetadata> convertMdPage(final Page<JpaTargetMetadata> findAll, final Pageable pageable) {
+        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    @Override
+    public Page<TargetMetadata> findMetaDataByTargetIdAndRsql(final Pageable pageable, final long targetId,
+            final String rsqlParam) {
+
+        throwExceptionIfTargetDoesNotExist(targetId);
+
+        final Specification<JpaTargetMetadata> spec = RSQLUtility.parse(rsqlParam, TargetMetadataFields.class,
+                virtualPropertyReplacer, database);
+
+        return convertMdPage(targetMetadataRepository.findAll((Specification<JpaTargetMetadata>) (root, query, cb) -> cb
+                .and(cb.equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId),
+                        spec.toPredicate(root, query, cb)),
+                pageable), pageable);
+    }
+
+    @Override
+    public Optional<TargetMetadata> getMetaDataByTargetId(final long targetId, final String key) {
+        throwExceptionIfTargetDoesNotExist(targetId);
+
+        return Optional.ofNullable(targetMetadataRepository.findOne(new TargetMetadataCompositeKey(targetId, key)));
     }
 
     @Override
