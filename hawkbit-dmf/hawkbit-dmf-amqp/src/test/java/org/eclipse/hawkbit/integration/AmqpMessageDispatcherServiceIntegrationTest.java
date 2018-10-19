@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.integration;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -179,17 +180,17 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Target target = controllerManagement.getByControllerId(controllerId).get();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final long actionId1 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        final List<Long> actions1 = assignDistributionSet(distributionSet, target).getActions();
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                actionId1, DmfActionStatus.ERROR);
+                actions1.get(0), DmfActionStatus.ERROR);
         getDmfClient().send(messageError);
         assertRequestAttributesUpdateMessageAbsent(controllerId);
 
-        final long actionId2 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        final List<Long> actions2 = assignDistributionSet(distributionSet, target).getActions();
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                actionId2, DmfActionStatus.FINISHED);
+                actions2.get(0), DmfActionStatus.FINISHED);
         getDmfClient().send(messageFin);
         assertRequestAttributesUpdateMessage(controllerId);
     }
