@@ -13,6 +13,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
@@ -36,8 +38,10 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -71,6 +75,9 @@ public final class MgmtTargetMapper {
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
                         .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
+        response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
     }
 
     static void addPollStatus(final Target target, final MgmtTarget targetRest) {
@@ -167,6 +174,17 @@ public final class MgmtTargetMapper {
                 .address(targetRest.getAddress());
     }
 
+    static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,
+            final EntityFactory entityFactory) {
+        if (metadata == null) {
+            return Collections.emptyList();
+        }
+
+        return metadata.stream().map(
+                metadataRest -> entityFactory.generateTargetMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .collect(Collectors.toList());
+    }
+
     static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus,
             final DeploymentManagement deploymentManagement) {
         if (actionStatus == null) {
@@ -259,6 +277,22 @@ public final class MgmtTargetMapper {
         result.setType(actionStatus.getStatus().name().toLowerCase());
 
         return result;
+    }
+
+    static MgmtMetadata toResponseTargetMetadata(final TargetMetadata metadata) {
+        final MgmtMetadata metadataRest = new MgmtMetadata();
+        metadataRest.setKey(metadata.getKey());
+        metadataRest.setValue(metadata.getValue());
+        return metadataRest;
+    }
+
+    static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
+
+        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
+        for (final TargetMetadata targetMetadata : metadata) {
+            mappedList.add(toResponseTargetMetadata(targetMetadata));
+        }
+        return mappedList;
     }
 
 }

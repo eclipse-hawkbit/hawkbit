@@ -16,6 +16,8 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +134,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Target updateTarget = this.targetManagement.update(entityFactory.target().update(controllerId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                 .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
-
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
@@ -348,6 +350,61 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         action = deploymentManagement.forceTargetAction(actionId);
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(controllerId, action));
+    }
+
+    @Override
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("controllerId") final String controllerId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Page<TargetMetadata> metaDataPage;
+
+        if (rsqlParam != null) {
+            metaDataPage = targetManagement.findMetaDataByControllerIdAndRsql(pageable, controllerId, rsqlParam);
+        } else {
+            metaDataPage = targetManagement.findMetaDataByControllerId(pageable, controllerId);
+        }
+
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponseTargetMetadata(metaDataPage.getContent()),
+                metaDataPage.getTotalElements()));
+    }
+
+    @Override
+    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("controllerId") final String controllerId,
+            @PathVariable("metadataKey") final String metadataKey) {
+        final TargetMetadata findOne = targetManagement.getMetaDataByControllerId(controllerId, metadataKey)
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, metadataKey));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(findOne));
+    }
+
+    @Override
+    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("controllerId") final String controllerId,
+            @PathVariable("metadataKey") final String metadataKey, final MgmtMetadataBodyPut metadata) {
+        final TargetMetadata updated = targetManagement.updateMetaData(controllerId,
+                entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(updated));
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteMetadata(@PathVariable("controllerId") final String controllerId,
+            @PathVariable("metadataKey") final String metadataKey) {
+        targetManagement.deleteMetaData(controllerId, metadataKey);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("controllerId") final String controllerId,
+            final List<MgmtMetadata> metadataRest) {
+        final List<TargetMetadata> created = targetManagement.createMetaData(controllerId,
+                MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
+        return new ResponseEntity<>(MgmtTargetMapper.toResponseTargetMetadata(created), HttpStatus.CREATED);
     }
 
 }

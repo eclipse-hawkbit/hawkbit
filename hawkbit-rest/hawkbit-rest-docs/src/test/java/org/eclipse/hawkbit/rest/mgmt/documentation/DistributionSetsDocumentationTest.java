@@ -504,7 +504,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
             distributionSetManagement.createMetaData(testDS.getId(), Lists
-                    .newArrayList(entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+                    .newArrayList(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
@@ -532,7 +532,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
             distributionSetManagement.createMetaData(testDS.getId(), Lists
-                    .newArrayList(entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+                    .newArrayList(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{dsId}/metadata", testDS.getId())
@@ -564,7 +564,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final String knownValue = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         distributionSetManagement.createMetaData(testDS.getId(),
-                Arrays.asList(entityFactory.generateMetadata(knownKey, knownValue)));
+                Arrays.asList(entityFactory.generateDsMetadata(knownKey, knownValue)));
 
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadatakey}",
@@ -588,7 +588,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         distributionSetManagement.createMetaData(testDS.getId(),
-                Arrays.asList(entityFactory.generateMetadata(knownKey, knownValue)));
+                Arrays.asList(entityFactory.generateDsMetadata(knownKey, knownValue)));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -616,7 +616,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         distributionSetManagement.createMetaData(testDS.getId(),
-                Arrays.asList(entityFactory.generateMetadata(knownKey, knownValue)));
+                Arrays.asList(entityFactory.generateDsMetadata(knownKey, knownValue)));
 
         mockMvc.perform(
                 delete(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{key}",

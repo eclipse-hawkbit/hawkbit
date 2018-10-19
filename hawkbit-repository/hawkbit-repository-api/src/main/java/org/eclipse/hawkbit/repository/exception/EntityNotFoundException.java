@@ -92,6 +92,20 @@ public class EntityNotFoundException extends AbstractServerRtException {
     }
 
     /**
+     * Parameterized constructor for {@link MetaData} not found.
+     * 
+     * @param type
+     *            of the entity that was not found
+     * @param enityId
+     *            of the {@link BaseEntity} the {@link MetaData} was for
+     * @param key
+     *            for the {@link MetaData} entry
+     */
+    public EntityNotFoundException(final Class<? extends MetaData> type, final String enityId, final String key) {
+        this(type.getSimpleName() + " for given entity {" + enityId + "} and with key {" + key + "} does not exist.");
+    }
+
+    /**
      * Parameterized constructor for a list of {@link BaseEntity}s not found.
      * 
      * @param type

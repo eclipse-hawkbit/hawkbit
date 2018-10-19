@@ -151,6 +151,11 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository.findByControllerId(controllerId);
     }
 
+    public JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
+        return targetRepository.findByControllerId(controllerId).map(JpaTarget.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
     @Override
     public List<Target> getByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(
@@ -166,17 +171,20 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<TargetMetadata> createMetaData(final long targetId, final Collection<MetaData> md) {
+    public List<TargetMetadata> createMetaData(final String controllerId, final Collection<MetaData> md) {
+
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         md.forEach(meta -> checkAndThrowIfTargetMetadataAlreadyExists(
-                new TargetMetadataCompositeKey(targetId, meta.getKey())));
+                new TargetMetadataCompositeKey(target.getId(), meta.getKey())));
 
-        assertMetaDataQuota(targetId, md.size());
+        assertMetaDataQuota(target.getId(), md.size());
 
-        final JpaTarget target = touch(targetId);
+        final JpaTarget updatedTarget = touch(target);
 
-        return Collections.unmodifiableList(md.stream().map(
-                meta -> targetMetadataRepository.save(new JpaTargetMetadata(meta.getKey(), target, meta.getValue())))
+        return Collections.unmodifiableList(md.stream()
+                .map(meta -> targetMetadataRepository
+                        .save(new JpaTargetMetadata(meta.getKey(), updatedTarget, meta.getValue())))
                 .collect(Collectors.toList()));
     }
 
@@ -192,34 +200,34 @@ public class JpaTargetManagement implements TargetManagement {
                 TargetMetadata.class, Target.class, targetMetadataRepository::countByTargetId);
     }
 
-    private JpaTarget touch(final Target target) {
+    private JpaTarget touch(final JpaTarget target) {
 
         // merge base target so optLockRevision gets updated and audit
         // log written because modifying metadata is modifying the base
         // target itself for auditing purposes.
-        final JpaTarget result = entityManager.merge((JpaTarget) target);
+        final JpaTarget result = entityManager.merge(target);
         result.setLastModifiedAt(0L);
 
         return targetRepository.save(result);
     }
 
-    private JpaTarget touch(final Long targetId) {
-        return touch(get(targetId).orElseThrow(() -> new EntityNotFoundException(Target.class, targetId)));
+    private JpaTarget touch(final String controllerId) {
+        return touch(getByControllerIdAndThrowIfNotFound(controllerId));
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetMetadata updateMetaData(final long targetId, final MetaData md) {
+    public TargetMetadata updateMetaData(final String controllerId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByTargetId(targetId, md.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, md.getKey()));
+        final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, md.getKey())
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, md.getKey()));
         toUpdate.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // target indirectly
-        touch(targetId);
+        touch(controllerId);
         return targetMetadataRepository.save(toUpdate);
     }
 
@@ -227,17 +235,17 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteMetaData(final long targetId, final String key) {
-        final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByTargetId(targetId, key)
-                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, key));
+    public void deleteMetaData(final String controllerId, final String key) {
+        final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, key)
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, key));
 
-        touch(metadata.getTarget());
+        touch(controllerId);
         targetMetadataRepository.delete(metadata.getId());
     }
 
     @Override
-    public Page<TargetMetadata> findMetaDataByTargetId(final Pageable pageable, final long targetId) {
-        throwExceptionIfTargetDoesNotExist(targetId);
+    public Page<TargetMetadata> findMetaDataByControllerId(final Pageable pageable, final String controllerId) {
+        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
         return convertMdPage(
                 targetMetadataRepository
@@ -248,21 +256,15 @@ public class JpaTargetManagement implements TargetManagement {
                 pageable);
     }
 
-    private void throwExceptionIfTargetDoesNotExist(final Long targetId) {
-        if (!targetRepository.exists(targetId)) {
-            throw new EntityNotFoundException(Target.class, targetId);
-        }
-    }
-
     private static Page<TargetMetadata> convertMdPage(final Page<JpaTargetMetadata> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
-    public Page<TargetMetadata> findMetaDataByTargetIdAndRsql(final Pageable pageable, final long targetId,
+    public Page<TargetMetadata> findMetaDataByControllerIdAndRsql(final Pageable pageable, final String controllerId,
             final String rsqlParam) {
 
-        throwExceptionIfTargetDoesNotExist(targetId);
+        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
         final Specification<JpaTargetMetadata> spec = RSQLUtility.parse(rsqlParam, TargetMetadataFields.class,
                 virtualPropertyReplacer, database);
@@ -274,8 +276,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Optional<TargetMetadata> getMetaDataByTargetId(final long targetId, final String key) {
-        throwExceptionIfTargetDoesNotExist(targetId);
+    public Optional<TargetMetadata> getMetaDataByControllerId(final String controllerId, final String key) {
+        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
         return Optional.ofNullable(targetMetadataRepository.findOne(new TargetMetadataCompositeKey(targetId, key)));
     }
@@ -312,8 +314,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Target update(final TargetUpdate u) {
         final JpaTargetUpdate update = (JpaTargetUpdate) u;
 
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(update.getControllerId())
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, update.getControllerId()));
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(update.getControllerId());
 
         update.getName().ifPresent(target::setName);
         update.getDescription().ifPresent(target::setDescription);
@@ -348,8 +349,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteByControllerID(final String controllerID) {
-        final Target target = targetRepository.findByControllerId(controllerID)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
+        final Target target = getByControllerIdAndThrowIfNotFound(controllerID);
 
         targetRepository.delete(target.getId());
     }
@@ -552,8 +552,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unAssignTag(final String controllerID, final long targetTagId) {
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerID)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerID));
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
@@ -769,16 +768,14 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Map<String, String> getControllerAttributes(final String controllerId) {
-        final JpaTarget target = (JpaTarget) getByControllerID(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         return target.getControllerAttributes();
     }
 
     @Override
     public void requestControllerAttributes(final String controllerId) {
-        final JpaTarget target = (JpaTarget) getByControllerID(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         target.setRequestControllerAttributes(true);
 
@@ -789,8 +786,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public boolean isControllerAttributesRequested(final String controllerId) {
-        final JpaTarget target = (JpaTarget) getByControllerID(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         return target.isRequestControllerAttributes();
     }

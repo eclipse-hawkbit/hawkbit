@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -288,5 +290,94 @@ public interface MgmtTargetRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/installedDS", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("controllerId") String controllerId);
+
+    /**
+     * Gets a paged list of meta data for a target.
+     *
+     * @param controllerId
+     *            the ID of the target for the meta data
+     * @param pagingOffsetParam
+     *            the offset of list of targets for pagination, might not be
+     *            present in the rest request then default value will be applied
+     * @param pagingLimitParam
+     *            the limit of the paged request, might not be present in the
+     *            rest request then default value will be applied
+     * @param sortParam
+     *            the sorting parameter in the request URL, syntax
+     *            {@code field:direction, field:direction}
+     * @param rsqlParam
+     *            the search parameter in the request URL, syntax
+     *            {@code q=key==abc}
+     * @return status OK if get request is successful with the paged list of
+     *         meta data
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/metadata", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("controllerId") String controllerId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
+
+    /**
+     * Gets a single meta data value for a specific key of a target.
+     *
+     * @param controllerId
+     *            the ID of the target to get the meta data from
+     * @param metadataKey
+     *            the key of the meta data entry to retrieve the value from
+     * @return status OK if get request is successful with the value of the meta
+     *         data
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/metadata/{metadataKey}", produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("controllerId") String controllerId,
+            @PathVariable("metadataKey") String metadataKey);
+
+    /**
+     * Updates a single meta data value of a target.
+     *
+     * @param controllerId
+     *            the ID of the target to update the meta data entry
+     * @param metadataKey
+     *            the key of the meta data to update the value
+     * @param metadata
+     *            update body
+     * @return status OK if the update request is successful and the updated
+     *         meta data result
+     */
+    @RequestMapping(method = RequestMethod.PUT, value = "/{controllerId}/metadata/{metadataKey}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("controllerId") String controllerId,
+            @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
+
+    /**
+     * Deletes a single meta data entry from the target.
+     *
+     * @param controllerId
+     *            the ID of the target to delete the meta data entry
+     * @param metadataKey
+     *            the key of the meta data to delete
+     * @return status OK if the delete request is successful
+     */
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{controllerId}/metadata/{metadataKey}")
+    ResponseEntity<Void> deleteMetadata(@PathVariable("controllerId") String controllerId,
+            @PathVariable("metadataKey") String metadataKey);
+
+    /**
+     * Creates a list of meta data for a specific target.
+     *
+     * @param controllerId
+     *            the ID of the controllerId to create meta data for
+     * @param metadataRest
+     *            the list of meta data entries to create
+     * @return status created if post request is successful with the value of
+     *         the created meta data
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/{controllerId}/metadata", consumes = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("controllerId") String controllerId,
+            List<MgmtMetadata> metadataRest);
 
 }

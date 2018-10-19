@@ -657,8 +657,9 @@ public interface TargetManagement {
     /**
      * Creates a list of target meta data entries.
      *
-     * @param targetId
-     *            {@link Target} the metadata has to be created for
+     * @param controllerId
+     *            {@link Target} controller id the metadata has to be created
+     *            for
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created target meta data entries
@@ -675,12 +676,12 @@ public interface TargetManagement {
      *             for the addressed {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<TargetMetadata> createMetaData(long targetId, @NotEmpty Collection<MetaData> metadata);
+    List<TargetMetadata> createMetaData(@NotEmpty String controllerId, @NotEmpty Collection<MetaData> metadata);
 
     /**
      * Deletes a target meta data entry.
      *
-     * @param targetId
+     * @param controllerId
      *            where meta data has to be deleted
      * @param key
      *            of the meta data element
@@ -689,15 +690,15 @@ public interface TargetManagement {
      *             if given target does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(long targetId, @NotEmpty String key);
+    void deleteMetaData(@NotEmpty String controllerId, @NotEmpty String key);
 
     /**
      * Finds all meta data by the given target id.
      * 
      * @param pageable
      *            the page request to page the result
-     * @param targetId
-     *            the target id to retrieve the meta data from
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
      *
      * @return a paged result of all meta data entries for a given target id
      * 
@@ -705,15 +706,15 @@ public interface TargetManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<TargetMetadata> findMetaDataByTargetId(@NotNull Pageable pageable, long targetId);
+    Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
      * Finds all meta data by the given target id.
      * 
      * @param pageable
      *            the page request to page the result
-     * @param targetId
-     *            the target id to retrieve the meta data from
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
      * @param rsqlParam
      *            rsql query string
      *
@@ -730,13 +731,13 @@ public interface TargetManagement {
      *             of target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<TargetMetadata> findMetaDataByTargetIdAndRsql(@NotNull Pageable pageable, long targetId,
+    Page<TargetMetadata> findMetaDataByControllerIdAndRsql(@NotNull Pageable pageable, @NotEmpty String controllerId,
             @NotNull String rsqlParam);
 
     /**
      * Finds a single target meta data by its id.
      *
-     * @param targetId
+     * @param controllerId
      *            of the {@link Target}
      * @param key
      *            of the meta data element
@@ -746,13 +747,14 @@ public interface TargetManagement {
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<TargetMetadata> getMetaDataByTargetId(long targetId, @NotEmpty String key);
+    Optional<TargetMetadata> getMetaDataByControllerId(@NotEmpty String controllerId, @NotEmpty String key);
 
     /**
      * Updates a target meta data value if corresponding entry exists.
      *
-     * @param targetId
-     *            {@link Target} id of the meta data entry to be updated
+     * @param controllerId
+     *            {@link Target} controller id of the meta data entry to be
+     *            updated
      * @param metadata
      *            meta data entry to be updated
      * @return the updated meta data entry
@@ -762,5 +764,5 @@ public interface TargetManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    TargetMetadata updateMetaData(long targetId, @NotNull MetaData metadata);
+    TargetMetadata updateMetaData(@NotEmpty String controllerId, @NotNull MetaData metadata);
 }
