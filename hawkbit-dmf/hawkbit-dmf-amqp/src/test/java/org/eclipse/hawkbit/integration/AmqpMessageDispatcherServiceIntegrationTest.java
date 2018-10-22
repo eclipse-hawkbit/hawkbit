@@ -179,19 +179,19 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Target target = controllerManagement.getByControllerId(controllerId).get();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final DistributionSetAssignmentResult dsAssignmentResult1 = assignDistributionSet(distributionSet, target);
+        final long actionId1 = assignDistributionSet(distributionSet, target).getActions().get(0);
         waitUntilTargetStatusIsPending(controllerId);
-        final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                dsAssignmentResult1.getActions().get(0), DmfActionStatus.ERROR);
+        final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId1,
+                DmfActionStatus.ERROR);
         getDmfClient().send(messageError);
         waitUntilTargetStatusIsError(controllerId);
 
         assertRequestAttributesUpdateMessageAbsent(controllerId);
 
-        final DistributionSetAssignmentResult dsAssignmentResult2 = assignDistributionSet(distributionSet, target);
+        final long actionId2 = assignDistributionSet(distributionSet, target).getActions().get(0);
         waitUntilTargetStatusIsPending(controllerId);
-        final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                dsAssignmentResult2.getActions().get(0), DmfActionStatus.FINISHED);
+        final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId2,
+                DmfActionStatus.FINISHED);
         getDmfClient().send(messageFin);
         waitUntilTargetStatusIsInSync(controllerId);
 
