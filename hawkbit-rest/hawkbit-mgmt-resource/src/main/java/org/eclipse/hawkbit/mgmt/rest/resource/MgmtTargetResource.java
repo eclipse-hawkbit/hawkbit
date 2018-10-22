@@ -386,7 +386,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("controllerId") final String controllerId,
-            @PathVariable("metadataKey") final String metadataKey, final MgmtMetadataBodyPut metadata) {
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         final TargetMetadata updated = targetManagement.updateMetaData(controllerId,
                 entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(updated));
@@ -401,7 +401,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("controllerId") final String controllerId,
-            final List<MgmtMetadata> metadataRest) {
+            @RequestBody final List<MgmtMetadata> metadataRest) {
         final List<TargetMetadata> created = targetManagement.createMetaData(controllerId,
                 MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
         return new ResponseEntity<>(MgmtTargetMapper.toResponseTargetMetadata(created), HttpStatus.CREATED);
