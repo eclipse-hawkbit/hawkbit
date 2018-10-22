@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.integration;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -180,18 +179,22 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Target target = controllerManagement.getByControllerId(controllerId).get();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final List<Long> actions1 = assignDistributionSet(distributionSet, target).getActions();
+        final DistributionSetAssignmentResult dsAssignmentResult1 = assignDistributionSet(distributionSet, target);
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                actions1.get(0), DmfActionStatus.ERROR);
+                dsAssignmentResult1.getActions().get(0), DmfActionStatus.ERROR);
         getDmfClient().send(messageError);
+        waitUntilTargetStatusIsError(controllerId);
+
         assertRequestAttributesUpdateMessageAbsent(controllerId);
 
-        final List<Long> actions2 = assignDistributionSet(distributionSet, target).getActions();
+        final DistributionSetAssignmentResult dsAssignmentResult2 = assignDistributionSet(distributionSet, target);
         waitUntilTargetStatusIsPending(controllerId);
         final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST,
-                actions2.get(0), DmfActionStatus.FINISHED);
+                dsAssignmentResult2.getActions().get(0), DmfActionStatus.FINISHED);
         getDmfClient().send(messageFin);
+        waitUntilTargetStatusIsInSync(controllerId);
+
         assertRequestAttributesUpdateMessage(controllerId);
     }
 
@@ -200,6 +203,22 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
             final Optional<Target> findTargetByControllerID = targetManagement.getByControllerID(controllerId);
             return findTargetByControllerID.isPresent()
                     && TargetUpdateStatus.PENDING.equals(findTargetByControllerID.get().getUpdateStatus());
+        });
+    }
+
+    private void waitUntilTargetStatusIsError(final String controllerId) {
+        waitUntil(() -> {
+            final Optional<Target> findTargetByControllerID = targetManagement.getByControllerID(controllerId);
+            return findTargetByControllerID.isPresent()
+                    && TargetUpdateStatus.ERROR.equals(findTargetByControllerID.get().getUpdateStatus());
+        });
+    }
+
+    private void waitUntilTargetStatusIsInSync(final String controllerId) {
+        waitUntil(() -> {
+            final Optional<Target> findTargetByControllerID = targetManagement.getByControllerID(controllerId);
+            return findTargetByControllerID.isPresent()
+                    && TargetUpdateStatus.IN_SYNC.equals(findTargetByControllerID.get().getUpdateStatus());
         });
     }
 
