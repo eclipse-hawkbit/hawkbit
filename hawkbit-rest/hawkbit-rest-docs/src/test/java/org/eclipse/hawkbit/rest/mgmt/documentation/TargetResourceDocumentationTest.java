@@ -20,6 +20,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.restdocs.snippet.Attributes.key;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +50,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -90,7 +94,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .type("enum").attributes(
                                         key("value").value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                         fieldWithPath("content[].securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
-                        fieldWithPath("content[].requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                        fieldWithPath("content[].requestAttributes")
+                                .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                         fieldWithPath("content[].installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
                         fieldWithPath("content[].lastModifiedAt")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
@@ -142,7 +147,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value")
                                                 .value("['error', 'in_sync', 'pending', 'registered', 'unknown']")),
                                 fieldWithPath("[]securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
-                                fieldWithPath("[]requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                                fieldWithPath("[]requestAttributes")
+                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 
@@ -183,12 +189,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(
                                 parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(optionalRequestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                                optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                                optionalRequestFieldWithPath("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                optionalRequestFieldWithPath("description")
+                                        .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("controllerId")
+                                        .description(ApiModelPropertiesGeneric.ITEM_ID),
                                 optionalRequestFieldWithPath("address").description(MgmtApiModelProperties.ADDRESS),
                                 optionalRequestFieldWithPath("securityToken")
                                         .description(MgmtApiModelProperties.SECURITY_TOKEN),
-                                optionalRequestFieldWithPath("requestAttributes").description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
+                                optionalRequestFieldWithPath("requestAttributes")
+                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
                         getResponseFieldTarget(false)));
     }
 
@@ -552,6 +561,166 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(
                                 parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
+    }
+
+    @Test
+    @Description("Get a paged list of meta data for a target with standard page size." + " Required Permission: "
+            + SpPermission.READ_REPOSITORY)
+    public void getMetadata() throws Exception {
+        final int totalMetadata = 4;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final Target testTarget = testdataFactory.createTarget("one");
+        for (int index = 0; index < totalMetadata; index++) {
+            targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
+                    entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+        }
+
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+                testTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andDo(this.document.document(
+                        pathParameters(
+                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        responseFields(fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
+                                fieldWithPath("size").type(JsonFieldType.NUMBER)
+                                        .description(ApiModelPropertiesGeneric.SIZE),
+                                fieldWithPath("content").description(MgmtApiModelProperties.META_DATA),
+                                fieldWithPath("content[].key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                fieldWithPath("content[].value").description(MgmtApiModelProperties.META_DATA_VALUE))));
+    }
+
+    @Test
+    @Description("Get a paged list of meta data for a target with defined page size and sorting by name descending and key starting with 'known'."
+            + " Required Permission: " + SpPermission.READ_REPOSITORY)
+    public void getMetadataWithParameters() throws Exception {
+        final int totalMetadata = 4;
+
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final Target testTarget = testdataFactory.createTarget("one");
+        for (int index = 0; index < totalMetadata; index++) {
+            targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
+                    entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+        }
+
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+                testTarget.getControllerId()).param("offset", "1").param("limit", "2").param("sort", "key:DESC")
+                        .param("q", "key==known*"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andDo(this.document.document(
+                        requestParameters(
+                                parameterWithName("limit").attributes(key("type").value("query"))
+                                        .description(ApiModelPropertiesGeneric.LIMIT),
+                                parameterWithName("sort").description(ApiModelPropertiesGeneric.SORT),
+                                parameterWithName("offset").description(ApiModelPropertiesGeneric.OFFSET),
+                                parameterWithName("q").description(ApiModelPropertiesGeneric.FIQL)),
+                        responseFields(fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
+                                fieldWithPath("size").type(JsonFieldType.NUMBER)
+                                        .description(ApiModelPropertiesGeneric.SIZE),
+                                fieldWithPath("content").description(MgmtApiModelProperties.META_DATA),
+                                fieldWithPath("content[].key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                fieldWithPath("content[].value").description(MgmtApiModelProperties.META_DATA_VALUE))));
+    }
+
+    @Test
+    @Description("Get a single meta data value for a meta data key." + " Required Permission: "
+            + SpPermission.READ_REPOSITORY)
+    public void getMetadataValue() throws Exception {
+
+        // prepare and create metadata
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+        final Target testTarget = testdataFactory.createTarget("one");
+        targetManagement.createMetaData(testTarget.getControllerId(),
+                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{metadatakey}",
+                testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                parameterWithName("metadatakey").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        responseFields(fieldWithPath("key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                fieldWithPath("value").description(MgmtApiModelProperties.META_DATA_VALUE))));
+    }
+
+    @Test
+    @Description("Update a single meta data value for speficic key." + " Required Permission: "
+            + SpPermission.UPDATE_REPOSITORY)
+    public void updateMetadata() throws Exception {
+        // prepare and create metadata for update
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+        final String updateValue = "valueForUpdate";
+
+        final Target testTarget = testdataFactory.createTarget("one");
+        targetManagement.createMetaData(testTarget.getControllerId(),
+                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+
+        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
+
+        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{metadatakey}",
+                testTarget.getControllerId(), knownKey)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonObject.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                parameterWithName("metadatakey").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        requestFields(requestFieldWithPath("key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                requestFieldWithPath("value").description(MgmtApiModelProperties.META_DATA_VALUE)),
+                        responseFields(fieldWithPath("key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                fieldWithPath("value").description(MgmtApiModelProperties.META_DATA_VALUE))));
+
+    }
+
+    @Test
+    @Description("Delete a single meta data." + " Required Permission: " + SpPermission.UPDATE_REPOSITORY)
+    public void deleteMetadata() throws Exception {
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        final Target testTarget = testdataFactory.createTarget("one");
+        targetManagement.createMetaData(testTarget.getControllerId(),
+                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{key}",
+                testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                parameterWithName("key").description(ApiModelPropertiesGeneric.ITEM_ID))));
+
+    }
+
+    @Test
+    @Description("Create a list of meta data entries" + " Required Permission: " + SpPermission.READ_REPOSITORY
+            + " and " + SpPermission.UPDATE_TARGET)
+    public void createMetadata() throws Exception {
+
+        final Target testTarget = testdataFactory.createTarget("one");
+
+        final String knownKey1 = "knownKey1";
+        final String knownKey2 = "knownKey2";
+
+        final String knownValue1 = "knownValue1";
+        final String knownValue2 = "knownValue2";
+
+        final JSONArray jsonArray = new JSONArray();
+        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+                testTarget.getControllerId()).contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(jsonArray.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andDo(this.document.document(
+                        pathParameters(
+                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        requestFields(requestFieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),
+                                optionalRequestFieldWithPath("[]value")
+                                        .description(MgmtApiModelProperties.META_DATA_VALUE))));
     }
 
     private String createTargetJsonForPostRequest(final String controllerId, final String name,
