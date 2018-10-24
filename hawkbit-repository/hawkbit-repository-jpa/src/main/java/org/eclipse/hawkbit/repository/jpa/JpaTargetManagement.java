@@ -24,7 +24,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -663,7 +662,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public boolean existsByControllerId(@NotEmpty final String controllerId) {
+    public boolean existsByControllerId(final String controllerId) {
         return targetRepository.existsByControllerId(controllerId);
     }
 
