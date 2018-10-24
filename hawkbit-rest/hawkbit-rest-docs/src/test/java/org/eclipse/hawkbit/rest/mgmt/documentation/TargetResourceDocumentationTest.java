@@ -64,7 +64,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Resource")
 public class TargetResourceDocumentationTest extends AbstractApiRestDocumentation {
 
-    private final String controllerId = "137";
+    private final String targetId = "137";
 
     @Override
     @Before
@@ -76,7 +76,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all targets within SP. Required Permission: READ_TARGET.")
     public void getTargets() throws Exception {
-        createTargetByGivenNameWithAttributes(controllerId, createDistributionSet());
+        createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
@@ -155,39 +155,39 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the DELETE request of deleting a single target within SP. Required Permission: DELETE_TARGET.")
     public void deleteTarget() throws Exception {
-        final Target target = testdataFactory.createTarget(controllerId);
+        final Target target = testdataFactory.createTarget(targetId);
 
         mockMvc.perform(
-                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}", target.getControllerId()))
+                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print()).andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.NAME))));
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 
     @Test
     @Description("Handles the GET request of retrieving a single target within SP. Required Permission: READ_TARGET.")
     public void getTarget() throws Exception {
-        final Target target = createTargetByGivenNameWithAttributes(controllerId, createDistributionSet());
+        final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}", target.getControllerId()))
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldTarget(false)));
     }
 
     @Test
     @Description("Handles the PUT request of updating a target within SP. Required Permission: UPDATE_TARGET.")
     public void putTarget() throws Exception {
-        final Target target = createTargetByGivenNameWithAttributes(controllerId, createDistributionSet());
-        final String targetAsJson = createJsonTarget(controllerId, "newTargetName", "I've been updated");
+        final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
+        final String targetAsJson = createJsonTarget(targetId, "newTargetName", "I've been updated");
 
-        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}", target.getControllerId())
+        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8).content(targetAsJson)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(optionalRequestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                                 optionalRequestFieldWithPath("description")
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
@@ -204,14 +204,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET.")
     public void getActionsFromTarget() throws Exception {
-        generateActionForTarget(controllerId);
+        generateActionForTarget(targetId);
 
         mockMvc.perform(get(
-                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
-                controllerId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
+                targetId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -236,14 +236,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target with maintenance window. Required Permission: READ_TARGET.")
     public void getActionsFromTargetWithMaintenanceWindow() throws Exception {
-        generateActionForTarget(controllerId, true, false, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
+        generateActionForTarget(targetId, true, false, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
 
         mockMvc.perform(get(
-                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
-                controllerId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
+                targetId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -278,9 +278,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all targets within SP based by parameter. Required Permission: READ_TARGET.")
     public void getActionsFromTargetWithParameters() throws Exception {
-        generateActionForTarget(controllerId);
+        generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/"
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "?limit=10&sort=id:ASC&offset=0&q=status==pending"))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(requestParameters(
@@ -294,22 +294,22 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET.")
     public void deleteActionFromTarget() throws Exception {
-        final Action actions = generateActionForTarget(controllerId, false);
+        final Action actions = generateActionForTarget(targetId, false);
 
-        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", controllerId, actions.getId()))
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, actions.getId()))
                 .andExpect(status().isNoContent()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 
     @Test
     @Description("Handles the GET request of retrieving all targets within SP based by parameter. Required Permission: READ_TARGET.")
     public void deleteActionsFromTargetWithParameters() throws Exception {
-        generateActionForTarget(controllerId);
+        generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/"
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "?force=true")).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print()).andDo(this.document.document(
                         requestParameters(parameterWithName("force").description(MgmtApiModelProperties.FORCE))));
@@ -318,15 +318,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTarget() throws Exception {
-        final Action action = generateActionForTarget(controllerId, true, true);
+        final Action action = generateActionForTarget(targetId, true, true);
         assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
                 .isEqualTo(ActionType.TIMEFORCED);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", controllerId, action.getId()))
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, action.getId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
@@ -352,14 +352,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTargetWithMaintenanceWindow() throws Exception {
-        final Action action = generateActionForTarget(controllerId, true, true, getTestSchedule(2), getTestDuration(1),
+        final Action action = generateActionForTarget(targetId, true, true, getTestSchedule(2), getTestDuration(1),
                 getTestTimeZone());
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", controllerId, action.getId()))
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, action.getId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
@@ -395,7 +395,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the PUT request to switch an action from soft to forced. Required Permission: UPDATE_TARGET.")
     public void switchActionToForced() throws Exception {
-        final Target target = testdataFactory.createTarget(controllerId);
+        final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
         final Long actionId = deploymentManagement
                 .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
@@ -405,13 +405,13 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final Map<String, Object> body = new HashMap<>();
         body.put("forceType", "forced");
 
-        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", controllerId, actionId)
+        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, actionId)
                         .content(this.objectMapper.writeValueAsString(body))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(
                                 requestFieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCED)),
@@ -437,13 +437,13 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getStatusFromAction() throws Exception {
-        final Action action = generateActionForTarget(controllerId);
+        final Action action = generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS,
-                controllerId, action.getId())).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                targetId, action.getId())).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
@@ -463,9 +463,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all targets within SP based by parameter. Required Permission: READ_TARGET.")
     public void getStatusFromActionWithParameters() throws Exception {
-        final Action action = generateActionForTarget(controllerId);
+        final Action action = generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/"
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
                 + MgmtRestConstants.TARGET_V1_ACTION_STATUS + "?limit=10&sort=id:ASC&offset=0"))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
@@ -478,21 +478,21 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving the assigned distribution set of an specific target. Required Permission: READ_TARGET.")
     public void getAssignedDistributionSetFromAction() throws Exception {
-        generateActionForTarget(controllerId);
+        generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, controllerId)).andExpect(status().isOk())
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
 
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
-        testdataFactory.createTarget(controllerId);
+        testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final long forceTime = System.currentTimeMillis();
@@ -501,13 +501,13 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone()))
                 .toString();
 
-        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, controllerId).content(body)
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(requestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
@@ -537,29 +537,29 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final Map<String, String> knownControllerAttrs = new HashMap<>();
         knownControllerAttrs.put("a", "1");
         knownControllerAttrs.put("b", "2");
-        final Target target = testdataFactory.createTarget(controllerId);
-        controllerManagement.updateControllerAttributes(controllerId, knownControllerAttrs, null);
+        final Target target = testdataFactory.createTarget(targetId);
+        controllerManagement.updateControllerAttributes(targetId, knownControllerAttrs, null);
 
         // test query target over rest resource
         mockMvc.perform(
-                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/attributes", target.getName()))
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/attributes", target.getName()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.a", equalTo("1"))).andExpect(jsonPath("$.b", equalTo("2")))
                 .andDo(this.document.document(pathParameters(
-                        parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+                        parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 
     @Test
     @Description("Handles the GET request of retrieving the installed distribution set of an specific target. Required Permission: READ_TARGET.")
     public void getInstalledDistributionSetFromTarget() throws Exception {
-        final Target target = createTargetByGivenNameWithAttributes(controllerId, createDistributionSet());
+        final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/"
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET, target.getName())).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
 
@@ -570,18 +570,18 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final int totalMetadata = 4;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
         for (int index = 0; index < totalMetadata; index++) {
             targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
                     entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
                 testTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -598,13 +598,13 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
         for (int index = 0; index < totalMetadata; index++) {
             targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
                     entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
                 testTarget.getControllerId()).param("offset", "1").param("limit", "2").param("sort", "key:DESC")
                         .param("q", "key==known*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -632,14 +632,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         // prepare and create metadata
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
                 Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{metadatakey}",
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("metadatakey").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 fieldWithPath("value").description(MgmtApiModelProperties.META_DATA_VALUE))));
@@ -654,18 +654,18 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String knownValue = "knownValue";
         final String updateValue = "valueForUpdate";
 
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
                 Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
-        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{metadatakey}",
+        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)
                         .contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("metadatakey").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(requestFieldWithPath("key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 requestFieldWithPath("value").description(MgmtApiModelProperties.META_DATA_VALUE)),
@@ -681,14 +681,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
 
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
                 Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
-        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata/{key}",
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{key}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
-                        pathParameters(parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("key").description(ApiModelPropertiesGeneric.ITEM_ID))));
 
     }
@@ -698,7 +698,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
             + " and " + SpPermission.UPDATE_TARGET)
     public void createMetadata() throws Exception {
 
-        final Target testTarget = testdataFactory.createTarget("one");
+        final Target testTarget = testdataFactory.createTarget(targetId);
 
         final String knownKey1 = "knownKey1";
         final String knownKey2 = "knownKey2";
@@ -710,14 +710,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{controllerId}/metadata",
+        mockMvc.perform(
+                post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
                 testTarget.getControllerId()).contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
                 .andDo(this.document.document(
                         pathParameters(
-                                parameterWithName("controllerId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(requestFieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 optionalRequestFieldWithPath("[]value")
                                         .description(MgmtApiModelProperties.META_DATA_VALUE))));

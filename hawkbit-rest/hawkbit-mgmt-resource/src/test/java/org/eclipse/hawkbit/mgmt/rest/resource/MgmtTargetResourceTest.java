@@ -1672,7 +1672,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
         mvc.perform(
-                post("/rest/v1/targets/{controllerId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -1695,7 +1695,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         }
 
         mvc.perform(
-                post("/rest/v1/targets/{controllerId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
@@ -1720,7 +1720,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
-        mvc.perform(put("/rest/v1/targets/{controllerId}/metadata/{key}", knownControllerId, knownKey)
+        mvc.perform(put("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -1750,7 +1750,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
 
-        mvc.perform(delete("/rest/v1/targets/{controllerId}/metadata/{key}", knownControllerId, knownKey))
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         assertThat(targetManagement.getMetaDataByControllerId(knownControllerId, knownKey)).isNotPresent();
@@ -1767,7 +1767,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
 
-        mvc.perform(delete("/rest/v1/targets/{controllerId}/metadata/XXX", knownControllerId))
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/XXX", knownControllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         mvc.perform(delete("/rest/v1/targets/1234/metadata/{key}", knownKey)).andDo(MockMvcResultPrinter.print())
@@ -1787,7 +1787,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
 
-        mvc.perform(get("/rest/v1/targets/{controllerId}/metadata/{key}", knownControllerId, knownKey))
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(knownValue)));
     }
@@ -1805,7 +1805,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         setupTargetWithMetadata(knownControllerId, knownKeyPrefix, knownValuePrefix, totalMetadata);
 
-        mvc.perform(get("/rest/v1/targets/{controllerId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
                 knownControllerId)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("size", equalTo(limitParam))).andExpect(jsonPath("total", equalTo(totalMetadata)))
                 .andExpect(jsonPath("content[0].key", equalTo("knownKey0")))
@@ -1838,7 +1838,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         final String rsqlSearchValue1 = "value==knownValue1";
 
-        mvc.perform(get("/rest/v1/targets/{controllerId}/metadata?q=" + rsqlSearchValue1, knownControllerId))
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?q=" + rsqlSearchValue1, knownControllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
                 .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));

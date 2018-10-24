@@ -73,7 +73,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("controllerId") final String controllerId) {
+    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String controllerId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
         // to single response include poll status
         final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget);
@@ -120,7 +120,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String controllerId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
         if (targetRest.isRequestAttributes() != null) {
@@ -143,14 +143,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
+    public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String controllerId) {
         this.targetManagement.deleteByControllerID(controllerId);
         LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
+    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") final String controllerId) {
         final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(controllerId);
         if (controllerAttributes.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -164,7 +164,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("targetId") final String controllerId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -192,7 +192,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") final String controllerId,
             @PathVariable("actionId") final Long actionId) {
 
         final Action action = deploymentManagement.findAction(actionId)
@@ -206,7 +206,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
@@ -230,7 +230,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
-            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
+            @PathVariable("targetId") final String controllerId, @PathVariable("actionId") final Long actionId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
@@ -260,7 +260,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("controllerId") final String controllerId) {
+            @PathVariable("targetId") final String controllerId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(controllerId)
                 .map(ds -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
@@ -277,7 +277,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("targetId") final String controllerId,
             @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
@@ -311,7 +311,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
-            @PathVariable("controllerId") final String controllerId) {
+            @PathVariable("targetId") final String controllerId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(controllerId)
                 .map(set -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(set);
@@ -333,7 +333,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtAction> updateAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") final String controllerId,
             @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
 
         Action action = deploymentManagement.findAction(actionId)
@@ -353,7 +353,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") final String controllerId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -377,7 +377,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("targetId") final String controllerId,
             @PathVariable("metadataKey") final String metadataKey) {
         final TargetMetadata findOne = targetManagement.getMetaDataByControllerId(controllerId, metadataKey)
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, metadataKey));
@@ -385,7 +385,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("targetId") final String controllerId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         final TargetMetadata updated = targetManagement.updateMetaData(controllerId,
                 entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
@@ -393,14 +393,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMetadata(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") final String controllerId,
             @PathVariable("metadataKey") final String metadataKey) {
         targetManagement.deleteMetaData(controllerId, metadataKey);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") final String controllerId,
             @RequestBody final List<MgmtMetadata> metadataRest) {
         final List<TargetMetadata> created = targetManagement.createMetaData(controllerId,
                 MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
