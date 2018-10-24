@@ -55,7 +55,7 @@ Start the hawkBit Update Server and Device Simulator together with an MySQL and 
 ```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/docker
-$ docker stack init
+$ docker swarm init
 $ docker stack deploy -c docker-compose-stack.yml hawkbit
 ```
 
