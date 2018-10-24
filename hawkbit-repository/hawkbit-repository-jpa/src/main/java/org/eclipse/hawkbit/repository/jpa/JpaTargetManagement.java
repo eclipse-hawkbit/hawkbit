@@ -151,16 +151,7 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository.findByControllerId(controllerId);
     }
 
-    /**
-     * Tries to locate the {@link Target} with the given controller ID. Throws a
-     * {@link EntityNotFoundException} of no such target can be found.
-     * 
-     * @param controllerId
-     *            of the target to be located
-     * 
-     * @return The {@link JpaTarget} matching the given controller ID.
-     */
-    public JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
+    private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
         return targetRepository.findByControllerId(controllerId).map(JpaTarget.class::cast)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
