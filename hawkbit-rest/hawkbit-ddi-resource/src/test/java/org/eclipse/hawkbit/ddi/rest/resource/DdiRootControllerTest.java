@@ -62,6 +62,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -372,7 +373,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     public void testAttributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("1");
-        Target savedTarget = testdataFactory.createTarget("922");
+        final Target savedTarget = testdataFactory.createTarget("922");
         final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeValue");
         assertThatAttributesUpdateIsRequested(savedTarget.getControllerId());
 
@@ -383,23 +384,33 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());
 
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
-        final long actionId1 = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        assertAttributesUpdateNotRequestedAfterFailedDeployment(savedTarget, ds);
+
+        assertAttributesUpdateRequestedAfterSuccessfulDeployment(savedTarget, ds);
+    }
+
+    @Step
+    private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds)
+            throws Exception {
+        target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
+        assignDistributionSet(ds.getId(), target.getControllerId());
+        final long actionId1 = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0).getId();
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), actionId1,
+        sendDeploymentActionFeedback(target.getControllerId(), actionId1,
                 JsonBuilder.deploymentActionFeedback(Long.toString(actionId1), "closed", "failure", ""))
                         .andExpect(status().isOk());
-        assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());
+        assertThatAttributesUpdateIsNotRequested(target.getControllerId());
+    }
 
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
-        final long actionId2 = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+    @Step
+    private void assertAttributesUpdateRequestedAfterSuccessfulDeployment(Target target, final DistributionSet ds)
+            throws Exception {
+        target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
+        final long actionId2 = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0).getId();
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), actionId2,
-                JsonBuilder.deploymentActionFeedback(Long.toString(actionId2), "closed"))
-                        .andExpect(status().isOk());
-        assertThatAttributesUpdateIsRequested(savedTarget.getControllerId());
+        sendDeploymentActionFeedback(target.getControllerId(), actionId2,
+                JsonBuilder.deploymentActionFeedback(Long.toString(actionId2), "closed")).andExpect(status().isOk());
+        assertThatAttributesUpdateIsRequested(target.getControllerId());
     }
 
     private void assertThatAttributesUpdateIsRequested(final String targetControllerId)
