@@ -86,7 +86,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         try {
             inputStream = Optional.of(new PipedInputStream(outputStream));
             publishUploadProgressEvent(fileUploadId, 0, fileSize);
-            startTransferToRepositoryThread(inputStream.get(), fileUploadId, mimeType);
+            startTransferToRepositoryThread(inputStream.orElseThrow(IOException::new), fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
             setFailureReasonUploadFailed();

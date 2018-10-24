@@ -53,7 +53,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     private final transient SoftwareModuleManagement softwareModuleManagement;
     private final long maxSize;
 
-    private volatile String mimeType;
     private volatile FileUploadId fileUploadId;
 
     FileTransferHandlerVaadinUpload(final long maxSize, final SoftwareModuleManagement softwareManagement,
@@ -72,7 +71,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadStarted(final StartedEvent event) {
         // reset internal state here because instance is reused for next upload!
         resetState();
-        this.mimeType = null;
         this.fileUploadId = null;
 
         assertThatOneSoftwareModuleIsSelected();
@@ -87,7 +85,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         }
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
-        this.mimeType = event.getMIMEType();
+        event.getMIMEType();
 
         if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
@@ -137,10 +135,9 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         final PipedOutputStream outputStream = new PipedOutputStream();
         Optional<PipedInputStream> inputStream = Optional.empty();
         try {
-            this.mimeType = mimeType;
             inputStream = Optional.of(new PipedInputStream(outputStream));
             publishUploadProgressEvent(fileUploadId, 0, 0);
-            startTransferToRepositoryThread(inputStream.get(), fileUploadId, mimeType);
+            startTransferToRepositoryThread(inputStream.orElseThrow(IOException::new), fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
             setFailureReasonUploadFailed();
@@ -149,9 +146,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             inputStream.ifPresent(AbstractFileTransferHandler::tryToCloseIOStream);
             getUploadState().updateFileUploadProgress(fileUploadId,
                     new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-            // uiNotification.displayWarning(getI18n().getMessage("message.delete.success",
-            // entitiesToDelete.size() + " " +
-            // getI18n().getMessage("caption.software.module") + "(s)"));
             uiNotification.displayWarning("try again");
             return ByteStreams.nullOutputStream();
         }

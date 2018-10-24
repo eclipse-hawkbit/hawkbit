@@ -50,8 +50,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private volatile boolean uploadInterrupted;
 
-    private volatile boolean uploadFailed;
-
     private volatile String failureReason;
 
     private final ArtifactUploadState artifactUploadState;
@@ -230,7 +228,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 UI.setCurrent(vaadinUi);
                 streamToRepository();
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
                 tryToCloseIOStream(inputStream);
                 LOG.error("Failed to transfer file to repository", e);
@@ -271,7 +269,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 try {
                     artifactManagement.delete(artifact.getId());
                     return;
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     exception = e;
                     tries++;
                 }
