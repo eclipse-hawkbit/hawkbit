@@ -13,7 +13,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -287,12 +286,7 @@ public final class MgmtTargetMapper {
     }
 
     static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
-
-        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final TargetMetadata targetMetadata : metadata) {
-            mappedList.add(toResponseTargetMetadata(targetMetadata));
-        }
-        return mappedList;
+        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).collect(Collectors.toList());
     }
 
 }

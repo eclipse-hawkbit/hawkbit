@@ -646,7 +646,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("Update a single meta data value for speficic key." + " Required Permission: "
+    @Description("Update a single meta data value for specific key." + " Required Permission: "
             + SpPermission.UPDATE_REPOSITORY)
     public void updateMetadata() throws Exception {
         // prepare and create metadata for update

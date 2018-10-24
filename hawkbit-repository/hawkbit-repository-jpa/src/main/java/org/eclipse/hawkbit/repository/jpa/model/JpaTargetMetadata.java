@@ -40,11 +40,30 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
         // default public constructor for JPA
     }
 
+    /**
+     * Creates a single metadata entry with the given key and value.
+     * 
+     * @param key
+     *            of the meta data entry
+     * @param value
+     *            of the meta data entry
+     */
     public JpaTargetMetadata(final String key, final String value) {
         super(key, value);
     }
 
-    public JpaTargetMetadata(final String key, final Target target, final String value) {
+    /**
+     * Creates a single metadata entry with the given key and value for the
+     * given {@link Target}.
+     * 
+     * @param key
+     *            of the meta data entry
+     * @param value
+     *            of the meta data entry
+     * @param target
+     *            the meta data entry is associated with
+     */
+    public JpaTargetMetadata(final String key, final String value, final Target target) {
         super(key, value);
         this.target = (JpaTarget) target;
     }

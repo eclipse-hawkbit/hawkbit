@@ -70,11 +70,11 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param type
      *            of the entity that was not found
      * 
-     * @param enityId
+     * @param entityId
      *            of the {@link BaseEntity}
      */
-    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object enityId) {
-        this(type.getSimpleName() + " with given identifier {" + enityId + "} does not exist.");
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
+        this(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.");
     }
 
     /**

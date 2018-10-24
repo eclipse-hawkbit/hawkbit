@@ -1794,7 +1794,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
     @Test
     @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
-    public void getPagedListofMetadata() throws Exception {
+    public void getPagedListOfMetadata() throws Exception {
         final String knownControllerId = "targetIdWithMetadata";
 
         final int totalMetadata = 10;

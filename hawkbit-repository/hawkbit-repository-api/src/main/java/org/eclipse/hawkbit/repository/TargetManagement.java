@@ -709,7 +709,7 @@ public interface TargetManagement {
     Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
-     * Finds all meta data by the given target id.
+     * Finds all meta data by the given target id and query.
      * 
      * @param pageable
      *            the page request to page the result
@@ -728,7 +728,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      * 
      * @throws EntityNotFoundException
-     *             of target with given ID does not exist
+     *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<TargetMetadata> findMetaDataByControllerIdAndRsql(@NotNull Pageable pageable, @NotEmpty String controllerId,

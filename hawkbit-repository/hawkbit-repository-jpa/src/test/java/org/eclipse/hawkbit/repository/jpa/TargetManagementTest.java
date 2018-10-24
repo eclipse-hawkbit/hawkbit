@@ -930,7 +930,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private JpaTargetMetadata insertTargetMetadata(final String knownKey, final Target target,
             final String knownValue) {
-        final JpaTargetMetadata metadata = new JpaTargetMetadata(knownKey, target, knownValue);
+        final JpaTargetMetadata metadata = new JpaTargetMetadata(knownKey, knownValue, target);
         return (JpaTargetMetadata) targetManagement
                 .createMetaData(target.getControllerId(), Collections.singletonList(metadata)).get(0);
     }
@@ -954,7 +954,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target2 = testdataFactory.createTarget("target2");
         final List<MetaData> metaData2 = new ArrayList<>();
         for (int i = 0; i < maxMetaData + 1; ++i) {
-            metaData2.add(new JpaTargetMetadata("k" + i, target2, "v" + i));
+            metaData2.add(new JpaTargetMetadata("k" + i, "v" + i, target2));
         }
         // verify quota is exceeded
         assertThatExceptionOfType(QuotaExceededException.class)
@@ -970,7 +970,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final int secondHalf = maxMetaData - firstHalf;
         final List<MetaData> metaData3 = new ArrayList<>();
         for (int i = 0; i < secondHalf + 1; ++i) {
-            metaData3.add(new JpaTargetMetadata("kk" + i, target3, "vv" + i));
+            metaData3.add(new JpaTargetMetadata("kk" + i, "vv" + i, target3));
         }
         // verify quota is exceeded
         assertThatExceptionOfType(QuotaExceededException.class)

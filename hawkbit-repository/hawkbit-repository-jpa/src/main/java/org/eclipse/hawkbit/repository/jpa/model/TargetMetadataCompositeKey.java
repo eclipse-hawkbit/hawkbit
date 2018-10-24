@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * The Target Metadata composite key which contains the meta data key and the ID
@@ -55,11 +56,7 @@ public final class TargetMetadataCompositeKey implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (target == null ? 0 : target.hashCode());
-        result = prime * result + (key == null ? 0 : key.hashCode());
-        return result;
+        return Objects.hash(target, key);
     }
 
     @Override
