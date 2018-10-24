@@ -24,6 +24,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -659,6 +660,11 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         return target.isRequestControllerAttributes();
+    }
+
+    @Override
+    public boolean existsByControllerId(@NotEmpty final String controllerId) {
+        return targetRepository.existsByControllerId(controllerId);
     }
 
 }

@@ -27,7 +27,7 @@ public final class IpUtil {
     private static final String HIDDEN_IP = "***";
     private static final String SCHEME_SEPERATOR = "://";
     private static final String HTTP_SCHEME = "http";
-    private static final String AMPQP_SCHEME = "amqp";
+    private static final String AMQP_SCHEME = "amqp";
     private static final Pattern IPV4_ADDRESS_PATTERN = Pattern
             .compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})");
 
@@ -142,7 +142,7 @@ public final class IpUtil {
      *             If the given string not parsable
      */
     public static URI createAmqpUri(final String host, final String exchange) {
-        return createUri(AMPQP_SCHEME, host).resolve("/" + exchange);
+        return createUri(AMQP_SCHEME, host).resolve("/" + exchange);
     }
 
     /**
@@ -177,7 +177,7 @@ public final class IpUtil {
      * @return true = is http host false = not
      */
     public static boolean isAmqpUri(final URI uri) {
-        return uri != null && AMPQP_SCHEME.equals(uri.getScheme());
+        return uri != null && AMQP_SCHEME.equals(uri.getScheme());
     }
 
     /**
@@ -189,7 +189,7 @@ public final class IpUtil {
      * @return <code>true</code> if IP address is actually known by the server
      */
     public static boolean isIpAddresKnown(final URI uri) {
-        return uri != null && !(AMPQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
+        return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
     }
 
 }

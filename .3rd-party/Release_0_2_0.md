@@ -54,7 +54,7 @@
 |org.apache.tomcat|tomcat-juli|8.0.28| [CQ10618](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10618) |
 |org.flywaydb|flyway-core|4.0.3| [CQ12947](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12947) |
 |org.glassfish|javax.json|1.0.4| [CQ10619](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10619) |
-|org.hibernate|hibernate-validator|6.0.7.Final| [CQ15540](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15540) |
+|org.hibernate.validator|hibernate-validator|6.0.7.Final| [CQ15540](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15540) |
 |org.jboss.logging|jboss-logging|3.2.1.Final| [CQ10621](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10621) |
 |org.jsoup|jsoup|1.8.3| [CQ12936](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12936) |
 |org.ow2.asm|asm-commons|5.0.1| [CQ12945](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12945) |

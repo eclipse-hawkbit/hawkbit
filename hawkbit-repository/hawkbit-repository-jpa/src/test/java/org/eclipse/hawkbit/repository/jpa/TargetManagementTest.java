@@ -88,8 +88,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL),
+                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()),
+                "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
@@ -122,10 +124,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
+        verifyThrownExceptionBy(() -> targetManagement
+                .toggleTagAssignment(Collections.singletonList(target.getControllerId()), NOT_EXIST_ID), "TargetTag");
         verifyThrownExceptionBy(
-                () -> targetManagement.toggleTagAssignment(Collections.singletonList(target.getControllerId()), NOT_EXIST_ID),
-                "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.toggleTagAssignment(Collections.singletonList(NOT_EXIST_ID), tag.getName()),
+                () -> targetManagement.toggleTagAssignment(Collections.singletonList(NOT_EXIST_ID), tag.getName()),
                 "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
@@ -142,8 +144,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
-        final String securityTokenWithReadPermission = securityRule.runAs(WithSpringAuthorityRule
-                .withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN), createdTarget::getSecurityToken);
+        final String securityTokenWithReadPermission = securityRule.runAs(
+                WithSpringAuthorityRule.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
+                createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
         final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
@@ -394,8 +397,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
+        assertThat(targetManagement.existsByControllerId("4711")).isTrue();
         targetManagement.delete(Collections.singletonList(target.getId()));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
+        assertThat(targetManagement.existsByControllerId("4711")).isFalse();
 
         final List<Long> targets = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
