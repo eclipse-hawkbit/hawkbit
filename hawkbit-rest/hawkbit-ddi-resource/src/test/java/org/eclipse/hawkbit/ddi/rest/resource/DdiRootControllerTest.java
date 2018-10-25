@@ -234,7 +234,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 etagWithFirstUpdate)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // now lets finish the update
-        sendDeploymentActionFeedback(target.getControllerId(), updateAction.getId(),
+        sendDeploymentActionFeedback(target, updateAction,
                 JsonBuilder.deploymentActionFeedback(updateAction.getId().toString(), "closed"))
                         .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -349,15 +349,15 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding"))
                         .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "failure"))
                         .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success"))
                         .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
     }
@@ -394,10 +394,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             throws Exception {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
         assignDistributionSet(ds.getId(), target.getControllerId());
-        final long actionId1 = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
-                .getContent().get(0).getId();
-        sendDeploymentActionFeedback(target.getControllerId(), actionId1,
-                JsonBuilder.deploymentActionFeedback(Long.toString(actionId1), "closed", "failure", ""))
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
+                .getContent().get(0);
+        sendDeploymentActionFeedback(target, action,
+                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure", ""))
                         .andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(target.getControllerId());
     }
@@ -406,10 +406,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void assertAttributesUpdateRequestedAfterSuccessfulDeployment(Target target, final DistributionSet ds)
             throws Exception {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
-        final long actionId2 = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
-                .getContent().get(0).getId();
-        sendDeploymentActionFeedback(target.getControllerId(), actionId2,
-                JsonBuilder.deploymentActionFeedback(Long.toString(actionId2), "closed")).andExpect(status().isOk());
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
+                .getContent().get(0);
+        sendDeploymentActionFeedback(target, action,
+                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed")).andExpect(status().isOk());
         assertThatAttributesUpdateIsRequested(target.getControllerId());
     }
 
@@ -427,10 +427,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.configData").doesNotExist());
     }
 
-    private ResultActions sendDeploymentActionFeedback(final String targetControllerId, final long actionID,
+    private ResultActions sendDeploymentActionFeedback(final Target target, final Action action,
             final String feedback) throws Exception {
         return mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), targetControllerId, actionID).content(feedback)
+                tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()).content(feedback)
                         .contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -451,17 +451,17 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
                         TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
                         TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
                         TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
@@ -493,17 +493,17 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
                         TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
                         TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
                         TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
@@ -531,17 +531,17 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "scheduled",
                         TARGET_SCHEDULED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "proceeding",
                         TARGET_PROCEEDING_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget.getControllerId(), savedAction.getId(),
+        sendDeploymentActionFeedback(savedTarget, savedAction,
                 JsonBuilder.deploymentActionFeedback(savedAction.getId().toString(), "closed", "success",
                         TARGET_COMPLETED_INSTALLATION_MSG)).andDo(MockMvcResultPrinter.print())
                                 .andExpect(status().isOk());

@@ -153,8 +153,8 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         assertReplyMessageHeader(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
     }
     
-    protected void assertRequestAttributesUpdateMessageAbsent(final String target) {
-        assertReplyMessageHeaderAbsent(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
+    protected void assertRequestAttributesUpdateMessageAbsent() {
+        assertReplyMessageIsAbsent(EventTopic.REQUEST_ATTRIBUTES_UPDATE);
     }
 
     protected void assertPingReplyMessage(final String correlationId) {
@@ -245,10 +245,9 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         return replyMessage;
     }
 
-    private void assertReplyMessageHeaderAbsent(final EventTopic eventTopic, final String controllerId) {
+    private void assertReplyMessageIsAbsent(final EventTopic eventTopic) {
         verifyReplyToListener();
-        final Message replyMessage = replyToListener.getEventTopicMessages().get(eventTopic);
-        assertThat(replyMessage).isNull();
+        assertThat(replyToListener.getEventTopicMessages()).doesNotContainKey(eventTopic);
     }
 
     @Step

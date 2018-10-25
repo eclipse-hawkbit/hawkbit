@@ -599,7 +599,9 @@ public class JpaControllerManagement implements ControllerManagement {
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
      */
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        LOG.debug("addUpdateActionStatus for action {}", action.getId());
+
+        String controllerId = null;
+        LOG.debug("handleAddUpdateActionStatus for action {}", action.getId());
 
         switch (actionStatus.getStatus()) {
         case ERROR:
@@ -608,7 +610,7 @@ public class JpaControllerManagement implements ControllerManagement {
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(action);
+            controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
         default:
             // information status entry - check for a potential DOS attack
@@ -619,10 +621,13 @@ public class JpaControllerManagement implements ControllerManagement {
 
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
+        final Action savedAction = actionRepository.save(action);
 
-        LOG.debug("addUpdateActionStatus for action {} isfinished.", action.getId());
-
-        return actionRepository.save(action);
+        if (controllerId != null) {
+            targetManagement.requestControllerAttributes(controllerId);
+        }
+        
+        return savedAction;
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -638,7 +643,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
     }
 
-    private void handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+    private String handleFinishedAndStoreInTargetStatus(final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
@@ -655,10 +660,9 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         targetRepository.save(target);
-
-        targetManagement.requestControllerAttributes(target.getControllerId());
-
         entityManager.detach(ds);
+
+        return target.getControllerId();
     }
 
     @Override
