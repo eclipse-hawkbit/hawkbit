@@ -76,20 +76,16 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
-import ru.yandex.qatools.allure.annotations.Title;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
 /**
  * Junit tests for RolloutManagment.
  */
-@Features("Component Tests - Repository")
-@Stories("Rollout Management")
+@Feature("Component Tests - Repository")
+@Story("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Before
@@ -298,7 +294,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Title("Deleting targets of a rollout")
+    // @Title("Deleting targets of a rollout")
     @Description("Verfiying that next group is started when targets of the group have been deleted.")
     public void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
 

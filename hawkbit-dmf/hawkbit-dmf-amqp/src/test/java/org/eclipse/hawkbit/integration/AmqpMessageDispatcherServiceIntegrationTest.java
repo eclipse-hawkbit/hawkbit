@@ -34,12 +34,12 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 import org.springframework.amqp.core.Message;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Device Management Federation API")
-@Stories("Amqp Message Dispatcher Service")
+@Feature("Component Tests - Device Management Federation API")
+@Story("Amqp Message Dispatcher Service")
 public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceIntegrationTest {
     private static final String TARGET_PREFIX = "Dmf_disp_";
 

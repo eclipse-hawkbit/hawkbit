@@ -12,12 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Unit Tests - Artifact URL Handler")
-@Stories("Base62 Utility tests")
+@Feature("Unit Tests - Artifact URL Handler")
+@Story("Base62 Utility tests")
 public class Base62UtilTest {
 
     @Test

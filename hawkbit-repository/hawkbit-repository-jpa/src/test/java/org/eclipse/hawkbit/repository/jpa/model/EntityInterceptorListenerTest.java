@@ -18,15 +18,15 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.After;
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test the entity listener interceptor.
  */
-@Features("Component Tests - Repository")
-@Stories("Entity Listener Interceptor")
+@Feature("Component Tests - Repository")
+@Story("Entity Listener Interceptor")
 public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     @After

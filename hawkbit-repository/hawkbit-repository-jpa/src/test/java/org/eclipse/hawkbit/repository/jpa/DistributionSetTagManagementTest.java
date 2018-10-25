@@ -32,16 +32,16 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * {@link DistributionSetTagManagement} tests.
  *
  */
-@Features("Component Tests - Repository")
-@Stories("DistributionSet Tag Management")
+@Feature("Component Tests - Repository")
+@Story("DistributionSet Tag Management")
 public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

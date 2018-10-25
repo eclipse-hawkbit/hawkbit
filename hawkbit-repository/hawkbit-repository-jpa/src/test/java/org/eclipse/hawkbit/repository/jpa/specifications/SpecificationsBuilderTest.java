@@ -30,12 +30,12 @@ import org.junit.Test;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Unit Tests - Repository")
-@Stories("Specifications builder")
+@Feature("Unit Tests - Repository")
+@Story("Specifications builder")
 public class SpecificationsBuilderTest {
 
     @Test

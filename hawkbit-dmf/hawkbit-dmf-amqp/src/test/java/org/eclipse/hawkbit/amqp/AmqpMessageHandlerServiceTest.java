@@ -69,13 +69,13 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.http.HttpStatus;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 @RunWith(MockitoJUnitRunner.class)
-@Features("Component Tests - Device Management Federation API")
-@Stories("AmqpMessage Handler Service Test")
+@Feature("Component Tests - Device Management Federation API")
+@Story("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
     private static final String SHA1 = "12345";

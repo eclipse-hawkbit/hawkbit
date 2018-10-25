@@ -48,15 +48,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.google.common.base.Charsets;
 import com.google.common.net.HttpHeaders;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test artifact downloads from the controller.
  */
-@Features("Component Tests - Direct Device Integration API")
-@Stories("Artifact Download Resource")
+@Feature("Component Tests - Direct Device Integration API")
+@Story("Artifact Download Resource")
 @SpringApplicationConfiguration(classes = DownloadTestConfiguration.class)
 public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
