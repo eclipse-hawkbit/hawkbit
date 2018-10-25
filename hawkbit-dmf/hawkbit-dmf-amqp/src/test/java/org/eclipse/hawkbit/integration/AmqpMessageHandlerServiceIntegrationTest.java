@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -363,13 +364,14 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     @Test
-    @Description("Tests register target and cancel a assignment")
+    @Description("Tests register target and send finished message")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void finishActionStatus() {
         final String controllerId = TARGET_PREFIX + "finishActionStatus";
@@ -805,7 +807,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyNumberOfDeadLetterMessages(3);
     }
 
-    private void sendUpdateAttributesMessageWithGivenAttributes(String target, String key, String value) {
+    private void sendUpdateAttributesMessageWithGivenAttributes(final String target, final String key, final String value) {
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put(key, value);
         final Message message = createUpdateAttributesMessage(target, TENANT_EXIST, controllerAttribute);
@@ -889,7 +891,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyNumberOfDeadLetterMessages(1);
     }
 
-    private void verifyNumberOfDeadLetterMessages(int numberOfInvocations) {
+    private void verifyNumberOfDeadLetterMessages(final int numberOfInvocations) {
         assertEmptyReceiverQueueCount();
         createConditionFactory()
                 .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
