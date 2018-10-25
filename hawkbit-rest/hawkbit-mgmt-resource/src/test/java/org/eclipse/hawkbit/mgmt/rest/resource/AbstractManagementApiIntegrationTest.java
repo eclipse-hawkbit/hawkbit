@@ -23,10 +23,12 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 @SpringBootTest(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 
     protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity,

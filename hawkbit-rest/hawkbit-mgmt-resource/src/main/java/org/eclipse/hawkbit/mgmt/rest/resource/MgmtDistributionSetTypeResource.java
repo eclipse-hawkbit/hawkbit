@@ -127,7 +127,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
                 .create(MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules));
+                .body(MgmtDistributionSetTypeMapper.toListResponse(createdSoftwareModules));
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {

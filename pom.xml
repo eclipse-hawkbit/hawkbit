@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.0.3.RELEASE</version>
+      <version>2.0.6.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -126,8 +126,8 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>2.0.3.RELEASE</spring.boot.version>
-      <spring.cloud.version>Finchley.SR1</spring.cloud.version>      
+      <spring.boot.version>2.0.6.RELEASE</spring.boot.version>
+      <spring.cloud.version>Finchley.SR2</spring.cloud.version>      
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
@@ -314,6 +314,7 @@
                       <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
                       <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
                       <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
+                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>

@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -66,20 +67,13 @@ final class MgmtDistributionSetTypeMapper {
                 .orElse(Collections.emptyList());
     }
 
-    static List<MgmtDistributionSetType> toTypesResponse(final List<DistributionSetType> types) {
-        if (types == null) {
-            return Collections.emptyList();
-        }
-
-        return types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList());
-    }
-
     static List<MgmtDistributionSetType> toListResponse(final List<DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
 
-        return types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList());
+        return new ResponseList<>(
+                types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList()));
     }
 
     static MgmtDistributionSetType toResponse(final DistributionSetType type) {
