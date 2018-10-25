@@ -12,7 +12,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
+import org.springframework.amqp.core.Message;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -53,7 +56,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
         registerTargetAndAssignDistributionSet(controllerId);
 
-        waitUntilTargetStatusIsPending(controllerId);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
     }
 
@@ -75,7 +78,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(2),
                 getTestDuration(10), getTestTimeZone());
 
-        waitUntilTargetStatusIsPending(controllerId);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadMessage(distributionSet.getModules(), controllerId);
     }
 
@@ -97,7 +100,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
                 getTestDuration(10), getTestTimeZone());
 
-        waitUntilTargetStatusIsPending(controllerId);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
     }
 
@@ -122,7 +125,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
 
         createAndSendTarget(controllerId, TENANT_EXIST);
-        waitUntilTargetStatusIsPending(controllerId);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
 
     }
@@ -143,7 +146,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         final Long actionId = registerTargetAndCancelActionId(controllerId);
 
         createAndSendTarget(controllerId, TENANT_EXIST);
-        waitUntilTargetStatusIsPending(controllerId);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(actionId, controllerId);
     }
 
@@ -159,11 +162,47 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceInte
         assertDeleteMessage(controllerId);
     }
 
-    private void waitUntilTargetStatusIsPending(final String controllerId) {
+
+    @Test
+    @Description("Verify that attribute update is requested after device successfully closed software update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = ActionUpdatedEvent.class, count = 2), @Expect(type = ActionCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    public void attributeRequestAfterSuccessfulUpdate() {
+        final String controllerId = TARGET_PREFIX + "attributeUpdateRequest";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final Target target = controllerManagement.getByControllerId(controllerId).get();
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+
+        final long actionId1 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
+        final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId1,
+                DmfActionStatus.ERROR);
+        getDmfClient().send(messageError);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.ERROR);
+
+        assertRequestAttributesUpdateMessageAbsent();
+
+        final long actionId2 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
+        final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId2,
+                DmfActionStatus.FINISHED);
+        getDmfClient().send(messageFin);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.IN_SYNC);
+
+        assertRequestAttributesUpdateMessage(controllerId);
+    }
+
+    private void waitUntilTargetHasStatus(final String controllerId, final TargetUpdateStatus status) {
         waitUntil(() -> {
             final Optional<Target> findTargetByControllerID = targetManagement.getByControllerID(controllerId);
             return findTargetByControllerID.isPresent()
-                    && TargetUpdateStatus.PENDING.equals(findTargetByControllerID.get().getUpdateStatus());
+                    && status.equals(findTargetByControllerID.get().getUpdateStatus());
         });
     }
 

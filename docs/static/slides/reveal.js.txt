@@ -1,0 +1,6 @@
+The files and folders in this folder (folder slides) are based on reveal.js
+
+MIT licensed
+Copyright (C) 2015 Hakim El Hattab, http://hakim.se
+
+see https://github.com/hakimel/reveal.js/

@@ -1,7 +1,13 @@
 ---
-title: Release Notes
+title: Release notes
 weight: 100
 ---
+
+## 0.2.3
+
+**Release Date:** Monday, October 1, 2018 <br />
+[Tag](https://github.com/eclipse/hawkbit/releases/tag/0.2.3) / 
+[Release](https://github.com/eclipse/hawkbit/milestone/12?closed=1)
 
 ## 0.2.2
 
