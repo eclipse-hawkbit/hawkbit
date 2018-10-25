@@ -62,6 +62,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 
 /**
