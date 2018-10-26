@@ -49,10 +49,11 @@ jobs:
         destination: pom.xml
 
     - run:
-        command: cp **/surefire/* bubu
+        command: find . -type f -regex ".*/surefire*/**" -exec cp {} bubu/ \;
 
     - store_artifacts:
-        path: bubu
+        path: bubu/
+        destination: bubu/
 
     - save_cache:
         paths:
