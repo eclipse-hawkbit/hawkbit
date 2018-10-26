@@ -151,28 +151,21 @@
       <!-- Vaadin versions - END -->
 
       <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
-      <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
       <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
-      <!-- Java 9 support -->
-      <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
-      <validation-api.version>2.0.1.Final</validation-api.version>
       <allure.version>2.7.0</allure.version>
-      <eclipselink.version>2.7.2</eclipselink.version>
+      <eclipselink.version>2.7.3</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.7.4</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>25.0-jre</guava.version>
-      <mariadb-java-client.version>2.0.2</mariadb-java-client.version>
       <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
-      <embedded-mongo.version>1.50.5</embedded-mongo.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
       <jlorem.version>1.1</jlorem.version>
-      <commons-lang3.version>3.4</commons-lang3.version>
       <commons-io.version>2.5</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <jayway.awaitility.version>1.7.0</jayway.awaitility.version>
@@ -210,7 +203,6 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven.compiler.plugin.version}</version>
             <configuration>
                <compilerArgument>-Xlint:all</compilerArgument>
                <showWarnings>true</showWarnings>
@@ -224,7 +216,6 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <version>1.4.1</version>
             <executions>
                <execution>
                   <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is
@@ -253,7 +244,6 @@
          </plugin>
          <plugin>
             <artifactId>maven-scm-plugin</artifactId>
-            <version>${maven.scm.plugin.version}</version>
             <configuration>
                <tag>${project.version}</tag>
             </configuration>
@@ -383,7 +373,6 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
-               <version>${maven.surefire.plugin.version}</version>
                <configuration>
                   <!-- Set output directory according to allure-framework recommendation -->
                   <systemPropertyVariables>
@@ -415,7 +404,7 @@
                <artifactId>maven-failsafe-plugin</artifactId>
                <configuration>
                   <reuseForks>true</reuseForks>
-                  <forkCount>3</forkCount>
+                  <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
@@ -624,11 +613,6 @@
             <version>${jsoup.version}</version>
          </dependency>
          <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>${validation-api.version}</version>
-         </dependency>
-         <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
             <version>${javax.el-api.version}</version>
@@ -747,11 +731,6 @@
             <version>${rsql-parser.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-         </dependency>
-         <dependency>
              <groupId>commons-io</groupId>
              <artifactId>commons-io</artifactId>
              <version>${commons-io.version}</version>
@@ -797,11 +776,6 @@
             <version>${powermock.version}</version>
             <scope>test</scope>
          </dependency>
-         <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>${mariadb-java-client.version}</version>
-        </dependency>
         <dependency>
            <groupId>com.microsoft.sqlserver</groupId>
            <artifactId>mssql-jdbc</artifactId>
