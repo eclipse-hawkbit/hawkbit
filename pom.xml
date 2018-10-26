@@ -399,9 +399,12 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${maven.surefire.plugin.version}</version>
                <configuration>
-                  <!-- Set output directory according to allure-framework recommendation -->
+
                   <systemPropertyVariables>
+                    <!-- Set output directory according to allure-framework recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
+                     <allure.report.timeout>600</allure.report.timeout>
 	              </systemPropertyVariables>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
