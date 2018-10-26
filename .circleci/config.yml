@@ -48,8 +48,11 @@ jobs:
         path: pom.xml
         destination: pom.xml
 
+    - run:
+        command: cp **/surefire/* bubu
+
     - store_artifacts:
-        path: /home/circleci/hawkBit/hawkbit-core/target/surefire
+        path: bubu
 
     - save_cache:
         paths:
