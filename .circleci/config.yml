@@ -37,12 +37,12 @@ jobs:
         name: Run tests incl. license check
         command: './.circleci/run-qa.sh'
 
-    - run:
-        name: Record test results
-        command: mkdir -p testresults/jUnit && find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/jUnit/ \;
+  #  - run:
+  #      name: Record test results
+  #      command: mkdir -p testresults/jUnit && find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/jUnit/ \;
 
-    - store_test_results:
-        path: testresults
+  #  - store_test_results:
+  #      path: testresults
 
     - store_artifacts:
         path: pom.xml
