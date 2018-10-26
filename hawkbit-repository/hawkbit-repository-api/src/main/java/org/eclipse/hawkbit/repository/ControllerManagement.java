@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -400,9 +400,9 @@ public interface ControllerManagement {
 
     /**
      * Cancels given {@link Action} for this {@link Target}. However, it might
-     * be possible that the controller will continue to work on the cancelation.
-     * The controller needs to acknowledge or reject the cancelation using
-     * {@link DdiRootController#postCancelActionFeedback}.
+     * be possible that the controller will continue to work on the
+     * cancellation. The controller needs to acknowledge or reject the
+     * cancellation using {@link DdiRootController#postCancelActionFeedback}.
      *
      * @param actionId
      *            to be canceled

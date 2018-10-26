@@ -32,16 +32,16 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
  *
  */
-@Features("Component Tests - Management API")
-@Stories("Target Filter Query Resource")
+@Feature("Component Tests - Management API")
+@Story("Target Filter Query Resource")
 public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String JSON_PATH_ROOT = "$";

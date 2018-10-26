@@ -63,16 +63,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  *
  * Test Amqp controller authentication.
  */
-@Features("Component Tests - Device Management Federation API")
-@Stories("AmqpController Authentication Test")
+@Feature("Component Tests - Device Management Federation API")
+@Story("AmqpController Authentication Test")
 @RunWith(MockitoJUnitRunner.class)
 public class AmqpControllerAuthenticationTest {
 

@@ -41,12 +41,12 @@ import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfigu
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("Entity Events")
+@Feature("Component Tests - Repository")
+@Story("Entity Events")
 @SpringBootTest(classes = { RepositoryTestConfiguration.class, RepositoryApplicationConfiguration.class,
         TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**

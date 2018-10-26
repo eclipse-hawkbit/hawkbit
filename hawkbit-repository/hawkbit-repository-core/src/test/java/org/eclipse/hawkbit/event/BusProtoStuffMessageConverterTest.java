@@ -27,7 +27,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 
-import ru.yandex.qatools.allure.annotations.Description;
+import io.qameta.allure.Description;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BusProtoStuffMessageConverterTest {

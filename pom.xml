@@ -160,7 +160,7 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
-      <allure.version>1.5.4</allure.version>
+      <allure.version>2.7.0</allure.version>
       <eclipselink.version>2.7.2</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.7.4</powermock.version>
@@ -385,6 +385,10 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${maven.surefire.plugin.version}</version>
                <configuration>
+                  <!-- Set output directory according to allure-framework recommendation -->
+                  <systemPropertyVariables>
+                     <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+	              </systemPropertyVariables>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
@@ -393,7 +397,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                   <includes>
@@ -416,7 +420,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                </configuration>
@@ -764,8 +768,8 @@
             </exclusions>
          </dependency>
          <dependency>
-            <groupId>ru.yandex.qatools.allure</groupId>
-            <artifactId>allure-junit-adaptor</artifactId>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit4</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>

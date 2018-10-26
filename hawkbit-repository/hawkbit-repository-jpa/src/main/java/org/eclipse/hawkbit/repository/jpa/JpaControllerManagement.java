@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+
 import java.net.URI;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -40,6 +43,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -96,9 +100,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -221,7 +222,7 @@ public class JpaControllerManagement implements ControllerManagement {
             return getPollingTime();
         }
 
-        return (new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS))
+        return new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS)
                 .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
     }
 
@@ -586,14 +587,16 @@ public class JpaControllerManagement implements ControllerManagement {
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
             final boolean actionActive) {
         return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
-                || (Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus())));
+                || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
     }
 
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
      */
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        LOG.debug("addUpdateActionStatus for action {}", action.getId());
+
+        String controllerId = null;
+        LOG.debug("handleAddUpdateActionStatus for action {}", action.getId());
 
         switch (actionStatus.getStatus()) {
         case ERROR:
@@ -602,7 +605,7 @@ public class JpaControllerManagement implements ControllerManagement {
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            handleFinishedAndStoreInTargetStatus(action);
+            controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
         default:
             // information status entry - check for a potential DOS attack
@@ -613,10 +616,24 @@ public class JpaControllerManagement implements ControllerManagement {
 
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
+        final Action savedAction = actionRepository.save(action);
 
-        LOG.debug("addUpdateActionStatus for action {} isfinished.", action.getId());
+        if (controllerId != null) {
+            requestControllerAttributes(controllerId);
+        }
 
-        return actionRepository.save(action);
+        return savedAction;
+    }
+
+    private void requestControllerAttributes(final String controllerId) {
+        final JpaTarget target = (JpaTarget) getByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        target.setRequestControllerAttributes(true);
+
+        eventPublisher.publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
+                JpaTarget.class.getName(), bus.getId()));
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -632,7 +649,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
     }
 
-    private void handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+    private String handleFinishedAndStoreInTargetStatus(final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
@@ -649,8 +666,9 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         targetRepository.save(target);
-
         entityManager.detach(ds);
+
+        return target.getControllerId();
     }
 
     @Override
@@ -661,10 +679,10 @@ public class JpaControllerManagement implements ControllerManagement {
             final UpdateMode mode) {
 
         /*
-            Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by
+         * EclipseLink. Hence, they are validated here.
          */
-        if (data.entrySet().stream()
-                .anyMatch(e -> !isAttributeEntryValid(e))) {
+        if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
         }
 
@@ -893,8 +911,8 @@ public class JpaControllerManagement implements ControllerManagement {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((controllerId == null) ? 0 : controllerId.hashCode());
-            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+            result = prime * result + (controllerId == null ? 0 : controllerId.hashCode());
+            result = prime * result + (tenant == null ? 0 : tenant.hashCode());
             return result;
         }
 

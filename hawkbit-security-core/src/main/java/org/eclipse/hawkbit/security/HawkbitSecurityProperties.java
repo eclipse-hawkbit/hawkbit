@@ -175,9 +175,14 @@ public class HawkbitSecurityProperties {
         private int maxTargetsPerAutoAssignment = 5000;
 
         /**
-         * Maximum size of artifacts in bytes.
+         * Maximum size of artifacts in bytes. Defaults to 1 GB.
          */
-        private long maxArtifactSize = 1_000_000_000;
+        private long maxArtifactSize = 1_073_741_824;
+
+        /**
+         * Maximum size of all artifacts in bytes. Defaults to 20 GB.
+         */
+        private long maxArtifactStorage = 21_474_836_480L;
 
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
@@ -301,6 +306,14 @@ public class HawkbitSecurityProperties {
 
         public long getMaxArtifactSize() {
             return maxArtifactSize;
+        }
+
+        public long getMaxArtifactStorage() {
+            return maxArtifactStorage;
+        }
+
+        public void setMaxArtifactStorage(final long maxArtifactStorage) {
+            this.maxArtifactStorage = maxArtifactStorage;
         }
 
         /**

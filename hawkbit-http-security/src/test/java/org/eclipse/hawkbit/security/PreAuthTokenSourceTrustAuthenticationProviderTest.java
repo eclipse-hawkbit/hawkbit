@@ -23,12 +23,12 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Unit Tests - Security")
-@Stories("PreAuthToken Source TrustAuthentication Provider Test")
+@Feature("Unit Tests - Security")
+@Story("PreAuthToken Source TrustAuthentication Provider Test")
 @RunWith(MockitoJUnitRunner.class)
 // TODO: create description annotations
 public class PreAuthTokenSourceTrustAuthenticationProviderTest {

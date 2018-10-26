@@ -21,15 +21,15 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.junit.Test;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test the remote entity events.
  */
-@Features("Component Tests - Repository")
-@Stories("Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent")
+@Feature("Component Tests - Repository")
+@Story("Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent")
 public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> {
 
     @Test

@@ -64,13 +64,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 @ActiveProfiles({ "test" })
-@Features("Component Tests - Device Management Federation API")
-@Stories("AmqpMessage Dispatcher Service Test")
+@Feature("Component Tests - Device Management Federation API")
+@Story("AmqpMessage Dispatcher Service Test")
 @SpringBootTest(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {

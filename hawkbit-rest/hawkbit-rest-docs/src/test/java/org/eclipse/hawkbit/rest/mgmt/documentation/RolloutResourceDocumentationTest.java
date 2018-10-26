@@ -52,16 +52,16 @@ import org.springframework.restdocs.snippet.Snippet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Rollout API for {@link Rollout}.
  *
  */
-@Features("Spring Rest Docs Tests - Rollout")
-@Stories("Rollout Resource")
+@Feature("Spring Rest Docs Tests - Rollout")
+@Story("Rollout Resource")
 public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     @Autowired

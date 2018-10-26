@@ -640,7 +640,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     void requestControllerAttributes(@NotEmpty String controllerId);
 
     /**
