@@ -379,7 +379,7 @@
                     <!-- Set output directory according to allure-framework recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                      <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
-                     <allure.report.timeout>600</allure.report.timeout>
+                     <allure.serve.timeout>600</allure.serve.timeout>
 	              </systemPropertyVariables>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
