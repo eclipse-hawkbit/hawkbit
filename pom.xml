@@ -378,10 +378,8 @@
                   <systemPropertyVariables>
                     <!-- Set output directory according to allure-framework recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
-                     <allure.serve.timeout>600</allure.serve.timeout>
-	              </systemPropertyVariables>
-                  <reuseForks>true</reuseForks>
+                  </systemPropertyVariables>
+                  <reuseForks>false</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
                      ${jacoco.agent.ut.arg} --illegal-access=warn --add-modules=java.xml.bind
@@ -406,7 +404,7 @@
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-failsafe-plugin</artifactId>
                <configuration>
-                  <reuseForks>true</reuseForks>
+                  <reuseForks>false</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
                   <properties>
