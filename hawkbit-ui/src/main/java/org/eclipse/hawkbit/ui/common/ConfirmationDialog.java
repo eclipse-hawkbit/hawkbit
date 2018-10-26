@@ -120,6 +120,31 @@ public class ConfirmationDialog implements Button.ClickListener {
      *            the cancel button label.
      * @param callback
      *            the callback.
+     * @param id
+     *            the id of the confirmation dialog
+     * @param mapCloseToCancel
+     *            Flag indicating whether or not the close event on the
+     *            enclosing window should be mapped to a cancel event.
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final String id,
+            final boolean mapCloseToCancel) {
+        this(caption, question, okLabel, cancelLabel, callback, null, id, null, mapCloseToCancel);
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
      * @param icon
      *            the icon of the dialog
      */
@@ -152,6 +177,37 @@ public class ConfirmationDialog implements Button.ClickListener {
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
             final ConfirmationTab tab) {
+        this(caption, question, okLabel, cancelLabel, callback, icon, id, tab, false);
+
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
+     * @param icon
+     *            the icon of the dialog
+     * @param id
+     *            the id of the confirmation dialog
+     * @param tab
+     *            ConfirmationTab which contains more information about the
+     *            action which has to be confirmed, e.g. maintenance window
+     * @param mapCloseToCancel
+     *            Flag indicating whether or not the close event on the
+     *            enclosing window should be mapped to a cancel event.
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
+            final ConfirmationTab tab, final boolean mapCloseToCancel) {
         window = new Window(caption);
         if (!StringUtils.isEmpty(id)) {
             window.setId(id);
@@ -165,6 +221,13 @@ public class ConfirmationDialog implements Button.ClickListener {
         okButton = createOkButton(okLabel);
 
         final Button cancelButton = createCancelButton(cancelLabel);
+        if (mapCloseToCancel) {
+            window.addCloseListener(e -> {
+                if (window.isVisible()) {
+                    cancelButton.click();
+                }
+            });
+        }
         window.setModal(true);
         window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
         if (this.callback == null) {
@@ -230,6 +293,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     @Override
     public void buttonClick(final ClickEvent event) {
         if (window.getParent() != null) {
+            window.setVisible(false);
             UI.getCurrent().removeWindow(window);
         }
         callback.response(event.getSource().equals(okButton));

@@ -323,10 +323,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                     if (ok) {
                         saveAllAssignments();
                     } else {
-                        manageDistUIState.getAssignedList().clear();
-                        manageDistUIState.getConsolidatedDistSoftwareList().clear();
+                        cancelAllAssignments();
                     }
-                }, UIComponentIdProvider.SOFT_MODULE_TO_DIST_ASSIGNMENT_CONFIRM_ID);
+                }, UIComponentIdProvider.SOFT_MODULE_TO_DIST_ASSIGNMENT_CONFIRM_ID, true);
     }
 
     private String createConfirmationMessageForAssignment(final String distributionNameToAssign,
@@ -342,7 +341,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void saveAllAssignments() {
         manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
-            final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
+            final List<Long> softIds = softIdNameSet.stream().map(SoftwareModuleIdName::getId)
                     .collect(Collectors.toList());
             distributionSetManagement.assignSoftwareModules(distIdName.getId(), softIds);
         });
@@ -354,9 +353,18 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
 
         getNotification().displaySuccess(getI18n().getMessage("message.software.assignment", count));
+        resetState();
+        getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+    }
+
+    private void cancelAllAssignments() {
+        getEventBus().publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
+        resetState();
+    }
+
+    private void resetState() {
         manageDistUIState.getAssignedList().clear();
         manageDistUIState.getConsolidatedDistSoftwareList().clear();
-        getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {

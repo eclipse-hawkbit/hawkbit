@@ -10,11 +10,10 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -23,7 +22,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModule
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
-import org.eclipse.hawkbit.ui.common.entity.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
@@ -56,8 +54,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient SoftwareModuleManagement softwareModuleManagement;
-
     private final transient TargetManagement targetManagement;
 
     private final TargetFilterQueryDetailsTable tfqDetailsTable;
@@ -68,7 +64,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
-            final SoftwareModuleManagement softwareManagement,
             final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
             final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
@@ -77,7 +72,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
                         manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
-        this.softwareModuleManagement = softwareManagement;
         this.targetManagement = targetManagement;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
@@ -106,63 +100,16 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         populateTargetFilterQueries();
     }
 
-    @Override
-    protected void populateModule() {
-        super.populateModule();
-        showUnsavedAssignment();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void showUnsavedAssignment() {
-        final Set<SoftwareModuleIdName> softwareModuleIdNameList = manageDistUIState.getLastSelectedDistribution()
-                .map(selectedDistId -> manageDistUIState.getAssignedList().entrySet().stream()
-                        .filter(entry -> entry.getKey().getId().equals(selectedDistId)).findAny()
-                        .map(Map.Entry::getValue).orElse(null))
-                .orElse(null);
-
-        if (softwareModuleIdNameList != null) {
-            if (assignedSWModule == null) {
-                assignedSWModule = new HashMap<>();
-            }
-
-            softwareModuleIdNameList.stream().map(SoftwareModuleIdName::getId).map(softwareModuleManagement::get)
-                    .forEach(found -> found.ifPresent(softwareModule -> {
-
-                        if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
-                            assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
-                                    .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(),
-                                            softwareModule.getVersion()))
-                                    .append("<I>");
-
-                        } else {
-                            assignedSWModule
-                                    .put(softwareModule.getType().getName(),
-                                            new StringBuilder().append("<I>")
-                                                    .append(HawkbitCommonUtil.getFormattedNameVersion(
-                                                            softwareModule.getName(), softwareModule.getVersion()))
-                                                    .append("<I>"));
-                        }
-
-                    }));
-            for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-                final Item item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
-                if (item != null) {
-                    item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
-                }
-            }
-        }
-    }
-
-    private Button assignSoftModuleButton(final String softwareModuleName) {
+    private Optional<Button> assignSoftModuleButton(final String softwareModuleName) {
         if (getPermissionChecker().hasUpdateRepositoryPermission() && manageDistUIState.getLastSelectedDistribution()
                 .map(selected -> targetManagement.countByAssignedDistributionSet(selected) <= 0).orElse(false)) {
 
             final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
             reassignSoftModule.setEnabled(false);
-            return reassignSoftModule;
+            return Optional.of(reassignSoftModule);
         }
-        return null;
+        return Optional.empty();
     }
 
     private static String getUnsavedAssigedSwModule(final String name, final String version) {
@@ -179,8 +126,8 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         if (assignedSWModule.containsKey(module.getType().getName())) {
             /*
              * If software module type is software, means multiple softwares can
-             * assigned to that type. Hence if multipe softwares belongs to same
-             * type is drroped, then add to the list.
+             * assigned to that type. Hence if multiple softwares belongs to
+             * same type is dropped, then add to the list.
              */
 
             if (module.getType().getMaxAssignments() > 1) {
@@ -216,13 +163,12 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
         final Label softwareModule = HawkbitCommonUtil.getFormatedLabel("");
-        final Button reassignSoftModule = assignSoftModuleButton(softwareModuleName);
         softwareModule.setValue(softwareModuleName);
         softwareModule.setDescription(softwareModuleName);
         softwareModule.setId(softwareModuleName + "-label");
         horizontalLayout.addComponent(softwareModule);
         horizontalLayout.setExpandRatio(softwareModule, 1F);
-        horizontalLayout.addComponent(reassignSoftModule);
+        assignSoftModuleButton(softwareModuleName).ifPresent(horizontalLayout::addComponent);
         verticalLayout.addComponent(horizontalLayout);
         return verticalLayout;
     }
@@ -248,10 +194,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
                 && getSelectedBaseEntity() != null) {
-            if (assignedSWModule != null) {
-                assignedSWModule.clear();
-            }
-
+            clearAssignments();
             getDistributionSetManagement().getWithDetails(getSelectedBaseEntityId()).ifPresent(set -> {
                 setSelectedBaseEntity(set);
                 UI.getCurrent().access(this::populateModule);
@@ -264,10 +207,13 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         if (saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ASSIGNMENT
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
-            if (assignedSWModule != null) {
-                assignedSWModule.clear();
-            }
-            showUnsavedAssignment();
+            clearAssignments();
+        }
+    }
+
+    private void clearAssignments() {
+        if (assignedSWModule != null) {
+            assignedSWModule.clear();
         }
     }
 
