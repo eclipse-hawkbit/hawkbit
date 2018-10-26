@@ -44,12 +44,10 @@ jobs:
     - store_test_results:
         path: testresults
 
-    - store_artifacts:
-        path: pom.xml
-        destination: pom.xml
 
     - run:
-        command: find . -type f -regex ".*/surefire*/**" -exec cp {} bubu/ \;
+        name: Collect surefire
+        command: mkdir -p bubu && find . -type f -regex ".*/surefire*/*" -exec cp {} bubu/ \;
 
     - store_artifacts:
         path: bubu/
