@@ -59,16 +59,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jayway.jsonpath.JsonPath;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Tests for {@link MgmtSoftwareModuleResource} {@link RestController}.
  *
  */
-@Feature("Component Tests - Management API")
-@Story("Software Module Resource")
+@Features("Component Tests - Management API")
+@Stories("Software Module Resource")
 @TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000",
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {

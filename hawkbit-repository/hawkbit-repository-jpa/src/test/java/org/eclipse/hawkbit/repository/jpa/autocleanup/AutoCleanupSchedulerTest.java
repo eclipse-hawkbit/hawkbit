@@ -19,16 +19,16 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test class for {@link AutoCleanupScheduler}.
  *
  */
-@Feature("Component Tests - Repository")
-@Story("Auto cleanup scheduler")
+@Features("Component Tests - Repository")
+@Stories("Auto cleanup scheduler")
 public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
 
     private final AtomicInteger counter = new AtomicInteger();

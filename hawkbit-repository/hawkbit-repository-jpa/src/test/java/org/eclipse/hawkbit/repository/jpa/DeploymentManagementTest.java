@@ -72,17 +72,17 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test class testing the functionality of triggering a deployment of
  * {@link DistributionSet}s to {@link Target}s.
  *
  */
-@Feature("Component Tests - Repository")
-@Story("Deployment Management")
+@Features("Component Tests - Repository")
+@Stories("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private EventHandlerStub eventHandlerStub;
 

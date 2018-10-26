@@ -37,17 +37,17 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * {@link DistributionSetManagement} tests.
  *
  */
-@Feature("Component Tests - Repository")
-@Story("DistributionSet Management")
+@Features("Component Tests - Repository")
+@Stories("DistributionSet Management")
 public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "

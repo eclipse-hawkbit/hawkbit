@@ -12,16 +12,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Tests for {@link AbstractHawkbitLoginUI}
  *
  */
-@Feature("Unit Tests - Management UI")
-@Story("Login UI")
+@Features("Unit Tests - Management UI")
+@Stories("Login UI")
 public class AbstractHawkbitLoginUITest {
 
     @Test

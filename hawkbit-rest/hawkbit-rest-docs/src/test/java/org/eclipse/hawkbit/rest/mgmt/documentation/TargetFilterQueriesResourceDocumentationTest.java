@@ -38,15 +38,15 @@ import org.springframework.restdocs.snippet.Snippet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Documentation generation for Management API for {@link TargetFilterQuery}.
  */
-@Feature("Spring Rest Docs Tests - TargetFilterQuery")
-@Story("TargetFilterQuery Resource")
+@Features("Spring Rest Docs Tests - TargetFilterQuery")
+@Stories("TargetFilterQuery Resource")
 public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     private static final String EXAMPLE_TFQ_NAME = "filter1";

@@ -19,12 +19,12 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.vaadin.client.UIDL;
 import com.vaadin.client.ui.dd.VDragEvent;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Drag And Drop")
-@Story("Client-side Accept criteria")
+@Features("Unit Tests - Drag And Drop")
+@Stories("Client-side Accept criteria")
 @RunWith(GwtMockitoTestRunner.class)
 public class ItemIdClientCriterionTest {
 

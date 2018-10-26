@@ -35,17 +35,17 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test class for {@link TargetTagManagement}.
  *
  */
-@Feature("Component Tests - Repository")
-@Story("Target Tag Management")
+@Features("Component Tests - Repository")
+@Stories("Target Tag Management")
 public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

@@ -14,12 +14,12 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Repository")
-@Story("Repository Model")
+@Features("Unit Tests - Repository")
+@Stories("Repository Model")
 public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
     @Test

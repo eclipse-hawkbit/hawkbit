@@ -38,12 +38,12 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Repository")
-@Story("Entity Events")
+@Features("Component Tests - Repository")
+@Stories("Entity Events")
 @SpringApplicationConfiguration(classes = RepositoryTestConfiguration.class)
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 

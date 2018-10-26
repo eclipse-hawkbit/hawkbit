@@ -60,16 +60,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test the root controller resources.
  */
-@Feature("Component Tests - Direct Device Integration API")
-@Story("Root Poll Resource")
+@Features("Component Tests - Direct Device Integration API")
+@Stories("Root Poll Resource")
 public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     private static final String TARGET_COMPLETED_INSTALLATION_MSG = "Target completed installation.";

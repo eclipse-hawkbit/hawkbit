@@ -25,12 +25,12 @@ import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Lists;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Repository")
-@Story("RSQL filter software module metadata")
+@Features("Component Tests - Repository")
+@Stories("RSQL filter software module metadata")
 public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long softwareModuleId;

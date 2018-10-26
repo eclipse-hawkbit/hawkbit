@@ -21,16 +21,16 @@ import org.junit.Test;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Mapping tests for {@link HawkBitEclipseLinkJpaDialect}.
  *
  */
-@Feature("Unit Tests - Repository")
-@Story("Exception handling")
+@Features("Unit Tests - Repository")
+@Stories("Exception handling")
 public class HawkBitEclipseLinkJpaDialectTest {
     private final HawkBitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkBitEclipseLinkJpaDialect();
 

@@ -174,7 +174,7 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
-      <allure.version>2.7.0</allure.version>
+      <allure.version>1.5.4</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.6.5</powermock.version>
@@ -399,12 +399,6 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${maven.surefire.plugin.version}</version>
                <configuration>
-                  <systemPropertyVariables>
-                     <!-- Set output directory according to allure-framework recommendation -->
-                     <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
-                     <allure.serve.timeout>650</allure.serve.timeout>
-	              </systemPropertyVariables>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
@@ -413,7 +407,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
                      </property>
                   </properties>
                   <includes>
@@ -436,7 +430,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
                      </property>
                   </properties>
                </configuration>
@@ -803,8 +797,8 @@
             <version>${json.version}</version>
          </dependency>
          <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit4</artifactId>
+            <groupId>ru.yandex.qatools.allure</groupId>
+            <artifactId>allure-junit-adaptor</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>

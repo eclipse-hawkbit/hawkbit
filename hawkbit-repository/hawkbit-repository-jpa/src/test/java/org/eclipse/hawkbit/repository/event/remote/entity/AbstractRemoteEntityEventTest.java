@@ -15,14 +15,14 @@ import java.lang.reflect.Constructor;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test the remote entity events.
  */
-@Feature("Component Tests - Repository")
-@Story("Entity Events")
+@Features("Component Tests - Repository")
+@Stories("Entity Events")
 public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEventTest {
 
     protected RemoteEntityEvent<?> assertAndCreateRemoteEvent(final Class<? extends RemoteEntityEvent<?>> eventType) {

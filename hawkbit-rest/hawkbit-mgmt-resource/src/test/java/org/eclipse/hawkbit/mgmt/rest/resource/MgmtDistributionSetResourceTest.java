@@ -55,13 +55,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Step;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Management API")
-@Story("Distribution Set Resource")
+@Features("Component Tests - Management API")
+@Stories("Distribution Set Resource")
 public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test

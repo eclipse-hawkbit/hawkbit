@@ -19,12 +19,12 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Artifact File System Repository")
-@Story("Test storing artifact binaries in the file-system")
+@Features("Unit Tests - Artifact File System Repository")
+@Stories("Test storing artifact binaries in the file-system")
 public class ArtifactFilesystemTest {
 
     @Test

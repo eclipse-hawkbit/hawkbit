@@ -47,13 +47,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
-import io.qameta.allure.Feature;
+import ru.yandex.qatools.allure.annotations.Features;
 
 /**
  * Parent class for all Management API rest documentation classes.
  *
  */
-@Feature("Documentation Verfication - API")
+@Features("Documentation Verfication - API")
 @SpringApplicationConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {

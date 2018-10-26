@@ -40,16 +40,16 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Spring MVC Tests against the MgmtTargetTagResource.
  *
  */
-@Feature("Component Tests - Management API")
-@Story("Target Tag Resource")
+@Features("Component Tests - Management API")
+@Stories("Target Tag Resource")
 public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGETTAGS_ROOT = "http://localhost" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING

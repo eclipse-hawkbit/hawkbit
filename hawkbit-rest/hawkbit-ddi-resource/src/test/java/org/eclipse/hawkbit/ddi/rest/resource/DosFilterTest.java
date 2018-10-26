@@ -33,17 +33,17 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.net.HttpHeaders;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test potential DOS attack scenarios and check if the filter prevents them.
  *
  */
 @ActiveProfiles({ "test" })
-@Feature("Component Tests - REST Security")
-@Story("Denial of Service protection filter")
+@Features("Component Tests - REST Security")
+@Stories("Denial of Service protection filter")
 public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override

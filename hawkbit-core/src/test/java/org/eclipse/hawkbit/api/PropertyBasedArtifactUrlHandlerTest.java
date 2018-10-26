@@ -22,15 +22,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Tests for creating urls to download artifacts.
  */
-@Feature("Unit Tests - Artifact URL Handler")
-@Story("Test to generate the artifact download URL")
+@Features("Unit Tests - Artifact URL Handler")
+@Stories("Test to generate the artifact download URL")
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyBasedArtifactUrlHandlerTest {
 

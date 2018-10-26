@@ -56,15 +56,15 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test deployment base from the controller.
  */
-@Feature("Component Tests - Direct Device Integration API")
-@Story("Deployment Action Resource")
+@Features("Component Tests - Direct Device Integration API")
+@Stories("Deployment Action Resource")
 public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";

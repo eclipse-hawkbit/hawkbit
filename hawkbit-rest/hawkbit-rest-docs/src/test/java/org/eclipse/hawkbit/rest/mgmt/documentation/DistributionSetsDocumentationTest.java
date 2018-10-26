@@ -44,16 +44,16 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.google.common.collect.Lists;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Documentation generation for Management API for {@link DistributionSet}.
  *
  */
-@Feature("Spring Rest Docs Tests - DistributionSet")
-@Story("DistributionSet Resource")
+@Features("Spring Rest Docs Tests - DistributionSet")
+@Stories("DistributionSet Resource")
 public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentation {
 
     @Override

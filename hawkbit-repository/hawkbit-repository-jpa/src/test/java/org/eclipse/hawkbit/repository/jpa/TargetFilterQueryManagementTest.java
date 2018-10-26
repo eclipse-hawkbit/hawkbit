@@ -37,16 +37,16 @@ import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test class for {@link TargetFilterQueryManagement}.
  * 
  */
-@Feature("Component Tests - Repository")
-@Story("Target Filter Query Management")
+@Features("Component Tests - Repository")
+@Stories("Target Filter Query Management")
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

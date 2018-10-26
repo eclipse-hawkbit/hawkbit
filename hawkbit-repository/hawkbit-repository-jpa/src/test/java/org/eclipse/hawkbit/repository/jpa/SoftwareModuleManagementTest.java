@@ -48,12 +48,12 @@ import org.springframework.data.domain.PageRequest;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Repository")
-@Story("Software Module Management")
+@Features("Component Tests - Repository")
+@Stories("Software Module Management")
 public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

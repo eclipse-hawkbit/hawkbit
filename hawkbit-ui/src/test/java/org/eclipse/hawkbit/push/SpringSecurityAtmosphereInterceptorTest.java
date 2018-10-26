@@ -26,12 +26,12 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Management UI")
-@Story("Push Security")
+@Features("Unit Tests - Management UI")
+@Stories("Push Security")
 @RunWith(MockitoJUnitRunner.class)
 public class SpringSecurityAtmosphereInterceptorTest {
 

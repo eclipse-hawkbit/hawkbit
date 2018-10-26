@@ -25,12 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Security")
-@Story("Issuer hash based authentication")
+@Features("Unit Tests - Security")
+@Stories("Issuer hash based authentication")
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 

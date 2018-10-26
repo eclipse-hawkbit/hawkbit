@@ -17,15 +17,15 @@ import org.junit.Test;
 
 import com.vaadin.ui.Button;
 
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Unit Test block for UI Component provider. Dynamic Factory Testing.
  * 
  */
-@Feature("Unit Tests - Management UI")
-@Story("UI components")
+@Features("Unit Tests - Management UI")
+@Stories("UI components")
 public class SPUIComponentProviderTest {
     /**
      * Test case for check button factory.

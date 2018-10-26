@@ -40,15 +40,15 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Documentation generation for System API for {@link TenantConfiguration}.
  */
-@Feature("Spring Rest Docs Tests - TenantConfiguration")
-@Story("TenantConfiguration Resource")
+@Features("Spring Rest Docs Tests - TenantConfiguration")
+@Stories("TenantConfiguration Resource")
 public class TenantResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     protected static final Map<String, String> CONFIG_ITEM_DESCRIPTIONS = new HashMap<>();

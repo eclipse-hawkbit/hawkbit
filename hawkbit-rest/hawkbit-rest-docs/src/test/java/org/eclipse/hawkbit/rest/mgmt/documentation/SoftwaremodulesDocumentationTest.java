@@ -45,15 +45,15 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Documentation generation for Management API for {@link SoftwareModule}.
  */
-@Feature("Spring Rest Docs Tests - SoftwareModule")
-@Story("Softwaremodule Resource")
+@Features("Spring Rest Docs Tests - SoftwareModule")
+@Stories("Softwaremodule Resource")
 public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentation {
 
     @Override

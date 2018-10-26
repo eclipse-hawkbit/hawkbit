@@ -62,13 +62,13 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "test" })
-@Feature("Component Tests - Device Management Federation API")
-@Story("AmqpMessage Dispatcher Service Test")
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpMessage Dispatcher Service Test")
 @SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 

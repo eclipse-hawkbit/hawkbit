@@ -54,8 +54,8 @@
 
       <!-- TEST -->
       <dependency>
-         <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit4</artifactId>
+         <groupId>ru.yandex.qatools.allure</groupId>
+         <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

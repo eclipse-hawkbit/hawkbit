@@ -13,15 +13,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test the remote entity events.
  */
-@Feature("Component Tests - Repository")
-@Story("Test TargetCreatedEvent, TargetUpdatedEvent and CancelTargetAssignmentEvent")
+@Features("Component Tests - Repository")
+@Stories("Test TargetCreatedEvent, TargetUpdatedEvent and CancelTargetAssignmentEvent")
 public class TargetEventTest extends AbstractRemoteEntityEventTest<Target> {
 
     @Test

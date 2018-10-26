@@ -22,12 +22,12 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Repository")
-@Story("Rollout Management")
+@Features("Component Tests - Repository")
+@Stories("Rollout Management")
 public class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

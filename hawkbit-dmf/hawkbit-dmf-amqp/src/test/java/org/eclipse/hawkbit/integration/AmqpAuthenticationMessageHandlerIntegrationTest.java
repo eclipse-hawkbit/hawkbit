@@ -39,12 +39,12 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Device Management Federation API")
-@Story("Amqp Authentication Message Handler")
+@Features("Component Tests - Device Management Federation API")
+@Stories("Amqp Authentication Message Handler")
 @SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
         DmfApiConfiguration.class })
 public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmqpIntegrationTest {

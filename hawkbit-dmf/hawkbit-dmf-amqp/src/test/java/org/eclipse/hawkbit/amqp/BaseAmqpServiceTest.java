@@ -28,13 +28,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Feature("Component Tests - Device Management Federation API")
-@Story("Base Amqp Service Test")
+@Features("Component Tests - Device Management Federation API")
+@Stories("Base Amqp Service Test")
 public class BaseAmqpServiceTest {
 
     @Mock

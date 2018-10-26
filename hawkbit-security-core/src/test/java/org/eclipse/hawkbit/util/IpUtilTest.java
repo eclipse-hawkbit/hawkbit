@@ -29,13 +29,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Feature("Unit Tests - Security")
-@Story("IP Util Test")
+@Features("Unit Tests - Security")
+@Stories("IP Util Test")
 public class IpUtilTest {
 
     private static final String KNOWN_REQUEST_HEADER = "bumlux";

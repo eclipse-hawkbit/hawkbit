@@ -23,12 +23,12 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Cache")
-@Story("Download ID Cache")
+@Features("Unit Tests - Cache")
+@Stories("Download ID Cache")
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultDownloadIdCacheTest {
 

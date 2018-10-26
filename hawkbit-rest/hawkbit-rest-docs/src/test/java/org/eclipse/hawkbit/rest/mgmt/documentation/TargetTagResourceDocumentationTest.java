@@ -43,16 +43,16 @@ import org.springframework.restdocs.snippet.Snippet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Documentation generation for Management API for {@link TargetTag}.
  * 
  */
-@Feature("Spring Rest Docs Tests - TargetTag")
-@Story("TargetTag Resource")
+@Features("Spring Rest Docs Tests - TargetTag")
+@Stories("TargetTag Resource")
 public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     private DistributionSet distributionSet;

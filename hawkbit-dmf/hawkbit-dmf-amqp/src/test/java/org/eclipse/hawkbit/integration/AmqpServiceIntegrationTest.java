@@ -51,7 +51,7 @@ import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-import io.qameta.allure.Step;
+import ru.yandex.qatools.allure.annotations.Step;
 
 /**
  *

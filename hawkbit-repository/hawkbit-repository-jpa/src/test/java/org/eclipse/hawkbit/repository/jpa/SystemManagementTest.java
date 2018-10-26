@@ -22,12 +22,12 @@ import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Component Tests - Repository")
-@Story("System Management")
+@Features("Component Tests - Repository")
+@Stories("System Management")
 public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

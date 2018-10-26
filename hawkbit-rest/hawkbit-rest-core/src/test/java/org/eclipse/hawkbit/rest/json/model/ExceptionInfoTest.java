@@ -15,12 +15,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
-@Feature("Unit Tests - Management API")
-@Story("Error Handling")
+@Features("Unit Tests - Management API")
+@Stories("Error Handling")
 public class ExceptionInfoTest {
 
     @Test
