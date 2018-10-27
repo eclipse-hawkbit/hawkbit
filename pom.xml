@@ -150,8 +150,8 @@
       <vaadin.addon.dbar-addon.version>2.0.0</vaadin.addon.dbar-addon.version>
       <!-- Vaadin versions - END -->
 
-      <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
-      <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
+      <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
+      <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>5.0.5</cron-utils.version>
@@ -185,7 +185,7 @@
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
       <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
-      <jacoco.version>0.8.1</jacoco.version>
+      <jacoco.version>0.8.2</jacoco.version>
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
       <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
       <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
@@ -374,12 +374,13 @@
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
                <configuration>
-
                   <systemPropertyVariables>
-                    <!-- Set output directory according to allure-framework recommendation -->
+                     <!-- Set output directory according to allure-framework recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                  </systemPropertyVariables>
-                  <reuseForks>false</reuseForks>
+                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
+                     <allure.serve.timeout>650</allure.serve.timeout>
+	              </systemPropertyVariables>
+                  <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
                      ${jacoco.agent.ut.arg} --illegal-access=warn --add-modules=java.xml.bind
