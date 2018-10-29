@@ -135,7 +135,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         }
     }
 
-    private VerticalLayout createSoftwareModuleLayout(final String softwareModuleName) {
+    private static VerticalLayout createSoftwareModuleLayout(final String softwareModuleName) {
         final VerticalLayout verticalLayout = new VerticalLayout();
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
