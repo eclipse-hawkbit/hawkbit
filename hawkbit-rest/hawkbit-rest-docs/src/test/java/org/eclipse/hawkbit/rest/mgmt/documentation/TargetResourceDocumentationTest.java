@@ -52,16 +52,16 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Management API for {@link Target}.
  *
  */
-@Features("Spring Rest Docs Tests - Target")
-@Stories("Target Resource")
+@Feature("Spring Rest Docs Tests - Target")
+@Story("Target Resource")
 public class TargetResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     private final String targetId = "137";

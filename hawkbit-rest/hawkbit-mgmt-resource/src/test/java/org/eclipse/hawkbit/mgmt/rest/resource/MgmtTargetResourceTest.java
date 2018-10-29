@@ -71,17 +71,17 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
  *
  */
-@Features("Component Tests - Management API")
-@Stories("Target Resource")
+@Feature("Component Tests - Management API")
+@Story("Target Resource")
 public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
