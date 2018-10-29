@@ -59,13 +59,13 @@ import org.springframework.data.domain.PageRequest;
 
 import com.google.common.collect.Iterables;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("Target Management")
+@Feature("Component Tests - Repository")
+@Story("Target Management")
 public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private static final String WHITESPACE_ERROR = "target with whitespaces in controller id should not be created";

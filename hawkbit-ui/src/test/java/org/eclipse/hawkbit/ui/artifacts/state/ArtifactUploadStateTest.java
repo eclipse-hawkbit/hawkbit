@@ -19,11 +19,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Unit Tests - Management UI")
-@Stories("Upload UI state")
+@Feature("Unit Tests - Management UI")
+@Story("Upload UI state")
 @RunWith(MockitoJUnitRunner.class)
 public class ArtifactUploadStateTest {
 

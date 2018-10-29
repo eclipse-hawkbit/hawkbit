@@ -28,12 +28,12 @@ import org.mockito.Spy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Unit Tests - Repository")
-@Stories("Placeholder resolution for virtual properties")
+@Feature("Unit Tests - Repository")
+@Story("Placeholder resolution for virtual properties")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TimestampCalculator.class)
 public class VirtualPropertyResolverTest {

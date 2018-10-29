@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.springframework.security.core.GrantedAuthority;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test {@link SpPermission}.
  */
-@Features("Unit Tests - Security")
-@Stories("Permission Test")
+@Feature("Unit Tests - Security")
+@Story("Permission Test")
 public final class PermissionTest {
 
     @Test

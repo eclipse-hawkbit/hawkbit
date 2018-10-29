@@ -42,16 +42,16 @@ import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Direct Device Integration API.
  *
  */
-@Features("Documentation Verfication - Direct Device Integration API")
-@Stories("Root Resource")
+@Feature("Documentation Verfication - Direct Device Integration API")
+@Story("Root Resource")
 public class RootControllerDocumentationTest extends AbstractApiRestDocumentation {
     private static final String CONTROLLER_ID = "CONTROLLER_ID";
 

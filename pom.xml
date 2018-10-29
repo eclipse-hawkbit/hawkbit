@@ -164,9 +164,9 @@
       <vaadin.addon.dbar-addon.version>2.0.0</vaadin.addon.dbar-addon.version>
       <!-- Vaadin versions - END -->
 
-      <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
-      <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
-      <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
+      <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
+      <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
+      <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
       <!-- Java 9 support -->
       <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
 
@@ -174,7 +174,7 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <validation-api.version>2.0.1.Final</validation-api.version>
-      <allure.version>1.5.4</allure.version>
+      <allure.version>2.7.0</allure.version>
       <eclipselink.version>2.7.1</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.6.5</powermock.version>
@@ -207,7 +207,7 @@
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
       <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
-      <jacoco.version>0.8.1</jacoco.version>
+      <jacoco.version>0.8.2</jacoco.version>
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
       <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
       <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
@@ -399,6 +399,12 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${maven.surefire.plugin.version}</version>
                <configuration>
+                  <systemPropertyVariables>
+                     <!-- Set output directory according to allure-framework recommendation -->
+                     <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
+                     <allure.serve.timeout>650</allure.serve.timeout>
+	              </systemPropertyVariables>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
@@ -407,7 +413,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                   <includes>
@@ -430,7 +436,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
                      </property>
                   </properties>
                </configuration>
@@ -797,8 +803,8 @@
             <version>${json.version}</version>
          </dependency>
          <dependency>
-            <groupId>ru.yandex.qatools.allure</groupId>
-            <artifactId>allure-junit-adaptor</artifactId>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit4</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>

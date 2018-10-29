@@ -22,12 +22,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("Controller Management")
+@Feature("Component Tests - Repository")
+@Story("Controller Management")
 @TestPropertySource(locations = "classpath:/jpa-test.properties", properties = {
         "hawkbit.server.repository.eagerPollPersistence=false",
         "hawkbit.server.repository.pollPersistenceFlushTime=1000" })

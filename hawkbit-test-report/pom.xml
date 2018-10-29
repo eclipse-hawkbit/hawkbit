@@ -41,7 +41,7 @@
                                  <directory>${basedir}/..</directory>
                                  <filtering>false</filtering>
                                  <includes>
-                                    <include>**/target/allure-results/*.xml</include>
+                                    <include>**/target/allure-results/*.json</include>
                                  </includes>
                               </resource>
                               <resource>
