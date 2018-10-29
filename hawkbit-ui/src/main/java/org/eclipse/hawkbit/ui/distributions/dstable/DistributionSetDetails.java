@@ -91,7 +91,7 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         populateTargetFilterQueries();
     }
 
-    private static String getUnsavedAssigedSwModule(final String name, final String version) {
+    private static String getUnsavedAssignedSwModule(final String name, final String version) {
         return HawkbitCommonUtil.getFormattedNameVersion(name, version);
     }
 
@@ -103,41 +103,39 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
         getSoftwareModuleTable().getContainerDataSource().getItemIds();
         if (assignedSWModule.containsKey(module.getType().getName())) {
-            /*
-             * If software module type is software, means multiple softwares can
-             * assigned to that type. Hence if multiple softwares belongs to
-             * same type is dropped, then add to the list.
-             */
 
+            /*
+             * If the module type allows multiple assignments, just append the
+             * module entry to the list.
+             */
             if (module.getType().getMaxAssignments() > 1) {
                 assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
-                        .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>");
+                        .append(getUnsavedAssignedSwModule(module.getName(), module.getVersion())).append("</I>");
             }
 
             /*
-             * If software module type is firmware, means single software can be
-             * assigned to that type. Hence if multiple softwares belongs to
-             * same type is dropped, then override with previous one.
+             * If the module type does not allow multiple assignments, override
+             * the previous module entry.
              */
             if (module.getType().getMaxAssignments() == 1) {
                 assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
-                        .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
+                        .append(getUnsavedAssignedSwModule(module.getName(), module.getVersion())).append("</I>"));
             }
 
         } else {
             assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
-                    .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
+                    .append(getUnsavedAssignedSwModule(module.getName(), module.getVersion())).append("</I>"));
         }
 
         for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
             final Item item = getSoftwareModuleTable().getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
-                item.getItemProperty(SOFT_MODULE).setValue(createSoftModuleLayout(entry.getValue().toString()));
+                item.getItemProperty(SOFT_MODULE).setValue(createSoftwareModuleLayout(entry.getValue().toString()));
             }
         }
     }
 
-    private VerticalLayout createSoftModuleLayout(final String softwareModuleName) {
+    private VerticalLayout createSoftwareModuleLayout(final String softwareModuleName) {
         final VerticalLayout verticalLayout = new VerticalLayout();
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setSizeFull();
