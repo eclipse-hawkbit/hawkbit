@@ -16,6 +16,8 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +73,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private EntityFactory entityFactory;
 
     @Override
-    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("controllerId") final String controllerId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(controllerId);
+    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
+        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
         final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget);
         MgmtTargetMapper.addPollStatus(findTarget, response);
@@ -117,21 +120,20 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
         if (targetRest.isRequestAttributes() != null) {
             if (targetRest.isRequestAttributes()) {
-                targetManagement.requestControllerAttributes(controllerId);
+                targetManagement.requestControllerAttributes(targetId);
             } else {
                 return ResponseEntity.badRequest().build();
             }
         }
 
-        final Target updateTarget = this.targetManagement.update(entityFactory.target().update(controllerId)
+        final Target updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                 .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
-
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
@@ -141,15 +143,15 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteTarget(@PathVariable("controllerId") final String controllerId) {
-        this.targetManagement.deleteByControllerID(controllerId);
-        LOG.debug("{} target deleted, return status {}", controllerId, HttpStatus.OK);
+    public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
+        this.targetManagement.deleteByControllerID(targetId);
+        LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("controllerId") final String controllerId) {
-        final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(controllerId);
+    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") final String targetId) {
+        final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(targetId);
         if (controllerAttributes.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -162,13 +164,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("targetId") final String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
-        findTargetWithExceptionIfNotFound(controllerId);
+        findTargetWithExceptionIfNotFound(targetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -178,40 +180,41 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Action> activeActions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, controllerId, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, controllerId);
+            activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, targetId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, targetId);
         } else {
-            activeActions = this.deploymentManagement.findActionsByTarget(controllerId, pageable);
-            totalActionCount = this.deploymentManagement.countActionsByTarget(controllerId);
+            activeActions = this.deploymentManagement.findActionsByTarget(targetId, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(targetId);
         }
 
-        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(controllerId, activeActions.getContent()),
+        return ResponseEntity.ok(
+                new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()),
                 totalActionCount));
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId) {
 
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-        if (!action.getTarget().getControllerId().equals(controllerId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
+        if (!action.getTarget().getControllerId().equals(targetId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(controllerId, action));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
     }
 
     @Override
-    public ResponseEntity<Void> cancelAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
-        if (!action.getTarget().getControllerId().equals(controllerId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, controllerId);
+        if (!action.getTarget().getControllerId().equals(targetId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -228,12 +231,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
-            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
+            @PathVariable("targetId") final String targetId, @PathVariable("actionId") final Long actionId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
+        final Target target = findTargetWithExceptionIfNotFound(targetId);
 
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -258,8 +261,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("controllerId") final String controllerId) {
-        final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(controllerId)
+            @PathVariable("targetId") final String targetId) {
+        final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(targetId)
                 .map(ds -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
                     MgmtDistributionSetMapper.addLinks(ds, response);
@@ -275,21 +278,21 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("controllerId") final String controllerId,
+            @PathVariable("targetId") final String targetId,
             @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(), Arrays.asList(controllerId))));
+                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(), Arrays.asList(targetId))));
         }
 
-        findTargetWithExceptionIfNotFound(controllerId);
+        findTargetWithExceptionIfNotFound(targetId);
         final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsId.getMaintenanceWindow();
 
         if (maintenanceWindow == null) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
-                    .assignDistributionSet(dsId.getId(), Arrays.asList(new TargetWithActionType(controllerId,
+                    .assignDistributionSet(dsId.getId(), Arrays.asList(new TargetWithActionType(targetId,
                             MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
         }
 
@@ -301,7 +304,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         return ResponseEntity
                 .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
-                        Arrays.asList(new TargetWithActionType(controllerId,
+                        Arrays.asList(new TargetWithActionType(targetId,
                                 MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
                                 cronSchedule, duration, timezone)))));
 
@@ -309,8 +312,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
-            @PathVariable("controllerId") final String controllerId) {
-        final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(controllerId)
+            @PathVariable("targetId") final String targetId) {
+        final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(targetId)
                 .map(set -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(set);
                     MgmtDistributionSetMapper.addLinks(set, response);
@@ -325,19 +328,19 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(distributionSetRest);
     }
 
-    private Target findTargetWithExceptionIfNotFound(final String controllerId) {
-        return targetManagement.getByControllerID(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    private Target findTargetWithExceptionIfNotFound(final String targetId) {
+        return targetManagement.getByControllerID(targetId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
     }
 
     @Override
-    public ResponseEntity<MgmtAction> updateAction(@PathVariable("controllerId") final String controllerId,
+    public ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
 
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-        if (!action.getTarget().getControllerId().equals(controllerId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), controllerId);
+        if (!action.getTarget().getControllerId().equals(targetId)) {
+            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -347,7 +350,62 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         action = deploymentManagement.forceTargetAction(actionId);
 
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(controllerId, action));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
+    }
+
+    @Override
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") final String targetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Page<TargetMetadata> metaDataPage;
+
+        if (rsqlParam != null) {
+            metaDataPage = targetManagement.findMetaDataByControllerIdAndRsql(pageable, targetId, rsqlParam);
+        } else {
+            metaDataPage = targetManagement.findMetaDataByControllerId(pageable, targetId);
+        }
+
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponseTargetMetadata(metaDataPage.getContent()),
+                metaDataPage.getTotalElements()));
+    }
+
+    @Override
+    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("targetId") final String targetId,
+            @PathVariable("metadataKey") final String metadataKey) {
+        final TargetMetadata findOne = targetManagement.getMetaDataByControllerId(targetId, metadataKey)
+                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, metadataKey));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(findOne));
+    }
+
+    @Override
+    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("targetId") final String targetId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
+        final TargetMetadata updated = targetManagement.updateMetaData(targetId,
+                entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(updated));
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") final String targetId,
+            @PathVariable("metadataKey") final String metadataKey) {
+        targetManagement.deleteMetaData(targetId, metadataKey);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") final String targetId,
+            @RequestBody final List<MgmtMetadata> metadataRest) {
+        final List<TargetMetadata> created = targetManagement.createMetaData(targetId,
+                MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
+        return new ResponseEntity<>(MgmtTargetMapper.toResponseTargetMetadata(created), HttpStatus.CREATED);
     }
 
 }

@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -166,6 +167,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     // time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
+
+    @CascadeOnDelete
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
+    private List<TargetMetadata> metadata;
 
     /**
      * Constructor.
@@ -349,6 +354,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Override
     public boolean isRequestControllerAttributes() {
         return requestControllerAttributes;
+    }
+
+    public List<TargetMetadata> getMetadata() {
+        if (metadata == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(metadata);
     }
 
     @Override

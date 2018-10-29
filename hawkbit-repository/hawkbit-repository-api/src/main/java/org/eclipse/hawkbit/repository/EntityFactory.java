@@ -43,7 +43,8 @@ public interface EntityFactory {
     DistributionSetBuilder distributionSet();
 
     /**
-     * Generates an {@link MetaData} element without persisting it.
+     * Generates an {@link MetaData} element for distribution set without
+     * persisting it.
      * 
      * @param key
      *            {@link MetaData#getKey()}
@@ -52,7 +53,20 @@ public interface EntityFactory {
      * 
      * @return {@link MetaData} object
      */
-    MetaData generateMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
+    MetaData generateDsMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
+            @Size(max = MetaData.VALUE_MAX_SIZE) String value);
+
+    /**
+     * Generates an {@link MetaData} element for target without persisting it.
+     * 
+     * @param key
+     *            {@link MetaData#getKey()}
+     * @param value
+     *            {@link MetaData#getValue()}
+     * 
+     * @return {@link MetaData} object
+     */
+    MetaData generateTargetMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
             @Size(max = MetaData.VALUE_MAX_SIZE) String value);
 
     /**

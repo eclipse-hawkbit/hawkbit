@@ -248,7 +248,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                     fieldWithPath(fieldArrayPrefix + "_links.attributes")
                             .description(MgmtApiModelProperties.LINKS_ATTRIBUTES),
                     fieldWithPath(fieldArrayPrefix + "_links.actions")
-                            .description(MgmtApiModelProperties.LINKS_ACTIONS)));
+                            .description(MgmtApiModelProperties.LINKS_ACTIONS),
+                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA)));
+
         }
         fields.addAll(Arrays.asList(descriptors));
 
