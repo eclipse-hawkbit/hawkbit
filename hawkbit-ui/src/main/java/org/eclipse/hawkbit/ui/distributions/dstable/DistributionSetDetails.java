@@ -10,11 +10,9 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -22,8 +20,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModule
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsTable;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
@@ -36,8 +32,6 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
@@ -54,8 +48,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
 
     private final ManageDistUIState manageDistUIState;
 
-    private final transient TargetManagement targetManagement;
-
     private final TargetFilterQueryDetailsTable tfqDetailsTable;
 
     private Map<String, StringBuilder> assignedSWModule;
@@ -64,15 +56,14 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
             final ManagementUIState managementUIState,
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
-            final DistributionSetManagement distributionSetManagement, final TargetManagement targetManagement,
-            final UINotification uiNotification, final DistributionSetTagManagement distributionSetTagManagement,
+            final DistributionSetManagement distributionSetManagement, final UINotification uiNotification,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, uiNotification, distributionSetTagManagement,
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
                         manageDistUIState, uiNotification));
         this.manageDistUIState = manageDistUIState;
-        this.targetManagement = targetManagement;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);
 
@@ -98,18 +89,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         populateTags(getDistributionTagToken());
         populateMetadataDetails();
         populateTargetFilterQueries();
-    }
-
-    private Optional<Button> assignSoftModuleButton(final String softwareModuleName) {
-        if (getPermissionChecker().hasUpdateRepositoryPermission() && manageDistUIState.getLastSelectedDistribution()
-                .map(selected -> targetManagement.countByAssignedDistributionSet(selected) <= 0).orElse(false)) {
-
-            final Button reassignSoftModule = SPUIComponentProvider.getButton(softwareModuleName, "", "", "", true,
-                    FontAwesome.TIMES, SPUIButtonStyleNoBorder.class);
-            reassignSoftModule.setEnabled(false);
-            return Optional.of(reassignSoftModule);
-        }
-        return Optional.empty();
     }
 
     private static String getUnsavedAssigedSwModule(final String name, final String version) {
@@ -168,7 +147,6 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
         softwareModule.setId(softwareModuleName + "-label");
         horizontalLayout.addComponent(softwareModule);
         horizontalLayout.setExpandRatio(softwareModule, 1F);
-        assignSoftModuleButton(softwareModuleName).ifPresent(horizontalLayout::addComponent);
         verticalLayout.addComponent(horizontalLayout);
         return verticalLayout;
     }

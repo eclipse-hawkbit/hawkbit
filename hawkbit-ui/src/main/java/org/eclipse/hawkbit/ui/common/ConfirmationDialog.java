@@ -42,6 +42,8 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     private final Window window;
 
+    private boolean isImplicitClose;
+
     /**
      * Constructor for configuring confirmation dialog.
      * 
@@ -223,7 +225,7 @@ public class ConfirmationDialog implements Button.ClickListener {
         final Button cancelButton = createCancelButton(cancelLabel);
         if (mapCloseToCancel) {
             window.addCloseListener(e -> {
-                if (window.isVisible()) {
+                if (!isImplicitClose) {
                     cancelButton.click();
                 }
             });
@@ -293,7 +295,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     @Override
     public void buttonClick(final ClickEvent event) {
         if (window.getParent() != null) {
-            window.setVisible(false);
+            isImplicitClose = true;
             UI.getCurrent().removeWindow(window);
         }
         callback.response(event.getSource().equals(okButton));

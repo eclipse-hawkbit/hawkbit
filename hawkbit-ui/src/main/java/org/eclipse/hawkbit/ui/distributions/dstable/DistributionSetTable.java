@@ -358,8 +358,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void cancelAllAssignments() {
-        getEventBus().publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
         resetState();
+        getEventBus().publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
 
     private void resetState() {

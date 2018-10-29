@@ -59,7 +59,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                         distributionAddUpdateWindowLayout),
                 distributionSetTable,
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
-                        distributionAddUpdateWindowLayout, distributionSetManagement, targetManagement, uiNotification,
+                        distributionAddUpdateWindowLayout, distributionSetManagement, uiNotification,
                         distributionSetTagManagement, popupLayout));
     }
 
