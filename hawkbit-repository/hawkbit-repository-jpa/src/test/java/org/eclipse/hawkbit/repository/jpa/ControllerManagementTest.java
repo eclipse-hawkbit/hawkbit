@@ -29,6 +29,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -60,13 +61,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("Controller Management")
+@Feature("Component Tests - Repository")
+@Story("Controller Management")
 public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
@@ -137,6 +138,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void controllerConfirmsUpdateWithFinished() {
         final Long actionId = createTargetAndAssignDs();
@@ -188,6 +190,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void controllerConfirmsUpdateWithFinishedAndIgnorsCancellationWithThat() {
         final Long actionId = createTargetAndAssignDs();
@@ -557,6 +560,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void tryToFinishUpdateProcessMoreThanOnce() {
         final Long actionId = prepareFinishedUpdate().getId();
@@ -593,6 +597,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void sendUpdatesForFinishUpdateProcessDropedIfDisabled() {
         repositoryProperties.setRejectActionStatusForClosedAction(true);
@@ -619,6 +624,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void sendUpdatesForFinishUpdateProcessAcceptedIfEnabled() {
         repositoryProperties.setRejectActionStatusForClosedAction(false);

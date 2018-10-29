@@ -449,7 +449,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    TargetManagement targetManagement(final EntityManager entityManager, final TargetRepository targetRepository,
+    TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
+            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -457,10 +458,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ApplicationEventPublisher eventPublisher, final ApplicationContext applicationContext,
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
-        return new JpaTargetManagement(entityManager, targetRepository, rolloutGroupRepository,
-                distributionSetRepository, targetFilterQueryRepository, targetTagRepository, criteriaNoCountDao,
-                eventPublisher, applicationContext, tenantAware, afterCommit, virtualPropertyReplacer,
-                properties.getDatabase());
+        return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
+                rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
+                criteriaNoCountDao, eventPublisher, applicationContext, tenantAware, afterCommit,
+                virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**

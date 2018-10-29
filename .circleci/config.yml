@@ -14,7 +14,7 @@ jobs:
     working_directory: ~/hawkBit
 
     docker:
-    - image: circleci/openjdk:8-jdk-browsers
+    - image: circleci/openjdk:8u181-jdk-stretch
       environment:
         _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
@@ -37,17 +37,16 @@ jobs:
         name: Run tests incl. license check
         command: './.circleci/run-qa.sh'
 
-    # Record test results
-    - run: mkdir -p testresults/junit/
-    - run: find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/junit/ \;
+    - run:
+        name: Record test results
+        command: mkdir -p testresults/jUnit && find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/jUnit/ \;
 
     - store_test_results:
-        path: testresults/junit/
-        destination: test-reports
+        path: testresults
 
     - store_artifacts:
         path: pom.xml
-        destination: pom
+        destination: pom.xml
 
     - save_cache:
         paths:

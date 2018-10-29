@@ -23,13 +23,16 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -650,4 +653,116 @@ public interface TargetManagement {
      *         {@code false}: update of controller attributes not requested.
      */
     boolean isControllerAttributesRequested(@NotEmpty String controllerId);
+
+    /**
+     * Creates a list of target meta data entries.
+     *
+     * @param controllerId
+     *            {@link Target} controller id the metadata has to be created
+     *            for
+     * @param metadata
+     *            the meta data entries to create or update
+     * @return the updated or created target meta data entries
+     * 
+     * @throws EntityNotFoundException
+     *             if given target does not exist
+     * 
+     * @throws EntityAlreadyExistsException
+     *             in case one of the meta data entry already exists for the
+     *             specific key
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of {@link MetaData} entries is exceeded
+     *             for the addressed {@link Target}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    List<TargetMetadata> createMetaData(@NotEmpty String controllerId, @NotEmpty Collection<MetaData> metadata);
+
+    /**
+     * Deletes a target meta data entry.
+     *
+     * @param controllerId
+     *            where meta data has to be deleted
+     * @param key
+     *            of the meta data element
+     * 
+     * @throws EntityNotFoundException
+     *             if given target does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void deleteMetaData(@NotEmpty String controllerId, @NotEmpty String key);
+
+    /**
+     * Finds all meta data by the given target id.
+     * 
+     * @param pageable
+     *            the page request to page the result
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
+     *
+     * @return a paged result of all meta data entries for a given target id
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
+    /**
+     * Finds all meta data by the given target id and query.
+     * 
+     * @param pageable
+     *            the page request to page the result
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
+     * @param rsqlParam
+     *            rsql query string
+     *
+     * @return a paged result of all meta data entries for a given target id
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * 
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<TargetMetadata> findMetaDataByControllerIdAndRsql(@NotNull Pageable pageable, @NotEmpty String controllerId,
+            @NotNull String rsqlParam);
+
+    /**
+     * Finds a single target meta data by its id.
+     *
+     * @param controllerId
+     *            of the {@link Target}
+     * @param key
+     *            of the meta data element
+     * @return the found TargetMetadata
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Optional<TargetMetadata> getMetaDataByControllerId(@NotEmpty String controllerId, @NotEmpty String key);
+
+    /**
+     * Updates a target meta data value if corresponding entry exists.
+     *
+     * @param controllerId
+     *            {@link Target} controller id of the meta data entry to be
+     *            updated
+     * @param metadata
+     *            meta data entry to be updated
+     * @return the updated meta data entry
+     * 
+     * @throws EntityNotFoundException
+     *             in case the meta data entry does not exists and cannot be
+     *             updated
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    TargetMetadata updateMetaData(@NotEmpty String controllerId, @NotNull MetaData metadata);
 }

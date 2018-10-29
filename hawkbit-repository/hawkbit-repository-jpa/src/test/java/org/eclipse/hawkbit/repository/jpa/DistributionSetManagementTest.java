@@ -56,17 +56,17 @@ import org.springframework.data.domain.PageRequest;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
 /**
  * {@link DistributionSetManagement} tests.
  *
  */
-@Features("Component Tests - Repository")
-@Stories("DistributionSet Management")
+@Feature("Component Tests - Repository")
+@Story("DistributionSet Management")
 public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
@@ -136,7 +136,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSetType");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.createMetaData(NOT_EXIST_IDL,
-                Arrays.asList(entityFactory.generateMetadata("123", "123"))), "DistributionSet");
+                Arrays.asList(entityFactory.generateDsMetadata("123", "123"))), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(Arrays.asList(NOT_EXIST_IDL)),
                 "DistributionSet");
@@ -167,10 +167,10 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(NOT_EXIST_IDL,
-                entityFactory.generateMetadata("xxx", "xxx")), "DistributionSet");
+                entityFactory.generateDsMetadata("xxx", "xxx")), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(set.getId(),
-                entityFactory.generateMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
+                entityFactory.generateDsMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
     }
 
     @Test
@@ -553,7 +553,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
-                .updateMetaData(ds.getId(), entityFactory.generateMetadata(knownKey, knownUpdateValue));
+                .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey, knownUpdateValue));
         // we are updating the sw meta data so also modifying the base software
         // module so opt lock
         // revision must be three

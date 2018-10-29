@@ -40,15 +40,15 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test class for {@link ArtifactManagement}.
  */
-@Features("Component Tests - Repository")
-@Stories("Artifact Management")
+@Feature("Component Tests - Repository")
+@Story("Artifact Management")
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

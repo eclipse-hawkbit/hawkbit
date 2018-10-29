@@ -47,13 +47,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
-import ru.yandex.qatools.allure.annotations.Features;
+import io.qameta.allure.Feature;
 
 /**
  * Parent class for all Management API rest documentation classes.
  *
  */
-@Features("Documentation Verfication - API")
+@Feature("Documentation Verfication - API")
 @SpringApplicationConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {
@@ -248,7 +248,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                     fieldWithPath(fieldArrayPrefix + "_links.attributes")
                             .description(MgmtApiModelProperties.LINKS_ATTRIBUTES),
                     fieldWithPath(fieldArrayPrefix + "_links.actions")
-                            .description(MgmtApiModelProperties.LINKS_ACTIONS)));
+                            .description(MgmtApiModelProperties.LINKS_ACTIONS),
+                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA)));
+
         }
         fields.addAll(Arrays.asList(descriptors));
 

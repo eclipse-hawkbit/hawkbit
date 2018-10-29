@@ -70,11 +70,25 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param type
      *            of the entity that was not found
      * 
-     * @param enityId
+     * @param entityId
      *            of the {@link BaseEntity}
      */
-    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object enityId) {
-        this(type.getSimpleName() + " with given identifier {" + enityId + "} does not exist.");
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
+        this(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.");
+    }
+
+    /**
+     * Parameterized constructor for {@link MetaData} not found.
+     * 
+     * @param type
+     *            of the entity that was not found
+     * @param entityId
+     *            of the {@link BaseEntity} the {@link MetaData} was for
+     * @param key
+     *            for the {@link MetaData} entry
+     */
+    public EntityNotFoundException(final Class<? extends MetaData> type, final Long entityId, final String key) {
+        this(type.getSimpleName() + " for given entity {" + entityId + "} and with key {" + key + "} does not exist.");
     }
 
     /**
@@ -87,7 +101,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param key
      *            for the {@link MetaData} entry
      */
-    public EntityNotFoundException(final Class<? extends MetaData> type, final Long enityId, final String key) {
+    public EntityNotFoundException(final Class<? extends MetaData> type, final String enityId, final String key) {
         this(type.getSimpleName() + " for given entity {" + enityId + "} and with key {" + key + "} does not exist.");
     }
 

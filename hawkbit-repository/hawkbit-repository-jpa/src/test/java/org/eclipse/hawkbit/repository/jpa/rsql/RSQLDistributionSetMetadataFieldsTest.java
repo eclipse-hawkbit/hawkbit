@@ -24,12 +24,12 @@ import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("RSQL filter distribution set metadata")
+@Feature("Component Tests - Repository")
+@Story("RSQL filter distribution set metadata")
 public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long distributionSetId;
@@ -41,13 +41,13 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
 
         final List<MetaData> metadata = new ArrayList<>(5);
         for (int i = 0; i < 5; i++) {
-            metadata.add(entityFactory.generateMetadata("" + i, "" + i));
+            metadata.add(entityFactory.generateDsMetadata("" + i, "" + i));
         }
 
         distributionSetManagement.createMetaData(distributionSetId, metadata);
 
         distributionSetManagement.createMetaData(distributionSetId,
-                Arrays.asList(entityFactory.generateMetadata("emptyValueTest", null)));
+                Arrays.asList(entityFactory.generateDsMetadata("emptyValueTest", null)));
     }
 
     @Test

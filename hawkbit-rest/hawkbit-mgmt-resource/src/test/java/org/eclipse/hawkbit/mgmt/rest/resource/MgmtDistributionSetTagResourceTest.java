@@ -42,12 +42,12 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Management API")
-@Stories("Distribution Set Tag Resource")
+@Feature("Component Tests - Management API")
+@Story("Distribution Set Tag Resource")
 public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost"

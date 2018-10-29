@@ -42,16 +42,16 @@ import org.springframework.restdocs.snippet.Snippet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Management API for {@link DistributionSetTag}.
  * 
  */
-@Features("Spring Rest Docs Tests - DistributionSetTag")
-@Stories("DistributionSet Tag Resource")
+@Feature("Spring Rest Docs Tests - DistributionSetTag")
+@Story("DistributionSet Tag Resource")
 public class DistributionSetTagResourceDocumentationTest extends AbstractApiRestDocumentation {
 
     private DistributionSet distributionSet;

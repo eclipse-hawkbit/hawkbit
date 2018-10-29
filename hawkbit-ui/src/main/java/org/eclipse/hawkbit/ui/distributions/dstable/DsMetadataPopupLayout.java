@@ -52,7 +52,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement
-                .createMetaData(entity.getId(), Arrays.asList(entityFactory.generateMetadata(key, value))).get(0);
+                .createMetaData(entity.getId(), Arrays.asList(entityFactory.generateDsMetadata(key, value))).get(0);
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -61,7 +61,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected DistributionSetMetadata updateMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement.updateMetaData(entity.getId(),
-                entityFactory.generateMetadata(key, value));
+                entityFactory.generateDsMetadata(key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }

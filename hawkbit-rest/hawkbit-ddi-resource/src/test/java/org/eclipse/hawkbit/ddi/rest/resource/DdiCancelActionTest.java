@@ -33,15 +33,15 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test cancel action from the controller.
  */
-@Features("Component Tests - Direct Device Integration API")
-@Stories("Cancel Action Resource")
+@Feature("Component Tests - Direct Device Integration API")
+@Story("Cancel Action Resource")
 public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
     @Test

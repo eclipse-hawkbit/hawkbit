@@ -20,14 +20,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  *
  */
-@Features("Unit Tests - Security")
-@Stories("Exclude path aware shallow ETag filter")
+@Feature("Unit Tests - Security")
+@Story("Exclude path aware shallow ETag filter")
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerPreAuthenticatedAnonymousDownloadTest {
 

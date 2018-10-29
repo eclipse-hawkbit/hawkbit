@@ -14,6 +14,7 @@ Here you can find links to arbitrary material covering Eclipse hawkBit which has
 - 03/20/2017 - Eclipse IoT Day SanJose, CA - [video](https://www.youtube.com/watch?v=x5OfBgnYW44) - [slides](https://docs.bosch-iot-rollouts.com/slides/iotDaySanJose2017.pdf)
 - 09/12/2017 - Eclipse IoT Day ThingMonk 2017 - [video](https://www.youtube.com/watch?v=7hK-kiQjKGA)
 - 01/10/2018 - Eclipse Virtual IoT Meetup - [video](https://www.youtube.com/watch?v=8vcLXs9lc-4) - [slides](https://docs.bosch-iot-rollouts.com/slides/hawkBitIntroduction.html)
+- 10/22/2018 - Community Day EclipseCon Europe 2018 - [slides](https://www.eclipse.org/hawkbit/slides/community-day-2018.html)
 
 ## Articles
 

@@ -49,13 +49,13 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.orm.jpa.vendor.Database;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 @RunWith(PowerMockRunner.class)
-@Features("Component Tests - Repository")
-@Stories("RSQL search utility")
+@Feature("Component Tests - Repository")
+@Story("RSQL search utility")
 @PrepareForTest(TimestampCalculator.class)
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text

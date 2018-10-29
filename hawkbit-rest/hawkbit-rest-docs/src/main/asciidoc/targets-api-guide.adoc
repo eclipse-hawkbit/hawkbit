@@ -683,6 +683,241 @@ include::../errors/406.adoc[]
 include::../errors/429.adoc[]
 |===
 
+== GET /rest/v1/targets/{targetId}/metadata
+
+===  Implementation Notes
+
+Get a paged list of meta data for a target. Required permission: READ_REPOSITORY
+
+=== Get a paged list of meta data
+
+==== Curl
+
+include::{snippets}/targets/get-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-metadata/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/get-metadata-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targets/get-metadata-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/get-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /rest/v1/targets/{targetId}/metadata
+
+=== Implementation Notes
+
+Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET
+
+=== Create a list of meta data entries
+
+
+==== CURL
+
+include::{snippets}/targets/create-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/create-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/create-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/create-metadata/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targets/create-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targets/{targetId}/metadata/{metadataKey}
+
+
+=== Implementation Notes
+
+Delete a single meta data. Required permission: UPDATE_REPOSITORY
+
+=== Delete a single meta data
+
+==== CURL
+
+include::{snippets}/targets/delete-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/delete-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/delete-metadata/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targets/delete-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targets/{targetId}/metadata/{metadataKey}
+
+
+===  Implementation Notes
+
+Get a single meta data value for a meta data key. Required permission: READ_REPOSITORY
+
+=== Get a single meta data value
+
+==== Curl
+
+include::{snippets}/targets/get-metadata-value/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-metadata-value/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-metadata-value/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/get-metadata-value/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-metadata-value/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== PUT /rest/v1/targets/{targetId}/metadata/{metadataKey} 
+
+
+=== Implementation Notes
+
+Update a single meta data value for speficic key. Required permission: UPDATE_REPOSITORY
+
+=== Update a single meta data value
+
+==== Curl
+
+include::{snippets}/targets/update-metadata/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/update-metadata/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/update-metadata/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/update-metadata/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targets/update-metadata/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/update-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
 
 == Additional content
 

@@ -24,9 +24,9 @@ import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Multi-Tenancy tests which testing the CRUD operations of entities that all
@@ -34,8 +34,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * belonging to the current tenant.
  *
  */
-@Features("Component Tests - Repository")
-@Stories("Multi Tenancy")
+@Feature("Component Tests - Repository")
+@Story("Multi Tenancy")
 public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     @Test

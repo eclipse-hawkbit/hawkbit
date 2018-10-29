@@ -44,17 +44,17 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
 /**
  * Test for {@link MgmtDistributionSetTypeResource}.
  *
  */
-@Features("Component Tests - Management API")
-@Stories("Distribution Set Type Resource")
+@Feature("Component Tests - Management API")
+@Story("Distribution Set Type Resource")
 public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test

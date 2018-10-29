@@ -33,13 +33,13 @@ import org.springframework.data.domain.Slice;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
-@Features("Component Tests - Repository")
-@Stories("Target Management Searches")
+@Feature("Component Tests - Repository")
+@Story("Target Management Searches")
 public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test

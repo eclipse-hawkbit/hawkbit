@@ -26,8 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,8 +47,10 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -54,6 +58,7 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -66,17 +71,17 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
 
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Step;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
  *
  */
-@Features("Component Tests - Management API")
-@Stories("Target Resource")
+@Feature("Component Tests - Management API")
+@Story("Target Resource")
 public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
@@ -1564,8 +1569,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("requestAttributes", true).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }
@@ -1575,8 +1580,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("description", "verify attribute can be missing").toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
     }
 
     @Step
@@ -1584,8 +1589,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String body = new JSONObject().put("requestAttributes", false).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }
@@ -1648,5 +1653,194 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);
         return targetManagement.getByControllerID(tA.getControllerId()).get();
+    }
+
+    @Test
+    @Description("Ensures that the metadata creation through API is reflected by the repository.")
+    public void createMetadata() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+        testdataFactory.createTarget(knownControllerId);
+
+        final String knownKey1 = "knownKey1";
+        final String knownKey2 = "knownKey2";
+
+        final String knownValue1 = "knownValue1";
+        final String knownValue2 = "knownValue2";
+
+        final JSONArray metaData1 = new JSONArray();
+        metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+
+        mvc.perform(
+                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
+                .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
+                .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
+
+        final TargetMetadata metaKey1 = targetManagement.getMetaDataByControllerId(knownControllerId, knownKey1).get();
+        final TargetMetadata metaKey2 = targetManagement.getMetaDataByControllerId(knownControllerId, knownKey2).get();
+
+        assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
+        assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+
+        // verify quota enforcement
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
+
+        final JSONArray metaData2 = new JSONArray();
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
+            metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
+        }
+
+        mvc.perform(
+                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
+
+        // verify that the number of meta data entries has not changed
+        // (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(targetManagement.findMetaDataByControllerId(new PageRequest(0, Integer.MAX_VALUE), knownControllerId)
+                .getTotalElements()).isEqualTo(metaData1.length());
+
+    }
+
+    @Test
+    @Description("Ensures that a metadata update through API is reflected by the repository.")
+    public void updateMetadata() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        // prepare and create metadata for update
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+        final String updateValue = "valueForUpdate";
+
+        setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
+
+        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
+
+        mvc.perform(put("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey)
+                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
+
+        final TargetMetadata updatedTargetMetadata = targetManagement
+                .getMetaDataByControllerId(knownControllerId, knownKey).get();
+        assertThat(updatedTargetMetadata.getValue()).isEqualTo(updateValue);
+
+    }
+
+    private void setupTargetWithMetadata(final String knownControllerId, final String knownKey,
+            final String knownValue) {
+        testdataFactory.createTarget(knownControllerId);
+        targetManagement.createMetaData(knownControllerId,
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+    }
+
+    @Test
+    @Description("Ensures that a metadata entry deletion through API is reflected by the repository.")
+    public void deleteMetadata() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
+
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetManagement.getMetaDataByControllerId(knownControllerId, knownKey)).isNotPresent();
+    }
+
+    @Test
+    @Description("Ensures that target metadata deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    public void deleteMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
+
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/XXX", knownControllerId))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/targets/1234/metadata/{key}", knownKey)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        assertThat(targetManagement.getMetaDataByControllerId(knownControllerId, knownKey)).isPresent();
+    }
+
+    @Test
+    @Description("Ensures that a metadata entry selection through API reflectes the repository content.")
+    public void getSingleMetadata() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        setupTargetWithMetadata(knownControllerId, knownKey, knownValue);
+
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(knownValue)));
+    }
+
+    @Test
+    @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
+    public void getPagedListOfMetadata() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        final int totalMetadata = 10;
+        final int limitParam = 5;
+        final String offsetParam = "0";
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+
+        setupTargetWithMetadata(knownControllerId, knownKeyPrefix, knownValuePrefix, totalMetadata);
+
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
+                knownControllerId)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("size", equalTo(limitParam))).andExpect(jsonPath("total", equalTo(totalMetadata)))
+                .andExpect(jsonPath("content[0].key", equalTo("knownKey0")))
+                .andExpect(jsonPath("content[0].value", equalTo("knownValue0")));
+
+    }
+
+    private void setupTargetWithMetadata(final String knownControllerId, final String knownKeyPrefix,
+            final String knownValuePrefix, final int totalMetadata) {
+        testdataFactory.createTarget(knownControllerId);
+
+        final List<MetaData> targetMetadataEntries = new LinkedList<>();
+        for (int index = 0; index < totalMetadata; index++) {
+            targetMetadataEntries
+                    .add(entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index));
+        }
+        targetManagement.createMetaData(knownControllerId, targetMetadataEntries);
+    }
+
+    @Test
+    @Description("Ensures that a target metadata filtered query with value==knownValue1 parameter returns only the metadata entries with that value.")
+    public void searchDistributionSetMetadataRsql() throws Exception {
+        final String knownControllerId = "targetIdWithMetadata";
+
+        final int totalMetadata = 10;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+
+        setupTargetWithMetadata(knownControllerId, knownKeyPrefix, knownValuePrefix, totalMetadata);
+
+        final String rsqlSearchValue1 = "value==knownValue1";
+
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?q=" + rsqlSearchValue1, knownControllerId))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
+                .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
     }
 }
