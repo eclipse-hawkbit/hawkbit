@@ -471,6 +471,11 @@ public final class UIComponentIdProvider {
     public static final String SHOW_TARGET_TAGS = "show.target.tags.icon";
 
     /**
+     * Target metadata button id.
+     */
+    public static final String TARGET_METADATA_BUTTON = "target.metadata.button";
+
+    /**
      * ID-Target tag table.
      */
     public static final String TARGET_TAG_TABLE_ID = "target.tag.tableId";
@@ -1131,7 +1136,7 @@ public final class UIComponentIdProvider {
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
 
     /**
-     * DistributionSet - Metadata button id.
+     * DistributionSet - Metadata detail link.
      */
     public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
 
@@ -1151,9 +1156,14 @@ public final class UIComponentIdProvider {
     public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
 
     /**
-     * Software Module - Metadata button id.
+     * Software Module - Metadata detail link.
      */
     public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
+
+    /**
+     * Target - Metadata detail link.
+     */
+    public static final String TARGET_METADATA_DETAIL_LINK = "target.metadata.detail.link";
 
     /**
      * Table multiselect for selecting DistType

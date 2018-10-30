@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.TargetMetadataDetailsLayout;
 import org.eclipse.hawkbit.ui.common.tagdetails.TargetTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
@@ -55,10 +57,16 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private static final long serialVersionUID = 1L;
 
     private final TargetTagToken targetTagToken;
+    
+    private final TargetMetadataDetailsLayout targetMetadataTable;
 
     private final TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
 
     private final transient TargetManagement targetManagement;
+
+    private final TargetMetadataPopupLayout targetMetadataPopupLayout;
+
+    private final UINotification uiNotification;
 
     private final transient DeploymentManagement deploymentManagement;
 
@@ -69,15 +77,21 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
             final UINotification uiNotification, final TargetTagManagement tagManagement,
-            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final EntityFactory entityFactory, final TargetTable targetTable) {
+            final TargetManagement targetManagement, final TargetMetadataPopupLayout targetMetadataPopupLayout,
+            final DeploymentManagement deploymentManagement, final EntityFactory entityFactory,
+            final TargetTable targetTable) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
-        targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,
+        this.targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus,
+                uiNotification,
                 entityFactory, targetTable);
+        this.uiNotification = uiNotification;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
+        this.targetMetadataPopupLayout = targetMetadataPopupLayout;
+        this.targetMetadataTable = new TargetMetadataDetailsLayout(i18n, targetManagement,
+                targetMetadataPopupLayout);
         addDetailsTab();
         restoreState();
     }
@@ -95,6 +109,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         getDetailsTab().addTab(createInstalledDistLayout(), getI18n().getMessage("header.target.installed"), null);
         getDetailsTab().addTab(getTagsLayout(), getI18n().getMessage("caption.tags.tab"), null);
         getDetailsTab().addTab(getLogLayout(), getI18n().getMessage("caption.logs.tab"), null);
+        getDetailsTab().addTab(targetMetadataTable, getI18n().getMessage("caption.metadata"), null);
     }
 
     private Component createInstalledDistLayout() {
@@ -157,6 +172,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
             populateDistributionDtls(assignedDistLayout, null);
         }
         populateTags(targetTagToken);
+        populateMetadataDetails();
     }
 
     @Override
@@ -326,23 +342,27 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     @Override
     protected boolean isMetadataIconToBeDisplayed() {
-        return false;
+        return true;
     }
 
     @Override
     protected void showMetadata(final ClickEvent event) {
-        // No implementation required
+        final Optional<Target> target = targetManagement.get(getSelectedBaseEntityId());
+        if (!target.isPresent()) {
+            uiNotification.displayWarning(getI18n().getMessage("targets.not.exists"));
+            return;
+        }
+        UI.getCurrent().addWindow(targetMetadataPopupLayout.getWindow(target.get(), null));
     }
 
     @Override
     protected void populateMetadataDetails() {
-        // No implementation required
+        targetMetadataTable.populateMetadata(getSelectedBaseEntity());
     }
 
     @Override
     protected String getMetadataButtonId() {
-        // No implementation required
-        return null;
+        return UIComponentIdProvider.TARGET_METADATA_BUTTON;
     }
 
 }

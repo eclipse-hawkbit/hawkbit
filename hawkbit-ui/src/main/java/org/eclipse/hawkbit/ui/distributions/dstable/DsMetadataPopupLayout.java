@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayoutVersioned;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +27,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Pop up layout to display distribution metadata.
  */
-public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<DistributionSet, MetaData> {
+public class DsMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<DistributionSet, MetaData> {
 
     private static final long serialVersionUID = -7778944849012048106L;
 
