@@ -41,13 +41,13 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
 
         final List<MetaData> metadata = new ArrayList<>(5);
         for (int i = 0; i < 5; i++) {
-            metadata.add(entityFactory.generateMetadata("" + i, "" + i));
+            metadata.add(entityFactory.generateDsMetadata("" + i, "" + i));
         }
 
         distributionSetManagement.createMetaData(distributionSetId, metadata);
 
         distributionSetManagement.createMetaData(distributionSetId,
-                Arrays.asList(entityFactory.generateMetadata("emptyValueTest", null)));
+                Arrays.asList(entityFactory.generateDsMetadata("emptyValueTest", null)));
     }
 
     @Test

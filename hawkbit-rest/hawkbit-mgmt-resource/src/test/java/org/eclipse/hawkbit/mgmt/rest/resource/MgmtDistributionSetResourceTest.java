@@ -1047,7 +1047,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String updateValue = "valueForUpdate";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -1071,7 +1071,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValue = "knownValue";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -1087,7 +1087,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValue = "knownValue";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/XXX", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
@@ -1105,7 +1105,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateMetadata(knownKey, knownValue));
+        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -1124,7 +1124,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
             createDistributionSetMetadata(testDS.getId(),
-                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
+                    entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
@@ -1200,7 +1200,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
             createDistributionSetMetadata(testDS.getId(),
-                    entityFactory.generateMetadata(knownKeyPrefix + index, knownValuePrefix + index));
+                    entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

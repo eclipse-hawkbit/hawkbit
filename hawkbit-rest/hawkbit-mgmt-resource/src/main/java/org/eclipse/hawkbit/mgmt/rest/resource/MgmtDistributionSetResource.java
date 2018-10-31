@@ -321,7 +321,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSetMetadata updated = distributionSetManagement.updateMetaData(distributionSetId,
-                entityFactory.generateMetadata(metadataKey, metadata.getValue()));
+                entityFactory.generateDsMetadata(metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(updated));
     }
 

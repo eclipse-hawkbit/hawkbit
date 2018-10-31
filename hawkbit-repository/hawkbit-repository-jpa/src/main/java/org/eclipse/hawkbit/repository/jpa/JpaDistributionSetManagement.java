@@ -458,7 +458,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createMetaData(final long dsId, final Collection<MetaData> md) {
 
-        md.forEach(meta -> checkAndThrowAlreadyIfDistributionSetMetadataExists(
+        md.forEach(meta -> checkAndThrowIfDistributionSetMetadataAlreadyExists(
                 new DsMetadataCompositeKey(dsId, meta.getKey())));
 
         assertMetaDataQuota(dsId, md.size());
@@ -677,7 +677,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
-    private void checkAndThrowAlreadyIfDistributionSetMetadataExists(final DsMetadataCompositeKey metadataId) {
+    private void checkAndThrowIfDistributionSetMetadataAlreadyExists(final DsMetadataCompositeKey metadataId) {
         if (distributionSetMetadataRepository.existsById(metadataId)) {
             throw new EntityAlreadyExistsException(
                     "Metadata entry with key '" + metadataId.getKey() + "' already exists");
