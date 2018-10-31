@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 
 @SpringBootTest(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
-@TestPropertySource(locations = "classpath:/jpa-test.properties")
+@TestPropertySource(locations = "classpath:/jpa-test.properties", properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     protected static final String INVALID_TEXT_HTML = "</noscript><br><script>";

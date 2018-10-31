@@ -318,7 +318,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                         sm.getId()).file(file).param("filename", "filename").param("file", "s")
                                 .param("md5sum", "md5sum").param("sha1sum", "sha1sum"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("filename").description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME),
                         parameterWithName("file").description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILE),
