@@ -10,50 +10,48 @@
 version: 2
 jobs:
   build:
-
     working_directory: ~/hawkBit
 
     docker:
-    - image: circleci/openjdk:8u181-jdk-stretch
-      environment:
-        _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+      - image: circleci/openjdk:8u181-jdk-stretch
+        environment:
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
-    - image: rabbitmq:3-management
-      environment:
-        RABBITMQ_DEFAULT_VHOST: "/"
+      - image: rabbitmq:3-management
+        environment:
+          RABBITMQ_DEFAULT_VHOST: "/"
 
     steps:
+      - checkout
 
-    - checkout
+      - restore_cache:
+          key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
-    - restore_cache:
-        key: circleci-hawkbit-{{ checksum "pom.xml" }}
+      - run:
+          name: Install dependencies without testing
+          command: mvn install --batch-mode -DskipTests
 
-    - run:
-       name: Install dependencies without testing
-       command: mvn install --batch-mode -DskipTests
+      - run:
+          name: Run tests incl. license check
+          command: "./.circleci/run-qa.sh"
 
-    - run:
-        name: Run tests incl. license check
-        command: './.circleci/run-qa.sh'
+      - run:
+          name: Record test results
+          command: mkdir -p testresults/jUnit && find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/jUnit/ \;
 
-    - run:
-        name: Record test results
-        command: mkdir -p testresults/jUnit && find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} testresults/jUnit/ \;
+      - store_test_results:
+          path: testresults
 
-    - store_test_results:
-        path: testresults
+      - store_artifacts:
+          path: pom.xml
+          destination: pom.xml
 
-    - store_artifacts:
-        path: pom.xml
-        destination: pom.xml
-
-    - save_cache:
-        paths:
-        - ~/.m2
-        key: circleci-hawkbit-{{ checksum "pom.xml" }}
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: circleci-hawkbit-{{ checksum "pom.xml" }}
 
 notify:
   webhooks:
-  # Gitter hook
-  - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39
+    # Gitter hook
+    - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39
