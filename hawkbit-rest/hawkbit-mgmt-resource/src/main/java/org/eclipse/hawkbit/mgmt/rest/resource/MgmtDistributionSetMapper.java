@@ -93,7 +93,7 @@ public final class MgmtDistributionSetMapper {
         }
 
         return metadata.stream()
-                .map(metadataRest -> entityFactory.generateMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                .map(metadataRest -> entityFactory.generateDsMetadata(metadataRest.getKey(), metadataRest.getValue()))
                 .collect(Collectors.toList());
     }
 

@@ -51,6 +51,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
@@ -277,10 +278,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
-        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .param("filename", "customFilename").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file).param("filename",
+                "customFilename")).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
 
         // check result in db...

@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -57,8 +58,13 @@ public class JpaEntityFactory implements EntityFactory {
     private SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
 
     @Override
-    public MetaData generateMetadata(final String key, final String value) {
+    public MetaData generateDsMetadata(final String key, final String value) {
         return new JpaDistributionSetMetadata(key, StringUtils.trimWhitespace(value));
+    }
+
+    @Override
+    public MetaData generateTargetMetadata(final String key, final String value) {
+        return new JpaTargetMetadata(key, StringUtils.trimWhitespace(value));
     }
 
     @Override
