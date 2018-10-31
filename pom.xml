@@ -469,7 +469,7 @@
                        <artifactId>maven-surefire-plugin</artifactId>
                        <configuration>
                            <argLine>
-                              ${jacoco.agent.ut.arg} -Xmx1024m 
+                              ${jacoco.agent.ut.arg}
                            </argLine>
                        </configuration>
                    </plugin>
