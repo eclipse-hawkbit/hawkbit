@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
@@ -182,10 +183,14 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget updatedTarget = touch(target);
 
-        return Collections.unmodifiableList(md.stream()
+        final List<TargetMetadata> createdMetadata = Collections.unmodifiableList(md.stream()
                 .map(meta -> targetMetadataRepository
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
                 .collect(Collectors.toList()));
+
+        eventPublisher.publishEvent(new TargetUpdatedEvent(updatedTarget, applicationContext.getId()));
+
+        return createdMetadata;
     }
 
     private void checkAndThrowIfTargetMetadataAlreadyExists(final TargetMetadataCompositeKey metadataId) {
