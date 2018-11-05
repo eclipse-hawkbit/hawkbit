@@ -232,8 +232,10 @@ public class JpaTargetManagement implements TargetManagement {
         toUpdate.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // target indirectly
-        touch(controllerId);
-        return targetMetadataRepository.save(toUpdate);
+        final JpaTarget target = touch(controllerId);
+        final JpaTargetMetadata matadata = targetMetadataRepository.save(toUpdate);
+        eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
+        return matadata;
     }
 
     @Override
@@ -244,8 +246,9 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, key)
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, key));
 
-        touch(controllerId);
+        final JpaTarget target = touch(controllerId);
         targetMetadataRepository.delete(metadata.getId());
+        eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
     }
 
     @Override
