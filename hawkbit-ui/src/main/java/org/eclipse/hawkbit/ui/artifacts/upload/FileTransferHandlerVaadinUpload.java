@@ -85,7 +85,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         }
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
-        event.getMIMEType();
 
         if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();

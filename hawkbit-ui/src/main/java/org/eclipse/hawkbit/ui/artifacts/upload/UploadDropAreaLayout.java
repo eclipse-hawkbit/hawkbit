@@ -178,19 +178,18 @@ public class UploadDropAreaLayout extends AbstractComponent {
         private void uploadFilesForSoftwareModule(final Html5File[] files, final Long softwareModuleId) {
             final SoftwareModule softwareModule = softwareManagement.get(softwareModuleId).orElse(null);
 
-            boolean isDuplicate = false;
+            boolean duplicateFound = false;
 
             for (final Html5File file : files) {
-
-                isDuplicate = artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule);
-
-                if (!isDuplicate) {
+                if (artifactUploadState.isFileInUploadState(file.getFileName(), softwareModule)) {
+                    duplicateFound = true;
+                } else {
                     file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(),
                             multipartConfigElement.getMaxFileSize(), file.getType(), softwareModule, artifactManagement,
                             i18n));
                 }
             }
-            if (isDuplicate) {
+            if (duplicateFound) {
                 uiNotification.displayValidationError(
                         i18n.getMessage("message.no.duplicateFiles"));
             }
