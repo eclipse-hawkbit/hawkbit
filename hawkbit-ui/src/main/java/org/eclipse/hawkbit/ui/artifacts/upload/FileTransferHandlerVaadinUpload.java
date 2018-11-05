@@ -133,17 +133,17 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
-        Optional<PipedInputStream> inputStream = Optional.empty();
+        PipedInputStream inputStream = null;
         try {
-            inputStream = Optional.of(new PipedInputStream(outputStream));
+            inputStream = new PipedInputStream(outputStream);
             publishUploadProgressEvent(fileUploadId, 0, 0);
-            startTransferToRepositoryThread(inputStream.orElseThrow(IOException::new), fileUploadId, mimeType);
+            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
+            tryToCloseIOStream(outputStream);
+            tryToCloseIOStream(inputStream);
             setFailureReasonUploadFailed();
             setUploadInterrupted();
-            tryToCloseIOStream(outputStream);
-            inputStream.ifPresent(AbstractFileTransferHandler::tryToCloseIOStream);
             getUploadState().updateFileUploadProgress(fileUploadId,
                     new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
             uiNotification.displayWarning("try again");

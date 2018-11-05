@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -82,17 +81,17 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
-        Optional<PipedInputStream> inputStream = Optional.empty();
+        PipedInputStream inputStream = null;
         try {
-            inputStream = Optional.of(new PipedInputStream(outputStream));
+            inputStream = new PipedInputStream(outputStream);
             publishUploadProgressEvent(fileUploadId, 0, fileSize);
-            startTransferToRepositoryThread(inputStream.orElseThrow(IOException::new), fileUploadId, mimeType);
+            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
             LOG.error("Creating piped Stream failed {}.", e);
+            tryToCloseIOStream(outputStream);
+            tryToCloseIOStream(inputStream);
             setFailureReasonUploadFailed();
             setUploadInterrupted();
-            tryToCloseIOStream(outputStream);
-            inputStream.ifPresent(AbstractFileTransferHandler::tryToCloseIOStream);
             getUploadState().updateFileUploadProgress(fileUploadId,
                     new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
             return ByteStreams.nullOutputStream();

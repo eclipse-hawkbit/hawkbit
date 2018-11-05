@@ -194,18 +194,23 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected static void tryToCloseIOStream(final OutputStream outputStream) {
-        try {
-            outputStream.close();
-        } catch (final IOException e1) {
-            LOG.error("Closing output stream caused an exception {}", e1);
+        if (outputStream != null) {
+            try {
+                outputStream.close();
+            } catch (final IOException e1) {
+                LOG.error("Closing output stream caused an exception {}", e1);
+            }
         }
+
     }
 
     protected static void tryToCloseIOStream(final InputStream inputStream) {
-        try {
-            inputStream.close();
-        } catch (final IOException e1) {
-            LOG.error("Closing input stream caused an exception {}", e1);
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (final IOException e1) {
+                LOG.error("Closing input stream caused an exception {}", e1);
+            }
         }
     }
 
@@ -230,8 +235,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 streamToRepository();
             } catch (final RuntimeException e) {
                 publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
-                tryToCloseIOStream(inputStream);
                 LOG.error("Failed to transfer file to repository", e);
+            } finally {
+                tryToCloseIOStream(inputStream);
             }
         }
 
@@ -239,7 +245,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             if (fileUploadId == null) {
                 throw new ArtifactUploadFailedException();
             }
-
             final String filename = fileUploadId.getFilename();
             LOG.info("Transfering file {} directly to repository", filename);
             final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
