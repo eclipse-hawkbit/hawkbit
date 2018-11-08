@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
@@ -295,6 +296,14 @@ public abstract class AbstractIntegrationTest {
 
     protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
         return distributionSetManagement.createMetaData(dsId, md);
+    }
+
+    protected TargetMetadata createTargetMetadata(final String controllerId, final MetaData md) {
+        return createTargetMetadata(controllerId, Collections.singletonList(md)).get(0);
+    }
+
+    protected List<TargetMetadata> createTargetMetadata(final String controllerId, final List<MetaData> md) {
+        return targetManagement.createMetaData(controllerId, md);
     }
 
     protected Long getOsModule(final DistributionSet ds) {

@@ -287,7 +287,7 @@ public final class RSQLUtility {
 
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
-            validateMapParamter(propertyEnum, node, graph);
+            validateMapParameter(propertyEnum, node, graph);
 
             // sub entity need minium 1 dot
             if (!propertyEnum.getSubEntityAttributes().isEmpty() && graph.length < 2) {
@@ -314,13 +314,16 @@ public final class RSQLUtility {
             return fieldNameBuilder.toString();
         }
 
-        private void validateMapParamter(final A propertyEnum, final ComparisonNode node, final String[] graph) {
+        private void validateMapParameter(final A propertyEnum, final ComparisonNode node, final String[] graph) {
             if (!propertyEnum.isMap()) {
                 return;
 
             }
-            if (!propertyEnum.getSubEntityAttributes().isEmpty()) {
-                throw new UnsupportedOperationException("Currently subentity attributes for maps are not supported");
+
+            final List<String> subEntityAttributes = propertyEnum.getSubEntityAttributes();
+            if (!subEntityAttributes.isEmpty() && !subEntityAttributes.equals(Arrays.asList("key", "value"))) {
+                throw new UnsupportedOperationException(
+                        "Currently subentity attributes for maps support only 'key' and 'value' attributes in the exact order");
             }
 
             // enum.key
@@ -616,10 +619,17 @@ public final class RSQLUtility {
         }
 
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
-            if (!enumField.isMap() || enumField.getValueFieldName() == null) {
+            final String valueFieldNameFromSubEntity = getValueFieldName(enumField);
+
+            if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
                 return fieldPath;
             }
-            return fieldPath.get(enumField.getValueFieldName());
+            return fieldPath.get(valueFieldNameFromSubEntity);
+        }
+
+        private String getValueFieldName(final A enumField) {
+            return enumField.getSubEntityAttributes().isEmpty() ? enumField.getValueFieldName()
+                    : enumField.getSubEntityAttributes().get(1);
         }
 
         @SuppressWarnings("unchecked")
@@ -636,7 +646,15 @@ public final class RSQLUtility {
                         keyValue.toUpperCase());
             }
 
-            return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
+            final String keyFieldName = getKeyFieldName(enumField);
+
+            return cb.equal(cb.upper(fieldPath.get(keyFieldName)), keyValue.toUpperCase());
+        }
+
+        private String getKeyFieldName(final A enumField) {
+            return enumField.getKeyFieldName() != null || enumField.getSubEntityAttributes().isEmpty()
+                    ? enumField.getKeyFieldName()
+                    : enumField.getSubEntityAttributes().get(0);
         }
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,

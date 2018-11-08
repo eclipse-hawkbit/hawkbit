@@ -77,7 +77,12 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * Last time the DDI or DMF client polled.
      */
-    LASTCONTROLLERREQUESTAT("lastTargetQuery");
+    LASTCONTROLLERREQUESTAT("lastTargetQuery"),
+
+    /**
+     * The metadata.
+     */
+    METADATA("metadata", true, Arrays.asList("key", "value"));
 
     private final String fieldName;
     private List<String> subEntityAttribues;
