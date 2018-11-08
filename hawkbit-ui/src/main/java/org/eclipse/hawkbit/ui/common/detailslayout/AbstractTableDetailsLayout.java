@@ -300,6 +300,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
     }
 
+    protected String getName() {
+        return getSelectedBaseEntity().getName();
+    }
+
     protected abstract void populateDetailsWidget();
 
     protected abstract void populateMetadataDetails();
@@ -330,8 +334,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract boolean hasEditPermission();
 
     protected abstract String getDetailsHeaderCaptionId();
-
-    protected abstract String getName();
 
     protected abstract boolean isMetadataIconToBeDisplayed();
 

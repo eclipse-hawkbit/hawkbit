@@ -439,11 +439,16 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
         return true;
     }
 
-    protected String getMetadataCaption() {
+    private String getMetadataCaption() {
         final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup"));
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup") + " "
+                + HawkbitCommonUtil.getBoldHTMLText(getElementTitle()));
         caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
         return caption.toString();
+    }
+
+    protected String getElementTitle() {
+        return getSelectedEntity().getName();
     }
 
     private void onCancel() {

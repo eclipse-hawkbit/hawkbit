@@ -37,13 +37,8 @@ public abstract class AbstractMetadataPopupLayoutVersioned<E extends NamedVersio
     }
 
     @Override
-    protected String getMetadataCaption() {
-        final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(getSelectedEntity().getName(),
+    protected String getElementTitle() {
+        return HawkbitCommonUtil.getFormattedNameVersion(getSelectedEntity().getName(),
                 getSelectedEntity().getVersion());
-        final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup") + " "
-                + HawkbitCommonUtil.getBoldHTMLText(nameVersion));
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
-        return caption.toString();
     }
 }

@@ -175,11 +175,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         populateMetadataDetails();
     }
 
-    @Override
-    protected String getName() {
-        return getSelectedBaseEntity().getName();
-    }
-
     private void updateDetailsLayout(final String controllerId, final URI address, final String securityToken,
             final String lastQueryDate) {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
