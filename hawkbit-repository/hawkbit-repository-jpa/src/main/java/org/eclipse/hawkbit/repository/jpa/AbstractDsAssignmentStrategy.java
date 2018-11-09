@@ -31,8 +31,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.CollectionUtils;
@@ -43,8 +41,6 @@ import org.springframework.util.CollectionUtils;
  *
  */
 public abstract class AbstractDsAssignmentStrategy {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDsAssignmentStrategy.class);
 
     protected final TargetRepository targetRepository;
     protected final AfterTransactionCommitExecutor afterCommit;

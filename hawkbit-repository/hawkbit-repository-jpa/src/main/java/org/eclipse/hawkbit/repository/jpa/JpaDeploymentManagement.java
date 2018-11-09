@@ -765,21 +765,21 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void dumpDistributionSetAssignment(final JpaTarget target, final JpaDistributionSet set,
             final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
             final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap) {
+        final ObjectWriter writer = new ObjectMapper().writer();
         final String correlationID = "DistributionSetAssignmentDump[" + Thread.currentThread().getId() + "]";
         dump(correlationID, "Target", Objects.toString(target));
         dump(correlationID, "DistributionSet", Objects.toString(set));
         if (target != null) {
             dump(correlationID, "ControllerID", Objects.toString(target.getControllerId()));
+            if (set != null) {
+                dump(correlationID, "Actions", toString(writer,
+                        actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)));
+            }
         }
-        final ObjectWriter writer = new ObjectMapper().writer();
         dump(correlationID, "ControllerIDs", toString(writer, controllerIDs));
         dump(correlationID, "Targets", toString(writer, targets));
         dump(correlationID, "TargetsWithActionType", toString(writer, targetsWithActionType));
         dump(correlationID, "TargetsWithActionMap", toString(writer, targetsWithActionMap));
-        if (target != null && set != null) {
-            dump(correlationID, "Actions", toString(writer,
-                    actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)));
-        }
     }
 
     private static void dump(final String prefix, final String key, final String value) {
