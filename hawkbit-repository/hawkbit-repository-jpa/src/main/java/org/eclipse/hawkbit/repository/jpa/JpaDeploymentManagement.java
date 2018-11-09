@@ -749,6 +749,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return "#" + Joiner.on(",#").join(elements);
     }
 
+    @SuppressWarnings({ "squid:S1695", "squid:S1696" })
     private JpaAction createTargetAction(final AbstractDsAssignmentStrategy assignmentStrategy,
             final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
             final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap,
@@ -786,10 +787,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         LOG.error("{} >>> {}: {}", prefix, key, value);
     }
 
+    @SuppressWarnings("squid:S1166")
     private static String toString(final ObjectWriter writer, final Object o) {
         try {
             return writer.writeValueAsString(o);
         } catch (final JsonProcessingException e) {
+            LOG.error("Object serialization failed", e);
             return e.getMessage();
         }
     }
