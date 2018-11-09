@@ -113,11 +113,6 @@ public abstract class AbstractSoftwareModuleDetails
     }
 
     @Override
-    protected boolean isMetadataIconToBeDisplayed() {
-        return true;
-    }
-
-    @Override
     protected void showMetadata(final ClickEvent event) {
         softwareModuleManagement.get(getSelectedBaseEntityId())
                 .ifPresent(swmodule -> UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null)));

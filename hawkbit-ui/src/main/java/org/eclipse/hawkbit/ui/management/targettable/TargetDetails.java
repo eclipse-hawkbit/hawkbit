@@ -336,11 +336,6 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     @Override
-    protected boolean isMetadataIconToBeDisplayed() {
-        return true;
-    }
-
-    @Override
     protected void showMetadata(final ClickEvent event) {
         final Optional<Target> target = targetManagement.get(getSelectedBaseEntityId());
         if (!target.isPresent()) {

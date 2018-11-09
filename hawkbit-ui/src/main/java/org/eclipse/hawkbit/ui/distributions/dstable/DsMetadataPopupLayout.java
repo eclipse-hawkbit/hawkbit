@@ -29,7 +29,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class DsMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<DistributionSet, MetaData> {
 
-    private static final long serialVersionUID = -7778944849012048106L;
+    private static final long serialVersionUID = 1L;
 
     private final transient DistributionSetManagement distributionSetManagement;
 

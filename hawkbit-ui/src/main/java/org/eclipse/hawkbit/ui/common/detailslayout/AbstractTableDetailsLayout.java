@@ -248,10 +248,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
             nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-            if (isMetadataIconToBeDisplayed()) {
-                nameEditLayout.addComponent(manageMetadataBtn);
-                nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
-            }
+            nameEditLayout.addComponent(manageMetadataBtn);
+            nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
         }
         nameEditLayout.setExpandRatio(caption, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
@@ -334,8 +332,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract boolean hasEditPermission();
 
     protected abstract String getDetailsHeaderCaptionId();
-
-    protected abstract boolean isMetadataIconToBeDisplayed();
 
     protected abstract void showMetadata(Button.ClickEvent event);
 
