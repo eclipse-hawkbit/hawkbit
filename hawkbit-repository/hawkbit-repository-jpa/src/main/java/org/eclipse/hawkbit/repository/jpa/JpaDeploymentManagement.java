@@ -90,6 +90,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -100,6 +103,7 @@ import com.google.common.collect.Lists;
 @Transactional(readOnly = true)
 @Validated
 public class JpaDeploymentManagement implements DeploymentManagement {
+
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
     /**
@@ -321,8 +325,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         assignmentStrategy.updateTargetStatus(set, targetIds, currentUser);
 
         final Map<String, JpaAction> targetIdsToActions = targets.stream()
-                .map(t -> actionRepository.save(assignmentStrategy.createTargetAction(targetsWithActionMap, t, set)))
-                .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
+                .map(trg -> createTargetAction(assignmentStrategy, targetsWithActionType, controllerIDs, targets,
+                        targetsWithActionMap, trg, set))
+                .map(actionRepository::save)
+                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
 
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
@@ -578,7 +584,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-
         return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
     }
 
@@ -592,14 +597,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public long countActionsByTarget(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public long countActionsByTarget(final String rsqlParam, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-
         return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
     }
 
@@ -684,7 +687,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long dsId) {
         throwExceptionIfDistributionSetDoesNotExist(dsId);
-
         return actionRepository.findByDistributionSetId(pageable, dsId);
     }
 
@@ -696,14 +698,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-
         return distributionSetRepository.findAssignedToTarget(controllerId);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-
         return distributionSetRepository.findInstalledAtTarget(controllerId);
     }
 
@@ -736,7 +736,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return deleteQuery.executeUpdate();
     }
 
-    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(Database database) {
+    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
         return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
                 QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
     }
@@ -747,6 +747,51 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private static String formatInClause(final Collection<String> elements) {
         return "#" + Joiner.on(",#").join(elements);
+    }
+
+    private JpaAction createTargetAction(final AbstractDsAssignmentStrategy assignmentStrategy,
+            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
+            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap,
+            final JpaTarget target, final JpaDistributionSet set) {
+        try {
+            return assignmentStrategy.createTargetAction(targetsWithActionMap, target, set);
+        } catch (final NullPointerException e) {
+            dumpDistributionSetAssignment(target, set, targetsWithActionType, controllerIDs, targets,
+                    targetsWithActionMap);
+            throw e;
+        }
+    }
+
+    private void dumpDistributionSetAssignment(final JpaTarget target, final JpaDistributionSet set,
+            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
+            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap) {
+        final String correlationID = "DistributionSetAssignmentDump[" + Thread.currentThread().getId() + "]";
+        dump(correlationID, "Target", Objects.toString(target));
+        dump(correlationID, "DistributionSet", Objects.toString(set));
+        if (target != null) {
+            dump(correlationID, "ControllerID", Objects.toString(target.getControllerId()));
+        }
+        final ObjectWriter writer = new ObjectMapper().writer();
+        dump(correlationID, "ControllerIDs", toString(writer, controllerIDs));
+        dump(correlationID, "Targets", toString(writer, targets));
+        dump(correlationID, "TargetsWithActionType", toString(writer, targetsWithActionType));
+        dump(correlationID, "TargetsWithActionMap", toString(writer, targetsWithActionMap));
+        if (target != null && set != null) {
+            dump(correlationID, "Actions", toString(writer,
+                    actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)));
+        }
+    }
+
+    private static void dump(final String prefix, final String key, final String value) {
+        LOG.error("{} >>> {}: {}", prefix, key, value);
+    }
+
+    private static String toString(final ObjectWriter writer, final Object o) {
+        try {
+            return writer.writeValueAsString(o);
+        } catch (final JsonProcessingException e) {
+            return e.getMessage();
+        }
     }
 
 }

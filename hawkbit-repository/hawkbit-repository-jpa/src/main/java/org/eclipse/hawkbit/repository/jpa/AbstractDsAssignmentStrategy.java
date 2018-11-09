@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -225,40 +223,12 @@ public abstract class AbstractDsAssignmentStrategy {
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
 
-        // START DEBUG
-        Objects.requireNonNull(target, "Argument 'target' must not be null.");
-        Objects.requireNonNull(set, "Argument 'set' must not be null.");
-        Objects.requireNonNull(targetsWithActionMap, "Argument 'targetsWithActionMap' must not be null.");
-        Objects.requireNonNull(target.getControllerId(), "Controller ID of target " + target + " must not be null.");
-        // END DEBUG
-
         // enforce the 'max actions per target' quota
         assertActionsPerTargetQuota(target, 1);
 
         // create the action
         final JpaAction actionForTarget = new JpaAction();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
-
-        // START DEBUG
-        if (targetWithActionType == null) {
-            // print the entries of targetsWithActionMap
-            final String controllerId = target.getControllerId();
-            final StringBuilder serializedMap = new StringBuilder("{");
-            targetsWithActionMap.forEach(
-                    (key, value) -> serializedMap.append("[").append(key).append(", ").append(value).append("]"));
-            serializedMap.append("}");
-            LOGGER.error("TargetWithActionType object for target {} not found in map {}", controllerId, serializedMap);
-
-            // print actions referring to the same target and distribution set
-            final StringBuilder serializedActions = new StringBuilder("{");
-            actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)
-                    .forEach(action -> serializedActions.append(action).append(", "));
-            serializedActions.append("}");
-            LOGGER.error("Target {} has the following actions for the same distribution set: {}", controllerId,
-                    serializedActions);
-        }
-        // END DEBUG
-
         actionForTarget.setActionType(targetWithActionType.getActionType());
         actionForTarget.setForcedTime(targetWithActionType.getForceTime());
         actionForTarget.setActive(true);
