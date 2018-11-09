@@ -188,6 +188,8 @@ public class JpaTargetManagement implements TargetManagement {
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
                 .collect(Collectors.toList()));
 
+        // target update event is set to ignore "lastModifiedAt" field so it is
+        // not send automatically within the touch() method
         eventPublisher.publishEvent(new TargetUpdatedEvent(updatedTarget, applicationContext.getId()));
 
         return createdMetadata;
@@ -234,6 +236,8 @@ public class JpaTargetManagement implements TargetManagement {
         // target indirectly
         final JpaTarget target = touch(controllerId);
         final JpaTargetMetadata matadata = targetMetadataRepository.save(toUpdate);
+        // target update event is set to ignore "lastModifiedAt" field so it is
+        // not send automatically within the touch() method
         eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
         return matadata;
     }
@@ -248,6 +252,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget target = touch(controllerId);
         targetMetadataRepository.delete(metadata.getId());
+        // target update event is set to ignore "lastModifiedAt" field so it is
+        // not send automatically within the touch() method
         eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
     }
 
