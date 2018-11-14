@@ -25,9 +25,7 @@ public class TargetWithActionType {
     private String maintenanceWindowTimeZone;
 
     public TargetWithActionType(final String controllerId) {
-        this.controllerId = controllerId;
-        this.actionType = ActionType.FORCED;
-        this.forceTime = 0;
+        this(controllerId, ActionType.FORCED, 0);
     }
 
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
@@ -115,4 +113,13 @@ public class TargetWithActionType {
     public String getMaintenanceWindowTimeZone() {
         return maintenanceWindowTimeZone;
     }
+
+    @Override
+    public String toString() {
+        return "TargetWithActionType [controllerId=" + controllerId + ", actionType=" + getActionType() + ", forceTime="
+                + getForceTime() + ", maintenanceSchedule=" + getMaintenanceSchedule() + ", maintenanceWindowDuration="
+                + getMaintenanceWindowDuration() + ", maintenanceWindowTimeZone=" + getMaintenanceWindowTimeZone()
+                + "]";
+    }
+
 }

@@ -123,13 +123,13 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
+        String lastname = StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
 
-        if (!StringUtils.isEmpty(firstname)) {
-            firstname += DETAIL_SEPERATOR;
+        if (!StringUtils.isEmpty(lastname)) {
+            lastname += DETAIL_SEPERATOR;
         }
 
-        final String firstAndLastname = firstname + StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
+        final String firstAndLastname = lastname + StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
 
         final String trimmedUsername = trimAndFormatDetail(firstAndLastname, expectedNameLength);
 
