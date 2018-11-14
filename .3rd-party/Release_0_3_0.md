@@ -10,9 +10,9 @@
 | com.esotericsoftware                 | kryo-shaded                    | 3.0.3          | [CQ17372](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17372) |
 | com.esotericsoftware                 | minlog                         | 1.3.0          | [CQ17371](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17371) |
 | com.fasterxml                        | classmate                      | 1.4.0          | []()                                                             |
-| com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | [CQ18137](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18137) |
-| com.fasterxml.jackson.core           | jackson-core                   | 2.9.7          | [CQ18138](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18138) |
-| com.fasterxml.jackson.core           | jackson-databind               | 2.9.7          | [CQ18139](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18139) |
+| com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | [CQ18146](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18146) |
+| com.fasterxml.jackson.core           | jackson-core                   | 2.9.7          | [CQ18147](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18147) |
+| com.fasterxml.jackson.core           | jackson-databind               | 2.9.7          | [CQ18145](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18145) |
 | com.github.ben-manes.caffeine        | caffeine                       | 2.6.2          | [CQ17377](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17377) |
 | com.github.gwtd3                     | gwt-d3-api                     | 1.2.0          | [CQ13029](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13029) |
 | com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
