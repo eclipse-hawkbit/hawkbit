@@ -92,13 +92,13 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter software module by type")
+    @Description("Test filter software module by type key")
     public void testFilterByType() {
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 3);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 3);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key==" + TestdataFactory.SM_TYPE_APP, 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key!=" + TestdataFactory.SM_TYPE_APP, 3);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key==noExist*", 0);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key=out=(" + TestdataFactory.SM_TYPE_APP + ")", 3);
     }
 
     @Test

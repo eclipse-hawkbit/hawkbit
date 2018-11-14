@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * Describing the fields of the Target model which can be used in the REST API
@@ -72,7 +75,7 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The tags field.
      */
-    TAG("tags.name"),
+    TAG("tags", "name"),
 
     /**
      * Last time the DDI or DMF client polled.
@@ -82,33 +85,45 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The metadata.
      */
-    METADATA("metadata", true, Arrays.asList("key", "value"));
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
     private List<String> subEntityAttribues;
     private boolean mapField;
+    private Entry<String, String> subEntityMapTuple;
 
     TargetFields(final String fieldName) {
-        this(fieldName, false, Collections.emptyList());
+        this(fieldName, false, Collections.emptyList(), null);
     }
 
     TargetFields(final String fieldName, final boolean isMapField) {
-        this(fieldName, isMapField, Collections.emptyList());
+        this(fieldName, isMapField, Collections.emptyList(), null);
     }
 
     TargetFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, false, Arrays.asList(subEntityAttribues));
+        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
     }
 
-    TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues) {
+    TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
+    }
+
+    TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+            final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;
         this.subEntityAttribues = subEntityAttribues;
+        this.subEntityMapTuple = subEntityMapTuple;
     }
 
     @Override
     public List<String> getSubEntityAttributes() {
         return subEntityAttribues;
+    }
+
+    @Override
+    public Optional<Entry<String, String>> getSubEntityMapTuple() {
+        return Optional.ofNullable(subEntityMapTuple);
     }
 
     @Override

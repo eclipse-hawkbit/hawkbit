@@ -8,6 +8,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+
 /**
  * Describing the fields of the DistributionSet model which can be used in the
  * REST API e.g. for sorting etc.
@@ -49,45 +56,64 @@ public enum DistributionSetFields implements FieldNameProvider {
     /**
      * The tags field.
      */
-    TAG("tags.name"),
+    TAG("tags", "name"),
 
     /**
      * The sw type key field.
      */
-    TYPE("type.key"),
+    TYPE("type", "key"),
 
     /**
      * The metadata.
      */
-    METADATA("metadata", "key", "value");
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
-    private String keyFieldName;
-    private String valueFieldName;
+    private List<String> subEntityAttribues;
+    private boolean mapField;
+    private Entry<String, String> subEntityMapTuple;
 
-    private DistributionSetFields(final String fieldName) {
-        this(fieldName, null, null);
+    DistributionSetFields(final String fieldName) {
+        this(fieldName, false, Collections.emptyList(), null);
     }
 
-    private DistributionSetFields(final String fieldName, final String keyFieldName, final String valueFieldName) {
+    DistributionSetFields(final String fieldName, final boolean isMapField) {
+        this(fieldName, isMapField, Collections.emptyList(), null);
+    }
+
+    DistributionSetFields(final String fieldName, final String... subEntityAttribues) {
+        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
+    }
+
+    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
+    }
+
+    DistributionSetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+            final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
-        this.keyFieldName = keyFieldName;
-        this.valueFieldName = valueFieldName;
+        this.mapField = mapField;
+        this.subEntityAttribues = subEntityAttribues;
+        this.subEntityMapTuple = subEntityMapTuple;
     }
 
     @Override
-    public String getValueFieldName() {
-        return valueFieldName;
+    public List<String> getSubEntityAttributes() {
+        return subEntityAttribues;
     }
 
     @Override
-    public String getKeyFieldName() {
-        return keyFieldName;
+    public Optional<Entry<String, String>> getSubEntityMapTuple() {
+        return Optional.ofNullable(subEntityMapTuple);
+    }
+
+    @Override
+    public boolean isMap() {
+        return mapField;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
     }
-
 }

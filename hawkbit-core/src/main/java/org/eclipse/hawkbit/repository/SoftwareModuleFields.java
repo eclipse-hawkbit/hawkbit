@@ -8,6 +8,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+
 /**
  * Describing the fields of the SoftwareModule model which can be used in the
  * REST API e.g. for sorting etc.
@@ -32,7 +39,7 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     /**
      * The type field of the software module.
      */
-    TYPE("type.key"),
+    TYPE("type", "key"),
     /**
      * The id field.
      */
@@ -40,34 +47,54 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     /**
      * The metadata.
      */
-    METADATA("metadata", "key", "value");
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
-    private String keyFieldName;
-    private String valueFieldName;
+    private List<String> subEntityAttribues;
+    private boolean mapField;
+    private Entry<String, String> subEntityMapTuple;
 
-    private SoftwareModuleFields(final String fieldName) {
-        this(fieldName, null, null);
+    SoftwareModuleFields(final String fieldName) {
+        this(fieldName, false, Collections.emptyList(), null);
     }
 
-    private SoftwareModuleFields(final String fieldName, final String keyFieldName, final String valueFieldName) {
+    SoftwareModuleFields(final String fieldName, final boolean isMapField) {
+        this(fieldName, isMapField, Collections.emptyList(), null);
+    }
+
+    SoftwareModuleFields(final String fieldName, final String... subEntityAttribues) {
+        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
+    }
+
+    SoftwareModuleFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
+    }
+
+    SoftwareModuleFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+            final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
-        this.keyFieldName = keyFieldName;
-        this.valueFieldName = valueFieldName;
+        this.mapField = mapField;
+        this.subEntityAttribues = subEntityAttribues;
+        this.subEntityMapTuple = subEntityMapTuple;
+    }
+
+    @Override
+    public List<String> getSubEntityAttributes() {
+        return subEntityAttribues;
+    }
+
+    @Override
+    public Optional<Entry<String, String>> getSubEntityMapTuple() {
+        return Optional.ofNullable(subEntityMapTuple);
+    }
+
+    @Override
+    public boolean isMap() {
+        return mapField;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
-    }
-
-    @Override
-    public String getKeyFieldName() {
-        return keyFieldName;
-    }
-
-    @Override
-    public String getValueFieldName() {
-        return valueFieldName;
     }
 }

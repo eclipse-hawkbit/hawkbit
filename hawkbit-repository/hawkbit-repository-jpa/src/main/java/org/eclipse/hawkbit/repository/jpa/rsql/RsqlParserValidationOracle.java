@@ -179,7 +179,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     }
 
     private static boolean shouldSuggestDotToken(final String currentTokenImageName, final boolean containsDot) {
-        return !containsDot && FieldNameDescription.hasSubEntries(currentTokenImageName);
+        return !containsDot && (FieldNameDescription.hasSubEntries(currentTokenImageName)
+                || FieldNameDescription.isMap(currentTokenImageName));
     }
 
     private static boolean shouldSuggestTopLevelFieldNames(final String currentTokenImageName,
@@ -293,6 +294,12 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             return Arrays.stream(TargetFields.values())
                     .filter(field -> field.toString().equalsIgnoreCase(finalTmpTokenName))
                     .map(TargetFields::getSubEntityAttributes).flatMap(List::stream).count() > 0;
+        }
+
+        private static boolean isMap(final String tokenImageName) {
+            return Arrays.stream(TargetFields.values())
+                    .filter(field -> field.toString().equalsIgnoreCase(tokenImageName)).findFirst()
+                    .map(TargetFields::isMap).orElse(false);
         }
 
         private static List<SuggestToken> toTopSuggestToken(final int beginToken, final int endToken,

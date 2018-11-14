@@ -112,24 +112,24 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter distribution set by tag")
+    @Description("Test filter distribution set by tag name")
     public void testFilterByTag() {
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "==Tag1", 2);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name==Tag1", 2);
         // does not include untagged sets
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "!=Tag1", 0);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "==T*", 2);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "==noExist*", 0);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "=out=(null)", 2);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name!=Tag1", 0);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name==T*", 2);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name==noExist*", 0);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name=in=(Tag1,notexist)", 2);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + ".name=out=(null)", 2);
     }
 
     @Test
-    @Description("Test filter distribution set by type")
+    @Description("Test filter distribution set by type key")
     public void testFilterByType() {
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "==noExist*", 0);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=in=(" + TestdataFactory.DS_TYPE_DEFAULT + ",ecl)", 4);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=out=(" + TestdataFactory.DS_TYPE_DEFAULT + ")", 1);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + ".key==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + ".key==noExist*", 0);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + ".key=in=(" + TestdataFactory.DS_TYPE_DEFAULT + ",ecl)", 4);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + ".key=out=(" + TestdataFactory.DS_TYPE_DEFAULT + ")", 1);
     }
 
     @Test
