@@ -55,4 +55,19 @@ public final class SpringContextHelper {
         return context.getBean(beanClazz);
     }
 
+    /**
+     * method to return a certain bean by its class and name.
+     * 
+     * @param beanName
+     *            name of the beand which should be returned from the
+     *            application context
+     * @param beanClazz
+     *            class of the bean which should be returned from the
+     *            application context
+     * @return the requested bean
+     */
+    public static <T> T getBean(final String beanName, final Class<T> beanClazz) {
+        return context.getBean(beanName, beanClazz);
+    }
+
 }

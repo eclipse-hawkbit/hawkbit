@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -51,7 +53,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     private final transient SoftwareModuleManagement softwareModuleManagement;
     private final long maxSize;
 
-    private volatile String mimeType;
     private volatile FileUploadId fileUploadId;
 
     FileTransferHandlerVaadinUpload(final long maxSize, final SoftwareModuleManagement softwareManagement,
@@ -70,12 +71,12 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadStarted(final StartedEvent event) {
         // reset internal state here because instance is reused for next upload!
         resetState();
-        this.mimeType = null;
         this.fileUploadId = null;
 
         assertThatOneSoftwareModuleIsSelected();
 
-        // selected software module at the time of this callback is considered
+        // selected software module at the time of this callback is
+        // considered
         SoftwareModule softwareModule = null;
         final Optional<Long> selectedSoftwareModuleId = getUploadState().getSelectedBaseSwModuleId();
         final Long softwareModuleId = selectedSoftwareModuleId.orElse(null);
@@ -84,7 +85,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         }
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
-        this.mimeType = event.getMIMEType();
 
         if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
@@ -131,26 +131,23 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
-        OutputStream outputStream = ByteStreams.nullOutputStream();
+        final PipedOutputStream outputStream = new PipedOutputStream();
+        PipedInputStream inputStream = null;
         try {
-            outputStream = createOutputStreamForTempFile();
-            this.mimeType = mimeType;
-            publishUploadProgressEvent(fileUploadId, 0, 0, getTempFilePath());
-
+            inputStream = new PipedInputStream(outputStream);
+            publishUploadProgressEvent(fileUploadId, 0, 0);
+            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.error("Creating temp file for upload failed {}.", e);
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (final IOException e1) {
-                    LOG.error("Closing output stream caused an exception {}", e1);
-                }
-            }
-
+            LOG.error("Creating piped Stream failed {}.", e);
+            tryToCloseIOStream(outputStream);
+            tryToCloseIOStream(inputStream);
             setFailureReasonUploadFailed();
             setUploadInterrupted();
+            getUploadState().updateFileUploadProgress(fileUploadId,
+                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
+            uiNotification.displayWarning("try again");
+            return ByteStreams.nullOutputStream();
         }
-
         return outputStream;
     }
 
@@ -173,7 +170,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             return;
         }
 
-        publishUploadProgressEvent(fileUploadId, readBytes, contentLength, getTempFilePath());
+        publishUploadProgressEvent(fileUploadId, readBytes, contentLength);
     }
 
     /**
@@ -190,8 +187,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             return;
         }
         assertStateConsistency(fileUploadId, event.getFilename());
-
-        transferArtifactToRepository(fileUploadId, event.getLength(), mimeType, getTempFilePath());
     }
 
     /**
@@ -220,6 +215,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         } else {
             publishUploadFailedEvent(fileUploadId, event.getReason());
         }
+        setUploadInterrupted();
         publishUploadFinishedEvent(fileUploadId);
     }
 

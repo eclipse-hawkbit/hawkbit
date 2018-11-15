@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -72,26 +74,28 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     @Override
     public final OutputStream getOutputStream() {
+        if (isUploadInterrupted()) {
+            return ByteStreams.nullOutputStream();
+        }
 
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
-        OutputStream outputStream = ByteStreams.nullOutputStream();
+        final PipedOutputStream outputStream = new PipedOutputStream();
+        PipedInputStream inputStream = null;
         try {
-            outputStream = createOutputStreamForTempFile();
-            publishUploadProgressEvent(fileUploadId, 0, fileSize, getTempFilePath());
-
+            inputStream = new PipedInputStream(outputStream);
+            publishUploadProgressEvent(fileUploadId, 0, fileSize);
+            startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.error("Creating temp file for upload failed {}.", e);
-            try {
-                outputStream.close();
-            } catch (final IOException e1) {
-                LOG.error("Closing output stream caused an exception {}", e1);
-            }
-
+            LOG.error("Creating piped Stream failed {}.", e);
+            tryToCloseIOStream(outputStream);
+            tryToCloseIOStream(inputStream);
             setFailureReasonUploadFailed();
             setUploadInterrupted();
+            getUploadState().updateFileUploadProgress(fileUploadId,
+                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
+            return ByteStreams.nullOutputStream();
         }
-
         return outputStream;
     }
 
@@ -124,7 +128,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             return;
         }
 
-        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength(), getTempFilePath());
+        publishUploadProgressEvent(fileUploadId, event.getBytesReceived(), event.getContentLength());
     }
 
     /**
@@ -137,8 +141,6 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     @Override
     public void streamingFinished(final StreamingEndEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
-
-        transferArtifactToRepository(fileUploadId, event.getContentLength(), mimeType, getTempFilePath());
     }
 
     /**
@@ -157,6 +159,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         } else {
             publishUploadFailedEvent(fileUploadId, event.getException());
         }
+        setUploadInterrupted();
         publishUploadFinishedEvent(fileUploadId);
     }
 

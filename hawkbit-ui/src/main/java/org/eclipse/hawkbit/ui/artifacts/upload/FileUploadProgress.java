@@ -87,6 +87,27 @@ public class FileUploadProgress implements Serializable {
      *            number of bytes read
      * @param contentLength
      *            size of the file in bytes
+     */
+    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus,
+            final long bytesRead, final long contentLength) {
+        this.fileUploadId = fileUploadId;
+        this.fileUploadStatus = fileUploadStatus;
+        this.contentLength = contentLength;
+        this.bytesRead = bytesRead;
+    }
+
+    /**
+     * Creates a new {@link FileUploadProgress} instance.
+     * 
+     * @param fileUploadId
+     *            the {@link FileUploadId} to which this progress information
+     *            belongs.
+     * @param fileUploadStatus
+     *            the {@link FileUploadStatus} of this progress
+     * @param bytesRead
+     *            number of bytes read
+     * @param contentLength
+     *            size of the file in bytes
      * @param filePath
      *            the path of the file
      */

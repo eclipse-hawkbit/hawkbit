@@ -10,7 +10,7 @@
 cd ..
 
 # Provided and compile (excludes the test modules)
-mvn dependency:list -DexcludeGroupIds=org.eclipse -pl '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'  -Dsort=true -DoutputFile=dependencies.txt
+mvn dependency:list -DexcludeGroupIds=org.eclipse,org.aspectj -pl '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'  -Dsort=true -DoutputFile=dependencies.txt
 find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:compile'| tr -d '[:blank:]'| sed -e 's/(optional)//'|sort|uniq > .3rd-party/compile.txt
 find . -name dependencies.txt|while read i; do cat $i;done|grep '.*:.*:provided'| tr -d '[:blank:]'| sed -e 's/(optional)//'|sort|uniq > .3rd-party/provided.txt
 
