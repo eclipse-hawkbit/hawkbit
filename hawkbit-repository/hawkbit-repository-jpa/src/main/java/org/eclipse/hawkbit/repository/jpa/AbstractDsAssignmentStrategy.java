@@ -215,6 +215,7 @@ public abstract class AbstractDsAssignmentStrategy {
                 .publishEvent(new CancelTargetAssignmentEvent(target, actionId, applicationContext.getId())));
     }
 
+    @SuppressWarnings("squid:S2259")
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
 
