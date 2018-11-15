@@ -45,11 +45,10 @@
 | javax.annotation                     | javax.annotation-api           | 1.3.2          | [CQ17375](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17375) |
 | org.glassfish                        | javax.json                     | 1.0.4          | [CQ10619](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10619) |
 | javax.servlet                        | javax.servlet-api              | 4.0.1          | [CQ18011](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18011) |
-| javax.transaction                    | javax.transaction-api          | 1.3            | []()                                                             |
+| javax.transaction                    | javax.transaction-api          | 1.3            | [CQ18178](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18178) |
 | javax.validation                     | validation-api                 | 2.0.1.Final    | [CQ18177](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18177) |
 | javax.websocket                      | javax.websocket-api            | 1.1            | []()                                                             |
 | org.apache.commons                   | commons-lang3                  | 3.7            | [CQ18140](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18140) |
-| org.aspectj                          | aspectjweaver                  | 1.9.2          | []()                                                             |
 | org.flywaydb                         | flyway-core                    | 5.2.1          | []()                                                             |
 | org.hibernate.validator              | hibernate-validator            | 6.0.13.Final   | [CQ15540](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15540) |
 | org.jboss.logging                    | jboss-logging                  | 3.3.2.Final    | [CQ10621](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10621) |
