@@ -9,7 +9,7 @@
 | com.cronutils                        | cron-utils                     | 5.0.5          | [CQ15762](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15762) |
 | com.esotericsoftware                 | kryo-shaded                    | 3.0.3          | [CQ17372](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17372) |
 | com.esotericsoftware                 | minlog                         | 1.3.0          | [CQ17371](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17371) |
-| com.fasterxml                        | classmate                      | 1.4.0          | [CQ18172](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18172) |
+| com.fasterxml                        | classmate                      | 1.3.4          | [CQ10239](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=10239) |
 | com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | [CQ18146](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18146) |
 | com.fasterxml.jackson.core           | jackson-core                   | 2.9.7          | [CQ18147](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18147) |
 | com.fasterxml.jackson.core           | jackson-databind               | 2.9.7          | [CQ18145](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18145) |
