@@ -61,9 +61,9 @@
 | org.reactivestreams                  | reactive-streams               | 1.0.2          | []()                                                             |
 | org.slf4j                            | jul-to-slf4j                   | 1.7.25         | [CQ12937](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12937) |
 | org.slf4j                            | slf4j-api                      | 1.7.25         | [CQ12940](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12940) |
-| org.springframework.amqp             | spring-amqp                    | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.amqp             | spring-rabbit                  | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.boot             | spring-boot-autoconfigure      | 2.1.0.RELEASE  | []()                                                             |
+| org.springframework.amqp             | spring-amqp                    | 2.1.0.RELEASE  | [CQ18141](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18141) |
+| org.springframework.amqp             | spring-rabbit                  | 2.1.0.RELEASE  | [CQ18142](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18142) |
+| org.springframework.boot             | spring-boot-autoconfigure      | 2.1.0.RELEASE  | [CQ18143](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18143) |
 | org.springframework.boot             | spring-boot                    | 2.1.0.RELEASE  | []()                                                             |
 | org.springframework.boot             | spring-boot-starter-aop        | 2.1.0.RELEASE  | []()                                                             |
 | org.springframework.boot             | spring-boot-starter-data-jpa   | 2.1.0.RELEASE  | []()                                                             |
