@@ -75,7 +75,7 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The tags field.
      */
-    TAG("tags", "name"),
+    TAG("tags.name"),
 
     /**
      * Last time the DDI or DMF client polled.

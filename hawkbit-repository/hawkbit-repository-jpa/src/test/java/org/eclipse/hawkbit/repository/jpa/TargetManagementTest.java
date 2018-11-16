@@ -149,7 +149,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "TargetMetadata");
         verifyThrownExceptionBy(() -> targetManagement.getMetaDataByControllerId(NOT_EXIST_ID, "xxx"), "Target");
         verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerId(PAGE, NOT_EXIST_ID), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerIdAndRsql(PAGE, NOT_EXIST_ID, "name==*"),
+        verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerIdAndRsql(PAGE, NOT_EXIST_ID, "key==*"),
                 "Target");
         verifyThrownExceptionBy(
                 () -> targetManagement.updateMetaData(NOT_EXIST_ID, entityFactory.generateTargetMetadata("xxx", "xxx")),
@@ -921,7 +921,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String knownValue = "targetMetaKnownValue";
 
         final Target target = testdataFactory.createTarget("targetIdWithMetadata");
-        final JpaTargetMetadata createdMetadata = insertTargetMetadata(knownKey, target, knownValue);
+        final JpaTargetMetadata createdMetadata = insertTargetMetadata(knownKey, knownValue, target);
 
         assertThat(createdMetadata).isNotNull();
         assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
@@ -930,8 +930,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(createdMetadata.getValue()).isEqualTo(knownValue);
     }
 
-    private JpaTargetMetadata insertTargetMetadata(final String knownKey, final Target target,
-            final String knownValue) {
+    private JpaTargetMetadata insertTargetMetadata(final String knownKey, final String knownValue,
+            final Target target) {
         final JpaTargetMetadata metadata = new JpaTargetMetadata(knownKey, knownValue, target);
         return (JpaTargetMetadata) targetManagement
                 .createMetaData(target.getControllerId(), Collections.singletonList(metadata)).get(0);
@@ -945,12 +945,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target1 = testdataFactory.createTarget("target1");
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
         for (int i = 0; i < maxMetaData; ++i) {
-            assertThat(insertTargetMetadata("k" + i, target1, "v" + i)).isNotNull();
+            assertThat(insertTargetMetadata("k" + i, "v" + i, target1)).isNotNull();
         }
 
         // quota exceeded
         assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> insertTargetMetadata("k" + maxMetaData, target1, "v" + maxMetaData));
+                .isThrownBy(() -> insertTargetMetadata("k" + maxMetaData, "v" + maxMetaData, target1));
 
         // add multiple meta data entries at once
         final Target target2 = testdataFactory.createTarget("target2");
@@ -966,7 +966,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target3 = testdataFactory.createTarget("target3");
         final int firstHalf = Math.round(maxMetaData / 2);
         for (int i = 0; i < firstHalf; ++i) {
-            insertTargetMetadata("k" + i, target3, "v" + i);
+            insertTargetMetadata("k" + i, "v" + i, target3);
         }
         // add too many data entries
         final int secondHalf = maxMetaData - firstHalf;
@@ -994,7 +994,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target.getOptLockRevision()).isEqualTo(1);
 
         // create target meta data entry
-        insertTargetMetadata(knownKey, target, knownValue);
+        insertTargetMetadata(knownKey, knownValue, target);
 
         Target changedLockRevisionTarget = targetManagement.get(target.getId()).get();
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
@@ -1024,16 +1024,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given target.")
     public void findAllTargetMetadataByControllerId() {
         // create targets
-        final Target target1 = testdataFactory.createTarget("target1");
-        final Target target2 = testdataFactory.createTarget("target2");
-
-        for (int index = 0; index < 10; index++) {
-            insertTargetMetadata("key" + index, target1, "value" + index);
-        }
-
-        for (int index = 0; index < 8; index++) {
-            insertTargetMetadata("key" + index, target2, "value" + index);
-        }
+        final Target target1 = createTargetWithMetadata("target1", 10);
+        final Target target2 = createTargetWithMetadata("target2", 8);
 
         final Page<TargetMetadata> metadataOfTarget1 = targetManagement
                 .findMetaDataByControllerId(new PageRequest(0, 100), target1.getControllerId());
@@ -1046,5 +1038,45 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(metadataOfTarget2.getNumberOfElements()).isEqualTo(8);
         assertThat(metadataOfTarget2.getTotalElements()).isEqualTo(8);
+    }
+
+    private Target createTargetWithMetadata(final String controllerId, final int count) {
+        final Target target = testdataFactory.createTarget(controllerId);
+
+        for (int index = 0; index < count; index++) {
+            insertTargetMetadata("key" + index, "value" + index, target);
+        }
+
+        return target;
+    }
+
+    @Test
+    @Description("Test that RSQL filter finds targets with metadata and/or controllerId.")
+    public void findTargetsByRsqlWithMetadata() {
+        final String controllerId1 = "target1";
+        final String controllerId2 = "target2";
+
+        final String rsqlAndControllerIdFilter = "id==target1 and metadata.key1==value1";
+        final String rsqlAndControllerIdWithWrongKeyFilter = "id==* and metadata.unknown==value1";
+        final String rsqlOrControllerIdFilter = "id==target1 or metadata.key1==value1";
+        final String rsqlOrControllerIdWithWrongKeyFilter = "id==target2 or metadata.unknown==value1";
+
+        createTargetWithMetadata(controllerId1, 2);
+        createTargetWithMetadata(controllerId2, 2);
+
+        assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
+        validateFoundTargetsbyRsql(rsqlAndControllerIdFilter, controllerId1);
+        validateFoundTargetsbyRsql(rsqlAndControllerIdWithWrongKeyFilter);
+        validateFoundTargetsbyRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
+        validateFoundTargetsbyRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
+    }
+
+    private void validateFoundTargetsbyRsql(final String rsqlFilter, final String... controllerId) {
+        final Page<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
+
+        assertThat(foundTargetsByMetadataAndControllerId.getTotalElements()).as("Targets count in RSQL filter is wrong")
+                .isEqualTo(controllerId.length);
+        assertThat(foundTargetsByMetadataAndControllerId.getContent().stream().map(Target::getControllerId))
+                .as("Targets found by RSQL filter have wrong controller ids").containsExactlyInAnyOrder(controllerId);
     }
 }

@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -56,12 +53,12 @@ public enum DistributionSetFields implements FieldNameProvider {
     /**
      * The tags field.
      */
-    TAG("tags", "name"),
+    TAG("tags.name"),
 
     /**
      * The sw type key field.
      */
-    TYPE("type", "key"),
+    TYPE("type.key"),
 
     /**
      * The metadata.
@@ -69,37 +66,22 @@ public enum DistributionSetFields implements FieldNameProvider {
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
-    private List<String> subEntityAttribues;
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
     DistributionSetFields(final String fieldName) {
-        this(fieldName, false, Collections.emptyList(), null);
-    }
-
-    DistributionSetFields(final String fieldName, final boolean isMapField) {
-        this(fieldName, isMapField, Collections.emptyList(), null);
-    }
-
-    DistributionSetFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
+        this(fieldName, false, null);
     }
 
     DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
+        this(fieldName, true, subEntityMapTuple);
     }
 
-    DistributionSetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+    DistributionSetFields(final String fieldName, final boolean mapField,
             final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;
-        this.subEntityAttribues = subEntityAttribues;
         this.subEntityMapTuple = subEntityMapTuple;
-    }
-
-    @Override
-    public List<String> getSubEntityAttributes() {
-        return subEntityAttribues;
     }
 
     @Override

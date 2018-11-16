@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -39,7 +36,7 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     /**
      * The type field of the software module.
      */
-    TYPE("type", "key"),
+    TYPE("type.key"),
     /**
      * The id field.
      */
@@ -50,37 +47,22 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
-    private List<String> subEntityAttribues;
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
     SoftwareModuleFields(final String fieldName) {
-        this(fieldName, false, Collections.emptyList(), null);
-    }
-
-    SoftwareModuleFields(final String fieldName, final boolean isMapField) {
-        this(fieldName, isMapField, Collections.emptyList(), null);
-    }
-
-    SoftwareModuleFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
+        this(fieldName, false, null);
     }
 
     SoftwareModuleFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
+        this(fieldName, true, subEntityMapTuple);
     }
 
-    SoftwareModuleFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+    SoftwareModuleFields(final String fieldName, final boolean mapField,
             final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;
-        this.subEntityAttribues = subEntityAttribues;
         this.subEntityMapTuple = subEntityMapTuple;
-    }
-
-    @Override
-    public List<String> getSubEntityAttributes() {
-        return subEntityAttribues;
     }
 
     @Override

@@ -172,15 +172,15 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by tag name")
     public void testFilterByTag() {
-        assertRSQLQuery(TargetFields.TAG.name() + ".name==Tag1", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name!=Tag1", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name==T*", 4);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name==noExist*", 0);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name!=notexist", 4);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name=in=(Tag1,notexist)", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name=in=(null)", 0);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name=out=(Tag1,notexist)", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + ".name=out=(null)", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 2);
+        assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
+        assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 0);
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 2);
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(null)", 4);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("")
+    @Description("Test filter target by metadata")
     public void testFilterByMetadata() {
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==*v*", 2);
