@@ -207,7 +207,7 @@
       <!-- ************************ -->
       <!-- Maven Surefire settings  -->
       <!-- ************************ -->
-      <surefire.forkcount>0</surefire.forkcount>
+      <surefire.forkcount>1</surefire.forkcount>
    </properties>
 
    <build>
