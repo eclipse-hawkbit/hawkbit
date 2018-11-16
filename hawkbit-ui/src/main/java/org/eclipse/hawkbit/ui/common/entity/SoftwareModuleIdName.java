@@ -22,16 +22,30 @@ public class SoftwareModuleIdName implements Serializable {
 
     private final Long id;
     private final String name;
+    private final String version;
 
     /**
      * @param id
-     *            if the {@link SoftwareModule}
+     *            if the {@link SoftwareModule#getId()}
      * @param name
-     *            of the {@link SoftwareModule}
+     *            of the {@link SoftwareModule#getName()}
+     * @param version
+     *            the {@link SoftwareModule#getVersion()}
      */
-    public SoftwareModuleIdName(final Long id, final String name) {
+    public SoftwareModuleIdName(final Long id, final String name, final String version) {
         this.id = id;
         this.name = name;
+        this.version = version;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param softwareModule
+     *            the softwareModule
+     */
+    public SoftwareModuleIdName(final SoftwareModule softwareModule) {
+        this(softwareModule.getId(), softwareModule.getName(), softwareModule.getVersion());
     }
 
     public Long getId() {
@@ -40,6 +54,10 @@ public class SoftwareModuleIdName implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     @Override

@@ -210,7 +210,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         final Object distItemId = dropData.getItemIdOver();
         if (distItemId != null) {
-            assignSwmToDs(source, softwareModulesIdList, (long) distItemId);
+            assignSwmToDs(softwareModulesIdList, (long) distItemId);
         }
     }
 
@@ -230,22 +230,24 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return super.isDropValid(dragEvent);
     }
 
-    private void assignSwmToDs(final Table source, final Set<Long> softwareModulesIdList, final long distId) {
+    private void assignSwmToDs(final Set<Long> softwareModulesIdList, final long distId) {
         final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distId);
-        distributionSet.ifPresent(set -> {
-            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(set);
-            selectDroppedEntities(distributionSetIdName.getId());
-            final HashMap<Long, HashSet<SoftwareModuleIdName>> map = createAssignmentMap(distributionSetIdName);
-            handleSoftwareModulesForAssignment(source, softwareModulesIdList, distId, map);
-            final HashSet<SoftwareModuleIdName> softwareModules = new HashSet<>();
-            map.keySet().forEach(typeId -> softwareModules.addAll(map.get(typeId)));
+        if (!distributionSet.isPresent()) {
+            getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
+            return;
+        }
+        distributionSet.ifPresent(ds -> {
+            selectDroppedEntities(ds.getId());
+            final HashSet<SoftwareModuleIdName> softwareModules = updateSmAssignmentMapOfDs(softwareModulesIdList, ds);
+            if (softwareModules.isEmpty()) {
+                cancelAllAssignments();
+                return;
+            }
+            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(ds);
             manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
             openConfirmationWindowForAssignment(distributionSetIdName.getName(),
                     softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
         });
-        if (!distributionSet.isPresent()) {
-            getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
-        }
     }
 
     private HashMap<Long, HashSet<SoftwareModuleIdName>> createAssignmentMap(
@@ -260,23 +262,27 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return map;
     }
 
-    private void handleSoftwareModulesForAssignment(final Table source, final Set<Long> softwareModulesIdList,
-            final long distId, final HashMap<Long, HashSet<SoftwareModuleIdName>> map) {
-        for (final Long softwareModuleId : softwareModulesIdList) {
-            final Item softwareItem = source.getContainerDataSource().getItem(softwareModuleId);
-            final String name = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-            final String swVersion = (String) softwareItem.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
+    private HashSet<SoftwareModuleIdName> updateSmAssignmentMapOfDs(final Set<Long> softwareModulesIdsToAssign,
+            final DistributionSet distributionSet) {
+        final HashMap<Long, HashSet<SoftwareModuleIdName>> softwareModulesAssignedToDsByType = createAssignmentMap(
+                new DistributionSetIdName(distributionSet));
 
+        for (final Long softwareModuleId : softwareModulesIdsToAssign) {
             final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
-
-            if (softwareModule.isPresent() && validSoftwareModule(distId, softwareModule.get())) {
-                final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModuleId,
-                        name.concat(":" + swVersion));
-                publishAssignEvent(distId, softwareModule.get());
-                handleSoftwareCase(map, softwareModule.get(), softwareModuleIdName);
-                handleFirmwareCase(map, softwareModule.get(), softwareModuleIdName);
-            }
+            softwareModule.ifPresent(sm -> {
+                if (validateAssignment(sm, distributionSet)
+                        && handleSmToDsAssignment(softwareModulesAssignedToDsByType, sm)) {
+                    publishAssignEvent(distributionSet.getId(), sm);
+                }
+            });
         }
+        // TODO: ensure it works when two people assign software modules
+        // simultaneously (two tabs, two confirmation dialogs, cancel one of
+        // them ...)
+        final HashSet<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
+        softwareModulesAssignedToDsByType.keySet().forEach(
+                typeId -> softwareModulesThatNeedToBeAssigned.addAll(softwareModulesAssignedToDsByType.get(typeId)));
+        return softwareModulesThatNeedToBeAssigned;
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
@@ -286,25 +292,21 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    private static void handleFirmwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
-            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
-        if (softwareModule.getType().getMaxAssignments() == 1) {
-            if (!map.containsKey(softwareModule.getType().getId())) {
-                map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
-            }
+    private static boolean handleSmToDsAssignment(final Map<Long, HashSet<SoftwareModuleIdName>> map,
+            final SoftwareModule softwareModule) {
+        final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModule);
+        if (!map.containsKey(softwareModule.getType().getId())) {
+            map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
+        }
+        if (softwareModule.getType().getMaxAssignments() > 1) {
+            map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
+            return true;
+        } else if (softwareModule.getType().getMaxAssignments() == 1) {
             map.get(softwareModule.getType().getId()).clear();
             map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
+            return true;
         }
-    }
-
-    private static void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
-            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
-        if (softwareModule.getType().getMaxAssignments() > 1) {
-            if (!map.containsKey(softwareModule.getType().getId())) {
-                map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
-            }
-            map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
-        }
+        return false;
     }
 
     private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
@@ -332,7 +334,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final SoftwareModuleIdName[] softwareModules) {
         if (softwareModules.length == 1) {
             return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "software module",
-                    softwareModules[0].getName());
+                    HawkbitCommonUtil.getSoftwareModuleNameAndVersion(softwareModules[0].getName(),
+                            softwareModules[0].getVersion()));
         } else {
             return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, softwareModules.length,
                     "software modules", distributionNameToAssign);
@@ -367,44 +370,36 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         manageDistUIState.getConsolidatedDistSoftwareList().clear();
     }
 
-    private boolean validSoftwareModule(final Long distId, final SoftwareModule sm) {
-        if (!isSoftwareModuleDragged(distId, sm)) {
-            return false;
-        }
-        final Optional<DistributionSet> ds = distributionSetManagement.getWithDetails(distId);
-        if (!ds.isPresent() || !validateSoftwareModule(sm, ds.get())) {
-            return false;
-        }
 
-        if (distributionSetManagement.isInUse(ds.get().getId())) {
-            getNotification().displayValidationError(getI18n().getMessage(
-                    "message.error.notification.ds.target.assigned", ds.get().getName(), ds.get().getVersion()));
+    private boolean validateAssignment(final SoftwareModule sm, final DistributionSet ds) {
+        final String dsNameAndVersion = HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion());
+        final String smNameAndVersion = HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion());
+        if (!isSoftwareModuleDragged(ds.getId(), sm)) {
             return false;
         }
-        return true;
-    }
-
-    private boolean validateSoftwareModule(final SoftwareModule sm, final DistributionSet ds) {
-        if (targetManagement.countByFilters(null, null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
+        if (targetManagement.countByFilters(null, null, null, ds.getId(), Boolean.FALSE,
+                new String[] {}) > 0) {
             /* Distribution is already assigned */
             getNotification().displayValidationError(getI18n().getMessage("message.dist.inuse",
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
+                    dsNameAndVersion));
             return false;
         }
-
         if (ds.getModules().contains(sm)) {
             /* Already has software module */
             getNotification().displayValidationError(getI18n().getMessage("message.software.dist.already.assigned",
-                    HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion())));
+                    smNameAndVersion, dsNameAndVersion));
             return false;
         }
-
         if (!ds.getType().containsModuleType(sm.getType())) {
             /* Invalid type of the software module */
             getNotification().displayValidationError(getI18n().getMessage("message.software.dist.type.notallowed",
-                    HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion()),
-                    HawkbitCommonUtil.concatStrings(":", ds.getName(), ds.getVersion()), sm.getType().getName()));
+                    smNameAndVersion, dsNameAndVersion, sm.getType().getName()));
+            return false;
+        }
+        if (distributionSetManagement.isInUse(ds.getId())) {
+            getNotification()
+                    .displayValidationError(getI18n().getMessage("message.error.notification.ds.target.assigned",
+                            ds.getName(), ds.getVersion()));
             return false;
         }
         return true;
@@ -418,7 +413,8 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             }
             final Set<SoftwareModuleIdName> swModuleIdNames = entry.getValue();
             for (final SoftwareModuleIdName swModuleIdName : swModuleIdNames) {
-                if ((sm.getName().concat(":" + sm.getVersion())).equals(swModuleIdName.getName())) {
+                if (sm.getName().equals(swModuleIdName.getName())
+                        && sm.getVersion().equals(swModuleIdName.getVersion())) {
                     getNotification().displayValidationError(getI18n().getMessage("message.software.already.dragged",
                             HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
                     return false;

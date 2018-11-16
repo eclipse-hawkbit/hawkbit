@@ -270,6 +270,15 @@ public final class HawkbitCommonUtil {
     }
 
     /**
+     * @param smName
+     * @param smVersion
+     * @return SoftwareModuleNameAndVersion
+     */
+    public static String getSoftwareModuleNameAndVersion(final String smName, final String smVersion) {
+        return new StringBuilder(smName).append(':').append(smVersion).toString();
+    }
+
+    /**
      * Display Target Tag action message.
      *
      * @param tagName
