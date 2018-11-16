@@ -132,7 +132,7 @@ CQ:
 | com.google.jsinterop            | jsinterop-annotations            | 1.0.1                |
 | com.google.jsinterop            | jsinterop-annotations            | sources              |
 | com.ibm.icu                     | icu4j                            | 50.1.1               |
-| com.jayway.awaitility           | awaitility                       | 1.7.0                |
+| org.awaitility                  | awaitility                       | 3.1.2                |
 | com.jayway.jsonpath             | json-path                        | 2.4.0                |
 | com.rabbitmq                    | http-client                      | 2.1.0.RELEASE        |
 | com.vaadin.external.google      | android-json                     | 0.0.20131108.vaadin1 |

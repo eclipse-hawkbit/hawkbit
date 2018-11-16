@@ -807,7 +807,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         verifyNumberOfDeadLetterMessages(3);
     }
 
-    private void sendUpdateAttributesMessageWithGivenAttributes(final String target, final String key, final String value) {
+    private void sendUpdateAttributesMessageWithGivenAttributes(final String target, final String key,
+            final String value) {
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put(key, value);
         final Message message = createUpdateAttributesMessage(target, TENANT_EXIST, controllerAttribute);
@@ -833,7 +834,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
-        createConditionFactory().await().until(() -> {
+        createConditionFactory().await().untilAsserted(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
@@ -893,7 +894,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
     private void verifyNumberOfDeadLetterMessages(final int numberOfInvocations) {
         assertEmptyReceiverQueueCount();
-        createConditionFactory()
-                .until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
+        createConditionFactory().untilAsserted(() -> Mockito
+                .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
     }
 }

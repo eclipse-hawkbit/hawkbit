@@ -102,7 +102,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected void verifyDeadLetterMessages(final int expectedMessages) {
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
         });
     }
@@ -155,7 +155,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertRequestAttributesUpdateMessage(final String target) {
         assertReplyMessageHeader(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
     }
-    
+
     protected void assertRequestAttributesUpdateMessageAbsent() {
         assertThat(replyToListener.getEventTopicMessages()).doesNotContainKey(EventTopic.REQUEST_ATTRIBUTES_UPDATE);
     }
@@ -215,7 +215,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected void verifyReplyToListener() {
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any());
         });
     }
