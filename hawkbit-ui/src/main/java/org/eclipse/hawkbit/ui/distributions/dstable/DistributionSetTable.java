@@ -210,7 +210,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         final Object distItemId = dropData.getItemIdOver();
         if (distItemId != null) {
-            assignSwmToDs(softwareModulesIdList, (long) distItemId);
+            handleSmToDsAssignment(softwareModulesIdList, (long) distItemId);
         }
     }
 
@@ -230,7 +230,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return super.isDropValid(dragEvent);
     }
 
-    private void assignSwmToDs(final Set<Long> softwareModulesIdList, final long distId) {
+    private void handleSmToDsAssignment(final Set<Long> softwareModulesIdList, final long distId) {
         final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distId);
         if (!distributionSet.isPresent()) {
             getNotification().displayWarning(getI18n().getMessage("distributionset.not.exists"));
@@ -238,19 +238,45 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
         distributionSet.ifPresent(ds -> {
             selectDroppedEntities(ds.getId());
-            final HashSet<SoftwareModuleIdName> softwareModules = updateSmAssignmentMapOfDs(softwareModulesIdList, ds);
+            final HashSet<SoftwareModule> softwareModules = getAssignableSoftwareModules(softwareModulesIdList, ds);
             if (softwareModules.isEmpty()) {
                 return;
             }
-            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(ds);
-            manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
-            openConfirmationWindowForAssignment(distributionSetIdName.getName(),
+            assignSoftwareModulesToDs(softwareModules, ds);
+            openConfirmationWindowForAssignment(ds.getName(),
                     softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
         });
     }
 
-    private HashMap<Long, HashSet<SoftwareModuleIdName>> createAssignmentMap(
-            final DistributionSetIdName distributionSetIdName) {
+    private HashSet<SoftwareModule> getAssignableSoftwareModules(final Set<Long> softwareModulesIds,
+            final DistributionSet distributionSet) {
+        final HashSet<SoftwareModule> assignableModules = new HashSet<>();
+        for (final Long softwareModuleId : softwareModulesIds) {
+            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
+            softwareModule.ifPresent(sm -> {
+                if (validateAssignment(sm, distributionSet)){
+                    assignableModules.add(sm);
+                }
+            });
+        }
+        return assignableModules;
+    }
+
+    private void assignSoftwareModulesToDs(final Set<SoftwareModule> softwareModules,
+            final DistributionSet distributionSet) {
+        addSoftwareModulesToConsolidatedDsAssignmentMap(distributionSet, softwareModules);
+
+        final HashSet<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
+        getConsolidatedAssignmentMap(distributionSet).values()
+                .forEach(modules -> softwareModulesThatNeedToBeAssigned.addAll(modules));
+
+        manageDistUIState.getAssignedList().put(new DistributionSetIdName(distributionSet),
+                softwareModulesThatNeedToBeAssigned);
+    }
+
+    private HashMap<Long, HashSet<SoftwareModuleIdName>> getConsolidatedAssignmentMap(
+            final DistributionSet distributionSet) {
+        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwareList().containsKey(distributionSetIdName)) {
             map = manageDistUIState.getConsolidatedDistSoftwareList().get(distributionSetIdName);
@@ -261,44 +287,30 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         return map;
     }
 
-    private HashSet<SoftwareModuleIdName> updateSmAssignmentMapOfDs(final Set<Long> softwareModulesIdsToAssign,
-            final DistributionSet distributionSet) {
-        final HashMap<Long, HashSet<SoftwareModuleIdName>> softwareModulesAssignedToDsByType = createAssignmentMap(
-                new DistributionSetIdName(distributionSet));
+    private void addSoftwareModulesToConsolidatedDsAssignmentMap(final DistributionSet distributionSet,
+            final Set<SoftwareModule> softwareModules) {
+        final Map<Long, HashSet<SoftwareModuleIdName>> assignmentMap = getConsolidatedAssignmentMap(distributionSet);
+        for (final SoftwareModule softwareModule : softwareModules) {
+            final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModule);
+            final Long smTypeID = softwareModule.getType().getId();
 
-        for (final Long softwareModuleId : softwareModulesIdsToAssign) {
-            final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
-            softwareModule.ifPresent(sm -> {
-                if (validateAssignment(sm, distributionSet)){
-                    handleSmToDsAssignment(softwareModulesAssignedToDsByType, sm);
-                    publishAssignEvent(distributionSet.getId(), sm);
-                }
-            });
+            if (!assignmentMap.containsKey(smTypeID)) {
+                assignmentMap.put(smTypeID, new HashSet<SoftwareModuleIdName>());
+            }
+            if (softwareModule.getType().getMaxAssignments() > 1) {
+                assignmentMap.get(smTypeID).add(softwareModuleIdName);
+            } else if (softwareModule.getType().getMaxAssignments() == 1) {
+                assignmentMap.get(smTypeID).clear();
+                assignmentMap.get(smTypeID).add(softwareModuleIdName);
+            }
+            publishAssignEvent(distributionSet.getId(), softwareModule);
         }
-        final HashSet<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
-        softwareModulesAssignedToDsByType.keySet().forEach(
-                typeId -> softwareModulesThatNeedToBeAssigned.addAll(softwareModulesAssignedToDsByType.get(typeId)));
-        return softwareModulesThatNeedToBeAssigned;
     }
 
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
         if (manageDistUIState.getLastSelectedDistribution().map(distId::equals).orElse(false)) {
             getEventBus().publish(this,
                     new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
-        }
-    }
-
-    private static void handleSmToDsAssignment(final Map<Long, HashSet<SoftwareModuleIdName>> map,
-            final SoftwareModule softwareModule) {
-        final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModule);
-        if (!map.containsKey(softwareModule.getType().getId())) {
-            map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
-        }
-        if (softwareModule.getType().getMaxAssignments() > 1) {
-            map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
-        } else if (softwareModule.getType().getMaxAssignments() == 1) {
-            map.get(softwareModule.getType().getId()).clear();
-            map.get(softwareModule.getType().getId()).add(softwareModuleIdName);
         }
     }
 
