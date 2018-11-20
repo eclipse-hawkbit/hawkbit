@@ -1043,8 +1043,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     private Target createTargetWithMetadata(final String controllerId, final int count) {
         final Target target = testdataFactory.createTarget(controllerId);
 
-        for (int index = 0; index < count; index++) {
-            insertTargetMetadata("key" + index, "value" + index, target);
+        for (int index = 1; index <= count; index++) {
+            insertTargetMetadata("key" + index, controllerId + "-value" + index, target);
         }
 
         return target;
@@ -1055,28 +1055,31 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     public void findTargetsByRsqlWithMetadata() {
         final String controllerId1 = "target1";
         final String controllerId2 = "target2";
-
-        final String rsqlAndControllerIdFilter = "id==target1 and metadata.key1==value1";
-        final String rsqlAndControllerIdWithWrongKeyFilter = "id==* and metadata.unknown==value1";
-        final String rsqlOrControllerIdFilter = "id==target1 or metadata.key1==value1";
-        final String rsqlOrControllerIdWithWrongKeyFilter = "id==target2 or metadata.unknown==value1";
-
         createTargetWithMetadata(controllerId1, 2);
         createTargetWithMetadata(controllerId2, 2);
+
+        final String rsqlAndControllerIdFilter = "id==target1 and metadata.key1==target1-value1";
+        final String rsqlAndControllerIdWithWrongKeyFilter = "id==* and metadata.unknown==value1";
+        final String rsqlAndControllerIdNotEqualFilter = "id==* and metadata.key2!=target1-value2";
+        final String rsqlOrControllerIdFilter = "id==target1 or metadata.key1==*value1";
+        final String rsqlOrControllerIdWithWrongKeyFilter = "id==target2 or metadata.unknown==value1";
+        final String rsqlOrControllerIdNotEqualFilter = "id==target1 or metadata.key1!=target1-value1";
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
         validateFoundTargetsbyRsql(rsqlAndControllerIdFilter, controllerId1);
         validateFoundTargetsbyRsql(rsqlAndControllerIdWithWrongKeyFilter);
+        validateFoundTargetsbyRsql(rsqlAndControllerIdNotEqualFilter, controllerId2);
         validateFoundTargetsbyRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
         validateFoundTargetsbyRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
+        validateFoundTargetsbyRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
     }
 
-    private void validateFoundTargetsbyRsql(final String rsqlFilter, final String... controllerId) {
+    private void validateFoundTargetsbyRsql(final String rsqlFilter, final String... controllerIds) {
         final Page<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
 
         assertThat(foundTargetsByMetadataAndControllerId.getTotalElements()).as("Targets count in RSQL filter is wrong")
-                .isEqualTo(controllerId.length);
+                .isEqualTo(controllerIds.length);
         assertThat(foundTargetsByMetadataAndControllerId.getContent().stream().map(Target::getControllerId))
-                .as("Targets found by RSQL filter have wrong controller ids").containsExactlyInAnyOrder(controllerId);
+                .as("Targets found by RSQL filter have wrong controller ids").containsExactlyInAnyOrder(controllerIds);
     }
 }
