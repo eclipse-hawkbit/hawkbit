@@ -438,7 +438,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
-        if (filterParams.getFilterByStatus() != null && !filterParams.getFilterByStatus().isEmpty()) {
+        if ((filterParams.getFilterByStatus() != null) && !filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
         if (filterParams.getOverdueState() != null) {
@@ -461,8 +461,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
-        return filterParams.getSelectTargetWithNoTag() != null && (filterParams.getSelectTargetWithNoTag()
-                || filterParams.getFilterByTagNames() != null && filterParams.getFilterByTagNames().length > 0);
+        return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
+                || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {

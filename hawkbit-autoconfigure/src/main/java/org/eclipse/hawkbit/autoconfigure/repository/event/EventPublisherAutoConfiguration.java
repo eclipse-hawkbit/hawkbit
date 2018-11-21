@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
+import org.springframework.cloud.stream.annotation.StreamMessageConverter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -144,6 +145,7 @@ public class EventPublisherAutoConfiguration {
          * @return the protostuff io message converter
          */
         @Bean
+        @StreamMessageConverter
         public MessageConverter busProtoBufConverter() {
             return new BusProtoStuffMessageConverter();
         }
