@@ -391,7 +391,9 @@
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                      <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
                      <allure.serve.timeout>650</allure.serve.timeout>
-	              </systemPropertyVariables>
+	                </systemPropertyVariables>
+                  <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
+                  <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
