@@ -8,7 +8,9 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -123,23 +125,24 @@
          <url>http://maven.vaadin.com/vaadin-addons</url>
       </repository>
       <repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
+         <id>spring-milestones</id>
+         <name>Spring Milestones</name>
+         <url>https://repo.spring.io/milestone</url>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+      </repository>
    </repositories>
 
    <properties>
       <java.version>1.8</java.version>
       <spring.boot.version>2.1.0.RELEASE</spring.boot.version>
       <spring.cloud.version>Greenwich.M3</spring.cloud.version>
-      
+
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
-      <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
+      <!-- Spring boot version overrides (should be reviewed with every boot 
+         upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <rabbitmq.http-client.version>2.1.0.RELEASE</rabbitmq.http-client.version>
@@ -169,12 +172,11 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <allure.version>2.7.0</allure.version>
-      <eclipselink.version>2.7.2</eclipselink.version>
+      <eclipselink.version>2.7.3</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <powermock.version>1.7.4</powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>25.0-jre</guava.version>
-      <mssql-jdbc.version>6.4.0.jre8</mssql-jdbc.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
       <jlorem.version>1.1</jlorem.version>
@@ -205,7 +207,7 @@
       <!-- Sonar - END -->
 
       <!-- ************************ -->
-      <!-- Maven Surefire settings  -->
+      <!-- Maven Surefire settings -->
       <!-- ************************ -->
       <surefire.forkcount>1</surefire.forkcount>
    </properties>
@@ -230,8 +232,9 @@
             <artifactId>maven-enforcer-plugin</artifactId>
             <executions>
                <execution>
-                  <!-- Make sure that only non-snapshot versions are used for the dependencies. Only active when property 'snapshotDependencyAllowed' is
-                     false. -->
+                  <!-- Make sure that only non-snapshot versions are used 
+                     for the dependencies. Only active when property 'snapshotDependencyAllowed' 
+                     is false. -->
                   <id>enforce-no-snapshots</id>
                   <goals>
                      <goal>enforce</goal>
@@ -245,6 +248,9 @@
                         <requireReleaseVersion>
                            <message>No Snapshots Allowed!</message>
                         </requireReleaseVersion>
+                        <requireMavenVersion>
+                           <version>3.5</version>
+                        </requireMavenVersion>
                      </rules>
                   </configuration>
                </execution>
@@ -313,10 +319,10 @@
                <configuration>
                   <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</header>
                   <validHeaders>
-                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
-                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
-                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>
@@ -387,11 +393,12 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <configuration>
                   <systemPropertyVariables>
-                     <!-- Set output directory according to allure-framework recommendation -->
+                     <!-- Set output directory according to allure-framework 
+                        recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                      <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
                      <allure.serve.timeout>650</allure.serve.timeout>
-	                </systemPropertyVariables>
+                  </systemPropertyVariables>
                   <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
@@ -461,27 +468,27 @@
       </pluginManagement>
    </build>
    <profiles>
-    <profile>
-        <id>jdk-8</id>
-        <activation>
+      <profile>
+         <id>jdk-8</id>
+         <activation>
             <jdk>1.8</jdk>
-        </activation>
-        <build>
+         </activation>
+         <build>
             <pluginManagement>
-                <plugins>
-                   <plugin>
-                       <groupId>org.apache.maven.plugins</groupId>
-                       <artifactId>maven-surefire-plugin</artifactId>
-                       <configuration>
-                           <argLine>
-                              ${jacoco.agent.ut.arg}
-                           </argLine>
-                       </configuration>
-                   </plugin>
-                </plugins>
+               <plugins>
+                  <plugin>
+                     <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-surefire-plugin</artifactId>
+                     <configuration>
+                        <argLine>
+                           ${jacoco.agent.ut.arg}
+                        </argLine>
+                     </configuration>
+                  </plugin>
+               </plugins>
             </pluginManagement>
-        </build>
-    </profile>
+         </build>
+      </profile>
       <profile>
          <id>nexus_staging</id>
          <activation>
@@ -492,10 +499,14 @@
          <build>
             <plugins>
                <plugin>
-                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
-                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
-                     or RELEASE version and property skipStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that
-                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually
+                  <!-- Use the Nexus Staging plugin as a full replacement 
+                     for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin 
+                     why this makes sense :-) We can control whether we want to deploy to the 
+                     Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT 
+                     or RELEASE version and property skipStaging=true/false. In any case we can 
+                     take advantage of the plugin's "deferred deploy" feature which makes sure 
+                     that all artifacts of a multi-module project are deployed as a whole at the 
+                     end of the build process instead of deploying each module's artifacts individually 
                      as part of building the module. -->
                   <groupId>org.sonatype.plugins</groupId>
                   <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -665,7 +676,7 @@
             <version>${spring.cloud.version}</version>
             <type>pom</type>
             <scope>import</scope>
-        </dependency>
+         </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -675,18 +686,18 @@
                   <groupId>org.springframework.boot</groupId>
                   <artifactId>spring-boot-starter-tomcat</artifactId>
                </exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.datatype</groupId>
-					<artifactId>jackson-datatype-jdk8</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.datatype</groupId>
-	  				<artifactId>jackson-datatype-jsr310</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.module</groupId>
-      				<artifactId>jackson-module-parameter-names</artifactId>
-				</exclusion>
+               <exclusion>
+                  <groupId>com.fasterxml.jackson.datatype</groupId>
+                  <artifactId>jackson-datatype-jdk8</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.fasterxml.jackson.datatype</groupId>
+                  <artifactId>jackson-datatype-jsr310</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>com.fasterxml.jackson.module</groupId>
+                  <artifactId>jackson-module-parameter-names</artifactId>
+               </exclusion>
             </exclusions>
          </dependency>
          <dependency>
@@ -700,13 +711,13 @@
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring.boot.version}</version>
             <exclusions>
-            	<exclusion>
-                	<groupId>org.apache.logging.log4j</groupId>
-      				<artifactId>log4j-to-slf4j</artifactId>
+               <exclusion>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-to-slf4j</artifactId>
                </exclusion>
             </exclusions>
          </dependency>
-         
+
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -716,7 +727,7 @@
                   <groupId>org.hibernate</groupId>
                   <artifactId>hibernate-entitymanager</artifactId>
                </exclusion>
-                <exclusion>
+               <exclusion>
                   <groupId>org.hibernate</groupId>
                   <artifactId>hibernate-core</artifactId>
                </exclusion>
@@ -724,10 +735,10 @@
                   <groupId>org.springframework.boot</groupId>
                   <artifactId>spring-boot-starter-logging</artifactId>
                </exclusion>
-              <exclusion>
-			      <groupId>javax.xml.bind</groupId>
-			      <artifactId>jaxb-api</artifactId>
-              </exclusion>
+               <exclusion>
+                  <groupId>javax.xml.bind</groupId>
+                  <artifactId>jaxb-api</artifactId>
+               </exclusion>
             </exclusions>
          </dependency>
          <dependency>
@@ -736,17 +747,17 @@
             <version>${eclipselink.version}</version>
          </dependency>
 
-        <!-- Protostuff Io -->
-      <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-core</artifactId>
-         <version>${io-protostuff.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-runtime</artifactId>
-         <version>${io-protostuff.version}</version>
-      </dependency>
+         <!-- Protostuff Io -->
+         <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${io-protostuff.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>${io-protostuff.version}</version>
+         </dependency>
 
          <!-- RSQL / FIQL parser -->
          <dependency>
@@ -755,10 +766,10 @@
             <version>${rsql-parser.version}</version>
          </dependency>
          <dependency>
-             <groupId>commons-io</groupId>
-             <artifactId>commons-io</artifactId>
-             <version>${commons-io.version}</version>
-          </dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+         </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -800,24 +811,19 @@
             <version>${powermock.version}</version>
             <scope>test</scope>
          </dependency>
-        <dependency>
-           <groupId>com.microsoft.sqlserver</groupId>
-           <artifactId>mssql-jdbc</artifactId>
-           <version>${mssql-jdbc.version}</version>
-        </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-junit</artifactId>
             <version>${spring-amqp.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
+         </dependency>
+         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-test</artifactId>
             <version>${spring-amqp.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
+         </dependency>
+         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
