@@ -18,7 +18,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -33,11 +32,11 @@ import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -45,18 +44,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(SpringRunner.class)
 @Feature("Component Tests - Repository")
 @Story("RSQL search utility")
-@PrepareForTest(TimestampCalculator.class)
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
 public class RSQLUtilityTest {
@@ -64,7 +64,7 @@ public class RSQLUtilityTest {
     @Spy
     private final VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
 
-    @Mock
+    @MockBean
     private TenantConfigurationManagement confMgmt;
 
     @Mock
@@ -79,6 +79,14 @@ public class RSQLUtilityTest {
 
     @Mock
     private Attribute attribute;
+
+    @Configuration
+    static class Config {
+        @Bean
+        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+            return TenantConfigurationManagementHolder.getInstance();
+        }
+    }
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:05:00").build();
@@ -361,9 +369,6 @@ public class RSQLUtilityTest {
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
-
-        mockStatic(TimestampCalculator.class);
-        when(TimestampCalculator.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
         return macroResolver;
     }

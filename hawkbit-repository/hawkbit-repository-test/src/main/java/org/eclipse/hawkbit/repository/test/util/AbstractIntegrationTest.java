@@ -85,6 +85,8 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.google.common.io.Files;
+
 @RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
@@ -346,7 +348,8 @@ public abstract class AbstractIntegrationTest {
 
     }
 
-    private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);
+    private static String artifactDirectory = Files.createTempDir().getAbsolutePath() + "/"
+            + RandomStringUtils.randomAlphanumeric(20);
 
     @After
     public void cleanUp() {

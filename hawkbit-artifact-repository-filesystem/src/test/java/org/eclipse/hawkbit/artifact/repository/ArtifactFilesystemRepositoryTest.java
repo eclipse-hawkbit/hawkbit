@@ -11,13 +11,21 @@ package org.eclipse.hawkbit.artifact.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.io.Files;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -26,12 +34,32 @@ import io.qameta.allure.Story;
 @Feature("Unit Tests - Artifact File System Repository")
 @Story("Test storing artifact binaries in the file-system")
 public class ArtifactFilesystemRepositoryTest {
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepositoryTest.class);
+
     private static final String TENANT = "test_tenant";
 
-    private final ArtifactFilesystemProperties artifactResourceProperties = new ArtifactFilesystemProperties();
+    private static ArtifactFilesystemProperties artifactResourceProperties;
 
-    private final ArtifactFilesystemRepository artifactFilesystemRepository = new ArtifactFilesystemRepository(
-            artifactResourceProperties);
+    private static ArtifactFilesystemRepository artifactFilesystemRepository;
+
+    @BeforeClass
+    public static void setup() {
+        artifactResourceProperties = new ArtifactFilesystemProperties();
+        artifactResourceProperties.setPath(Files.createTempDir().getAbsolutePath());
+
+        artifactFilesystemRepository = new ArtifactFilesystemRepository(artifactResourceProperties);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        if (new File(artifactResourceProperties.getPath()).exists()) {
+            try {
+                FileUtils.deleteDirectory(new File(artifactResourceProperties.getPath()));
+            } catch (final IOException | IllegalArgumentException e) {
+                LOG.warn("Cannot delete file-directory", e);
+            }
+        }
+    }
 
     @Test
     @Description("Verfies that an artifact can be successfully stored in the file-system repository")
