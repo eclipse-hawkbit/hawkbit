@@ -42,10 +42,12 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
  */
 public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyReplacer {
 
+    private static final long serialVersionUID = 1L;
+
     private StrSubstitutor substitutor;
 
     @Override
-    public String lookup(String rhs) {
+    public String lookup(final String rhs) {
         String resolved = null;
 
         if ("now_ts".equalsIgnoreCase(rhs)) {
@@ -57,7 +59,7 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
     }
 
     @Override
-    public String replace(String input) {
+    public String replace(final String input) {
         if (substitutor == null) {
             substitutor = new StrSubstitutor(this, StrSubstitutor.DEFAULT_PREFIX, StrSubstitutor.DEFAULT_SUFFIX,
                     StrSubstitutor.DEFAULT_ESCAPE);

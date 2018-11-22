@@ -158,6 +158,8 @@ public final class RSQLUtility {
 
     private static final class RSQLSpecification<A extends Enum<A> & FieldNameProvider, T> implements Specification<T> {
 
+        private static final long serialVersionUID = 1L;
+
         private final String rsql;
         private final Class<A> enumType;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
