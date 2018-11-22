@@ -229,13 +229,14 @@ public class JpaTargetManagement implements TargetManagement {
     public TargetMetadata updateMetadata(final String controllerId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, md.getKey())
+        final JpaTargetMetadata updatedMetadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId,
+                md.getKey())
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, md.getKey()));
-        toUpdate.setValue(md.getValue());
+        updatedMetadata.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // target indirectly
         final JpaTarget target = touch(controllerId);
-        final JpaTargetMetadata matadata = targetMetadataRepository.save(toUpdate);
+        final JpaTargetMetadata matadata = targetMetadataRepository.save(updatedMetadata);
         // target update event is set to ignore "lastModifiedAt" field so it is
         // not send automatically within the touch() method
         eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));

@@ -40,7 +40,7 @@ public class TargetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
      * @param i18n
      *            the i18n service
      * @param targetManagement
-     *            the target set management service
+     *            the target management service
      * @param targetMetadataPopupLayout
      *            the target metadata popup layout
      */
