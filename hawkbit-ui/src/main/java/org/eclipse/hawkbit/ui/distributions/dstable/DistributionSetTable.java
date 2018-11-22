@@ -268,7 +268,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
         final HashSet<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
         getConsolidatedAssignmentMap(distributionSet).values()
-                .forEach(modules -> softwareModulesThatNeedToBeAssigned.addAll(modules));
+                .forEach(softwareModulesThatNeedToBeAssigned::addAll);
 
         manageDistUIState.getAssignedList().put(new DistributionSetIdName(distributionSet),
                 softwareModulesThatNeedToBeAssigned);
@@ -298,8 +298,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 assignmentMap.put(smTypeID, new HashSet<SoftwareModuleIdName>());
             }
             if (softwareModule.getType().getMaxAssignments() > 1) {
+                // add application
                 assignmentMap.get(smTypeID).add(softwareModuleIdName);
             } else if (softwareModule.getType().getMaxAssignments() == 1) {
+                // replace firmware
                 assignmentMap.get(smTypeID).clear();
                 assignmentMap.get(smTypeID).add(softwareModuleIdName);
             }
