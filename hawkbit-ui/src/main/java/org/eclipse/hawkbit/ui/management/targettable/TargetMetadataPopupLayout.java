@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +50,8 @@ public class TargetMetadataPopupLayout extends AbstractMetadataPopupLayout<Targe
     @Override
     protected MetaData createMetadata(final Target entity, final String key, final String value) {
         final TargetMetadata metaData = targetManagement
-                .createMetaData(entity.getControllerId(), Arrays.asList(entityFactory.generateDsMetadata(key, value)))
+                .createMetaData(entity.getControllerId(),
+                        Collections.singletonList(entityFactory.generateDsMetadata(key, value)))
                 .get(0);
         setSelectedEntity(metaData.getTarget());
         return metaData;
@@ -59,8 +59,8 @@ public class TargetMetadataPopupLayout extends AbstractMetadataPopupLayout<Targe
 
     @Override
     protected MetaData updateMetadata(final Target entity, final String key, final String value) {
-        final TargetMetadata metaData = targetManagement.updateMetaData(entity.getControllerId(),
-                entityFactory.generateDsMetadata(key, value));
+        final TargetMetadata metaData = targetManagement.updateMetadata(entity.getControllerId(),
+                entityFactory.generateTargetMetadata(key, value));
         setSelectedEntity(metaData.getTarget());
         return metaData;
     }

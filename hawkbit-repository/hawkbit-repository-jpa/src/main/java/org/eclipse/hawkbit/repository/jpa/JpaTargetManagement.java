@@ -188,8 +188,8 @@ public class JpaTargetManagement implements TargetManagement {
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
                 .collect(Collectors.toList()));
 
-        // target update event is set to ignore "lastModifiedAt" field so it is
-        // not send automatically within the touch() method
+        // TargetUpdatedEvent is not sent within the touch() method due to the
+        // "lastModifiedAt" field being ignored in JpaTarget
         eventPublisher.publishEvent(new TargetUpdatedEvent(updatedTarget, applicationContext.getId()));
 
         return createdMetadata;
@@ -226,7 +226,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetMetadata updateMetaData(final String controllerId, final MetaData md) {
+    public TargetMetadata updateMetadata(final String controllerId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
         final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, md.getKey())

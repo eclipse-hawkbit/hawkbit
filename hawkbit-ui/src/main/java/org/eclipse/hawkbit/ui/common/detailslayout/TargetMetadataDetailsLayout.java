@@ -42,7 +42,7 @@ public class TargetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
      * @param targetManagement
      *            the target set management service
      * @param targetMetadataPopupLayout
-     *            the target set metadata popup layout
+     *            the target metadata popup layout
      */
     public TargetMetadataDetailsLayout(final VaadinMessageSource i18n,
             final TargetManagement targetManagement,

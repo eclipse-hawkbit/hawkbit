@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,7 +51,8 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<
     protected DistributionSetMetadata createMetadata(final DistributionSet entity, final String key,
             final String value) {
         final DistributionSetMetadata dsMetaData = distributionSetManagement
-                .createMetaData(entity.getId(), Arrays.asList(entityFactory.generateDsMetadata(key, value))).get(0);
+                .createMetaData(entity.getId(), Collections.singletonList(entityFactory.generateDsMetadata(key, value)))
+                .get(0);
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
