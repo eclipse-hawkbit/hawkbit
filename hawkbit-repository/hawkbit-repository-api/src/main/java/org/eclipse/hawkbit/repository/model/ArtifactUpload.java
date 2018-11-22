@@ -114,7 +114,7 @@ public class ArtifactUpload {
         return providedSha1Sum;
     }
 
-    public boolean getOverrideExisting() {
+    public boolean overrideExisting() {
         return overrideExisting;
     }
 
