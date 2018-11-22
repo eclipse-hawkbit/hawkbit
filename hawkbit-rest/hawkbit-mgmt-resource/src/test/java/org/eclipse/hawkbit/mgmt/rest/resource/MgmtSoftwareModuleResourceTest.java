@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -426,10 +427,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, artifactSize);
-        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
-                false, artifactSize);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         downloadAndVerify(sm, random, artifact);
         downloadAndVerify(sm, random, artifact2);
@@ -458,8 +459,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, artifactSize);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
@@ -485,10 +486,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, artifactSize);
-        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2",
-                false, artifactSize);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -527,7 +528,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // SM does not exist
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize);
+        artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
         mvc.perform(get("/rest/v1/softwaremodules/1234567890/artifacts")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -838,7 +840,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize);
+        artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
         assertThat(artifactManagement.count()).isEqualTo(1);
@@ -861,7 +864,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         final Long appTypeSmId = ds1.findFirstModuleByType(appType).get().getId();
 
-        artifactManagement.create(new ByteArrayInputStream(random), appTypeSmId, "file1", false, artifactSize);
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), appTypeSmId, "file1", false, artifactSize));
 
         assertThat(softwareModuleManagement.count()).isEqualTo(3);
         assertThat(artifactManagement.count()).isEqualTo(1);
@@ -889,9 +893,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         // Create 2 artifacts
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, artifactSize);
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);

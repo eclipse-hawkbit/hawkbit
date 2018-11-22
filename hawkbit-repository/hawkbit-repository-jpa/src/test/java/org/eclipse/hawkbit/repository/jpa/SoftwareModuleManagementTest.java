@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -370,7 +371,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
-        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize);
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx",
+                false, artifactSize));
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
@@ -378,7 +380,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
-        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false, artifactSize);
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
+                false, artifactSize));
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -413,14 +416,16 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.create(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize);
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx",
+                false, artifactSize));
         moduleX = softwareModuleManagement.get(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
-        artifactManagement.create(new ByteArrayInputStream(source), moduleY.getId(), "artifactx", false, artifactSize);
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
+                false, artifactSize));
         moduleY = softwareModuleManagement.get(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -468,8 +473,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         for (int i = 0; i < numberArtifacts; i++) {
-            artifactManagement.create(new RandomGeneratedInputStream(artifactSize), softwareModule.getId(),
-                    "file" + (i + 1), false, artifactSize);
+            artifactManagement.create(new ArtifactUpload(new RandomGeneratedInputStream(artifactSize),
+                    softwareModule.getId(), "file" + (i + 1), false, artifactSize));
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts

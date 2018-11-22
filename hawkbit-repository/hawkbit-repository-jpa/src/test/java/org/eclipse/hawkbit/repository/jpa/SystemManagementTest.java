@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -134,13 +135,15 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     private void createTestArtifact(final byte[] random) {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, random.length);
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, random.length));
     }
 
     private void createDeletedTestArtifact(final byte[] random) {
         final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
         ds.getModules().stream().forEach(module -> {
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "file1", false, random.length);
+            artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file1",
+                    false, random.length));
             softwareModuleManagement.delete(module.getId());
         });
     }

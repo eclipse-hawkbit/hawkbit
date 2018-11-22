@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -259,8 +260,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
         private Optional<Artifact> uploadArtifact(final String filename) {
             try {
-                return Optional.ofNullable(artifactManagement.create(inputStream, fileUploadId.getSoftwareModuleId(),
-                        filename, null, null, true, mimeType, -1));
+                return Optional.ofNullable(artifactManagement.create(new ArtifactUpload(inputStream,
+                        fileUploadId.getSoftwareModuleId(), filename, null, null, true, mimeType, -1)));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
                 LOG.error("Failed to transfer file to repository", e);
                 return Optional.empty();
