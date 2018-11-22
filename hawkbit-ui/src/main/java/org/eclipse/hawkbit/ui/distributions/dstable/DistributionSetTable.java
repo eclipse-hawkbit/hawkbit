@@ -238,7 +238,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
         distributionSet.ifPresent(ds -> {
             selectDroppedEntities(ds.getId());
-            final HashSet<SoftwareModule> softwareModules = getAssignableSoftwareModules(softwareModulesIdList, ds);
+            final Set<SoftwareModule> softwareModules = getAssignableSoftwareModules(softwareModulesIdList, ds);
             if (softwareModules.isEmpty()) {
                 return;
             }
@@ -248,9 +248,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         });
     }
 
-    private HashSet<SoftwareModule> getAssignableSoftwareModules(final Set<Long> softwareModulesIds,
+    private Set<SoftwareModule> getAssignableSoftwareModules(final Set<Long> softwareModulesIds,
             final DistributionSet distributionSet) {
-        final HashSet<SoftwareModule> assignableModules = new HashSet<>();
+        final Set<SoftwareModule> assignableModules = new HashSet<>();
         for (final Long softwareModuleId : softwareModulesIds) {
             final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(softwareModuleId);
             softwareModule.ifPresent(sm -> {
@@ -274,7 +274,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 softwareModulesThatNeedToBeAssigned);
     }
 
-    private HashMap<Long, HashSet<SoftwareModuleIdName>> getConsolidatedAssignmentMap(
+    private Map<Long, HashSet<SoftwareModuleIdName>> getConsolidatedAssignmentMap(
             final DistributionSet distributionSet) {
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
         final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
