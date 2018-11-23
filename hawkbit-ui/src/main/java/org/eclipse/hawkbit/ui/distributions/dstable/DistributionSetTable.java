@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -243,8 +244,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 return;
             }
             assignSoftwareModulesToDs(softwareModules, ds);
+            final List<SoftwareModuleIdName> softwareModuleIdNames = new ArrayList<>();
+            softwareModules.forEach(sm -> softwareModuleIdNames.add(new SoftwareModuleIdName(sm)));
             openConfirmationWindowForAssignment(ds.getName(),
-                    softwareModules.toArray(new SoftwareModuleIdName[softwareModules.size()]));
+                    softwareModuleIdNames.toArray(new SoftwareModuleIdName[softwareModuleIdNames.size()]));
         });
     }
 
