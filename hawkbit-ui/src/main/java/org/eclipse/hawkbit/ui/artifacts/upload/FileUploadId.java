@@ -91,7 +91,6 @@ public class FileUploadId implements Serializable {
         return new EqualsBuilder().append(id, other.id).isEquals();
     }
 
-
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(id).toHashCode();

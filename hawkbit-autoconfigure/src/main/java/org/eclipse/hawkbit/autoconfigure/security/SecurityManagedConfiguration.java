@@ -107,9 +107,6 @@ public class SecurityManagedConfiguration {
 
     private static final int DOS_FILTER_ORDER = -200;
 
-    @Autowired
-    private AuthenticationConfiguration configuration;
-
     /**
      * @return the {@link UserAuthenticationFilter} to include into the hawkBit
      *         security configuration.
@@ -121,7 +118,8 @@ public class SecurityManagedConfiguration {
     @ConditionalOnMissingBean
     // Exception squid:S00112 - Is aspectJ proxy
     @SuppressWarnings({ "squid:S00112" })
-    public UserAuthenticationFilter userAuthenticationFilter() throws Exception {
+    UserAuthenticationFilter userAuthenticationFilter(final AuthenticationConfiguration configuration)
+            throws Exception {
         return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
     }
 

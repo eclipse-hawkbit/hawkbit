@@ -121,7 +121,8 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
     }
 
     /**
-     * @param groups List of {@link MgmtRolloutGroup}
+     * @param groups
+     *            List of {@link MgmtRolloutGroup}
      */
     public void setGroups(List<MgmtRolloutGroup> groups) {
         this.groups = groups;

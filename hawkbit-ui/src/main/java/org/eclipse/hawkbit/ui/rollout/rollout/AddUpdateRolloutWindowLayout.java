@@ -356,7 +356,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private Long getScheduledStartTime() {
             return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
+                    : null;
         }
 
         private int getErrorThresholdPercentage(final int amountGroup) {

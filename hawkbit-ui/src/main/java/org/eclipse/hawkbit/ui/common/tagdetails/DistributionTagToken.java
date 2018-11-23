@@ -108,8 +108,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            distributionSetTagManagement
-                    .findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
+            distributionSetTagManagement.findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
                     .getContent().stream().forEach(tag -> addNewToken(tag.getId()));
         }
     }

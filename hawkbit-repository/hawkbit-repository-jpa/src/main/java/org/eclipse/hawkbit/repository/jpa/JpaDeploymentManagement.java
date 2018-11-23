@@ -93,7 +93,6 @@ import org.springframework.validation.annotation.Validated;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
@@ -744,7 +743,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private static String formatInClause(final Collection<String> elements) {
-        return "#" + Joiner.on(",#").join(elements);
+        return "#" + String.join(",#", elements);
     }
 
     @SuppressWarnings({ "squid:S1695", "squid:S1696" })

@@ -87,7 +87,8 @@ public class TextFieldSuggestionBox extends AbstractExtension implements TextFie
 
     private void updateValidationIcon(final ValidationOracleContext suggest, final String text) {
         final String errorMessage = (suggest.getSyntaxErrorContext() != null)
-                ? suggest.getSyntaxErrorContext().getErrorMessage() : null;
+                ? suggest.getSyntaxErrorContext().getErrorMessage()
+                : null;
         autoCompleteTextFieldComponent.onQueryFilterChange(text, !suggest.isSyntaxError(), errorMessage);
     }
 }

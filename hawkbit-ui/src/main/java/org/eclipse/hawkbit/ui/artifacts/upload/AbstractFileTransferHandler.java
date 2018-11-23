@@ -103,9 +103,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class)
-                .execute(
-                        new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent()));
+        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class).execute(
+                new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent()));
     }
 
     private void setFailureReason(final String failureReason) {
@@ -134,7 +133,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void publishUploadStarted(final FileUploadId fileUploadId) {
         LOG.info("Upload started for file {}", fileUploadId);
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_STARTED);
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_STARTED);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, fileUploadProgress);
     }

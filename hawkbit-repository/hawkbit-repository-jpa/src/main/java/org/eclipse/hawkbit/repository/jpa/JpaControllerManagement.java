@@ -96,7 +96,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -473,7 +472,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private static String formatQueryInStatementParams(final Collection<String> paramNames) {
-        return "#" + Joiner.on(",#").join(paramNames);
+        return "#" + String.join(",#", paramNames);
     }
 
     /**

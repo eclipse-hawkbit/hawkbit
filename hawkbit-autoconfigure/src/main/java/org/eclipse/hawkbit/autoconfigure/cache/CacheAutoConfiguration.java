@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,13 +42,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 @EnableCaching
 public class CacheAutoConfiguration {
 
-    @Autowired
-    private TenantAware tenantAware;
-
-    @Autowired
-    @Qualifier("directCacheManager")
-    private CacheManager directCacheManager;
-
     /**
      * @return the default cache manager bean if none other cache manager is
      *         existing.
@@ -57,7 +49,8 @@ public class CacheAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Primary
-    public TenancyCacheManager cacheManager() {
+    TenancyCacheManager cacheManager(@Qualifier("directCacheManager") final CacheManager directCacheManager,
+            final TenantAware tenantAware) {
         return new TenantAwareCacheManager(directCacheManager, tenantAware);
     }
 
@@ -70,9 +63,6 @@ public class CacheAutoConfiguration {
     @EnableConfigurationProperties(CacheProperties.class)
     static class DirectCacheManagerConfiguration {
 
-        @Autowired
-        private CacheProperties cacheProperties;
-
         /**
          * @return the direct cache manager to access without tenant aware
          *         check, cause in sometimes it's necessary to access the cache
@@ -81,7 +71,7 @@ public class CacheAutoConfiguration {
          */
         @Bean(name = "directCacheManager")
         @ConditionalOnMissingBean(name = "directCacheManager")
-        public CacheManager directCacheManager() {
+        public CacheManager directCacheManager(final CacheProperties cacheProperties) {
             final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 
             if (cacheProperties.getTtl() > 0) {
@@ -102,9 +92,16 @@ public class CacheAutoConfiguration {
      */
     public class TenantCacheResolver extends SimpleCacheResolver {
 
+        private final TenantAware tenantAware;
+
+        public TenantCacheResolver(final TenantAware tenantAware) {
+            this.tenantAware = tenantAware;
+        }
+
         @Override
         public Collection<Cache> resolveCaches(final CacheOperationInvocationContext<?> context) {
-            return super.resolveCaches(context).stream().map(TenantCacheWrapper::new).collect(Collectors.toList());
+            return super.resolveCaches(context).stream().map(cache -> new TenantCacheWrapper(cache, tenantAware))
+                    .collect(Collectors.toList());
         }
 
         @Override
@@ -117,19 +114,17 @@ public class CacheAutoConfiguration {
     /**
      * An {@link Cache} wrapper which returns the name of the cache include the
      * {@link TenantAware#getCurrentTenant()}.
-     *
-     *
-     *
-     *
      */
     public class TenantCacheWrapper implements Cache {
         private final Cache delegate;
+        private final TenantAware tenantAware;
 
         /**
          * @param delegate
          */
-        public TenantCacheWrapper(final Cache delegate) {
+        public TenantCacheWrapper(final Cache delegate, final TenantAware tenantAware) {
             this.delegate = delegate;
+            this.tenantAware = tenantAware;
         }
 
         /**

@@ -400,8 +400,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 }
             } while (assignedTargets.hasNext() && (query = assignedTargets.nextPageable()) != null);
             if (assigned) {
-                getNotification().displaySuccess(
-                        getI18n().getMessage("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
+                getNotification()
+                        .displaySuccess(getI18n().getMessage("message.no.targets.assiged.fortag", targetTagName));
             }
         });
     }
@@ -654,7 +654,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     private boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
             getNotification().displayValidationError(getI18n().getMessage("message.tag.cannot.be.assigned",
-                    new Object[] { getI18n().getMessage("label.no.tag.assigned") }));
+                    getI18n().getMessage("label.no.tag.assigned")));
             return true;
         }
         return false;
@@ -664,8 +664,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final String distNameVersion) {
         String pendActionMsg = getI18n().getMessage("message.target.assigned.pending");
         if (null == message) {
-            pendActionMsg = getI18n().getMessage("message.dist.pending.action",
-                    new Object[] { controllerId, distNameVersion });
+            pendActionMsg = getI18n().getMessage("message.dist.pending.action", controllerId, distNameVersion);
         }
         return pendActionMsg;
     }

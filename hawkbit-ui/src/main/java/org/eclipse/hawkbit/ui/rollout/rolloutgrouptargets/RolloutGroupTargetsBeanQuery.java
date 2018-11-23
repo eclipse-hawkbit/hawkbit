@@ -87,9 +87,11 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             return getProxyRolloutGroupTargetsList(firstPageTargetSets.getContent());
         }
 
-        return rolloutGroup.map(group -> getProxyRolloutGroupTargetsList(getRolloutGroupManagement()
-                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(startIndex / count, count), group.getId())
-                .getContent())).orElse(Collections.emptyList());
+        return rolloutGroup
+                .map(group -> getProxyRolloutGroupTargetsList(
+                        getRolloutGroupManagement().findAllTargetsOfRolloutGroupWithActionStatus(
+                                PageRequest.of(startIndex / count, count), group.getId()).getContent()))
+                .orElse(Collections.emptyList());
     }
 
     private static List<ProxyTarget> getProxyRolloutGroupTargetsList(
@@ -133,8 +135,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         long size = 0;
 
         try {
-            firstPageTargetSets = rolloutGroup.map(group -> getRolloutGroupManagement()
-                    .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
+            firstPageTargetSets = rolloutGroup
+                    .map(group -> getRolloutGroupManagement().findAllTargetsOfRolloutGroupWithActionStatus(
+                            PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
                     .orElse(null);
 
             size = firstPageTargetSets == null ? 0 : firstPageTargetSets.getTotalElements();

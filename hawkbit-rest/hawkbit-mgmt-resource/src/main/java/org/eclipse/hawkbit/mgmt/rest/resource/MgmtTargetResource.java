@@ -61,6 +61,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtTargetResource implements MgmtTargetRestApi {
+    private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
+
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetResource.class);
 
     @Autowired
@@ -199,7 +201,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -214,7 +216,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -242,7 +244,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
             return ResponseEntity.notFound().build();
         }
 
@@ -340,7 +342,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 

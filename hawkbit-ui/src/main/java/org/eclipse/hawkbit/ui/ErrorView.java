@@ -57,17 +57,16 @@ public class ErrorView extends VerticalLayout implements View {
     public void enter(final ViewChangeListener.ViewChangeEvent event) {
         final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
         if (view == null) {
-            message.setValue(i18n.getMessage("message.error.view", new Object[] { event.getViewName() }));
+            message.setValue(i18n.getMessage("message.error.view", event.getViewName()));
             return;
         }
         if (dashboardMenu.isAccessDenied(event.getViewName())) {
             final Notification nt = new Notification("Access denied",
-                    i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }),
-                    Type.ERROR_MESSAGE, false);
+                    i18n.getMessage("message.accessdenied.view", event.getViewName()), Type.ERROR_MESSAGE, false);
             nt.setStyleName(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
             nt.setPosition(Position.BOTTOM_RIGHT);
             nt.show(UI.getCurrent().getPage());
-            message.setValue(i18n.getMessage("message.accessdenied.view", new Object[] { event.getViewName() }));
+            message.setValue(i18n.getMessage("message.accessdenied.view", event.getViewName()));
         }
     }
 

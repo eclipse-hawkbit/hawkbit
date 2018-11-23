@@ -25,10 +25,11 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -48,7 +49,7 @@ public interface DdiRootControllerRestApi {
      *            of the software module
      * @return the response
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
+    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
@@ -65,8 +66,7 @@ public interface DdiRootControllerRestApi {
      *            the HTTP request injected by spring
      * @return the response
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId);
 
@@ -91,7 +91,7 @@ public interface DdiRootControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -116,7 +116,7 @@ public interface DdiRootControllerRestApi {
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
+    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
             + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
@@ -152,9 +152,8 @@ public interface DdiRootControllerRestApi {
      *            the HTTP request injected by spring
      * @return the response
      */
-    @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
-            + "/{actionId}", method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
@@ -197,8 +196,8 @@ public interface DdiRootControllerRestApi {
      *
      * @return status of the request
      */
-    @RequestMapping(value = "/{controllerId}/"
-            + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{controllerId}/"
+            + DdiRestConstants.CONFIG_DATA_ACTION, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 
@@ -216,9 +215,8 @@ public interface DdiRootControllerRestApi {
      *
      * @return the {@link DdiCancel} response
      */
-    @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
-            + "/{actionId}", method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
@@ -241,8 +239,8 @@ public interface DdiRootControllerRestApi {
      * @return the {@link DdiActionFeedback} response
      */
 
-    @RequestMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
+            + DdiRestConstants.FEEDBACK, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,

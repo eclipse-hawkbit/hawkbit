@@ -94,8 +94,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         if (StringUtils.isEmpty(searchText)) {
             rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(pageRequest, false);
         } else {
-            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText,
-                    false);
+            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText, false);
         }
         return getProxyRolloutList(rolloutBeans);
     }

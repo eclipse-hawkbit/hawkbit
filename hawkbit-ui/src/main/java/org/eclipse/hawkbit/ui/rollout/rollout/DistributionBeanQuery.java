@@ -119,8 +119,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                 .setIsComplete(true).build();
 
-        firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+        firstPageDistributionSets = getDistributionSetManagement()
+                .findByDistributionSetFilter(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         final long size = firstPageDistributionSets.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;

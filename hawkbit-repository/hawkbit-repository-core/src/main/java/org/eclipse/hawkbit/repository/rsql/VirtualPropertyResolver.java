@@ -44,7 +44,7 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
 
     private static final long serialVersionUID = 1L;
 
-    private StrSubstitutor substitutor;
+    private transient StrSubstitutor substitutor;
 
     @Override
     public String lookup(final String rhs) {

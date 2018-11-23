@@ -583,7 +583,8 @@ public final class RSQLUtility {
                 singleList.add(getOutPredicate(transformedValues, fieldPath));
                 break;
             default:
-                LOGGER.info("operator symbol {} is either not supported or not implemented");
+                LOGGER.info("operator symbol {} is either not supported or not implemented",
+                        node.getOperator().getSymbol());
             }
         }
 

@@ -183,7 +183,8 @@ public final class HawkbitCommonUtil {
 
     private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
         return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
-                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH) : 0;
+                ? (newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH)
+                : 0;
     }
 
     /**
@@ -287,24 +288,21 @@ public final class HawkbitCommonUtil {
         final int alreadyAssignedCount = result.getAlreadyAssigned();
         final int unassignedCount = result.getUnassigned();
         if (assignedCount == 1) {
-            formMsg.append(i18n.getMessage("message.target.assigned.one",
-                    new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
+            formMsg.append(i18n.getMessage("message.target.assigned.one", result.getAssignedEntity().get(0).getName(),
+                    tagName)).append("<br>");
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.getMessage("message.target.assigned.many", new Object[] { assignedCount, tagName }))
-                    .append("<br>");
+            formMsg.append(i18n.getMessage("message.target.assigned.many", assignedCount, tagName)).append("<br>");
 
             if (alreadyAssignedCount > 0) {
-                final String alreadyAssigned = i18n.getMessage("message.target.alreadyAssigned",
-                        new Object[] { alreadyAssignedCount });
+                final String alreadyAssigned = i18n.getMessage("message.target.alreadyAssigned", alreadyAssignedCount);
                 formMsg.append(alreadyAssigned).append("<br>");
             }
         }
         if (unassignedCount == 1) {
             formMsg.append(i18n.getMessage("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
+                    result.getUnassignedEntity().get(0).getName(), tagName)).append("<br>");
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.getMessage("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
-                    .append("<br>");
+            formMsg.append(i18n.getMessage("message.target.unassigned.many", unassignedCount, tagName)).append("<br>");
         }
         return formMsg.toString();
     }

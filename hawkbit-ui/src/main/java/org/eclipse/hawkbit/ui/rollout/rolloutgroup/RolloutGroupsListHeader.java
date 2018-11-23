@@ -48,7 +48,8 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
      * @param i18n
      *            I18N
      */
-    public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState, final VaadinMessageSource i18n) {
+    public RolloutGroupsListHeader(final UIEventBus eventBus, final RolloutUIState rolloutUiState,
+            final VaadinMessageSource i18n) {
         super(null, rolloutUiState, i18n);
         this.eventBus = eventBus;
         eventBus.subscribe(this);

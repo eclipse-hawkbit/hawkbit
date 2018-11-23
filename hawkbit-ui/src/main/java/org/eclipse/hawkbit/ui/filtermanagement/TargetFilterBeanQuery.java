@@ -60,8 +60,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
                 searchText = String.format("%%%s%%", searchText);
             }
         }
-        
-        if (sortStates!= null && sortStates.length > 0) {
+
+        if (sortStates != null && sortStates.length > 0) {
             // Initalize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -84,8 +84,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             targetFilterQuery = firstPageTargetFilter;
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
-            targetFilterQuery = getTargetFilterQueryManagement().findAll(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetFilterQuery = getTargetFilterQueryManagement()
+                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             targetFilterQuery = getTargetFilterQueryManagement().findByName(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),

@@ -39,7 +39,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -178,7 +177,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             return targetFilterQueryRepository.findAll(pageable);
         }
 
-        final Specifications<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
+        final Specification<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
         return targetFilterQueryRepository.findAll(specs, pageable);
     }
 

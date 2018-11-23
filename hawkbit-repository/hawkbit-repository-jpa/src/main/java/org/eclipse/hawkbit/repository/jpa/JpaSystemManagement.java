@@ -326,6 +326,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    // Exception squid:S2229 - calling findTenants without transaction is
+    // intended in this case
+    @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
 
         Page<String> tenants;

@@ -70,12 +70,11 @@ public class RolloutView extends VerticalLayout implements View {
 
     @Autowired
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-                final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-                final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
-                final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-                final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
-                final QuotaManagement quotaManagement,
-                final TenantConfigurationManagement tenantConfigManagement) {
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
+            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
+            final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigManagement) {
         this.permChecker = permissionChecker;
         this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,

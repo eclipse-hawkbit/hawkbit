@@ -25,10 +25,12 @@ public class ApprovalConfigurationItem extends AbstractBooleanTenantConfiguratio
     private boolean configurationEnabledChange;
 
     /**
-     *  Constructor for tenant specific approval mode setting.
+     * Constructor for tenant specific approval mode setting.
      *
-     * @param tenantConfigurationManagement used to enable/disable the approval mode per tenant
-     * @param i18n used to translate labels
+     * @param tenantConfigurationManagement
+     *            used to enable/disable the approval mode per tenant
+     * @param i18n
+     *            used to translate labels
      */
     public ApprovalConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
             final VaadinMessageSource i18n) {

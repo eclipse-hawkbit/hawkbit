@@ -56,8 +56,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
 
     @Override
     public int size() {
-        firstPageTargetTag = getTagManagement()
-                .findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+        firstPageTargetTag = getTagManagement().findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         long size = firstPageTargetTag.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;

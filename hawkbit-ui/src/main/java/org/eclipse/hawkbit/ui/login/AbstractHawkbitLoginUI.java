@@ -289,8 +289,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void buildSignInButton() {
-        final String caption = isDemo
-                ? i18n.getMessage("button.login.agreeandsignin")
+        final String caption = isDemo ? i18n.getMessage("button.login.agreeandsignin")
                 : i18n.getMessage("button.login.signin");
 
         signIn = new Button(caption);
@@ -306,7 +305,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         password.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         password.setId("login-password");
-        if(isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
+        if (isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
             password.setValue(uiProperties.getDemo().getPassword());
         }
     }
@@ -317,7 +316,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         username.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         username.setId("login-username");
-        if(isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
+        if (isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
             username.setValue(uiProperties.getDemo().getUser());
         }
     }

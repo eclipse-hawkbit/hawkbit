@@ -25,9 +25,12 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -43,8 +46,7 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve
      * @return a single target with status OK.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") String targetId);
 
     /**
@@ -67,8 +69,7 @@ public interface MgmtTargetRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
 
-    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getTargets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -86,9 +87,8 @@ public interface MgmtTargetRestApi {
      *         entities. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> createTargets(List<MgmtTargetRequestBody> targets);
 
     /**
@@ -105,7 +105,7 @@ public interface MgmtTargetRestApi {
      * @return the updated target response which contains all fields also fields
      *         which have not updated
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{targetId}", consumes = { MediaTypes.HAL_JSON_VALUE,
+    @PutMapping(value = "/{targetId}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") String targetId,
@@ -120,7 +120,7 @@ public interface MgmtTargetRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}")
+    @DeleteMapping(value = "/{targetId}")
     ResponseEntity<Void> deleteTarget(@PathVariable("targetId") String targetId);
 
     /**
@@ -131,8 +131,8 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve the attributes.
      * @return the target attributes as map response with status OK
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/attributes", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/attributes", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") String targetId);
 
     /**
@@ -156,8 +156,8 @@ public interface MgmtTargetRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/actions", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("targetId") String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -174,8 +174,8 @@ public interface MgmtTargetRestApi {
      *            to load
      * @return the action
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/actions/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") String targetId,
             @PathVariable("actionId") Long actionId);
 
@@ -191,7 +191,7 @@ public interface MgmtTargetRestApi {
      *            optional parameter, which indicates a force cancel
      * @return status no content in case cancellation was successful
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}/actions/{actionId}")
+    @DeleteMapping(value = "/{targetId}/actions/{actionId}")
     ResponseEntity<Void> cancelAction(@PathVariable("targetId") String targetId,
             @PathVariable("actionId") Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") boolean force);
@@ -207,8 +207,8 @@ public interface MgmtTargetRestApi {
      *            to update the action
      * @return status no content in case cancellation was successful
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{targetId}/actions/{actionId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+    @PutMapping(value = "/{targetId}/actions/{actionId}", consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") String targetId,
             @PathVariable("actionId") Long actionId, MgmtActionRequestBodyPut actionUpdate);
@@ -234,8 +234,8 @@ public interface MgmtTargetRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}/status", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/actions/{actionId}/status", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(@PathVariable("targetId") String targetId,
             @PathVariable("actionId") Long actionId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
@@ -252,8 +252,8 @@ public interface MgmtTargetRestApi {
      * @return the assigned distribution set with status OK, if none is assigned
      *         than {@code null} content (e.g. "{}")
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/assignedDS", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/assignedDS", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("targetId") String targetId);
 
     /**
@@ -271,8 +271,8 @@ public interface MgmtTargetRestApi {
      *         complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{targetId}/assignedDS", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{targetId}/assignedDS", consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") String targetId, MgmtDistributionSetAssignment dsId,
@@ -287,8 +287,8 @@ public interface MgmtTargetRestApi {
      * @return the assigned installed set with status OK, if none is installed
      *         than {@code null} content (e.g. "{}")
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/installedDS", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/installedDS", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("targetId") String targetId);
 
     /**
@@ -311,8 +311,8 @@ public interface MgmtTargetRestApi {
      * @return status OK if get request is successful with the paged list of
      *         meta data
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/metadata", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -329,8 +329,7 @@ public interface MgmtTargetRestApi {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/metadata/{metadataKey}", produces = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{targetId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("targetId") String targetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -346,8 +345,8 @@ public interface MgmtTargetRestApi {
      * @return status OK if the update request is successful and the updated
      *         meta data result
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{targetId}/metadata/{metadataKey}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = "/{targetId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("targetId") String targetId,
             @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
 
@@ -360,7 +359,7 @@ public interface MgmtTargetRestApi {
      *            the key of the meta data to delete
      * @return status OK if the delete request is successful
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}/metadata/{metadataKey}")
+    @DeleteMapping(value = "/{targetId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") String targetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -374,8 +373,7 @@ public interface MgmtTargetRestApi {
      * @return status created if post request is successful with the value of
      *         the created meta data
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{targetId}/metadata", consumes = {
-            MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = "/{targetId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") String targetId,
             List<MgmtMetadata> metadataRest);

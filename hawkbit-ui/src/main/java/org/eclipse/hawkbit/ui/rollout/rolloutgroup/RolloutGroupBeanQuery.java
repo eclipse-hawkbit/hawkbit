@@ -156,8 +156,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         long size = 0;
         if (rolloutId != null) {
             try {
-                firstPageRolloutGroupSets = getRolloutGroupManagement().findByRolloutWithDetailedStatus(
-                        PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
+                firstPageRolloutGroupSets = getRolloutGroupManagement()
+                        .findByRolloutWithDetailedStatus(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
                 size = firstPageRolloutGroupSets.getTotalElements();
             } catch (final EntityNotFoundException e) {
                 LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);

@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
  * from a {@link HttpServletRequest}.
  *
  */
+// Exception squid:S2083 - false positive, file paths not handled here
+@SuppressWarnings("squid:S2083")
 public final class IpUtil {
 
     private static final String HIDDEN_IP = "***";
@@ -139,7 +141,7 @@ public final class IpUtil {
      *            the exchange will store in the path
      * @return the {@link URI}
      * @throws IllegalArgumentException
-     *             If the given string not parsable
+     *             If the given string not parse able
      */
     public static URI createAmqpUri(final String host, final String exchange) {
         return createUri(AMQP_SCHEME, host).resolve("/" + exchange);

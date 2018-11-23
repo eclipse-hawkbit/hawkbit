@@ -168,8 +168,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                             .type(distributionSetType).requiredMigrationStep(isMigStepReq));
 
             eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.ADD_ENTITY, newDist));
-            notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
-                    new Object[] { newDist.getName(), newDist.getVersion() }));
+            notificationMessage.displaySuccess(
+                    i18n.getMessage("message.new.dist.save.success", newDist.getName(), newDist.getVersion()));
             distributionSetTable.setValue(Sets.newHashSet(newDist.getId()));
         }
 
@@ -194,7 +194,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
             distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT);
             notificationMessage.displayValidationError(i18n.getMessage("message.duplicate.dist",
-                    new Object[] { existingDs.get().getName(), existingDs.get().getVersion() }));
+                    existingDs.get().getName(), existingDs.get().getVersion()));
 
             return true;
         }

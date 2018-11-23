@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +36,11 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @ConditionalOnMissingBean(UserDetailsService.class)
 public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-    @Autowired
-    private SecurityProperties securityProperties;
+    private final SecurityProperties securityProperties;
+
+    InMemoryUserManagementAutoConfiguration(final SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
+    }
 
     @Override
     public void configure(final AuthenticationManagerBuilder auth) throws Exception {
@@ -52,7 +54,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
      */
     @Bean
     @ConditionalOnMissingBean
-    public UserDetailsService userDetailsService() {
+    UserDetailsService userDetailsService() {
         final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserPrincipalDetailsManager();
         inMemoryUserDetailsManager.setAuthenticationManager(null);
         inMemoryUserDetailsManager.createUser(new User(securityProperties.getUser().getName(),
@@ -65,7 +67,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
      */
     @Bean
     @ConditionalOnMissingBean
-    public MultitenancyIndicator multiTenancyIndicator() {
+    MultitenancyIndicator multiTenancyIndicator() {
         return () -> false;
     }
 
