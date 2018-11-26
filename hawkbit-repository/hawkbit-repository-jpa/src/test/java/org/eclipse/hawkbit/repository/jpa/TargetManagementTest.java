@@ -152,9 +152,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerIdAndRsql(PAGE, NOT_EXIST_ID, "name==*"),
                 "Target");
         verifyThrownExceptionBy(
-                () -> targetManagement.updateMetaData(NOT_EXIST_ID, entityFactory.generateTargetMetadata("xxx", "xxx")),
+                () -> targetManagement.updateMetadata(NOT_EXIST_ID, entityFactory.generateTargetMetadata("xxx", "xxx")),
                 "Target");
-        verifyThrownExceptionBy(() -> targetManagement.updateMetaData(target.getControllerId(),
+        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(target.getControllerId(),
                 entityFactory.generateTargetMetadata(NOT_EXIST_ID, "xxx")), "TargetMetadata");
     }
 
@@ -1002,7 +1002,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Thread.sleep(100);
 
         // update the target metadata
-        final JpaTargetMetadata updated = (JpaTargetMetadata) targetManagement.updateMetaData(target.getControllerId(),
+        final JpaTargetMetadata updated = (JpaTargetMetadata) targetManagement.updateMetadata(target.getControllerId(),
                 entityFactory.generateTargetMetadata(knownKey, knownUpdateValue));
         // we are updating the target meta data so also modifying the base
         // software
