@@ -47,9 +47,11 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
             final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
             final SpPermissionChecker permissionChecker, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final Executor uiExecutor) {
+        final TargetMetadataPopupLayout targetMetadataPopupLayout = new TargetMetadataPopupLayout(i18n, uiNotification,
+                eventBus, targetManagement, entityFactory, permissionChecker);
         this.eventBus = eventBus;
         this.targetDetails = new TargetDetails(i18n, eventBus, permissionChecker, managementUIState, uiNotification,
-                tagManagement, targetManagement, deploymentManagement, entityFactory, targetTable);
+                tagManagement, targetManagement, targetMetadataPopupLayout, deploymentManagement, entityFactory, targetTable);
         this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, uiNotification,
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiProperties,
                 entityFactory, uiNotification, tagManagement, distributionSetManagement, uiExecutor, targetTable);

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -61,7 +61,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
  *            M is the metadata
  * 
  */
-public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity, M extends MetaData>
+public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M extends MetaData>
         extends CustomComponent {
 
     private static final String DELETE_BUTTON = "DELETE_BUTTON";
@@ -140,10 +140,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
      */
     public CommonDialogWindow getWindow(final E entity, final String metaDatakey) {
         selectedEntity = entity;
-        final String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
 
         metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(getMetadataCaption(nameVersion)).content(this).cancelButtonClickListener(event -> onCancel())
+                .caption(getMetadataCaption()).content(this).cancelButtonClickListener(event -> onCancel())
                 .id(UIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 
@@ -440,12 +439,16 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         return true;
     }
 
-    private String getMetadataCaption(final String nameVersionStr) {
+    private String getMetadataCaption() {
         final StringBuilder caption = new StringBuilder();
         caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup") + " "
-                + HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
+                + HawkbitCommonUtil.getBoldHTMLText(getElementTitle()));
         caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
         return caption.toString();
+    }
+
+    protected String getElementTitle() {
+        return getSelectedEntity().getName();
     }
 
     private void onCancel() {
