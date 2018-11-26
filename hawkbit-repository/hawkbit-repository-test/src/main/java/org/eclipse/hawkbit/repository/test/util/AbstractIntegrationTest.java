@@ -404,8 +404,8 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestSchedule(final int minutesToAdd) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(minutesToAdd);
-        return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
-                currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
+        return String.format("%d %d %d %d %d ? %d", currentTime.getSecond(), currentTime.getMinute(),
+                currentTime.getHour(), currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
     }
 
     protected static String getTestDuration(final int duration) {
