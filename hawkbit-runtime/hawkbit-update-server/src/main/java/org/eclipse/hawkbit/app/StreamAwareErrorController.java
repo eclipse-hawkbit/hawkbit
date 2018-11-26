@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  */
 @Controller
+// Exception squid:S3752 - errors need handling for all methods
+@SuppressWarnings("squid:S3752")
 public class StreamAwareErrorController extends BasicErrorController {
 
     /**
