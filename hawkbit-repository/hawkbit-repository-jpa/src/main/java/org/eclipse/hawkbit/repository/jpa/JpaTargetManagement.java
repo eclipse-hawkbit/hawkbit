@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
@@ -182,10 +183,16 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget updatedTarget = touch(target);
 
-        return Collections.unmodifiableList(md.stream()
+        final List<TargetMetadata> createdMetadata = Collections.unmodifiableList(md.stream()
                 .map(meta -> targetMetadataRepository
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
                 .collect(Collectors.toList()));
+
+        // TargetUpdatedEvent is not sent within the touch() method due to the
+        // "lastModifiedAt" field being ignored in JpaTarget
+        eventPublisher.publishEvent(new TargetUpdatedEvent(updatedTarget, applicationContext.getId()));
+
+        return createdMetadata;
     }
 
     private void checkAndThrowIfTargetMetadataAlreadyExists(final TargetMetadataCompositeKey metadataId) {
@@ -219,16 +226,21 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetMetadata updateMetaData(final String controllerId, final MetaData md) {
+    public TargetMetadata updateMetadata(final String controllerId, final MetaData md) {
 
         // check if exists otherwise throw entity not found exception
-        final JpaTargetMetadata toUpdate = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, md.getKey())
+        final JpaTargetMetadata updatedMetadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId,
+                md.getKey())
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, md.getKey()));
-        toUpdate.setValue(md.getValue());
+        updatedMetadata.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // target indirectly
-        touch(controllerId);
-        return targetMetadataRepository.save(toUpdate);
+        final JpaTarget target = touch(controllerId);
+        final JpaTargetMetadata matadata = targetMetadataRepository.save(updatedMetadata);
+        // target update event is set to ignore "lastModifiedAt" field so it is
+        // not send automatically within the touch() method
+        eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
+        return matadata;
     }
 
     @Override
@@ -239,8 +251,11 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, key)
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, key));
 
-        touch(controllerId);
+        final JpaTarget target = touch(controllerId);
         targetMetadataRepository.delete(metadata.getId());
+        // target update event is set to ignore "lastModifiedAt" field so it is
+        // not send automatically within the touch() method
+        eventPublisher.publishEvent(new TargetUpdatedEvent(target, applicationContext.getId()));
     }
 
     @Override

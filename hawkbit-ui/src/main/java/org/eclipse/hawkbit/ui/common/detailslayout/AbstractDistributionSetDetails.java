@@ -129,11 +129,6 @@ public abstract class AbstractDistributionSetDetails
     }
 
     @Override
-    protected boolean isMetadataIconToBeDisplayed() {
-        return true;
-    }
-
-    @Override
     protected void showMetadata(final ClickEvent event) {
         final Optional<DistributionSet> ds = distributionSetManagement.get(getSelectedBaseEntityId());
         if (!ds.isPresent()) {
