@@ -573,7 +573,7 @@ public final class RSQLUtility {
                 return getOutPredicate(transformedValues, fieldPath);
             default:
                 throw new RSQLParameterSyntaxException("operator symbol {" + node.getOperator().getSymbol()
-                        + "} is either not supported or not implemented", null);
+                        + "} is either not supported or not implemented");
             }
         }
 

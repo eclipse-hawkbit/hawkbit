@@ -1066,15 +1066,15 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String rsqlOrControllerIdNotEqualFilter = "id==target1 or metadata.key1!=target1-value1";
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
-        validateFoundTargetsbyRsql(rsqlAndControllerIdFilter, controllerId1);
-        validateFoundTargetsbyRsql(rsqlAndControllerIdWithWrongKeyFilter);
-        validateFoundTargetsbyRsql(rsqlAndControllerIdNotEqualFilter, controllerId2);
-        validateFoundTargetsbyRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
-        validateFoundTargetsbyRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
-        validateFoundTargetsbyRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
+        validateFoundTargetsByRsql(rsqlAndControllerIdFilter, controllerId1);
+        validateFoundTargetsByRsql(rsqlAndControllerIdWithWrongKeyFilter);
+        validateFoundTargetsByRsql(rsqlAndControllerIdNotEqualFilter, controllerId2);
+        validateFoundTargetsByRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
+        validateFoundTargetsByRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
+        validateFoundTargetsByRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
     }
 
-    private void validateFoundTargetsbyRsql(final String rsqlFilter, final String... controllerIds) {
+    private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {
         final Page<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
 
         assertThat(foundTargetsByMetadataAndControllerId.getTotalElements()).as("Targets count in RSQL filter is wrong")

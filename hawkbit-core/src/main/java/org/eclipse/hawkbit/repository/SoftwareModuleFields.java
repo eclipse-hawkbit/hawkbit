@@ -50,15 +50,15 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
-    SoftwareModuleFields(final String fieldName) {
+    private SoftwareModuleFields(final String fieldName) {
         this(fieldName, false, null);
     }
 
-    SoftwareModuleFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+    private SoftwareModuleFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
         this(fieldName, true, subEntityMapTuple);
     }
 
-    SoftwareModuleFields(final String fieldName, final boolean mapField,
+    private SoftwareModuleFields(final String fieldName, final boolean mapField,
             final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;

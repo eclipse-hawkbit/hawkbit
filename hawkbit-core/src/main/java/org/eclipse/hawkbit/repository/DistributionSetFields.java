@@ -69,15 +69,15 @@ public enum DistributionSetFields implements FieldNameProvider {
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
-    DistributionSetFields(final String fieldName) {
+    private DistributionSetFields(final String fieldName) {
         this(fieldName, false, null);
     }
 
-    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+    private DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
         this(fieldName, true, subEntityMapTuple);
     }
 
-    DistributionSetFields(final String fieldName, final boolean mapField,
+    private DistributionSetFields(final String fieldName, final boolean mapField,
             final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;

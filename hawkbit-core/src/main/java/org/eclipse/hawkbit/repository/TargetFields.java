@@ -92,23 +92,23 @@ public enum TargetFields implements FieldNameProvider {
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
-    TargetFields(final String fieldName) {
+    private TargetFields(final String fieldName) {
         this(fieldName, false, Collections.emptyList(), null);
     }
 
-    TargetFields(final String fieldName, final boolean isMapField) {
+    private TargetFields(final String fieldName, final boolean isMapField) {
         this(fieldName, isMapField, Collections.emptyList(), null);
     }
 
-    TargetFields(final String fieldName, final String... subEntityAttribues) {
+    private TargetFields(final String fieldName, final String... subEntityAttribues) {
         this(fieldName, false, Arrays.asList(subEntityAttribues), null);
     }
 
-    TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+    private TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
         this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
     }
 
-    TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
+    private TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
             final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
         this.mapField = mapField;
