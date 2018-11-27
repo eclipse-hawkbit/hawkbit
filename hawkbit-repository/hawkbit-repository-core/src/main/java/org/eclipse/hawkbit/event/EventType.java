@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -128,6 +130,8 @@ public class EventType {
         TYPES.put(35, TargetFilterQueryUpdatedEvent.class);
         TYPES.put(36, TargetFilterQueryDeletedEvent.class);
 
+        // target attributes requested flag
+        TYPES.put(37, TargetAttributesRequestedEvent.class);
     }
 
     private int value;
@@ -168,10 +172,8 @@ public class EventType {
      */
     public static EventType from(final Class<?> clazz) {
         final Optional<Integer> foundEventType = TYPES.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(clazz)).map(entry -> entry.getKey()).findAny();
-        if (!foundEventType.isPresent()) {
-            return null;
-        }
-        return new EventType(foundEventType.get());
+                .filter(entry -> entry.getValue().equals(clazz)).map(Entry::getKey).findAny();
+
+        return foundEventType.map(EventType::new).orElse(null);
     }
 }
