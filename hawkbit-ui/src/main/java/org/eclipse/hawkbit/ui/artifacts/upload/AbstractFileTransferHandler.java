@@ -121,6 +121,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
+    protected void setFailureReasonFileIllegalFilename() {
+        setFailureReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
+    }
+
     protected boolean isFileAlreadyContainedInSoftwareModule(final FileUploadId newFileUploadId,
             final SoftwareModule softwareModule) {
         for (final Artifact artifact : softwareModule.getArtifacts()) {
@@ -235,7 +239,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 UI.setCurrent(vaadinUi);
                 streamToRepository();
             } catch (final RuntimeException e) {
+                setFailureReasonUploadFailed();
                 publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
+                publishUploadFinishedEvent(fileUploadId);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {
                 tryToCloseIOStream(inputStream);
@@ -251,6 +257,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
             if (isUploadInterrupted()) {
                 handleUploadFailure(artifact);
+                publishUploadFinishedEvent(fileUploadId);
                 return;
             }
             publishUploadSucceeded(fileUploadId, artifact.getSize());

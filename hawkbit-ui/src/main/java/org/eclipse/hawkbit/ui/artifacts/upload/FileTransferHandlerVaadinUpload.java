@@ -15,7 +15,9 @@ import java.io.PipedOutputStream;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RegexHelper;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -126,6 +128,15 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
 
         if (isUploadInterrupted()) {
+            return ByteStreams.nullOutputStream();
+        }
+
+        if (RegexHelper.stringContainsIllegalCharacters(fileName, ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
+            setUploadInterrupted();
+            setFailureReasonFileIllegalFilename();
+            publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.uploadedfile.illegalFilename"), null);
+            publishUploadFinishedEvent(fileUploadId);
+            uiNotification.displayWarning("illegal file name");
             return ByteStreams.nullOutputStream();
         }
 

@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Regular expression characters providing their encoded and their readable
  * expression
@@ -24,6 +29,10 @@ public class RegexChar {
     public static RegexChar EXCLAMATION_MARK = new RegexChar("!");
     public static RegexChar QUESRION_MARK = new RegexChar("?");
     
+    public static Set<RegexChar> getImmutableCharSet(final RegexChar... chars) {
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(chars)));
+    }
+
     public final String regExp;
     public final String readableExp;
 

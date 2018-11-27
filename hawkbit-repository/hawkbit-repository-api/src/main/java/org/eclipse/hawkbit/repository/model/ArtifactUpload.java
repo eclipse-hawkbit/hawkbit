@@ -9,10 +9,12 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.io.InputStream;
+import java.util.Set;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.RegexChar;
 import org.hibernate.validator.constraints.SafeHtml;
 
 /**
@@ -20,6 +22,9 @@ import org.hibernate.validator.constraints.SafeHtml;
  *
  */
 public class ArtifactUpload {
+
+    public static final Set<RegexChar> ILLEGAL_FILENAME_CHARACTERS = RegexChar.getImmutableCharSet(
+            RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES, RegexChar.QUOTATION_MARKS);
 
     @NotNull
     private final InputStream inputStream;

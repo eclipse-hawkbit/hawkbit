@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class RegexHelper {
 
     public static boolean stringContainsIllegalCharacters(final String stringToCheck,
-            final List<RegexChar> illegalChars) {
+            final Set<RegexChar> illegalChars) {
         final StringBuilder charBuilder = new StringBuilder();
         illegalChars.forEach(character -> charBuilder.append(character.regExp));
         final String regularExpressions = String.format("[%s]", charBuilder.toString());
