@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayoutVersioned;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -32,7 +32,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Pop up layout to display software module metadata.
  */
-public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareModule, SoftwareModuleMetadata> {
+public class SwMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<SoftwareModule, SoftwareModuleMetadata> {
 
     private static final long serialVersionUID = 1L;
 

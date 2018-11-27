@@ -390,7 +390,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("targetId") final String targetId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
-        final TargetMetadata updated = targetManagement.updateMetaData(targetId,
+        final TargetMetadata updated = targetManagement.updateMetadata(targetId,
                 entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(updated));
     }

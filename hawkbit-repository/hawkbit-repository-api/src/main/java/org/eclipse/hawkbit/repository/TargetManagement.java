@@ -778,5 +778,5 @@ public interface TargetManagement {
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    TargetMetadata updateMetaData(@NotEmpty String controllerId, @NotNull MetaData metadata);
+    TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
 }

@@ -54,7 +54,7 @@ public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetail
     }
 
     /**
-     * Populate software module metadata.
+     * Populate distribution set metadata.
      *
      * @param distributionSet
      */
@@ -69,7 +69,6 @@ public class DistributionSetMetadataDetailsLayout extends AbstractMetadataDetail
         if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
             dsMetadataList.forEach(this::setMetadataProperties);
         }
-
     }
 
     @Override
