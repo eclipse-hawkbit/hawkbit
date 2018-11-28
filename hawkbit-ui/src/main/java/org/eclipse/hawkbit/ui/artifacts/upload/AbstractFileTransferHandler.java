@@ -121,7 +121,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
-    protected void setFailureReasonFileIllegalFilename() {
+    protected void setFailureReasonIllegalFilename() {
         setFailureReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
     }
 

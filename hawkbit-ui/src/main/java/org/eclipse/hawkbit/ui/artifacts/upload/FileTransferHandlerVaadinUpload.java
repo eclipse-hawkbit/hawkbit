@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexHelper;
@@ -73,22 +72,16 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadStarted(final StartedEvent event) {
         // reset internal state here because instance is reused for next upload!
         resetState();
-        this.fileUploadId = null;
 
-        assertThatOneSoftwareModuleIsSelected();
-
-        // selected software module at the time of this callback is
-        // considered
-        SoftwareModule softwareModule = null;
-        final Optional<Long> selectedSoftwareModuleId = getUploadState().getSelectedBaseSwModuleId();
-        final Long softwareModuleId = selectedSoftwareModuleId.orElse(null);
-        if (softwareModuleId != null) {
-            softwareModule = softwareModuleManagement.get(softwareModuleId).orElse(null);
-        }
+        final SoftwareModule softwareModule = getSelectedSoftwareModule();
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
 
-        if (getUploadState().isFileInUploadState(this.fileUploadId)) {
+        if (RegexHelper.stringContainsCharacters(event.getFilename(), ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
+            setUploadInterrupted();
+            setFailureReasonIllegalFilename();
+            event.getUpload().interruptUpload();
+        } else if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             setFailureReasonUploadFailed();
             // actual interrupt will happen a bit late so setting the below
             // flag
@@ -108,14 +101,14 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         }
     }
 
-    private void assertThatOneSoftwareModuleIsSelected() {
-        // FileUpload button should be disabled if no SoftwareModul or more
-        // than one is selected!
-        if (getUploadState().isNoSoftwareModuleSelected()) {
-            throw new IllegalStateException("No SoftwareModul selected");
-        } else if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
+    private SoftwareModule getSelectedSoftwareModule() {
+        if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
             throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
         }
+        final long selectedId = getUploadState().getSelectedBaseSwModuleId()
+                .orElseThrow(() -> new IllegalStateException("No SoftwareModul selected"));
+        return softwareModuleManagement.get(selectedId)
+                .orElseThrow(() -> new IllegalStateException("SoftwareModul with unknown ID selected"));
     }
 
     /**
@@ -128,15 +121,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
 
         if (isUploadInterrupted()) {
-            return ByteStreams.nullOutputStream();
-        }
-
-        if (RegexHelper.stringContainsIllegalCharacters(fileName, ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
-            setUploadInterrupted();
-            setFailureReasonFileIllegalFilename();
-            publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.uploadedfile.illegalFilename"), null);
-            publishUploadFinishedEvent(fileUploadId);
-            uiNotification.displayWarning("illegal file name");
             return ByteStreams.nullOutputStream();
         }
 
@@ -230,4 +214,9 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         publishUploadFinishedEvent(fileUploadId);
     }
 
+    @Override
+    protected void resetState() {
+        super.resetState();
+        this.fileUploadId = null;
+    }
 }
