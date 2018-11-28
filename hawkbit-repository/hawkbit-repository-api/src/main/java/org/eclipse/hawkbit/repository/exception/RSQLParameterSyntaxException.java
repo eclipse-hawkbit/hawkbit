@@ -34,6 +34,17 @@ public class RSQLParameterSyntaxException extends AbstractServerRtException {
     }
 
     /**
+     * Creates a new RSQLParameterSyntaxException with
+     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
+     * 
+     * @param message
+     *            the message of the exception
+     */
+    public RSQLParameterSyntaxException(final String message) {
+        super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX);
+    }
+
+    /**
      * Creates a new RSQLSyntaxException with
      * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
      * 
