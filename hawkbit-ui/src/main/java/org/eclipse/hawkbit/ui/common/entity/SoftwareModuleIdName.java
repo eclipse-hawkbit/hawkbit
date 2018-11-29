@@ -26,7 +26,7 @@ public class SoftwareModuleIdName implements Serializable {
 
     /**
      * @param id
-     *            if the {@link SoftwareModule#getId()}
+     *            of the {@link SoftwareModule#getId()}
      * @param name
      *            of the {@link SoftwareModule#getName()}
      * @param version
