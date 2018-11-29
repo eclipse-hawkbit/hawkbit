@@ -276,10 +276,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 softwareModulesThatNeedToBeAssigned);
     }
 
-    private Map<Long, HashSet<SoftwareModuleIdName>> getConsolidatedAssignmentMap(
+    private Map<Long, Set<SoftwareModuleIdName>> getConsolidatedAssignmentMap(
             final DistributionSet distributionSet) {
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
-        final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
+        final Map<Long, Set<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwareList().containsKey(distributionSetIdName)) {
             map = manageDistUIState.getConsolidatedDistSoftwareList().get(distributionSetIdName);
         } else {
@@ -291,14 +291,13 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void addSoftwareModulesToConsolidatedDsAssignmentMap(final DistributionSet distributionSet,
             final Set<SoftwareModule> softwareModules) {
-        final Map<Long, HashSet<SoftwareModuleIdName>> assignmentMap = getConsolidatedAssignmentMap(distributionSet);
+        final Map<Long, Set<SoftwareModuleIdName>> assignmentMap = getConsolidatedAssignmentMap(distributionSet);
         for (final SoftwareModule softwareModule : softwareModules) {
             final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModule);
             final Long smTypeID = softwareModule.getType().getId();
 
-            if (!assignmentMap.containsKey(smTypeID)) {
-                assignmentMap.put(smTypeID, new HashSet<SoftwareModuleIdName>());
-            }
+            assignmentMap.putIfAbsent(smTypeID, new HashSet<SoftwareModuleIdName>());
+
             if (softwareModule.getType().getMaxAssignments() > 1) {
                 // add application
                 assignmentMap.get(smTypeID).add(softwareModuleIdName);
