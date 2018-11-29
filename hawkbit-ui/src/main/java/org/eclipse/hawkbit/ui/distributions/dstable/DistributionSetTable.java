@@ -296,7 +296,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final SoftwareModuleIdName softwareModuleIdName = new SoftwareModuleIdName(softwareModule);
             final Long smTypeID = softwareModule.getType().getId();
 
-            assignmentMap.putIfAbsent(smTypeID, new HashSet<SoftwareModuleIdName>());
+            assignmentMap.computeIfAbsent(smTypeID, key -> new HashSet<SoftwareModuleIdName>());
 
             if (softwareModule.getType().getMaxAssignments() > 1) {
                 // add application
