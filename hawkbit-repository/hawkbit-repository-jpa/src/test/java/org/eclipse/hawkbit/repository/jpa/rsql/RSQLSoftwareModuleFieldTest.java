@@ -92,7 +92,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter software module by type")
+    @Description("Test filter software module by type key")
     public void testFilterByType() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 3);

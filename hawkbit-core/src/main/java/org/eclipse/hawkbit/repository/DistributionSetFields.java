@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
+import java.util.Optional;
+
 /**
  * Describing the fields of the DistributionSet model which can be used in the
  * REST API e.g. for sorting etc.
@@ -59,35 +63,39 @@ public enum DistributionSetFields implements FieldNameProvider {
     /**
      * The metadata.
      */
-    METADATA("metadata", "key", "value");
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String fieldName;
-    private String keyFieldName;
-    private String valueFieldName;
+    private boolean mapField;
+    private Entry<String, String> subEntityMapTuple;
 
     private DistributionSetFields(final String fieldName) {
-        this(fieldName, null, null);
+        this(fieldName, false, null);
     }
 
-    private DistributionSetFields(final String fieldName, final String keyFieldName, final String valueFieldName) {
+    private DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+        this(fieldName, true, subEntityMapTuple);
+    }
+
+    private DistributionSetFields(final String fieldName, final boolean mapField,
+            final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
-        this.keyFieldName = keyFieldName;
-        this.valueFieldName = valueFieldName;
+        this.mapField = mapField;
+        this.subEntityMapTuple = subEntityMapTuple;
     }
 
     @Override
-    public String getValueFieldName() {
-        return valueFieldName;
+    public Optional<Entry<String, String>> getSubEntityMapTuple() {
+        return Optional.ofNullable(subEntityMapTuple);
     }
 
     @Override
-    public String getKeyFieldName() {
-        return keyFieldName;
+    public boolean isMap() {
+        return mapField;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
     }
-
 }
