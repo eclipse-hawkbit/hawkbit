@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -244,10 +243,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
                 return;
             }
             assignSoftwareModulesToDs(softwareModules, ds);
-            final List<SoftwareModuleIdName> softwareModuleIdNames = new ArrayList<>();
-            softwareModules.forEach(sm -> softwareModuleIdNames.add(new SoftwareModuleIdName(sm)));
+
             openConfirmationWindowForAssignment(ds.getName(),
-                    softwareModuleIdNames.toArray(new SoftwareModuleIdName[softwareModuleIdNames.size()]));
+                    softwareModules.stream().map(SoftwareModuleIdName::new)
+                            .toArray(size -> new SoftwareModuleIdName[size]));
         });
     }
 
@@ -269,7 +268,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final DistributionSet distributionSet) {
         addSoftwareModulesToConsolidatedDsAssignmentMap(distributionSet, softwareModules);
 
-        final HashSet<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
+        final Set<SoftwareModuleIdName> softwareModulesThatNeedToBeAssigned = new HashSet<>();
         getConsolidatedAssignmentMap(distributionSet).values()
                 .forEach(softwareModulesThatNeedToBeAssigned::addAll);
 
@@ -360,7 +359,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         });
 
         int count = 0;
-        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
+        for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : manageDistUIState
                 .getAssignedList().entrySet()) {
             count += entry.getValue().size();
         }
@@ -419,7 +418,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private boolean isSoftwareModuleDragged(final Long distId, final SoftwareModule sm) {
-        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
+        for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : manageDistUIState
                 .getAssignedList().entrySet()) {
             if (!distId.equals(entry.getKey().getId())) {
                 continue;

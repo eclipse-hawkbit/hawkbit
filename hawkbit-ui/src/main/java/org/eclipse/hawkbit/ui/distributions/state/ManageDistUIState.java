@@ -37,7 +37,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
 
     private final ManageSoftwareModuleFilters softwareModuleFilters;
 
-    private final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = new HashMap<>();
+    private final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = new HashMap<>();
 
     private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
@@ -91,7 +91,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
      *
      * @return the assignedList
      */
-    public Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> getAssignedList() {
+    public Map<DistributionSetIdName, Set<SoftwareModuleIdName>> getAssignedList() {
         return assignedList;
     }
 
