@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -78,7 +80,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             context.setSyntaxError(false);
             suggestionContext.getSuggestions().addAll(getLogicalOperatorSuggestion(rsqlQuery));
         } catch (final RSQLParameterSyntaxException | RSQLParserException ex) {
-            setExceptionDetails(new Exception(ex.getCause().getCause()), expectedTokens);
+            setExceptionDetails(rsqlQuery, new Exception(ex.getCause().getCause()), expectedTokens);
             errorContext.setErrorMessage(getCustomMessage(ex.getCause().getMessage(), expectedTokens));
             suggestionContext.setSuggestions(expectedTokens);
             LOGGER.trace("Syntax exception on parsing :", ex);
@@ -94,8 +96,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     private static Collection<? extends SuggestToken> getLogicalOperatorSuggestion(final String rsqlQuery) {
         if (!rsqlQuery.endsWith(" ")) {
             return Collections.emptyList();
-        }
-        if (rsqlQuery.endsWith(" ")) {
+        } else {
             final int currentQueryLength = rsqlQuery.length();
             // only return and/or suggestion when there is a space at the end
             final Collection<String> tokenImages = TokenDescription.getTokenImage(TokenDescription.LOGICAL_OP);
@@ -106,18 +107,19 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             }
             return logicalOps;
         }
-        return Collections.emptyList();
     }
 
-    private static void setExceptionDetails(final Exception ex, final List<SuggestToken> expectedTokens) {
-        expectedTokens.addAll(getNextTokens(ex));
-    }
-
-    private static List<SuggestToken> getNextTokens(final Exception e) {
-        final ParseException parseException = findParseException(e);
+    private static void setExceptionDetails(final String rsqlQuery, final Exception ex,
+            final List<SuggestToken> expectedTokens) {
+        final ParseException parseException = findParseException(ex);
         if (parseException == null) {
-            return Collections.emptyList();
+            expectedTokens.addAll(getComparatorOperatorSuggestions(rsqlQuery));
+        } else {
+            expectedTokens.addAll(getNextTokens(parseException));
         }
+    }
+
+    private static List<SuggestToken> getNextTokens(final ParseException parseException) {
         final List<SuggestToken> listTokens = new ArrayList<>();
         final ParseExceptionWrapper parseExceptionWrapper = new ParseExceptionWrapper(parseException);
         final int[][] expectedTokenSequence = parseExceptionWrapper.getExpectedTokenSequence();
@@ -144,6 +146,22 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             addSuggestionOnTokenImage(listTokens, nextTokenBeginColumn, currentTokenEndColumn, is);
         }
         return listTokens;
+    }
+
+    private static List<SuggestToken> getComparatorOperatorSuggestions(final String rsqlQuery) {
+        // only return comparator operators suggestions when there is a '=' or
+        // '!' symbol at the end
+        final String mapKeyOperatorPattern = "(\\w+)\\.\\w+[=!]{1}$";
+        final Matcher mapKeyOperatorMatcher = Pattern.compile(mapKeyOperatorPattern).matcher(rsqlQuery);
+
+        if (mapKeyOperatorMatcher.find() && FieldNameDescription.isMap(mapKeyOperatorMatcher.group(1))) {
+            final int currentQueryLength = rsqlQuery.length() - 1;
+            final Collection<String> tokenImages = TokenDescription.getTokenImage(TokenDescription.COMPARATOR);
+            return tokenImages.stream().map(tokenImage -> new SuggestToken(currentQueryLength,
+                    currentQueryLength + tokenImage.length(), null, tokenImage)).collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 
     private static void addSuggestionOnTokenImage(final List<SuggestToken> listTokens, final int nextTokenBeginColumn,
@@ -179,7 +197,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     }
 
     private static boolean shouldSuggestDotToken(final String currentTokenImageName, final boolean containsDot) {
-        return !containsDot && FieldNameDescription.hasSubEntries(currentTokenImageName);
+        return !containsDot && (FieldNameDescription.hasSubEntries(currentTokenImageName)
+                || FieldNameDescription.isMap(currentTokenImageName));
     }
 
     private static boolean shouldSuggestTopLevelFieldNames(final String currentTokenImageName,
@@ -293,6 +312,12 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             return Arrays.stream(TargetFields.values())
                     .filter(field -> field.toString().equalsIgnoreCase(finalTmpTokenName))
                     .map(TargetFields::getSubEntityAttributes).flatMap(List::stream).count() > 0;
+        }
+
+        private static boolean isMap(final String tokenImageName) {
+            return Arrays.stream(TargetFields.values())
+                    .filter(field -> field.toString().equalsIgnoreCase(tokenImageName)).findFirst()
+                    .map(TargetFields::isMap).orElse(false);
         }
 
         private static List<SuggestToken> toTopSuggestToken(final int beginToken, final int endToken,

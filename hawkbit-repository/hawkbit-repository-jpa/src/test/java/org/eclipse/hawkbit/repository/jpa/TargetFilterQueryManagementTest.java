@@ -81,7 +81,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(1234L, set.getId()),
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(NOT_EXIST_IDL, set.getId()),
                 "TargetFilterQuery");
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL),
@@ -325,16 +325,16 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement.updateAutoAssignDS(tfq2.getId(), distributionSet.getId());
 
         // check if find works for two
-        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(PageRequest.of(0, 500),
-                distributionSet.getId(), null);
+        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(PageRequest.of(0, 500), distributionSet.getId(),
+                null);
         assertThat(2L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
         Iterator<TargetFilterQuery> iterator = tfqList.iterator();
         assertEquals("Returns correct target filter query 1", tfq.getId(), iterator.next().getId());
         assertEquals("Returns correct target filter query 2", tfq2.getId(), iterator.next().getId());
 
         // check if find works with name filter
-        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(PageRequest.of(0, 500),
-                distributionSet.getId(), "name==" + filterName);
+        tfqList = targetFilterQueryManagement.findByAutoAssignDSAndRsql(PageRequest.of(0, 500), distributionSet.getId(),
+                "name==" + filterName);
         assertThat(1L).as("Target filter query count").isEqualTo(tfqList.getTotalElements());
 
         assertEquals("Returns correct target filter query", tfq2.getId(), tfqList.iterator().next().getId());

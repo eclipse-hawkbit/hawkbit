@@ -132,7 +132,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     private static byte[] writeClassHeader(final Class<?> clazz) {
         final EventType clazzEventType = EventType.from(clazz);
         if (clazzEventType == null) {
-            LOG.error("There is no mapping to EventType for the given clazz {}", clazzEventType);
+            LOG.error("There is no mapping to EventType for the given class {}", clazz);
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
         @SuppressWarnings("unchecked")

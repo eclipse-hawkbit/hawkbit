@@ -36,34 +36,27 @@ public enum TargetFilterQueryFields implements FieldNameProvider {
 
     private final String fieldName;
     private List<String> subEntityAttributes;
-    private boolean mapField;
 
-    TargetFilterQueryFields(final String fieldName) {
-        this(fieldName, false, Collections.emptyList());
+    private TargetFilterQueryFields(final String fieldName) {
+        this(fieldName, Collections.emptyList());
     }
 
-    TargetFilterQueryFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, false, Arrays.asList(subEntityAttribues));
+    private TargetFilterQueryFields(final String fieldName, final String... subEntityAttribues) {
+        this(fieldName, Arrays.asList(subEntityAttribues));
     }
 
-    TargetFilterQueryFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues) {
+    private TargetFilterQueryFields(final String fieldName, final List<String> subEntityAttribues) {
         this.fieldName = fieldName;
-        this.mapField = mapField;
         this.subEntityAttributes = subEntityAttribues;
-    }
-
-    @Override
-    public List<String> getSubEntityAttributes() {
-        return subEntityAttributes;
-    }
-
-    @Override
-    public boolean isMap() {
-        return mapField;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
+    }
+
+    @Override
+    public List<String> getSubEntityAttributes() {
+        return subEntityAttributes;
     }
 }

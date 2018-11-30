@@ -52,7 +52,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL), "SoftwareModuleType");
 
         verifyThrownExceptionBy(
-                () -> softwareModuleTypeManagement.update(entityFactory.softwareModuleType().update(1234L)),
+                () -> softwareModuleTypeManagement.update(entityFactory.softwareModuleType().update(NOT_EXIST_IDL)),
                 "SoftwareModuleType");
     }
 

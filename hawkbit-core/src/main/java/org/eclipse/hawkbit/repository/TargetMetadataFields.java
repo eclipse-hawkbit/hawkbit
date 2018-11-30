@@ -25,7 +25,7 @@ public enum TargetMetadataFields implements FieldNameProvider {
 
     private final String fieldName;
 
-    TargetMetadataFields(final String fieldName) {
+    private TargetMetadataFields(final String fieldName) {
         this.fieldName = fieldName;
     }
 

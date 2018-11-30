@@ -395,7 +395,6 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds)
             throws Exception {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
-        assignDistributionSet(ds.getId(), target.getControllerId());
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
         sendDeploymentActionFeedback(target, action,

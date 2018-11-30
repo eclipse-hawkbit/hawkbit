@@ -37,7 +37,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
 
     private final ManageSoftwareModuleFilters softwareModuleFilters;
 
-    private final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = new HashMap<>();
+    private final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = new HashMap<>();
 
     private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
@@ -65,7 +65,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
 
     private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<>();
 
-    private final Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<>();
+    private final Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<>();
 
     private boolean noDataAvilableSwModule;
 
@@ -91,7 +91,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
      *
      * @return the assignedList
      */
-    public Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> getAssignedList() {
+    public Map<DistributionSetIdName, Set<SoftwareModuleIdName>> getAssignedList() {
         return assignedList;
     }
 
@@ -201,7 +201,7 @@ public class ManageDistUIState implements ManagementEntityState, Serializable {
         this.noDataAvailableDist = noDataAvailableDist;
     }
 
-    public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwareList() {
+    public Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> getConsolidatedDistSoftwareList() {
         return consolidatedDistSoftwarewList;
     }
 

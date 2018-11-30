@@ -884,7 +884,8 @@ public class TestdataFactory {
             final String descriptionPrefix, final Long lastTargetQuery) {
 
         return targetManagement.create(IntStream.range(0, numberOfTargets)
-                .mapToObj(i -> entityFactory.target().create().controllerId(controllerIdPrefix + i)
+                .mapToObj(i -> entityFactory.target().create()
+                        .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery))
                 .collect(Collectors.toList()));
     }

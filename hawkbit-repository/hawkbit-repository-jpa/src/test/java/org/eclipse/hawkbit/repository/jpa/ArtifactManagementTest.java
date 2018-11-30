@@ -77,8 +77,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> artifactManagement.create(IOUtils.toInputStream(artifactData, "UTF-8"),
                 NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize), "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> artifactManagement.create(IOUtils.toInputStream(artifactData, "UTF-8"), 1234L,
-                "xxx", false, artifactSize), "SoftwareModule");
+        verifyThrownExceptionBy(() -> artifactManagement.create(IOUtils.toInputStream(artifactData, "UTF-8"),
+                NOT_EXIST_IDL, "xxx", false, artifactSize), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
 
@@ -114,7 +114,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
             createArtifactForSoftwareModule("file11", sm.getId(), artifactSize, inputStream2);
             createArtifactForSoftwareModule("file12", sm.getId(), artifactSize, inputStream3);
-            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream4);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
+                    inputStream4);
 
             assertThat(artifact1).isInstanceOf(Artifact.class);
             assertThat(artifact1.getSoftwareModule().getId()).isEqualTo(sm.getId());
@@ -263,7 +264,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                 final InputStream inputStream2 = new RandomGeneratedInputStream(artifactSize)) {
 
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
-            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
+                    inputStream2);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
 
@@ -271,16 +273,18 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifact2.getId()).isNotNull();
             assertThat(((JpaArtifact) artifact1).getSha1Hash()).isNotEqualTo(((JpaArtifact) artifact2).getSha1Hash());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                    .isNotNull();
+            assertThat(
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
+                            .isNotNull();
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
                             .isNotNull();
 
             artifactManagement.delete(artifact1.getId());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                    .isNull();
+            assertThat(
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
+                            .isNull();
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
                             .isNotNull();
@@ -310,22 +314,26 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
                 final InputStream inputStream2 = new ByteArrayInputStream(randomBytes)) {
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
-            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
+                    inputStream2);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
             assertThat(artifact1.getId()).isNotNull();
             assertThat(artifact2.getId()).isNotNull();
             assertThat(((JpaArtifact) artifact1).getSha1Hash()).isEqualTo(((JpaArtifact) artifact2).getSha1Hash());
 
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                    .isNotNull();
+            assertThat(
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
+                            .isNotNull();
             artifactManagement.delete(artifact1.getId());
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                    .isNotNull();
+            assertThat(
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
+                            .isNotNull();
 
             artifactManagement.delete(artifact2.getId());
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                    .isNull();
+            assertThat(
+                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
+                            .isNull();
         }
     }
 

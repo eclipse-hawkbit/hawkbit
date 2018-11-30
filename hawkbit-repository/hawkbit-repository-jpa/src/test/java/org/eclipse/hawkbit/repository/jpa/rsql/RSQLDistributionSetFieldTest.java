@@ -112,7 +112,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter distribution set by tag")
+    @Description("Test filter distribution set by tag name")
     public void testFilterByTag() {
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==Tag1", 2);
         // does not include untagged sets
@@ -124,7 +124,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter distribution set by type")
+    @Description("Test filter distribution set by type key")
     public void testFilterByType() {
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==noExist*", 0);
@@ -133,7 +133,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("")
+    @Description("Test filter distribution set by metadata")
     public void testFilterByMetadata() {
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==*v*", 2);

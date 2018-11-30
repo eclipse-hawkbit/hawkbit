@@ -72,7 +72,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
                 testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), Arrays.asList(NOT_EXIST_IDL)),
                 "SoftwareModuleType");
 
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(1234L,
+        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(NOT_EXIST_IDL,
                 Arrays.asList(osType.getId())), "DistributionSetType");
         verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(
                 testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), Arrays.asList(NOT_EXIST_IDL)),

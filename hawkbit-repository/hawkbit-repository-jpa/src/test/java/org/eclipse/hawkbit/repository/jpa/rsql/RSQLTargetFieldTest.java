@@ -49,6 +49,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         attributes.put("revision", "1.1");
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), attributes, null);
         target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target.getControllerId(), LOCALHOST);
+        createTargetMetadata(target.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "metaValue"));
 
         target2 = targetManagement
                 .create(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
@@ -56,6 +57,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         Thread.sleep(1);
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes, null);
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target2.getControllerId(), LOCALHOST);
+        createTargetMetadata(target2.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "value"));
 
         final Target target3 = testdataFactory.createTarget("targetId1235");
         final Target target4 = testdataFactory.createTarget("targetId1236");
@@ -168,7 +170,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter target by tag")
+    @Description("Test filter target by tag name")
     public void testFilterByTag() {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 2);
@@ -192,6 +194,18 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target2.getLastTargetQuery(), 0);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=le=${NOW_TS}", 2);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=${OVERDUE_TS}", 2);
+    }
+
+    @Test
+    @Description("Test filter target by metadata")
+    public void testFilterByMetadata() {
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==*v*", 2);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==noExist*", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".notExist==metaValue", 0);
+
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
