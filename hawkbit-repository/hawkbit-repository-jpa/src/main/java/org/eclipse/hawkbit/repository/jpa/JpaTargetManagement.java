@@ -812,4 +812,9 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository.existsByControllerId(controllerId);
     }
 
+    @Override
+    public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
+        return targetRepository.findByRequestControllerAttributesIsTrue(pageReq);
+    }
+
 }

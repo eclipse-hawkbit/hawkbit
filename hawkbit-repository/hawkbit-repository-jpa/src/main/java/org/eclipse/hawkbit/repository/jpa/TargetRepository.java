@@ -178,6 +178,18 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * retrieves {@link Target}s where
+     * {@link JpaTarget#isRequestControllerAttributes()}.
+     * 
+     * @param pageReq
+     *            page parameter
+     *
+     * @return the found {@link Target}s
+     * 
+     */
+    Page<Target> findByRequestControllerAttributesIsTrue(Pageable pageable);
+
+    /**
      * Counts number of targets with given distribution set Id.
      *
      * @param distId

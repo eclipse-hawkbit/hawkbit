@@ -658,6 +658,19 @@ public interface TargetManagement {
     boolean isControllerAttributesRequested(@NotEmpty String controllerId);
 
     /**
+     * Retrieves {@link Target}s where
+     * {@link #isControllerAttributesRequested(String)}.
+     * 
+     * @param pageReq
+     *            page parameter
+     *
+     * @return the found {@link Target}s
+     * 
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageReq);
+
+    /**
      * Verifies that {@link Target} with given controller ID exists in the
      * repository.
      * 

@@ -63,6 +63,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuild
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
@@ -70,6 +71,10 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -99,7 +104,6 @@ import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
@@ -126,12 +130,11 @@ import com.google.common.collect.Maps;
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository.jpa" })
+@EnableJpaRepositories("org.eclipse.hawkbit.repository.jpa")
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
 @Configuration
-@ComponentScan
 @EnableScheduling
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
@@ -144,6 +147,53 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
             final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    PauseRolloutGroupAction pauseRolloutGroupAction(final RolloutManagement rolloutManagement,
+            final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
+        return new PauseRolloutGroupAction(rolloutManagement, rolloutGroupRepository, systemSecurityContext);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction(
+            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement,
+            final SystemSecurityContext systemSecurityContext) {
+        return new StartNextGroupRolloutGroupSuccessAction(rolloutGroupRepository, deploymentManagement,
+                systemSecurityContext);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ThresholdRolloutGroupErrorCondition thresholdRolloutGroupErrorCondition(final ActionRepository actionRepository) {
+        return new ThresholdRolloutGroupErrorCondition(actionRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ThresholdRolloutGroupSuccessCondition thresholdRolloutGroupSuccessCondition(
+            final ActionRepository actionRepository) {
+        return new ThresholdRolloutGroupSuccessCondition(actionRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    SystemManagementCacheKeyGenerator systemManagementCacheKeyGenerator() {
+        return new SystemManagementCacheKeyGenerator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    AfterTransactionCommitDefaultServiceExecutor afterTransactionCommitDefaultServiceExecutor() {
+        return new AfterTransactionCommitDefaultServiceExecutor();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    NoCountPagingRepository noCountPagingRepository() {
+        return new NoCountPagingRepository();
     }
 
     @Bean

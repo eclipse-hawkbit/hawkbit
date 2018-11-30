@@ -14,19 +14,19 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Threshold to calculate if rollout group success condition is reached and the
  * next rollout group can get started.
  */
-@Component("thresholdRolloutGroupSuccessCondition")
 public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
 
-    @Autowired
-    private ActionRepository actionRepository;
+    private final ActionRepository actionRepository;
+
+    public ThresholdRolloutGroupSuccessCondition(final ActionRepository actionRepository) {
+        this.actionRepository = actionRepository;
+    }
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
