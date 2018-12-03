@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -204,6 +205,21 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
+    }
+    
+    @Test
+    @Description("Verifies that artifacts invailde filename cannot be uploaded to prevent cross site scripting.")
+    public void uploadArtifactFailsIfFilenameInvalide() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
+        final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
+
+        final byte[] randomBytes = randomBytes(5 * 1024);
+        final MockMultipartFile file = new MockMultipartFile("file", illegalFilename, null, randomBytes);
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("The filename might contain unsafe HTML code.")));
     }
 
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {

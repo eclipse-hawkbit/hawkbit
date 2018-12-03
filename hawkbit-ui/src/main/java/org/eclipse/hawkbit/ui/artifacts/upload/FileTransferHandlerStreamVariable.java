@@ -64,7 +64,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (RegexHelper.stringContainsCharacters(event.getFileName(), ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
+        if (RegexHelper.stringContainsCharacters(event.getFileName(), ArtifactUpload.getIllegalFilenameCharacters())) {
             LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
             interruptUploadDueToIllegalFilename();
         } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {

@@ -17,17 +17,17 @@ import java.util.Set;
  * Regular expression characters providing their encoded and their readable
  * expression
  */
-public class RegexChar {
+public final class RegexChar {
 
-    public static RegexChar WHITESPACE = new RegexChar("\\s", "whitespace");
-    public static RegexChar DIGITS = new RegexChar("0-9", "digits");
-    public static RegexChar QUOTATION_MARKS = new RegexChar("'\"", "quotation marks");
-    public static RegexChar SLASHES = new RegexChar("\\/\\\\", "slashes");
-    public static RegexChar GREATER_THAN = new RegexChar(">");
-    public static RegexChar LESS_THAN = new RegexChar("<");
-    public static RegexChar EQUALS = new RegexChar("=");
-    public static RegexChar EXCLAMATION_MARK = new RegexChar("!");
-    public static RegexChar QUESRION_MARK = new RegexChar("?");
+    public final static RegexChar WHITESPACE = new RegexChar("\\s", "whitespace");
+    public final static RegexChar DIGITS = new RegexChar("0-9", "digits");
+    public final static RegexChar QUOTATION_MARKS = new RegexChar("'\"", "quotation marks");
+    public final static RegexChar SLASHES = new RegexChar("\\/\\\\", "slashes");
+    public final static RegexChar GREATER_THAN = new RegexChar(">");
+    public final static RegexChar LESS_THAN = new RegexChar("<");
+    public final static RegexChar EQUALS_SYMBOL = new RegexChar("=");
+    public final static RegexChar EXCLAMATION_MARK = new RegexChar("!");
+    public final static RegexChar QUESRION_MARK = new RegexChar("?");
     
     public static Set<RegexChar> getImmutableCharSet(final RegexChar... chars) {
         return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(chars)));

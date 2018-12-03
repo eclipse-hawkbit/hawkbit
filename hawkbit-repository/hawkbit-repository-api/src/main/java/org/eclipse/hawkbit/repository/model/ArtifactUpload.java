@@ -23,8 +23,13 @@ import org.hibernate.validator.constraints.SafeHtml;
  */
 public class ArtifactUpload {
 
-    public static final Set<RegexChar> ILLEGAL_FILENAME_CHARACTERS = RegexChar.getImmutableCharSet(
+    protected static final Set<RegexChar> ILLEGAL_FILENAME_CHARACTERS = RegexChar
+            .getImmutableCharSet(
             RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
+
+    public static Set<RegexChar> getIllegalFilenameCharacters() {
+        return ILLEGAL_FILENAME_CHARACTERS;
+    }
 
     @NotNull
     private final InputStream inputStream;

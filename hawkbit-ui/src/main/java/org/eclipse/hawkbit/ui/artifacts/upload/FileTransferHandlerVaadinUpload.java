@@ -85,7 +85,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             LOG.info("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
-            if (RegexHelper.stringContainsCharacters(event.getFilename(), ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
+            if (RegexHelper.stringContainsCharacters(event.getFilename(),
+                    ArtifactUpload.getIllegalFilenameCharacters())) {
                 LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
                         fileUploadId);
                 interruptUploadDueToIllegalFilename();
