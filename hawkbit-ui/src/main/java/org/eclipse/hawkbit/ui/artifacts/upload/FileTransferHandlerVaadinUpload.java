@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.RegexHelper;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,25 +76,23 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
 
-        if (RegexHelper.stringContainsCharacters(event.getFilename(), ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
-            setUploadInterrupted();
-            setFailureReasonIllegalFilename();
-            event.getUpload().interruptUpload();
-        } else if (getUploadState().isFileInUploadState(this.fileUploadId)) {
-            setFailureReasonUploadFailed();
+        if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             // actual interrupt will happen a bit late so setting the below
             // flag
-            setDuplicateFile();
+            interruptUploadDueToDuplicateFile();
             event.getUpload().interruptUpload();
         } else {
             LOG.info("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
-            if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
+            if (RegexHelper.stringContainsCharacters(event.getFilename(), ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS)) {
+                LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
+                        fileUploadId);
+                interruptUploadDueToIllegalFilename();
+                event.getUpload().interruptUpload();
+            }else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
                 LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
-                getUploadState().updateFileUploadProgress(fileUploadId,
-                        new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-                setDuplicateFile();
+                interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();
             }
         }
@@ -136,11 +133,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             LOG.error("Creating piped Stream failed {}.", e);
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
-            setFailureReasonUploadFailed();
-            setUploadInterrupted();
-            getUploadState().updateFileUploadProgress(fileUploadId,
-                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-            uiNotification.displayWarning("try again");
+            interruptUploadDueToUploadFailed();
+            publishUploadFailedAndFinishedEvent(fileUploadId, e);
             return ByteStreams.nullOutputStream();
         }
         return outputStream;
@@ -155,8 +149,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void updateProgress(final long readBytes, final long contentLength) {
         if (readBytes > maxSize || contentLength > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            setFailureReasonFileSizeExceeded(maxSize);
-            setUploadInterrupted();
+            interruptUploadDueToFileSizeExceeded(maxSize);
             return;
         }
         if (isUploadInterrupted()) {
@@ -204,14 +197,10 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadFailed(final FailedEvent event) {
         assertStateConsistency(fileUploadId, event.getFilename());
 
-        if (isDuplicateFile()) {
-            publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
-                    event.getReason());
-        } else {
-            publishUploadFailedEvent(fileUploadId, event.getReason());
+        if (!isUploadInterrupted()) {
+            interruptUploadDueToUploadFailed();
         }
-        setUploadInterrupted();
-        publishUploadFinishedEvent(fileUploadId);
+        publishUploadFailedAndFinishedEvent(fileUploadId, event.getReason());
     }
 
     @Override

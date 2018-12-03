@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class RegexChar {
 
-    public static RegexChar WHITESPACE = new RegexChar("/s", "whitespace");
+    public static RegexChar WHITESPACE = new RegexChar("\\s", "whitespace");
     public static RegexChar DIGITS = new RegexChar("0-9", "digits");
     public static RegexChar QUOTATION_MARKS = new RegexChar("'\"", "quotation marks");
     public static RegexChar SLASHES = new RegexChar("\\/\\\\", "slashes");

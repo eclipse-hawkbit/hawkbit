@@ -19,7 +19,7 @@ public class RegexHelper {
     public static boolean stringContainsCharacters(final String stringToCheck, final Set<RegexChar> characters) {
         final StringBuilder charBuilder = new StringBuilder();
         characters.forEach(character -> charBuilder.append(character.regExp));
-        final String regularExpressions = String.format("[%s]", charBuilder.toString());
+        final String regularExpressions = String.format(".*[%s]+.*", charBuilder.toString());
         return Pattern.matches(regularExpressions, stringToCheck);
     }
 

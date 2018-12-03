@@ -47,8 +47,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFileTransferHandler.class);
 
-    private volatile boolean duplicateFile;
-
     private volatile boolean uploadInterrupted;
 
     private volatile String failureReason;
@@ -71,16 +69,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         this.uiNotification = SpringContextHelper.getBean(UINotification.class);
     }
 
-    protected boolean isDuplicateFile() {
-        return duplicateFile;
-    }
-
-    protected void setDuplicateFile() {
-        uploadInterrupted = true;
-        duplicateFile = true;
-    }
-
-    protected void setUploadInterrupted() {
+    private void setUploadInterrupted() {
         uploadInterrupted = true;
     }
 
@@ -89,7 +78,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected void resetState() {
-        duplicateFile = false;
         uploadInterrupted = false;
         failureReason = null;
     }
@@ -110,18 +98,27 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     private void setFailureReason(final String failureReason) {
+        setUploadInterrupted();
         this.failureReason = failureReason;
     }
 
-    protected void setFailureReasonUploadFailed() {
+    protected void interruptUploadDueToUploadFailed() {
+        setUploadInterrupted();
         setFailureReason(i18n.getMessage("message.upload.failed"));
     }
 
-    protected void setFailureReasonFileSizeExceeded(final long maxSize) {
+    protected void interruptUploadDueToDuplicateFile() {
+        setUploadInterrupted();
+        setFailureReason(i18n.getMessage("message.no.duplicateFiles"));
+    }
+
+    protected void interruptUploadDueToFileSizeExceeded(final long maxSize) {
+        setUploadInterrupted();
         setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
-    protected void setFailureReasonIllegalFilename() {
+    protected void interruptUploadDueToIllegalFilename() {
+        setUploadInterrupted();
         setFailureReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
     }
 
@@ -176,19 +173,17 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, fileUploadId.getSoftwareModuleId()));
     }
 
-    protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final String failureReason,
+    protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId,
             final Exception uploadException) {
         LOG.info("Upload failed for file {} due to {}", fileUploadId,
-                StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
+                "reason: " + failureReason + " exception: " + uploadException.getMessage());
+
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
-                StringUtils.isBlank(failureReason) ? uploadException.getMessage() : failureReason);
+                StringUtils.isBlank(failureReason) ? i18n.getMessage("message.upload.failed") : failureReason);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, fileUploadProgress);
-    }
-
-    protected void publishUploadFailedEvent(final FileUploadId fileUploadId, final Exception uploadException) {
-        publishUploadFailedEvent(fileUploadId, failureReason, uploadException);
+        publishUploadFinishedEvent(fileUploadId);
     }
 
     protected void assertStateConsistency(final FileUploadId fileUploadId, final String filenameExtractedFromEvent) {
@@ -239,9 +234,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 UI.setCurrent(vaadinUi);
                 streamToRepository();
             } catch (final RuntimeException e) {
-                setFailureReasonUploadFailed();
-                publishUploadFailedEvent(fileUploadId, i18n.getMessage("message.upload.failed"), e);
-                publishUploadFinishedEvent(fileUploadId);
+                interruptUploadDueToUploadFailed();
+                publishUploadFailedAndFinishedEvent(fileUploadId, e);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {
                 tryToCloseIOStream(inputStream);
