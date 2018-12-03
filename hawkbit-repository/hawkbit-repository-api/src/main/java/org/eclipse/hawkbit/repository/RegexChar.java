@@ -19,15 +19,15 @@ import java.util.Set;
  */
 public final class RegexChar {
 
-    public final static RegexChar WHITESPACE = new RegexChar("\\s", "whitespace");
-    public final static RegexChar DIGITS = new RegexChar("0-9", "digits");
-    public final static RegexChar QUOTATION_MARKS = new RegexChar("'\"", "quotation marks");
-    public final static RegexChar SLASHES = new RegexChar("\\/\\\\", "slashes");
-    public final static RegexChar GREATER_THAN = new RegexChar(">");
-    public final static RegexChar LESS_THAN = new RegexChar("<");
-    public final static RegexChar EQUALS_SYMBOL = new RegexChar("=");
-    public final static RegexChar EXCLAMATION_MARK = new RegexChar("!");
-    public final static RegexChar QUESRION_MARK = new RegexChar("?");
+    public static final RegexChar WHITESPACE = new RegexChar("\\s", "whitespace");
+    public static final RegexChar DIGITS = new RegexChar("0-9", "digits");
+    public static final RegexChar QUOTATION_MARKS = new RegexChar("'\"", "quotation marks");
+    public static final RegexChar SLASHES = new RegexChar("\\/\\\\", "slashes");
+    public static final RegexChar GREATER_THAN = new RegexChar(">");
+    public static final RegexChar LESS_THAN = new RegexChar("<");
+    public static final RegexChar EQUALS_SYMBOL = new RegexChar("=");
+    public static final RegexChar EXCLAMATION_MARK = new RegexChar("!");
+    public static final RegexChar QUESRION_MARK = new RegexChar("?");
     
     public static Set<RegexChar> getImmutableCharSet(final RegexChar... chars) {
         return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(chars)));
@@ -69,5 +69,4 @@ public final class RegexChar {
     public int hashCode() {
         return regExp.hashCode();
     }
-
 }

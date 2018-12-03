@@ -175,8 +175,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId,
             final Exception uploadException) {
-        LOG.info("Upload failed for file {} due to {}", fileUploadId,
-                "reason: " + failureReason + " exception: " + uploadException.getMessage());
+        LOG.info("Upload failed for file {} due to reason: {}, exception: {}", fileUploadId, failureReason,
+                uploadException.getMessage());
 
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,

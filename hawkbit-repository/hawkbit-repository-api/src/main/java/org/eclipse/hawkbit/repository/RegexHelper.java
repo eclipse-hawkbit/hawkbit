@@ -16,6 +16,10 @@ import java.util.regex.Pattern;
  */
 public class RegexHelper {
 
+    private RegexHelper() {
+
+    }
+
     public static boolean stringContainsCharacters(final String stringToCheck, final Set<RegexChar> characters) {
         final StringBuilder charBuilder = new StringBuilder();
         characters.forEach(character -> charBuilder.append(character.regExp));

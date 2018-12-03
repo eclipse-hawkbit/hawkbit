@@ -27,10 +27,6 @@ public class ArtifactUpload {
             .getImmutableCharSet(
             RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
 
-    public static Set<RegexChar> getIllegalFilenameCharacters() {
-        return ILLEGAL_FILENAME_CHARACTERS;
-    }
-
     @NotNull
     private final InputStream inputStream;
 
@@ -53,7 +49,7 @@ public class ArtifactUpload {
     /**
      * Constructor
      * 
-     * @param stream
+     * @param inputStream
      *            to read from for artifact binary
      * @param moduleId
      *            to assign the new artifact to
@@ -73,7 +69,7 @@ public class ArtifactUpload {
     /**
      * Constructor
      * 
-     * @param stream
+     * @param inputStream
      *            to read from for artifact binary
      * @param moduleId
      *            to assign the new artifact to
@@ -102,6 +98,10 @@ public class ArtifactUpload {
         this.overrideExisting = overrideExisting;
         this.contentType = contentType;
         this.filesize = filesize;
+    }
+
+    public static Set<RegexChar> getIllegalFilenameCharacters() {
+        return ILLEGAL_FILENAME_CHARACTERS;
     }
 
     public InputStream getInputStream() {
