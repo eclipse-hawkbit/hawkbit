@@ -82,11 +82,8 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -123,7 +120,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private final EntityManager entityManager;
-    private final ActionRepository actionRepository;
+    protected final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -133,7 +130,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final ApplicationContext applicationContext;
     private final AfterTransactionCommitExecutor afterCommit;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final PlatformTransactionManager txManager;
+    protected final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -142,7 +139,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TenantAware tenantAware;
     private final Database database;
 
-    JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
+    protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
@@ -312,7 +309,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels the
-        targetIds.forEach(tIds -> actionRepository.switchStatus(Status.CANCELED, tIds, false, Status.SCHEDULED));
+        targetIds.forEach(this::cancelInactiveScheduledActionsForTargets);
 
         // set assigned distribution set and TargetUpdateStatus
         final String currentUser;
@@ -349,6 +346,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
                 targetManagement);
+    }
+
+    @Override
+    public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
+        actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
     }
 
     /**
@@ -439,11 +441,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
             final Long distributionSetId, final Long rolloutGroupParentId, final int limit) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("startScheduledActions-" + rolloutId);
-        def.setReadOnly(false);
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(status -> {
+        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
                     rolloutGroupParentId, limit);
 
@@ -796,5 +794,4 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return e.getMessage();
         }
     }
-
 }

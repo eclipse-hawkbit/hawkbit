@@ -207,6 +207,16 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 
+    @Query("SELECT a.id FROM JpaAction a WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
+    List<Long> findByTargetIdInAndActiveIsAndActionStatusAndDistributionSetNotRequiredMigrationStep(
+            @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
+            @Param("currentStatus") Action.Status currentStatus);
+
+    @Modifying
+    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds")
+    void switchStatusForActions(@Param("statusToSet") Action.Status statusToSet,
+            @Param("actionIds") List<Long> actionIds);
+
     /**
      *
      * Retrieves all {@link Action}s which are active and referring to the given

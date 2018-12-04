@@ -18,6 +18,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Utility class for deployment related topics.
@@ -88,4 +93,12 @@ public final class DeploymentHelper {
         targetRepository.save(target);
     }
 
+    public static <T> T runInNewTransaction(final PlatformTransactionManager txManager, final String transactionName,
+            final TransactionCallback<T> action) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName(transactionName);
+        def.setReadOnly(false);
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(action);
+    }
 }

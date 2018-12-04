@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -410,6 +411,17 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Action forceTargetAction(long actionId);
+
+    /**
+     * Sets the {@link Status} of inactive scheduled {@link Action}s for the
+     * specified {@link Target}s to CANCELED
+     *
+     * @param targetIds
+     *            ids of the {@link Target}s the actions belong to
+     * 
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void cancelInactiveScheduledActionsForTargets(List<Long> targetIds);
 
     /**
      * Starts all scheduled actions of an RolloutGroup parent.

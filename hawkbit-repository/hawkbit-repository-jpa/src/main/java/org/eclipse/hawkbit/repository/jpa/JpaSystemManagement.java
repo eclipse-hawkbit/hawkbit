@@ -46,11 +46,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -207,12 +204,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("initial-tenant-creation");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        def.setReadOnly(false);
-        return systemSecurityContext
-                .runAsSystemAsTenant(() -> new TransactionTemplate(txManager, def).execute(status -> {
+        return systemSecurityContext.runAsSystemAsTenant(
+                () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
                 }), tenant);

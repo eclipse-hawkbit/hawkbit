@@ -30,7 +30,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -78,14 +77,6 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.tenantAware = tenantAware;
         this.lockRegistry = lockRegistry;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
-    }
-
-    protected Long runInNewTransaction(final String transactionName, final TransactionCallback<Long> action) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName(transactionName);
-        def.setReadOnly(false);
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(action);
     }
 
     protected RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
