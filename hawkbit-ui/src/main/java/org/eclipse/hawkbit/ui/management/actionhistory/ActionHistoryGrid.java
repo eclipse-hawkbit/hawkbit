@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -108,6 +109,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     boolean forceClientRefreshToggle = true;
 
+    private final SpPermissionChecker permissionChecker;
+
     /**
      * Constructor.
      *
@@ -118,11 +121,13 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * @param managementUIState
      */
     protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
-            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
+            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
+            final SpPermissionChecker permissionChecker) {
         super(i18n, eventBus, null);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
+        this.permissionChecker = permissionChecker;
 
         setMaximizeSupport(new ActionHistoryMaximizeSupport());
         setSingleSelectionSupport(new SingleSelectionSupport());
@@ -239,19 +244,22 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createCancelButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_NEUTRAL, i18n.getMessage("message.cancel.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, isDisabled);
     }
 
     private StatusFontIcon createForceButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_NEUTRAL, i18n.getMessage("message.force.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, isDisabled);
     }
 
     private StatusFontIcon createForceQuitButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_RED, i18n.getMessage("message.forcequit.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, isDisabled);
     }
