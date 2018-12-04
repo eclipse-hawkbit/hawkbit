@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -287,7 +288,7 @@ public final class RSQLUtility {
 
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
-            validateMapParamter(propertyEnum, node, graph);
+            validateMapParameter(propertyEnum, node, graph);
 
             // sub entity need minium 1 dot
             if (!propertyEnum.getSubEntityAttributes().isEmpty() && graph.length < 2) {
@@ -314,13 +315,15 @@ public final class RSQLUtility {
             return fieldNameBuilder.toString();
         }
 
-        private void validateMapParamter(final A propertyEnum, final ComparisonNode node, final String[] graph) {
+        private void validateMapParameter(final A propertyEnum, final ComparisonNode node, final String[] graph) {
             if (!propertyEnum.isMap()) {
                 return;
 
             }
+
             if (!propertyEnum.getSubEntityAttributes().isEmpty()) {
-                throw new UnsupportedOperationException("Currently subentity attributes for maps are not supported");
+                throw new UnsupportedOperationException(
+                        "Currently subentity attributes for maps are not supported, alternatively you could use the key/value tuple, defined by SimpleImmutableEntry class");
             }
 
             // enum.key
@@ -540,48 +543,37 @@ public final class RSQLUtility {
                 value = virtualPropertyReplacer.replace(value);
             }
 
-            final List<Predicate> singleList = new ArrayList<>();
-
             final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);
-            if (mapPredicate != null) {
-                singleList.add(mapPredicate);
-            }
 
-            addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath), transformedValues, transformedValue,
-                    value, singleList, database);
-            return Collections.unmodifiableList(singleList);
+            final Predicate valuePredicate = addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath),
+                    transformedValues, transformedValue, value, database);
+
+            return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
         }
 
-        private void addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+        private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<Object> transformedValues, final Object transformedValue, final String value,
-                final List<Predicate> singleList, final Database database) {
+                final Database database) {
             switch (node.getOperator().getSymbol()) {
             case "==":
-                singleList.add(getEqualToPredicate(transformedValue, fieldPath, database));
-                break;
+                return getEqualToPredicate(transformedValue, fieldPath, database);
             case "!=":
-                singleList.add(getNotEqualToPredicate(transformedValue, fieldPath, database));
-                break;
+                return getNotEqualToPredicate(transformedValue, fieldPath, database);
             case "=gt=":
-                singleList.add(cb.greaterThan(pathOfString(fieldPath), value));
-                break;
+                return cb.greaterThan(pathOfString(fieldPath), value);
             case "=ge=":
-                singleList.add(cb.greaterThanOrEqualTo(pathOfString(fieldPath), value));
-                break;
+                return cb.greaterThanOrEqualTo(pathOfString(fieldPath), value);
             case "=lt=":
-                singleList.add(cb.lessThan(pathOfString(fieldPath), value));
-                break;
+                return cb.lessThan(pathOfString(fieldPath), value);
             case "=le=":
-                singleList.add(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
-                break;
+                return cb.lessThanOrEqualTo(pathOfString(fieldPath), value);
             case "=in=":
-                singleList.add(getInPredicate(transformedValues, fieldPath));
-                break;
+                return getInPredicate(transformedValues, fieldPath);
             case "=out=":
-                singleList.add(getOutPredicate(transformedValues, fieldPath));
-                break;
+                return getOutPredicate(transformedValues, fieldPath);
             default:
-                LOGGER.info("operator symbol {} is either not supported or not implemented");
+                throw new RSQLParameterSyntaxException("operator symbol {" + node.getOperator().getSymbol()
+                        + "} is either not supported or not implemented");
             }
         }
 
@@ -616,10 +608,13 @@ public final class RSQLUtility {
         }
 
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
-            if (!enumField.isMap() || enumField.getValueFieldName() == null) {
+            final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue)
+                    .orElse(null);
+
+            if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
                 return fieldPath;
             }
-            return fieldPath.get(enumField.getValueFieldName());
+            return fieldPath.get(valueFieldNameFromSubEntity);
         }
 
         @SuppressWarnings("unchecked")
@@ -636,7 +631,11 @@ public final class RSQLUtility {
                         keyValue.toUpperCase());
             }
 
-            return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
+            final String keyFieldName = enumField.getSubEntityMapTuple().map(Entry::getKey)
+                    .orElseThrow(() -> new UnsupportedOperationException(
+                            "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
+
+            return cb.equal(cb.upper(fieldPath.get(keyFieldName)), keyValue.toUpperCase());
         }
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,

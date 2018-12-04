@@ -115,15 +115,23 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                     criteriaQueryMock, criteriaBuilderMock);
-            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
+            fail("Missing expected RSQLParameterSyntaxException for target attributes map, caused by wrong RSQL syntax (key was not present)");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
-        wrongRSQL = TargetFields.ATTRIBUTE + ".unkwon.wrong==abc";
+        wrongRSQL = TargetFields.ATTRIBUTE + ".unknown.wrong==abc";
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                     criteriaQueryMock, criteriaBuilderMock);
-            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
+            fail("Missing expected RSQLParameterSyntaxException for target attributes map, caused by wrong RSQL syntax (key includes dots)");
+        } catch (final RSQLParameterUnsupportedFieldException e) {
+        }
+
+        wrongRSQL = TargetFields.METADATA + ".unknown.wrong==abc";
+        try {
+            RSQLUtility.parse(wrongRSQL, TargetFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
+                    criteriaQueryMock, criteriaBuilderMock);
+            fail("Missing expected RSQLParameterSyntaxException for target metadata map, caused by wrong RSQL syntax (key includes dots)");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -131,7 +139,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, DistributionSetFields.class, null, testDb)
                     .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
-            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
+            fail("Missing expected RSQLParameterSyntaxException for distribution set metadata map, caused by wrong RSQL syntax (key was not present)");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 

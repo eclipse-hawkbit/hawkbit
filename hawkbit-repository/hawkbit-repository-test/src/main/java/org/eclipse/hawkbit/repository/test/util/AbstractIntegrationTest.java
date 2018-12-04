@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
@@ -297,6 +298,14 @@ public abstract class AbstractIntegrationTest {
         return distributionSetManagement.createMetaData(dsId, md);
     }
 
+    protected TargetMetadata createTargetMetadata(final String controllerId, final MetaData md) {
+        return createTargetMetadata(controllerId, Collections.singletonList(md)).get(0);
+    }
+
+    protected List<TargetMetadata> createTargetMetadata(final String controllerId, final List<MetaData> md) {
+        return targetManagement.createMetaData(controllerId, md);
+    }
+
     protected Long getOsModule(final DistributionSet ds) {
         return ds.findFirstModuleByType(osType).get().getId();
     }
@@ -395,8 +404,8 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestSchedule(final int minutesToAdd) {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(minutesToAdd);
-        return String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
-                currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
+        return String.format("%d %d %d %d %d ? %d", currentTime.getSecond(), currentTime.getMinute(),
+                currentTime.getHour(), currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
     }
 
     protected static String getTestDuration(final int duration) {

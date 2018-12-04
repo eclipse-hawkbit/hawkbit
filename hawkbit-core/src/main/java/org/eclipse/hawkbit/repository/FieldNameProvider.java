@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * An interface for declaring the name of the field described in the database
@@ -65,21 +67,10 @@ public interface FieldNameProvider {
     }
 
     /**
-     * The database column for the key
-     *
-     * @return key fieldname
+     * @return a key/value tuple of a sub entity.
      */
-    default String getKeyFieldName() {
-        return null;
-    }
-
-    /**
-     * The database column for the value
-     *
-     * @return key fieldname
-     */
-    default String getValueFieldName() {
-        return null;
+    default Optional<Entry<String, String>> getSubEntityMapTuple() {
+        return Optional.empty();
     }
 
     /**
@@ -88,6 +79,6 @@ public interface FieldNameProvider {
      * @return <true> is a map <false> is not a map
      */
     default boolean isMap() {
-        return getKeyFieldName() != null;
+        return false;
     }
 }

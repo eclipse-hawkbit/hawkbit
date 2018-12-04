@@ -393,7 +393,6 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds)
             throws Exception {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
-        assignDistributionSet(ds.getId(), target.getControllerId());
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
         sendDeploymentActionFeedback(target, action,
@@ -413,12 +412,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThatAttributesUpdateIsRequested(target.getControllerId());
     }
 
-    private void assertThatAttributesUpdateIsRequested(final String targetControllerId)
-            throws Exception {
-        mvc.perform(
-                get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(jsonPath("$._links.configData.href").isNotEmpty());
+    private void assertThatAttributesUpdateIsRequested(final String targetControllerId) throws Exception {
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), targetControllerId)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+                .andExpect(jsonPath("$._links.configData.href").isNotEmpty());
     }
 
     private void assertThatAttributesUpdateIsNotRequested(final String targetControllerId) throws Exception {
@@ -427,8 +424,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.configData").doesNotExist());
     }
 
-    private ResultActions sendDeploymentActionFeedback(final Target target, final Action action,
-            final String feedback) throws Exception {
+    private ResultActions sendDeploymentActionFeedback(final Target target, final Action action, final String feedback)
+            throws Exception {
         return mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()).content(feedback)
                         .contentType(MediaType.APPLICATION_JSON));
