@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Regular expression characters providing their encoded and their readable
@@ -68,5 +69,12 @@ public final class RegexChar {
     @Override
     public int hashCode() {
         return regExp.hashCode();
+    }
+
+    public static boolean stringContainsCharacters(final String stringToCheck, final Set<RegexChar> characters) {
+        final StringBuilder charBuilder = new StringBuilder();
+        characters.forEach(character -> charBuilder.append(character.regExp));
+        final String regularExpressions = String.format(".*[%s]+.*", charBuilder.toString());
+        return Pattern.matches(regularExpressions, stringToCheck);
     }
 }

@@ -20,7 +20,7 @@ import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Repository")
 @Story("Regular expression helper")
-public class RegexHelperTest {
+public class RegexCharTest {
 
     private final String testString = getPrintableAsciiCharacters();
 
@@ -59,15 +59,15 @@ public class RegexHelperTest {
             notMatchingString = notMatchingString.replace(character, "");
         }
         for(final String character : charactersExpectedToBeFoundByRegex) {
-            assertThat(RegexHelper.stringContainsCharacters("", regexToVerify)).isFalse();
-            assertThat(RegexHelper.stringContainsCharacters(notMatchingString, regexToVerify)).isFalse();
-            assertThat(RegexHelper.stringContainsCharacters(character, regexToVerify)).isTrue();
-            assertThat(RegexHelper.stringContainsCharacters(insertStringIntoString(notMatchingString, character, 0),
+            assertThat(RegexChar.stringContainsCharacters("", regexToVerify)).isFalse();
+            assertThat(RegexChar.stringContainsCharacters(notMatchingString, regexToVerify)).isFalse();
+            assertThat(RegexChar.stringContainsCharacters(character, regexToVerify)).isTrue();
+            assertThat(RegexChar.stringContainsCharacters(insertStringIntoString(notMatchingString, character, 0),
                     regexToVerify)).isTrue();
-            assertThat(RegexHelper.stringContainsCharacters(
+            assertThat(RegexChar.stringContainsCharacters(
                     insertStringIntoString(notMatchingString, character, notMatchingString.length()), regexToVerify))
                             .isTrue();
-            assertThat(RegexHelper.stringContainsCharacters(
+            assertThat(RegexChar.stringContainsCharacters(
                     insertStringIntoString(notMatchingString, character, notMatchingString.length() / 2),
                     regexToVerify)).isTrue();
             

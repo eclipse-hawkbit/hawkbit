@@ -14,7 +14,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.RegexHelper;
+import org.eclipse.hawkbit.repository.RegexChar;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -64,7 +64,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (RegexHelper.stringContainsCharacters(event.getFileName(), ArtifactUpload.getIllegalFilenameCharacters())) {
+        if (RegexChar.stringContainsCharacters(event.getFileName(), ArtifactUpload.getIllegalFilenameCharacters())) {
             LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
             interruptUploadDueToIllegalFilename();
         } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
