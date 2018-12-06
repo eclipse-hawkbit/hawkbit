@@ -105,6 +105,7 @@ public class RegexCharTest {
 
     private static String insertStringIntoString(final String baseString, final String stringToInsert,
             final int position) {
-        return baseString.substring(0, position) + stringToInsert + baseString.substring(position, baseString.length());
+        final StringBuilder stringBuilder = new StringBuilder(baseString);
+        return stringBuilder.insert(position, stringToInsert).toString();
     }
 }
