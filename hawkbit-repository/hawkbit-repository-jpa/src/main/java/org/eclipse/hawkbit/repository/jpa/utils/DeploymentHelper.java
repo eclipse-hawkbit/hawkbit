@@ -6,13 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -35,27 +37,25 @@ public final class DeploymentHelper {
     }
 
     /**
-     * Internal helper method used only inside service level. As a result is no
-     * additional security necessary.
+     * Changes targets update status and conditionally installation date
      *
      * @param target
      *            to update
      * @param status
      *            of the target
      * @param setInstalledDate
-     *            to set
-     * @param targetInfoRepository
-     *            for the operation
+     *            flag to update installation date
      *
      * @return updated target
      */
-    static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
+    public static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
             final boolean setInstalledDate) {
         target.setUpdateStatus(status);
 
         if (setInstalledDate) {
             target.setInstallationDate(System.currentTimeMillis());
         }
+
         return target;
     }
 
@@ -70,10 +70,8 @@ public final class DeploymentHelper {
      *            for the operation
      * @param targetRepository
      *            for the operation
-     * @param targetInfoRepository
-     *            for the operation
      */
-    static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
+    public static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
             final TargetRepository targetRepository) {
 
         // set action inactive
@@ -90,11 +88,24 @@ public final class DeploymentHelper {
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }
+
         targetRepository.save(target);
     }
 
-    public static <T> T runInNewTransaction(final PlatformTransactionManager txManager, final String transactionName,
-            final TransactionCallback<T> action) {
+    /**
+     * Executes the modifying action in new transaction
+     *
+     * @param txManager
+     *            transaction manager interface
+     * @param transactionName
+     *            the name of the new transaction
+     * @param action
+     *            the callback to execute in new tranaction
+     *
+     * @return the result of the action
+     */
+    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
+            final String transactionName, @NotNull final TransactionCallback<T> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
