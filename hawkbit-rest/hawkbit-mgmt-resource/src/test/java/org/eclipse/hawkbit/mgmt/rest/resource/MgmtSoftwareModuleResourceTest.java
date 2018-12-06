@@ -208,7 +208,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
     
     @Test
-    @Description("Verifies that artifact with invailde filename cannot be uploaded to prevent cross site scripting.")
+    @Description("Verifies that artifact with invalid filename cannot be uploaded to prevent cross site scripting.")
     public void uploadArtifactFailsIfFilenameInvalide() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
         final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
