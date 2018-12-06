@@ -22,39 +22,59 @@ import io.qameta.allure.Story;
 @Story("Regular expression helper")
 public class RegexCharTest {
 
-    private final String testString = getPrintableAsciiCharacters();
+    private static final String TEST_STRING = getPrintableAsciiCharacters();
 
-    private static String getPrintableAsciiCharacters() {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 32; i < 127; i++) {
-            stringBuilder.append((char) i);
+    private static final int INDEX_FIRST_PRINTABLE_ASCII_CHAR = 32;
+    private static final int INDEX_LAST_PRINTABLE_ASCII_CHAR = 127;
+
+    @Test
+    @Description("Verifies every RegexChar can be used to exclusively find the desired characters in a String.")
+    public void allRegexCharsOnlyFindExpectedChars() {
+        for (final RegexChar character : RegexChar.values()) {
+            switch (character) {
+            case DIGITS:
+                assertRegexCharExclusivelyFindsGivenCharacters(character, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+                break;
+            case WHITESPACE:
+                assertRegexCharExclusivelyFindsGivenCharacters(character, " ", "\t");
+                break;
+            case SLASHES:
+                assertRegexCharExclusivelyFindsGivenCharacters(character, "/", "\\");
+                break;
+            case QUOTATION_MARKS:
+                assertRegexCharExclusivelyFindsGivenCharacters(character, "\"", "'");
+                break;
+            default:
+                assertRegexCharExclusivelyFindsGivenCharacters(character, character.regExp);
+                break;
+            }
         }
-        stringBuilder.append("\t");
-        return stringBuilder.toString();
-    }
 
-    private static String insertStringIntoString(final String baseString, final String stringToInsert,
-            final int position) {
-        return baseString.substring(0, position) + stringToInsert + baseString.substring(position, baseString.length());
     }
 
     @Test
-    @Description("Verifies that given Regex characters in a String are recognized.")
-    public void stringContainsCharacters() {
+    @Description("Verifies that combinations of RegexChars can be used to find the desired characters in a String.")
+    public void combinedRegexCharsFindExpectedChars() {
         final Set<RegexChar> greaterAndLessThan = RegexChar.getImmutableCharSet(RegexChar.GREATER_THAN,
                 RegexChar.LESS_THAN);
-        final Set<RegexChar> whitespace = RegexChar.getImmutableCharSet(RegexChar.WHITESPACE);
-        final Set<RegexChar> slashes = RegexChar.getImmutableCharSet(RegexChar.SLASHES);
+        final Set<RegexChar> equalsAndQuestionMark = RegexChar.getImmutableCharSet(RegexChar.EQUALS_SYMBOL,
+                RegexChar.QUESTION_MARK);
+        final Set<RegexChar> colonAndWhitespace = RegexChar.getImmutableCharSet(RegexChar.COLON, RegexChar.WHITESPACE);
 
-        assertRegexOnlyMatchesGivenCharacters(greaterAndLessThan, "<", ">");
-        assertRegexOnlyMatchesGivenCharacters(whitespace, " ", "\t");
-        assertRegexOnlyMatchesGivenCharacters(slashes, "/", "\\");
-
+        assertRegexCharsExclusivelyFindsGivenCharacters(greaterAndLessThan, "<", ">");
+        assertRegexCharsExclusivelyFindsGivenCharacters(equalsAndQuestionMark, "=", "?");
+        assertRegexCharsExclusivelyFindsGivenCharacters(colonAndWhitespace, ":", " ", "\t");
     }
 
-    private void assertRegexOnlyMatchesGivenCharacters(final Set<RegexChar> regexToVerify,
+    private void assertRegexCharExclusivelyFindsGivenCharacters(final RegexChar characterToVerify,
             final String... charactersExpectedToBeFoundByRegex) {
-        String notMatchingString = testString;
+        assertRegexCharsExclusivelyFindsGivenCharacters(RegexChar.getImmutableCharSet(characterToVerify),
+                charactersExpectedToBeFoundByRegex);
+    }
+
+    private void assertRegexCharsExclusivelyFindsGivenCharacters(final Set<RegexChar> regexToVerify,
+            final String... charactersExpectedToBeFoundByRegex) {
+        String notMatchingString = TEST_STRING;
         for(final String character : charactersExpectedToBeFoundByRegex) {
             notMatchingString = notMatchingString.replace(character, "");
         }
@@ -72,5 +92,19 @@ public class RegexCharTest {
                     regexToVerify)).isTrue();
             
         }
+    }
+
+    private static String getPrintableAsciiCharacters() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (int i = INDEX_FIRST_PRINTABLE_ASCII_CHAR; i < INDEX_LAST_PRINTABLE_ASCII_CHAR; i++) {
+            stringBuilder.append((char) i);
+        }
+        stringBuilder.append("\t");
+        return stringBuilder.toString();
+    }
+
+    private static String insertStringIntoString(final String baseString, final String stringToInsert,
+            final int position) {
+        return baseString.substring(0, position) + stringToInsert + baseString.substring(position, baseString.length());
     }
 }
