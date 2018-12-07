@@ -37,29 +37,6 @@ public final class DeploymentHelper {
     }
 
     /**
-     * Changes targets update status and conditionally installation date
-     *
-     * @param target
-     *            to update
-     * @param status
-     *            of the target
-     * @param setInstalledDate
-     *            flag to update installation date
-     *
-     * @return updated target
-     */
-    public static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
-            final boolean setInstalledDate) {
-        target.setUpdateStatus(status);
-
-        if (setInstalledDate) {
-            target.setInstallationDate(System.currentTimeMillis());
-        }
-
-        return target;
-    }
-
-    /**
      * This method is called, when cancellation has been successful. It sets the
      * action to canceled, resets the meta data of the target and in case there
      * is a new action this action is triggered.
@@ -84,7 +61,7 @@ public final class DeploymentHelper {
 
         if (nextActiveActions.isEmpty()) {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());
-            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false);
+            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }

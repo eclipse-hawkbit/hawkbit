@@ -121,7 +121,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private final EntityManager entityManager;
-    protected final ActionRepository actionRepository;
+    private final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -131,7 +131,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final ApplicationContext applicationContext;
     private final AfterTransactionCommitExecutor afterCommit;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-    protected final PlatformTransactionManager txManager;
+    private final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -794,5 +794,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             LOG.error("Object serialization failed", e);
             return e.getMessage();
         }
+    }
+
+    protected ActionRepository getActionRepository() {
+        return actionRepository;
+    }
+
+    protected PlatformTransactionManager getTxManager() {
+        return txManager;
     }
 }

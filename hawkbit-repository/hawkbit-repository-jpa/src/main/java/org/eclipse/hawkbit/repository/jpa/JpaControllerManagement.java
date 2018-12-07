@@ -596,8 +596,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            final JpaTarget target = DeploymentHelper.updateTargetInfo((JpaTarget) action.getTarget(),
-                    TargetUpdateStatus.ERROR, false);
+            final JpaTarget target = (JpaTarget) action.getTarget();
+            target.setUpdateStatus(TargetUpdateStatus.ERROR);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
