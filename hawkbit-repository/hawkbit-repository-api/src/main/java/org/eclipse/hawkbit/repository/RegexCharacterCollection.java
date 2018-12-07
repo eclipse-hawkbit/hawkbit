@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Collection of regular expression characters to check strings
@@ -31,9 +32,9 @@ public class RegexCharacterCollection {
     }
 
     private Pattern getPatternAtLeastOneCharacterOfCollection() {
-        final StringBuilder charBuilder = new StringBuilder();
-        characters.forEach(character -> charBuilder.append(character.regExp));
-        final String regularExpression = String.format(".*[%s]+.*", charBuilder.toString());
+        final String regexCharacters = characters.stream().map(RegexChar::getRegExp)
+                .collect(Collectors.joining());
+        final String regularExpression = String.format(".*[%s]+.*", regexCharacters);
         return Pattern.compile(regularExpression);
     }
 
@@ -42,8 +43,8 @@ public class RegexCharacterCollection {
                 "character.quotationMarks"), SLASHES("\\/\\\\", "character.slashes"), GREATER_THAN(
                         ">"), LESS_THAN("<"), EQUALS_SYMBOL("="), EXCLAMATION_MARK("!"), QUESTION_MARK("?"), COLON(":");
 
-        public final String regExp;
-        public final Optional<String> l18nReferenceDescription;
+        private final String regExp;
+        private final String l18nReferenceDescription;
 
         private RegexChar(final String character) {
             this(character, null);
@@ -51,7 +52,15 @@ public class RegexCharacterCollection {
     
         private RegexChar(final String regExp, final String l18nReferenceDescription) {
             this.regExp = regExp;
-            this.l18nReferenceDescription = Optional.ofNullable(l18nReferenceDescription);
+            this.l18nReferenceDescription = l18nReferenceDescription;
+        }
+
+        public String getRegExp() {
+            return regExp;
+        }
+
+        public Optional<String> getL18nReferenceDescription() {
+            return Optional.ofNullable(l18nReferenceDescription);
         }
     }
 }

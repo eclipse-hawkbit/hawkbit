@@ -44,7 +44,7 @@ public class RegexCharTest {
                 assertRegexCharExclusivelyFindsGivenCharacters(character, "\"", "'");
                 break;
             default:
-                assertRegexCharExclusivelyFindsGivenCharacters(character, character.regExp);
+                assertRegexCharExclusivelyFindsGivenCharacters(character, character.getRegExp());
                 break;
             }
         }
