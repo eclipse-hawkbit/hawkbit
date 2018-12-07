@@ -1106,18 +1106,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private enum ERROR_THRESHOLD_OPTIONS {
 
-        PERCENT("%"),
-
-        COUNT("Count");
-
-        private final String value;
-
-        ERROR_THRESHOLD_OPTIONS(final String val) {
-            value = val;
-        }
+        PERCENT,
+        COUNT;
 
         private String getValue() {
-            return value;
+            return  "label.errorthreshold.option." + name().toLowerCase();
         }
     }
 }
