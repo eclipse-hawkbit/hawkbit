@@ -338,12 +338,12 @@ public final class SPUIComponentProvider {
      *
      * @return generated link
      */
-    public static Link getHelpLink(final String uri) {
+    public static Link getHelpLink(final VaadinMessageSource i18n, final String uri) {
 
         final Link link = new Link("", new ExternalResource(uri));
         link.setTargetName("_blank");
         link.setIcon(FontAwesome.QUESTION_CIRCLE);
-        link.setDescription("Documentation");
+        link.setDescription(i18n.getMessage("tooltip.documentation.link"));
         return link;
 
     }

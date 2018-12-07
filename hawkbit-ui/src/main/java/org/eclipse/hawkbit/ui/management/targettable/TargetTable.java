@@ -1033,7 +1033,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private Link maintenanceWindowHelpLinkControl() {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        return SPUIComponentProvider.getHelpLink(maintenanceWindowHelpUrl);
+        return SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
     }
 
     private void initMaintenanceWindow() {

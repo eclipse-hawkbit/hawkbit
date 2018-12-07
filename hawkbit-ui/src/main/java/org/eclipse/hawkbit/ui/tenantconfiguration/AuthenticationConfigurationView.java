@@ -129,7 +129,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, 3);
 
         final Link linkToSecurityHelp = SPUIComponentProvider
-                .getHelpLink(uiProperties.getLinks().getDocumentation().getSecurity());
+                .getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getSecurity());
         gridLayout.addComponent(linkToSecurityHelp, 2, 3);
         gridLayout.setComponentAlignment(linkToSecurityHelp, Alignment.BOTTOM_RIGHT);
 
