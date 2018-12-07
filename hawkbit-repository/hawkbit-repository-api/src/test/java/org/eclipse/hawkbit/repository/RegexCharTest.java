@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
-
+import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.junit.Test;
 
 import io.qameta.allure.Description;
@@ -49,17 +48,17 @@ public class RegexCharTest {
                 break;
             }
         }
-
     }
 
     @Test
     @Description("Verifies that combinations of RegexChars can be used to find the desired characters in a String.")
     public void combinedRegexCharsFindExpectedChars() {
-        final Set<RegexChar> greaterAndLessThan = RegexChar.getImmutableCharSet(RegexChar.GREATER_THAN,
+        final RegexCharacterCollection greaterAndLessThan = new RegexCharacterCollection(RegexChar.GREATER_THAN,
                 RegexChar.LESS_THAN);
-        final Set<RegexChar> equalsAndQuestionMark = RegexChar.getImmutableCharSet(RegexChar.EQUALS_SYMBOL,
+        final RegexCharacterCollection equalsAndQuestionMark = new RegexCharacterCollection(RegexChar.EQUALS_SYMBOL,
                 RegexChar.QUESTION_MARK);
-        final Set<RegexChar> colonAndWhitespace = RegexChar.getImmutableCharSet(RegexChar.COLON, RegexChar.WHITESPACE);
+        final RegexCharacterCollection colonAndWhitespace = new RegexCharacterCollection(RegexChar.COLON,
+                RegexChar.WHITESPACE);
 
         assertRegexCharsExclusivelyFindsGivenCharacters(greaterAndLessThan, "<", ">");
         assertRegexCharsExclusivelyFindsGivenCharacters(equalsAndQuestionMark, "=", "?");
@@ -68,28 +67,26 @@ public class RegexCharTest {
 
     private void assertRegexCharExclusivelyFindsGivenCharacters(final RegexChar characterToVerify,
             final String... charactersExpectedToBeFoundByRegex) {
-        assertRegexCharsExclusivelyFindsGivenCharacters(RegexChar.getImmutableCharSet(characterToVerify),
+        assertRegexCharsExclusivelyFindsGivenCharacters(new RegexCharacterCollection(characterToVerify),
                 charactersExpectedToBeFoundByRegex);
     }
 
-    private void assertRegexCharsExclusivelyFindsGivenCharacters(final Set<RegexChar> regexToVerify,
+    private void assertRegexCharsExclusivelyFindsGivenCharacters(final RegexCharacterCollection regexToVerify,
             final String... charactersExpectedToBeFoundByRegex) {
         String notMatchingString = TEST_STRING;
         for(final String character : charactersExpectedToBeFoundByRegex) {
             notMatchingString = notMatchingString.replace(character, "");
         }
         for(final String character : charactersExpectedToBeFoundByRegex) {
-            assertThat(RegexChar.stringContainsCharacters("", regexToVerify)).isFalse();
-            assertThat(RegexChar.stringContainsCharacters(notMatchingString, regexToVerify)).isFalse();
-            assertThat(RegexChar.stringContainsCharacters(character, regexToVerify)).isTrue();
-            assertThat(RegexChar.stringContainsCharacters(insertStringIntoString(notMatchingString, character, 0),
-                    regexToVerify)).isTrue();
-            assertThat(RegexChar.stringContainsCharacters(
-                    insertStringIntoString(notMatchingString, character, notMatchingString.length()), regexToVerify))
-                            .isTrue();
-            assertThat(RegexChar.stringContainsCharacters(
-                    insertStringIntoString(notMatchingString, character, notMatchingString.length() / 2),
-                    regexToVerify)).isTrue();
+            assertThat(regexToVerify.stringContainsCharacter("")).isFalse();
+            assertThat(regexToVerify.stringContainsCharacter(notMatchingString)).isFalse();
+            assertThat(regexToVerify.stringContainsCharacter(character)).isTrue();
+            assertThat(regexToVerify.stringContainsCharacter(insertStringIntoString(notMatchingString, character, 0)))
+                    .isTrue();
+            assertThat(regexToVerify.stringContainsCharacter(
+                    insertStringIntoString(notMatchingString, character, notMatchingString.length()))).isTrue();
+            assertThat(regexToVerify.stringContainsCharacter(
+                    insertStringIntoString(notMatchingString, character, notMatchingString.length() / 2))).isTrue();
             
         }
     }
