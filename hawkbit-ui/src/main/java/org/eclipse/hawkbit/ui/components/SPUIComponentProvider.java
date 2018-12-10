@@ -333,6 +333,8 @@ public final class SPUIComponentProvider {
     /**
      * Generates help/documentation links from within management UI.
      *
+     * @param i18n
+     *            the i18n
      * @param uri
      *            to documentation site
      *
