@@ -69,10 +69,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         this.uiNotification = SpringContextHelper.getBean(UINotification.class);
     }
 
-    private void setUploadInterrupted() {
-        uploadInterrupted = true;
-    }
-
     protected boolean isUploadInterrupted() {
         return uploadInterrupted;
     }
@@ -97,29 +93,25 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                         new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent()));
     }
 
-    private void setFailureReason(final String failureReason) {
-        setUploadInterrupted();
+    private void interruptUploadAndSetReason(final String failureReason) {
+        uploadInterrupted = true;
         this.failureReason = failureReason;
     }
 
     protected void interruptUploadDueToUploadFailed() {
-        setUploadInterrupted();
-        setFailureReason(i18n.getMessage("message.upload.failed"));
+        interruptUploadAndSetReason(i18n.getMessage("message.upload.failed"));
     }
 
     protected void interruptUploadDueToDuplicateFile() {
-        setUploadInterrupted();
-        setFailureReason(i18n.getMessage("message.no.duplicateFiles"));
+        interruptUploadAndSetReason(i18n.getMessage("message.no.duplicateFiles"));
     }
 
     protected void interruptUploadDueToFileSizeExceeded(final long maxSize) {
-        setUploadInterrupted();
-        setFailureReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
+        interruptUploadAndSetReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
     }
 
     protected void interruptUploadDueToIllegalFilename() {
-        setUploadInterrupted();
-        setFailureReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
+        interruptUploadAndSetReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
     }
 
     protected boolean isFileAlreadyContainedInSoftwareModule(final FileUploadId newFileUploadId,

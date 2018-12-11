@@ -20,6 +20,8 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -139,6 +141,21 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(3);
         }
 
+    }
+
+    @Test
+    @Description("Verifies that artifact management does not create artifacts with illegal filename.")
+    public void entityQueryWithIllegalFilenameThrowsException() throws URISyntaxException {
+        final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
+        final String artifactData = "test";
+        final int artifactSize = artifactData.length();
+
+        final long smID = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "smIllegalFilenameTest", "1.0", null, null)).getId();
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> artifactManagement.create(
+                new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"), smID, illegalFilename, false,
+                        artifactSize)));
+        assertThat(softwareModuleManagement.get(smID).get().getArtifacts()).hasSize(0);
     }
 
     @Test
