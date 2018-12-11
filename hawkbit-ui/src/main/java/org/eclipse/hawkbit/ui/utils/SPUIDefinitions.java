@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.data.domain.Sort.Direction;
 
 /**
