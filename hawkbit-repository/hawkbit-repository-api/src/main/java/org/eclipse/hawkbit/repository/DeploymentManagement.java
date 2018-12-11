@@ -413,8 +413,8 @@ public interface DeploymentManagement {
     Action forceTargetAction(long actionId);
 
     /**
-     * Sets the {@link Status} of inactive scheduled {@link Action}s for the
-     * specified {@link Target}s to CANCELED
+     * Sets the status of inactive scheduled {@link Action}s for the specified
+     * {@link Target}s to {@link Status#CANCELED}
      *
      * @param targetIds
      *            ids of the {@link Target}s the actions belong to

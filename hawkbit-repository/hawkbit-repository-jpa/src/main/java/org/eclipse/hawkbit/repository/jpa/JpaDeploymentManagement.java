@@ -338,18 +338,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      * @param requested
      *            number of targets to check
      */
-    private void assertMaxTargetsPerManualAssignmentQuota(final Long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
-                Target.class, DistributionSet.class, null);
+    private void assertMaxTargetsPerManualAssignmentQuota(final Long distributionSetId,
+            final int requestedTargetsCount) {
+        QuotaHelper.assertAssignmentQuota(distributionSetId, requestedTargetsCount,
+                quotaManagement.getMaxTargetsPerManualAssignment(), Target.class, DistributionSet.class, null);
     }
 
     private Set<Long> closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
-            final List<List<Long>> targetIds) {
+            final List<List<Long>> targetIdsChunks) {
         if (isActionsAutocloseEnabled()) {
-            assignmentStrategy.closeActiveActions(targetIds);
+            assignmentStrategy.closeActiveActions(targetIdsChunks);
             return Collections.emptySet();
         } else {
-            return assignmentStrategy.cancelActiveActions(targetIds);
+            return assignmentStrategy.cancelActiveActions(targetIdsChunks);
         }
     }
 
@@ -368,9 +369,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
-            final JpaDistributionSet set, final List<List<Long>> targetIds) {
+            final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
         final String currentUser = auditorProvider != null ? auditorProvider.getCurrentAuditor() : null;
-        assignmentStrategy.updateTargetStatus(set, targetIds, currentUser);
+        assignmentStrategy.updateTargetStatus(set, targetIdsChunks, currentUser);
     }
 
     private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
@@ -395,13 +396,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void detachEntitiesAndSendAssignmentEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
             final AbstractDsAssignmentStrategy assignmentStrategy, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> targetIdsToActions) {
+            final Map<String, JpaAction> controllerIdsToActions) {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
         // detaching as the entity has been updated by the JPQL query above
         targets.forEach(entityManager::detach);
 
-        assignmentStrategy.sendAssignmentEvents(set, targets, targetIdsCancellList, targetIdsToActions);
+        assignmentStrategy.sendAssignmentEvents(set, targets, targetIdsCancellList, controllerIdsToActions);
     }
 
     @Override
@@ -834,9 +835,5 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     protected ActionRepository getActionRepository() {
         return actionRepository;
-    }
-
-    protected PlatformTransactionManager getTxManager() {
-        return txManager;
     }
 }

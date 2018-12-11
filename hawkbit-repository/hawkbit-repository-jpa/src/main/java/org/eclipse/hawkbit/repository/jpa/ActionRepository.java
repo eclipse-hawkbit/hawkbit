@@ -222,7 +222,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the found list of {@link Action} IDs
      */
     @Query("SELECT a.id FROM JpaAction a WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
-    List<Long> findByTargetIdInAndActiveIsAndActionStatusAndDistributionSetNotRequiredMigrationStep(
+    List<Long> findByTargetIdInAndIsActiveAndActionStatusAndDistributionSetNotRequiredMigrationStep(
             @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
             @Param("currentStatus") Action.Status currentStatus);
 
