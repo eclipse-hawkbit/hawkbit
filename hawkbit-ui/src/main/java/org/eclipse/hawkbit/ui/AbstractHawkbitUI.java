@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
@@ -168,7 +167,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
         // set locale is required for I18N class also, to get the locale from
         // cookie
-        final String locale = getLocaleId(new HashSet<>(uiProperties.getLocalization().getAvailableLocals()));
+        final String locale = getLocaleId(uiProperties.getLocalization().getAvailableLocals());
         setLocale(new Locale(locale));
 
         if (UI.getCurrent().getErrorHandler() == null) {
@@ -213,7 +212,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
      *            as set
      * @return String as preferred locale
      */
-    private String getLocaleId(final Set<String> availableLocalesInApp) {
+    private String getLocaleId(final List<String> availableLocalesInApp) {
         final String[] localeChain = getLocaleChain();
         String spLocale = uiProperties.getLocalization().getDefaultLocal();
         if (null != localeChain) {
