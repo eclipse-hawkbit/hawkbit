@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -53,12 +54,12 @@ public class UiProperties implements Serializable {
         /**
          * Default localization
          */
-        private String defaultLocal;
+        private String defaultLocal = "en";
 
         /**
          *  List of available localizations
          */
-        private List<String> availableLocals;
+        private List<String> availableLocals = Collections.singletonList("en");
 
         public String getDefaultLocal() {
             return defaultLocal;
