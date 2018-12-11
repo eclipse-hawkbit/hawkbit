@@ -1109,7 +1109,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         PERCENT("label.errorthreshold.option.percent"),
         COUNT("label.errorthreshold.option.count");
 
-        private String value;
+        private final String value;
 
         ERROR_THRESHOLD_OPTIONS(final String value) {
             this.value = value;
