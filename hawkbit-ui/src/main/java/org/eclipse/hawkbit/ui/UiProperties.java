@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,6 +23,8 @@ public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean gravatar;
+
+    private final Localization localization = new Localization();
 
     private final Links links = new Links();
 
@@ -37,6 +40,41 @@ public class UiProperties implements Serializable {
 
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
+    }
+
+
+
+    /**
+     * Localization information
+     */
+    public static class Localization implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Default localization
+         */
+        private String defaultLocal;
+
+        /**
+         *  List of available localizations
+         */
+        private List<String> availableLocals;
+
+        public String getDefaultLocal() {
+            return defaultLocal;
+        }
+
+        public List<String> getAvailableLocals() {
+            return availableLocals;
+        }
+
+        public void setDefaultLocal(final String defaultLocal) {
+            this.defaultLocal = defaultLocal;
+        }
+
+        public void setAvailableLocals(final List<String> availableLocals) {
+            this.availableLocals = availableLocals;
+        }
     }
 
     /**
@@ -373,6 +411,10 @@ public class UiProperties implements Serializable {
 
     public Event getEvent() {
         return event;
+    }
+
+    public Localization getLocalization() {
+        return localization;
     }
 
 }

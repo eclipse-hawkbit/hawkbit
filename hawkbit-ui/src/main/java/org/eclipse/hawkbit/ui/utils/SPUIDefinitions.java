@@ -19,15 +19,6 @@ import org.springframework.data.domain.Sort.Direction;
  */
 public final class SPUIDefinitions {
     /**
-     * Available locales.
-     */
-    private static final Set<String> AVAILABLE_LOCALES = Stream.of("en", "de", "cn").collect(Collectors.toSet());
-
-    /**
-     * Default locale.
-     */
-    public static final String DEFAULT_LOCALE = "en";
-    /**
      * Locale cookie name.
      */
     public static final String COOKIE_NAME = "BOSCHSI_UII_LOCALE";
@@ -387,14 +378,5 @@ public final class SPUIDefinitions {
      */
     private SPUIDefinitions() {
 
-    }
-
-    /**
-     * Get the locales
-     *
-     * @return the availableLocales
-     */
-    public static Set<String> getAvailableLocales() {
-        return AVAILABLE_LOCALES;
     }
 }
