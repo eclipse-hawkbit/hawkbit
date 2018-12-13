@@ -354,7 +354,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
-    private boolean isActionsAutocloseEnabled() {
+    protected boolean isActionsAutocloseEnabled() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
                 .getValue());

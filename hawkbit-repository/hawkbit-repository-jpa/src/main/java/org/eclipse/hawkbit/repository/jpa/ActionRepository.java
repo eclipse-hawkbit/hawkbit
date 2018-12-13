@@ -228,18 +228,24 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Switches the status of actions from one specific status into another for
-     * given actions IDs
+     * given actions IDs, active flag and current status
      *
      * @param statusToSet
      *            the new status the actions should get
      * @param actionIds
      *            the IDs of the actions which are affected
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @param currentStatus
+     *            the current status of the actions
+     * @return the amount of updated actions
      */
     @Modifying
     @Transactional
-    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds")
-    void switchStatusForActions(@Param("statusToSet") Action.Status statusToSet,
-            @Param("actionIds") List<Long> actionIds);
+    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds AND a.active = :active AND a.status = :currentStatus")
+    int switchStatusForActionIdInAndIsActiveAndActionStatus(@Param("statusToSet") Action.Status statusToSet,
+            @Param("actionIds") List<Long> actionIds, @Param("active") boolean active,
+            @Param("currentStatus") Action.Status currentStatus);
 
     /**
      *
