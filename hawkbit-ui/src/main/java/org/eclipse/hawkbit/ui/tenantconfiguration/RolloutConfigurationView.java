@@ -74,7 +74,7 @@ public class RolloutConfigurationView extends BaseConfigurationView
         hLayout.addComponent(approvalConfigurationItem);
 
         final Link linkToApprovalHelp = SPUIComponentProvider
-                .getHelpLink(uiProperties.getLinks().getDocumentation().getRollout());
+                .getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getRollout());
         hLayout.addComponent(linkToApprovalHelp);
         hLayout.setComponentAlignment(linkToApprovalHelp, Alignment.BOTTOM_RIGHT);
 

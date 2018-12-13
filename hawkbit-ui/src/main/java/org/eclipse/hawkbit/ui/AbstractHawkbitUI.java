@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
@@ -81,9 +81,11 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
     private Label viewTitle;
 
+    private final UiProperties uiProperties;
+
     protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
             final SpringViewProvider viewProvider, final ApplicationContext context, final DashboardMenu dashboardMenu,
-            final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton) {
+            final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton, final UiProperties uiProperties) {
         this.pushStrategy = pushStrategy;
         this.eventBus = eventBus;
         this.viewProvider = viewProvider;
@@ -91,6 +93,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         this.dashboardMenu = dashboardMenu;
         this.errorview = errorview;
         this.notificationUnreadButton = notificationUnreadButton;
+        this.uiProperties = uiProperties;
     }
 
     @Override
@@ -164,7 +167,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
         // set locale is required for I18N class also, to get the locale from
         // cookie
-        final String locale = getLocaleId(SPUIDefinitions.getAvailableLocales());
+        final String locale = getLocaleId(uiProperties.getLocalization().getAvailableLocals());
         setLocale(new Locale(locale));
 
         if (UI.getCurrent().getErrorHandler() == null) {
@@ -209,9 +212,9 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
      *            as set
      * @return String as preferred locale
      */
-    private static String getLocaleId(final Set<String> availableLocalesInApp) {
+    private String getLocaleId(final List<String> availableLocalesInApp) {
         final String[] localeChain = getLocaleChain();
-        String spLocale = SPUIDefinitions.DEFAULT_LOCALE;
+        String spLocale = uiProperties.getLocalization().getDefaultLocal();
         if (null != localeChain) {
             // Find best matching locale
             for (final String localeId : localeChain) {

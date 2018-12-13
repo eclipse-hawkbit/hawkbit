@@ -479,7 +479,7 @@ public class CommonDialogWindow extends Window {
         if (StringUtils.isEmpty(helpLink)) {
             return;
         }
-        final Link helpLinkComponent = SPUIComponentProvider.getHelpLink(helpLink);
+        final Link helpLinkComponent = SPUIComponentProvider.getHelpLink(i18n, helpLink);
         buttonsLayout.addComponent(helpLinkComponent);
         buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
     }

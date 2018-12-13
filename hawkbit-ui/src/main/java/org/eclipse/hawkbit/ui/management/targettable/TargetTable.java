@@ -582,7 +582,7 @@ public class TargetTable extends AbstractTable<Target> {
         final String tagName = HawkbitCommonUtil.removePrefix(wrapperSource.getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
-            if ("NO TAG".equals(tagName)) {
+            if (getI18n().getMessage("label.no.tag").equals(tagName)) {
                 getNotification()
                         .displayValidationError(getI18n().getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED));
                 return false;
@@ -1033,7 +1033,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private Link maintenanceWindowHelpLinkControl() {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        return SPUIComponentProvider.getHelpLink(maintenanceWindowHelpUrl);
+        return SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
     }
 
     private void initMaintenanceWindow() {
