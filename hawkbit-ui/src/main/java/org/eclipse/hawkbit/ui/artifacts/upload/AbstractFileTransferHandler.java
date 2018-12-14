@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RegexCharacterCollection;
+import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
@@ -60,6 +62,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     private final VaadinMessageSource i18n;
 
     protected final UINotification uiNotification;
+
+    protected static final RegexCharacterCollection ILLEGAL_FILENAME_CHARACTERS = new RegexCharacterCollection(
+            RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
 
     AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
         this.artifactManagement = artifactManagement;

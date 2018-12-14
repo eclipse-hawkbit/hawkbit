@@ -78,15 +78,16 @@ public class RegexCharTest {
             notMatchingString = notMatchingString.replace(character, "");
         }
         for(final String character : charactersExpectedToBeFoundByRegex) {
-            assertThat(regexToVerify.stringContainsCharacter("")).isFalse();
-            assertThat(regexToVerify.stringContainsCharacter(notMatchingString)).isFalse();
-            assertThat(regexToVerify.stringContainsCharacter(character)).isTrue();
-            assertThat(regexToVerify.stringContainsCharacter(insertStringIntoString(notMatchingString, character, 0)))
-                    .isTrue();
-            assertThat(regexToVerify.stringContainsCharacter(
-                    insertStringIntoString(notMatchingString, character, notMatchingString.length()))).isTrue();
-            assertThat(regexToVerify.stringContainsCharacter(
-                    insertStringIntoString(notMatchingString, character, notMatchingString.length() / 2))).isTrue();
+            assertThat(RegexCharacterCollection.stringContainsCharacter("", regexToVerify)).isFalse();
+            assertThat(RegexCharacterCollection.stringContainsCharacter(notMatchingString, regexToVerify)).isFalse();
+            assertThat(RegexCharacterCollection.stringContainsCharacter(character, regexToVerify)).isTrue();
+            assertThat(RegexCharacterCollection
+                    .stringContainsCharacter(insertStringIntoString(notMatchingString, character, 0), regexToVerify))
+                            .isTrue();
+            assertThat(RegexCharacterCollection.stringContainsCharacter(
+                    insertStringIntoString(notMatchingString, character, notMatchingString.length()), regexToVerify)).isTrue();
+            assertThat(RegexCharacterCollection.stringContainsCharacter(
+                    insertStringIntoString(notMatchingString, character, notMatchingString.length() / 2), regexToVerify)).isTrue();
             
         }
     }

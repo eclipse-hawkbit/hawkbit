@@ -20,18 +20,19 @@ import java.util.stream.Collectors;
 public class RegexCharacterCollection {
 
     private final EnumSet<RegexChar> characters;
-    private final Pattern atLeastOneCharacterOfCollection;
+    private final Pattern findAnyCharacter;
 
     public RegexCharacterCollection(final RegexChar... characters) {
         this.characters = EnumSet.copyOf(Arrays.asList(characters));
-        this.atLeastOneCharacterOfCollection = getPatternAtLeastOneCharacterOfCollection();
+        this.findAnyCharacter = getPatternFindAnyCharacter();
     }
 
-    public boolean stringContainsCharacter(final String stringToCheck) {
-        return atLeastOneCharacterOfCollection.matcher(stringToCheck).matches();
+    public static boolean stringContainsCharacter(final String stringToCheck,
+            final RegexCharacterCollection regexCharacterCollection) {
+        return regexCharacterCollection.findAnyCharacter.matcher(stringToCheck).matches();
     }
 
-    private Pattern getPatternAtLeastOneCharacterOfCollection() {
+    private Pattern getPatternFindAnyCharacter() {
         final String regexCharacters = characters.stream().map(RegexChar::getRegExp)
                 .collect(Collectors.joining());
         final String regularExpression = String.format(".*[%s]+.*", regexCharacters);
@@ -46,11 +47,11 @@ public class RegexCharacterCollection {
         private final String regExp;
         private final String l18nReferenceDescription;
 
-        private RegexChar(final String character) {
+        RegexChar(final String character) {
             this(character, null);
         }
     
-        private RegexChar(final String regExp, final String l18nReferenceDescription) {
+        RegexChar(final String regExp, final String l18nReferenceDescription) {
             this.regExp = regExp;
             this.l18nReferenceDescription = l18nReferenceDescription;
         }

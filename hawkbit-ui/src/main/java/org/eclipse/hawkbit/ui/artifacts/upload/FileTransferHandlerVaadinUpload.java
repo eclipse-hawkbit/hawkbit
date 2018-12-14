@@ -14,8 +14,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             LOG.info("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
-            if (ArtifactUpload.ILLEGAL_FILENAME_CHARACTERS.stringContainsCharacter(event.getFilename())) {
+            if (RegexCharacterCollection.stringContainsCharacter(event.getFilename(), ILLEGAL_FILENAME_CHARACTERS)) {
                 LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
                         fileUploadId);
                 interruptUploadDueToIllegalFilename();

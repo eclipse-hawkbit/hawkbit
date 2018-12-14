@@ -13,8 +13,6 @@ import java.io.InputStream;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.RegexCharacterCollection;
-import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.hibernate.validator.constraints.SafeHtml;
 
 /**
@@ -22,9 +20,6 @@ import org.hibernate.validator.constraints.SafeHtml;
  *
  */
 public class ArtifactUpload {
-
-    public static final RegexCharacterCollection ILLEGAL_FILENAME_CHARACTERS = new RegexCharacterCollection(
-            RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
 
     @NotNull
     private final InputStream inputStream;
