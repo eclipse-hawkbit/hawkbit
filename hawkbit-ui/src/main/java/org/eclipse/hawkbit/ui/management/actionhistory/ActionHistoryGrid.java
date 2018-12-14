@@ -109,8 +109,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     boolean forceClientRefreshToggle = true;
 
-    private final SpPermissionChecker permissionChecker;
-
     /**
      * Constructor.
      *
@@ -123,11 +121,10 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
             final SpPermissionChecker permissionChecker) {
-        super(i18n, eventBus, null);
+        super(i18n, eventBus, permissionChecker);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
-        this.permissionChecker = permissionChecker;
 
         setMaximizeSupport(new ActionHistoryMaximizeSupport());
         setSingleSelectionSupport(new SingleSelectionSupport());
