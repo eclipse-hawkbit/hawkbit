@@ -152,7 +152,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertRequestAttributesUpdateMessage(final String target) {
         assertReplyMessageHeader(EventTopic.REQUEST_ATTRIBUTES_UPDATE, target);
     }
-    
+
     protected void assertRequestAttributesUpdateMessageAbsent() {
         assertThat(replyToListener.getEventTopicMessages()).doesNotContainKey(EventTopic.REQUEST_ATTRIBUTES_UPDATE);
     }
@@ -352,12 +352,18 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
 
     @Step
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
-        final Target findByControllerId = waitUntilIsPresent(
-                () -> controllerManagement.getByControllerId(controllerId));
-        final Map<String, String> controllerAttributes = targetManagement
-                .getControllerAttributes(findByControllerId.getControllerId());
-        assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
-        attributes.forEach((k, v) -> assertKeyValueInMap(k, v, controllerAttributes));
+        waitUntilIsPresent(() -> controllerManagement.getByControllerId(controllerId));
+
+        createConditionFactory().until(() -> {
+            try {
+                final Map<String, String> controllerAttributes = securityRule
+                        .runAsPrivileged(() -> targetManagement.getControllerAttributes(controllerId));
+                assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
+                attributes.forEach((k, v) -> assertKeyValueInMap(k, v, controllerAttributes));
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private void assertKeyValueInMap(final String key, final String value,
