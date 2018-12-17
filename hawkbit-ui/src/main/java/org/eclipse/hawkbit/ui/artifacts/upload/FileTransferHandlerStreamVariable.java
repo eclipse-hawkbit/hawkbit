@@ -14,8 +14,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +63,13 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
+        if (RegexCharacterCollection.stringContainsCharacter(event.getFileName(), ILLEGAL_FILENAME_CHARACTERS)) {
+            LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
+            interruptUploadDueToIllegalFilename();
+        } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
             LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
                     selectedSoftwareModule);
-            getUploadState().updateFileUploadProgress(fileUploadId,
-                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-            setDuplicateFile();
+            interruptUploadDueToDuplicateFile();
         }
     }
 
@@ -90,10 +91,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             LOG.error("Creating piped Stream failed {}.", e);
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
-            setFailureReasonUploadFailed();
-            setUploadInterrupted();
-            getUploadState().updateFileUploadProgress(fileUploadId,
-                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
+            interruptUploadDueToUploadFailed();
+            publishUploadFailedAndFinishedEvent(fileUploadId, e);
             return ByteStreams.nullOutputStream();
         }
         return outputStream;
@@ -120,8 +119,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            setFailureReasonFileSizeExceeded(maxSize);
-            setUploadInterrupted();
+            interruptUploadDueToFileSizeExceeded(maxSize);
             return;
         }
         if (isUploadInterrupted()) {
@@ -153,14 +151,10 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void streamingFailed(final StreamingErrorEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (isDuplicateFile()) {
-            publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
-                    event.getException());
-        } else {
-            publishUploadFailedEvent(fileUploadId, event.getException());
+        if (!isUploadInterrupted()) {
+            interruptUploadDueToUploadFailed();
         }
-        setUploadInterrupted();
-        publishUploadFinishedEvent(fileUploadId);
+        publishUploadFailedAndFinishedEvent(fileUploadId, event.getException());
     }
 
     @Override

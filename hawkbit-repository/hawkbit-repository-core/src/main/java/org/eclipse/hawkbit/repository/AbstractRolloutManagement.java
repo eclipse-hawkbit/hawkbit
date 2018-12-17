@@ -27,10 +27,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -65,8 +61,8 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware,
-            final LockRegistry lockRegistry, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final RolloutApprovalStrategy rolloutApprovalStrategy) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -78,14 +74,6 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.tenantAware = tenantAware;
         this.lockRegistry = lockRegistry;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
-    }
-
-    protected Long runInNewTransaction(final String transactionName, final TransactionCallback<Long> action) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName(transactionName);
-        def.setReadOnly(false);
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(action);
     }
 
     protected RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,

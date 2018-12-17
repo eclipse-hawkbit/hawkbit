@@ -186,7 +186,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         saveButton = createSaveButton();
         searchIcon = createSearchIcon();
 
-        helpLink = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getTargetfilterView());
+        helpLink = SPUIComponentProvider.getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getTargetfilterView());
 
         closeIcon = createSearchResetIcon();
     }

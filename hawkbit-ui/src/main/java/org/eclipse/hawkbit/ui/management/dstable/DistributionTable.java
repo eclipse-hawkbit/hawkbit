@@ -612,7 +612,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private Link maintenanceWindowHelpLinkControl() {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        return SPUIComponentProvider.getHelpLink(maintenanceWindowHelpUrl);
+        return SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
     }
 
     private void initMaintenanceWindow() {

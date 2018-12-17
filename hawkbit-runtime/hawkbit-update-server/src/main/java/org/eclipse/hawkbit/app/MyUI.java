@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.ErrorView;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
@@ -43,8 +44,9 @@ public class MyUI extends AbstractHawkbitUI {
     @Autowired
     MyUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus, final SpringViewProvider viewProvider,
             final ApplicationContext context, final DashboardMenu dashboardMenu, final ErrorView errorview,
-            final NotificationUnreadButton notificationUnreadButton) {
-        super(pushStrategy, eventBus, viewProvider, context, dashboardMenu, errorview, notificationUnreadButton);
+            final NotificationUnreadButton notificationUnreadButton, final UiProperties uiProperties) {
+        super(pushStrategy, eventBus, viewProvider, context, dashboardMenu, errorview, notificationUnreadButton,
+                uiProperties);
     }
 
 }

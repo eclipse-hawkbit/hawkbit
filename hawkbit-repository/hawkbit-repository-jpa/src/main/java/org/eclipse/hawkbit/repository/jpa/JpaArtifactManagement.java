@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.io.InputStream;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -30,6 +29,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -95,22 +95,24 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final InputStream stream, final long moduleId, final String filename,
-            final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
-            final String contentType, final long filesize) {
+    public Artifact create(final ArtifactUpload artifactUpload) {
+        final String filename = artifactUpload.getFilename();
+        final long moduleId = artifactUpload.getModuleId();
         AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
-        final Artifact existing = checkForExistingArtifact(filename, overrideExisting, softwareModule);
+        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(),
+                softwareModule);
 
         assertArtifactQuota(moduleId, 1);
-        assertMaxArtifactSizeQuota(filename, moduleId, filesize);
-        assertMaxArtifactStorageQuota(filename, filesize);
+        assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
+        assertMaxArtifactStorageQuota(filename, artifactUpload.getFilesize());
 
         try {
-            result = artifactRepository.store(tenantAware.getCurrentTenant(), stream, filename, contentType,
-                    new DbArtifactHash(providedSha1Sum, providedMd5Sum));
+            result = artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(), filename,
+                    artifactUpload.getContentType(),
+                    new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum()));
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
@@ -246,15 +248,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         LOG.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(artifact);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final InputStream inputStream, final long moduleId, final String filename,
-            final boolean overrideExisting, final long filesize) {
-        return create(inputStream, moduleId, filename, null, null, overrideExisting, null, filesize);
     }
 
     @Override

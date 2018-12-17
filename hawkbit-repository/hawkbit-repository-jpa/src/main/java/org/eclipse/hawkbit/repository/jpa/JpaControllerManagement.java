@@ -60,6 +60,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
+import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -88,12 +89,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Joiner;
@@ -176,14 +174,6 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         this.repositoryProperties = repositoryProperties;
-    }
-
-    private <T> T runInNewTransaction(final String transactionName, final TransactionCallback<T> action) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName(transactionName);
-        def.setReadOnly(false);
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(action);
     }
 
     @Override
@@ -423,7 +413,8 @@ public class JpaControllerManagement implements ControllerManagement {
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
                 final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
-                tenantAware.runAsTenant(tenant, () -> runInNewTransaction("flushUpdateQueue", createTransaction));
+                tenantAware.runAsTenant(tenant,
+                        () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
             });
         } catch (final RuntimeException ex) {
             LOG.error("Failed to persist UpdateQueue content.", ex);
@@ -605,8 +596,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         switch (actionStatus.getStatus()) {
         case ERROR:
-            final JpaTarget target = DeploymentHelper.updateTargetInfo((JpaTarget) action.getTarget(),
-                    TargetUpdateStatus.ERROR, false);
+            final JpaTarget target = (JpaTarget) action.getTarget();
+            target.setUpdateStatus(TargetUpdateStatus.ERROR);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
@@ -626,7 +617,7 @@ public class JpaControllerManagement implements ControllerManagement {
         if (controllerId != null) {
             targetManagement.requestControllerAttributes(controllerId);
         }
-        
+
         return savedAction;
     }
 
@@ -673,10 +664,10 @@ public class JpaControllerManagement implements ControllerManagement {
             final UpdateMode mode) {
 
         /*
-            Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by
+         * EclipseLink. Hence, they are validated here.
          */
-        if (data.entrySet().stream()
-                .anyMatch(e -> !isAttributeEntryValid(e))) {
+        if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
         }
 

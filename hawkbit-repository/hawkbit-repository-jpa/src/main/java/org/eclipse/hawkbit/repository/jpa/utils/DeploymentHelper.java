@@ -6,18 +6,25 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Utility class for deployment related topics.
@@ -27,31 +34,6 @@ public final class DeploymentHelper {
 
     private DeploymentHelper() {
         // utility class
-    }
-
-    /**
-     * Internal helper method used only inside service level. As a result is no
-     * additional security necessary.
-     *
-     * @param target
-     *            to update
-     * @param status
-     *            of the target
-     * @param setInstalledDate
-     *            to set
-     * @param targetInfoRepository
-     *            for the operation
-     *
-     * @return updated target
-     */
-    static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
-            final boolean setInstalledDate) {
-        target.setUpdateStatus(status);
-
-        if (setInstalledDate) {
-            target.setInstallationDate(System.currentTimeMillis());
-        }
-        return target;
     }
 
     /**
@@ -65,10 +47,8 @@ public final class DeploymentHelper {
      *            for the operation
      * @param targetRepository
      *            for the operation
-     * @param targetInfoRepository
-     *            for the operation
      */
-    static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
+    public static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
             final TargetRepository targetRepository) {
 
         // set action inactive
@@ -81,11 +61,32 @@ public final class DeploymentHelper {
 
         if (nextActiveActions.isEmpty()) {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());
-            updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false);
+            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         } else {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }
+
         targetRepository.save(target);
     }
 
+    /**
+     * Executes the modifying action in new transaction
+     *
+     * @param txManager
+     *            transaction manager interface
+     * @param transactionName
+     *            the name of the new transaction
+     * @param action
+     *            the callback to execute in new tranaction
+     *
+     * @return the result of the action
+     */
+    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
+            final String transactionName, @NotNull final TransactionCallback<T> action) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName(transactionName);
+        def.setReadOnly(false);
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def).execute(action);
+    }
 }

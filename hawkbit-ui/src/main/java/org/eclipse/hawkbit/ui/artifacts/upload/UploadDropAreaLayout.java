@@ -190,8 +190,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
                 }
             }
             if (duplicateFound) {
-                uiNotification.displayValidationError(
-                        i18n.getMessage("message.no.duplicateFiles"));
+                uiNotification.displayValidationError(i18n.getMessage("message.no.duplicateFiles"));
             }
         }
 

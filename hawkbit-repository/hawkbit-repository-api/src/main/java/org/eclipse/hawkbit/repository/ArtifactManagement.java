@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.io.InputStream;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,50 +47,8 @@ public interface ArtifactManagement {
      * Persists artifact binary as provided by given InputStream. assign the
      * artifact in addition to given {@link SoftwareModule}.
      *
-     * @param inputStream
-     *            to read from for artifact binary
-     * @param moduleId
-     *            to assign the new artifact to
-     * @param filename
-     *            of the artifact
-     * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overridden
-     *            if it already exists
-     * @param filesize
-     *            the size of the file in bytes.
-     *
-     * @return uploaded {@link Artifact}
-     *
-     * @throws ArtifactUploadFailedException
-     *             if upload fails
-     * @throws EntityNotFoundException
-     *             if given software module does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    Artifact create(@NotNull InputStream inputStream, long moduleId, final String filename,
-            final boolean overrideExisting, final long filesize);
-
-    /**
-     * Persists artifact binary as provided by given InputStream. assign the
-     * artifact in addition to given {@link SoftwareModule}.
-     *
-     * @param stream
-     *            to read from for artifact binary
-     * @param moduleId
-     *            to assign the new artifact to
-     * @param filename
-     *            of the artifact
-     * @param providedSha1Sum
-     *            optional sha1 checksum to check the new file against
-     * @param providedMd5Sum
-     *            optional md5 checksum to check the new file against
-     * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overridden
-     *            if it already exists
-     * @param contentType
-     *            the contentType of the file
-     * @param filesize
-     *            the size of the file in bytes.
+     * @param artifactUpload
+     *            {@link ArtifactUpload} containing the upload information
      * 
      * @return uploaded {@link Artifact}
      *
@@ -102,10 +62,11 @@ public interface ArtifactManagement {
      *             if check against provided MD5 checksum failed
      * @throws InvalidSHA1HashException
      *             if check against provided SHA1 checksum failed
+     * @throws ConstraintViolationException
+     *             if {@link ArtifactUpload} contains invalid values
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    Artifact create(@NotNull InputStream stream, long moduleId, @NotEmpty String filename, String providedMd5Sum,
-            String providedSha1Sum, boolean overrideExisting, String contentType, long filesize);
+    Artifact create(@NotNull @Valid ArtifactUpload artifactUpload);
 
     /**
      * Garbage collects artifact binaries if only referenced by given

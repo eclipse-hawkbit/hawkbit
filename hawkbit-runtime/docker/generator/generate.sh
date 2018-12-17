@@ -9,7 +9,7 @@ set -euxo pipefail
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-HAWKBIT_VERSION="0.2.4"
+HAWKBIT_VERSION="0.2.5"
 MARIADB_DRIVER_VERSION="2.3.0"
 BASE_IMAGE="openjdk:8u181-jre-alpine"
 

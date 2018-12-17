@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -466,7 +467,8 @@ public class TestdataFactory {
             final String artifactData = "some test data" + i;
             final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));
             artifacts.add(
-                    artifactManagement.create(stubInputStream, moduleId, "filename" + i, false, artifactData.length()));
+                    artifactManagement.create(new ArtifactUpload(stubInputStream, moduleId, "filename" + i, false,
+                            artifactData.length())));
 
         }
 

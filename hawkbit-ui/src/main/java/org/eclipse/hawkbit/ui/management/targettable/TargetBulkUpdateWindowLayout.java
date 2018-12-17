@@ -145,7 +145,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         targetsCountLabel = getStatusCountLabel();
         bulkUploader = getBulkUploadHandler();
         linkToSystemConfigHelp = SPUIComponentProvider
-                .getHelpLink(uiproperties.getLinks().getDocumentation().getDeploymentView());
+                .getHelpLink(i18n, uiproperties.getLinks().getDocumentation().getDeploymentView());
         windowCaption = new Label(i18n.getMessage("caption.bulk.upload.targets"));
         minimizeButton = getMinimizeButton();
         closeButton = getCloseButton();

@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -444,10 +445,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Target savedTarget = testdataFactory.createTarget();
 
         // create two artifacts with identical SHA1 hash
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
-        final Artifact artifact2 = artifactManagement.create(new ByteArrayInputStream(random),
-                ds2.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
+                ds2.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
         assertThat(

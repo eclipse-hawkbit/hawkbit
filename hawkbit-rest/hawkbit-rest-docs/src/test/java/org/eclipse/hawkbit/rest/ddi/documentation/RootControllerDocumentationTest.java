@@ -29,6 +29,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -129,8 +130,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         set.getModules().forEach(module -> {
             final byte random[] = RandomStringUtils.random(5).getBytes();
 
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0);
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "file.signature", false, 0);
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0));
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file.signature", false, 0));
         });
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
@@ -250,8 +253,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         set.getModules().forEach(module -> {
             final byte random[] = RandomStringUtils.random(5).getBytes();
 
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0);
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "file.signature", false, 0);
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0));
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file.signature", false, 0));
         });
 
         softwareModuleManagement.createMetaData(
@@ -426,7 +431,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final SoftwareModule module = (SoftwareModule) set.getModules().toArray()[0];
 
         final byte random[] = RandomStringUtils.random(5).getBytes();
-        artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "binaryFile", false, 0);
+        artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binaryFile", false, 0));
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         deploymentManagement.assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType()));
