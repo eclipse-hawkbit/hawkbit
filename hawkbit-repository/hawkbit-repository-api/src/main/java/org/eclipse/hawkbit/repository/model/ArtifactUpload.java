@@ -14,6 +14,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.SafeHtml;
+import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
 
 /**
  * Use to create a new artifact.
@@ -27,7 +28,7 @@ public class ArtifactUpload {
     private final long moduleId;
 
     @NotEmpty
-    @SafeHtml(message = "The filename might contain unsafe HTML code")
+    @SafeHtml(whitelistType = WhiteListType.NONE, message = "Invalid characters in string")
     private final String filename;
 
     private final String providedMd5Sum;
