@@ -12,12 +12,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,49 +70,41 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadStarted(final StartedEvent event) {
         // reset internal state here because instance is reused for next upload!
         resetState();
-        this.fileUploadId = null;
 
-        assertThatOneSoftwareModuleIsSelected();
-
-        // selected software module at the time of this callback is
-        // considered
-        SoftwareModule softwareModule = null;
-        final Optional<Long> selectedSoftwareModuleId = getUploadState().getSelectedBaseSwModuleId();
-        final Long softwareModuleId = selectedSoftwareModuleId.orElse(null);
-        if (softwareModuleId != null) {
-            softwareModule = softwareModuleManagement.get(softwareModuleId).orElse(null);
-        }
+        final SoftwareModule softwareModule = getSelectedSoftwareModule();
 
         this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
 
         if (getUploadState().isFileInUploadState(this.fileUploadId)) {
-            setFailureReasonUploadFailed();
             // actual interrupt will happen a bit late so setting the below
             // flag
-            setDuplicateFile();
+            interruptUploadDueToDuplicateFile();
             event.getUpload().interruptUpload();
         } else {
             LOG.info("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
-            if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
+            if (RegexCharacterCollection.stringContainsCharacter(event.getFilename(), ILLEGAL_FILENAME_CHARACTERS)) {
+                LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
+                        fileUploadId);
+                interruptUploadDueToIllegalFilename();
+                event.getUpload().interruptUpload();
+            }else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
                 LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
-                getUploadState().updateFileUploadProgress(fileUploadId,
-                        new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-                setDuplicateFile();
+                interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();
             }
         }
     }
 
-    private void assertThatOneSoftwareModuleIsSelected() {
-        // FileUpload button should be disabled if no SoftwareModul or more
-        // than one is selected!
-        if (getUploadState().isNoSoftwareModuleSelected()) {
-            throw new IllegalStateException("No SoftwareModul selected");
-        } else if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
+    private SoftwareModule getSelectedSoftwareModule() {
+        if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
             throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
         }
+        final long selectedId = getUploadState().getSelectedBaseSwModuleId()
+                .orElseThrow(() -> new IllegalStateException("No SoftwareModul selected"));
+        return softwareModuleManagement.get(selectedId)
+                .orElseThrow(() -> new IllegalStateException("SoftwareModul with unknown ID selected"));
     }
 
     /**
@@ -141,11 +132,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             LOG.error("Creating piped Stream failed {}.", e);
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
-            setFailureReasonUploadFailed();
-            setUploadInterrupted();
-            getUploadState().updateFileUploadProgress(fileUploadId,
-                    new FileUploadProgress(fileUploadId, FileUploadStatus.UPLOAD_FAILED));
-            uiNotification.displayWarning("try again");
+            interruptUploadDueToUploadFailed();
+            publishUploadFailedAndFinishedEvent(fileUploadId, e);
             return ByteStreams.nullOutputStream();
         }
         return outputStream;
@@ -160,8 +148,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void updateProgress(final long readBytes, final long contentLength) {
         if (readBytes > maxSize || contentLength > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            setFailureReasonFileSizeExceeded(maxSize);
-            setUploadInterrupted();
+            interruptUploadDueToFileSizeExceeded(maxSize);
             return;
         }
         if (isUploadInterrupted()) {
@@ -209,14 +196,15 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     public void uploadFailed(final FailedEvent event) {
         assertStateConsistency(fileUploadId, event.getFilename());
 
-        if (isDuplicateFile()) {
-            publishUploadFailedEvent(fileUploadId, getI18n().getMessage("message.no.duplicateFiles"),
-                    event.getReason());
-        } else {
-            publishUploadFailedEvent(fileUploadId, event.getReason());
+        if (!isUploadInterrupted()) {
+            interruptUploadDueToUploadFailed();
         }
-        setUploadInterrupted();
-        publishUploadFinishedEvent(fileUploadId);
+        publishUploadFailedAndFinishedEvent(fileUploadId, event.getReason());
     }
 
+    @Override
+    protected void resetState() {
+        super.resetState();
+        this.fileUploadId = null;
+    }
 }
