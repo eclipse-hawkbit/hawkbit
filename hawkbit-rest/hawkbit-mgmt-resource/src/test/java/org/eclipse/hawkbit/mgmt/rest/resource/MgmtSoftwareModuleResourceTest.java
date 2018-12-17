@@ -206,7 +206,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
-    
+
     @Test
     @Description("Verifies that artifact with invalid filename cannot be uploaded to prevent cross site scripting.")
     public void uploadArtifactFailsIfFilenameInvalide() throws Exception {
@@ -219,7 +219,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("The filename might contain unsafe HTML code.")));
+                .andExpect(jsonPath("$.message", containsString("Invalid characters in string")));
     }
 
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
