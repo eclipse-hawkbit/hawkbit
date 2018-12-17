@@ -318,7 +318,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     deploymentManagement.forceTargetAction(actionId);
                     populateAndUpdateTargetDetails(selectedTarget);
                     notification.displaySuccess(i18n.getMessage("message.force.action.success"));
-                });
+                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
         confirmDialog.getWindow().bringToFront();
@@ -346,7 +346,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     } else {
                         notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
                     }
-                }, FontAwesome.WARNING);
+                }, FontAwesome.WARNING, UIComponentIdProvider.CONFIRMATION_POPUP_ID, null);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
         confirmDialog.getWindow().bringToFront();
@@ -377,7 +377,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     } else {
                         notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
                     }
-                });
+                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
