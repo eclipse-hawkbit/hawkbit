@@ -117,6 +117,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * @param eventBus
      * @param notification
      * @param managementUIState
+     * @param permissionChecker
      */
     protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
