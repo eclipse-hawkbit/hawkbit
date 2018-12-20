@@ -378,7 +378,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
         return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
-                .map(actionRepository::save)
+                .filter(Objects::nonNull).map(actionRepository::save)
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
     }
 
