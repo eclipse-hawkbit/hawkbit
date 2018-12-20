@@ -292,11 +292,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(post(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.assigned", equalTo(knownTargetIdDifferentCase.length)))
-                .andExpect(jsonPath("$.alreadyAssigned", equalTo(0)))
-                .andExpect(jsonPath("$.total", equalTo(knownTargetIdDifferentCase.length)));
-
+                .andExpect(status().isOk());
+        // we just need to make sure that no error 500 is returned
     }
 
     @Test
