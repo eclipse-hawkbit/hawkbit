@@ -274,6 +274,32 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Ensures that targets can be assigned even if the specified controller IDs are in different case (e.g. 'TARGET1' instead of 'target1'.")
+    public void assignTargetsToDistributionSetIgnoreCase() throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "64-da-a0-02-43-8b", "Trg1", "target2", "target4" };
+        final String[] knownTargetIdDifferentCase = new String[] { "64-DA-A0-02-43-8b", "TRG1", "TarGET2", "target4" };
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+        }
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIdDifferentCase) {
+            list.put(new JSONObject().put("id", targetId).put("type", "forced"));
+        }
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigned", equalTo(knownTargetIdDifferentCase.length)))
+                .andExpect(jsonPath("$.alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("$.total", equalTo(knownTargetIdDifferentCase.length)));
+
+    }
+
+    @Test
     @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
     public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
 
