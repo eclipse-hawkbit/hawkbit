@@ -139,7 +139,7 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <java.version>1.8</java.version>
       <spring.boot.version>2.1.1.RELEASE</spring.boot.version>
-      <spring.cloud.version>Greenwich.RC1</spring.cloud.version>
+      <spring.cloud.version>Greenwich.RC2</spring.cloud.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
