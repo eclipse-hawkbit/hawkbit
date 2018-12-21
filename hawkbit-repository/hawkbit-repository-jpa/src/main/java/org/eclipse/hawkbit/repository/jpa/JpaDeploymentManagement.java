@@ -88,9 +88,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -288,7 +285,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targetEntitiesIdsChunks);
 
         final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
-                assignmentStrategy, controllerIDs, distributionSetEntity);
+                assignmentStrategy, distributionSetEntity);
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
@@ -376,14 +373,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
             final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
-            final List<String> controllerIDs, final JpaDistributionSet set) {
+            final JpaDistributionSet set) {
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
                 .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
-        return targets.stream()
-                .map(trg -> createTargetAction(assignmentStrategy, targetsWithActionType, controllerIDs, targets,
-                        targetsWithActionMap, trg, set))
-                .map(actionRepository::save)
+        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
+                .filter(Objects::nonNull).map(actionRepository::save)
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
     }
 
@@ -783,54 +778,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private static String formatInClause(final Collection<String> elements) {
         return "#" + Joiner.on(",#").join(elements);
-    }
-
-    @SuppressWarnings({ "squid:S1695", "squid:S1696" })
-    private JpaAction createTargetAction(final AbstractDsAssignmentStrategy assignmentStrategy,
-            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
-            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set) {
-        try {
-            return assignmentStrategy.createTargetAction(targetsWithActionMap, target, set);
-        } catch (final NullPointerException e) {
-            dumpDistributionSetAssignment(target, set, targetsWithActionType, controllerIDs, targets,
-                    targetsWithActionMap);
-            throw e;
-        }
-    }
-
-    private void dumpDistributionSetAssignment(final JpaTarget target, final JpaDistributionSet set,
-            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
-            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap) {
-        final ObjectWriter writer = new ObjectMapper().writer();
-        final String correlationID = "DistributionSetAssignmentDump[" + Thread.currentThread().getId() + "]";
-        dump(correlationID, "Target", Objects.toString(target));
-        dump(correlationID, "DistributionSet", Objects.toString(set));
-        if (target != null) {
-            dump(correlationID, "ControllerID", Objects.toString(target.getControllerId()));
-            if (set != null) {
-                dump(correlationID, "Actions", toString(writer,
-                        actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)));
-            }
-        }
-        dump(correlationID, "ControllerIDs", toString(writer, controllerIDs));
-        dump(correlationID, "Targets", toString(writer, targets));
-        dump(correlationID, "TargetsWithActionType", toString(writer, targetsWithActionType));
-        dump(correlationID, "TargetsWithActionMap", toString(writer, targetsWithActionMap));
-    }
-
-    private static void dump(final String prefix, final String key, final String value) {
-        LOG.error("{} >>> {}: {}", prefix, key, value);
-    }
-
-    @SuppressWarnings("squid:S1166")
-    private static String toString(final ObjectWriter writer, final Object o) {
-        try {
-            return writer.writeValueAsString(o);
-        } catch (final JsonProcessingException e) {
-            LOG.error("Object serialization failed", e);
-            return e.getMessage();
-        }
     }
 
     protected ActionRepository getActionRepository() {

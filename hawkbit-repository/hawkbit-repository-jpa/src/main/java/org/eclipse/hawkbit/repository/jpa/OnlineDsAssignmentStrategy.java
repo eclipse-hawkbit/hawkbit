@@ -93,7 +93,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
-        result.setStatus(Status.RUNNING);
+        if (result != null) {
+            result.setStatus(Status.RUNNING);
+        }
         return result;
     }
 
