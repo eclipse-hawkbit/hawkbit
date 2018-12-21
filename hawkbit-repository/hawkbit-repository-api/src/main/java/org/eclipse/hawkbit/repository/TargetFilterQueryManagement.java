@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
@@ -220,6 +221,7 @@ public interface TargetFilterQueryManagement {
      *            of the target filter query to be updated
      * @param dsId
      *            to be updated or <code>null</code> in order to remove it
+     *            together with the auto-assign {@link ActionType}
      * 
      * @return the updated {@link TargetFilterQuery}
      * 
@@ -233,5 +235,23 @@ public interface TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDS(long queryId, Long dsId);
+
+    /**
+     * Updates the the auto-assign {@link ActionType} of the addressed
+     * {@link TargetFilterQuery}.
+     *
+     * @param queryId
+     *            of the target filter query to be updated
+     * @param actionType
+     *            to be updated
+     * 
+     * @return the updated {@link TargetFilterQuery}
+     * 
+     * @throws EntityNotFoundException
+     *             if {@link TargetFilterQuery} is provided but not found
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetFilterQuery updateAutoAssignActionType(long queryId, @NotNull ActionType actionType);
 
 }

@@ -108,8 +108,9 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as there is no distribution set
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("testfilter").set(set.getId()).query("name==target*")));
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
+                        .name("testfilter").autoAssignDistributionSet(set.getId()).query("name==target*")));
     }
 
     @Test
@@ -225,8 +226,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as the query does not exceed the quota
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("testfilter").set(set.getId()).query("name==foo"));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
+                .create().name("testfilter").autoAssignDistributionSet(set.getId()).query("name==foo"));
 
         // update with a query string that addresses too many targets
         assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement

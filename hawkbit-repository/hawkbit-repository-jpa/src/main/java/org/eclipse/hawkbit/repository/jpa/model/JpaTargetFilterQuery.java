@@ -23,10 +23,12 @@ import javax.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -41,7 +43,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 @SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
         implements TargetFilterQuery, EventAwareEntity {
-    private static final long serialVersionUID = 7493966984413479089L;
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
     @Size(max = NamedEntity.NAME_MAX_SIZE)
@@ -57,6 +59,10 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @JoinColumn(name = "auto_assign_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_filter_auto_assign_ds"))
     private JpaDistributionSet autoAssignDistributionSet;
 
+    @Column(name = "auto_assign_action_type", nullable = true)
+    @Convert("actionType")
+    private ActionType autoAssignActionType;
+
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
     }
@@ -71,11 +77,12 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
      * @param autoAssignDistributionSet
      *            of the {@link TargetFilterQuery}.
      */
-    public JpaTargetFilterQuery(final String name, final String query,
-            final DistributionSet autoAssignDistributionSet) {
+    public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
+            final ActionType autoAssignActionType) {
         this.name = name;
         this.query = query;
         this.autoAssignDistributionSet = (JpaDistributionSet) autoAssignDistributionSet;
+        this.autoAssignActionType = autoAssignActionType;
     }
 
     @Override
@@ -103,6 +110,15 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
 
     public void setAutoAssignDistributionSet(final JpaDistributionSet distributionSet) {
         this.autoAssignDistributionSet = distributionSet;
+    }
+
+    @Override
+    public ActionType getAutoAssignActionType() {
+        return autoAssignActionType;
+    }
+
+    public void setAutoAssignActionType(final ActionType actionType) {
+        this.autoAssignActionType = actionType;
     }
 
     @Override
