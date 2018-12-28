@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionType;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -222,7 +222,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
+    public TargetFilterQuery updateAutoAssignDSWithActionType(final long queryId, final Long dsId,
+            final ActionType actionType) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
 
         if (dsId == null) {
@@ -234,33 +235,26 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // specify an
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
+
             targetFilterQuery.setAutoAssignDistributionSet(findDistributionSetAndThrowExceptionIfNotFound(dsId));
+            // the action type is set to FORCED per default (when not explicitly
+            // specified)
+            targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(actionType));
         }
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
-    @Override
-    @Transactional
-    public TargetFilterQuery updateAutoAssignActionType(final long queryId, final ActionType actionType) {
-        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
+    private ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
+        if (actionType == null) {
+            return ActionType.FORCED;
+        }
 
-        validateAutoAssignActionType(actionType, targetFilterQuery);
-        targetFilterQuery.setAutoAssignActionType(actionType);
-
-        return targetFilterQueryRepository.save(targetFilterQuery);
-    }
-
-    private void validateAutoAssignActionType(final ActionType actionType,
-            final JpaTargetFilterQuery targetFilterQuery) {
         if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
-            throw new InvalidAutoAssignActionType();
+            throw new InvalidAutoAssignActionTypeException();
         }
 
-        if (targetFilterQuery.getAutoAssignDistributionSet() == null) {
-            throw new InvalidAutoAssignActionType(
-                    "Update of action type for auto-assignment is not allowed when distribution set is absent");
-        }
+        return actionType;
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {

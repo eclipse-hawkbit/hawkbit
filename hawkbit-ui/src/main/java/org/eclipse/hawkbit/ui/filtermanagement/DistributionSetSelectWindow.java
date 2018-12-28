@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import java.io.Serializable;
+import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -47,11 +47,13 @@ import com.vaadin.ui.Window;
 public class DistributionSetSelectWindow
         implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
 
-    private static final long serialVersionUID = 4752345414134989396L;
+    private static final long serialVersionUID = 1L;
+    // private static final Logger LOG =
+    // LoggerFactory.getLogger(DistributionSetSelectWindow.class);
 
     private final VaadinMessageSource i18n;
 
-    private final DistributionSetSelectTable dsTable;
+    private final DistributionSetSelectComboBox dsCombo;
 
     private final transient EventBus.UIEventBus eventBus;
 
@@ -66,7 +68,7 @@ public class DistributionSetSelectWindow
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
-        this.dsTable = new DistributionSetSelectTable(i18n, eventBus, manageDistUIState);
+        this.dsCombo = new DistributionSetSelectComboBox(i18n, eventBus, manageDistUIState);
         this.eventBus = eventBus;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
@@ -80,21 +82,17 @@ public class DistributionSetSelectWindow
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
 
-        setTableEnabled(false);
-
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
-        verticalLayout.addComponent(dsTable);
+        verticalLayout.addComponent(dsCombo);
 
         return verticalLayout;
     }
 
     private void setValue(final Long distSet) {
         checkBox.setValue(distSet != null);
-        dsTable.setValue(distSet);
-        dsTable.setCurrentPageFirstItemId(distSet);
-        dsTable.setNullSelectionAllowed(false);
+        dsCombo.setValue(distSet);
     }
 
     /**
@@ -137,16 +135,11 @@ public class DistributionSetSelectWindow
     @Override
     public void valueChange(final Property.ValueChangeEvent event) {
         if (checkBox.getValue()) {
-            setTableEnabled(true);
+            dsCombo.setRequired(true);
         } else {
-            dsTable.select(null);
-            setTableEnabled(false);
+            dsCombo.select(null);
+            dsCombo.setRequired(false);
         }
-    }
-
-    private void setTableEnabled(final boolean enabled) {
-        dsTable.setEnabled(enabled);
-        dsTable.setRequired(enabled);
     }
 
     /**
@@ -164,7 +157,7 @@ public class DistributionSetSelectWindow
     }
 
     private boolean isAutoAssignmentEnabledAndDistributionSetSelected() {
-        return checkBox.getValue() && dsTable.getValue() != null;
+        return checkBox.getValue() && dsCombo.getValue() != null;
     }
 
     private boolean isAutoAssignmentDisabled() {
@@ -177,8 +170,8 @@ public class DistributionSetSelectWindow
      */
     @Override
     public void saveOrUpdate() {
-        if (checkBox.getValue() && dsTable.getValue() != null) {
-            updateTargetFilterQueryDS(tfqId, (Long) dsTable.getValue());
+        if (checkBox.getValue() && dsCombo.getValue() != null) {
+            updateTargetFilterQueryDS(tfqId, (Long) dsCombo.getValue());
 
         } else if (!checkBox.getValue()) {
             updateTargetFilterQueryDS(tfqId, null);
@@ -202,13 +195,10 @@ public class DistributionSetSelectWindow
 
     private void confirmWithConsequencesDialog(final TargetFilterQuery tfq, final Long dsId) {
 
-        final ConfirmConsequencesDialog dialog = new ConfirmConsequencesDialog(tfq, dsId, new ConfirmCallback() {
-            @Override
-            public void onConfirmResult(final boolean accepted) {
-                if (accepted) {
-                    targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), dsId);
-                    eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
-                }
+        final ConfirmConsequencesDialog dialog = new ConfirmConsequencesDialog(tfq, dsId, accepted -> {
+            if (accepted) {
+                targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), dsId);
+                eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
             }
         });
 
@@ -225,17 +215,14 @@ public class DistributionSetSelectWindow
      */
     private class ConfirmConsequencesDialog extends Window implements Button.ClickListener {
 
-        private static final long serialVersionUID = 7738545414137389326L;
+        private static final long serialVersionUID = 1L;
 
         private final TargetFilterQuery targetFilterQuery;
         private final Long distributionSetId;
-
-        private Button okButton;
-
-        private final ConfirmCallback callback;
+        private final transient Consumer<Boolean> callback;
 
         public ConfirmConsequencesDialog(final TargetFilterQuery targetFilterQuery, final Long dsId,
-                final ConfirmCallback callback) {
+                final Consumer<Boolean> callback) {
             super(i18n.getMessage("caption.confirm.assign.consequences"));
 
             this.callback = callback;
@@ -273,7 +260,7 @@ public class DistributionSetSelectWindow
             buttonsLayout.addStyleName("actionButtonsMargin");
             layout.addComponent(buttonsLayout);
 
-            okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
+            final Button okButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
                     i18n.getMessage(UIMessageIdProvider.BUTTON_OK), "", "", true, FontAwesome.SAVE,
                     SPUIButtonStyleNoBorderWithIcon.class);
             okButton.setSizeUndefined();
@@ -297,19 +284,14 @@ public class DistributionSetSelectWindow
 
         @Override
         public void buttonClick(final Button.ClickEvent event) {
-            if (event.getButton().getId().equals(okButton.getId())) {
-                callback.onConfirmResult(true);
+            if (event.getButton().getId().equals(UIComponentIdProvider.SAVE_BUTTON)) {
+                callback.accept(true);
             } else {
-                callback.onConfirmResult(false);
+                callback.accept(false);
             }
 
             close();
 
         }
-    }
-
-    @FunctionalInterface
-    private interface ConfirmCallback extends Serializable {
-        void onConfirmResult(boolean accepted);
     }
 }

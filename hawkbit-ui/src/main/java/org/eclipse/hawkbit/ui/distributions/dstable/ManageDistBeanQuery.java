@@ -32,6 +32,8 @@ import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
+import com.vaadin.data.util.filter.SimpleStringFilter;
+
 /**
  * Manage Distributions table bean query.
  *
@@ -60,7 +62,12 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
-            searchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
+            final String filterText = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
+                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst()
+                    .orElse(null);
+            searchText = queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT) != null
+                    ? (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT)
+                    : filterText;
             if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }

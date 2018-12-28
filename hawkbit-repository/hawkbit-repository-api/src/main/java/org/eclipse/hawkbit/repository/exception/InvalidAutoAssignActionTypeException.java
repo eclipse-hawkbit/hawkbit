@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.exception;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
-public class InvalidAutoAssignActionType extends AbstractServerRtException {
+public class InvalidAutoAssignActionTypeException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID;
@@ -20,18 +20,7 @@ public class InvalidAutoAssignActionType extends AbstractServerRtException {
     /**
      * Default constructor.
      */
-    public InvalidAutoAssignActionType() {
+    public InvalidAutoAssignActionTypeException() {
         super(THIS_ERROR);
     }
-
-    /**
-     * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     */
-    public InvalidAutoAssignActionType(final String message) {
-        super(message, THIS_ERROR);
-    }
-
 }

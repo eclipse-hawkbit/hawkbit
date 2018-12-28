@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -214,8 +215,8 @@ public interface TargetFilterQueryManagement {
     TargetFilterQuery update(@NotNull @Valid TargetFilterQueryUpdate update);
 
     /**
-     * Updates the the auto-assign {@link DistributionSet} of the addressed
-     * {@link TargetFilterQuery}.
+     * Updates the the auto-assign {@link DistributionSet} and sets default
+     * (FORCED) {@link ActionType} of the addressed {@link TargetFilterQuery}
      *
      * @param queryId
      *            of the target filter query to be updated
@@ -234,24 +235,36 @@ public interface TargetFilterQueryManagement {
      *             query addresses too many targets (auto-assignments only)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateAutoAssignDS(long queryId, Long dsId);
+    default TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
+        return updateAutoAssignDSWithActionType(queryId, dsId, null);
+    }
 
     /**
-     * Updates the the auto-assign {@link ActionType} of the addressed
-     * {@link TargetFilterQuery}.
+     * Updates the the auto-assign {@link DistributionSet} and
+     * {@link ActionType} of the addressed {@link TargetFilterQuery}
      *
      * @param queryId
      *            of the target filter query to be updated
+     * @param dsId
+     *            to be updated or <code>null</code> in order to remove it
+     *            together with the auto-assign {@link ActionType}
      * @param actionType
      *            to be updated
      * 
      * @return the updated {@link TargetFilterQuery}
      * 
      * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} is provided but not found
-     *
+     *             if either {@link TargetFilterQuery} and/or autoAssignDs are
+     *             provided but not found
+     * 
+     * @throws QuotaExceededException
+     *             if the query that is already associated with this filter
+     *             query addresses too many targets (auto-assignments only)
+     * 
+     * @throws InvalidAutoAssignActionTypeException
+     *             if the provided {@link ActionType} is not valid (neither
+     *             FORCED, nor SOFT)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateAutoAssignActionType(long queryId, @NotNull ActionType actionType);
-
+    TargetFilterQuery updateAutoAssignDSWithActionType(long queryId, Long dsId, ActionType actionType);
 }

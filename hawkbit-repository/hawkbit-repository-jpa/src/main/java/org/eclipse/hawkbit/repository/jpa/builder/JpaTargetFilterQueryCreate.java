@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetFilterQueryUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionType;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -46,7 +46,7 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
     private boolean isAutoAssignActionTypeValid(final ActionType actionType) {
         if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
-            throw new InvalidAutoAssignActionType();
+            throw new InvalidAutoAssignActionTypeException();
         }
 
         return true;
