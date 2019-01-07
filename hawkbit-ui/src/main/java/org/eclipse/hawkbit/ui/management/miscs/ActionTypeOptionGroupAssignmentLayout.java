@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -26,38 +25,20 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Action type option group layout.
+ * Action type option group layout for manual assignment.
  */
-public class ActionTypeOptionGroupLayout extends HorizontalLayout {
-
+public class ActionTypeOptionGroupAssignmentLayout extends ActionTypeOptionGroupAbstractLayout {
     private static final long serialVersionUID = 1L;
-
-    private static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
-
-    private final VaadinMessageSource i18n;
-
-    private FlexibleOptionGroup actionTypeOptionGroup;
 
     private DateField forcedTimeDateField;
 
-    /**
-     * Constructor
-     * 
-     * @param i18n
-     *            VaadinMessageSource
-     */
-    public ActionTypeOptionGroupLayout(final VaadinMessageSource i18n) {
-        this.i18n = i18n;
-
-        createOptionGroup();
+    public ActionTypeOptionGroupAssignmentLayout(final VaadinMessageSource i18n) {
+        super(i18n);
         addValueChangeListener();
-        setStyleName("dist-window-actiontype-horz-layout");
-        setSizeUndefined();
     }
 
     private void addValueChangeListener() {
@@ -77,37 +58,20 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         });
     }
 
-    private void createOptionGroup() {
+    @Override
+    protected void createOptionGroup() {
         actionTypeOptionGroup = new FlexibleOptionGroup();
         actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
         actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
         actionTypeOptionGroup.addItem(ActionTypeOption.AUTO_FORCED);
         selectDefaultOption();
 
-        final FlexibleOptionGroupItemComponent forceItem = actionTypeOptionGroup
-                .getItemComponent(ActionTypeOption.FORCED);
-        forceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        forceItem.setId(UIComponentIdProvider.SAVE_ACTION_RADIO_FORCED);
-        addComponent(forceItem);
-        final Label forceLabel = new Label();
-        forceLabel.setStyleName("statusIconPending");
-        forceLabel.setIcon(FontAwesome.BOLT);
-        forceLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED));
-        forceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_FORCED_ITEM));
-        forceLabel.setStyleName("padding-right-style");
-        addComponent(forceLabel);
+        addForcedItemWithLabel();
+        addSoftItemWithLabel();
+        addAutoForceItemWithLabelAndDateField();
+    }
 
-        final FlexibleOptionGroupItemComponent softItem = actionTypeOptionGroup.getItemComponent(ActionTypeOption.SOFT);
-        softItem.setId(UIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
-        softItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        addComponent(softItem);
-        final Label softLabel = new Label();
-        softLabel.setSizeFull();
-        softLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT));
-        softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
-        softLabel.setStyleName("padding-right-style");
-        addComponent(softLabel);
-
+    private void addAutoForceItemWithLabelAndDateField() {
         final FlexibleOptionGroupItemComponent autoForceItem = actionTypeOptionGroup
                 .getItemComponent(ActionTypeOption.AUTO_FORCED);
         autoForceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
@@ -138,38 +102,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         addComponent(forcedTimeDateField);
     }
 
-    /**
-     * To Set Default option for save.
-     */
-
-    public void selectDefaultOption() {
-        actionTypeOptionGroup.select(ActionTypeOption.FORCED);
-    }
-
-    /**
-     * Enum which described the options for the action type
-     *
-     */
-    public enum ActionTypeOption {
-        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED);
-
-        private final ActionType actionType;
-
-        ActionTypeOption(final ActionType actionType) {
-            this.actionType = actionType;
-        }
-
-        public ActionType getActionType() {
-            return actionType;
-        }
-    }
-
-    public FlexibleOptionGroup getActionTypeOptionGroup() {
-        return actionTypeOptionGroup;
-    }
-
     public DateField getForcedTimeDateField() {
         return forcedTimeDateField;
     }
-
 }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,16 +59,34 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
+        init(definition, queryConfig, sortPropertyIds, sortStates);
+    }
+
+    private void init(final QueryDefinition definition, final Map<String, Object> queryConfig,
+            final Object[] sortPropertyIds, final boolean[] sortStates) {
+        setSearchText(definition, queryConfig);
+        populateDataFromQueryConfig(queryConfig);
+        setupSorting(sortPropertyIds, sortStates);
+    }
+
+    private void setSearchText(final QueryDefinition definition, final Map<String, Object> queryConfig) {
+        final String configSearchText = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT);
+        final String filterSearchText = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
+                .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst().orElse(null);
+
+        // search text coming from query config (in our case from search field,
+        // attached to distribution set table) has higher priority compared to
+        // the search text coming from filter (in our case from combobox built
+        // in filter)
+        searchText = configSearchText != null ? configSearchText : filterSearchText;
+
+        if (!StringUtils.isEmpty(searchText)) {
+            searchText = String.format("%%%s%%", searchText);
+        }
+    }
+
+    private void populateDataFromQueryConfig(final Map<String, Object> queryConfig) {
         if (HawkbitCommonUtil.isNotNullOrEmpty(queryConfig)) {
-            final String filterText = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
-                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst()
-                    .orElse(null);
-            searchText = queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT) != null
-                    ? (String) queryConfig.get(SPUIDefinitions.FILTER_BY_TEXT)
-                    : filterText;
-            if (!StringUtils.isEmpty(searchText)) {
-                searchText = String.format("%%%s%%", searchText);
-            }
             if (queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE) != null) {
                 distributionSetType = (DistributionSetType) queryConfig
                         .get(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE);
@@ -79,7 +95,9 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                 dsComplete = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_DS_COMPLETE);
             }
         }
+    }
 
+    private void setupSorting(final Object[] sortPropertyIds, final boolean[] sortStates) {
         if (sortStates != null && sortStates.length > 0) {
             // Initialize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
@@ -153,11 +171,5 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         }
         return distributionSetManagement;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        firstPageDistributionSets = (Page<DistributionSet>) in.readObject();
     }
 }

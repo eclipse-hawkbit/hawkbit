@@ -34,8 +34,6 @@ import com.vaadin.ui.ComboBox;
 
 public class DistributionSetSelectComboBox extends ComboBox {
     private static final long serialVersionUID = 1L;
-    // private static final Logger LOG =
-    // LoggerFactory.getLogger(DistributionSetSelectComboBox.class);
 
     private final VaadinMessageSource i18n;
     private final ManageDistUIState manageDistUIState;
@@ -46,21 +44,24 @@ public class DistributionSetSelectComboBox extends ComboBox {
         this.i18n = i18n;
         this.manageDistUIState = manageDistUIState;
 
-        setNullSelectionAllowed(false);
-        setSizeFull();
-        setId(UIComponentIdProvider.DIST_SET_SELECT_TABLE_ID);
-        setCaption("Distribution Set:");
-
+        init();
         populateWithData();
         eventBus.subscribe(this);
     }
 
+    private void init() {
+        setNullSelectionAllowed(false);
+        setSizeFull();
+        setId(UIComponentIdProvider.DIST_SET_SELECT_COMBO_ID);
+        setCaption(i18n.getMessage(UIMessageIdProvider.HEADER_DISTRIBUTION_SET));
+    }
+
     private void populateWithData() {
         final Container container = createContainer();
-        container.addContainerProperty(SPUILabelDefinitions.NAME, String.class, null);
+        container.addContainerProperty(SPUILabelDefinitions.VAR_NAME_VERSION, String.class, null);
 
         setItemCaptionMode(ItemCaptionMode.PROPERTY);
-        setItemCaptionPropertyId(SPUILabelDefinitions.NAME);
+        setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME_VERSION);
         setFilteringMode(FilteringMode.CONTAINS);
 
         setContainerDataSource(container);

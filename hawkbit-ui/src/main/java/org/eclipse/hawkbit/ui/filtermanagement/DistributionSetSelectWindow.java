@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
@@ -21,6 +22,8 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAbstractLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAutoAssignmentLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -46,32 +49,27 @@ import com.vaadin.ui.Window;
  */
 public class DistributionSetSelectWindow
         implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
-
     private static final long serialVersionUID = 1L;
-    // private static final Logger LOG =
-    // LoggerFactory.getLogger(DistributionSetSelectWindow.class);
 
     private final VaadinMessageSource i18n;
-
-    private final DistributionSetSelectComboBox dsCombo;
-
     private final transient EventBus.UIEventBus eventBus;
-
     private final transient TargetManagement targetManagement;
-
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final ManageDistUIState manageDistUIState;
 
     private CheckBox checkBox;
+    private ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
+    private DistributionSetSelectComboBox dsCombo;
     private Long tfqId;
 
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final ManageDistUIState manageDistUIState) {
         this.i18n = i18n;
-        this.dsCombo = new DistributionSetSelectComboBox(i18n, eventBus, manageDistUIState);
         this.eventBus = eventBus;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.manageDistUIState = manageDistUIState;
     }
 
     private VerticalLayout initView() {
@@ -82,17 +80,16 @@ public class DistributionSetSelectWindow
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(this);
 
+        actionTypeOptionGroupLayout = new ActionTypeOptionGroupAutoAssignmentLayout(i18n);
+        dsCombo = new DistributionSetSelectComboBox(i18n, eventBus, manageDistUIState);
+
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
+        verticalLayout.addComponent(actionTypeOptionGroupLayout);
         verticalLayout.addComponent(dsCombo);
 
         return verticalLayout;
-    }
-
-    private void setValue(final Long distSet) {
-        checkBox.setValue(distSet != null);
-        dsCombo.setValue(distSet);
     }
 
     /**
@@ -109,10 +106,12 @@ public class DistributionSetSelectWindow
         final VerticalLayout verticalLayout = initView();
 
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
+        final ActionType actionType = tfq.getAutoAssignActionType();
+
         if (distributionSet != null) {
-            setValue(distributionSet.getId());
+            setValue(distributionSet.getId(), actionType);
         } else {
-            setValue(null);
+            setValue(null, null);
         }
 
         // build window after values are set to view elements
@@ -126,6 +125,16 @@ public class DistributionSetSelectWindow
         window.setVisible(true);
     }
 
+    private void setValue(final Long distSet, final ActionType actionType) {
+        checkBox.setValue(distSet != null);
+        switchAutoAssignmentInputsVisibility(distSet != null);
+
+        final ActionTypeOption actionTypeToSet = ActionTypeOption.getOptionForActionType(actionType)
+                .orElse(ActionTypeOption.FORCED);
+        actionTypeOptionGroupLayout.getActionTypeOptionGroup().select(actionTypeToSet);
+        dsCombo.setValue(distSet);
+    }
+
     /**
      * Is triggered when the checkbox value changes
      *
@@ -134,12 +143,15 @@ public class DistributionSetSelectWindow
      */
     @Override
     public void valueChange(final Property.ValueChangeEvent event) {
-        if (checkBox.getValue()) {
-            dsCombo.setRequired(true);
-        } else {
-            dsCombo.select(null);
-            dsCombo.setRequired(false);
-        }
+        switchAutoAssignmentInputsVisibility(checkBox.getValue());
+    }
+
+    private void switchAutoAssignmentInputsVisibility(final boolean autoAssignmentEnabled) {
+        actionTypeOptionGroupLayout.setVisible(autoAssignmentEnabled);
+
+        dsCombo.setVisible(autoAssignmentEnabled);
+        dsCombo.setEnabled(autoAssignmentEnabled);
+        dsCombo.setRequired(autoAssignmentEnabled);
     }
 
     /**
@@ -171,33 +183,32 @@ public class DistributionSetSelectWindow
     @Override
     public void saveOrUpdate() {
         if (checkBox.getValue() && dsCombo.getValue() != null) {
-            updateTargetFilterQueryDS(tfqId, (Long) dsCombo.getValue());
-
+            final ActionType autoAssignActionType = ((ActionTypeOption) actionTypeOptionGroupLayout
+                    .getActionTypeOptionGroup().getValue()).getActionType();
+            updateTargetFilterQueryDS(tfqId, (Long) dsCombo.getValue(), autoAssignActionType);
         } else if (!checkBox.getValue()) {
-            updateTargetFilterQueryDS(tfqId, null);
-
+            updateTargetFilterQueryDS(tfqId, null, null);
         }
-
     }
 
-    private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId) {
+    private void updateTargetFilterQueryDS(final Long targetFilterQueryId, final Long dsId,
+            final ActionType actionType) {
         final TargetFilterQuery tfq = targetFilterQueryManagement.get(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         if (dsId != null) {
-            confirmWithConsequencesDialog(tfq, dsId);
+            confirmWithConsequencesDialog(tfq, dsId, actionType);
         } else {
             targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryId, null);
             eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
         }
-
     }
 
-    private void confirmWithConsequencesDialog(final TargetFilterQuery tfq, final Long dsId) {
-
+    private void confirmWithConsequencesDialog(final TargetFilterQuery tfq, final Long dsId,
+            final ActionType actionType) {
         final ConfirmConsequencesDialog dialog = new ConfirmConsequencesDialog(tfq, dsId, accepted -> {
             if (accepted) {
-                targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), dsId);
+                targetFilterQueryManagement.updateAutoAssignDSWithActionType(tfq.getId(), dsId, actionType);
                 eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
             }
         });
@@ -206,7 +217,6 @@ public class DistributionSetSelectWindow
 
         UI.getCurrent().addWindow(dialog);
         dialog.setVisible(true);
-
     }
 
     /**
@@ -214,7 +224,6 @@ public class DistributionSetSelectWindow
      * the
      */
     private class ConfirmConsequencesDialog extends Window implements Button.ClickListener {
-
         private static final long serialVersionUID = 1L;
 
         private final TargetFilterQuery targetFilterQuery;
@@ -230,7 +239,6 @@ public class DistributionSetSelectWindow
             this.distributionSetId = dsId;
 
             init();
-
         }
 
         private void init() {
@@ -279,7 +287,6 @@ public class DistributionSetSelectWindow
             buttonsLayout.addComponent(cancelButton);
             buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
             buttonsLayout.setExpandRatio(cancelButton, 1.0F);
-
         }
 
         @Override
@@ -291,7 +298,6 @@ public class DistributionSetSelectWindow
             }
 
             close();
-
         }
     }
 }
