@@ -247,8 +247,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
-        final JpaDistributionSet set = distributionSetRepository.findById(dsID)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
+        final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
+        final List<String> controllerIDs = getControllerIdsForAssignmentAndCheckQuota(targetsWithActionType,
+                distributionSetEntity);
+        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(controllerIDs,
+                distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
@@ -277,13 +280,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
 
-        // set assigned distribution set and TargetUpdateStatus
-        final String currentUser;
-        if (auditorProvider != null) {
-            currentUser = auditorProvider.getCurrentAuditor().orElse(null);
-        } else {
-            currentUser = null;
-        }
+        setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
+                targetEntitiesIdsChunks);
 
         final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
                 assignmentStrategy, distributionSetEntity);
@@ -291,9 +289,28 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
         // action history.
-        actionStatusRepository.saveAll(targetIdsToActions.values().stream()
-                .map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
-                .collect(Collectors.toList()));
+        createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
+
+        detachEntitiesAndSendAssignmentEvents(distributionSetEntity, targetEntities, assignmentStrategy,
+                cancelingTargetEntitiesIds, controllerIdsToActions);
+
+        return new DistributionSetAssignmentResult(
+                targetEntities.stream().map(Target::getControllerId).collect(Collectors.toList()),
+                targetEntities.size(), controllerIDs.size() - targetEntities.size(),
+                Lists.newArrayList(controllerIdsToActions.values()), targetManagement);
+    }
+
+    private JpaDistributionSet getAndValidateDsById(final Long dsID) {
+        final JpaDistributionSet distributionSet = distributionSetRepository.findById(dsID)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
+
+        if (!distributionSet.isComplete()) {
+            throw new IncompleteDistributionSetException("Distribution set of type "
+                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+
+        return distributionSet;
+    }
 
     private List<String> getControllerIdsForAssignmentAndCheckQuota(
             final Collection<TargetWithActionType> targetsWithActionType, final JpaDistributionSet distributionSet) {
@@ -349,7 +366,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
-        final String currentUser = auditorProvider != null ? auditorProvider.getCurrentAuditor() : null;
+        final String currentUser = auditorProvider.getCurrentAuditor().orElse(null);
         assignmentStrategy.updateTargetStatus(set, targetIdsChunks, currentUser);
     }
 
@@ -367,7 +384,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void createActionsStatus(final Collection<JpaAction> actions,
             final AbstractDsAssignmentStrategy assignmentStrategy, final String actionMessage) {
         actionStatusRepository
-                .save(actions.stream().map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
+                .saveAll(actions.stream().map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
                         .collect(Collectors.toList()));
     }
 
