@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -113,10 +114,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false, artifactSize);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
+        final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), getOsModule(ds), "test1.signature", false, artifactSize));
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -271,10 +272,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false, artifactSize);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
+        final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), getOsModule(ds), "test1.signature", false, artifactSize));
 
         softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
@@ -395,10 +396,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "test1",
-                false, artifactSize);
-        final Artifact artifactSignature = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds),
-                "test1.signature", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
+        final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), getOsModule(ds), "test1.signature", false, artifactSize));
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 

@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTes
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -89,8 +90,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
 
         // no artifact available
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/123455",
@@ -176,8 +177,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final int artifactSize = 5 * 1024 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize);
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
+                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
@@ -216,8 +217,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "file1",
-                false, artifactSize);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, artifactSize));
 
         // download
         final MvcResult result = mvc.perform(get(
@@ -246,8 +247,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), getOsModule(ds), "file1",
-                false, resultLength);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, resultLength));
 
         assertThat(random.length).isEqualTo(resultLength);
 

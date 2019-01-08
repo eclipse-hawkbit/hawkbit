@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -189,7 +190,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
         distributionSet.getModules().forEach(module -> {
             final byte[] random = RandomStringUtils.random(5).getBytes();
-            artifactManagement.create(new ByteArrayInputStream(random), module.getId(), "file1", false, 0);
+            artifactManagement
+                    .create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file1", false, 0));
             softwareModuleManagement.update(entityFactory.softwareModule().update(module.getId())
                     .description("Description of the software module"));
         });

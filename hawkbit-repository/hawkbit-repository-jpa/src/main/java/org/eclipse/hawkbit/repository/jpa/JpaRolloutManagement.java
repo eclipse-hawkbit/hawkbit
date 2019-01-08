@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditio
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -390,10 +391,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                 RolloutGroupStatus.READY, group);
 
-        final long targetsInGroupFilter = runInNewTransaction("countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
+        final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
+                "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
                 count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
-        final long currentlyInGroup = runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
+        final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
+                "countRolloutTargetGroupByRolloutGroup",
                 count -> rolloutTargetGroupRepository.countByRolloutGroup(group));
 
         // Switch the Group status to READY, when there are enough Targets in
@@ -415,8 +418,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             } while (targetsLeftToAdd > 0);
 
             group.setStatus(RolloutGroupStatus.READY);
-            group.setTotalTargets(runInNewTransaction("countRolloutTargetGroupByRolloutGroup",
-                    count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).intValue());
+            group.setTotalTargets(
+                    DeploymentHelper.runInNewTransaction(txManager, "countRolloutTargetGroupByRolloutGroup",
+                            count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).intValue());
             return rolloutGroupRepository.save(group);
 
         } catch (final TransactionException e) {
@@ -428,7 +432,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
-        return runInNewTransaction("assignTargetsToRolloutGroup", status -> {
+        return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
@@ -579,7 +583,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
-        return runInNewTransaction("createActionsForTargets", status -> {
+        return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
             final PageRequest pageRequest = PageRequest.of(0, limit);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
                     .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
@@ -612,7 +616,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         // current scheduled action to cancel. E.g. a new scheduled action is
         // created.
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
-        actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
+        deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
         targets.forEach(target -> {
 
             assertActionsPerTargetQuota(target, 1);
@@ -825,7 +829,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
 
         try {
-            rollouts.forEach(rolloutId -> runInNewTransaction(handlerId + "-" + rolloutId,
+            rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
                     status -> executeFittingHandler(rolloutId)));
         } finally {
             lock.unlock();

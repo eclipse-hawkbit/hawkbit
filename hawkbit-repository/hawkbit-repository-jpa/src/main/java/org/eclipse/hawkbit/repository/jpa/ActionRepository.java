@@ -209,8 +209,48 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      *
+     * Retrieves all IDs for {@link Action}s referring to the given target IDs,
+     * active flag, current status and distribution set not requiring migration
+     * step.
+     *
+     * @param targetIds
+     *            the IDs of targets for the actions
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @param currentStatus
+     *            the current status of the actions
+     * @return the found list of {@link Action} IDs
+     */
+    @Query("SELECT a.id FROM JpaAction a WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
+    List<Long> findByTargetIdInAndIsActiveAndActionStatusAndDistributionSetNotRequiredMigrationStep(
+            @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
+            @Param("currentStatus") Action.Status currentStatus);
+
+    /**
+     * Switches the status of actions from one specific status into another for
+     * given actions IDs, active flag and current status
+     *
+     * @param statusToSet
+     *            the new status the actions should get
+     * @param actionIds
+     *            the IDs of the actions which are affected
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @param currentStatus
+     *            the current status of the actions
+     * @return the amount of updated actions
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds AND a.active = :active AND a.status = :currentStatus")
+    int switchStatusForActionIdInAndIsActiveAndActionStatus(@Param("statusToSet") Action.Status statusToSet,
+            @Param("actionIds") List<Long> actionIds, @Param("active") boolean active,
+            @Param("currentStatus") Action.Status currentStatus);
+
+    /**
+     *
      * Retrieves all {@link Action}s which are active and referring to the given
-     * target Ids and distribution set required migration step.
+     * target Ids and distribution set not requiring migration step.
      *
      * @param targetIds
      *            the IDs of targets for the actions
@@ -226,7 +266,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      *
      * Retrieves all {@link Action}s which are active and referring to the given
-     * target Ids and distribution set required migration step.
+     * target Ids and distribution set not requiring migration step.
      *
      * @param targetIds
      *            the IDs of targets for the actions

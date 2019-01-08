@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -82,17 +83,11 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.Lists;
 
 /**
@@ -141,7 +136,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TenantAware tenantAware;
     private final Database database;
 
-    JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
+    protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
@@ -255,61 +250,32 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final JpaDistributionSet set = distributionSetRepository.findById(dsID)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
 
-        if (!set.isComplete()) {
-            throw new IncompleteDistributionSetException(
-                    "Distribution set of type " + set.getType().getKey() + " is incomplete: " + set.getId());
-        }
-
-        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
-                .collect(Collectors.toList());
-
-        // enforce the 'max targets per manual assignment' quota
-        if (!controllerIDs.isEmpty()) {
-            assertMaxTargetsPerManualAssignmentQuota(set.getId(), controllerIDs.size());
-        }
-
-        LOG.debug("assignDistribution({}) to {} targets", set, controllerIDs.size());
-
-        final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
-                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
-
-        // split tIDs length into max entries in-statement because many database
-        // have constraint of max entries in in-statements e.g. Oracle with
-        // maximum 1000 elements, so we need to split the entries here and
-        // execute multiple statements we take the target only into account if
-        // the requested operation is no duplicate of a previous one
-        final List<JpaTarget> targets = assignmentStrategy.findTargetsForAssignment(controllerIDs, set.getId());
-
-        if (targets.isEmpty()) {
+        if (targetEntities.isEmpty()) {
             // detaching as it is not necessary to persist the set itself
-            entityManager.detach(set);
+            entityManager.detach(distributionSetEntity);
             // return with nothing as all targets had the DS already assigned
             return new DistributionSetAssignmentResult(Collections.emptyList(), 0, targetsWithActionType.size(),
                     Collections.emptyList(), targetManagement);
         }
 
-        final List<List<Long>> targetIds = Lists.partition(
-                targets.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
+        // split tIDs length into max entries in-statement because many database
+        // have constraint of max entries in in-statements e.g. Oracle with
+        // maximum 1000 elements, so we need to split the entries here and
+        // execute multiple statements
+        final List<List<Long>> targetEntitiesIdsChunks = Lists.partition(
+                targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+                Constants.MAX_ENTRIES_IN_STATEMENT);
 
         // override all active actions and set them into canceling state, we
         // need to remember which one we have been switched to canceling state
         // because for targets which we have changed to canceling we don't want
         // to publish the new action update event.
-        final Set<Long> targetIdsCancellList;
-
-        if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
-                .getValue())) {
-            targetIdsCancellList = Collections.emptySet();
-            assignmentStrategy.closeActiveActions(targetIds);
-        } else {
-            targetIdsCancellList = assignmentStrategy.cancelActiveActions(targetIds);
-        }
-
+        final Set<Long> cancelingTargetEntitiesIds = closeOrCancelActiveActions(assignmentStrategy,
+                targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
-        // cancels the
-        targetIds.forEach(tIds -> actionRepository.switchStatus(Status.CANCELED, tIds, false, Status.SCHEDULED));
+        // cancels them
+        targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
 
         // set assigned distribution set and TargetUpdateStatus
         final String currentUser;
@@ -319,14 +285,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             currentUser = null;
         }
 
-        assignmentStrategy.updateTargetStatus(set, targetIds, currentUser);
-
-        final Map<String, JpaAction> targetIdsToActions = targets.stream()
-                .map(trg -> createTargetAction(assignmentStrategy, targetsWithActionType, controllerIDs, targets,
-                        targetsWithActionMap, trg, set))
-                .map(actionRepository::save)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
-
+        final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
+                assignmentStrategy, distributionSetEntity);
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
@@ -335,17 +295,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
                 .collect(Collectors.toList()));
 
-        // detaching as it is not necessary to persist the set itself
-        entityManager.detach(set);
-        // detaching as the entity has been updated by the JPQL query above
-        targets.forEach(entityManager::detach);
+    private List<String> getControllerIdsForAssignmentAndCheckQuota(
+            final Collection<TargetWithActionType> targetsWithActionType, final JpaDistributionSet distributionSet) {
+        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+                .collect(Collectors.toList());
 
-        assignmentStrategy.sendAssignmentEvents(set, targets, targetIdsCancellList, targetIdsToActions);
+        // enforce the 'max targets per manual assignment' quota
+        if (!controllerIDs.isEmpty()) {
+            assertMaxTargetsPerManualAssignmentQuota(distributionSet.getId(), controllerIDs.size());
+        }
 
-        return new DistributionSetAssignmentResult(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), targets.size(),
-                controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
-                targetManagement);
+        return controllerIDs;
     }
 
     /**
@@ -357,9 +317,69 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      * @param requested
      *            number of targets to check
      */
-    private void assertMaxTargetsPerManualAssignmentQuota(final Long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxTargetsPerManualAssignment(),
-                Target.class, DistributionSet.class, null);
+    private void assertMaxTargetsPerManualAssignmentQuota(final Long distributionSetId,
+            final int requestedTargetsCount) {
+        QuotaHelper.assertAssignmentQuota(distributionSetId, requestedTargetsCount,
+                quotaManagement.getMaxTargetsPerManualAssignment(), Target.class, DistributionSet.class, null);
+    }
+
+    private Set<Long> closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
+            final List<List<Long>> targetIdsChunks) {
+        if (isActionsAutocloseEnabled()) {
+            assignmentStrategy.closeActiveActions(targetIdsChunks);
+            return Collections.emptySet();
+        } else {
+            return assignmentStrategy.cancelActiveActions(targetIdsChunks);
+        }
+    }
+
+    protected boolean isActionsAutocloseEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
+                .getValue());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
+        actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
+    }
+
+    private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
+            final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
+        final String currentUser = auditorProvider != null ? auditorProvider.getCurrentAuditor() : null;
+        assignmentStrategy.updateTargetStatus(set, targetIdsChunks, currentUser);
+    }
+
+    private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
+            final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
+            final JpaDistributionSet set) {
+        final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
+                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
+
+        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
+                .filter(Objects::nonNull).map(actionRepository::save)
+                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
+    }
+
+    private void createActionsStatus(final Collection<JpaAction> actions,
+            final AbstractDsAssignmentStrategy assignmentStrategy, final String actionMessage) {
+        actionStatusRepository
+                .save(actions.stream().map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
+                        .collect(Collectors.toList()));
+    }
+
+    private void detachEntitiesAndSendAssignmentEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
+            final AbstractDsAssignmentStrategy assignmentStrategy, final Set<Long> targetIdsCancellList,
+            final Map<String, JpaAction> controllerIdsToActions) {
+        // detaching as it is not necessary to persist the set itself
+        entityManager.detach(set);
+        // detaching as the entity has been updated by the JPQL query above
+        targets.forEach(entityManager::detach);
+
+        assignmentStrategy.sendAssignmentEvents(set, targets, targetIdsCancellList, controllerIdsToActions);
     }
 
     @Override
@@ -436,11 +456,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
             final Long distributionSetId, final Long rolloutGroupParentId, final int limit) {
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("startScheduledActions-" + rolloutId);
-        def.setReadOnly(false);
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        return new TransactionTemplate(txManager, def).execute(status -> {
+        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
             final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
                     rolloutGroupParentId, limit);
 
@@ -746,52 +762,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return "#" + String.join(",#", elements);
     }
 
-    @SuppressWarnings({ "squid:S1695", "squid:S1696" })
-    private JpaAction createTargetAction(final AbstractDsAssignmentStrategy assignmentStrategy,
-            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
-            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set) {
-        try {
-            return assignmentStrategy.createTargetAction(targetsWithActionMap, target, set);
-        } catch (final NullPointerException e) {
-            dumpDistributionSetAssignment(target, set, targetsWithActionType, controllerIDs, targets,
-                    targetsWithActionMap);
-            throw e;
-        }
+    protected ActionRepository getActionRepository() {
+        return actionRepository;
     }
-
-    private void dumpDistributionSetAssignment(final JpaTarget target, final JpaDistributionSet set,
-            final Collection<TargetWithActionType> targetsWithActionType, final List<String> controllerIDs,
-            final List<JpaTarget> targets, final Map<String, TargetWithActionType> targetsWithActionMap) {
-        final ObjectWriter writer = new ObjectMapper().writer();
-        final String correlationID = "DistributionSetAssignmentDump[" + Thread.currentThread().getId() + "]";
-        dump(correlationID, "Target", Objects.toString(target));
-        dump(correlationID, "DistributionSet", Objects.toString(set));
-        if (target != null) {
-            dump(correlationID, "ControllerID", Objects.toString(target.getControllerId()));
-            if (set != null) {
-                dump(correlationID, "Actions", toString(writer,
-                        actionRepository.findByTargetAndDistributionSet(new PageRequest(0, 500), target, set)));
-            }
-        }
-        dump(correlationID, "ControllerIDs", toString(writer, controllerIDs));
-        dump(correlationID, "Targets", toString(writer, targets));
-        dump(correlationID, "TargetsWithActionType", toString(writer, targetsWithActionType));
-        dump(correlationID, "TargetsWithActionMap", toString(writer, targetsWithActionMap));
-    }
-
-    private static void dump(final String prefix, final String key, final String value) {
-        LOG.error("{} >>> {}: {}", prefix, key, value);
-    }
-
-    @SuppressWarnings("squid:S1166")
-    private static String toString(final ObjectWriter writer, final Object o) {
-        try {
-            return writer.writeValueAsString(o);
-        } catch (final JsonProcessingException e) {
-            LOG.error("Object serialization failed", e);
-            return e.getMessage();
-        }
-    }
-
 }

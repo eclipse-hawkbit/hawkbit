@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,8 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +44,8 @@ import org.springframework.util.CollectionUtils;
  *
  */
 public abstract class AbstractDsAssignmentStrategy {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDsAssignmentStrategy.class);
 
     protected final TargetRepository targetRepository;
     protected final AfterTransactionCommitExecutor afterCommit;
@@ -213,7 +218,6 @@ public abstract class AbstractDsAssignmentStrategy {
                 () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
     }
 
-    @SuppressWarnings("squid:S2259")
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
             final JpaDistributionSet set) {
 
@@ -221,17 +225,21 @@ public abstract class AbstractDsAssignmentStrategy {
         assertActionsPerTargetQuota(target, 1);
 
         // create the action
-        final JpaAction actionForTarget = new JpaAction();
-        final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
-        actionForTarget.setActionType(targetWithActionType.getActionType());
-        actionForTarget.setForcedTime(targetWithActionType.getForceTime());
-        actionForTarget.setActive(true);
-        actionForTarget.setTarget(target);
-        actionForTarget.setDistributionSet(set);
-        actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
-        actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
-        actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
-        return actionForTarget;
+        return getTargetWithActionType(targetsWithActionMap, target.getControllerId()).map(targetWithActionType -> {
+            final JpaAction actionForTarget = new JpaAction();
+            actionForTarget.setActionType(targetWithActionType.getActionType());
+            actionForTarget.setForcedTime(targetWithActionType.getForceTime());
+            actionForTarget.setActive(true);
+            actionForTarget.setTarget(target);
+            actionForTarget.setDistributionSet(set);
+            actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
+            actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
+            actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
+            return actionForTarget;
+        }).orElseGet(() -> {
+            LOG.warn("Cannot find targetWithActionType for target '{}'.", target.getControllerId());
+            return null;
+        });
     }
 
     JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
@@ -250,6 +258,16 @@ public abstract class AbstractDsAssignmentStrategy {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
+    }
+
+    private static Optional<TargetWithActionType> getTargetWithActionType(
+            final Map<String, TargetWithActionType> targetsWithActionMap, final String controllerId) {
+        if (targetsWithActionMap.containsKey(controllerId)) {
+            return Optional.of(targetsWithActionMap.get(controllerId));
+        } else {
+            return targetsWithActionMap.values().stream()
+                    .filter(t -> controllerId.equalsIgnoreCase(t.getControllerId())).findFirst();
+        }
     }
 
 }

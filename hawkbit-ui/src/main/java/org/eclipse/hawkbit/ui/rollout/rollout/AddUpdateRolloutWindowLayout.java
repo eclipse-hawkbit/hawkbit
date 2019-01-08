@@ -362,7 +362,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private int getErrorThresholdPercentage(final int amountGroup) {
             int errorThresoldPercent = Integer.parseInt(errorThreshold.getValue());
-            if (errorThresholdOptionGroup.getValue().equals(ERROR_THRESHOLD_OPTIONS.COUNT.getValue())) {
+            if (errorThresholdOptionGroup.getValue().equals(ERROR_THRESHOLD_OPTIONS.COUNT.getValue(i18n))) {
                 final int groupSize = (int) Math.ceil((double) totalTargetsCount / (double) amountGroup);
                 final int erroThresoldCount = Integer.parseInt(errorThreshold.getValue());
                 errorThresoldPercent = (int) Math.ceil(((float) erroThresoldCount / (float) groupSize) * 100);
@@ -684,7 +684,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private OptionGroup createErrorThresholdOptionGroup() {
         final OptionGroup errorThresoldOptions = new OptionGroup();
         for (final ERROR_THRESHOLD_OPTIONS option : ERROR_THRESHOLD_OPTIONS.values()) {
-            errorThresoldOptions.addItem(option.getValue());
+            errorThresoldOptions.addItem(option.getValue(i18n));
         }
         errorThresoldOptions.setId(UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_OPTION_ID);
         errorThresoldOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
@@ -697,7 +697,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private void listenerOnErrorThresoldOptionChange(final ValueChangeEvent event) {
         errorThreshold.clear();
         errorThreshold.removeAllValidators();
-        if (event.getProperty().getValue().equals(ERROR_THRESHOLD_OPTIONS.COUNT.getValue())) {
+        if (event.getProperty().getValue().equals(ERROR_THRESHOLD_OPTIONS.COUNT.getValue(i18n))) {
             errorThreshold.addValidator(new ErrorThresholdOptionValidator());
         } else {
             errorThreshold.addValidator(new ThresholdFieldValidator());
@@ -829,7 +829,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void setDefaultSaveStartGroupOption() {
-        errorThresholdOptionGroup.setValue(ERROR_THRESHOLD_OPTIONS.PERCENT.getValue());
+        errorThresholdOptionGroup.setValue(ERROR_THRESHOLD_OPTIONS.PERCENT.getValue(i18n));
     }
 
     private static TextArea createDescription() {
@@ -1107,18 +1107,17 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private enum ERROR_THRESHOLD_OPTIONS {
 
-        PERCENT("%"),
-
-        COUNT("Count");
+        PERCENT("label.errorthreshold.option.percent"),
+        COUNT("label.errorthreshold.option.count");
 
         private final String value;
 
-        ERROR_THRESHOLD_OPTIONS(final String val) {
-            value = val;
+        ERROR_THRESHOLD_OPTIONS(final String value) {
+            this.value = value;
         }
 
-        private String getValue() {
-            return value;
+        private String getValue(final VaadinMessageSource i18n) {
+            return  i18n.getMessage(value);
         }
     }
 }

@@ -8,25 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Class to provide the unchanged constants.
  */
 public final class SPUIDefinitions {
-    /**
-     * Available locales.
-     */
-    private static final Set<String> AVAILABLE_LOCALES = Stream.of("en", "de").collect(Collectors.toSet());
-
-    /**
-     * Default locale.
-     */
-    public static final String DEFAULT_LOCALE = "en";
     /**
      * Locale cookie name.
      */
@@ -387,14 +374,5 @@ public final class SPUIDefinitions {
      */
     private SPUIDefinitions() {
 
-    }
-
-    /**
-     * Get the locales
-     *
-     * @return the availableLocales
-     */
-    public static Set<String> getAvailableLocales() {
-        return AVAILABLE_LOCALES;
     }
 }
