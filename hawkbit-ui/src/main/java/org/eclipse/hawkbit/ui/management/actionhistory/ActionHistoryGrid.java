@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -116,10 +117,12 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      * @param eventBus
      * @param notification
      * @param managementUIState
+     * @param permissionChecker
      */
     protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
-            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState) {
-        super(i18n, eventBus, null);
+            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
+            final SpPermissionChecker permissionChecker) {
+        super(i18n, eventBus, permissionChecker);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
@@ -239,19 +242,22 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createCancelButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_NEUTRAL, i18n.getMessage("message.cancel.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, isDisabled);
     }
 
     private StatusFontIcon createForceButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_NEUTRAL, i18n.getMessage("message.force.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, isDisabled);
     }
 
     private StatusFontIcon createForceQuitButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled();
+        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled()
+                || !permissionChecker.hasUpdateTargetPermission();
         return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_RED, i18n.getMessage("message.forcequit.action"),
                 UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, isDisabled);
     }
@@ -313,7 +319,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     deploymentManagement.forceTargetAction(actionId);
                     populateAndUpdateTargetDetails(selectedTarget);
                     notification.displaySuccess(i18n.getMessage("message.force.action.success"));
-                });
+                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
         confirmDialog.getWindow().bringToFront();
@@ -341,7 +347,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     } else {
                         notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
                     }
-                }, FontAwesome.WARNING);
+                }, FontAwesome.WARNING, UIComponentIdProvider.CONFIRMATION_POPUP_ID, null);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
 
         confirmDialog.getWindow().bringToFront();
@@ -372,7 +378,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     } else {
                         notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
                     }
-                });
+                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
