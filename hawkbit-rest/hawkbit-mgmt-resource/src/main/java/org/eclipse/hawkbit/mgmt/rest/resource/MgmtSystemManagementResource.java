@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +39,14 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MgmtSystemManagementResource.class);
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemManagement systemManagement;
 
-    @Autowired
-    private CacheManager cacheManager;
+    private final CacheManager cacheManager;
+
+    MgmtSystemManagementResource(final SystemManagement systemManagement, final CacheManager cacheManager) {
+        this.systemManagement = systemManagement;
+        this.cacheManager = cacheManager;
+    }
 
     /**
      * Deletes the tenant data of a given tenant. USE WITH CARE!

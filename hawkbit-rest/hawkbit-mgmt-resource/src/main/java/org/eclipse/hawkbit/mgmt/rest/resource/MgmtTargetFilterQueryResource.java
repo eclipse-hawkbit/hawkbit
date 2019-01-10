@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -44,11 +43,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetFilterQueryResource.class);
 
-    @Autowired
-    private TargetFilterQueryManagement filterManagement;
+    private final TargetFilterQueryManagement filterManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtTargetFilterQueryResource(final TargetFilterQueryManagement filterManagement,
+            final EntityFactory entityFactory) {
+        this.filterManagement = filterManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") final Long filterId) {

@@ -155,6 +155,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
+
         if (selectedBaseSwModuleId.isPresent()) {
             return softwareModuleManagement.get(selectedBaseSwModuleId.get());
         }

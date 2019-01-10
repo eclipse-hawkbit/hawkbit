@@ -139,7 +139,8 @@ import com.google.common.collect.Maps;
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class })
+@Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class,
+        SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 

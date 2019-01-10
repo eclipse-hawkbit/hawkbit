@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,10 +58,10 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @PostMapping(value = "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "/{softwareModuleId}/artifacts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestParam("file") final MultipartFile file,
+            @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
             @RequestParam(value = "sha1sum", required = false) final String sha1Sum);

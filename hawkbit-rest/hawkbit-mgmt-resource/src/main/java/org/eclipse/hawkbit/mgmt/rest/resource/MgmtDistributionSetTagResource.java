@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,14 +49,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtDistributionSetTagResource.class);
 
-    @Autowired
-    private DistributionSetTagManagement distributionSetTagManagement;
+    private final DistributionSetTagManagement distributionSetTagManagement;
 
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtDistributionSetTagResource(final DistributionSetTagManagement distributionSetTagManagement,
+            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory) {
+        this.distributionSetTagManagement = distributionSetTagManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(

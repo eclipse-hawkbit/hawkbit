@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +36,6 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final TenantConfigurationProperties tenantConfigurationProperties;
 
-    @Autowired
     MgmtTenantManagementResource(final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantConfigurationProperties tenantConfigurationProperties) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
