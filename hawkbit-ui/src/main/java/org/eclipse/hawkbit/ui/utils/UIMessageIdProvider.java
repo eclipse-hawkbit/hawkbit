@@ -21,6 +21,10 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_SAVE = "button.save";
 
+    public static final String BUTTON_NO_AUTO_ASSIGNMENT = "button.no.auto.assignment";
+
+    public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
+
     public static final String HEADER_DISTRIBUTION_SET = "header.distributionset";
 
     public static final String CAPTION_ACTION_FORCED = "label.action.forced";
