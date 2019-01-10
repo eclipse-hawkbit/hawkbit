@@ -59,6 +59,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import io.qameta.allure.Description;
@@ -78,6 +79,18 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private static final String TARGET_SCHEDULED_INSTALLATION_MSG = "Target scheduled installation.";
     @Autowired
     private HawkbitSecurityProperties securityProperties;
+
+    @Test
+    @Description("Ensures that the API returns JSON when no Accept header is specified by the client.")
+    public void apiReturnsJSONByDefault() throws Exception {
+        final MvcResult result = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8)).andReturn();
+
+        // verify that we did not specify a content-type in the request, in case
+        // there are any default values
+        assertThat(result.getRequest().getHeader("Accept")).isNull();
+    }
 
     @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
