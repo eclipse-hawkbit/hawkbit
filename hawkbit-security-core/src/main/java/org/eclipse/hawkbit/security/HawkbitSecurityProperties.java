@@ -30,12 +30,26 @@ public class HawkbitSecurityProperties {
      */
     private boolean requireSsl;
 
+    /**
+     * Basic authentication realm, see
+     * https://tools.ietf.org/html/rfc2617#page-3 .
+     */
+    private String basicRealm = "hawbBit";
+
     public boolean isRequireSsl() {
         return requireSsl;
     }
 
     public void setRequireSsl(final boolean requireSsl) {
         this.requireSsl = requireSsl;
+    }
+
+    public String getBasicRealm() {
+        return basicRealm;
+    }
+
+    public void setBasicRealm(final String basicRealm) {
+        this.basicRealm = basicRealm;
     }
 
     public String getContentSecurityPolicy() {

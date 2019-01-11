@@ -494,7 +494,7 @@ public class SecurityManagedConfiguration {
         protected void configure(final HttpSecurity http) throws Exception {
 
             final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
-            basicAuthEntryPoint.setRealmName("hawkBit");
+            basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
             if (securityProperties.isRequireSsl()) {
@@ -541,9 +541,6 @@ public class SecurityManagedConfiguration {
 
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
-
-        @Autowired
-        private HawkbitSecurityProperties ecurityProperties;
 
         @Autowired
         private HawkbitSecurityProperties hawkbitSecurityProperties;
@@ -632,7 +629,7 @@ public class SecurityManagedConfiguration {
                     // disable as CSRF is handled by Vaadin
                     .csrf().disable();
 
-            if (ecurityProperties.isRequireSsl()) {
+            if (hawkbitSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             } else {
 
