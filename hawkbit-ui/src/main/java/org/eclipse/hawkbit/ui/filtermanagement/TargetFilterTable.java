@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -80,8 +79,8 @@ public class TargetFilterTable extends Table {
 
     public TargetFilterTable(final VaadinMessageSource i18n, final UINotification notification,
             final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState,
-            final TargetManagement targetManagement, final SpPermissionChecker permChecker) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
+            final SpPermissionChecker permChecker) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
@@ -89,8 +88,8 @@ public class TargetFilterTable extends Table {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.permChecker = permChecker;
 
-        this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, targetManagement,
-                targetFilterQueryManagement, manageDistUIState);
+        this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, notification, targetManagement,
+                targetFilterQueryManagement);
 
         setStyleName("sp-table");
         setSizeFull();

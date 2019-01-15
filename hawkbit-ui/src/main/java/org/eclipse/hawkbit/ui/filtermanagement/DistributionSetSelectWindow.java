@@ -20,18 +20,17 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAbstractLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAutoAssignmentLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.data.Property;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Alignment;
@@ -47,15 +46,13 @@ import com.vaadin.ui.Window;
  * Creates a dialog window to select the distribution set for a target filter
  * query.
  */
-public class DistributionSetSelectWindow
-        implements CommonDialogWindow.SaveDialogCloseListener, Property.ValueChangeListener {
-    private static final long serialVersionUID = 1L;
+public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialogCloseListener {
 
     private final VaadinMessageSource i18n;
-    private final transient EventBus.UIEventBus eventBus;
-    private final transient TargetManagement targetManagement;
-    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
-    private final ManageDistUIState manageDistUIState;
+    private final UINotification notification;
+    private final EventBus.UIEventBus eventBus;
+    private final TargetManagement targetManagement;
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
 
     private CheckBox checkBox;
     private ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
@@ -63,13 +60,13 @@ public class DistributionSetSelectWindow
     private Long tfqId;
 
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final ManageDistUIState manageDistUIState) {
+            final UINotification notification, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement) {
         this.i18n = i18n;
+        this.notification = notification;
         this.eventBus = eventBus;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.manageDistUIState = manageDistUIState;
     }
 
     private VerticalLayout initView() {
@@ -78,10 +75,11 @@ public class DistributionSetSelectWindow
         checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
         checkBox.setId(UIComponentIdProvider.DIST_SET_SELECT_ENABLE_ID);
         checkBox.setImmediate(true);
-        checkBox.addValueChangeListener(this);
+        checkBox.addValueChangeListener(
+                event -> switchAutoAssignmentInputsVisibility((boolean) event.getProperty().getValue()));
 
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAutoAssignmentLayout(i18n);
-        dsCombo = new DistributionSetSelectComboBox(i18n, eventBus, manageDistUIState);
+        dsCombo = new DistributionSetSelectComboBox(i18n);
 
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
@@ -108,11 +106,7 @@ public class DistributionSetSelectWindow
         final DistributionSet distributionSet = tfq.getAutoAssignDistributionSet();
         final ActionType actionType = tfq.getAutoAssignActionType();
 
-        if (distributionSet != null) {
-            setValue(distributionSet.getId(), actionType);
-        } else {
-            setValue(null, null);
-        }
+        setInitialControlValues(distributionSet, actionType);
 
         // build window after values are set to view elements
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
@@ -125,25 +119,26 @@ public class DistributionSetSelectWindow
         window.setVisible(true);
     }
 
-    private void setValue(final Long distSet, final ActionType actionType) {
-        checkBox.setValue(distSet != null);
-        switchAutoAssignmentInputsVisibility(distSet != null);
+    private void setInitialControlValues(final DistributionSet distributionSet, final ActionType actionType) {
+        checkBox.setValue(distributionSet != null);
+        switchAutoAssignmentInputsVisibility(distributionSet != null);
 
         final ActionTypeOption actionTypeToSet = ActionTypeOption.getOptionForActionType(actionType)
                 .orElse(ActionTypeOption.FORCED);
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().select(actionTypeToSet);
-        dsCombo.setValue(distSet);
-    }
 
-    /**
-     * Is triggered when the checkbox value changes
-     *
-     * @param event
-     *            change event
-     */
-    @Override
-    public void valueChange(final Property.ValueChangeEvent event) {
-        switchAutoAssignmentInputsVisibility(checkBox.getValue());
+        if (distributionSet != null) {
+            final int filteredSize = dsCombo.setInitialValueFilter(distributionSet.getName());
+
+            if (filteredSize <= 0) {
+                notification.displayValidationError(
+                        i18n.getMessage("message.selected.distributionset.not.found", distributionSet.getName()));
+                dsCombo.refreshContainer();
+                dsCombo.setValue(null);
+                return;
+            }
+        }
+        dsCombo.setValue(distributionSet != null ? distributionSet.getId() : null);
     }
 
     private void switchAutoAssignmentInputsVisibility(final boolean autoAssignmentEnabled) {
