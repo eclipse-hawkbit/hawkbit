@@ -110,9 +110,14 @@ public class DistributionSetSelectComboBox extends ComboBox {
         final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<>(ManageDistBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfig);
 
-        final QueryView distributionSetFilterLazyQueryView = new DistributionSetFilterQueryView(new LazyQueryView(
-                new LazyQueryDefinition(false, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID),
-                distributionQF));
+        final LazyQueryDefinition distribtuinQD = new LazyQueryDefinition(false, SPUIDefinitions.PAGE_SIZE,
+                SPUILabelDefinitions.VAR_ID);
+
+        final QueryView distributionSetFilterLazyQueryView = new DistributionSetFilterQueryView(
+                new LazyQueryView(distribtuinQD, distributionQF));
+        distributionSetFilterLazyQueryView.sort(
+                new Object[] { SPUILabelDefinitions.VAR_NAME, SPUILabelDefinitions.VAR_VERSION },
+                new boolean[] { true, true });
 
         return new LazyQueryContainer(distributionSetFilterLazyQueryView);
     }
@@ -277,7 +282,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
     // this, combobox will try to find the corresponding id from container that
     // will lead to multiple database queries
     public int setInitialValueFilter(final String initialFilterString) {
-        final Filter filter = buildFilter(initialFilterString, getFilteringMode());
+        final Filter filter = super.buildFilter(initialFilterString, getFilteringMode());
 
         if (filter != null) {
             final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();

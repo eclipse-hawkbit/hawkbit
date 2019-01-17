@@ -69,7 +69,7 @@ public class TargetFilterTable extends Table {
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    private final DistributionSetSelectWindow dsSelectWindow;
+    private final transient DistributionSetSelectWindow dsSelectWindow;
 
     private final SpPermissionChecker permChecker;
 
