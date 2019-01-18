@@ -57,7 +57,7 @@ public final class MgmtApiModelProperties {
     public static final String DS_RUNTIME = "Runtime software module (e.g. JVM) - DEPRECATED (use modules).";
     public static final String DS_APPLICATION = "Application software module (e.g. OSGi container) - DEPRECATED (use modules).";
     public static final String DS_MODULES = "Software modules (e.g. OSGi bundles, runtimes).";
-    public static final String DS_REQUIRED_STEP = "True if DS a required migration step. As a result the DS will be installed even when a newer. (note: updatable only if DS is not yet assigned to a target)";
+    public static final String DS_REQUIRED_STEP = "True if DS is a required migration step for another DS. As a result the DS's assignment will not be cancelled when another DS is assigned (note: updatable only if DS is not yet assigned to a target)";
     public static final String DS_ASSIGNED_TARGETS = "Targets that have this distribution set assigned.";
     public static final String DS_INSTALLED_TARGETS = "Targets that have this distribution set installed.";
     public static final String DS_LIST = "List of distribution sets.";
@@ -137,7 +137,7 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_LIST = "List of actions.";
 
-    public static final String IP_ADDRESS = "Last known IP address of the target. Only presented if IP address of the target itself is known (connected directy through DDI API).";
+    public static final String IP_ADDRESS = "Last known IP address of the target. Only presented if IP address of the target itself is known (connected directly through DDI API).";
 
     public static final String ADDRESS = "The last known address URI of the target. Includes information of the target is connected either directly (DDI) through HTTP or indirectly (DMF) through amqp.";
 
@@ -155,7 +155,7 @@ public final class MgmtApiModelProperties {
 
     public static final String SM_TYPE_KEY = "Key that can be interpreted by the target.";
 
-    public static final String SM_MAX_ASSIGNMENTS = "Maximum number of assigments to a distribution set/target, e.g. only one firmware but multiple applications.";
+    public static final String SM_MAX_ASSIGNMENTS = "Maximum number of assignments to a distribution set/target, e.g. only one firmware but multiple applications.";
 
     public static final String SM_TYPE_LIST = "List of software modules types.";
 

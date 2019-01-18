@@ -20,6 +20,8 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -31,6 +33,7 @@ import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -74,11 +77,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final String artifactData = "test";
         final int artifactSize = artifactData.length();
-        verifyThrownExceptionBy(() -> artifactManagement.create(IOUtils.toInputStream(artifactData, "UTF-8"),
-                NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize), "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> artifactManagement.create(new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"),
+                        NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize)),
+                "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> artifactManagement.create(IOUtils.toInputStream(artifactData, "UTF-8"), 1234L,
-                "xxx", false, artifactSize), "SoftwareModule");
+        verifyThrownExceptionBy(() -> artifactManagement.create(
+                new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"), 1234L, "xxx", false, artifactSize)),
+                "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
 
@@ -135,6 +141,21 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(3);
         }
 
+    }
+
+    @Test
+    @Description("Verifies that artifact management does not create artifacts with illegal filename.")
+    public void entityQueryWithIllegalFilenameThrowsException() throws URISyntaxException {
+        final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
+        final String artifactData = "test";
+        final int artifactSize = artifactData.length();
+
+        final long smID = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "smIllegalFilenameTest", "1.0", null, null)).getId();
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> artifactManagement.create(
+                new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"), smID, illegalFilename, false,
+                        artifactSize)));
+        assertThat(softwareModuleManagement.get(smID).get().getArtifacts()).hasSize(0);
     }
 
     @Test
@@ -408,7 +429,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize,
             final InputStream inputStream) throws IOException {
-        return artifactManagement.create(inputStream, moduleId, filename, false, artifactSize);
+        return artifactManagement.create(new ArtifactUpload(inputStream, moduleId, filename, false, artifactSize));
     }
 
     private static byte[] randomBytes(final int len) {

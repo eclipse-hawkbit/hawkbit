@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
@@ -244,7 +245,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final byte random[] = RandomStringUtils.random(5).getBytes();
 
-        artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0);
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
         mockMvc.perform(
                 get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId()))
@@ -333,8 +334,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final byte random[] = RandomStringUtils.random(5).getBytes();
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, 0);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
         mockMvc.perform(delete(
                 MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
@@ -352,8 +353,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final byte random[] = RandomStringUtils.random(5).getBytes();
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, 0);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
         mockMvc.perform(
                 get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
@@ -387,8 +388,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final byte random[] = RandomStringUtils.random(5).getBytes();
 
-        final Artifact artifact = artifactManagement.create(new ByteArrayInputStream(random), sm.getId(), "file1",
-                false, 0);
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
         mockMvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
                 + "/{softwareModuleId}/artifacts/{artifactId}/download", sm.getId(), artifact.getId())

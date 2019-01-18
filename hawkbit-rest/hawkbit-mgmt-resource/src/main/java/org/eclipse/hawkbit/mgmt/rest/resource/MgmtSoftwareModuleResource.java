@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.slf4j.Logger;
@@ -81,9 +82,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         try (InputStream in = file.getInputStream()) {
-            final Artifact result = artifactManagement.create(in, softwareModuleId, fileName,
+            final Artifact result = artifactManagement.create(new ArtifactUpload(in, softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
-                    file.getContentType(), file.getSize());
+                    file.getContentType(), file.getSize()));
 
             final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
             MgmtSoftwareModuleMapper.addLinks(result, reponse);
