@@ -31,7 +31,6 @@ import org.vaadin.addons.lazyquerycontainer.QueryView;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.ComboBox;
 
@@ -41,40 +40,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
     private final VaadinMessageSource i18n;
     private String selectedValueCaption;
     private Long previousValue;
-
-    public void setSelectedValueCaption(final String selectedValueCaption) {
-        this.selectedValueCaption = selectedValueCaption;
-    }
-
-    public String getSelectedValueCaption() {
-        return selectedValueCaption;
-    }
-
-    @Override
-    public void setValue(final Object selectedItemId) {
-        if (selectedItemId != null) {
-            // we do not want to set the same value multiple times during
-            // validation, because it will lead to multiple database queries, in
-            // order to get the caption property
-            if (selectedItemId.equals(previousValue)) {
-                return;
-            }
-            selectedValueCaption = Optional.ofNullable(getContainerProperty(selectedItemId, getItemCaptionPropertyId()))
-                    .map(Property::getValue).map(String.class::cast).orElse(selectedValueCaption);
-        }
-
-        super.setValue(selectedItemId);
-        previousValue = (Long) selectedItemId;
-    }
-
-    @Override
-    public String getItemCaption(final Object itemId) {
-        if (itemId != null && itemId.equals(getValue())) {
-            return selectedValueCaption;
-        }
-
-        return super.getItemCaption(itemId);
-    }
+    private String lastFilterString;
 
     DistributionSetSelectComboBox(final VaadinMessageSource i18n) {
         super();
@@ -124,8 +90,6 @@ public class DistributionSetSelectComboBox extends ComboBox {
 
     private static class DistributionSetFilterQueryView implements QueryView {
         private final QueryView defaultQueryView;
-
-        private String lastFilterString;
 
         DistributionSetFilterQueryView(final QueryView defaultQueryView) {
             this.defaultQueryView = defaultQueryView;
@@ -199,7 +163,6 @@ public class DistributionSetSelectComboBox extends ComboBox {
         @Override
         public void refresh() {
             defaultQueryView.refresh();
-            lastFilterString = null;
         }
 
         @Override
@@ -210,15 +173,11 @@ public class DistributionSetSelectComboBox extends ComboBox {
         // combobox removes filter after getting the filtered options, but we do
         // not want to call refresh() as in default queryView, because it
         // will clear all filtered cache entries and we would need to search
-        // item properies (distribution set name and version) in database based
-        // on ids. Additionally we remember the last filter string not to add
-        // the same filter once more when the filter string was not changed
+        // item properties (distribution set name and version) in database based
+        // on ids.
         @Override
         public void removeFilter(final Filter filter) {
             defaultQueryView.getQueryDefinition().removeFilter(filter);
-            lastFilterString = Optional.ofNullable(filter).filter(SimpleStringFilter.class::isInstance)
-                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString)
-                    .orElse(lastFilterString);
         }
 
         @Override
@@ -245,34 +204,55 @@ public class DistributionSetSelectComboBox extends ComboBox {
         public void sort(final Object[] arg0, final boolean[] arg1) {
             defaultQueryView.sort(arg0, arg1);
         }
+    }
 
-        public String getLastFilterString() {
-            return lastFilterString;
+    @Override
+    public void setValue(final Object selectedItemId) {
+        if (selectedItemId != null) {
+            // we do not want to set the same value multiple times during
+            // validation, because it will lead to multiple database queries, in
+            // order to get the caption property
+            if (selectedItemId.equals(previousValue)) {
+                return;
+            }
+            selectedValueCaption = Optional.ofNullable(getContainerProperty(selectedItemId, getItemCaptionPropertyId()))
+                    .map(Property::getValue).map(String.class::cast).orElse(selectedValueCaption);
         }
+
+        super.setValue(selectedItemId);
+        previousValue = (Long) selectedItemId;
+    }
+
+    @Override
+    public String getItemCaption(final Object itemId) {
+        // we do not want to retrieve the caption for the selected distribution
+        // set from container, because it can be not present in the filtered
+        // options
+        if (itemId != null && itemId.equals(getValue())) {
+            return selectedValueCaption;
+        }
+
+        return super.getItemCaption(itemId);
     }
 
     @Override
     protected Filter buildFilter(final String filterString, final FilteringMode filteringMode) {
         final Filter filter = super.buildFilter(filterString, filteringMode);
 
-        final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();
-        final DistributionSetFilterQueryView queryView = (DistributionSetFilterQueryView) container.getQueryView();
-        final String lastFilterString = queryView.getLastFilterString();
-
         // we do not want to update the filter when the filterString (value of
         // combobox) was not changed, because it would lead to additional
-        // database
-        // requests during combobox page change while scrolling instead of
-        // retreiving items from container cache
+        // database requests during combobox page change while scrolling instead
+        // of retreiving items from container cache
         if (filter != null && !StringUtils.isEmpty(lastFilterString) && filterString.equals(lastFilterString)) {
             return null;
         }
 
         // in order to refresh if the filterstring becomes empty
-        if (filter == null && !StringUtils.isEmpty(lastFilterString) && filterString != null) {
-            return new SimpleStringFilter(getItemCaptionPropertyId(), filterString, true, false);
+        if (filter == null && !StringUtils.isEmpty(lastFilterString)) {
+            refreshContainer();
         }
 
+        lastFilterString = filterString;
         return filter;
     }
 
@@ -282,7 +262,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
     // this, combobox will try to find the corresponding id from container that
     // will lead to multiple database queries
     public int setInitialValueFilter(final String initialFilterString) {
-        final Filter filter = super.buildFilter(initialFilterString, getFilteringMode());
+        final Filter filter = buildFilter(initialFilterString, getFilteringMode());
 
         if (filter != null) {
             final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();

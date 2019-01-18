@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAbstractLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAutoAssignmentLayout;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -128,11 +129,13 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().select(actionTypeToSet);
 
         if (distributionSet != null) {
-            final int filteredSize = dsCombo.setInitialValueFilter(distributionSet.getName());
+            final String initialFilterString = HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),
+                    distributionSet.getVersion());
+            final int filteredSize = dsCombo.setInitialValueFilter(initialFilterString);
 
             if (filteredSize <= 0) {
                 notification.displayValidationError(
-                        i18n.getMessage("message.selected.distributionset.not.found", distributionSet.getName()));
+                        i18n.getMessage("message.selected.distributionset.not.found", initialFilterString));
                 dsCombo.refreshContainer();
                 dsCombo.setValue(null);
                 return;
