@@ -269,7 +269,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
         }
 
         // in order to refresh if the filterstring becomes empty
-        if (filter == null && !StringUtils.isEmpty(lastFilterString)) {
+        if (filter == null && !StringUtils.isEmpty(lastFilterString) && filterString != null) {
             return new SimpleStringFilter(getItemCaptionPropertyId(), filterString, true, false);
         }
 

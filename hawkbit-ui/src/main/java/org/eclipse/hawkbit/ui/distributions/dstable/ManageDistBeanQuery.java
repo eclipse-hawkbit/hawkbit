@@ -88,8 +88,12 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     }
 
     private void setFilterString(final QueryDefinition definition) {
-        filterString = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
-                .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst().orElse(null);
+        // if search text is set, we do not want to apply the filter
+        if (StringUtils.isEmpty(searchText)) {
+            filterString = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
+                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst()
+                    .orElse(null);
+        }
     }
 
     private void setupSorting(final Object[] sortPropertyIds, final boolean[] sortStates) {

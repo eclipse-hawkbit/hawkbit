@@ -624,9 +624,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        // if search text is set, we do not want to apply the filter
-        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())
-                && StringUtils.isEmpty(distributionSetFilter.getSearchText())) {
+        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())) {
             final String[] dsFilterNameAndVersionEntries = getDsFilterNameAndVersionEntries(
                     distributionSetFilter.getFilterString());
             spec = DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0],
