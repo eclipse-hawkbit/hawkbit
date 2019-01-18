@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -112,26 +113,11 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     protected List<ProxyDistribution> loadBeans(final int startIndex, final int count) {
         Page<DistributionSet> distBeans;
         final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
+
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
-        } else if (StringUtils.isEmpty(searchText)) {
-            if (!StringUtils.isEmpty(filterString)) {
-                final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder()
-                        .setIsDeleted(false).setIsComplete(dsComplete).setFilterString(filterString)
-                        .setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
-                distBeans = getDistributionSetManagement().findByDistributionSetFilter(
-                        new PageRequest(startIndex / count, count, sort), distributionSetFilter);
-            } else {
-                // if no search filters available
-                distBeans = getDistributionSetManagement()
-                        .findByCompleted(new OffsetBasedPageRequest(startIndex, count, sort), dsComplete);
-            }
         } else {
-            final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
-                    .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
-                    .setType(distributionSetType).build();
-            distBeans = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(startIndex / count, count, sort), distributionSetFilter);
+            distBeans = findDistBeans(new OffsetBasedPageRequest(startIndex, count, sort));
         }
 
         for (final DistributionSet distributionSet : distBeans) {
@@ -148,25 +134,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        if (StringUtils.isEmpty(searchText) && distributionSetType == null) {
-            if (!StringUtils.isEmpty(filterString)) {
-                final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder()
-                        .setIsDeleted(false).setIsComplete(dsComplete).setFilterString(filterString)
-                        .setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
-                firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                        new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
-            } else {
-                // if no search filters available
-                firstPageDistributionSets = getDistributionSetManagement()
-                        .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);
-            }
-        } else {
-            final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
-                    .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
-                    .setType(distributionSetType).build();
-            firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
-        }
+        firstPageDistributionSets = findDistBeans(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         final long size = firstPageDistributionSets.getTotalElements();
 
         if (size > Integer.MAX_VALUE) {
@@ -174,6 +142,18 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         }
 
         return (int) size;
+    }
+
+    private Page<DistributionSet> findDistBeans(final Pageable pageable) {
+        if (StringUtils.isEmpty(filterString) && StringUtils.isEmpty(searchText) && distributionSetType == null) {
+            return getDistributionSetManagement().findByCompleted(pageable, dsComplete);
+        } else {
+            final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
+                    .setIsComplete(dsComplete).setSearchText(searchText).setFilterString(filterString)
+                    .setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
+
+            return getDistributionSetManagement().findByDistributionSetFilter(pageable, distributionSetFilter);
+        }
     }
 
     private DistributionSetManagement getDistributionSetManagement() {

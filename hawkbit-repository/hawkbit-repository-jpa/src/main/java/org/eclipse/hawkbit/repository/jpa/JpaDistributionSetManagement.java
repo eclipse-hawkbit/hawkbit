@@ -624,7 +624,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())) {
+        // if search text is set, we do not want to apply the filter
+        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())
+                && StringUtils.isEmpty(distributionSetFilter.getSearchText())) {
             final String[] dsFilterNameAndVersionEntries = getDsFilterNameAndVersionEntries(
                     distributionSetFilter.getFilterString());
             spec = DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0],
@@ -655,8 +657,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final int semicolonIndex = filterString.indexOf(':');
 
         final String dsFilterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
-                : filterString + "%";
-        final String dsFilterVersion = semicolonIndex != -1 ? filterString.substring(semicolonIndex + 1) + "%" : "%";
+                : (filterString + "%");
+        final String dsFilterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
 
         return new String[] { !StringUtils.isEmpty(dsFilterName) ? dsFilterName : "%", dsFilterVersion };
     }
