@@ -34,6 +34,10 @@ import com.vaadin.data.Property;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.ComboBox;
 
+/**
+ * Creates a combobox in order to select the distribution set for a target
+ * filter query auto assignment.
+ */
 public class DistributionSetSelectComboBox extends ComboBox {
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +51,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
         this.i18n = i18n;
 
         init();
-        populateWithData();
+        initDataSource();
     }
 
     private void init() {
@@ -58,7 +62,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
         setCaption(i18n.getMessage(UIMessageIdProvider.HEADER_DISTRIBUTION_SET));
     }
 
-    private void populateWithData() {
+    private void initDataSource() {
         final Container container = createContainer();
         container.addContainerProperty(SPUILabelDefinitions.VAR_NAME_VERSION, String.class, null);
 
@@ -88,6 +92,11 @@ public class DistributionSetSelectComboBox extends ComboBox {
         return new LazyQueryContainer(distributionSetFilterLazyQueryView);
     }
 
+    /**
+     * The custom QueryView implementation is only needed to modify the behavior
+     * when removing the filter (do not refresh the container). In all other
+     * cases the default LazyQueryView implementation is being reused.
+     */
     private static class DistributionSetFilterQueryView implements QueryView {
         private final QueryView defaultQueryView;
 
@@ -170,14 +179,17 @@ public class DistributionSetSelectComboBox extends ComboBox {
             defaultQueryView.removeAllItems();
         }
 
-        // combobox removes filter after getting the filtered options, but we do
-        // not want to call refresh() as in default queryView, because it
-        // will clear all filtered cache entries and we would need to search
-        // item properties (distribution set name and version) in database based
-        // on ids.
+        /**
+         * Default implementation of the combobox removes the filter each time
+         * it builds the options during repaint. However, container should not
+         * be refreshed here (default LazyQueryView implementation), as this
+         * would clear all filtered cache entries following by multiple database
+         * queries.
+         */
         @Override
         public void removeFilter(final Filter filter) {
             defaultQueryView.getQueryDefinition().removeFilter(filter);
+            // no refresh here
         }
 
         @Override
@@ -206,28 +218,43 @@ public class DistributionSetSelectComboBox extends ComboBox {
         }
     }
 
+    /**
+     * Overriden in order to get the selected distibution set's option caption
+     * (name:version) from container and preventing multiple calls by saving the
+     * selected Id.
+     * 
+     * @param selectedItemId
+     *            the Id of the selected distribution set
+     */
     @Override
     public void setValue(final Object selectedItemId) {
         if (selectedItemId != null) {
-            // we do not want to set the same value multiple times during
-            // validation, because it will lead to multiple database queries, in
-            // order to get the caption property
+            // Can happen during validation, leading to multiple database
+            // queries, in order to get the caption property
             if (selectedItemId.equals(previousValue)) {
                 return;
             }
             selectedValueCaption = Optional.ofNullable(getContainerProperty(selectedItemId, getItemCaptionPropertyId()))
-                    .map(Property::getValue).map(String.class::cast).orElse(selectedValueCaption);
+                    .map(Property::getValue).map(String.class::cast).orElse("");
         }
 
         super.setValue(selectedItemId);
         previousValue = (Long) selectedItemId;
     }
 
+    /**
+     * Overriden in order to return the caption for the selected distribution
+     * set from cache. Otherwise, it could lead to multiple database queries,
+     * trying to retrieve the caption from container, when it is not present in
+     * filtered options.
+     * 
+     * @param itemId
+     *            the Id of the selected distribution set
+     * @return the option caption (name:version) of the selected distribution
+     *         set
+     */
     @Override
     public String getItemCaption(final Object itemId) {
-        // we do not want to retrieve the caption for the selected distribution
-        // set from container, because it can be not present in the filtered
-        // options
         if (itemId != null && itemId.equals(getValue())) {
             return selectedValueCaption;
         }
@@ -235,32 +262,54 @@ public class DistributionSetSelectComboBox extends ComboBox {
         return super.getItemCaption(itemId);
     }
 
+    /**
+     * Overriden not to update the filter when the filterstring (value of
+     * combobox input) was not changed. Otherwise, it would lead to additional
+     * database requests during combobox page change while scrolling instead of
+     * retreiving items from container cache.
+     * 
+     * @param filterString
+     *            value of combobox input
+     * @param filteringMode
+     *            the filtering mode (starts_with, contains)
+     * @return SimpleStringFilter to transfer filterstring in container
+     */
     @Override
     protected Filter buildFilter(final String filterString, final FilteringMode filteringMode) {
-        final Filter filter = super.buildFilter(filterString, filteringMode);
-
-        // we do not want to update the filter when the filterString (value of
-        // combobox) was not changed, because it would lead to additional
-        // database requests during combobox page change while scrolling instead
-        // of retreiving items from container cache
-        if (filter != null && !StringUtils.isEmpty(lastFilterString) && filterString.equals(lastFilterString)) {
+        if (filterStringIsNotChanged(filterString)) {
             return null;
         }
 
-        // in order to refresh if the filterstring becomes empty
-        if (filter == null && !StringUtils.isEmpty(lastFilterString)) {
-            refreshContainer();
-        }
+        final Filter filter = super.buildFilter(filterString, filteringMode);
+
+        refreshContainerIfFilterStringBecomesEmpty(filterString);
 
         lastFilterString = filterString;
         return filter;
     }
 
-    // before setting the value of the selected distribution set we need
-    // to initialize the container and apply the right filter in order to limit
-    // the number of entities and save them in container cache. If we do not do
-    // this, combobox will try to find the corresponding id from container that
-    // will lead to multiple database queries
+    private boolean filterStringIsNotChanged(final String filterString) {
+        return !StringUtils.isEmpty(filterString) && !StringUtils.isEmpty(lastFilterString)
+                && filterString.equals(lastFilterString);
+    }
+
+    private void refreshContainerIfFilterStringBecomesEmpty(final String filterString) {
+        if (StringUtils.isEmpty(filterString) && !StringUtils.isEmpty(lastFilterString)) {
+            refreshContainer();
+        }
+    }
+
+    /**
+     * Before setting the value of the selected distribution set we need to
+     * initialize the container and apply the right filter in order to limit the
+     * number of entities and save them in container cache. Otherwise, combobox
+     * will try to find the corresponding id from container, leading to multiple
+     * database queries.
+     * 
+     * @param initialFilterString
+     *            value of initial distribution set caption (name:version)
+     * @return the size of filtered options
+     */
     public int setInitialValueFilter(final String initialFilterString) {
         final Filter filter = buildFilter(initialFilterString, getFilteringMode());
 
@@ -277,6 +326,9 @@ public class DistributionSetSelectComboBox extends ComboBox {
         return 0;
     }
 
+    /**
+     * Refreshes the underlying container, clearing all the caches.
+     */
     public void refreshContainer() {
         final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();
         container.refresh();
