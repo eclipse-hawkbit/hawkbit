@@ -133,7 +133,7 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
                 Date.from(LocalDateTime.now().plusMinutes(30).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         startAtDateField.setImmediate(true);
         startAtDateField.setTimeZone(tz);
-        startAtDateField.setLocale(HawkbitCommonUtil.getLocale());
+        startAtDateField.setLocale(HawkbitCommonUtil.getCurrentLocale());
         startAtDateField.setResolution(Resolution.MINUTE);
         startAtDateField.addStyleName(ValoTheme.DATEFIELD_SMALL);
         addComponent(startAtDateField);

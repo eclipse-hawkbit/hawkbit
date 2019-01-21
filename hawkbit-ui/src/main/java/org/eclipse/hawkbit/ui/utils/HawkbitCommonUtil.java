@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.utils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -18,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -526,7 +528,7 @@ public final class HawkbitCommonUtil {
      * @see com.vaadin.ui.UI#getLocale()
      * @see java.util.Locale#getDefault()
      */
-    public static Locale getLocale() {
+    public static Locale getCurrentLocale() {
         final UI currentUI = UI.getCurrent();
         return currentUI == null ? Locale.getDefault() : currentUI.getLocale();
     }
@@ -559,6 +561,15 @@ public final class HawkbitCommonUtil {
             caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS);
         }
         return getCaptionText(caption);
+    }
+
+    public static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties, final UI ui) {
+        final List<String> availableLocals = localizationProperties.getAvailableLocals();
+        final Locale uiLocale = ui.getSession().getLocale();
+        if (availableLocals.contains(uiLocale.getLanguage())) {
+            return uiLocale;
+        }
+        return new Locale(localizationProperties.getDefaultLocal());
     }
 
 }

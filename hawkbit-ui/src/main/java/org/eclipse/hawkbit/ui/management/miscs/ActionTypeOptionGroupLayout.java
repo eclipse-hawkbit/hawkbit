@@ -132,7 +132,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
                 Date.from(LocalDateTime.now().plusWeeks(2).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         forcedTimeDateField.setImmediate(true);
         forcedTimeDateField.setTimeZone(tz);
-        forcedTimeDateField.setLocale(HawkbitCommonUtil.getLocale());
+        forcedTimeDateField.setLocale(HawkbitCommonUtil.getCurrentLocale());
         forcedTimeDateField.setResolution(Resolution.MINUTE);
         forcedTimeDateField.addStyleName(ValoTheme.DATEFIELD_SMALL);
         addComponent(forcedTimeDateField);
