@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -233,6 +234,10 @@ public interface TargetFilterQueryManagement {
      * @throws QuotaExceededException
      *             if the query that is already associated with this filter
      *             query addresses too many targets (auto-assignments only)
+     * 
+     * @throws InvalidAutoAssignDistributionSetException
+     *             if the provided auto-assign {@link DistributionSet} is not
+     *             valid (incomplete or soft deleted)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     default TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
@@ -262,8 +267,12 @@ public interface TargetFilterQueryManagement {
      *             query addresses too many targets (auto-assignments only)
      * 
      * @throws InvalidAutoAssignActionTypeException
-     *             if the provided {@link ActionType} is not valid (neither
-     *             FORCED, nor SOFT)
+     *             if the provided auto-assign {@link ActionType} is not valid
+     *             (neither FORCED, nor SOFT)
+     * 
+     * @throws InvalidAutoAssignDistributionSetException
+     *             if the provided auto-assign {@link DistributionSet} is not
+     *             valid (incomplete or soft deleted)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDSWithActionType(long queryId, Long dsId, ActionType actionType);

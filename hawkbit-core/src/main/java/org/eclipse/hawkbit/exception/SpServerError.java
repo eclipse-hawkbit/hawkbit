@@ -155,7 +155,7 @@ public enum SpServerError {
      *
      */
     SP_DS_INCOMPLETE("hawkbit.server.error.distributionset.incomplete",
-            "Distribution set is assigned to a a target that is incomplete (i.e. mandatory modules are missing)"),
+            "Distribution set is assigned to a target that is incomplete (i.e. mandatory modules are missing)"),
 
     /**
      *
@@ -224,7 +224,13 @@ public enum SpServerError {
     *
     */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
-            "The given action type for auto-assignment is invalid: allowed values are FORCED and SOFT");
+            "The given action type for auto-assignment is invalid: allowed values are FORCED and SOFT"),
+
+    /**
+    *
+    */
+    SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
+            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted");
 
     private final String key;
     private final String message;

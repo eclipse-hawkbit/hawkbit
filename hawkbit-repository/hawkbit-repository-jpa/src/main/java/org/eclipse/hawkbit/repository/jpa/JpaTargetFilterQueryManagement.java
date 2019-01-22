@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -236,13 +237,23 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
 
-            targetFilterQuery.setAutoAssignDistributionSet(findDistributionSetAndThrowExceptionIfNotFound(dsId));
+            final JpaDistributionSet distributionSetToAutoAssign = findDistributionSetAndThrowExceptionIfNotFound(dsId);
+            // must be completed and not soft deleted
+            verifyDistributionSetAndThrowExceptionIfNotValid(distributionSetToAutoAssign);
+
+            targetFilterQuery.setAutoAssignDistributionSet(distributionSetToAutoAssign);
             // the action type is set to FORCED per default (when not explicitly
             // specified)
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(actionType));
         }
 
         return targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    private void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
+        if (!distributionSet.isComplete() || distributionSet.isDeleted()) {
+            throw new InvalidAutoAssignDistributionSetException();
+        }
     }
 
     private ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
@@ -258,7 +269,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) distributionSetManagement.getWithDetails(setId)
+        return (JpaDistributionSet) distributionSetManagement.get(setId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 

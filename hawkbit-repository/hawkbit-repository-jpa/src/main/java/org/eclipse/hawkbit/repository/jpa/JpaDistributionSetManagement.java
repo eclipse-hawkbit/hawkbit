@@ -266,7 +266,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!assigned.isEmpty()) {
             final Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
             distributionSetRepository.deleteDistributionSet(dsIds);
-            targetFilterQueryRepository.unsetAutoAssignDistributionSet(dsIds);
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(dsIds);
         }
 
         // mark the rest as hard delete
@@ -275,6 +275,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // hard delete the rest if exists
         if (!toHardDelete.isEmpty()) {
+            targetFilterQueryRepository
+                    .unsetAutoAssignDistributionSetAndActionType(toHardDelete.toArray(new Long[toHardDelete.size()]));
             // don't give the delete statement an empty list, JPA/Oracle cannot
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
