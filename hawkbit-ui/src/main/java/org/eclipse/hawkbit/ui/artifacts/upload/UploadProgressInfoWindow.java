@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -18,6 +17,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -328,16 +328,30 @@ public class UploadProgressInfoWindow extends Window {
             status = STATUS_INPROGRESS;
         }
         item.getItemProperty(COLUMN_STATUS).setValue(status);
-
-        final String failureReason = artifactUploadState.getFileUploadProgress(fileUploadId).getFailureReason();
-        if (StringUtils.isNotBlank(failureReason)) {
-            item.getItemProperty(COLUMN_REASON).setValue(failureReason);
-        }
+        item.getItemProperty(COLUMN_REASON).setValue(getFailureReason(fileUploadId));
 
         final long bytesRead = fileUploadProgress.getBytesRead();
         final long fileSize = fileUploadProgress.getContentLength();
         if (bytesRead > 0 && fileSize > 0) {
             item.getItemProperty(COLUMN_PROGRESS).setValue((double) bytesRead / (double) fileSize);
         }
+    }
+
+    /**
+     * Returns the failure reason for the provided fileUploadId or an empty
+     * string but never <code>null</code>.
+     * 
+     * @param fileUploadId
+     * @return the failure reason or an empty String.
+     */
+    private String getFailureReason(final FileUploadId fileUploadId) {
+        String failureReason = "";
+        if (artifactUploadState.getFileUploadProgress(fileUploadId) != null) {
+            failureReason = artifactUploadState.getFileUploadProgress(fileUploadId).getFailureReason();
+        }
+        if (StringUtils.isEmpty(failureReason)) {
+            return "";
+        }
+        return failureReason;
     }
 }
