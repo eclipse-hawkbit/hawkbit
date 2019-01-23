@@ -124,14 +124,6 @@
          <id>vaadin-addons</id>
          <url>http://maven.vaadin.com/vaadin-addons</url>
       </repository>
-      <repository>
-         <id>spring-milestones</id>
-         <name>Spring Milestones</name>
-         <url>https://repo.spring.io/milestone</url>
-         <snapshots>
-            <enabled>false</enabled>
-         </snapshots>
-      </repository>
    </repositories>
 
    <properties>
@@ -139,7 +131,7 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <java.version>1.8</java.version>
       <spring.boot.version>2.1.2.RELEASE</spring.boot.version>
-      <spring.cloud.version>Greenwich.RC2</spring.cloud.version>
+      <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 

@@ -73,11 +73,11 @@
 | org.springframework.boot             | spring-boot-starter-logging    | 2.1.0.RELEASE  | [CQ18210](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18210) |
 | org.springframework.boot             | spring-boot-starter-validation | 2.1.0.RELEASE  | [CQ18211](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18211) |
 | org.springframework.boot             | spring-boot-starter-web        | 2.1.0.RELEASE  | [CQ18212](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18212) |
-| org.springframework.cloud            | spring-cloud-bus               | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.cloud            | spring-cloud-commons           | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.cloud            | spring-cloud-context           | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.cloud            | spring-cloud-starter           | 2.1.0.RELEASE  | []()                                                             |
-| org.springframework.cloud            | spring-cloud-stream            | 2.1.0.RELEASE  | []()                                                             |
+| org.springframework.cloud            | spring-cloud-bus               | 2.1.0.RELEASE  | [CQ18799](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18799) |
+| org.springframework.cloud            | spring-cloud-commons           | 2.1.0.RELEASE  | [CQ18800](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18800) |
+| org.springframework.cloud            | spring-cloud-context           | 2.1.0.RELEASE  | [CQ18801](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18801) |
+| org.springframework.cloud            | spring-cloud-starter           | 2.1.0.RELEASE  | [CQ18803](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18803) |
+| org.springframework.cloud            | spring-cloud-stream            | 2.1.0.RELEASE  | [CQ18802](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18802) |
 | org.springframework.data             | spring-data-commons            | 2.1.2.RELEASE  | [CQ18213](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18213) |
 | org.springframework.data             | spring-data-jpa                | 2.1.2.RELEASE  | [CQ18214](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18214) |
 | org.springframework.hateoas          | spring-hateoas                 | 0.25.0.RELEASE | [CQ18228](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18228) |
@@ -117,13 +117,13 @@
 
 ## Test and build dependencies
 
-CQ:
+CQ: [CQ18804](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18804)
 
 | Group ID                        | Artifact ID                      | Version              |
 | ------------------------------- | -------------------------------- | -------------------- |
 | ant                             | ant                              | 1.6.5                |
 | colt                            | colt                             | 1.2.0                |
-| com.fasterxml.jackson.module    | jackson-module-jaxb-annotations  | 2.9.7                |
+| com.fasterxml.jackson.module    | jackson-module-jaxb-annotations  | 2.9.8                |
 | com.google.code.gson            | gson                             | 2.8.5                |
 | com.google.gwt.gwtmockito       | gwtmockito                       | 1.1.8                |
 | com.google.gwt                  | gwt-dev                          | 2.8.0                |
@@ -145,8 +145,8 @@ CQ:
 | javax.el                        | javax.el-api                     | 2.2.4                |
 | junit                           | junit                            | 4.12                 |
 | net.\_01001111                  | jlorem                           | 1.1                  |
-| net.bytebuddy                   | byte-buddy-agent                 | 1.9.3                |
-| net.bytebuddy                   | byte-buddy                       | 1.9.3                |
+| net.bytebuddy                   | byte-buddy-agent                 | 1.9.7                |
+| net.bytebuddy                   | byte-buddy                       | 1.9.7                |
 | net.minidev                     | accessors-smart                  | 1.2                  |
 | net.minidev                     | json-smart                       | 2.3                  |
 | net.sourceforge.htmlunit        | htmlunit-core-js                 | 2.33                 |
@@ -158,7 +158,7 @@ CQ:
 | org.apache.httpcomponents       | httpcore                         | 4.4.10               |
 | org.apache.httpcomponents       | httpmime                         | 4.5.6                |
 | org.apache.tika                 | tika-core                        | 1.14                 |
-| org.apache.tomcat.embed         | tomcat-embed-el                  | 9.0.12               |
+| org.apache.tomcat.embed         | tomcat-embed-el                  | 9.0.14               |
 | org.aspectj                     | aspectjrt                        | 1.9.2                |
 | org.aspectj                     | aspectjweaver                    | 1.9.2                |
 | org.assertj                     | assertj-core                     | 3.11.1               |
@@ -169,8 +169,8 @@ CQ:
 | org.javassist                   | javassist                        | 3.22.0-GA            |
 | org.jooq                        | joor-java-8                      | 0.9.9                |
 | org.mariadb.jdbc                | mariadb-java-client              | 2.3.0                |
-| org.mockito                     | mockito-core                     | 2.23.0               |
-| org.mortbay.jasper              | apache-jsp                       | 8.5.24.2             |
+| org.mockito                     | mockito-core                     | 2.23.4               |
+| org.mortbay.jasper              | apache-jsp                       | 8.5.33.1             |
 | org.objenesis                   | objenesis                        | 2.6                  |
 | org.ow2.asm                     | asm-commons                      | 5.0.3                |
 | org.ow2.asm                     | asm-tree                         | 5.0.3                |
@@ -178,18 +178,18 @@ CQ:
 | org.ow2.asm                     | asm                              | 5.0.3                |
 | org.ow2.asm                     | asm                              | 5.0.4                |
 | org.skyscreamer                 | jsonassert                       | 1.5.0                |
-| org.springframework.amqp        | spring-rabbit-junit              | 2.1.0.RELEASE        |
-| org.springframework.amqp        | spring-rabbit-test               | 2.1.0.RELEASE        |
-| org.springframework.boot        | spring-boot-starter-test         | 2.1.0.RELEASE        |
-| org.springframework.boot        | spring-boot-test-autoconfigure   | 2.1.0.RELEASE        |
-| org.springframework.boot        | spring-boot-test                 | 2.1.0.RELEASE        |
-| org.springframework.cloud       | spring-cloud-stream-binder-test  | 2.1.0.RC2            |
-| org.springframework.cloud       | spring-cloud-stream-test-support | 2.1.0.RC2            |
-| org.springframework.integration | spring-integration-test-support  | 5.1.0.RELEASE        |
-| org.springframework.integration | spring-integration-test          | 5.1.0.RELEASE        |
-| org.springframework.restdocs    | spring-restdocs-core             | 2.0.2.RELEASE        |
-| org.springframework.restdocs    | spring-restdocs-mockmvc          | 2.0.2.RELEASE        |
-| org.springframework             | spring-test                      | 5.1.2.RELEASE        |
+| org.springframework.amqp        | spring-rabbit-junit              | 2.1.3.RELEASE        |
+| org.springframework.amqp        | spring-rabbit-test               | 2.1.3.RELEASE        |
+| org.springframework.boot        | spring-boot-starter-test         | 2.1.2.RELEASE        |
+| org.springframework.boot        | spring-boot-test-autoconfigure   | 2.1.2.RELEASE        |
+| org.springframework.boot        | spring-boot-test                 | 2.1.2.RELEASE        |
+| org.springframework.cloud       | spring-cloud-stream-binder-test  | 2.1.0.RELEASE        |
+| org.springframework.cloud       | spring-cloud-stream-test-support | 2.1.0.RELEASE        |
+| org.springframework.integration | spring-integration-test-support  | 5.1.2.RELEASE        |
+| org.springframework.integration | spring-integration-test          | 5.1.2.RELEASE        |
+| org.springframework.restdocs    | spring-restdocs-core             | 2.0.3.RELEASE        |
+| org.springframework.restdocs    | spring-restdocs-mockmvc          | 2.0.3.RELEASE        |
+| org.springframework             | spring-test                      | 5.1.4.RELEASE        |
 | org.xmlunit                     | xmlunit-core                     | 2.6.2                |
 | org.yaml                        | snakeyaml                        | 1.23                 |
 | tapestry                        | tapestry                         | 4.0.2                |
