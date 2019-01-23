@@ -77,8 +77,6 @@ org.springframework.boot:spring-boot:jar:2.1.2.RELEASE:compile
 org.springframework.cloud:spring-cloud-bus:jar:2.1.0.RELEASE:compile
 org.springframework.cloud:spring-cloud-commons:jar:2.1.0.RELEASE:compile
 org.springframework.cloud:spring-cloud-context:jar:2.1.0.RELEASE:compile
-org.springframework.cloud:spring-cloud-function-context:jar:2.0.0.RELEASE:compile
-org.springframework.cloud:spring-cloud-function-core:jar:2.0.0.RELEASE:compile
 org.springframework.cloud:spring-cloud-starter:jar:2.1.0.RELEASE:compile
 org.springframework.cloud:spring-cloud-stream:jar:2.1.0.RELEASE:compile
 org.springframework.data:spring-data-commons:jar:2.1.4.RELEASE:compile
