@@ -303,7 +303,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             versionTextField.setValue(swModule.getVersion());
             vendorTextField.setValue(swModule.getVendor());
             descTextArea.setValue(swModule.getDescription());
-            softwareModuleType = new LabelBuilder().name(swModule.getType().getName()).caption("Type").buildLabel();
+            softwareModuleType = new LabelBuilder().name(swModule.getType().getName())
+                    .caption(i18n.getMessage("upload.swmodule.type")).buildLabel();
         });
     }
 

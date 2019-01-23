@@ -85,8 +85,8 @@ public class TargetFilterHeader extends VerticalLayout {
         createfilterButton = createAddButton();
     }
 
-    private static Label createHeaderCaption() {
-        return new LabelBuilder().name(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION).buildCaptionLabel();
+    private Label createHeaderCaption() {
+        return new LabelBuilder().name(i18n.getMessage("caption.filter.custom")).buildCaptionLabel();
     }
 
     private void buildLayout() {

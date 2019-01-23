@@ -297,8 +297,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void setTableColumnDetails(final Table table) {
 
-        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
-        table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
+        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_FILENAME));
+        table.setColumnHeader(SIZE, i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_FILESIZE_BYTES));
         if (fullWindowMode) {
             table.setColumnHeader(SHA1HASH, i18n.getMessage("upload.sha1"));
             table.setColumnHeader(MD5HASH, i18n.getMessage("upload.md5"));

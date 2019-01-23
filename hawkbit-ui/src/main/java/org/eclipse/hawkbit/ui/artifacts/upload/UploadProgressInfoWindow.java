@@ -13,9 +13,9 @@ import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStat
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -48,18 +48,14 @@ public class UploadProgressInfoWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String COLUMN_PROGRESS = "Progress";
-
-    private static final String COLUMN_FILE_NAME = "File name";
-
-    private static final String COLUMN_STATUS = "Status";
-
-    private static final String COLUMN_REASON = "Reason";
+    private static final String COLUMN_PROGRESS = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_PROGRESS;
+    private static final String COLUMN_FILE_NAME = UIMessageIdProvider.CAPTION_ARTIFACT_FILENAME;
+    private static final String COLUMN_STATUS = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_STATUS;
+    private static final String COLUMN_REASON = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_REASON;
+    private static final String COLUMN_SOFTWARE_MODULE = UIMessageIdProvider.CAPTION_SOFTWARE_MODULE;
 
     private static final String STATUS_INPROGRESS = "InProgress";
-
     private static final String STATUS_FINISHED = "Finished";
-
     private static final String STATUS_FAILED = "Failed";
 
     private final ArtifactUploadState artifactUploadState;
@@ -157,11 +153,14 @@ public class UploadProgressInfoWindow extends Window {
     private void setGridColumnProperties() {
         grid.getColumn(COLUMN_STATUS).setRenderer(new StatusRenderer());
         grid.getColumn(COLUMN_PROGRESS).setRenderer(new ProgressBarRenderer());
-        grid.setColumnOrder(COLUMN_STATUS, COLUMN_PROGRESS, COLUMN_FILE_NAME, SPUILabelDefinitions.NAME_VERSION,
+        grid.setColumnOrder(COLUMN_STATUS, COLUMN_PROGRESS, COLUMN_FILE_NAME, COLUMN_SOFTWARE_MODULE,
                 COLUMN_REASON);
         setColumnWidth();
-        grid.getColumn(SPUILabelDefinitions.NAME_VERSION)
-                .setHeaderCaption(i18n.getMessage("upload.swModuleTable.header"));
+        grid.getColumn(COLUMN_STATUS).setHeaderCaption(i18n.getMessage(COLUMN_STATUS));
+        grid.getColumn(COLUMN_PROGRESS).setHeaderCaption(i18n.getMessage(COLUMN_PROGRESS));
+        grid.getColumn(COLUMN_FILE_NAME).setHeaderCaption(i18n.getMessage(COLUMN_FILE_NAME));
+        grid.getColumn(COLUMN_SOFTWARE_MODULE).setHeaderCaption(i18n.getMessage(COLUMN_SOFTWARE_MODULE));
+        grid.getColumn(COLUMN_REASON).setHeaderCaption(i18n.getMessage(COLUMN_REASON));
         grid.setFrozenColumnCount(5);
     }
 
@@ -182,7 +181,7 @@ public class UploadProgressInfoWindow extends Window {
         uploadContainer.addContainerProperty(COLUMN_FILE_NAME, String.class, null);
         uploadContainer.addContainerProperty(COLUMN_PROGRESS, Double.class, 0D);
         uploadContainer.addContainerProperty(COLUMN_REASON, String.class, "");
-        uploadContainer.addContainerProperty(SPUILabelDefinitions.NAME_VERSION, String.class, "");
+        uploadContainer.addContainerProperty(COLUMN_SOFTWARE_MODULE, String.class, "");
         return uploadContainer;
     }
 
@@ -197,7 +196,7 @@ public class UploadProgressInfoWindow extends Window {
     }
 
     private void createStatusPopupHeaderComponents() {
-        windowCaption = new Label("Upload status");
+        windowCaption = new Label(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_POPUP));
         closeButton = getCloseButton();
     }
 
@@ -206,7 +205,7 @@ public class UploadProgressInfoWindow extends Window {
         grid.getColumn(COLUMN_PROGRESS).setWidth(150);
         grid.getColumn(COLUMN_FILE_NAME).setWidth(200);
         grid.getColumn(COLUMN_REASON).setWidth(290);
-        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidth(200);
+        grid.getColumn(COLUMN_SOFTWARE_MODULE).setWidth(200);
     }
 
     private static class StatusRenderer extends HtmlRenderer {
@@ -314,7 +313,7 @@ public class UploadProgressInfoWindow extends Window {
         if (item == null) {
             item = grid.getContainerDataSource().addItem(fileUploadId);
             item.getItemProperty(COLUMN_FILE_NAME).setValue(fileUploadId.getFilename());
-            item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(HawkbitCommonUtil.getFormattedNameVersion(
+            item.getItemProperty(COLUMN_SOFTWARE_MODULE).setValue(HawkbitCommonUtil.getFormattedNameVersion(
                     fileUploadId.getSoftwareModuleName(), fileUploadId.getSoftwareModuleVersion()));
         }
 
