@@ -37,6 +37,8 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_FILTER_BY_TYPE = "caption.filter.by.type";
 
+    public static final String CAPTION_FILTER_CUSTOM = "caption.filter.custom";
+
     public static final String CAPTION_DISTRIBUTION_TAG = "caption.entity.distribution.tag";
 
     public static final String CAPTION_TARGET_TAG = "caption.entity.target.tag";
@@ -150,6 +152,8 @@ public final class UIMessageIdProvider {
     public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
+
+    public static final String CAPTION_ARTIFACT_SOFTWARE_MODULE_Type = "artifact.softwaremodule.type.caption";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 

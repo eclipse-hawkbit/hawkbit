@@ -86,7 +86,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        return new LabelBuilder().name(i18n.getMessage("caption.filter.custom")).buildCaptionLabel();
+        return new LabelBuilder().name(i18n.getMessage(UIMessageIdProvider.CAPTION_FILTER_CUSTOM)).buildCaptionLabel();
     }
 
     private void buildLayout() {
