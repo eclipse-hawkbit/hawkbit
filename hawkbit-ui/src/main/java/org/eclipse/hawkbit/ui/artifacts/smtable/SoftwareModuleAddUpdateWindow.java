@@ -229,8 +229,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 .id(UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION).buildTextComponent();
 
         typeComboBox = SPUIComponentProvider.getComboBox(
-                i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_Type), "", null, null, true, null,
-                i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_Type));
+                i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE), "", null, null, true, null,
+                i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE));
         typeComboBox.setId(UIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
