@@ -31,19 +31,15 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -62,8 +58,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Artifact Download Resource")
-@SpringBootTest(classes = { DownloadTestConfiguration.class, DdiApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest(classes = { DownloadTestConfiguration.class })
 public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private static volatile int downLoadProgress = 0;

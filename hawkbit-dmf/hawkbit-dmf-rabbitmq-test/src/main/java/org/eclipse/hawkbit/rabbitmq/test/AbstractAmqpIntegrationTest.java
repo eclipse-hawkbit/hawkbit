@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.rabbitmq.test;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -25,18 +26,18 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
+@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
         TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
-    protected static final long TIMEOUT = 5_000;
+    private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     @Rule
     @Autowired
@@ -62,7 +63,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     }
 
     protected ConditionFactory createConditionFactory() {
-        return Awaitility.await().atMost(TIMEOUT, TimeUnit.MILLISECONDS);
+        return Awaitility.await().atMost(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {

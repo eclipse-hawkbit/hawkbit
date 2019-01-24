@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
@@ -46,6 +45,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.SubsectionDescriptor;
 import org.springframework.restdocs.snippet.Snippet;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -60,7 +60,7 @@ import io.qameta.allure.Feature;
  *
  */
 @Feature("Documentation Verfication - API")
-@SpringBootTest(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
+@ContextConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {

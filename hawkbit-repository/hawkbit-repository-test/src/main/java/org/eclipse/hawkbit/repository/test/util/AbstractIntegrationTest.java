@@ -81,6 +81,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
@@ -91,7 +92,8 @@ import com.google.common.io.Files;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringBootTest(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest
+@ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very

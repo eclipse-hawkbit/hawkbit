@@ -31,16 +31,16 @@ import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
+@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
-@TestPropertySource(locations = "classpath:/jpa-test.properties", properties = "spring.main.allow-bean-definition-overriding=true")
+@TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     protected static final String INVALID_TEXT_HTML = "</noscript><br><script>";

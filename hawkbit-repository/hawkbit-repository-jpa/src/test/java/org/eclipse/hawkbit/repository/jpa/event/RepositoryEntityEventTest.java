@@ -26,18 +26,15 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
@@ -47,8 +44,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Entity Events")
-@SpringBootTest(classes = { RepositoryTestConfiguration.class, RepositoryApplicationConfiguration.class,
-        TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest(classes = { RepositoryTestConfiguration.class })
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired

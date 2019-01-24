@@ -58,7 +58,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Handler Service")
-public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
+public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
     private static final String CORRELATION_ID = UUID.randomUUID().toString();
     private static final String TARGET_PREFIX = "Dmf_hand_";
 

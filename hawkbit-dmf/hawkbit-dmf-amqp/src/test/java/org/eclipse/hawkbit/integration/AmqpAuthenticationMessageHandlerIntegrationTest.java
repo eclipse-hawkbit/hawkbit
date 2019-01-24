@@ -19,14 +19,11 @@ import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
-import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -37,7 +34,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
@@ -47,8 +43,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Authentication Message Handler")
-@SpringBootTest(classes = { DmfApiConfiguration.class, RepositoryApplicationConfiguration.class,
-        AmqpTestConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest(classes = { DmfApiConfiguration.class })
 public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmqpIntegrationTest {
 
     private static final String TARGET_SECRUITY_TOKEN = "12345";

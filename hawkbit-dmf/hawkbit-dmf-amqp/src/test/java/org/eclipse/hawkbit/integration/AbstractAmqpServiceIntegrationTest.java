@@ -50,8 +50,8 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
 import io.qameta.allure.Step;
 
@@ -60,10 +60,10 @@ import io.qameta.allure.Step;
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
-@SpringBootTest(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        DmfApiConfiguration.class, DmfTestConfiguration.class, TestConfiguration.class,
+@ContextConfiguration(classes = { DmfApiConfiguration.class, DmfTestConfiguration.class,
+        RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
-public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
+public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";

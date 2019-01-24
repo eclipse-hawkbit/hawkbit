@@ -127,8 +127,6 @@
    </repositories>
 
    <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <java.version>1.8</java.version>
       <spring.boot.version>2.1.2.RELEASE</spring.boot.version>
       <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
@@ -253,6 +251,7 @@
          </plugin>
          <plugin>
             <artifactId>maven-scm-plugin</artifactId>
+            <version>${maven.scm.plugin.version}</version>
             <configuration>
                <tag>${project.version}</tag>
             </configuration>
