@@ -153,7 +153,7 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
 
-    public static final String CAPTION_ARTIFACT_SOFTWARE_MODULE_Type = "artifact.softwaremodule.type.caption";
+    public static final String CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE = "artifact.softwaremodule.type.caption";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 

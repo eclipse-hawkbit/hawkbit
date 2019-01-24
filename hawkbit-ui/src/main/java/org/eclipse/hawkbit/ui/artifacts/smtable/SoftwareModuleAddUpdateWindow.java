@@ -306,7 +306,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             vendorTextField.setValue(swModule.getVendor());
             descTextArea.setValue(swModule.getDescription());
             softwareModuleType = new LabelBuilder().name(swModule.getType().getName())
-                    .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_Type)).buildLabel();
+                    .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE)).buildLabel();
         });
     }
 
