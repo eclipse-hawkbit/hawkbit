@@ -76,7 +76,6 @@
 | org.springframework.cloud            | spring-cloud-bus               | 2.1.0.RELEASE  | [CQ18799](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18799) |
 | org.springframework.cloud            | spring-cloud-commons           | 2.1.0.RELEASE  | [CQ18800](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18800) |
 | org.springframework.cloud            | spring-cloud-context           | 2.1.0.RELEASE  | [CQ18801](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18801) |
-| org.springframework.cloud            | spring-cloud-starter           | 2.1.0.RELEASE  | [CQ18803](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18803) |
 | org.springframework.cloud            | spring-cloud-stream            | 2.1.0.RELEASE  | [CQ18802](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18802) |
 | org.springframework.data             | spring-data-commons            | 2.1.2.RELEASE  | [CQ18213](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18213) |
 | org.springframework.data             | spring-data-jpa                | 2.1.2.RELEASE  | [CQ18214](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18214) |
