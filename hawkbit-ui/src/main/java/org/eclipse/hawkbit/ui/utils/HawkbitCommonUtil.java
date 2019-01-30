@@ -563,9 +563,22 @@ public final class HawkbitCommonUtil {
         return getCaptionText(caption);
     }
 
+    /**
+     * Determine the language that should be used considering localization
+     * properties and UI settings
+     * 
+     * @param localizationProperties
+     *            UI Localization settings
+     * @param ui
+     *            UI which settings are considered
+     * @return Locale to be used according to UI and properties
+     */
     public static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties, final UI ui) {
         final List<String> availableLocals = localizationProperties.getAvailableLocals();
         final Locale uiLocale = ui.getSession().getLocale();
+        // ckeck if language code of UI locale matches an available local.
+        // Country, region and variant are ignored. "availableLocals" must only
+        // contain language codes without country or other extensions.
         if (availableLocals.contains(uiLocale.getLanguage())) {
             return uiLocale;
         }
