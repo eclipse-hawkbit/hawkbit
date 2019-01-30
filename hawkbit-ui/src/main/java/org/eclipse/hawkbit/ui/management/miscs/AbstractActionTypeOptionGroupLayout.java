@@ -25,7 +25,7 @@ import com.vaadin.ui.Label;
 /**
  * Action type option group abstract layout.
  */
-public abstract class ActionTypeOptionGroupAbstractLayout extends HorizontalLayout {
+public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayout {
     private static final long serialVersionUID = 1L;
 
     protected static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
@@ -40,7 +40,7 @@ public abstract class ActionTypeOptionGroupAbstractLayout extends HorizontalLayo
      * @param i18n
      *            VaadinMessageSource
      */
-    protected ActionTypeOptionGroupAbstractLayout(final VaadinMessageSource i18n) {
+    protected AbstractActionTypeOptionGroupLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
         init();
     }
@@ -105,6 +105,13 @@ public abstract class ActionTypeOptionGroupAbstractLayout extends HorizontalLayo
             return actionType;
         }
 
+        /**
+         * Matches the action type to the option
+         * 
+         * @param actionType
+         *            the action type to get option for
+         * @return action type option if matches, otherwise empty Optional
+         */
         public static Optional<ActionTypeOption> getOptionForActionType(final ActionType actionType) {
             return Arrays.stream(ActionTypeOption.values()).filter(option -> option.getActionType().equals(actionType))
                     .findFirst();

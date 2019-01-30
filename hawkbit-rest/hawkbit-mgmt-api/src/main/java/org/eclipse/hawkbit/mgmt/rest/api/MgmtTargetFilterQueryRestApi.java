@@ -136,8 +136,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *
      * @param filterId
      *            of the target to change
-     * @param dsId
-     *            of the Id of the auto assign distribution set
+     * @param dsIdWithActionType
+     *            id of the distribution set and the action type for auto
+     *            assignment
      * @return http status
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{filterId}/autoAssignDS", consumes = {

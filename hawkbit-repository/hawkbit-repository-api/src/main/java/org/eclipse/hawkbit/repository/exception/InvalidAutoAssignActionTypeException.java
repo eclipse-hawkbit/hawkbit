@@ -12,6 +12,9 @@ package org.eclipse.hawkbit.repository.exception;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
+/**
+ * Thrown if an action type for auto-assignment is neither 'forced', nor 'soft'.
+ */
 public class InvalidAutoAssignActionTypeException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;

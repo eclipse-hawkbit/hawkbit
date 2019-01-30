@@ -73,7 +73,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
         setContainerDataSource(container);
     }
 
-    private Container createContainer() {
+    private static Container createContainer() {
         final Map<String, Object> queryConfig = new HashMap<>();
         queryConfig.put(SPUIDefinitions.FILTER_BY_DS_COMPLETE, Boolean.TRUE);
 

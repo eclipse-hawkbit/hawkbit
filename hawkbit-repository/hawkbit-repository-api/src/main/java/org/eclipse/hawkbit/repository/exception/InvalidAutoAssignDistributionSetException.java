@@ -12,6 +12,10 @@ package org.eclipse.hawkbit.repository.exception;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
+/**
+ * Thrown if a distribution set for auto-assignment is incomplete (i.e.
+ * mandatory modules are missing) or soft deleted.
+ */
 public class InvalidAutoAssignDistributionSetException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;

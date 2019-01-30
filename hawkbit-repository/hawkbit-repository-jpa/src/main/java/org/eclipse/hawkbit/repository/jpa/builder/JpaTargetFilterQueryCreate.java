@@ -36,7 +36,7 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
         return new JpaTargetFilterQuery(name, query,
                 getAutoAssignDistributionSetId().map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null),
-                getAutoAssignActionType().filter(this::isAutoAssignActionTypeValid).orElse(null));
+                getAutoAssignActionType().filter(JpaTargetFilterQueryCreate::isAutoAssignActionTypeValid).orElse(null));
     }
 
     private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
@@ -44,7 +44,7 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 
-    private boolean isAutoAssignActionTypeValid(final ActionType actionType) {
+    private static boolean isAutoAssignActionTypeValid(final ActionType actionType) {
         if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
             throw new InvalidAutoAssignActionTypeException();
         }

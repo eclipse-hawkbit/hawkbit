@@ -250,13 +250,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
-    private void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
+    private static void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
         if (!distributionSet.isComplete() || distributionSet.isDeleted()) {
             throw new InvalidAutoAssignDistributionSetException();
         }
     }
 
-    private ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
+    private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
         if (actionType == null) {
             return ActionType.FORCED;
         }

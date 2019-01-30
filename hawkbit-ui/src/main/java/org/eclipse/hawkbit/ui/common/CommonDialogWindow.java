@@ -378,7 +378,7 @@ public class CommonDialogWindow extends Window {
         for (final Validator validator : validators) {
             try {
                 validator.validate(value);
-            } catch (final InvalidValueException e) {
+            } catch (@SuppressWarnings("squid:S1166") final InvalidValueException e) {
                 return false;
             }
         }

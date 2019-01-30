@@ -14,9 +14,15 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 /**
  * Action type option group layout for auto assignment.
  */
-public class ActionTypeOptionGroupAutoAssignmentLayout extends ActionTypeOptionGroupAbstractLayout {
+public class ActionTypeOptionGroupAutoAssignmentLayout extends AbstractActionTypeOptionGroupLayout {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     */
     public ActionTypeOptionGroupAutoAssignmentLayout(final VaadinMessageSource i18n) {
         super(i18n);
     }

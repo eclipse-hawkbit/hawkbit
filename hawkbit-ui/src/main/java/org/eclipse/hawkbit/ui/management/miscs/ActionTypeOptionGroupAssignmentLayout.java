@@ -31,11 +31,17 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Action type option group layout for manual assignment.
  */
-public class ActionTypeOptionGroupAssignmentLayout extends ActionTypeOptionGroupAbstractLayout {
+public class ActionTypeOptionGroupAssignmentLayout extends AbstractActionTypeOptionGroupLayout {
     private static final long serialVersionUID = 1L;
 
     private DateField forcedTimeDateField;
 
+    /**
+     * Constructor
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     */
     public ActionTypeOptionGroupAssignmentLayout(final VaadinMessageSource i18n) {
         super(i18n);
         addValueChangeListener();
