@@ -37,6 +37,7 @@ import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Validator;
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -292,7 +293,7 @@ public class CommonDialogWindow extends Window {
             if (field instanceof CheckBox && originalValue == null) {
                 originalValue = Boolean.FALSE;
             }
-            final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
+            final Object currentValue = getCurrentValue(currentChangedComponent, newValue, field);
 
             if (!Objects.equals(originalValue, currentValue)) {
                 return true;
@@ -301,7 +302,7 @@ public class CommonDialogWindow extends Window {
         return false;
     }
 
-    private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
+    private static Object getCurrentValue(final Component currentChangedComponent, final Object newValue,
             final AbstractField<?> field) {
         Object currentValue = field.getValue();
         if (field instanceof Table) {
@@ -332,8 +333,8 @@ public class CommonDialogWindow extends Window {
 
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
-        for (final AbstractField field : requiredComponents) {
-            Object value = getCurrentVaue(currentChangedComponent, newValue, field);
+        for (final AbstractField<?> field : requiredComponents) {
+            Object value = getCurrentValue(currentChangedComponent, newValue, field);
 
             if (Set.class.equals(field.getType())) {
                 value = emptyToNull((Collection<?>) value);
@@ -343,12 +344,10 @@ public class CommonDialogWindow extends Window {
                 return false;
             }
 
-            // We need to loop through the entire loop for validity testing.
-            // Otherwise the UI will only mark the
-            // first field with errors and then stop. If there are several
-            // fields with errors, this is bad.
-            field.setValue(value);
-            if (!field.isValid()) {
+            // We need to loop through all of components for validity testing.
+            // Otherwise the UI will only mark the first field with errors and
+            // then stop
+            if (!isValueForFieldValid(field, value)) {
                 valid = false;
             }
         }
@@ -371,6 +370,20 @@ public class CommonDialogWindow extends Window {
             }
         }
         return false;
+    }
+
+    private static boolean isValueForFieldValid(final AbstractField<?> field, final Object value) {
+        final Collection<Validator> validators = field.getValidators();
+
+        for (final Validator validator : validators) {
+            try {
+                validator.validate(value);
+            } catch (final InvalidValueException e) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
