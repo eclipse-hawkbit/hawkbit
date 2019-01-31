@@ -37,7 +37,6 @@ import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Validator;
-import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -333,7 +332,7 @@ public class CommonDialogWindow extends Window {
 
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
-        for (final AbstractField<?> field : requiredComponents) {
+        for (final AbstractField field : requiredComponents) {
             Object value = getCurrentValue(currentChangedComponent, newValue, field);
 
             if (Set.class.equals(field.getType())) {
@@ -346,8 +345,12 @@ public class CommonDialogWindow extends Window {
 
             // We need to loop through all of components for validity testing.
             // Otherwise the UI will only mark the first field with errors and
-            // then stop
-            if (!isValueForFieldValid(field, value)) {
+            // then stop. Setting the value is necessary because not all
+            // required input fields have empty string validator, but emptiness
+            // is checked during isValid() call. Setting the value could be
+            // redundant, check if it could be removed in the future.
+            field.setValue(value);
+            if (!field.isValid()) {
                 valid = false;
             }
         }
@@ -370,20 +373,6 @@ public class CommonDialogWindow extends Window {
             }
         }
         return false;
-    }
-
-    private static boolean isValueForFieldValid(final AbstractField<?> field, final Object value) {
-        final Collection<Validator> validators = field.getValidators();
-
-        for (final Validator validator : validators) {
-            try {
-                validator.validate(value);
-            } catch (@SuppressWarnings("squid:S1166") final InvalidValueException e) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {

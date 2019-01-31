@@ -255,7 +255,7 @@ public class DistributionSetSelectComboBox extends ComboBox {
      */
     @Override
     public String getItemCaption(final Object itemId) {
-        if (itemId != null && itemId.equals(getValue())) {
+        if (itemId != null && itemId.equals(getValue()) && !StringUtils.isEmpty(selectedValueCaption)) {
             return selectedValueCaption;
         }
 
