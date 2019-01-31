@@ -255,13 +255,11 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     /**
-     * Creates the wrapper which contains the menu item and the adjacent label
-     * for displaying the occurred events
+     * Creates the wrapper which contains the menu item and the adjacent label for
+     * displaying the occurred events
      * 
-     * @param menuItemButton
-     *            the menu item
-     * @param notificationLabel
-     *            the label for displaying the occurred events
+     * @param menuItemButton    the menu item
+     * @param notificationLabel the label for displaying the occurred events
      * @return Component of type CssLayout
      */
     private static Component buildLabelWrapper(final ValoMenuItemButton menuItemButton,
@@ -281,8 +279,8 @@ public final class DashboardMenu extends CustomComponent {
      * Returns all views which are currently accessible by the current logged in
      * user.
      *
-     * @return a list of all views which are currently visible and accessible
-     *         for the current logged in user
+     * @return a list of all views which are currently visible and accessible for
+     *         the current logged in user
      */
     private List<DashboardMenuItem> getAccessibleViews() {
         return this.dashboardVaadinViews.stream()
@@ -310,19 +308,18 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * Is a View available.
      *
-     * @return the accessibleViewsEmpty <true> no rights for any view <false> a
-     *         view is available
+     * @return the accessibleViewsEmpty <code>true</code> no rights for any view
+     *         <code>false</code> a view is available
      */
     public boolean isAccessibleViewsEmpty() {
         return accessibleViewsEmpty;
     }
 
     /**
-     * notifies the dashboard that the view has been changed and the button
-     * needs to be re-styled.
+     * notifies the dashboard that the view has been changed and the button needs to
+     * be re-styled.
      *
-     * @param event
-     *            the post view change event
+     * @param event the post view change event
      */
     public void postViewChange(final PostViewChangeEvent event) {
         menuButtons.forEach(button -> button.postViewChange(event));
@@ -331,10 +328,9 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * Returns the dashboard view type by a given view name.
      *
-     * @param viewName
-     *            the name of the view to retrieve
-     * @return the dashboard view for a given viewname or {@code null} if view
-     *         with given viewname does not exists
+     * @param viewName the name of the view to retrieve
+     * @return the dashboard view for a given viewname or {@code null} if view with
+     *         given viewname does not exists
      */
     public DashboardMenuItem getByViewName(final String viewName) {
         final Optional<DashboardMenuItem> findFirst = dashboardVaadinViews.stream()
@@ -350,9 +346,8 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * Is the given view accessible.
      *
-     * @param viewName
-     *            the view name
-     * @return <true> = denied, <false> = accessible
+     * @param viewName the view name
+     * @return <code>true</code> = denied, <code>false</code> = accessible
      */
     public boolean isAccessDenied(final String viewName) {
         final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
@@ -392,11 +387,9 @@ public final class DashboardMenu extends CustomComponent {
         private final DashboardMenuItem view;
 
         /**
-         * creates a new button in case of pressed switches to the given
-         * {@code view}.
+         * creates a new button in case of pressed switches to the given {@code view}.
          *
-         * @param view
-         *            the view to switch to in case the button is pressed
+         * @param view the view to switch to in case the button is pressed
          */
         public ValoMenuItemButton(final DashboardMenuItem view) {
             this.view = view;
@@ -413,8 +406,7 @@ public final class DashboardMenu extends CustomComponent {
         /**
          * notifies the button to change his style.
          *
-         * @param event
-         *            the post view change event
+         * @param event the post view change event
          */
         public void postViewChange(final PostViewChangeEvent event) {
             removeStyleName(STYLE_SELECTED);

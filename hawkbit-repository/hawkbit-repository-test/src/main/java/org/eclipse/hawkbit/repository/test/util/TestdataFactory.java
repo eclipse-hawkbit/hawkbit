@@ -104,19 +104,19 @@ public class TestdataFactory {
     public static final String DS_TYPE_DEFAULT = "test_default_ds_type";
 
     /**
-     * Key of test "os" {@link SoftwareModuleType} -> mandatory firmware in
+     * Key of test "os" {@link SoftwareModuleType} : mandatory firmware in
      * {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_OS = "os";
 
     /**
-     * Key of test "runtime" {@link SoftwareModuleType} -> optional firmware in
+     * Key of test "runtime" {@link SoftwareModuleType} : optional firmware in
      * {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_RT = "runtime";
 
     /**
-     * Key of test "application" {@link SoftwareModuleType} -> optional software
+     * Key of test "application" {@link SoftwareModuleType} : optional software
      * in {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_APP = "application";
@@ -466,9 +466,8 @@ public class TestdataFactory {
         for (int i = 0; i < 3; i++) {
             final String artifactData = "some test data" + i;
             final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));
-            artifacts.add(
-                    artifactManagement.create(new ArtifactUpload(stubInputStream, moduleId, "filename" + i, false,
-                            artifactData.length())));
+            artifacts.add(artifactManagement.create(
+                    new ArtifactUpload(stubInputStream, moduleId, "filename" + i, false, artifactData.length())));
 
         }
 

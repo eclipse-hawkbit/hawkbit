@@ -103,20 +103,13 @@ public class CommonDialogWindow extends Window {
     /**
      * Constructor.
      *
-     * @param caption
-     *            the caption
-     * @param content
-     *            the content
-     * @param helpLink
-     *            the helpLinks
-     * @param closeListener
-     *            the saveDialogCloseListener
-     * @param cancelButtonClickListener
-     *            the cancelButtonClickListener
-     * @param layout
-     *            the abstract layout
-     * @param i18n
-     *            the i18n service
+     * @param caption                   the caption
+     * @param content                   the content
+     * @param helpLink                  the helpLinks
+     * @param closeListener             the saveDialogCloseListener
+     * @param cancelButtonClickListener the cancelButtonClickListener
+     * @param layout                    the abstract layout
+     * @param i18n                      the i18n service
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final SaveDialogCloseListener closeListener, final ClickListener cancelButtonClickListener,
@@ -230,8 +223,7 @@ public class CommonDialogWindow extends Window {
     }
 
     /**
-     * saves the original values in a Map so we can use them for detecting
-     * changes
+     * saves the original values in a Map so we can use them for detecting changes
      */
     public final void setOrginaleValues() {
         for (final AbstractField<?> field : allComponents) {
@@ -523,8 +515,7 @@ public class CommonDialogWindow extends Window {
      * ValueChangeListener to it. Necessary in Update Distribution Type as the
      * CheckBox concerned is an ItemProperty...
      *
-     * @param component
-     *            AbstractField
+     * @param component AbstractField
      */
     public void updateAllComponents(final AbstractField<?> component) {
 
@@ -545,8 +536,8 @@ public class CommonDialogWindow extends Window {
     }
 
     /**
-     * Check if the safe action can executed. After a the save action the
-     * listener checks if the dialog can closed.
+     * Check if the safe action can executed. After a the save action the listener
+     * checks if the dialog can closed.
      *
      */
     public interface SaveDialogCloseListener {
@@ -554,33 +545,33 @@ public class CommonDialogWindow extends Window {
         /**
          * Checks if the safe action can executed.
          *
-         * @return <true> = save action can executed <false> = cannot execute
-         *         safe action .
+         * @return <code>true</code> = save action can executed <code>false</code> =
+         *         cannot execute safe action .
          */
         boolean canWindowSaveOrUpdate();
 
         /**
          * Checks if the window can closed after the safe action is executed
          *
-         * @return <true> = window will close <false> = will not closed.
+         * @return <code>true</code> = window will close <code>false</code> = will not
+         *         closed.
          */
         default boolean canWindowClose() {
             return true;
         }
 
         /**
-         * Saves/Updates action. Is called if canWindowSaveOrUpdate is <true>.
+         * Saves/Updates action. Is called if canWindowSaveOrUpdate is true.
          *
          */
         void saveOrUpdate();
     }
 
     /**
-     * Updates the field allComponents. All components existing on the given
-     * layout are added to the list of allComponents
+     * Updates the field allComponents. All components existing on the given layout
+     * are added to the list of allComponents
      *
-     * @param layout
-     *            AbstractLayout
+     * @param layout AbstractLayout
      */
     public void updateAllComponents(final AbstractLayout layout) {
         allComponents = getAllComponents(layout);

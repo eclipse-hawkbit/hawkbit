@@ -143,11 +143,12 @@ public interface DdiRootControllerRestApi {
      *            resource utilization by controllers, maximum number of
      *            messages that are retrieved from database is limited by
      *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
-     *            actionHistoryMessageCount < 0, retrieves the maximum allowed
-     *            number of action status messages from history;
-     *            actionHistoryMessageCount = 0, does not retrieve any message;
-     *            and actionHistoryMessageCount > 0, retrieves the specified
-     *            number of messages, limited by maximum allowed number.
+     *            actionHistoryMessageCount less then zero, retrieves the
+     *            maximum allowed number of action status messages from history;
+     *            actionHistoryMessageCount equal to zero, does not retrieve any
+     *            message; and actionHistoryMessageCount greater then zero,
+     *            retrieves the specified number of messages, limited by maximum
+     *            allowed number.
      * @param request
      *            the HTTP request injected by spring
      * @return the response

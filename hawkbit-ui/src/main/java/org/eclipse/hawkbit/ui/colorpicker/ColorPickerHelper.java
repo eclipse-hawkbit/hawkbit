@@ -42,7 +42,7 @@ public final class ColorPickerHelper {
     }
 
     /**
-     * Covert RGB code to {@Color}.
+     * Covert RGB code to {@link Color}.
      *
      * @param value
      *            RGB vale
