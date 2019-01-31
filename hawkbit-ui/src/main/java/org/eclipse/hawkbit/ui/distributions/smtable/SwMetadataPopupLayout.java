@@ -32,7 +32,8 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * Pop up layout to display software module metadata.
  */
-public class SwMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<SoftwareModule, SoftwareModuleMetadata> {
+public class SwMetadataPopupLayout
+        extends AbstractMetadataPopupLayoutVersioned<SoftwareModule, SoftwareModuleMetadata> {
 
     private static final long serialVersionUID = 1L;
 

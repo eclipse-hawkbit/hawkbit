@@ -49,10 +49,8 @@ public class TargetMetadataPopupLayout extends AbstractMetadataPopupLayout<Targe
 
     @Override
     protected MetaData createMetadata(final Target entity, final String key, final String value) {
-        final TargetMetadata metaData = targetManagement
-                .createMetaData(entity.getControllerId(),
-                        Collections.singletonList(entityFactory.generateTargetMetadata(key, value)))
-                .get(0);
+        final TargetMetadata metaData = targetManagement.createMetaData(entity.getControllerId(),
+                Collections.singletonList(entityFactory.generateTargetMetadata(key, value))).get(0);
         setSelectedEntity(metaData.getTarget());
         return metaData;
     }

@@ -28,16 +28,17 @@ public interface FieldNameProvider {
     String SUB_ATTRIBUTE_SEPERATOR = ".";
 
     /**
-     * @return the string representation of the underlying persistence field name
-     *         e.g. in case of sorting. Never {@code null}.
+     * @return the string representation of the underlying persistence field
+     *         name e.g. in case of sorting. Never {@code null}.
      */
     String getFieldName();
 
     /**
      * Contains the sub entity the given field.
      *
-     * @param propertyField the given field
-     * @return true contains <code>false</code> contains not
+     * @param propertyField
+     *            the given field
+     * @return <code>true</code> contains <code>false</code> contains not
      */
     default boolean containsSubEntityAttribute(final String propertyField) {
 

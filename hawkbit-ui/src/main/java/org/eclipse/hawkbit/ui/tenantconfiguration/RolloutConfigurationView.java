@@ -73,8 +73,8 @@ public class RolloutConfigurationView extends BaseConfigurationView
         hLayout.addComponent(approvalCheckbox);
         hLayout.addComponent(approvalConfigurationItem);
 
-        final Link linkToApprovalHelp = SPUIComponentProvider
-                .getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getRollout());
+        final Link linkToApprovalHelp = SPUIComponentProvider.getHelpLink(i18n,
+                uiProperties.getLinks().getDocumentation().getRollout());
         hLayout.addComponent(linkToApprovalHelp);
         hLayout.setComponentAlignment(linkToApprovalHelp, Alignment.BOTTOM_RIGHT);
 

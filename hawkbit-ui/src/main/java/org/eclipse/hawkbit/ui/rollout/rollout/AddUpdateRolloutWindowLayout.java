@@ -1107,8 +1107,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private enum ERROR_THRESHOLD_OPTIONS {
 
-        PERCENT("label.errorthreshold.option.percent"),
-        COUNT("label.errorthreshold.option.count");
+        PERCENT("label.errorthreshold.option.percent"), COUNT("label.errorthreshold.option.count");
 
         private final String value;
 
@@ -1117,7 +1116,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private String getValue(final VaadinMessageSource i18n) {
-            return  i18n.getMessage(value);
+            return i18n.getMessage(value);
         }
     }
 }
