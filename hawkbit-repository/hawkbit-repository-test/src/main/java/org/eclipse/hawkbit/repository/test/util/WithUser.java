@@ -17,9 +17,6 @@ import java.lang.annotation.Target;
 /**
  * Annotation to run test classes or test methods with a specific user with
  * specific permissions.
- * 
- *
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

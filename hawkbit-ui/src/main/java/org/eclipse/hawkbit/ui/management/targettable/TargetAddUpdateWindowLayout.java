@@ -130,7 +130,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         final Target target = targetManagement.update(entityFactory.target().update(controllerId)
                 .name(nameTextField.getValue()).description(descTextArea.getValue()));
         /* display success msg */
-        uINotification.displaySuccess(i18n.getMessage("message.update.success", new Object[] { target.getName() }));
+        uINotification.displaySuccess(i18n.getMessage("message.update.success", target.getName()));
         // publishing through event bus
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
     }
@@ -144,7 +144,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 entityFactory.target().create().controllerId(newControllerId).name(newName).description(newDesc));
 
         eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.ADD_ENTITY, newTarget));
-        uINotification.displaySuccess(i18n.getMessage("message.save.success", new Object[] { newTarget.getName() }));
+        uINotification.displaySuccess(i18n.getMessage("message.save.success", newTarget.getName()));
         targetTable.setValue(Sets.newHashSet(newTarget.getId()));
     }
 

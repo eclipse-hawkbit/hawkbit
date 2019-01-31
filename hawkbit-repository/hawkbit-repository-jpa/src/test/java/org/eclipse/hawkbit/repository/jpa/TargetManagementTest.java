@@ -419,8 +419,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
+        assertThat(targetManagement.existsByControllerId("4711")).isTrue();
         targetManagement.delete(Collections.singletonList(target.getId()));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
+        assertThat(targetManagement.existsByControllerId("4711")).isFalse();
 
         final List<Long> targets = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -664,7 +666,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         targetManagement.delete(targetsIdsToDelete);
 
-        final List<Target> targetsLeft = targetManagement.findAll(new PageRequest(0, 200)).getContent();
+        final List<Target> targetsLeft = targetManagement.findAll(PageRequest.of(0, 200)).getContent();
         assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of split list")
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 
@@ -905,12 +907,18 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify that the flag for requesting controller attributes is set correctly.")
     public void verifyRequestControllerAttributes() {
-        final String knownTargetId = "KnownControllerId";
-        createTargetWithAttributes(knownTargetId);
+        final String knownControllerId = "KnownControllerId";
+        final Target target = createTargetWithAttributes(knownControllerId);
 
-        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isFalse();
-        targetManagement.requestControllerAttributes(knownTargetId);
-        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+        assertThat(targetManagement.findByControllerAttributesRequested(PAGE)).isEmpty();
+        assertThat(targetManagement.isControllerAttributesRequested(knownControllerId)).isFalse();
+
+        targetManagement.requestControllerAttributes(knownControllerId);
+        final Target updated = targetManagement.getByControllerID(knownControllerId).get();
+
+        assertThat(target.isRequestControllerAttributes()).isFalse();
+        assertThat(targetManagement.findByControllerAttributesRequested(PAGE).getContent()).contains(updated);
+        assertThat(targetManagement.isControllerAttributesRequested(knownControllerId)).isTrue();
 
     }
 

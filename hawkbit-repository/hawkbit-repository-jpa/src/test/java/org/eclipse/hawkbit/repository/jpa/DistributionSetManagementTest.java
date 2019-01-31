@@ -868,10 +868,10 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement
-                .findMetaDataByDistributionSetId(new PageRequest(0, 100), ds1.getId());
+                .findMetaDataByDistributionSetId(PageRequest.of(0, 100), ds1.getId());
 
         final Page<DistributionSetMetadata> metadataOfDs2 = distributionSetManagement
-                .findMetaDataByDistributionSetId(new PageRequest(0, 100), ds2.getId());
+                .findMetaDataByDistributionSetId(PageRequest.of(0, 100), ds2.getId());
 
         assertThat(metadataOfDs1.getNumberOfElements()).isEqualTo(10);
         assertThat(metadataOfDs1.getTotalElements()).isEqualTo(10);

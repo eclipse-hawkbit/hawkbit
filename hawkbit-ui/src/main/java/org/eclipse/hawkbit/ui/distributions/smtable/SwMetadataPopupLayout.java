@@ -77,7 +77,7 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayoutVersioned<
     @Override
     protected List<SoftwareModuleMetadata> getMetadataList() {
         return Collections.unmodifiableList(softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), getSelectedEntity().getId())
+                .findMetaDataBySoftwareModuleId(PageRequest.of(0, MAX_METADATA_QUERY), getSelectedEntity().getId())
                 .getContent());
     }
 

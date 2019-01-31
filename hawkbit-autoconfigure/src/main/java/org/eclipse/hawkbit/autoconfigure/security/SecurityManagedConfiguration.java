@@ -52,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
@@ -108,9 +107,6 @@ public class SecurityManagedConfiguration {
 
     private static final int DOS_FILTER_ORDER = -200;
 
-    @Autowired
-    private AuthenticationConfiguration configuration;
-
     /**
      * @return the {@link UserAuthenticationFilter} to include into the hawkBit
      *         security configuration.
@@ -122,7 +118,8 @@ public class SecurityManagedConfiguration {
     @ConditionalOnMissingBean
     // Exception squid:S00112 - Is aspectJ proxy
     @SuppressWarnings({ "squid:S00112" })
-    public UserAuthenticationFilter userAuthenticationFilter() throws Exception {
+    UserAuthenticationFilter userAuthenticationFilter(final AuthenticationConfiguration configuration)
+            throws Exception {
         return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
     }
 
@@ -154,19 +151,19 @@ public class SecurityManagedConfiguration {
         private final TenantConfigurationManagement tenantConfigurationManagement;
         private final TenantAware tenantAware;
         private final DdiSecurityProperties ddiSecurityConfiguration;
-        private final SecurityProperties springSecurityProperties;
+        private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
 
         @Autowired
         ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
-                final SystemSecurityContext systemSecurityContext) {
+                final DdiSecurityProperties ddiSecurityConfiguration,
+                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
-            this.springSecurityProperties = springSecurityProperties;
+            this.securityProperties = securityProperties;
             this.systemSecurityContext = systemSecurityContext;
         }
 
@@ -219,7 +216,7 @@ public class SecurityManagedConfiguration {
 
             HttpSecurity httpSec = http.csrf().disable();
 
-            if (springSecurityProperties.isRequireSsl()) {
+            if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
@@ -270,19 +267,19 @@ public class SecurityManagedConfiguration {
         private final TenantConfigurationManagement tenantConfigurationManagement;
         private final TenantAware tenantAware;
         private final DdiSecurityProperties ddiSecurityConfiguration;
-        private final SecurityProperties springSecurityProperties;
+        private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
 
         @Autowired
         ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-                final DdiSecurityProperties ddiSecurityConfiguration, final SecurityProperties springSecurityProperties,
-                final SystemSecurityContext systemSecurityContext) {
+                final DdiSecurityProperties ddiSecurityConfiguration,
+                final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
             this.controllerManagement = controllerManagement;
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.ddiSecurityConfiguration = ddiSecurityConfiguration;
-            this.springSecurityProperties = springSecurityProperties;
+            this.securityProperties = securityProperties;
             this.systemSecurityContext = systemSecurityContext;
         }
 
@@ -341,7 +338,7 @@ public class SecurityManagedConfiguration {
 
             HttpSecurity httpSec = http.csrf().disable();
 
-            if (springSecurityProperties.isRequireSsl()) {
+            if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
@@ -465,7 +462,7 @@ public class SecurityManagedConfiguration {
         private SystemManagement systemManagement;
 
         @Autowired
-        private SecurityProperties springSecurityProperties;
+        private HawkbitSecurityProperties securityProperties;
 
         @Autowired
         private SystemSecurityContext systemSecurityContext;
@@ -497,10 +494,10 @@ public class SecurityManagedConfiguration {
         protected void configure(final HttpSecurity http) throws Exception {
 
             final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
-            basicAuthEntryPoint.setRealmName(springSecurityProperties.getBasic().getRealm());
+            basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
-            if (springSecurityProperties.isRequireSsl()) {
+            if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
@@ -544,9 +541,6 @@ public class SecurityManagedConfiguration {
 
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
-
-        @Autowired
-        private SecurityProperties springSecurityProperties;
 
         @Autowired
         private HawkbitSecurityProperties hawkbitSecurityProperties;
@@ -635,7 +629,7 @@ public class SecurityManagedConfiguration {
                     // disable as CSRF is handled by Vaadin
                     .csrf().disable();
 
-            if (springSecurityProperties.isRequireSsl()) {
+            if (hawkbitSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             } else {
 

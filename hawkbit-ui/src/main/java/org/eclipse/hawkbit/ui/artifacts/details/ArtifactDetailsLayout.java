@@ -155,6 +155,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
+
         if (selectedBaseSwModuleId.isPresent()) {
             return softwareModuleManagement.get(selectedBaseSwModuleId.get());
         }
@@ -281,9 +282,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.delete.artifact.confirmbox"),
-                i18n.getMessage("message.delete.artifact", new Object[] { fileName }),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
-                ok -> {
+                i18n.getMessage("message.delete.artifact", fileName), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));

@@ -88,7 +88,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<SoftwareModuleMetadata> findEnitity = softwareModuleManagement
-                .findMetaDataByRsql(new PageRequest(0, 100), softwareModuleId, rsqlParam);
+                .findMetaDataByRsql(PageRequest.of(0, 100), softwareModuleId, rsqlParam);
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

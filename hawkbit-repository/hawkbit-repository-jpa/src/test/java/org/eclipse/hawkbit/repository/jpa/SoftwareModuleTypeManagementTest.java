@@ -49,20 +49,18 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL),
-                "SoftwareModuleType");
+        verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL), "SoftwareModuleType");
 
         verifyThrownExceptionBy(
-                () -> softwareModuleTypeManagement
-                        .update(entityFactory.softwareModuleType().update(1234L)),
+                () -> softwareModuleTypeManagement.update(entityFactory.softwareModuleType().update(NOT_EXIST_IDL)),
                 "SoftwareModuleType");
     }
 
     @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepositoryForType() {
-        final SoftwareModuleType created = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
+        final SoftwareModuleType created = softwareModuleTypeManagement
+                .create(entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
         final SoftwareModuleType updated = softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(created.getId()));
@@ -75,8 +73,8 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Calling update for changed fields results in change in the repository.")
     public void updateSoftareModuleTypeFieldsToNewValue() {
-        final SoftwareModuleType created = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
+        final SoftwareModuleType created = softwareModuleTypeManagement
+                .create(entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
         final SoftwareModuleType updated = softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(created.getId()).description("changed").colour("changed"));
@@ -106,39 +104,34 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Tests the successfull deletion of software module types. Both unused (hard delete) and used ones (soft delete).")
     public void deleteAssignedAndUnassignedSoftwareModuleTypes() {
-        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType,
-                runtimeType, appType);
+        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
 
-        SoftwareModuleType type = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("bundle").name("OSGi Bundle"));
+        SoftwareModuleType type = softwareModuleTypeManagement
+                .create(entityFactory.softwareModuleType().create().key("bundle").name("OSGi Bundle"));
 
-        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType,
-                runtimeType, appType, type);
+        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
 
         // delete unassigned
         softwareModuleTypeManagement.delete(type.getId());
-        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType,
-                runtimeType, appType);
+        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains((JpaSoftwareModuleType) osType,
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType);
 
-        type = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("bundle2").name("OSGi Bundle2"));
+        type = softwareModuleTypeManagement
+                .create(entityFactory.softwareModuleType().create().key("bundle2").name("OSGi Bundle2"));
 
-        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType,
-                runtimeType, appType, type);
+        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
 
-        softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(type).name("Test SM").version("1.0"));
+        softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(type).name("Test SM").version("1.0"));
 
         // delete assigned
         softwareModuleTypeManagement.delete(type.getId());
-        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType,
-                runtimeType, appType);
+        assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
 
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains((JpaSoftwareModuleType) osType,
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType,
-                softwareModuleTypeRepository.findOne(type.getId()));
+                softwareModuleTypeRepository.findById(type.getId()).get());
     }
 
     @Test
@@ -147,21 +140,19 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
         testdataFactory.createSoftwareModuleOs();
         final SoftwareModuleType found = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
-        softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("thetype2").name("anothername"));
+        softwareModuleTypeManagement
+                .create(entityFactory.softwareModuleType().create().key("thetype2").name("anothername"));
 
-        assertThat(softwareModuleTypeManagement.getByName("thename").get())
-                .as("Type with given name").isEqualTo(found);
+        assertThat(softwareModuleTypeManagement.getByName("thename").get()).as("Type with given name").isEqualTo(found);
     }
 
     @Test
     @Description("Verfies that it is not possible to create a type that alrady exists.")
     public void createSoftwareModuleTypeFailsWithExistingEntity() {
-        softwareModuleTypeManagement
-                .create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
+        softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
-            softwareModuleTypeManagement.create(
-                    entityFactory.softwareModuleType().create().key("thetype").name("thename"));
+            softwareModuleTypeManagement
+                    .create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -172,11 +163,10 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verfies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
-        softwareModuleTypeManagement
-                .create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
+        softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
-            softwareModuleTypeManagement.create(
-                    Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+            softwareModuleTypeManagement
+                    .create(Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                             entityFactory.softwareModuleType().create().key("anothertype").name("anothername")));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
@@ -188,8 +178,8 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Description("Verifies that the creation of a softwareModuleType is failing because of invalid max assignment")
     public void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
         try {
-            softwareModuleTypeManagement.create(
-                    entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0));
+            softwareModuleTypeManagement
+                    .create(entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0));
             fail("should not have worked as max assignment is invalid. Should be greater than 0.");
         } catch (final ConstraintViolationException e) {
 
@@ -199,13 +189,12 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verfies that multiple types are created as requested.")
     public void createMultipleSoftwareModuleTypes() {
-        final List<SoftwareModuleType> created = softwareModuleTypeManagement.create(
-                Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
+        final List<SoftwareModuleType> created = softwareModuleTypeManagement
+                .create(Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                         entityFactory.softwareModuleType().create().key("thetype2").name("thename2")));
 
         assertThat(created.size()).as("Number of created types").isEqualTo(2);
-        assertThat(softwareModuleTypeManagement.count()).as("Number of types in repository")
-                .isEqualTo(5);
+        assertThat(softwareModuleTypeManagement.count()).as("Number of types in repository").isEqualTo(5);
     }
 
 }

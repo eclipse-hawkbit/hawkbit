@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui;
 
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.atmosphere.cpr.ApplicationConfig;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

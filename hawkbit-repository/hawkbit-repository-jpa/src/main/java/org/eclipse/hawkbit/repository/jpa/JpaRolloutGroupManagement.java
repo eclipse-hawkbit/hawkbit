@@ -96,7 +96,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Optional<RolloutGroup> get(final long rolloutGroupId) {
-        return Optional.ofNullable(rolloutGroupRepository.findOne(rolloutGroupId));
+        return rolloutGroupRepository.findById(rolloutGroupId).map(rg -> (RolloutGroup) rg);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     private void throwEntityNotFoundExceptionIfRolloutDoesNotExist(final Long rolloutId) {
-        if (!rolloutRepository.exists(rolloutId)) {
+        if (!rolloutRepository.existsById(rolloutId)) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }
     }
@@ -265,7 +265,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .where(cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id),
                         rolloutGroupId));
         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
-                .setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
+                .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
                 .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1]))
                 .collect(Collectors.toList());
 
@@ -285,7 +285,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     private void throwExceptionIfRolloutGroupDoesNotExist(final Long rolloutGroupId) {
-        if (!rolloutGroupRepository.exists(rolloutGroupId)) {
+        if (!rolloutGroupRepository.existsById(rolloutGroupId)) {
             throw new EntityNotFoundException(RolloutGroup.class, rolloutGroupId);
         }
     }

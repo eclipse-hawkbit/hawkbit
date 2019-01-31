@@ -57,7 +57,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -105,7 +105,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final ApplicationContext applicationContext;
+    private final BusProperties bus;
 
     private final TenantAware tenantAware;
 
@@ -126,7 +126,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
-            final ApplicationContext applicationContext, final TenantAware tenantAware,
+            final BusProperties bus, final TenantAware tenantAware,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
@@ -142,7 +142,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.actionRepository = actionRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisher = eventPublisher;
-        this.applicationContext = applicationContext;
+        this.bus = bus;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -153,7 +153,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> getWithDetails(final long distid) {
-        return Optional.ofNullable(distributionSetRepository.findOne(DistributionSetSpecification.byId(distid)));
+        return distributionSetRepository.findOne(DistributionSetSpecification.byId(distid))
+                .map(d -> (DistributionSet) d);
     }
 
     @Override
@@ -242,7 +243,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long moduleId) {
-        return Optional.ofNullable(softwareModuleRepository.findOne(moduleId))
+        return softwareModuleRepository.findById(moduleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
     }
 
@@ -282,7 +283,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         afterCommit.afterCommit(() -> distributionSetIDs.forEach(
                 dsId -> eventPublisher.publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(),
-                        dsId, JpaDistributionSet.class.getName(), applicationContext.getId()))));
+                        dsId, JpaDistributionSet.class.getName(), bus.getId()))));
     }
 
     @Override
@@ -370,12 +371,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      * @return a single DistributionSet which is either installed or assigned to
      *         a specific target or {@code null}.
      */
-    private DistributionSet findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
+    private Optional<JpaDistributionSet> findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
             final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
         if (CollectionUtils.isEmpty(specList)) {
-            return null;
+            return Optional.empty();
         }
         return distributionSetRepository.findOne(SpecificationsBuilder.combineWithAnd(specList));
     }
@@ -400,12 +401,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final DistributionSetFilter filterWithInstalledTargets = distributionSetFilterBuilder
                 .setInstalledTargetId(assignedOrInstalled).setAssignedTargetId(null).build();
-        final DistributionSet installedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
+        final Optional<JpaDistributionSet> installedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
                 filterWithInstalledTargets);
 
         final DistributionSetFilter filterWithAssignedTargets = distributionSetFilterBuilder.setInstalledTargetId(null)
                 .setAssignedTargetId(assignedOrInstalled).build();
-        final DistributionSet assignedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
+        final Optional<JpaDistributionSet> assignedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
                 filterWithAssignedTargets);
 
         final DistributionSetFilter dsFilterWithNoTargetLinked = distributionSetFilterBuilder.setInstalledTargetId(null)
@@ -417,20 +418,20 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final List<DistributionSet> resultSet = new ArrayList<>(findDistributionSetsByFilters.getContent());
         int orderIndex = 0;
-        if (installedDS != null) {
-            final boolean remove = resultSet.remove(installedDS);
+        if (installedDS.isPresent()) {
+            final boolean remove = resultSet.remove(installedDS.get());
             if (!remove) {
                 resultSet.remove(resultSet.size() - 1);
             }
-            resultSet.add(orderIndex, installedDS);
+            resultSet.add(orderIndex, installedDS.get());
             orderIndex++;
         }
-        if (assignedDS != null && !assignedDS.equals(installedDS)) {
-            final boolean remove = resultSet.remove(assignedDS);
+        if (assignedDS.isPresent() && !assignedDS.equals(installedDS)) {
+            final boolean remove = resultSet.remove(assignedDS.get());
             if (!remove) {
                 resultSet.remove(resultSet.size() - 1);
             }
-            resultSet.add(orderIndex, assignedDS);
+            resultSet.add(orderIndex, assignedDS.get());
         }
 
         return new PageImpl<>(resultSet, pageable, findDistributionSetsByFilters.getTotalElements());
@@ -440,7 +441,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Optional<DistributionSet> getByNameAndVersion(final String distributionName, final String version) {
         final Specification<JpaDistributionSet> spec = DistributionSetSpecification
                 .equalsNameAndVersionIgnoreCase(distributionName, version);
-        return Optional.ofNullable(distributionSetRepository.findOne(spec));
+        return distributionSetRepository.findOne(spec).map(d -> (DistributionSet) d);
 
     }
 
@@ -508,7 +509,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                         () -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
 
         touch(metadata.getDistributionSet());
-        distributionSetMetadataRepository.delete(metadata.getId());
+        distributionSetMetadataRepository.deleteById(metadata.getId());
     }
 
     /**
@@ -579,12 +580,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final long setId, final String key) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
-        return Optional.ofNullable(distributionSetMetadataRepository.findOne(new DsMetadataCompositeKey(setId, key)));
+        return distributionSetMetadataRepository.findById(new DsMetadataCompositeKey(setId, key))
+                .map(dmd -> (DistributionSetMetadata) dmd);
     }
 
     @Override
     public Optional<DistributionSet> getByAction(final long actionId) {
-        if (!actionRepository.exists(actionId)) {
+        if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
 
@@ -676,7 +678,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private void checkAndThrowIfDistributionSetMetadataAlreadyExists(final DsMetadataCompositeKey metadataId) {
-        if (distributionSetMetadataRepository.exists(metadataId)) {
+        if (distributionSetMetadataRepository.existsById(metadataId)) {
             throw new EntityAlreadyExistsException(
                     "Metadata entry with key '" + metadataId.getKey() + "' already exists");
         }
@@ -738,14 +740,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {
-        if (!distributionSetRepository.exists(setId)) {
+        if (!distributionSetRepository.existsById(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
     }
 
     @Override
     public List<DistributionSet> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(distributionSetRepository.findAll(ids));
+        return Collections.unmodifiableList(distributionSetRepository.findAllById(ids));
     }
 
     @Override
@@ -757,7 +759,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private void throwEntityNotFoundExceptionIfDsTagDoesNotExist(final Long tagId) {
-        if (!distributionSetTagRepository.exists(tagId)) {
+        if (!distributionSetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagId);
         }
     }
@@ -791,12 +793,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> get(final long id) {
-        return Optional.ofNullable(distributionSetRepository.findOne(id));
+        return distributionSetRepository.findById(id).map(d -> (DistributionSet) d);
     }
 
     @Override
     public boolean exists(final long id) {
-        return distributionSetRepository.exists(id);
+        return distributionSetRepository.existsById(id);
     }
 
 }

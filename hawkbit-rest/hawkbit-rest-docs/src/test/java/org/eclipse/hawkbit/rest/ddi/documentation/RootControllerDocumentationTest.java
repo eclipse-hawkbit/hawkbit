@@ -78,7 +78,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID)),
@@ -107,7 +107,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID)),
@@ -147,7 +147,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         + "/{actionId}", tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId())
                                 .accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
@@ -217,7 +217,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 put(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION,
                         tenantAware.getCurrentTenant(), target.getControllerId())
-                                .content(JsonBuilder.configData("", attributes, "closed", "merge"))
+                                .content(JsonBuilder.configData("", attributes, "closed", "merge").toString())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -283,7 +283,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         + "/{actionId}?actionHistory=10",
                 tenantAware.getCurrentTenant(), target.getControllerId(), actionId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
@@ -302,11 +302,11 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['available', 'unavailable']")),
                                 fieldWithPath("deployment.chunks").description(DdiApiModelProperties.CHUNK),
                                 fieldWithPath("deployment.chunks[].metadata")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA).optional(),
                                 fieldWithPath("deployment.chunks[].metadata[].key")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA_KEY),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_KEY).optional(),
                                 fieldWithPath("deployment.chunks[].metadata[].value")
-                                        .description(DdiApiModelProperties.CHUNK_META_DATA_VALUE),
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_VALUE).optional(),
                                 fieldWithPath("deployment.chunks[].part").description(DdiApiModelProperties.CHUNK_TYPE),
                                 fieldWithPath("deployment.chunks[].name").description(DdiApiModelProperties.CHUNK_NAME),
                                 fieldWithPath("deployment.chunks[].version")
@@ -354,7 +354,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         + "/{actionId}?actionHistory=10",
                 tenantAware.getCurrentTenant(), target.getControllerId(), actionId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
@@ -442,7 +442,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         tenantAware.getCurrentTenant(), target.getControllerId(), module.getId())
                                 .accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),

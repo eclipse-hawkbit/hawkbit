@@ -15,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
 
 /**
  * Implementation of {@link CurrentTenantCacheKeyGenerator}.
  *
  */
-@Service
 public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyGenerator {
 
     @Autowired

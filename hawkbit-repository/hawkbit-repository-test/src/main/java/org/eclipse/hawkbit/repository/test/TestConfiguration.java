@@ -42,12 +42,9 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.guava.GuavaCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
-import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +62,6 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.util.AntPathMatcher;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -128,8 +124,9 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     TenantAwareCacheManager cacheManager() {
-        return new TenantAwareCacheManager(new GuavaCacheManager(), tenantAware());
+        return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware());
     }
+
     /**
      * Bean for the download id cache.
      *
@@ -204,15 +201,6 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     VirtualPropertyReplacer virtualPropertyReplacer() {
         return new VirtualPropertyResolver();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    ServiceMatcher serviceMatcher(final ApplicationContext applicationContext) {
-        final ServiceMatcher serviceMatcher = new ServiceMatcher();
-        serviceMatcher.setMatcher(new AntPathMatcher(":"));
-        serviceMatcher.setApplicationContext(applicationContext);
-        return serviceMatcher;
     }
 
     @Bean

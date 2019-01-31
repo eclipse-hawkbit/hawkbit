@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.google.common.collect.Lists;
@@ -43,10 +43,10 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
-            final ApplicationContext applicationContext, final ActionRepository actionRepository,
+            final BusProperties bus, final ActionRepository actionRepository,
             final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
-        super(targetRepository, afterCommit, eventPublisher, applicationContext, actionRepository,
-                actionStatusRepository, quotaManagement);
+        super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
+                quotaManagement);
     }
 
     @Override

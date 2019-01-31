@@ -16,9 +16,11 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -47,8 +49,7 @@ public interface MgmtRolloutRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -62,8 +63,7 @@ public interface MgmtRolloutRestApi {
      *            the ID of the rollout to retrieve
      * @return a single rollout with status OK.
      */
-    @RequestMapping(value = "/{rolloutId}", method = RequestMethod.GET, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{rolloutId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") Long rolloutId);
 
     /**
@@ -76,9 +76,8 @@ public interface MgmtRolloutRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBody rolloutRequestBody);
 
     /**
@@ -87,11 +86,11 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId
      *            the ID of the rollout to be approved.
      * @param remark
-     *             an optional remark on the approval decision
+     *            an optional remark on the approval decision
      * @return OK response (200) if rollout is approved now. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/approve", produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{rolloutId}/approve", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> approve(@PathVariable("rolloutId") Long rolloutId,
             @RequestParam(value = "remark", required = false) String remark);
@@ -102,11 +101,11 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId
      *            the ID of the rollout to be denied.
      * @param remark
-     *             an optional remark on the denial decision
+     *            an optional remark on the denial decision
      * @return OK response (200) if rollout is denied now. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/deny", produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{rolloutId}/deny", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deny(@PathVariable("rolloutId") Long rolloutId,
             @RequestParam(value = "remark", required = false) String remark);
@@ -119,7 +118,7 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be started. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/start", produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{rolloutId}/start", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> start(@PathVariable("rolloutId") Long rolloutId);
 
@@ -131,7 +130,7 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be paused. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/pause", produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{rolloutId}/pause", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> pause(@PathVariable("rolloutId") Long rolloutId);
 
@@ -143,8 +142,7 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be deleted. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{rolloutId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = "/{rolloutId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("rolloutId") Long rolloutId);
 
     /**
@@ -155,7 +153,7 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be resumed. In case of any
      *         exception the corresponding errors occur.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/resume", produces = { MediaTypes.HAL_JSON_VALUE,
+    @PostMapping(value = "/{rolloutId}/resume", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> resume(@PathVariable("rolloutId") Long rolloutId);
 
@@ -181,8 +179,8 @@ public interface MgmtRolloutRestApi {
      *         paged. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{rolloutId}/deploygroups", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(@PathVariable("rolloutId") Long rolloutId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -198,8 +196,8 @@ public interface MgmtRolloutRestApi {
      *            the groupId to retrieve the rollout group
      * @return the OK response containing the MgmtRolloutGroupResponseBody
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{rolloutId}/deploygroups/{groupId}", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") Long rolloutId,
             @PathVariable("groupId") Long groupId);
 
@@ -226,8 +224,8 @@ public interface MgmtRolloutRestApi {
      * @return a paged list of targets related to a specific rollout and rollout
      *         group.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}/targets", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{rolloutId}/deploygroups/{groupId}/targets", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(@PathVariable("rolloutId") Long rolloutId,
             @PathVariable("groupId") Long groupId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,

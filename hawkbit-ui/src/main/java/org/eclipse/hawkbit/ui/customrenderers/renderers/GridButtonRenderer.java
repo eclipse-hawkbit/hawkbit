@@ -41,8 +41,6 @@ public class GridButtonRenderer extends ClickableRenderer<FontIconData> {
         addClickListener(listener);
     }
 
-
-
     /**
      * Initialize custom object renderer with the given type.
      *
@@ -53,7 +51,6 @@ public class GridButtonRenderer extends ClickableRenderer<FontIconData> {
     public GridButtonRenderer(final Class<FontIconData> presentationType) {
         super(presentationType);
     }
-
 
     @Override
     public JsonValue encode(final FontIconData resource) {

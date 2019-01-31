@@ -79,7 +79,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView {
         hlayout.addComponent(configurationLabel);
 
         final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetTypeManagement
-                .findAll(new PageRequest(0, 100));
+                .findAll(PageRequest.of(0, 100));
 
         combobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);

@@ -59,8 +59,9 @@ public class DistributionTagLayout extends AbstractFilterLayout implements Refre
             final DistributionSetTagManagement distributionSetTagManagement, final EntityFactory entityFactory,
             final UINotification uiNotification, final DistributionTagButtons distributionTagButtons) {
 
-        super(new DistributionTagFilterHeader(i18n, managementUIState, permChecker, eventBus, distributionSetTagManagement,
-                entityFactory, uiNotification, distributionTagButtons), distributionTagButtons, eventBus);
+        super(new DistributionTagFilterHeader(i18n, managementUIState, permChecker, eventBus,
+                distributionSetTagManagement, entityFactory, uiNotification, distributionTagButtons),
+                distributionTagButtons, eventBus);
         this.managementUIState = managementUIState;
 
         restoreState();

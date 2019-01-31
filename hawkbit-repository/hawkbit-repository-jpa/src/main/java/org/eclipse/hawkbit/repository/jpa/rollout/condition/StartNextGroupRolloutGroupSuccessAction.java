@@ -19,25 +19,26 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Success action which starts the next following {@link RolloutGroup}.
  */
-@Component("startNextRolloutGroupAction")
 public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActionEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(StartNextGroupRolloutGroupSuccessAction.class);
 
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
+    private final RolloutGroupRepository rolloutGroupRepository;
 
-    @Autowired
-    private DeploymentManagement deploymentManagement;
+    private final DeploymentManagement deploymentManagement;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final SystemSecurityContext systemSecurityContext;
+
+    public StartNextGroupRolloutGroupSuccessAction(final RolloutGroupRepository rolloutGroupRepository,
+            final DeploymentManagement deploymentManagement, final SystemSecurityContext systemSecurityContext) {
+        this.rolloutGroupRepository = rolloutGroupRepository;
+        this.deploymentManagement = deploymentManagement;
+        this.systemSecurityContext = systemSecurityContext;
+    }
 
     @Override
     public boolean verifyExpression(final String expression) {

@@ -104,7 +104,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
                     .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
                     .setType(distributionSetType).build();
             distBeans = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(startIndex / count, count, sort), distributionSetFilter);
+                    PageRequest.of(startIndex / count, count, sort), distributionSetFilter);
         }
 
         for (final DistributionSet distributionSet : distBeans) {
@@ -124,13 +124,13 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (StringUtils.isEmpty(searchText) && distributionSetType == null) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
-                    .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);
+                    .findByCompleted(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), dsComplete);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(dsComplete).setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE)
                     .setType(distributionSetType).build();
             firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         }
         final long size = firstPageDistributionSets.getTotalElements();
 

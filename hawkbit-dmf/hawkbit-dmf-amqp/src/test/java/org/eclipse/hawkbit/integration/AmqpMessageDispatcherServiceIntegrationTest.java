@@ -40,7 +40,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")
-public class AmqpMessageDispatcherServiceIntegrationTest extends AmqpServiceIntegrationTest {
+public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
     private static final String TARGET_PREFIX = "Dmf_disp_";
 
     @Test

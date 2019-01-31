@@ -39,7 +39,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -99,11 +98,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long targetFilterQueryId) {
-        if (!targetFilterQueryRepository.exists(targetFilterQueryId)) {
+        if (!targetFilterQueryRepository.existsById(targetFilterQueryId)) {
             throw new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId);
         }
 
-        targetFilterQueryRepository.delete(targetFilterQueryId);
+        targetFilterQueryRepository.deleteById(targetFilterQueryId);
     }
 
     @Override
@@ -178,7 +177,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             return targetFilterQueryRepository.findAll(pageable);
         }
 
-        final Specifications<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
+        final Specification<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
         return targetFilterQueryRepository.findAll(specs, pageable);
     }
 
@@ -189,7 +188,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Optional<TargetFilterQuery> get(final long targetFilterQueryId) {
-        return Optional.ofNullable(targetFilterQueryRepository.findOne(targetFilterQueryId));
+        return targetFilterQueryRepository.findById(targetFilterQueryId).map(tfq -> (TargetFilterQuery) tfq);
     }
 
     @Override

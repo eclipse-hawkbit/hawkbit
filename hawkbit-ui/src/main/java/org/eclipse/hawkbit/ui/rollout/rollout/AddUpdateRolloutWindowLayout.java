@@ -356,7 +356,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         private Long getScheduledStartTime() {
             return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
-                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime() : null;
+                    ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
+                    : null;
         }
 
         private int getErrorThresholdPercentage(final int amountGroup) {
@@ -802,7 +803,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(new PageRequest(0, 1),
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
                 rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
@@ -1043,7 +1044,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.setOrginaleValues();
 
             updateGroupsChart(rolloutGroupManagement
-                    .findByRollout(new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                    .findByRollout(PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
                     .getContent(), rollout.getTotalTargets());
 
             totalTargetsCount = rollout.getTotalTargets();

@@ -19,27 +19,27 @@ public class FileUploadProgress implements Serializable {
      * Status of a file upload.
      */
     public enum FileUploadStatus {
-    
+
         /**
          * An upload for a file has been started.
          */
         UPLOAD_STARTED,
-    
+
         /**
          * Progress changed for one file upload.
          */
         UPLOAD_IN_PROGRESS,
-    
+
         /**
          * Upload of one file failed.
          */
         UPLOAD_FAILED,
-    
+
         /**
          * One file upload succeeded.
          */
         UPLOAD_SUCCESSFUL,
-    
+
         /**
          * One file upload finished ()
          */
@@ -57,9 +57,8 @@ public class FileUploadProgress implements Serializable {
     private String failureReason;
 
     private String filePath;
-    
-    private final FileUploadStatus fileUploadStatus;
 
+    private final FileUploadStatus fileUploadStatus;
 
     /**
      * Creates a new {@link FileUploadProgress} instance.
@@ -88,8 +87,8 @@ public class FileUploadProgress implements Serializable {
      * @param contentLength
      *            size of the file in bytes
      */
-    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus,
-            final long bytesRead, final long contentLength) {
+    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus, final long bytesRead,
+            final long contentLength) {
         this.fileUploadId = fileUploadId;
         this.fileUploadStatus = fileUploadStatus;
         this.contentLength = contentLength;
@@ -111,9 +110,8 @@ public class FileUploadProgress implements Serializable {
      * @param filePath
      *            the path of the file
      */
-    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus,
-            final long bytesRead, final long contentLength,
-            final String filePath) {
+    FileUploadProgress(final FileUploadId fileUploadId, final FileUploadStatus fileUploadStatus, final long bytesRead,
+            final long contentLength, final String filePath) {
         this.fileUploadId = fileUploadId;
         this.fileUploadStatus = fileUploadStatus;
         this.contentLength = contentLength;
@@ -158,7 +156,7 @@ public class FileUploadProgress implements Serializable {
     public String getFilePath() {
         return filePath;
     }
-    
+
     public FileUploadStatus getFileUploadStatus() {
         return fileUploadStatus;
     }

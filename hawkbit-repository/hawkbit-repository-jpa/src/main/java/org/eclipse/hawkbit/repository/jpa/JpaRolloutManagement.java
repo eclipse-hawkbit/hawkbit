@@ -77,6 +77,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -149,20 +150,21 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final BusProperties bus;
 
     private final Database database;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
+            final RolloutApprovalStrategy rolloutApprovalStrategy) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
                 eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
         this.database = database;
+        this.bus = bus;
     }
 
     @Override
@@ -194,7 +196,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Optional<Rollout> get(final long rolloutId) {
-        return Optional.ofNullable(rolloutRepository.findOne(rolloutId));
+        return rolloutRepository.findById(rolloutId).map(r -> (Rollout) r);
     }
 
     @Override
@@ -337,7 +339,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
-                new PageRequest(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")),
+                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")),
                 rollout.getId()).getContent();
 
         int readyGroups = 0;
@@ -431,7 +433,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final long limit) {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
-            final PageRequest pageRequest = new PageRequest(0, Math.toIntExact(limit));
+            final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
@@ -582,9 +584,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
-            final PageRequest pageRequest = new PageRequest(0, limit);
-            final Rollout rollout = rolloutRepository.findOne(rolloutId);
-            final RolloutGroup group = rolloutGroupRepository.findOne(groupId);
+            final PageRequest pageRequest = PageRequest.of(0, limit);
+            final Rollout rollout = rolloutRepository.findById(rolloutId)
+                    .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+            final RolloutGroup group = rolloutGroupRepository.findById(groupId)
+                    .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, groupId));
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             final ActionType actionType = rollout.getActionType();
@@ -832,9 +836,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
     }
 
-    private long executeFittingHandler(final Long rolloutId) {
+    private long executeFittingHandler(final long rolloutId) {
         LOGGER.debug("handle rollout {}", rolloutId);
-        final JpaRollout rollout = rolloutRepository.findOne(rolloutId);
+        final JpaRollout rollout = rolloutRepository.findById(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
         switch (rollout.getStatus()) {
         case CREATING:
@@ -882,7 +887,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long rolloutId) {
-        final JpaRollout jpaRollout = rolloutRepository.findOne(rolloutId);
+        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
         if (jpaRollout == null) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
@@ -945,7 +951,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), applicationContext.getId()))));
+                        JpaRolloutGroup.class.getName(), bus.getId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
@@ -971,7 +977,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {
-        return actionRepository.findByRolloutIdAndStatus(new PageRequest(0, TRANSACTION_ACTIONS), rollout.getId(),
+        return actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, TRANSACTION_ACTIONS), rollout.getId(),
                 Status.SCHEDULED);
     }
 
@@ -1071,7 +1077,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public boolean exists(final long rolloutId) {
-        return rolloutRepository.exists(rolloutId);
+        return rolloutRepository.existsById(rolloutId);
     }
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {

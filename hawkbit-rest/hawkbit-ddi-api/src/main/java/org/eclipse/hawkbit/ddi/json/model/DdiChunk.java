@@ -34,6 +34,7 @@ public class DdiChunk {
     private String name;
 
     @JsonProperty("artifacts")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DdiArtifact> artifacts;
 
     @JsonProperty("metadata")

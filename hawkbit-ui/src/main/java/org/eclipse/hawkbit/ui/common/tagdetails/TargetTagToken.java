@@ -98,7 +98,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
         if (selectedEntity != null) {
-            for (final TargetTag tag : tagManagement.findByTarget(new PageRequest(0, MAX_TAGS),
+            for (final TargetTag tag : tagManagement.findByTarget(PageRequest.of(0, MAX_TAGS),
                     selectedEntity.getControllerId())) {
                 addNewToken(tag.getId());
             }
@@ -109,7 +109,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
     }

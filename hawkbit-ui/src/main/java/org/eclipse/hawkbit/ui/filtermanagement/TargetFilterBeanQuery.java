@@ -60,8 +60,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
                 searchText = String.format("%%%s%%", searchText);
             }
         }
-        
-        if (sortStates!= null && sortStates.length > 0) {
+
+        if (sortStates != null && sortStates.length > 0) {
             // Initalize sort
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
@@ -84,11 +84,11 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             targetFilterQuery = firstPageTargetFilter;
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
-            targetFilterQuery = getTargetFilterQueryManagement().findAll(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetFilterQuery = getTargetFilterQueryManagement()
+                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             targetFilterQuery = getTargetFilterQueryManagement().findByName(
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     searchText);
         }
         for (final TargetFilterQuery tarFilterQuery : targetFilterQuery) {
@@ -121,10 +121,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     public int size() {
         if (StringUtils.isEmpty(searchText)) {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findByName(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+                    .findByName(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

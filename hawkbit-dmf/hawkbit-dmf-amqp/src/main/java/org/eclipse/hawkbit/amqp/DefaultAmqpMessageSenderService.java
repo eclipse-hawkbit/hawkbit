@@ -9,15 +9,15 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.util.StringUtils;
 
 /**
  * A default implementation for the sender service. The service sends all amqp
@@ -47,7 +47,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
         final String correlationId = UUID.randomUUID().toString();
 
         if (isCorrelationIdEmpty(message)) {
-            message.getMessageProperties().setCorrelationId(correlationId.getBytes(StandardCharsets.UTF_8));
+            message.getMessageProperties().setCorrelationId(correlationId);
         }
 
         if (LOGGER.isTraceEnabled()) {
@@ -60,8 +60,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     }
 
     protected static boolean isCorrelationIdEmpty(final Message message) {
-        return message.getMessageProperties().getCorrelationId() == null
-                || message.getMessageProperties().getCorrelationId().length <= 0;
+        return !StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
 
 }

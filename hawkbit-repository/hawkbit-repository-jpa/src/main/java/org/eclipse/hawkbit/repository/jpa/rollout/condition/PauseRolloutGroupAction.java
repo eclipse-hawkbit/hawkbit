@@ -15,24 +15,25 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Error action evaluator which pauses the whole {@link Rollout} and sets the
  * current {@link RolloutGroup} to error.
  */
-@Component("pauseRolloutGroupAction")
 public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
 
-    @Autowired
-    private RolloutManagement rolloutManagement;
+    private final RolloutManagement rolloutManagement;
 
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
+    private final RolloutGroupRepository rolloutGroupRepository;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final SystemSecurityContext systemSecurityContext;
+
+    public PauseRolloutGroupAction(final RolloutManagement rolloutManagement,
+            final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
+        this.rolloutManagement = rolloutManagement;
+        this.rolloutGroupRepository = rolloutGroupRepository;
+        this.systemSecurityContext = systemSecurityContext;
+    }
 
     @Override
     public boolean verifyExpression(final String expression) {

@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,14 +36,18 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MgmtDownloadResource.class);
 
-    @Autowired
-    private ArtifactRepository artifactRepository;
+    private final ArtifactRepository artifactRepository;
 
-    @Autowired
-    private DownloadIdCache downloadIdCache;
+    private final DownloadIdCache downloadIdCache;
 
-    @Autowired
-    private RequestResponseContextHolder requestResponseContextHolder;
+    private final RequestResponseContextHolder requestResponseContextHolder;
+
+    MgmtDownloadResource(final ArtifactRepository artifactRepository, final DownloadIdCache downloadIdCache,
+            final RequestResponseContextHolder requestResponseContextHolder) {
+        this.artifactRepository = artifactRepository;
+        this.downloadIdCache = downloadIdCache;
+        this.requestResponseContextHolder = requestResponseContextHolder;
+    }
 
     @Override
     @ResponseBody

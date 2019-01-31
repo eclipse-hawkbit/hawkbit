@@ -41,7 +41,7 @@ public class PropertyHostnameResolverAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(value = HostnameResolver.class)
-    public HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
+    HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
         return () -> {
             try {
                 return new URL(serverProperties.getUrl());
@@ -58,7 +58,7 @@ public class PropertyHostnameResolverAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(ArtifactUrlHandler.class)
-    public PropertyBasedArtifactUrlHandler propertyBasedArtifactUrlHandler(
+    PropertyBasedArtifactUrlHandler propertyBasedArtifactUrlHandler(
             final ArtifactUrlHandlerProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
     }

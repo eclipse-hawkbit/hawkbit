@@ -159,4 +159,9 @@ public class ResponseList<T> extends ResourceSupport implements List<T> {
         return content.subList(fromIndex, toIndex);
     }
 
+    @Override
+    public String toString() {
+        return "ResponseList [content=" + content + "]";
+    }
+
 }

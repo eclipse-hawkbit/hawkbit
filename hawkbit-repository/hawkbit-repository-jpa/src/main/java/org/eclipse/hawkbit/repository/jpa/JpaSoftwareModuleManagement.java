@@ -180,7 +180,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void throwExceptionIfSoftwareModuleTypeDoesNotExist(final Long typeId) {
-        if (!softwareModuleTypeRepository.exists(typeId)) {
+        if (!softwareModuleTypeRepository.existsById(typeId)) {
             throw new EntityNotFoundException(SoftwareModuleType.class, typeId);
         }
     }
@@ -201,7 +201,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Optional<SoftwareModule> get(final long id) {
-        return Optional.ofNullable(softwareModuleRepository.findOne(id));
+        return softwareModuleRepository.findById(id).map(sm -> (SoftwareModule) sm);
     }
 
     @Override
@@ -252,7 +252,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             deleteGridFsArtifacts(swModule);
 
             if (isUnassigned(swModule.getId())) {
-                softwareModuleRepository.delete(swModule.getId());
+                softwareModuleRepository.deleteById(swModule.getId());
             } else {
                 assignedModuleIds.add(swModule.getId());
             }
@@ -261,7 +261,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         if (!assignedModuleIds.isEmpty()) {
             String currentUser = null;
             if (auditorProvider != null) {
-                currentUser = auditorProvider.getCurrentAuditor();
+                currentUser = auditorProvider.getCurrentAuditor().orElse(null);
             }
             softwareModuleRepository.deleteSoftwareModule(System.currentTimeMillis(), currentUser,
                     assignedModuleIds.toArray(new Long[0]));
@@ -374,7 +374,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         // map result
         if (pageable.getOffset() < assignedSoftwareModules.size()) {
             assignedSoftwareModules
-                    .subList(pageable.getOffset(), Math.min(assignedSoftwareModules.size(), pageable.getPageSize()))
+                    .subList((int) pageable.getOffset(),
+                            Math.min(assignedSoftwareModules.size(), pageable.getPageSize()))
                     .forEach(sw -> resultList.add(new AssignedSoftwareModule(sw, true)));
         }
 
@@ -401,7 +402,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         unassignedQuery.orderBy(cb.asc(unassignedRoot.get(JpaSoftwareModule_.name)),
                 cb.asc(unassignedRoot.get(JpaSoftwareModule_.version)));
         final List<JpaSoftwareModule> unassignedSoftwareModules = entityManager.createQuery(unassignedQuery)
-                .setFirstResult(Math.max(0, pageable.getOffset() - assignedSoftwareModules.size()))
+                .setFirstResult((int) Math.max(0, pageable.getOffset() - assignedSoftwareModules.size()))
                 .setMaxResults(pageSize).getResultList();
         // map result
         unassignedSoftwareModules.forEach(sw -> resultList.add(new AssignedSoftwareModule(sw, false)));
@@ -456,7 +457,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByAssignedTo(final Pageable pageable, final long setId) {
-        if (!distributionSetRepository.exists(setId)) {
+        if (!distributionSetRepository.existsById(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
 
@@ -527,7 +528,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private void assertSoftwareModuleMetadataDoesNotExist(final Long moduleId,
             final JpaSoftwareModuleMetadataCreate md) {
-        if (softwareModuleMetadataRepository.exists(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
+        if (softwareModuleMetadataRepository.existsById(new SwMetadataCompositeKey(moduleId, md.getKey()))) {
             throwMetadataKeyAlreadyExists(md.getKey());
         }
     }
@@ -607,11 +608,11 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
 
         touch(metadata.getSoftwareModule());
-        softwareModuleMetadataRepository.delete(metadata.getId());
+        softwareModuleMetadataRepository.deleteById(metadata.getId());
     }
 
     private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
-        if (!softwareModuleRepository.exists(swId)) {
+        if (!softwareModuleRepository.existsById(swId)) {
             throw new EntityNotFoundException(SoftwareModule.class, swId);
         }
     }
@@ -654,7 +655,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(final long moduleId, final String key) {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
-        return Optional.ofNullable(softwareModuleMetadataRepository.findOne(new SwMetadataCompositeKey(moduleId, key)));
+        return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(moduleId, key))
+                .map(smmd -> (SoftwareModuleMetadata) smmd);
     }
 
     private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
@@ -671,7 +673,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public boolean exists(final long id) {
-        return softwareModuleRepository.exists(id);
+        return softwareModuleRepository.existsById(id);
     }
 
     @Override
@@ -680,7 +682,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
         return convertMdPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
-                new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true), pageable);
+                PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true), pageable);
     }
 
 }

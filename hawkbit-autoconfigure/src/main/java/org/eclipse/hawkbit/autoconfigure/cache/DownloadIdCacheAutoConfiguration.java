@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.autoconfigure.cache;
 
 import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +23,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DownloadIdCacheAutoConfiguration {
 
-    @Autowired
-    private CacheManager cacheManager;
-
     /**
      * Bean for the downloadId cache that returns the DefaultDownloadIdCache.
      * The DefaultDownloadIdCache cannot be used within a cluster because the
@@ -38,7 +34,7 @@ public class DownloadIdCacheAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public DownloadIdCache downloadIdCache() {
+    public DownloadIdCache downloadIdCache(final CacheManager cacheManager) {
         return new DefaultDownloadIdCache(cacheManager);
     }
 

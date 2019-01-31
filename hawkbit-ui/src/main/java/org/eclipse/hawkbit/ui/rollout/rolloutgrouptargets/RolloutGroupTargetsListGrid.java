@@ -276,7 +276,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
             return RolloutGroupStatus.READY.toString().toLowerCase();
         } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
             final String ds = rolloutUIState.getRolloutDistributionSet().orElse("");
-            return i18n.getMessage("message.dist.already.assigned", new Object[] { ds });
+            return i18n.getMessage("message.dist.already.assigned", ds);
         }
         return "unknown";
     }

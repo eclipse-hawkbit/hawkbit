@@ -59,15 +59,12 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     @ExpectEvents({ @Expect(type = DistributionSetTagUpdatedEvent.class, count = 0),
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID),
-                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID), "DistributionSetTag");
 
-        verifyThrownExceptionBy(
-                () -> distributionSetTagManagement.findByDistributionSet(PAGE, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(
-                () -> distributionSetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "DistributionSetTag");
     }
 
@@ -82,16 +79,11 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final Collection<DistributionSet> dsBCs = testdataFactory.createDistributionSets("DS-BC", 13);
         final Collection<DistributionSet> dsABCs = testdataFactory.createDistributionSets("DS-ABC", 9);
 
-        final DistributionSetTag tagA = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("A"));
-        final DistributionSetTag tagB = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("B"));
-        final DistributionSetTag tagC = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("C"));
-        final DistributionSetTag tagX = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("X"));
-        final DistributionSetTag tagY = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("Y"));
+        final DistributionSetTag tagA = distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
+        final DistributionSetTag tagB = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
+        final DistributionSetTag tagC = distributionSetTagManagement.create(entityFactory.tag().create().name("C"));
+        final DistributionSetTag tagX = distributionSetTagManagement.create(entityFactory.tag().create().name("X"));
+        final DistributionSetTag tagY = distributionSetTagManagement.create(entityFactory.tag().create().name("Y"));
 
         toggleTagAssignment(dsAs, tagA);
         toggleTagAssignment(dsBs, tagB);
@@ -210,8 +202,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.get(
-                concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
+        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement
+                .get(concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
     }
@@ -219,15 +211,15 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createDistributionSetTag() {
-        final Tag tag = distributionSetTagManagement.create(
-                entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
+        final Tag tag = distributionSetTagManagement
+                .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
         assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
         assertThat(distributionSetTagManagement.getByName("kai1").get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
-        assertThat(distributionSetTagManagement.get(tag.getId()).get().getColour())
-                .as("wrong tag found").isEqualTo("colour");
+        assertThat(distributionSetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found")
+                .isEqualTo("colour");
     }
 
     @Test
@@ -238,7 +230,7 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetRepository.findOne(set.getId()).getTags()).as("Wrong tag found")
+            assertThat(distributionSetRepository.findById(set.getId()).get().getTags()).as("Wrong tag found")
                     .contains(toDelete);
         }
 
@@ -246,12 +238,13 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         distributionSetTagManagement.delete(tags.iterator().next().getName());
 
         // check
-        assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
-        assertThat(distributionSetTagManagement.findAll(PAGE).getContent())
-                .as("Wrong size of tags after deletion").hasSize(19);
+        assertThat(distributionSetTagRepository.findById(toDelete.getId())).as("Deleted tag should be null")
+                .isNotPresent();
+        assertThat(distributionSetTagManagement.findAll(PAGE).getContent()).as("Wrong size of tags after deletion")
+                .hasSize(19);
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetRepository.findOne(set.getId()).getTags()).as("Wrong found tags")
+            assertThat(distributionSetRepository.findById(set.getId()).get().getTags()).as("Wrong found tags")
                     .doesNotContain(toDelete);
         }
     }
@@ -272,8 +265,7 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
         distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
-        final DistributionSetTag tag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("B"));
+        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
 
         try {
             distributionSetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A"));
@@ -294,14 +286,13 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final DistributionSetTag savedAssigned = tags.iterator().next();
 
         // persist
-        distributionSetTagManagement
-                .update(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
+        distributionSetTagManagement.update(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
 
         // check data
-        assertThat(distributionSetTagManagement.findAll(PAGE).getContent())
-                .as("Wrong size of ds tags").hasSize(tags.size());
-        assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag found")
-                .isEqualTo("test123");
+        assertThat(distributionSetTagManagement.findAll(PAGE).getContent()).as("Wrong size of ds tags")
+                .hasSize(tags.size());
+        assertThat(distributionSetTagRepository.findById(savedAssigned.getId()).get().getName())
+                .as("Wrong ds tag found").isEqualTo("test123");
     }
 
     @Test

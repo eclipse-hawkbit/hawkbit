@@ -47,7 +47,7 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
     @Before
     public void setup() throws Exception {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
-        this.jacksonMessageConverter = autoConfiguration.busJsonConverter();
+        this.jacksonMessageConverter = autoConfiguration.busJsonConverter(null);
         ReflectionTestUtils.setField(jacksonMessageConverter, "packagesToScan",
                 new String[] { "org.eclipse.hawkbit.repository.event.remote",
                         ClassUtils.getPackageName(RemoteApplicationEvent.class) });

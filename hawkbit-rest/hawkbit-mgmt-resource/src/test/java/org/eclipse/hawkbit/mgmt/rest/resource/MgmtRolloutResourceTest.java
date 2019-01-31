@@ -625,9 +625,9 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
         final RolloutGroup secondGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(1, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(1, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
         retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
@@ -720,7 +720,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -743,7 +743,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, firstGroup.getId())
                 .getContent().get(0).getControllerId();
@@ -774,7 +774,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         rolloutManagement.handleRollouts();
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(new PageRequest(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(

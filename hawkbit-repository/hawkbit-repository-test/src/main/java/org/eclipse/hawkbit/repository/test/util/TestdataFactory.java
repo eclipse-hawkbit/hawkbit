@@ -886,7 +886,8 @@ public class TestdataFactory {
             final String descriptionPrefix, final Long lastTargetQuery) {
 
         return targetManagement.create(IntStream.range(0, numberOfTargets)
-                .mapToObj(i -> entityFactory.target().create().controllerId(controllerIdPrefix + i)
+                .mapToObj(i -> entityFactory.target().create()
+                        .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery))
                 .collect(Collectors.toList()));
     }
@@ -973,7 +974,7 @@ public class TestdataFactory {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
             final List<Action> findByTarget = deploymentManagement
-                    .findActionsByTarget(target.getControllerId(), new PageRequest(0, 400)).getContent();
+                    .findActionsByTarget(target.getControllerId(), PageRequest.of(0, 400)).getContent();
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, msgs));
             }

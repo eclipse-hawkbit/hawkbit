@@ -21,7 +21,7 @@ import org.springframework.data.domain.Sort;
 public final class OffsetBasedPageRequest extends PageRequest {
 
     private static final long serialVersionUID = 1L;
-    private final int offset;
+    private final long offset;
 
     /**
      * Creates a new {@link OffsetBasedPageRequest}. Offsets are zero indexed,
@@ -32,8 +32,8 @@ public final class OffsetBasedPageRequest extends PageRequest {
      * @param limit
      *            the limit of the page to be returned.
      */
-    public OffsetBasedPageRequest(final int offset, final int limit) {
-        this(offset, limit, null);
+    public OffsetBasedPageRequest(final long offset, final int limit) {
+        this(offset, limit, Sort.unsorted());
     }
 
     /**
@@ -47,13 +47,13 @@ public final class OffsetBasedPageRequest extends PageRequest {
      * @param sort
      *            sort can be {@literal null}.
      */
-    public OffsetBasedPageRequest(final int offset, final int limit, final Sort sort) {
+    public OffsetBasedPageRequest(final long offset, final int limit, final Sort sort) {
         super(0, limit, sort);
         this.offset = offset;
     }
 
     @Override
-    public int getOffset() {
+    public long getOffset() {
         return offset;
     }
 
@@ -67,7 +67,7 @@ public final class OffsetBasedPageRequest extends PageRequest {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + offset;
+        result = prime * result + (int) (offset ^ (offset >>> 32));
         return result;
     }
 
@@ -79,11 +79,14 @@ public final class OffsetBasedPageRequest extends PageRequest {
         if (!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof OffsetBasedPageRequest)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final OffsetBasedPageRequest other = (OffsetBasedPageRequest) obj;
-        return offset == other.offset;
+        if (offset != other.offset) {
+            return false;
+        }
+        return true;
     }
 
 }

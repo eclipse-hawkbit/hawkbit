@@ -170,7 +170,7 @@ public class NotificationUnreadButton extends Button {
             setEnabled(true);
             setCaption("<div class='" + STYLE_UNREAD_COUNTER + "'>" + unreadNotificationCounter + "</div>");
         }
-        setDescription(i18n.getMessage(DESCRIPTION, new Object[] { unreadNotificationCounter }));
+        setDescription(i18n.getMessage(DESCRIPTION, unreadNotificationCounter));
     }
 
     private static class NotificationUnreadValue {

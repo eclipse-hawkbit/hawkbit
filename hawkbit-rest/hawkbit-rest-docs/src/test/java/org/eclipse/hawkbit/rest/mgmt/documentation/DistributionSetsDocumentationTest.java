@@ -39,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
@@ -361,9 +362,9 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
             targetManagement.create(entityFactory.target().create().controllerId(targetId));
-            list.put(new JSONObject().put("id", targetId).put("type", "timeforced").put("forcetime", forceTime).put(
-                    "maintenanceWindow",
-                    getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone())));
+            list.put(new JSONObject().put("id", targetId).put("type", "timeforced").put("forcetime", forceTime)
+                    .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                            .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())));
         }
 
         // assign already one target to DS
@@ -509,7 +510,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
                 testDS.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -538,7 +539,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{dsId}/metadata", testDS.getId())
                 .param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q", "key==known*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         requestParameters(
                                 parameterWithName("limit").attributes(key("type").value("query"))
@@ -648,7 +649,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
                 testDS.getId()).contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),

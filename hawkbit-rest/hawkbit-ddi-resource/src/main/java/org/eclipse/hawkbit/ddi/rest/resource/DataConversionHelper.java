@@ -55,12 +55,12 @@ public final class DataConversionHelper {
                 .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
                         .map(SoftwareModule::getId).collect(Collectors.toList()));
 
-        return uAction.getDistributionSet().getModules().stream()
+        return new ResponseList<>(uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(),
                         createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
                         mapMetadata(metadata.get(module.getId()))))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
     }
 
@@ -156,7 +156,7 @@ public final class DataConversionHelper {
         final int prime = 31;
         int result = action.hashCode();
         int offsetPrime = action.isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237;
-        offsetPrime = (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable()) ? 1249 : offsetPrime;
+        offsetPrime = action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable() ? 1249 : offsetPrime;
 
         result = prime * result + offsetPrime;
         return result;

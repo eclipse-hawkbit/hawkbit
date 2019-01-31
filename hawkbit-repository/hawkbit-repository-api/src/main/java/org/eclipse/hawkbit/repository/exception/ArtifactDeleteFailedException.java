@@ -26,7 +26,7 @@ public final class ArtifactDeleteFailedException extends AbstractServerRtExcepti
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
+     * {@link SpServerError#SP_ARTIFACT_DELETE_FAILED} error.
      */
     public ArtifactDeleteFailedException() {
         super(SpServerError.SP_ARTIFACT_DELETE_FAILED);

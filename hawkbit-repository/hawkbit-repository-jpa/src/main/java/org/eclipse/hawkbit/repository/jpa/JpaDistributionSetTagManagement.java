@@ -142,7 +142,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long setId) {
-        if (!distributionSetRepository.exists(setId)) {
+        if (!distributionSetRepository.existsById(setId)) {
             throw new EntityNotFoundException(DistributionSet.class, setId);
         }
 
@@ -165,24 +165,24 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
-        final List<JpaDistributionSetTag> setsFound = distributionSetTagRepository.findAll(ids);
+        final List<JpaDistributionSetTag> setsFound = distributionSetTagRepository.findAllById(ids);
 
         if (setsFound.size() < ids.size()) {
             throw new EntityNotFoundException(DistributionSetTag.class, ids,
                     setsFound.stream().map(DistributionSetTag::getId).collect(Collectors.toList()));
         }
 
-        distributionSetTagRepository.delete(setsFound);
+        distributionSetTagRepository.deleteAll(setsFound);
     }
 
     @Override
     public List<DistributionSetTag> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(distributionSetTagRepository.findAll(ids));
+        return Collections.unmodifiableList(distributionSetTagRepository.findAllById(ids));
     }
 
     @Override
     public Optional<DistributionSetTag> get(final long id) {
-        return Optional.ofNullable(distributionSetTagRepository.findOne(id));
+        return distributionSetTagRepository.findById(id).map(dst -> (DistributionSetTag) dst);
     }
 
     @Override
@@ -190,12 +190,12 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        distributionSetTagRepository.delete(id);
+        distributionSetTagRepository.deleteById(id);
     }
 
     @Override
     public boolean exists(final long id) {
-        return distributionSetTagRepository.exists(id);
+        return distributionSetTagRepository.existsById(id);
     }
 
     @Override
