@@ -31,7 +31,7 @@ The user has to set a `reply_to` header (see chapter below), to change the defau
 
 The following chapter describes the message body, header and properties.
 
-Note: the DMF protocol was intended to be compatible for other use cases by design. As a result, DMF uses the term **thing** and not **target** but they are actually synonyms in this case.
+Note: the DMF protocol was intended to be compatible to other use cases by design. As a result, DMF uses the term **thing** and not **target** but they are actually synonyms in this case.
 
 ## Messages sent to hawkBit
 
