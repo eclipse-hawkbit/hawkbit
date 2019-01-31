@@ -25,9 +25,8 @@ The user decides who can produce on an exchange and who can create bindings on t
 
 hawkBit will create all necessary queues, exchanges and bindings for the user, making it easy to get started.
 The exchange name for outgoing messages is **dmf.exchange**.
-The queue name for incoming messages is **sp_direct_queue**. Unless a ``reply_to`` header is set, hawkBit will reply on the **sp.direct.exchange** which is bound to the **sp_direct_queue**.
 
-The user can set a ``reply_to`` header (see chapter below), to change the default sender exchange.
+The user has to set a ``reply_to`` header (see chapter below), to change the default sender exchange.
 
 The following chapter describes the message body, header and properties.
 
@@ -49,7 +48,7 @@ All messages have to be sent to the exchange **dmf.exchange**.
 | Message Properties                      | Description                      | Type                                | Mandatory                                                    
 |-----------------------------|----------------------------------|-------------------------------------|----------------
 | content_type                 | The content type of the payload  | String                              | true
-| reply_to                     | Exchange to reply to. The default is sp.direct.exchange which is bound to the sp_direct_queue             | String                              | false
+| reply_to                     | Exchange to reply to.            | String                              | false
 
 **Example Header**
 
@@ -209,7 +208,7 @@ After this message has been sent, an action status event with either actionStatu
 }
 ```
 ## Messages sent by hawkBit
-All messages from hawkBit will be sent to the **sp_direct_queue** or the one specified in the ``reply_to`` property.
+All messages from hawkBit will be sent to the specified exchange in the ``reply_to`` property.
 
 ### Message sent by hawkBit to initialize an update task
 
