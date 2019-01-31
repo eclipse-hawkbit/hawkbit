@@ -145,7 +145,7 @@ Possible actionStatus
 | type    | Type of the message              | Fixed string "Event"           | true      |
 | thingId | The ID of the registered thing   | String                         | true      |
 | topic   | Topic to handle events different | Fixed string "CANCEL_DOWNLOAD" | true      |
-| tenant  | The tenant this thing belongs to | String                         | false     |
+| tenant  | The tenant this thing belongs to | String                         | true      |
 
 | Message Properties | Description                     | Type   | Mandatory |
 | ------------------ | ------------------------------- | ------ | --------- |
@@ -216,7 +216,7 @@ All messages from hawkBit will be sent to the specified exchange in the `reply_t
 | type    | Type of the message              | Fixed string "EVENT"                | true      |
 | thingId | The ID of the registered thing   | String                              | true      |
 | topic   | Topic to handle events different | Fixed string "DOWNLOAD_AND_INSTALL" | true      |
-| tenant  | The tenant this thing belongs to | String                              | false     |
+| tenant  | The tenant this thing belongs to | String                              | true      |
 
 | Message Properties | Description                     | Type   | Mandatory |
 | ------------------ | ------------------------------- | ------ | --------- |
