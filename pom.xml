@@ -162,7 +162,7 @@
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.8.3</jsoup.version>
       <allure.version>2.7.0</allure.version>
-      <eclipselink.version>2.7.3</eclipselink.version>
+      <eclipselink.version>2.7.4</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>25.0-jre</guava.version>
@@ -303,6 +303,14 @@
       <pluginManagement>
          <plugins>
             <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-javadoc-plugin</artifactId>
+               <configuration>
+                  <doclint>syntax</doclint>
+               </configuration>
+            </plugin>
+
+            <plugin>
                <groupId>com.mycila</groupId>
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
@@ -313,7 +321,7 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
-                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/README</exclude>
@@ -490,11 +498,15 @@
          <build>
             <plugins>
                <plugin>
-                  <!-- Use the Nexus Staging plugin as a full replacement for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
-                     why this makes sense :-) We can control whether we want to deploy to the Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
-                     or RELEASE version and property skipNexusStaging=true/false. In any case we can take advantage of the plugin's "deferred deploy" feature which makes sure that
-                     all artifacts of a multi-module project are deployed as a whole at the end of the build process instead of deploying each module's artifacts individually
-                     as part of building the module. -->
+                  <!-- Use the Nexus Staging plugin as a full replacement 
+                     for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin 
+                     why this makes sense :-) We can control whether we want to deploy to the 
+                     Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT 
+                     or RELEASE version and property skipNexusStaging=true/false. In any case 
+                     we can take advantage of the plugin's "deferred deploy" feature which makes 
+                     sure that all artifacts of a multi-module project are deployed as a whole 
+                     at the end of the build process instead of deploying each module's artifacts 
+                     individually as part of building the module. -->
                   <groupId>org.sonatype.plugins</groupId>
                   <artifactId>nexus-staging-maven-plugin</artifactId>
                   <version>1.6.7</version>

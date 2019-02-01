@@ -431,7 +431,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @param pageable
      *            page parameters
      * @param rolloutId
-     *            the rollout the actions beglong to
+     *            the rollout the actions belong to
      * @param actionStatus
      *            the status of the actions
      * @return the actions referring a specific rollout an in a specific status

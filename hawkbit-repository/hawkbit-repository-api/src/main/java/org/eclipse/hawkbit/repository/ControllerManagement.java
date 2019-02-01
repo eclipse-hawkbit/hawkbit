@@ -374,19 +374,19 @@ public interface ControllerManagement {
     /**
      * Retrieves the specified number of messages from action history of the
      * given {@link Action} based on messageCount. Regardless of the value of
-     * messageCount, in order to restrict resource utilization by controllers,
+     * messageCount, in order to restrict resource utilisation by controllers,
      * maximum number of messages that are retrieved from database is limited by
-     * {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}. messageCount <
-     * 0, retrieves the maximum allowed number of action status messages from
-     * history; messageCount = 0, does not retrieve any message; and
-     * messageCount > 0, retrieves the specified number of messages, limited by
-     * maximum allowed number. A controller sends the feedback for an
-     * {@link ActionStatus} as a list of messages; while returning the messages,
-     * even though the messages from multiple {@link ActionStatus} are retrieved
-     * in descending order by the reported time
-     * ({@link ActionStatus#getOccurredAt()}), i.e. latest ActionStatus first,
-     * the sub-ordering of messages from within single {@link ActionStatus} is
-     * unspecified.
+     * {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}. messageCount
+     * less then zero, retrieves the maximum allowed number of action status
+     * messages from history; messageCount equal zero, does not retrieve any
+     * message; and messageCount larger then zero, retrieves the specified
+     * number of messages, limited by maximum allowed number. A controller sends
+     * the feedback for an {@link ActionStatus} as a list of messages; while
+     * returning the messages, even though the messages from multiple
+     * {@link ActionStatus} are retrieved in descending order by the reported
+     * time ({@link ActionStatus#getOccurredAt()}), i.e. latest ActionStatus
+     * first, the sub-ordering of messages from within single
+     * {@link ActionStatus} is unspecified.
      *
      * @param actionId
      *            to be filtered on

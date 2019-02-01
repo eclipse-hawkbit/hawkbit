@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.EntityInterceptor;
+import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

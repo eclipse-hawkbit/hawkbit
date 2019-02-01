@@ -27,7 +27,7 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
-     * Gets the read Target & Dist Permission.
+     * Gets the read Target and repository Permission.
      * 
      * @return TARGET_REPOSITORY_READ boolean value
      */

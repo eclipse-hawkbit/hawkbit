@@ -65,21 +65,21 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * entities. RSQL parser library: https://github.com/jirutka/rsql-parser
  *
  * <ul>
- * <li>Equal to : ==</li>
- * <li>Not equal to : !=</li>
- * <li>Less than : =lt= or <</li>
- * <li>Less than or equal to : =le= or <=</li>
- * <li>Greater than operator : =gt= or ></li>
- * <li>Greater than or equal to : =ge= or >=</li>
+ * <li>{@code Equal to : ==}</li>
+ * <li>{@code Not equal to : !=}</li>
+ * <li>{@code Less than : =lt= or <}</li>
+ * <li>{@code Less than or equal to : =le= or <=}</li>
+ * <li>{@code Greater than operator : =gt= or >}</li>
+ * <li>{@code Greater than or equal to : =ge= or >=}</li>
  * </ul>
  * <p>
  * Examples of RSQL expressions in both FIQL-like and alternative notation:
  * <ul>
- * <li>version==2.0.0</li>
- * <li>name==targetId1;description==plugAndPlay</li>
- * <li>name==targetId1 and description==plugAndPlay</li>
- * <li>name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN</li>
- * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
+ * <li>{@code version==2.0.0}</li>
+ * <li>{@code name==targetId1;description==plugAndPlay}</li>
+ * <li>{@code name==targetId1 and description==plugAndPlay}</li>
+ * <li>{@code name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN}</li>
+ * <li>{@code name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN}</li>
  * </ul>
  * <p>
  * There is also a mechanism that allows to refer to known macros that can
