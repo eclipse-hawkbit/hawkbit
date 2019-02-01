@@ -570,7 +570,8 @@ public class CommonDialogWindow extends Window {
         }
 
         /**
-         * Saves/Updates action. Is called if canWindowSaveOrUpdate is true.
+         * Saves/Updates action. Is called if canWindowSaveOrUpdate is
+         * <code>true</code>.
          *
          */
         void saveOrUpdate();

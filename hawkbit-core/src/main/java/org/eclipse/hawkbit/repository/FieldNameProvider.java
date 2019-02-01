@@ -76,7 +76,7 @@ public interface FieldNameProvider {
     /**
      * Is the entity field a {@link Map}.
      *
-     * @return <code>true</code> is a map false is not a map
+     * @return <code>true</code> is a map <code>false</code> is not a map
      */
     default boolean isMap() {
         return false;
