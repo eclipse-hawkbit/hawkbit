@@ -59,8 +59,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     UserDetailsService userDetailsService() {
         final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserPrincipalDetailsManager();
         inMemoryUserDetailsManager.setAuthenticationManager(null);
-        final org.springframework.boot.autoconfigure.security.SecurityProperties.User user = securityProperties
-                .getUser();
+        final SecurityProperties.User user = securityProperties.getUser();
         final UserBuilder userBuilder = User.builder().username(user.getName()).password(user.getPassword())
                 .authorities(PermissionUtils.createAllAuthorityList());
         final List<String> roles = user.getRoles();
