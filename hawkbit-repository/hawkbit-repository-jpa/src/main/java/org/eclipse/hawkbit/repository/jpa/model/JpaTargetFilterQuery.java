@@ -23,12 +23,15 @@ import javax.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
+import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -60,7 +63,10 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     private JpaDistributionSet autoAssignDistributionSet;
 
     @Column(name = "auto_assign_action_type", nullable = true)
-    @Convert("actionType")
+    @ObjectTypeConverter(name = "autoAssignActionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
+            @ConversionValue(objectValue = "FORCED", dataValue = "0"),
+            @ConversionValue(objectValue = "SOFT", dataValue = "1") })
+    @Convert("autoAssignActionType")
     private ActionType autoAssignActionType;
 
     public JpaTargetFilterQuery() {

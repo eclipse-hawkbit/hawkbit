@@ -221,14 +221,16 @@ public enum SpServerError {
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
 
     /**
-    *
-    */
+     * Error message informing that the action type for auto-assignment is
+     * invalid.
+     */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
             "The given action type for auto-assignment is invalid: allowed values are FORCED and SOFT"),
 
     /**
-    *
-    */
+     * Error message informing that the distribution set for auto-assignment is
+     * invalid.
+     */
     SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
             "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted");
 

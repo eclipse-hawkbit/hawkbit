@@ -91,7 +91,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         // if search text is set, we do not want to apply the filter
         if (StringUtils.isEmpty(searchText)) {
             filterString = definition.getFilters().stream().filter(SimpleStringFilter.class::isInstance)
-                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findFirst()
+                    .map(SimpleStringFilter.class::cast).map(SimpleStringFilter::getFilterString).findAny()
                     .orElse(null);
         }
     }

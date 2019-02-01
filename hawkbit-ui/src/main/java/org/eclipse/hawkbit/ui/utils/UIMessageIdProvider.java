@@ -51,11 +51,19 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ARTIFACT_DETAILS_OF = "caption.artifact.details.of";
 
+    public static final String CAPTION_SELECT_AUTO_ASSIGN_DS = "caption.select.auto.assign.dist";
+
+    public static final String CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES = "caption.confirm.assign.consequences";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
 
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
+
+    public static final String LABEL_AUTO_ASSIGNMENT_DESC = "label.auto.assign.description";
+
+    public static final String LABEL_AUTO_ASSIGNMENT_ENABLE = "label.auto.assign.enable";
 
     public static final String MESSAGE_NO_DATA = "message.no.data";
 
@@ -64,6 +72,12 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_UPLOAD_ACTION = "upload.action";
 
     public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
+
+    public static final String MESSAGE_SELECTED_DS_NOT_FOUND = "message.selected.distributionset.not.found";
+
+    public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE = "message.confirm.assign.consequences.none";
+
+    public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT = "message.confirm.assign.consequences.text";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";
 

@@ -71,9 +71,9 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
     }
 
     private VerticalLayout initView() {
-        final Label label = new Label(i18n.getMessage("label.auto.assign.description"));
+        final Label label = new Label(i18n.getMessage(UIMessageIdProvider.LABEL_AUTO_ASSIGNMENT_DESC));
 
-        checkBox = new CheckBox(i18n.getMessage("label.auto.assign.enable"));
+        checkBox = new CheckBox(i18n.getMessage(UIMessageIdProvider.LABEL_AUTO_ASSIGNMENT_ENABLE));
         checkBox.setId(UIComponentIdProvider.DIST_SET_SELECT_ENABLE_ID);
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(
@@ -111,7 +111,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
 
         // build window after values are set to view elements
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.select.auto.assign.dist")).content(verticalLayout)
+                .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_SELECT_AUTO_ASSIGN_DS)).content(verticalLayout)
                 .layout(verticalLayout).i18n(i18n).saveDialogCloseListener(this).buildCommonDialogWindow();
         window.setId(UIComponentIdProvider.DIST_SET_SELECT_WINDOW_ID);
 
@@ -135,7 +135,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
 
             if (filteredSize <= 0) {
                 notification.displayValidationError(
-                        i18n.getMessage("message.selected.distributionset.not.found", initialFilterString));
+                        i18n.getMessage(UIMessageIdProvider.MESSAGE_SELECTED_DS_NOT_FOUND, initialFilterString));
                 dsCombo.refreshContainer();
                 dsCombo.setValue(null);
                 return;
@@ -230,7 +230,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
 
         public ConfirmConsequencesDialog(final TargetFilterQuery targetFilterQuery, final Long dsId,
                 final Consumer<Boolean> callback) {
-            super(i18n.getMessage("caption.confirm.assign.consequences"));
+            super(i18n.getMessage(UIMessageIdProvider.CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES));
 
             this.callback = callback;
             this.targetFilterQuery = targetFilterQuery;
@@ -253,9 +253,11 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
                     targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {
-                mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.none"));
+                mainTextLabel = new Label(
+                        i18n.getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE));
             } else {
-                mainTextLabel = new Label(i18n.getMessage("message.confirm.assign.consequences.text", targetsCount));
+                mainTextLabel = new Label(i18n
+                        .getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT, targetsCount));
             }
 
             layout.addComponent(mainTextLabel);

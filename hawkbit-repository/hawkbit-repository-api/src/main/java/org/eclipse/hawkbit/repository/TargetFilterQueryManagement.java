@@ -217,7 +217,7 @@ public interface TargetFilterQueryManagement {
 
     /**
      * Updates the the auto-assign {@link DistributionSet} and sets default
-     * (FORCED) {@link ActionType} of the addressed {@link TargetFilterQuery}
+     * (FORCED) {@link ActionType} of the addressed {@link TargetFilterQuery}.
      *
      * @param queryId
      *            of the target filter query to be updated
@@ -246,7 +246,7 @@ public interface TargetFilterQueryManagement {
 
     /**
      * Updates the the auto-assign {@link DistributionSet} and
-     * {@link ActionType} of the addressed {@link TargetFilterQuery}
+     * {@link ActionType} of the addressed {@link TargetFilterQuery}.
      *
      * @param queryId
      *            of the target filter query to be updated
@@ -254,7 +254,8 @@ public interface TargetFilterQueryManagement {
      *            to be updated or <code>null</code> in order to remove it
      *            together with the auto-assign {@link ActionType}
      * @param actionType
-     *            to be updated
+     *            to be updated or <code>null</code> for default (FORCED) if
+     *            distribution set Id is present
      * 
      * @return the updated {@link TargetFilterQuery}
      * 
