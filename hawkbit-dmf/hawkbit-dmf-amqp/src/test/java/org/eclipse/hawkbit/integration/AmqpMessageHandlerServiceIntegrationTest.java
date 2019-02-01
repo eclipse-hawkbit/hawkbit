@@ -122,19 +122,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     }
 
     @Test
-    @Description("Tests not allowed content-type in message. This message should forwarded to the deadletter queue")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void wrongContentType() {
-        final String controllerId = TARGET_PREFIX + "wrongContentType";
-        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
-        createTargetMessage.getMessageProperties().setContentType("WrongContentType");
-        getDmfClient().send(createTargetMessage);
-
-        verifyOneDeadLetterMessage();
-        assertAllTargetsCount(0);
-    }
-
-    @Test
     @Description("Tests null reply to property in message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void missingReplyToProperty() {
