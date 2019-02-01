@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
@@ -24,6 +25,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.User.UserBuilder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -57,8 +59,15 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     UserDetailsService userDetailsService() {
         final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserPrincipalDetailsManager();
         inMemoryUserDetailsManager.setAuthenticationManager(null);
-        inMemoryUserDetailsManager.createUser(new User(securityProperties.getUser().getName(),
-                securityProperties.getUser().getPassword(), PermissionUtils.createAllAuthorityList()));
+        final org.springframework.boot.autoconfigure.security.SecurityProperties.User user = securityProperties
+                .getUser();
+        final UserBuilder userBuilder = User.builder().username(user.getName()).password(user.getPassword())
+                .authorities(PermissionUtils.createAllAuthorityList());
+        final List<String> roles = user.getRoles();
+        if (!roles.isEmpty()) {
+            userBuilder.roles(roles.toArray(new String[roles.size()]));
+        }
+        inMemoryUserDetailsManager.createUser(userBuilder.build());
         return inMemoryUserDetailsManager;
     }
 
