@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
@@ -71,20 +70,6 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "=in=(" + filter1.getName() + ",notexist)", 1);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "=out=(" + filter1.getName() + ",notexist)", 2);
-    }
-
-    @Test
-    @Description("Test filter target filter query by auto assigned action type")
-    public void testFilterByAutoAssignedActionType() {
-        assertRSQLQuery(
-                TargetFilterQueryFields.AUTOASSIGNACTIONTYPE.name() + "==" + ActionType.SOFT.name().toLowerCase(), 1);
-        assertRSQLQuery(
-                TargetFilterQueryFields.AUTOASSIGNACTIONTYPE.name() + "==" + ActionType.FORCED.name().toLowerCase(), 1);
-        assertRSQLQuery(
-                TargetFilterQueryFields.AUTOASSIGNACTIONTYPE.name() + "==" + ActionType.TIMEFORCED.name().toLowerCase(),
-                0);
-        assertThatExceptionOfType(Exception.class).isThrownBy(() -> targetFilterQueryManagement.findByRsql(PAGE,
-                TargetFilterQueryFields.AUTOASSIGNACTIONTYPE.name() + "==noExist"));
     }
 
     @Test
