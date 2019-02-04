@@ -18,8 +18,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 
+import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
-import org.eclipse.hawkbit.repository.model.EntityInterceptor;
 
 /**
  * Entity listener which calls the callback's of all registered entity

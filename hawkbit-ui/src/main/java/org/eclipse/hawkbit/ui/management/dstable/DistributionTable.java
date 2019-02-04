@@ -389,7 +389,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         // assign dist to those targets
 
         targetTagManagement.getByName(targetTagName).ifPresent(tag -> {
-            Pageable query = new PageRequest(0, 500);
+            Pageable query = PageRequest.of(0, 500);
             Page<Target> assignedTargets;
             boolean assigned = false;
             do {

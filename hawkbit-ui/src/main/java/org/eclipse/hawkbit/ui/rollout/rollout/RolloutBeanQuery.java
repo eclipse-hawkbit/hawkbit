@@ -89,13 +89,12 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
-        final PageRequest pageRequest = new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
+        final PageRequest pageRequest = PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE,
                 SPUIDefinitions.PAGE_SIZE, sort);
         if (StringUtils.isEmpty(searchText)) {
             rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(pageRequest, false);
         } else {
-            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText,
-                    false);
+            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText, false);
         }
         return getProxyRolloutList(rolloutBeans);
     }

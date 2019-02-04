@@ -291,53 +291,53 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
     }
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for creating
-     * a container instance.
+     * Template method invoked by {@link #addNewContainerDS()} for creating a
+     * container instance.
      *
      * @return new container instance used by the grid.
      */
     protected abstract T createContainer();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for adding
+     * Template method invoked by {@link #addNewContainerDS()} for adding
      * properties to the container (usually by invoking { @link
      * Container#addContainerProperty(Object, Class, Object))})
      */
     protected abstract void addContainerProperties();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for setting
-     * the expand ratio of the columns.
+     * Template method invoked by {@link #addNewContainerDS()} for setting the
+     * expand ratio of the columns.
      */
     protected abstract void setColumnExpandRatio();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for setting
-     * the column names.
+     * Template method invoked by {@link #addNewContainerDS()} for setting the
+     * column names.
      */
     protected abstract void setColumnHeaderNames();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for setting
-     * the column properties to the grid.
+     * Template method invoked by {@link #addNewContainerDS()} for setting the
+     * column properties to the grid.
      */
     protected abstract void setColumnProperties();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for adding
+     * Template method invoked by {@link #addNewContainerDS()} for adding
      * special column renderers if needed.
      */
     protected abstract void addColumnRenderes();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} that hides
-     * columns. If a column is hidable and hidden, it can be made visible via
+     * Template method invoked by {@link #addNewContainerDS()} that hides
+     * columns. If a column is hideable and hidden, it can be made visible via
      * grid column menu.
      */
     protected abstract void setHiddenColumns();
 
     /**
-     * Template method invoked by {@link this#addNewContainerDS()} for adding a
+     * Template method invoked by {@link #addNewContainerDS()} for adding a
      * CellDescriptionGenerator to the grid.
      */
     protected abstract CellDescriptionGenerator getDescriptionGenerator();

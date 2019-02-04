@@ -26,12 +26,13 @@ import org.springframework.security.core.GrantedAuthority;
  * </p>
  *
  * <p>
- * The Permissions cover CRUD for two data areas of SP:<br/>
- * <br/>
+ * The Permissions cover CRUD for two data areas:
+ * 
  * XX_Target_CRUD which covers the following entities: {@link Target} entities
- * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s<br/>
+ * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s
  * XX_Repository CRUD which covers: {@link DistributionSet}s,
- * {@link SoftwareModule}s, DS Tags<br/>
+ * {@link SoftwareModule}s, DS Tags
+ * </p>
  */
 public final class SpPermission {
 
@@ -179,11 +180,14 @@ public final class SpPermission {
     }
 
     /**
+     * <p>
      * Contains all the spring security evaluation expressions for the
      * {@link PreAuthorize} annotation for method security.
-     * <p/>
+     * </p>
+     * 
+     * <p>
      * Examples:
-     * <p/>
+     * 
      * {@code
      * hasRole([role])   Returns true if the current principal has the specified role.
      * hasAnyRole([role1,role2])  Returns true if the current principal has any of the supplied roles (given as a comma-separated list of strings)
@@ -196,7 +200,7 @@ public final class SpPermission {
      * isAuthenticated() Returns true if the user is not anonymous
      * isFullyAuthenticated()  Returns true if the user is not an anonymous or a remember-me user
      * }
-     *
+     * </p>
      */
     public static final class SpringEvalExpressions {
         /*

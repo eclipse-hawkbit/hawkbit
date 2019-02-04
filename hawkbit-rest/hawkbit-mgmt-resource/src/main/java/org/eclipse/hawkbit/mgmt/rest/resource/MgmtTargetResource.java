@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -61,16 +60,22 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtTargetResource implements MgmtTargetRestApi {
+    private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
+
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetResource.class);
 
-    @Autowired
-    private TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private DeploymentManagement deploymentManagement;
+    private final DeploymentManagement deploymentManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtTargetResource(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final EntityFactory entityFactory) {
+        this.targetManagement = targetManagement;
+        this.deploymentManagement = deploymentManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
@@ -163,8 +168,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
-            @PathVariable("targetId") final String targetId,
+    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("targetId") final String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -188,8 +192,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         return ResponseEntity.ok(
-                new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()),
-                totalActionCount));
+                new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount));
     }
 
     @Override
@@ -199,7 +202,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -214,7 +217,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", actionId, targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -242,7 +245,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), target.getId());
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
             return ResponseEntity.notFound().build();
         }
 
@@ -278,8 +281,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("targetId") final String targetId,
-            @RequestBody final MgmtDistributionSetAssignment dsId,
+            @PathVariable("targetId") final String targetId, @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
@@ -340,7 +342,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn("given action ({}) is not assigned to given target ({}).", action.getId(), targetId);
+            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 

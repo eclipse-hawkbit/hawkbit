@@ -186,7 +186,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         saveButton = createSaveButton();
         searchIcon = createSearchIcon();
 
-        helpLink = SPUIComponentProvider.getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getTargetfilterView());
+        helpLink = SPUIComponentProvider.getHelpLink(i18n,
+                uiProperties.getLinks().getDocumentation().getTargetfilterView());
 
         closeIcon = createSearchResetIcon();
     }
@@ -373,8 +374,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private void createTargetFilterQuery() {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
                 .create().name(nameTextField.getValue()).query(queryTextField.getValue()));
-        notification.displaySuccess(
-                i18n.getMessage("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
+        notification.displaySuccess(i18n.getMessage("message.create.filter.success", targetFilterQuery.getName()));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
     }
 

@@ -28,8 +28,8 @@ import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
-import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
@@ -62,7 +62,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -94,7 +94,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private BusProperties bus;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -196,7 +196,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         requestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> eventPublisher
                                 .publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId,
-                                        shippedSinceLastEvent, applicationContext.getId())));
+                                        shippedSinceLastEvent, bus.getId())));
 
             }
         }

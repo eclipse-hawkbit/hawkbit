@@ -126,7 +126,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
      *            entity for which metadata data is displayed
      * @param metaDatakey
      *            metadata key to be selected
-     * @return @link{CommonDialogWindow}
+     * @return {@link CommonDialogWindow}
      */
     public CommonDialogWindow getWindow(final E entity, final String metaDatakey) {
         selectedEntity = entity;

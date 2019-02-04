@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,14 +47,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
-    @Autowired
-    private SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    @Autowired
-    private DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistributionSetTypeManagement distributionSetTypeManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtDistributionSetTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final EntityFactory entityFactory) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
@@ -127,7 +130,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
                 .create(MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules));
+                .body(MgmtDistributionSetTypeMapper.toListResponse(createdSoftwareModules));
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {

@@ -147,7 +147,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
         background.attr("width", textWidth * 1.1);
         background.attr("height", textHeight);
 
-        moveSelection(background, -textWidth * 1.1 / 2.0, -textHeight*0.8);
+        moveSelection(background, -textWidth * 1.1 / 2.0, -textHeight * 0.8);
         moveSelection(infoText, x, y);
         infoText.attr(ATTR_VISIBILITY, "visible");
     }
@@ -156,14 +156,13 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
         sel.attr(ATTR_TRANSFORM, "translate(" + x + ", " + y + ")");
     }
 
-
     private static final native double getTextWidth(Element e)/*-{
-        return e.getBBox().width;
-    }-*/;
+                                                              return e.getBBox().width;
+                                                              }-*/;
 
     private static final native double getTextHeight(Element e)/*-{
-        return e.getBBox().height;
-    }-*/;
+                                                               return e.getBBox().height;
+                                                               }-*/;
 
     private void initChart() {
         arc = D3.svg().arc().innerRadius(0).outerRadius(90);

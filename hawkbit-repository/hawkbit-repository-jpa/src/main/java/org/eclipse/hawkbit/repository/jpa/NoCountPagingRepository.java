@@ -103,7 +103,7 @@ public class NoCountPagingRepository {
 
         @Override
         protected Page<T> readPage(final TypedQuery<T> query, final Pageable pageable, final Specification<T> spec) {
-            query.setFirstResult(pageable.getOffset());
+            query.setFirstResult((int) pageable.getOffset());
             query.setMaxResults(pageable.getPageSize());
 
             final List<T> content = query.getResultList();

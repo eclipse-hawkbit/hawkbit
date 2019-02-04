@@ -12,36 +12,35 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
+@RunWith(SpringRunner.class)
 @Feature("Unit Tests - Repository")
 @Story("Placeholder resolution for virtual properties")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(TimestampCalculator.class)
 public class VirtualPropertyResolverTest {
 
     @Spy
     private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
 
-    @Mock
+    @MockBean
     private TenantConfigurationManagement confMgmt;
 
     private StrSubstitutor substitutor;
@@ -51,15 +50,20 @@ public class VirtualPropertyResolverTest {
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
 
+    @Configuration
+    static class Config {
+        @Bean
+        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+            return TenantConfigurationManagementHolder.getInstance();
+        }
+    }
+
     @Before
     public void before() {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
-
-        mockStatic(TimestampCalculator.class);
-        when(TimestampCalculator.getTenantConfigurationManagement()).thenReturn(confMgmt);
 
         substitutor = new StrSubstitutor(resolverUnderTest, StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);

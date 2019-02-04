@@ -17,9 +17,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -71,7 +69,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
@@ -80,18 +78,22 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import com.google.common.io.Files;
+
+@RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringApplicationConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@SpringBootTest
+@ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
@@ -102,18 +104,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
         MySqlTestDatabase.class, MsSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable PAGE = new PageRequest(0, 400, new Sort(Direction.ASC, "id"));
+    protected static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
-
-    /**
-     * Constant for MediaType HAL with encoding UTF-8. Necessary since Spring
-     * version 4.3.2 @see https://jira.spring.io/browse/SPR-14577
-     */
-    protected static final String APPLICATION_JSON_HAL_UTF = MediaTypes.HAL_JSON + ";charset=UTF-8";
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -362,7 +359,8 @@ public abstract class AbstractIntegrationTest {
 
     }
 
-    private static String artifactDirectory = "./artifactrepo/" + RandomStringUtils.randomAlphanumeric(20);
+    private static String artifactDirectory = Files.createTempDir().getAbsolutePath() + "/"
+            + RandomStringUtils.randomAlphanumeric(20);
 
     @After
     public void cleanUp() {
@@ -415,21 +413,5 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
-    }
-
-    protected static Map<String, String> getMaintenanceWindow(final String schedule, final String duration,
-            final String timezone) {
-        final Map<String, String> maintenanceWindowMap = new HashMap<>();
-        maintenanceWindowMap.put("schedule", schedule);
-        maintenanceWindowMap.put("duration", duration);
-        maintenanceWindowMap.put("timezone", timezone);
-        return maintenanceWindowMap;
-    }
-
-    protected static Map<String, String> getMaintenanceWindowWithNextStart(final String schedule, final String duration,
-            final String timezone, final long nextStartAt) {
-        final Map<String, String> maintenanceWindowMap = getMaintenanceWindow(schedule, duration, timezone);
-        maintenanceWindowMap.put("nextStartAt", String.valueOf(nextStartAt));
-        return maintenanceWindowMap;
     }
 }

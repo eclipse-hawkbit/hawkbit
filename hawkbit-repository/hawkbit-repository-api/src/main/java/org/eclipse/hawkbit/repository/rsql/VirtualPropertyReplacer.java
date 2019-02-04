@@ -8,13 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.rsql;
 
+import java.io.Serializable;
+
 /**
  * Implementations map a placeholder to the associated value.
  * <p>
  * This is used in context of string replacement.
  */
 @FunctionalInterface
-public interface VirtualPropertyReplacer {
+public interface VirtualPropertyReplacer extends Serializable {
 
     /**
      * Looks up a placeholders and replaces them

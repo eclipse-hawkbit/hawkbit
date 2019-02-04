@@ -55,8 +55,8 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 distributionSetManagement, entityFactory, permissionChecker);
 
         super.init(i18n,
-                new DistributionSetTableHeader(i18n, permissionChecker, eventBus, manageDistUIState,
-                        distributionAddUpdateWindowLayout),
+                new DistributionSetTableHeader(
+                        i18n, permissionChecker, eventBus, manageDistUIState, distributionAddUpdateWindowLayout),
                 distributionSetTable,
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
                         distributionAddUpdateWindowLayout, distributionSetManagement, uiNotification,

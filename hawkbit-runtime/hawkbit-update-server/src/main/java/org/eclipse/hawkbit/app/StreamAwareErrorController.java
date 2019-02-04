@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.app;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.boot.autoconfigure.web.BasicErrorController;
-import org.springframework.boot.autoconfigure.web.ErrorAttributes;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  */
 @Controller
+// Exception squid:S3752 - errors need handling for all methods
+@SuppressWarnings("squid:S3752")
 public class StreamAwareErrorController extends BasicErrorController {
 
     /**

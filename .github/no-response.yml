@@ -1,7 +1,7 @@
 # Configuration for probot-no-response - https://github.com/probot/no-response
 
 daysUntilClose: 15
-responseRequiredLabel: "awaiting response"
+responseRequiredLabel: awaiting
 
 closeComment: >
   There has been no response from the original author so I closed this issue.

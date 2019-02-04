@@ -153,8 +153,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
-        final Link linkToSystemConfigHelp = SPUIComponentProvider
-                .getHelpLink(i18n, uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
+        final Link linkToSystemConfigHelp = SPUIComponentProvider.getHelpLink(i18n,
+                uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
         hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;

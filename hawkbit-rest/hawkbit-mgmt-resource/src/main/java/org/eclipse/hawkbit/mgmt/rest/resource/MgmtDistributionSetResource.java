@@ -47,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -66,29 +65,36 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtDistributionSetResource.class);
 
-    @Autowired
-    private SoftwareModuleManagement softwareModuleManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
-    @Autowired
-    private TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
 
-    @Autowired
-    private DeploymentManagement deployManagament;
+    private final DeploymentManagement deployManagament;
 
-    @Autowired
-    private SystemManagement systemManagement;
+    private final SystemManagement systemManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
 
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
+    private final SystemSecurityContext systemSecurityContext;
+
+    MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final DeploymentManagement deployManagament, final SystemManagement systemManagement,
+            final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
+            final SystemSecurityContext systemSecurityContext) {
+        this.softwareModuleManagement = softwareModuleManagement;
+        this.targetManagement = targetManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.deployManagament = deployManagament;
+        this.systemManagement = systemManagement;
+        this.entityFactory = entityFactory;
+        this.distributionSetManagement = distributionSetManagement;
+        this.systemSecurityContext = systemSecurityContext;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(

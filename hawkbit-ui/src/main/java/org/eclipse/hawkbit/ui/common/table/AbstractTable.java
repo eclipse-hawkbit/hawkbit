@@ -546,7 +546,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private boolean validateDropList(final Set<?> droplist) {
         if (droplist.isEmpty()) {
-            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work", new Object[] {});
+            final String actionDidNotWork = i18n.getMessage("message.action.did.not.work");
             notification.displayValidationError(actionDidNotWork);
             return false;
         }

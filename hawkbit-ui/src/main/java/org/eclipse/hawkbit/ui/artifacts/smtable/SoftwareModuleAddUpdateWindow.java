@@ -150,7 +150,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             final SoftwareModule newSoftwareModule = softwareModuleManagement.create(softwareModule);
             eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                    new Object[] { newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion() }));
+                    newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
             softwareModuleTable.setValue(Sets.newHashSet(newSoftwareModule.getId()));
         }
 
@@ -163,8 +163,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                     .map(SoftwareModuleType::getId);
             if (moduleType.isPresent() && softwareModuleManagement
                     .getByNameAndVersionAndType(name, version, moduleType.get()).isPresent()) {
-                uiNotifcation.displayValidationError(
-                        i18n.getMessage("message.duplicate.softwaremodule", new Object[] { name, version }));
+                uiNotifcation
+                        .displayValidationError(i18n.getMessage("message.duplicate.softwaremodule", name, version));
                 return true;
             }
             return false;
@@ -178,11 +178,12 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                     .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
             if (newSWModule != null) {
                 uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                        new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
+                        newSWModule.getName() + ":" + newSWModule.getVersion()));
 
                 eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
             }
         }
+
     }
 
     /**
@@ -281,9 +282,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         setCompositionRoot(formLayout);
 
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module"))).id(UIComponentIdProvider.SW_MODULE_CREATE_DIALOG)
-                .content(this).layout(formLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
-                .buildCommonDialogWindow();
+                .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module")))
+                .id(UIComponentIdProvider.SW_MODULE_CREATE_DIALOG).content(this).layout(formLayout).i18n(i18n)
+                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
         nameTextField.setEnabled(!editSwModule);
         versionTextField.setEnabled(!editSwModule);
 

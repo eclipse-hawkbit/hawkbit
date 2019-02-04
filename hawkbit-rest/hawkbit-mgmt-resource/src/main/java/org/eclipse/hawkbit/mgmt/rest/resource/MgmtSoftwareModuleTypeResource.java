@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -42,11 +41,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRestApi {
-    @Autowired
-    private SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
+    private final EntityFactory entityFactory;
+
+    MgmtSoftwareModuleTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final EntityFactory entityFactory) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
@@ -96,10 +100,9 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
             @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
 
-        final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(softwareModuleTypeId)
-                        .description(restSoftwareModuleType.getDescription())
-                        .colour(restSoftwareModuleType.getColour()));
+        final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement.update(entityFactory
+                .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
+                .colour(restSoftwareModuleType.getColour()));
 
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toResponse(updatedSoftwareModuleType));
     }
@@ -108,8 +111,8 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
-        final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement.create(
-                MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
+        final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement
+                .create(MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

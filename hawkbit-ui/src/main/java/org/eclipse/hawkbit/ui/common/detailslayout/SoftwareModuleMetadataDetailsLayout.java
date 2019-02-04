@@ -64,8 +64,7 @@ public class SoftwareModuleMetadataDetailsLayout extends AbstractMetadataDetails
         }
         selectedSWModuleId = swModule.getId();
         final List<SoftwareModuleMetadata> swMetadataList = softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, MAX_METADATA_QUERY), selectedSWModuleId)
-                .getContent();
+                .findMetaDataBySoftwareModuleId(PageRequest.of(0, MAX_METADATA_QUERY), selectedSWModuleId).getContent();
         if (!CollectionUtils.isEmpty(swMetadataList)) {
             swMetadataList.forEach(this::setMetadataProperties);
         }

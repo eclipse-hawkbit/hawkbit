@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Optional;
 import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
@@ -82,10 +82,10 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         final Component errorOrigin = findAbstractComponent(event);
 
         if (errorOrigin != null && errorOrigin.getUI() != null) {
-            return Optional.fromNullable(errorOrigin.getUI().getPage());
+            return Optional.ofNullable(errorOrigin.getUI().getPage());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

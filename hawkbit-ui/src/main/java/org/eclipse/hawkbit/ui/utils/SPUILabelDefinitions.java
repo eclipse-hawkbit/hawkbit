@@ -138,7 +138,7 @@ public final class SPUILabelDefinitions {
      */
     public static final String AUTO_ASSIGN_ACTION_TYPE = "autoAssignActionType";
     /**
-     * ASSIGNED DISTRIBUTION Name & Version.
+     * ASSIGNED DISTRIBUTION Name and Version.
      */
     public static final String ASSIGNED_DISTRIBUTION_NAME_VER = "assignedDistNameVersion";
 
@@ -148,7 +148,7 @@ public final class SPUILabelDefinitions {
     public static final String INSTALLED_DISTRIBUTION_ID = "installedDistributionSet.id";
 
     /**
-     * INSTALLED DISTRIBUTION Name & Version.
+     * INSTALLED DISTRIBUTION Name and Version.
      */
     public static final String INSTALLED_DISTRIBUTION_NAME_VER = "installedDistNameVersion";
 

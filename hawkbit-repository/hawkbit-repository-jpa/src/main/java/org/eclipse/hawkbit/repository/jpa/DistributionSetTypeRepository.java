@@ -93,7 +93,7 @@ public interface DistributionSetTypeRepository
      */
     @Override
     @Query("SELECT d FROM JpaDistributionSetType d WHERE d.id IN ?1")
-    List<JpaDistributionSetType> findAll(Iterable<Long> ids);
+    List<JpaDistributionSetType> findAllById(Iterable<Long> ids);
 
     /**
      * Counts the {@link SoftwareModuleType}s which are associated with the

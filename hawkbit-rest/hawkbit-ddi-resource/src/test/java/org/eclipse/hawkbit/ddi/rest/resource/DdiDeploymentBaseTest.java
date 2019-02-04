@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -98,9 +99,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$.[?(@.filename==filename0)]", hasSize(1)))
-                .andExpect(jsonPath("$.[?(@.filename==filename1)]", hasSize(1)))
-                .andExpect(jsonPath("$.[?(@.filename==filename2)]", hasSize(1)));
+                .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
 
     }
 
@@ -145,7 +146,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -167,57 +168,57 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].name",
                         contains(ds.findFirstModuleByType(runtimeType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
                         contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].name",
                         contains(ds.findFirstModuleByType(osType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.md5",
                         contains(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.MD5SUM")))
 
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].filename",
                         contains("test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.md5",
                         contains(artifactSignature.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
 
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].name",
                         contains(ds.findFirstModuleByType(appType).get().getName())));
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(new PageRequest(0, 100, Direction.DESC, "id"), uaction.getId());
+                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId());
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -235,7 +236,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         MvcResult mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8)).andReturn();
 
         final String urlBeforeSwitch = JsonPath.compile("_links.deploymentBase.href")
                 .read(mvcResult.getResponse().getContentAsString()).toString();
@@ -243,7 +244,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // Time is not yet over, so we should see the same URL
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8)).andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
                         .startsWith("http://localhost/" + tenantAware.getCurrentTenant()
@@ -254,7 +255,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF)).andReturn();
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8)).andReturn();
 
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isNotEqualTo(urlBeforeSwitch);
@@ -309,7 +310,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -329,58 +330,58 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("attempt")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].name",
                         contains(ds.findFirstModuleByType(runtimeType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
                         contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].name",
                         contains(ds.findFirstModuleByType(osType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].metadata[0].key").value(visibleMetadataOsKey))
-                .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].metadata[0].value").value(visibleMetadataOsValue))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].key").value(visibleMetadataOsKey))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].value")
+                        .value(visibleMetadataOsValue))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.md5",
                         contains(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1")))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1.MD5SUM")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].filename",
                         contains("test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.md5",
                         contains(artifactSignature.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
                 .andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
                                 contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                         + "/controller/v1/4712/softwaremodules/"
                                         + getOsModule(findDistributionSetByAction) + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/" + getOsModule(findDistributionSetByAction)
                                 + "/artifacts/test1.signature.MD5SUM")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].metadata").doesNotExist())
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name")
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].metadata").doesNotExist())
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].name")
                         .value(ds.findFirstModuleByType(appType).get().getName()));
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(new PageRequest(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -427,7 +428,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
                         + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
@@ -442,62 +443,62 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/{actionId}", tenantAware.getCurrentTenant(),
-                uaction.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                uaction.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].name",
                         contains(ds.findFirstModuleByType(runtimeType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
                         contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].name",
                         contains(ds.findFirstModuleByType(osType).get().getName())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].filename", contains("test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.md5",
                         contains(artifact.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
                         contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.download-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[0]._links.md5sum-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.MD5SUM")))
 
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].size", contains(5 * 1024)))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].filename",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].filename",
                         contains("test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.md5",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.md5",
                         contains(artifactSignature.getMd5Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1].hashes.sha1",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
                         contains(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.download-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].artifacts[1]._links.md5sum-http.href",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
                         contains(
                                 HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                         + findDistributionSetByAction.findFirstModuleByType(osType).get().getId()
                                         + "/artifacts/test1.signature.MD5SUM")))
 
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].name",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].name",
                         contains(ds.findFirstModuleByType(appType).get().getName())));
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(new PageRequest(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -612,7 +613,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(3);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
         assertThat(deploymentManagement.getInstalledDistributionSet(myT.getControllerId())).isNotPresent();
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
 
         // action1 done
 
@@ -628,7 +629,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.getInstalledDistributionSet(myT.getControllerId()).get()).isEqualTo(ds1);
 
         Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusAll(new PageRequest(0, 100, Direction.DESC, "id")).getContent();
+                .findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(4);
         assertThat(actionStatusMessages.iterator().next().getStatus()).isEqualTo(Status.FINISHED);
 
@@ -644,7 +645,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
         assertThat(deploymentManagement.getInstalledDistributionSet(myT.getControllerId()).get()).isEqualTo(ds2);
-        actionStatusMessages = deploymentManagement.findActionStatusAll(new PageRequest(0, 100, Direction.DESC, "id"))
+        actionStatusMessages = deploymentManagement.findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id"))
                 .getContent();
         assertThat(actionStatusMessages).hasSize(5);
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
@@ -660,7 +661,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(0);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
         assertThat(deploymentManagement.getInstalledDistributionSet(myT.getControllerId()).get()).isEqualTo(ds3);
-        actionStatusMessages = deploymentManagement.findActionStatusAll(new PageRequest(0, 100, Direction.DESC, "id"))
+        actionStatusMessages = deploymentManagement.findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id"))
                 .getContent();
         assertThat(actionStatusMessages).hasSize(6);
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
@@ -690,13 +691,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         Target myT = targetManagement.getByControllerID("4712").get();
         assertThat(targetManagement.getByControllerID("4712").get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(0);
         assertThat(deploymentManagement.countActionsByTarget(myT.getControllerId())).isEqualTo(1);
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusAll(new PageRequest(0, 100, Direction.DESC, "id")).getContent();
+                .findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.ERROR));
 
@@ -714,9 +715,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(1);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(0);
         assertThat(deploymentManagement.findInActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(2);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
@@ -757,9 +758,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
         assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(5,
@@ -772,9 +773,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
         assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(5,
@@ -787,9 +788,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(1);
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
         assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(6,
@@ -803,9 +804,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(0);
 
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
         assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(7,
@@ -837,8 +838,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
-        assertThat(targetManagement.findByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(1);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(0);
+        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(1);
 
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(10);
         assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(7,

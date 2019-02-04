@@ -17,9 +17,6 @@ import java.lang.annotation.Target;
 /**
  * Annotation to run test classes or test methods with a specific user with
  * specific permissions.
- * 
- *
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
@@ -50,7 +47,7 @@ public @interface WithUser {
     /**
      * Should tenant auto created.
      * 
-     * @return <true> = auto create <false> not create
+     * @return <code>true</code> = auto create <code>false</code> not create
      */
     boolean autoCreateTenant() default true;
 

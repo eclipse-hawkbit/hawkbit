@@ -43,8 +43,6 @@ public class UiProperties implements Serializable {
         this.gravatar = gravatar;
     }
 
-
-
     /**
      * Localization information
      */
@@ -57,7 +55,7 @@ public class UiProperties implements Serializable {
         private String defaultLocal = "en";
 
         /**
-         *  List of available localizations
+         * List of available localizations
          */
         private List<String> availableLocals = Collections.singletonList("en");
 

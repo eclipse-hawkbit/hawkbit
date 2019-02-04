@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
 import io.qameta.allure.Description;
@@ -73,11 +74,11 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==jvm)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
                         contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==os)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
                         contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath("$.deployment.chunks[?(@.part==bApp)].version",
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())));
 
         // and finish it
@@ -108,9 +109,9 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
-                TestdataFactory.DEFAULT_CONTROLLER_ID).accept(APPLICATION_JSON_HAL_UTF))
+                TestdataFactory.DEFAULT_CONTROLLER_ID).accept(MediaTypes.HAL_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
@@ -143,7 +144,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
                 TestdataFactory.DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
@@ -335,7 +336,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(),
                 TestdataFactory.DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
@@ -362,7 +363,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
                 TestdataFactory.DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.cancelAction.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"

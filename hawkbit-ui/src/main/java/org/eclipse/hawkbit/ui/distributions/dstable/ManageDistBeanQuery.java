@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -121,7 +120,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
         } else {
-            distBeans = findDistBeans(new OffsetBasedPageRequest(startIndex, count, sort));
+            distBeans = findDistBeans(PageRequest.of(startIndex / count, count, sort));
         }
 
         for (final DistributionSet distributionSet : distBeans) {
@@ -138,7 +137,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        firstPageDistributionSets = findDistBeans(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+        firstPageDistributionSets = findDistBeans(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
         final long size = firstPageDistributionSets.getTotalElements();
 
         if (size > Integer.MAX_VALUE) {

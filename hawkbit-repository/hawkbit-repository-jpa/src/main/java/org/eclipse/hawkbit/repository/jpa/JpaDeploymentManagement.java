@@ -69,7 +69,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
@@ -88,7 +88,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
@@ -125,7 +124,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final TargetManagement targetManagement;
     private final AuditorAware<String> auditorProvider;
     private final ApplicationEventPublisher eventPublisher;
-    private final ApplicationContext applicationContext;
+    private final BusProperties bus;
     private final AfterTransactionCommitExecutor afterCommit;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
@@ -141,7 +140,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
             final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
-            final ApplicationContext applicationContext, final AfterTransactionCommitExecutor afterCommit,
+            final BusProperties bus, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
@@ -153,14 +152,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.targetManagement = targetManagement;
         this.auditorProvider = auditorProvider;
         this.eventPublisher = eventPublisher;
-        this.applicationContext = applicationContext;
+        this.bus = bus;
         this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
-        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher, bus,
+                actionRepository, actionStatusRepository, quotaManagement);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                applicationContext, actionRepository, actionStatusRepository, quotaManagement);
+                bus, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -367,7 +366,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
-        final String currentUser = auditorProvider != null ? auditorProvider.getCurrentAuditor() : null;
+        final String currentUser = auditorProvider.getCurrentAuditor().orElse(null);
         assignmentStrategy.updateTargetStatus(set, targetIdsChunks, currentUser);
     }
 
@@ -385,7 +384,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void createActionsStatus(final Collection<JpaAction> actions,
             final AbstractDsAssignmentStrategy assignmentStrategy, final String actionMessage) {
         actionStatusRepository
-                .save(actions.stream().map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
+                .saveAll(actions.stream().map(action -> assignmentStrategy.createActionStatus(action, actionMessage))
                         .collect(Collectors.toList()));
     }
 
@@ -493,7 +492,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
             if (!CollectionUtils.isEmpty(targetAssignments)) {
                 afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                        distributionSetId, targetAssignments, applicationContext.getId(), maintenanceWindowAvailable)));
+                        distributionSetId, targetAssignments, bus.getId(), maintenanceWindowAvailable)));
             }
 
             return rolloutGroupActions.getTotalElements();
@@ -503,7 +502,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
             final Long rolloutGroupParentId, final int limit) {
 
-        final PageRequest pageRequest = new PageRequest(0, limit);
+        final PageRequest pageRequest = PageRequest.of(0, limit);
         if (rolloutGroupParentId == null) {
             return actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
                     Action.Status.SCHEDULED);
@@ -577,7 +576,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Optional<Action> findAction(final long actionId) {
-        return Optional.ofNullable(actionRepository.findOne(actionId));
+        return actionRepository.findById(actionId).map(a -> (Action) a);
     }
 
     @Override
@@ -644,7 +643,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long dsId) {
-        if (!distributionSetRepository.exists(dsId)) {
+        if (!distributionSetRepository.existsById(dsId)) {
             throw new EntityNotFoundException(DistributionSet.class, dsId);
         }
     }
@@ -666,7 +665,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
-        if (!actionRepository.exists(actionId)) {
+        if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
 
@@ -690,7 +689,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
         selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
 
-        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult(pageable.getOffset())
+        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult((int) pageable.getOffset())
                 .setMaxResults(pageable.getPageSize()).getResultList().stream().collect(Collectors.toList());
 
         return new PageImpl<>(result, pageable, totalCount);
@@ -777,7 +776,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private static String formatInClause(final Collection<String> elements) {
-        return "#" + Joiner.on(",#").join(elements);
+        return "#" + String.join(",#", elements);
     }
 
     protected ActionRepository getActionRepository() {

@@ -172,14 +172,14 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(knownTargetAmount)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].query", contains(testQuery)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].query", contains(testQuery)))
                 // idB
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].name", contains(idB)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idB + ")].query", contains(testQuery)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].name", contains(idB)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idB + "')].query", contains(testQuery)))
                 // idC
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].query", contains(testQuery)));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].query", contains(testQuery)));
     }
 
     @Test
@@ -203,8 +203,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].name", contains(idA)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idA + ")].query", contains(testQuery)));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].name", contains(idA)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idA + "')].query", contains(testQuery)));
     }
 
     @Test
@@ -232,14 +232,14 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)))
                 // idA
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].name", contains(idC)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idC + ")].query", contains(testQuery)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].name", contains(idC)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idC + "')].query", contains(testQuery)))
                 // idB
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].name", contains(idD)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idD + ")].query", contains(testQuery)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].name", contains(idD)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idD + "')].query", contains(testQuery)))
                 // idC
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].name", contains(idE)))
-                .andExpect(jsonPath("$.content.[?(@.name==" + idE + ")].query", contains(testQuery)));
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].name", contains(idE)))
+                .andExpect(jsonPath("$.content.[?(@.name=='" + idE + "')].query", contains(testQuery)));
     }
 
     @Test

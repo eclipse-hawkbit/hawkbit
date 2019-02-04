@@ -15,9 +15,11 @@ import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationV
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * REST Resource for handling tenant specific configuration operations.
@@ -32,8 +34,7 @@ public interface MgmtTenantManagementRestApi {
      * 
      * @return a map of all configuration values.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/configs", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/configs", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration();
 
     /**
@@ -46,7 +47,7 @@ public interface MgmtTenantManagementRestApi {
      *         OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
+    @DeleteMapping(value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
@@ -60,7 +61,7 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
+    @GetMapping(value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
             @PathVariable("keyName") String keyName);
@@ -77,7 +78,7 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/configs/{keyName}", consumes = { MediaTypes.HAL_JSON_VALUE,
+    @PutMapping(value = "/configs/{keyName}", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(

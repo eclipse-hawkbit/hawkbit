@@ -284,8 +284,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertArtifactNull(artifact1, artifact2);
 
         // verify: meta data of artifact is deleted
-        assertThat(artifactRepository.findOne(artifact1.getId())).isNull();
-        assertThat(artifactRepository.findOne(artifact2.getId())).isNull();
+        assertThat(artifactRepository.findById(artifact1.getId())).isNotPresent();
+        assertThat(artifactRepository.findById(artifact2.getId())).isNotPresent();
     }
 
     @Test
@@ -315,8 +315,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertArtifactNull(artifact1, artifact2);
 
         // verify: artifact meta data is still available
-        assertThat(artifactRepository.findOne(artifact1.getId())).isNotNull();
-        assertThat(artifactRepository.findOne(artifact2.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifact1.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifact2.getId())).isNotNull();
     }
 
     @Test
@@ -355,8 +355,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertArtifactNull(artifact1, artifact2);
 
         // verify: artifact meta data is still available
-        assertThat(artifactRepository.findOne(artifact1.getId())).isNotNull();
-        assertThat(artifactRepository.findOne(artifact2.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifact1.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifact2.getId())).isNotNull();
     }
 
     @Test
@@ -398,10 +398,11 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertArtifactNotNull(artifactY);
 
         // verify: meta data of artifactX is deleted
-        assertThat(artifactRepository.findOne(artifactX.getId())).isNull();
+        assertThat(artifactRepository.findById(artifactX.getId())).isNotPresent();
 
         // verify: meta data of artifactY is not deleted
-        assertThat(artifactRepository.findOne(artifactY.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifactY.getId())).isPresent();
+
     }
 
     @Test
@@ -459,7 +460,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertArtifactNull(artifactX, artifactY);
 
         // verify: meta data of artifactX and artifactY is not deleted
-        assertThat(artifactRepository.findOne(artifactY.getId())).isNotNull();
+        assertThat(artifactRepository.findById(artifactY.getId())).isNotNull();
     }
 
     private SoftwareModule createSoftwareModuleWithArtifacts(final SoftwareModuleType type, final String name,
@@ -488,7 +489,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             assertArtifactNotNull(artifacts.toArray(new Artifact[artifacts.size()]));
         }
 
-        artifacts.forEach(artifact -> assertThat(artifactRepository.findOne(artifact.getId())).isNotNull());
+        artifacts.forEach(artifact -> assertThat(artifactRepository.findById(artifact.getId())).isNotNull());
         return softwareModule;
     }
 
@@ -791,13 +792,15 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         ah = softwareModuleManagement.get(ah.getId()).get();
 
-        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(new PageRequest(0, 10), ah.getId())
-                .getContent()).as("Contains the created metadata element")
+        assertThat(
+                softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), ah.getId()).getContent())
+                        .as("Contains the created metadata element")
                         .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareModuleManagement.deleteMetaData(ah.getId(), knownKey1);
-        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(new PageRequest(0, 10), ah.getId())
-                .getContent()).as("Metadata elemenets are").isEmpty();
+        assertThat(
+                softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), ah.getId()).getContent())
+                        .as("Metadata elemenets are").isEmpty();
     }
 
     @Test
@@ -835,10 +838,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
 
         Page<SoftwareModuleMetadata> metadataSw1 = softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw1.getId());
+                .findMetaDataBySoftwareModuleId(PageRequest.of(0, 100), sw1.getId());
 
         Page<SoftwareModuleMetadata> metadataSw2 = softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(new PageRequest(0, 100), sw2.getId());
+                .findMetaDataBySoftwareModuleId(PageRequest.of(0, 100), sw2.getId());
 
         assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);
         assertThat(metadataSw1.getTotalElements()).isEqualTo(metadataCountSw1);
@@ -846,10 +849,10 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(metadataSw2.getNumberOfElements()).isEqualTo(metadataCountSw2);
         assertThat(metadataSw2.getTotalElements()).isEqualTo(metadataCountSw2);
 
-        metadataSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw1 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(PageRequest.of(0, 100),
                 sw1.getId());
 
-        metadataSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(new PageRequest(0, 100),
+        metadataSw2 = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(PageRequest.of(0, 100),
                 sw2.getId());
 
         assertThat(metadataSw1.getNumberOfElements()).isEqualTo(metadataCountSw1);

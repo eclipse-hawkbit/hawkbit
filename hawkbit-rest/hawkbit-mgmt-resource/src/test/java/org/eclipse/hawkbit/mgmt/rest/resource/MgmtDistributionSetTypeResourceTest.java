@@ -72,22 +72,22 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..name",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + standardDsType.getKey() + "')].name",
                         contains(standardDsType.getName())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..description",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + standardDsType.getKey() + "')].description",
                         contains(standardDsType.getDescription())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + standardDsType.getKey() + ")]$..key",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + standardDsType.getKey() + "')].key",
                         contains(standardDsType.getKey())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..id", contains(testType.getId().intValue())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..name", contains("TestName123")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..description", contains("Desc1234")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..createdBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..createdAt", contains(testType.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..lastModifiedBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..lastModifiedAt",
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].id", contains(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].name", contains("TestName123")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdAt", contains(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedAt",
                         contains(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$..key", contains("test123")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)]$.._links.self.href",
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].key", contains("test123")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')]._links.self.href",
                         contains("http://localhost/rest/v1/distributionsettypes/" + testType.getId())))
                 .andExpect(jsonPath("$.total", equalTo(5)));
     }

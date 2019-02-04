@@ -37,8 +37,8 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.core.ConditionTimeoutException;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 
 /**
  * Test rule to setup and verify the event count for a method.

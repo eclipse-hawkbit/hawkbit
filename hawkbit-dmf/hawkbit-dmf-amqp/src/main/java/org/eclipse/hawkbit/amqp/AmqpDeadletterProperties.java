@@ -20,7 +20,7 @@ import com.google.common.collect.Maps;
  * Bean which holds the necessary properties for configuring the AMQP deadletter
  * queue.
  */
-@ConfigurationProperties("hawkbit.dmf.rabbitmq.deadLetter")
+@ConfigurationProperties("hawkbit.dmf.rabbitmq.dead-letter")
 public class AmqpDeadletterProperties {
     private static final int THREE_WEEKS = 21;
 

@@ -27,7 +27,6 @@ public class UploadFixed extends Upload {
 
     private boolean uploadInterrupted;
 
-
     @Override
     public void interruptUpload() {
         super.interruptUpload();

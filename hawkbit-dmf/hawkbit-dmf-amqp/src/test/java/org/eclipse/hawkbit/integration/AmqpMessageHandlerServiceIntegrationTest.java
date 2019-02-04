@@ -58,7 +58,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Handler Service")
-public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegrationTest {
+public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
     private static final String CORRELATION_ID = UUID.randomUUID().toString();
     private static final String TARGET_PREFIX = "Dmf_hand_";
 
@@ -119,19 +119,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
-    }
-
-    @Test
-    @Description("Tests not allowed content-type in message. This message should forwarded to the deadletter queue")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void wrongContentType() {
-        final String controllerId = TARGET_PREFIX + "wrongContentType";
-        final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
-        createTargetMessage.getMessageProperties().setContentType("WrongContentType");
-        getDmfClient().send(createTargetMessage);
-
-        verifyOneDeadLetterMessage();
-        assertAllTargetsCount(0);
     }
 
     @Test
@@ -836,7 +823,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
     }
 
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
-        createConditionFactory().await().until(() -> {
+        createConditionFactory().await().untilAsserted(() -> {
             try {
                 securityRule.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
@@ -870,7 +857,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
-        messageProperties.setCorrelationId(CORRELATION_ID.getBytes());
+        messageProperties.setCorrelationId(CORRELATION_ID);
 
         return createMessage(payload, messageProperties);
     }
@@ -896,7 +883,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
 
     private void verifyNumberOfDeadLetterMessages(final int numberOfInvocations) {
         assertEmptyReceiverQueueCount();
-        createConditionFactory().until(() -> Mockito.verify(getDeadletterListener(), Mockito.times(numberOfInvocations))
-                .handleMessage(Mockito.any()));
+        createConditionFactory().untilAsserted(() -> Mockito
+                .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
     }
 }

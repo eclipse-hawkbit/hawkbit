@@ -688,8 +688,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // populated;
         final List<JpaTarget> allFoundTargets = targetRepository.findAll();
 
-        final List<JpaTarget> deployedTargetsFromDB = targetRepository.findAll(deployedTargetIDs);
-        final List<JpaTarget> undeployedTargetsFromDB = targetRepository.findAll(undeployedTargetIDs);
+        final List<JpaTarget> deployedTargetsFromDB = targetRepository.findAllById(deployedTargetIDs);
+        final List<JpaTarget> undeployedTargetsFromDB = targetRepository.findAllById(undeployedTargetIDs);
 
         // test that number of Targets
         assertThat(allFoundTargets.spliterator().getExactSizeIfKnown()).as("number of target is wrong")
@@ -721,7 +721,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             + "from target/controller. Expected behaviour is that in case of OK finished update the target will go to "
             + "IN_SYNC status and installed DS is set to the assigned DS entry.")
     public void assignDistributionSetAndAddFinishedActionStatus() {
-        final PageRequest pageRequest = new PageRequest(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
 
         final DeploymentResult deployResWithDsA = prepareComplexRepo("undep-A-T", 2, "dep-A-T", 4, 1, "dsA");
         final DeploymentResult deployResWithDsB = prepareComplexRepo("undep-B-T", 3, "dep-B-T", 5, 1, "dsB");
@@ -815,7 +815,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             + "if the DS is assigned to a target and a hard delete if the DS is not in use at all.")
     public void deleteDistributionSet() {
 
-        final PageRequest pageRequest = new PageRequest(0, 100, Direction.ASC, "id");
+        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, "id");
 
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 2;

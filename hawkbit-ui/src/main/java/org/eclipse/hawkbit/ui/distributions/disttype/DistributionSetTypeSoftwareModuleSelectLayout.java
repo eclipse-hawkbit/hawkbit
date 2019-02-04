@@ -189,7 +189,7 @@ public class DistributionSetTypeSoftwareModuleSelectLayout extends VerticalLayou
     protected void createSourceTableData() {
         sourceTableContainer.removeAllItems();
         final Iterable<SoftwareModuleType> moduleTypeBeans = softwareModuleTypeManagement
-                .findAll(new PageRequest(0, 1000));
+                .findAll(PageRequest.of(0, 1000));
         Item saveTblitem;
         for (final SoftwareModuleType swTypeTag : moduleTypeBeans) {
             saveTblitem = sourceTableContainer.addItem(swTypeTag.getId());

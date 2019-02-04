@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -60,7 +59,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -392,8 +391,6 @@ public class AmqpMessageHandlerServiceTest {
 
         final Artifact localArtifactMock = mock(Artifact.class);
         when(artifactManagementMock.findFirstBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
-        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyString(), anyLong()))
-                .thenThrow(EntityNotFoundException.class);
 
         // test
         final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
@@ -515,15 +512,11 @@ public class AmqpMessageHandlerServiceTest {
         final Target targetMock = mock(Target.class);
         final DistributionSet distributionSetMock = mock(DistributionSet.class);
 
-        when(distributionSetMock.getId()).thenReturn(1L);
         when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
         when(actionMock.getId()).thenReturn(targetId);
-        when(actionMock.getStatus()).thenReturn(status);
         when(actionMock.getTenant()).thenReturn("DEFAULT");
         when(actionMock.getTarget()).thenReturn(targetMock);
         when(targetMock.getControllerId()).thenReturn("target1");
-        when(targetMock.getSecurityToken()).thenReturn("securityToken");
-        when(targetMock.getAddress()).thenReturn(null);
         return actionMock;
     }
 

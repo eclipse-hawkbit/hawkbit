@@ -40,7 +40,7 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
      *            the applicationId
      */
     public RemoteTenantAwareEvent(final Object source, final String tenant, final String applicationId) {
-        super(source, applicationId, "**");
+        super(source, applicationId);
         this.tenant = tenant;
     }
 

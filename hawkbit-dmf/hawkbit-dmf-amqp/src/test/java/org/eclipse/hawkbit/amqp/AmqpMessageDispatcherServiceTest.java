@@ -12,9 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -59,7 +59,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import io.qameta.allure.Description;
@@ -69,7 +69,7 @@ import io.qameta.allure.Story;
 @ActiveProfiles({ "test" })
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Dispatcher Service Test")
-@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class })
+@SpringBootTest(classes = { RepositoryApplicationConfiguration.class })
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
@@ -214,7 +214,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             });
         }
     }
-    
+
     @Test
     @Description("Verifies that sending update controller attributes event works.")
     public void sendUpdateAttributesRequest() {

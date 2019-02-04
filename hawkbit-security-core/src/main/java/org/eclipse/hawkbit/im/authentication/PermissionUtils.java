@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,36 +19,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public final class PermissionUtils {
 
-    private PermissionUtils() {
+	private PermissionUtils() {
 
-    }
+	}
 
-    /**
-     * Create {@link GrantedAuthority} by a special role.
-     * 
-     * @param roles
-     *            the roles
-     * @return a list of {@link GrantedAuthority}
-     */
-    public static List<GrantedAuthority> createAuthorityList(final Collection<String> roles) {
-        final List<GrantedAuthority> authorities = new ArrayList<>(roles.size());
-
-        for (final String role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role));
-            // add spring security ROLE authority which is indicated by the
-            // `ROLE_` prefix
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
-        }
-
-        return authorities;
-    }
-
-    /**
-     * Returns all authorities.
-     * 
-     * @return a list of {@link GrantedAuthority}
-     */
-    public static List<GrantedAuthority> createAllAuthorityList() {
-        return createAuthorityList(SpPermission.getAllAuthorities());
-    }
+	/**
+	 * Returns all authorities.
+	 * 
+	 * @return a list of {@link GrantedAuthority}
+	 */
+	public static List<GrantedAuthority> createAllAuthorityList() {
+		return SpPermission.getAllAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+	}
 }

@@ -114,7 +114,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
 
     @Override
     public void clean() {
-        LOG.info("Cleanup delayed event push strategy for UI", vaadinUI.getUIId());
+        LOG.info("Cleanup delayed event push strategy for UI {}", vaadinUI.getUIId());
         jobHandle.cancel(true);
         queue.clear();
     }
@@ -206,6 +206,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
                 }).get();
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Wait for Vaadin session for UI {} interrupted!", vaadinUI.getUIId(), e);
+                Thread.currentThread().interrupt();
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }

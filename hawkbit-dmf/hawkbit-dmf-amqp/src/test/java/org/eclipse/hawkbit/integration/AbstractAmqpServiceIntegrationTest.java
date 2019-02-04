@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Assert;
@@ -49,7 +50,8 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
 import io.qameta.allure.Step;
 
@@ -58,9 +60,10 @@ import io.qameta.allure.Step;
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
-@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        DmfApiConfiguration.class, DmfTestConfiguration.class })
-public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
+@ContextConfiguration(classes = { DmfApiConfiguration.class, DmfTestConfiguration.class,
+        RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
+public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
@@ -99,7 +102,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected void verifyDeadLetterMessages(final int expectedMessages) {
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
         });
     }
@@ -165,8 +168,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
 
         assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
-        assertThat(correlationId)
-                .isEqualTo(new String(replyMessage.getMessageProperties().getCorrelationId(), StandardCharsets.UTF_8));
+        assertThat(correlationId).isEqualTo(replyMessage.getMessageProperties().getCorrelationId());
         assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.PING_RESPONSE.toString());
         assertThat(Long.valueOf(new String(replyMessage.getBody(), StandardCharsets.UTF_8)))
                 .isLessThanOrEqualTo(System.currentTimeMillis());
@@ -213,7 +215,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     }
 
     protected void verifyReplyToListener() {
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any());
         });
     }
@@ -306,7 +308,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected Message createPingMessage(final String correlationId, final String tenant) {
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.PING.toString());
-        messageProperties.setCorrelationId(correlationId.getBytes());
+        messageProperties.setCorrelationId(correlationId);
         messageProperties.setReplyTo(DmfTestConfiguration.REPLY_TO_EXCHANGE);
 
         return createMessage(null, messageProperties);
@@ -354,7 +356,7 @@ public abstract class AmqpServiceIntegrationTest extends AbstractAmqpIntegration
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         waitUntilIsPresent(() -> controllerManagement.getByControllerId(controllerId));
 
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             try {
                 final Map<String, String> controllerAttributes = securityRule
                         .runAsPrivileged(() -> targetManagement.getControllerAttributes(controllerId));

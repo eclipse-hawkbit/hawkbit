@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,20 +50,25 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
-    @Autowired
-    private RolloutManagement rolloutManagement;
+    private final RolloutManagement rolloutManagement;
 
-    @Autowired
-    private RolloutGroupManagement rolloutGroupManagement;
+    private final RolloutGroupManagement rolloutGroupManagement;
 
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtRolloutResource(final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory) {
+        this.rolloutManagement = rolloutManagement;
+        this.rolloutGroupManagement = rolloutGroupManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
@@ -119,8 +123,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
 
         } else if (rolloutRequestBody.getAmountGroups() != null) {
-            rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(),
-                    rolloutGroupConditions);
+            rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
 
         } else {
             throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
@@ -222,7 +225,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam != null) {
-            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId, rsqlParam);
+            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId,
+                    rsqlParam);
         } else {
             final Page<Target> pageTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(pageable, groupId);
             rolloutGroupTargets = pageTargets;
@@ -232,9 +236,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {
-        return this.distributionSetManagement.get(rolloutRequestBody.getDistributionSetId())
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class,
-                        rolloutRequestBody.getDistributionSetId()));
+        return this.distributionSetManagement.get(rolloutRequestBody.getDistributionSetId()).orElseThrow(
+                () -> new EntityNotFoundException(DistributionSet.class, rolloutRequestBody.getDistributionSetId()));
 
     }
 }

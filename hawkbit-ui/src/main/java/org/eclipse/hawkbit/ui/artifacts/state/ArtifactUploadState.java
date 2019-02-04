@@ -237,7 +237,7 @@ public class ArtifactUploadState implements ManagementEntityState, Serializable 
             if (!StringUtils.isBlank(fileUploadProgress.getFilePath())) {
                 final boolean deleted = FileUtils.deleteQuietly(new File(fileUploadProgress.getFilePath()));
                 if (!deleted) {
-                    LOG.warn("TempFile was not deleted: " + fileUploadProgress.getFilePath());
+                    LOG.warn("TempFile was not deleted: {}", fileUploadProgress.getFilePath());
                 }
             }
         }

@@ -52,7 +52,7 @@ public final class DistributionSetTypeSpecification {
 
     /**
      * {@link Specification} for retrieving {@link DistributionSetType} with
-     * given {@link DistributionSetType#getName())} including fetching the
+     * given {@link DistributionSetType#getName()} including fetching the
      * elements list.
      *
      * @param name

@@ -39,12 +39,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -305,7 +305,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
         final JSONArray payload = new JSONArray();
-        targets.forEach(trg -> payload.put(new JSONObject().put("id", trg.getId())));
+        targets.forEach(trg -> {
+            try {
+                payload.put(new JSONObject().put("id", trg.getId()));
+            } catch (final JSONException e) {
+                e.printStackTrace();
+            }
+        });
 
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
                 .contentType(MediaType.APPLICATION_JSON).content(payload.toString())).andExpect(status().isForbidden());
@@ -344,7 +350,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5);
         final JSONArray list = new JSONArray();
-        targets.forEach(target -> list.put(new JSONObject().put("id", target.getControllerId())));
+        targets.forEach(target -> {
+            try {
+                list.put(new JSONObject().put("id", target.getControllerId()));
+            } catch (final JSONException e) {
+                e.printStackTrace();
+            }
+        });
 
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), targets.get(0).getControllerId());
@@ -373,7 +385,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         for (final String targetId : knownTargetIds) {
             testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(0), "", "")));
+                    new JSONObject().put("schedule", getTestSchedule(0))));
         }
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
@@ -396,7 +408,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         for (final String targetId : knownTargetIds) {
             testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    AbstractIntegrationTest.getMaintenanceWindow("", AbstractIntegrationTest.getTestDuration(10), "")));
+                    new JSONObject().put("duration", getTestDuration(10))));
         }
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
@@ -419,8 +431,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         for (final String targetId : knownTargetIds) {
             testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(10),
-                            AbstractIntegrationTest.getTestDuration(10), AbstractIntegrationTest.getTestTimeZone())));
+                    new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(10))
+                            .put("timezone", getTestTimeZone())));
         }
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
@@ -443,8 +455,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         for (final String targetId : knownTargetIds) {
             testdataFactory.createTarget(targetId);
             list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(-30),
-                            AbstractIntegrationTest.getTestDuration(5), AbstractIntegrationTest.getTestTimeZone())));
+                    new JSONObject().put("schedule", getTestSchedule(-30)).put("duration", getTestDuration(5))
+                            .put("timezone", getTestTimeZone())));
         }
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
@@ -468,9 +480,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
             testdataFactory.createTarget(targetId);
             if (Integer.parseInt(targetId) % 2 == 0) {
                 list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                        AbstractIntegrationTest.getMaintenanceWindow(AbstractIntegrationTest.getTestSchedule(10),
-                                AbstractIntegrationTest.getTestDuration(5),
-                                AbstractIntegrationTest.getTestTimeZone())));
+                        new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(5))
+                                .put("timezone", getTestTimeZone())));
             } else {
                 list.put(new JSONObject().put("id", Long.valueOf(targetId)));
             }
@@ -690,11 +701,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo(set.getLastModifiedBy())))
                 .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.content.[0].version", equalTo(set.getVersion())))
-                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
-                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(set.findFirstModuleByType(appType).get().getId().intValue())))
-                .andExpect(jsonPath("$.content.[0].modules.[?(@.type==" + osType.getKey() + ")].id",
+                .andExpect(jsonPath("$.content.[0].modules.[?(@.type=='" + osType.getKey() + "')].id",
                         contains(getOsModule(set).intValue())));
     }
 
@@ -722,11 +733,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(set.getLastModifiedBy())))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(set.getLastModifiedAt())))
                 .andExpect(jsonPath("$.version", equalTo(set.getVersion())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(set.findFirstModuleByType(runtimeType).get().getId().intValue())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(set.findFirstModuleByType(appType).get().getId().intValue())))
-                .andExpect(jsonPath("$.modules.[?(@.type==" + osType.getKey() + ")].id",
+                .andExpect(jsonPath("$.modules.[?(@.type=='" + osType.getKey() + "')].id",
                         contains(getOsModule(set).intValue())));
 
     }
@@ -808,11 +819,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[0]version", equalTo(one.getVersion())))
                 .andExpect(jsonPath("[0]complete", equalTo(Boolean.TRUE)))
                 .andExpect(jsonPath("[0]requiredMigrationStep", equalTo(one.isRequiredMigrationStep())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("[0].modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(one.findFirstModuleByType(runtimeType).get().getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("[0].modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(one.findFirstModuleByType(appType).get().getId().intValue())))
-                .andExpect(jsonPath("[0].modules.[?(@.type==" + osType.getKey() + ")].id",
+                .andExpect(jsonPath("[0].modules.[?(@.type=='" + osType.getKey() + "')].id",
                         contains(one.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[1]name", equalTo(two.getName())))
                 .andExpect(jsonPath("[1]description", equalTo(two.getDescription())))
@@ -820,11 +831,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[1]type", equalTo(standardDsType.getKey())))
                 .andExpect(jsonPath("[1]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1]version", equalTo(two.getVersion())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("[1].modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(two.findFirstModuleByType(runtimeType).get().getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("[1].modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(two.findFirstModuleByType(appType).get().getId().intValue())))
-                .andExpect(jsonPath("[1].modules.[?(@.type==" + osType.getKey() + ")].id",
+                .andExpect(jsonPath("[1].modules.[?(@.type=='" + osType.getKey() + "')].id",
                         contains(two.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[1]requiredMigrationStep", equalTo(two.isRequiredMigrationStep())))
                 .andExpect(jsonPath("[2]name", equalTo(three.getName())))
@@ -833,11 +844,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[2]type", equalTo(standardDsType.getKey())))
                 .andExpect(jsonPath("[2]createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[2]version", equalTo(three.getVersion())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + runtimeType.getKey() + ")].id",
+                .andExpect(jsonPath("[2].modules.[?(@.type=='" + runtimeType.getKey() + "')].id",
                         contains(three.findFirstModuleByType(runtimeType).get().getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + appType.getKey() + ")].id",
+                .andExpect(jsonPath("[2].modules.[?(@.type=='" + appType.getKey() + "')].id",
                         contains(three.findFirstModuleByType(appType).get().getId().intValue())))
-                .andExpect(jsonPath("[2].modules.[?(@.type==" + osType.getKey() + ")].id",
+                .andExpect(jsonPath("[2].modules.[?(@.type=='" + osType.getKey() + "')].id",
                         contains(three.findFirstModuleByType(osType).get().getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.isRequiredMigrationStep()))).andReturn();
     }
@@ -1045,7 +1056,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // verify that the number of meta data entries has not changed
         // (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(distributionSetManagement
-                .findMetaDataByDistributionSetId(new PageRequest(0, Integer.MAX_VALUE), testDS.getId())
+                .findMetaDataByDistributionSetId(PageRequest.of(0, Integer.MAX_VALUE), testDS.getId())
                 .getTotalElements()).isEqualTo(metaData1.length());
 
     }

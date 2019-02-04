@@ -10,10 +10,6 @@ package org.eclipse.hawkbit.tenancy;
 
 /**
  * Interface for components that are aware of the application's current tenant.
- *
- *
- *
- *
  */
 public interface TenantAware {
 

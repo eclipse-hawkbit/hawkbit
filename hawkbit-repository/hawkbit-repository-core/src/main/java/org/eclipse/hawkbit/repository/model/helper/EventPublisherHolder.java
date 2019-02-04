@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
@@ -26,7 +26,7 @@ public final class EventPublisherHolder {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private BusProperties bus;
 
     private EventPublisherHolder() {
 
@@ -47,7 +47,7 @@ public final class EventPublisherHolder {
     }
 
     public String getApplicationId() {
-        return applicationContext.getId();
+        return bus.getId();
     }
 
 }

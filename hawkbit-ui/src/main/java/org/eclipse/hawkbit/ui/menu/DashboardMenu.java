@@ -310,8 +310,8 @@ public final class DashboardMenu extends CustomComponent {
     /**
      * Is a View available.
      *
-     * @return the accessibleViewsEmpty <true> no rights for any view <false> a
-     *         view is available
+     * @return the accessibleViewsEmpty <code>true</code> no rights for any view
+     *         <code>false</code> a view is available
      */
     public boolean isAccessibleViewsEmpty() {
         return accessibleViewsEmpty;
@@ -352,7 +352,7 @@ public final class DashboardMenu extends CustomComponent {
      *
      * @param viewName
      *            the view name
-     * @return <true> = denied, <false> = accessible
+     * @return <code>true</code> = denied, <code>false</code> = accessible
      */
     public boolean isAccessDenied(final String viewName) {
         final List<DashboardMenuItem> accessibleViews = getAccessibleViews();

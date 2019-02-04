@@ -178,6 +178,18 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * retrieves {@link Target}s where
+     * {@link JpaTarget#isRequestControllerAttributes()}.
+     * 
+     * @param pageReq
+     *            page parameter
+     *
+     * @return the found {@link Target}s
+     * 
+     */
+    Page<Target> findByRequestControllerAttributesIsTrue(Pageable pageable);
+
+    /**
      * Counts number of targets with given distribution set Id.
      *
      * @param distId
@@ -209,7 +221,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
-    List<JpaTarget> findAll(Iterable<Long> ids);
+    List<JpaTarget> findAllById(Iterable<Long> ids);
 
     /**
      * 

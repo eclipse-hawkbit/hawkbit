@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
+import org.springframework.cloud.stream.annotation.StreamMessageConverter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,14 +44,6 @@ import io.protostuff.Schema;
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
 @PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
 public class EventPublisherAutoConfiguration {
-
-    @Autowired
-    @Qualifier("asyncExecutor")
-    private Executor executor;
-
-    @Autowired
-    private TenantAware tenantAware;
-
     /**
      * Server internal event publisher that allows parallel event processing if
      * the event listener is marked as so.
@@ -58,7 +51,8 @@ public class EventPublisherAutoConfiguration {
      * @return publisher bean
      */
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-    public ApplicationEventMulticaster applicationEventMulticaster() {
+    ApplicationEventMulticaster applicationEventMulticaster(@Qualifier("asyncExecutor") final Executor executor,
+            final TenantAware tenantAware) {
         final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
                 tenantAware, applicationEventFilter());
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
@@ -72,7 +66,7 @@ public class EventPublisherAutoConfiguration {
      * @return the singleton instance of the {@link EventPublisherHolder}
      */
     @Bean
-    public EventPublisherHolder eventBusHolder() {
+    EventPublisherHolder eventBusHolder() {
         return EventPublisherHolder.getInstance();
     }
 
@@ -82,7 +76,7 @@ public class EventPublisherAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ApplicationEventFilter applicationEventFilter() {
+    ApplicationEventFilter applicationEventFilter() {
         return e -> false;
     }
 
@@ -144,6 +138,7 @@ public class EventPublisherAutoConfiguration {
          * @return the protostuff io message converter
          */
         @Bean
+        @StreamMessageConverter
         public MessageConverter busProtoBufConverter() {
             return new BusProtoStuffMessageConverter();
         }

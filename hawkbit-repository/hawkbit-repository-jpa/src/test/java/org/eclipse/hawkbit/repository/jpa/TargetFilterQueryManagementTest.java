@@ -85,7 +85,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(1234L, set.getId()),
+        verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(NOT_EXIST_IDL, set.getId()),
                 "TargetFilterQuery");
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), NOT_EXIST_IDL),
@@ -128,7 +128,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 entityFactory.targetFilterQuery().create().name("someOtherFilter").query("name==PendingTargets002"));
 
         final List<TargetFilterQuery> results = targetFilterQueryManagement
-                .findByRsql(new PageRequest(0, 10), "name==" + filterName).getContent();
+                .findByRsql(PageRequest.of(0, 10), "name==" + filterName).getContent();
         assertEquals("Search result should have 1 result", 1, results.size());
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery, results.get(0));
     }
@@ -137,7 +137,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Description("Test searching a target filter query with an invalid filter.")
     public void searchTargetFilterQueryInvalidField() {
         // Should throw an exception
-        targetFilterQueryManagement.findByRsql(new PageRequest(0, 10), "unknownField==testValue").getContent();
+        targetFilterQueryManagement.findByRsql(PageRequest.of(0, 10), "unknownField==testValue").getContent();
 
     }
 
@@ -372,17 +372,14 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         // check if find works with name filter
         verifyFindByDistributionSetAndRsql(distributionSet, "name==" + filterName, tfq2);
 
-        // check if find works with autoAssignActionType filter
-        verifyFindByDistributionSetAndRsql(distributionSet,
-                "autoAssignActionType==" + ActionType.SOFT.name().toLowerCase(), tfq);
-
         verifyFindForAllWithAutoAssignDs(tfq, tfq2);
     }
 
+    @Step
     private void verifyFindByDistributionSetAndRsql(final DistributionSet distributionSet, final String rsql,
             final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findByAutoAssignDSAndRsql(new PageRequest(0, 500), distributionSet.getId(), rsql);
+                .findByAutoAssignDSAndRsql(PageRequest.of(0, 500), distributionSet.getId(), rsql);
 
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
     }
@@ -396,9 +393,10 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 
+    @Step
     private void verifyFindForAllWithAutoAssignDs(final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findWithAutoAssignDS(new PageRequest(0, 500));
+                .findWithAutoAssignDS(PageRequest.of(0, 500));
 
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
     }

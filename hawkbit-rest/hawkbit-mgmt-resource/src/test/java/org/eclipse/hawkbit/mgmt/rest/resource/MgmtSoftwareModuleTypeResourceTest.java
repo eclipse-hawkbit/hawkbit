@@ -59,33 +59,34 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].name", contains(osType.getName())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].description",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].name", contains(osType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].description",
                         contains(osType.getDescription())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].maxAssignments", contains(1)))
-                .andExpect(jsonPath("$.content.[?(@.key==" + osType.getKey() + ")].key", contains("os")))
-                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].name",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].maxAssignments", contains(1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].key", contains("os")))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + runtimeType.getKey() + "')].name",
                         contains(runtimeType.getName())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].description",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + runtimeType.getKey() + "')].description",
                         contains(runtimeType.getDescription())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].maxAssignments", contains(1)))
-                .andExpect(jsonPath("$.content.[?(@.key==" + runtimeType.getKey() + ")].key", contains("runtime")))
-                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].name", contains(appType.getName())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].description",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + runtimeType.getKey() + "')].maxAssignments", contains(1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + runtimeType.getKey() + "')].key", contains("runtime")))
+                .andExpect(
+                        jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].name", contains(appType.getName())))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].description",
                         contains(appType.getDescription())))
-                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].maxAssignments",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].maxAssignments",
                         contains(Integer.MAX_VALUE)))
-                .andExpect(jsonPath("$.content.[?(@.key==" + appType.getKey() + ")].key", contains("application")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].id", contains(testType.getId().intValue())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].name", contains("TestName123")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].description", contains("Desc1234")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].createdBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].createdAt", contains(testType.getCreatedAt())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].lastModifiedBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].lastModifiedAt",
+                .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].key", contains("application")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].id", contains(testType.getId().intValue())))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].name", contains("TestName123")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdAt", contains(testType.getCreatedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedBy", contains("uploadTester")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedAt",
                         contains(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].maxAssignments", contains(5)))
-                .andExpect(jsonPath("$.content.[?(@.key==test123)].key", contains("test123")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].maxAssignments", contains(5)))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].key", contains("test123")))
                 .andExpect(jsonPath("$.total", equalTo(4)));
     }
 

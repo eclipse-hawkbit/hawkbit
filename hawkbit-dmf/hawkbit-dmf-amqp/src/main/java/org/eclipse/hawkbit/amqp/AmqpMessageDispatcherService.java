@@ -35,8 +35,8 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -140,7 +140,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                     .forEach(
                             module -> modules.put(module,
                                     softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                                            new PageRequest(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
+                                            PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
                                             .getContent()));
 
             targetManagement.getByControllerID(assignedEvent.getActions().keySet())

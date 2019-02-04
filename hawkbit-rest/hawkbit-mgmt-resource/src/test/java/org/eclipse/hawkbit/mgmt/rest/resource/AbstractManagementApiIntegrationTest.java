@@ -12,16 +12,23 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.eclipse.hawkbit.rest.RestConfiguration;
+import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-@SpringApplicationConfiguration(classes = { MgmtApiConfiguration.class })
+@ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
+        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 
     protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity,
@@ -41,13 +48,13 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
     protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity, final String arrayElement)
             throws Exception {
         return mvcResult -> {
-            jsonPath("$." + arrayElement + ".[?(@.controllerId==" + entity.getControllerId() + ")].createdBy",
+            jsonPath("$." + arrayElement + ".[?(@.controllerId=='" + entity.getControllerId() + "')].createdBy",
                     contains(entity.getCreatedBy())).match(mvcResult);
-            jsonPath("$." + arrayElement + ".[?(@.controllerId==" + entity.getControllerId() + ")].createdAt",
+            jsonPath("$." + arrayElement + ".[?(@.controllerId=='" + entity.getControllerId() + "')].createdAt",
                     contains(entity.getCreatedAt())).match(mvcResult);
-            jsonPath("$." + arrayElement + ".[?(@.controllerId==" + entity.getControllerId() + ")].lastModifiedBy",
+            jsonPath("$." + arrayElement + ".[?(@.controllerId=='" + entity.getControllerId() + "')].lastModifiedBy",
                     contains(entity.getLastModifiedBy())).match(mvcResult);
-            jsonPath("$." + arrayElement + ".[?(@.controllerId==" + entity.getControllerId() + ")].lastModifiedAt",
+            jsonPath("$." + arrayElement + ".[?(@.controllerId=='" + entity.getControllerId() + "')].lastModifiedAt",
                     contains(entity.getLastModifiedAt())).match(mvcResult);
         };
     }
@@ -104,13 +111,13 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
 
     protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity) throws Exception {
         return mvcResult -> {
-            jsonPath("$.[?(@.controllerId==" + entity.getControllerId() + ")].createdBy",
+            jsonPath("$.[?(@.controllerId=='" + entity.getControllerId() + "')].createdBy",
                     contains(entity.getCreatedBy())).match(mvcResult);
-            jsonPath("$.[?(@.controllerId==" + entity.getControllerId() + ")].createdAt",
+            jsonPath("$.[?(@.controllerId=='" + entity.getControllerId() + "')].createdAt",
                     contains(entity.getCreatedAt())).match(mvcResult);
-            jsonPath("$.[?(@.controllerId==" + entity.getControllerId() + ")].lastModifiedBy",
+            jsonPath("$.[?(@.controllerId=='" + entity.getControllerId() + "')].lastModifiedBy",
                     contains(entity.getLastModifiedBy())).match(mvcResult);
-            jsonPath("$.[?(@.controllerId==" + entity.getControllerId() + ")].lastModifiedAt",
+            jsonPath("$.[?(@.controllerId=='" + entity.getControllerId() + "')].lastModifiedAt",
                     contains(entity.getLastModifiedAt())).match(mvcResult);
         };
     }
@@ -119,8 +126,8 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return mvcResult -> {
             applyBaseEntityMatcherOnPagedResult(entity);
 
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].name", contains(entity.getName())).match(mvcResult);
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].description", contains(entity.getDescription()))
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')].name", contains(entity.getName())).match(mvcResult);
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')].description", contains(entity.getDescription()))
                     .match(mvcResult);
         };
     }
@@ -130,7 +137,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity);
 
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].version", contains(entity.getVersion())).match(mvcResult);
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')].version", contains(entity.getVersion())).match(mvcResult);
         };
     }
 
@@ -138,14 +145,14 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity);
 
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].colour", contains(entity.getColour())).match(mvcResult);
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')].colour", contains(entity.getColour())).match(mvcResult);
         };
     }
 
     protected static ResultMatcher applySelfLinkMatcherOnArrayResult(final BaseEntity entity, final String link)
             throws Exception {
         return mvcResult -> {
-            jsonPath("$.[?(@.id==" + entity.getId() + ")]._links.self.href", contains(link)).match(mvcResult);
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')]._links.self.href", contains(link)).match(mvcResult);
         };
     }
 
