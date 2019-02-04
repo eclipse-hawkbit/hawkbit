@@ -72,7 +72,7 @@ public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<TargetMetadata> findEnitity = targetManagement
-                .findMetaDataByControllerIdAndRsql(new PageRequest(0, 100), controllerId, rsqlParam);
+                .findMetaDataByControllerIdAndRsql(PageRequest.of(0, 100), controllerId, rsqlParam);
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);
