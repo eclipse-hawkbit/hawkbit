@@ -17,9 +17,7 @@
    </parent>
    <artifactId>hawkbit-test-report</artifactId>
    <name>hawkBit :: Test Report</name>
-
-   <packaging>pom</packaging>
-
+   
    <profiles>
       <profile>
          <id>generateTestReport</id>
@@ -61,9 +59,9 @@
                   <artifactId>maven-assembly-plugin</artifactId>
                   <configuration>
                      <descriptors>
-                        <descriptor>src/main/assembly/test-report.xml</descriptor>
+                        <descriptor>src/main/resources/assemblies/test-report.xml</descriptor>
                      </descriptors>
-                     <appendAssemblyId>false</appendAssemblyId>
+                     <appendAssemblyId>true</appendAssemblyId>
                   </configuration>
                   <executions>
                      <execution>
