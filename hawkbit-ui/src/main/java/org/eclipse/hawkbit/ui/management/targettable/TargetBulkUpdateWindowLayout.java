@@ -337,15 +337,15 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         minimizeButton.setEnabled(false);
     }
 
-    private String getFormattedCountLabelValue(final int succussfulUploadCount, final int failedUploadCount) {
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(
-                i18n.getMessage(UIMessageIdProvider.MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS, succussfulUploadCount));
-        stringBuilder.append("<br/><font color=RED>");
-        stringBuilder
+    private String getFormattedCountLabelValue(final int successfulUploadCount, final int failedUploadCount) {
+        final StringBuilder countLabelBuilder = new StringBuilder();
+        countLabelBuilder.append(
+                i18n.getMessage(UIMessageIdProvider.MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS, successfulUploadCount));
+        countLabelBuilder.append("<br/><font color=RED>");
+        countLabelBuilder
                 .append(i18n.getMessage(UIMessageIdProvider.MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL, failedUploadCount));
-        stringBuilder.append("</font>");
-        return stringBuilder.toString();
+        countLabelBuilder.append("</font>");
+        return countLabelBuilder.toString();
     }
 
     /**
