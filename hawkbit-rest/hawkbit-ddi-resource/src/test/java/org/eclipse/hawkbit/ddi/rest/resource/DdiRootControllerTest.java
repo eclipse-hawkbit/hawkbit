@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -79,6 +80,14 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private static final String TARGET_SCHEDULED_INSTALLATION_MSG = "Target scheduled installation.";
     @Autowired
     private HawkbitSecurityProperties securityProperties;
+
+    @Test
+    @Description("Ensure that the root poll resource is available as CBOR")
+    public void rootPollResourceCbor() throws Exception {
+        mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+                .accept(DdiRestConstants.MEDIA_TYPE_CBOR)).andDo(MockMvcResultPrinter.print())
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR_UTF8)).andExpect(status().isOk());
+    }
 
     @Test
     @Description("Ensures that the API returns JSON when no Accept header is specified by the client.")

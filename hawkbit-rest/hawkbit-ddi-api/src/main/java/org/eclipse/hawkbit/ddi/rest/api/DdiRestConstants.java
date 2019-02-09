@@ -50,6 +50,19 @@ public final class DdiRestConstants {
      */
     public static final String NO_ACTION_HISTORY = "0";
 
+    /**
+     * Media type for CBOR content. Unfortunately, there is no other constant we
+     * can reuse - even the Jackson data converter simply hardcodes this.
+     */
+    public static final String MEDIA_TYPE_CBOR = "application/cbor";
+
+    /**
+     * Media type for CBOR content with strings encoded as UTF-8. Technically
+     * redundant since CBOR always uses UTF-8, but Spring will append it
+     * regardless.
+     */
+    public static final String MEDIA_TYPE_CBOR_UTF8 = "application/cbor;charset=UTF-8";
+
     private DdiRestConstants() {
         // constant class, private constructor.
     }

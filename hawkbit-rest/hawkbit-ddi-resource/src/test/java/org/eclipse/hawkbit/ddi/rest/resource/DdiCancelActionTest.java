@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -33,6 +34,8 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.integration.json.JsonPathUtils;
+import org.springframework.test.util.JsonPathExpectationsHelper;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -44,6 +47,32 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Cancel Action Resource")
 public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
+
+    @Test
+    @Description("Tests that the cancel action resource can be used with CBOR.")
+    public void cancelActionCbor() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        final Target savedTarget = testdataFactory.createTarget();
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+                .get(0);
+        final Action cancelAction = deploymentManagement.cancelAction(actionId);
+
+        // check that we can get the cancel action as CBOR
+        byte[] result = mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
+                + cancelAction.getId(), tenantAware.getCurrentTenant()).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR_UTF8))
+                .andReturn().getResponse().getContentAsByteArray();
+        assertThat(JsonPathUtils.<String>evaluate(cborToJson(result), "$.id")).isEqualTo(String.valueOf(cancelAction.getId()));
+        assertThat(JsonPathUtils.<String>evaluate(cborToJson(result), "$.cancelAction.stopId")).isEqualTo(String.valueOf(actionId));
+
+        // and submit feedback as CBOR
+        mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
+                + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant()).content(
+                        jsonToCbor(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "proceeding")))
+                        .contentType(DdiRestConstants.MEDIA_TYPE_CBOR).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+    }
 
     @Test
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")
