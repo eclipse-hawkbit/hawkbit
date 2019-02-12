@@ -6,6 +6,7 @@ com.esotericsoftware:minlog:jar:1.3.0:compile
 com.fasterxml.jackson.core:jackson-annotations:jar:2.9.0:compile
 com.fasterxml.jackson.core:jackson-core:jar:2.9.8:compile
 com.fasterxml.jackson.core:jackson-databind:jar:2.9.8:compile
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:jar:2.9.8:compile
 com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.9.8:compile
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.9.8:compile
 com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.9.8:compile
