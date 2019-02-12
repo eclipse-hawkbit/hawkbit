@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
@@ -48,10 +49,11 @@ import io.qameta.allure.Story;
 @Story("Config Data Resource")
 public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
-    private static final String KEY_TOO_LONG = "123456789012345678901234567890123";
-    private static final String KEY_VALID = "12345678901234567890123456789012";
-    private static final String VALUE_TOO_LONG = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-    private static final String VALUE_VALID = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+    private static final String KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1);
+    private static final String KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE);
+    private static final String VALUE_TOO_LONG = generateRandomStringWithLength(
+            Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1);
+    private static final String VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE);
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
@@ -199,6 +201,20 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
+    }
+
+    private static String generateRandomStringWithLength(final int length) {
+        final StringBuilder randomStringBuilder = new StringBuilder(length);
+        final Random rand = new Random();
+        final int lowercaseACode = 97;
+        final int lowercaseZCode = 122;
+
+        for (int i = 0; i < length; i++) {
+            final char randomCharacter = (char) (rand.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
+            randomStringBuilder.append(randomCharacter);
+        }
+
+        return randomStringBuilder.toString();
     }
 
     @Step
