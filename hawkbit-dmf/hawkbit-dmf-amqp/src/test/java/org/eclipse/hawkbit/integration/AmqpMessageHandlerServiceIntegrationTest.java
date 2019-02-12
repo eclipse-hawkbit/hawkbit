@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -795,10 +796,10 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AmqpServiceIntegra
         // setup
         final String target = "ControllerAttributeTestTarget";
         registerAndAssertTargetWithExistingTenant(target);
-        final String keyTooLong = "123456789012345678901234567890123";
-        final String keyValid = "12345678901234567890123456789012";
-        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+        final String keyTooLong = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1);
+        final String keyValid = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE);
+        final String valueTooLong = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1);
+        final String valueValid = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE);
 
         sendUpdateAttributesMessageWithGivenAttributes(target, keyTooLong, valueValid);
 

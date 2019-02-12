@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -431,5 +432,19 @@ public abstract class AbstractIntegrationTest {
         final Map<String, String> maintenanceWindowMap = getMaintenanceWindow(schedule, duration, timezone);
         maintenanceWindowMap.put("nextStartAt", String.valueOf(nextStartAt));
         return maintenanceWindowMap;
+    }
+
+    protected static String generateRandomStringWithLength(final int length) {
+        final StringBuilder randomStringBuilder = new StringBuilder(length);
+        final Random rand = new Random();
+        final int lowercaseACode = 97;
+        final int lowercaseZCode = 122;
+
+        for (int i = 0; i < length; i++) {
+            final char randomCharacter = (char) (rand.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
+            randomStringBuilder.append(randomCharacter);
+        }
+
+        return randomStringBuilder.toString();
     }
 }
