@@ -324,11 +324,6 @@ public final class SPUIDefinitions {
     public static final String EDIT = "Edit";
 
     /**
-     * TARGET_FILTER_MANAGEMENT - header caption .
-     */
-    public static final String TARGET_FILTER_LIST_HEADER_CAPTION = "Custom Filters";
-
-    /**
      * Bulk upload DS combo style.
      */
     public static final String BULK_UPLOD_DS_COMBO_STYLE = "bulk-upload-ds-combo";
