@@ -40,7 +40,7 @@ public class VaadinMessageSource implements Serializable {
 
     /**
      * Tries to resolve the message based on
-     * {@link HawkbitCommonUtil#getLocale()}. Returns message code if fitting
+     * {@link HawkbitCommonUtil#getCurrentLocale()}. Returns message code if fitting
      * message could not be found.
      *
      * @param code
@@ -52,11 +52,11 @@ public class VaadinMessageSource implements Serializable {
      * @return the resolved message, or the message code if the lookup fails.
      *
      * @see MessageSource#getMessage(String, Object[], Locale)
-     * @see HawkbitCommonUtil#getLocale()
+     * @see HawkbitCommonUtil#getCurrentLocale()
      */
     public String getMessage(final String code, final Object... args) {
         try {
-            return source.getMessage(code, args, HawkbitCommonUtil.getLocale());
+            return source.getMessage(code, args, HawkbitCommonUtil.getCurrentLocale());
         } catch (final NoSuchMessageException ex) {
             LOG.error("Failed to retrieve message!", ex);
             return code;

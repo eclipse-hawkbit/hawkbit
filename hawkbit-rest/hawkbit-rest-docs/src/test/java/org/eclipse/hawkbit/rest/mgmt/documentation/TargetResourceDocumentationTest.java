@@ -46,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
@@ -157,8 +158,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void deleteTarget() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
 
-        mockMvc.perform(
-                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId()))
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print()).andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
@@ -171,8 +171,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldTarget(false)));
     }
 
@@ -186,8 +185,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                 .contentType(MediaType.APPLICATION_JSON_UTF8).content(targetAsJson)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(optionalRequestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                                 optionalRequestFieldWithPath("description")
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
@@ -206,12 +204,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void getActionsFromTarget() throws Exception {
         generateActionForTarget(targetId);
 
-        mockMvc.perform(get(
-                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
-                targetId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+        mockMvc.perform(
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
+                        targetId))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -238,12 +236,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void getActionsFromTargetWithMaintenanceWindow() throws Exception {
         generateActionForTarget(targetId, true, false, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
 
-        mockMvc.perform(get(
-                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
-                targetId)).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+        mockMvc.perform(
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
+                        targetId))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -405,10 +403,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final Map<String, Object> body = new HashMap<>();
         body.put("forceType", "forced");
 
-        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, actionId)
-                        .content(this.objectMapper.writeValueAsString(body))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+        mockMvc.perform(
+                put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
+                        + "/{actionId}", targetId, actionId).content(this.objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -439,9 +437,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void getStatusFromAction() throws Exception {
         final Action action = generateActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS,
-                targetId, action.getId())).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+        mockMvc.perform(
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
+                        + "/{actionId}/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS, targetId, action.getId()))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -484,8 +483,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
 
@@ -497,8 +495,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final long forceTime = System.currentTimeMillis();
         final String body = new JSONObject().put("id", set.getId()).put("type", "timeforced")
-                .put("forcetime", forceTime).put("maintenanceWindow",
-                        getMaintenanceWindow(getTestSchedule(10), getTestDuration(10), getTestTimeZone()))
+                .put("forcetime", forceTime)
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone()))
                 .toString();
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
@@ -506,8 +505,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(requestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
@@ -541,12 +539,11 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         controllerManagement.updateControllerAttributes(targetId, knownControllerAttrs, null);
 
         // test query target over rest resource
-        mockMvc.perform(
-                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/attributes", target.getName()))
+        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/attributes", target.getName()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.a", equalTo("1"))).andExpect(jsonPath("$.b", equalTo("2")))
-                .andDo(this.document.document(pathParameters(
-                        parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 
     @Test
@@ -558,8 +555,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                 + MgmtRestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET, target.getName())).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
 
@@ -576,12 +572,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                     entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
-                testTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+        mockMvc.perform(
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
@@ -604,11 +600,11 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                     entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
-                testTarget.getControllerId()).param("offset", "1").param("limit", "2").param("sort", "key:DESC")
-                        .param("q", "key==known*"))
+        mockMvc.perform(
+                get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId())
+                        .param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q", "key==known*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
                         requestParameters(
                                 parameterWithName("limit").attributes(key("type").value("query"))
@@ -711,14 +707,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
         mockMvc.perform(
-                post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
-                testTarget.getControllerId()).contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .content(jsonArray.toString()))
+                post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(APPLICATION_JSON_HAL_UTF))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(
-                        pathParameters(
-                                parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(requestFieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),
                                 optionalRequestFieldWithPath("[]value")
                                         .description(MgmtApiModelProperties.META_DATA_VALUE))));
@@ -763,7 +757,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
             final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) throws Exception {
-        final PageRequest pageRequest = new PageRequest(0, 1, Direction.ASC, ActionStatusFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 1, Direction.ASC, ActionStatusFields.ID.getFieldName());
 
         createTargetByGivenNameWithAttributes(knownControllerId, inSync, timeforced, createDistributionSet(),
                 maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);

@@ -42,8 +42,20 @@
                <artifactId>spring-boot-starter-tomcat</artifactId>
             </exclusion>
             <exclusion>
-               <groupId>com.esotericsoftware</groupId>
-               <artifactId>kryo-shaded</artifactId>
+               <groupId>org.springframework.security</groupId>
+               <artifactId>spring-security-rsa</artifactId>
+            </exclusion>
+            <exclusion>
+               	<groupId>org.objenesis</groupId>
+      			<artifactId>objenesis</artifactId>
+            </exclusion>
+            <exclusion>
+               	<groupId>org.apache.tomcat.embed</groupId>
+  				<artifactId>tomcat-embed-el</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-function-context</artifactId>
             </exclusion>
          </exclusions>
       </dependency>

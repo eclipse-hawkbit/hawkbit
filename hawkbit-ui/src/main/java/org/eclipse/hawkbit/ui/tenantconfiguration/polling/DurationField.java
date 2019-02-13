@@ -143,7 +143,7 @@ public class DurationField extends DateField {
      * Sets the duration value
      * 
      * @param duration
-     *            duration, only values <= 23:59:59 are excepted
+     *            duration, only values less then 23:59:59 are excepted
      */
     public void setDuration(@NotNull final Duration duration) {
         if (duration.compareTo(MAXIMUM_DURATION) > 0) {

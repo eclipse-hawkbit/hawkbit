@@ -148,19 +148,19 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
             firstPageDistributionSets = getDistributionSetManagement()
                     .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
-                            new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
+                            PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
                             pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
-                    .findByCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), true);
+                    .findByCompleted(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
 
             firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
 
         }
         final long size = firstPageDistributionSets.getTotalElements();

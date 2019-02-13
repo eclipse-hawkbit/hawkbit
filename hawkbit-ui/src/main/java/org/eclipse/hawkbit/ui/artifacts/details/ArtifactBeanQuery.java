@@ -95,7 +95,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
         long size = 0;
         if (baseSwModuleId != null) {
             firstPagetArtifacts = getArtifactManagement()
-                    .findBySoftwareModule(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
+                    .findBySoftwareModule(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
             size = firstPagetArtifacts.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

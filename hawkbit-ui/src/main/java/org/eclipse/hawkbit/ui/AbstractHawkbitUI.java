@@ -8,11 +8,6 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import java.util.List;
-import java.util.Locale;
-
-import javax.servlet.http.Cookie;
-
 import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
@@ -21,7 +16,6 @@ import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +33,6 @@ import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -85,7 +78,8 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
     protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
             final SpringViewProvider viewProvider, final ApplicationContext context, final DashboardMenu dashboardMenu,
-            final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton, final UiProperties uiProperties) {
+            final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton,
+            final UiProperties uiProperties) {
         this.pushStrategy = pushStrategy;
         this.eventBus = eventBus;
         this.viewProvider = viewProvider;
@@ -120,6 +114,8 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
         final HorizontalLayout rootLayout = new HorizontalLayout();
         rootLayout.setSizeFull();
+
+        setLocale(HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), getUI()));
 
         dashboardMenu.init();
         dashboardMenu.setResponsive(true);
@@ -165,16 +161,12 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         navigator.addProvider(new ManagementViewProvider());
         setNavigator(navigator);
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
-        // set locale is required for I18N class also, to get the locale from
-        // cookie
-        final String locale = getLocaleId(uiProperties.getLocalization().getAvailableLocals());
-        setLocale(new Locale(locale));
 
         if (UI.getCurrent().getErrorHandler() == null) {
             UI.getCurrent().setErrorHandler(new HawkbitUIErrorHandler());
         }
 
-        LOG.info("Current locale of the application is : {}", HawkbitCommonUtil.getLocale());
+        LOG.info("Current locale of the application is : {}", getLocale());
     }
 
     private Panel buildContent() {
@@ -205,50 +197,6 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         return cssLayout;
     }
 
-    /**
-     * Get Specific Locale.
-     *
-     * @param availableLocalesInApp
-     *            as set
-     * @return String as preferred locale
-     */
-    private String getLocaleId(final List<String> availableLocalesInApp) {
-        final String[] localeChain = getLocaleChain();
-        String spLocale = uiProperties.getLocalization().getDefaultLocal();
-        if (null != localeChain) {
-            // Find best matching locale
-            for (final String localeId : localeChain) {
-                if (availableLocalesInApp.contains(localeId)) {
-                    spLocale = localeId;
-                    break;
-                }
-            }
-        }
-        return spLocale;
-    }
-
-    /**
-     * Get Locale for i18n.
-     *
-     * @return String as locales
-     */
-    private static String[] getLocaleChain() {
-        String[] localeChain = null;
-        // Fetch all cookies from the request
-        final Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
-        if (cookies == null) {
-            return localeChain;
-        }
-
-        for (final Cookie c : cookies) {
-            if (c.getName().equals(SPUIDefinitions.COOKIE_NAME) && !c.getValue().isEmpty()) {
-                localeChain = c.getValue().split("#");
-                break;
-            }
-        }
-        return localeChain;
-    }
-
     private class ManagementViewProvider implements ViewProvider {
 
         private static final long serialVersionUID = 1L;
@@ -273,7 +221,5 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
             }
             return viewName;
         }
-
     }
-
 }

@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -43,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,18 +56,22 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(MgmtSoftwareModuleResource.class);
 
-    @Autowired
-    private ArtifactManagement artifactManagement;
+    private final ArtifactManagement artifactManagement;
 
-    @Autowired
-    private SoftwareModuleManagement softwareModuleManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement,
+            final SoftwareModuleManagement softwareModuleManagement, final EntityFactory entityFactory) {
+        this.artifactManagement = artifactManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestParam("file") final MultipartFile file,
+            @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
             @RequestParam(value = "sha1sum", required = false) final String sha1Sum) {

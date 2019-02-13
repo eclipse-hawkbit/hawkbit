@@ -37,9 +37,8 @@ public final class UserDetailsFormatter {
 
     /**
      * Load user details by the user name and format the user name to max 100
-     * characters.
-     * 
-     * @see {@link UserDetailsFormatter#loadAndFormatUsername(String, int)}
+     * characters. See
+     * {@link UserDetailsFormatter#loadAndFormatUsername(String, int)}.
      * 
      * @param username
      *            the user name

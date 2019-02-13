@@ -38,7 +38,7 @@ public interface FieldNameProvider {
      *
      * @param propertyField
      *            the given field
-     * @return <true> contains <false> contains not
+     * @return <code>true</code> contains <code>false</code> contains not
      */
     default boolean containsSubEntityAttribute(final String propertyField) {
 
@@ -76,7 +76,7 @@ public interface FieldNameProvider {
     /**
      * Is the entity field a {@link Map}.
      *
-     * @return <true> is a map <false> is not a map
+     * @return <code>true</code> is a map <code>false</code> is not a map
      */
     default boolean isMap() {
         return false;

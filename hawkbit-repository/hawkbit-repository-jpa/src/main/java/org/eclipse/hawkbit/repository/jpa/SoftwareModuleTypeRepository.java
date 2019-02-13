@@ -84,5 +84,5 @@ public interface SoftwareModuleTypeRepository
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaSoftwareModuleType d WHERE d.id IN ?1")
-    List<JpaSoftwareModuleType> findAll(Iterable<Long> ids);
+    List<JpaSoftwareModuleType> findAllById(Iterable<Long> ids);
 }

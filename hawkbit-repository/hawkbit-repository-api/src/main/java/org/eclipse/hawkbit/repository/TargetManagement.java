@@ -631,6 +631,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 
     /**
@@ -642,6 +643,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     void requestControllerAttributes(@NotEmpty String controllerId);
 
     /**
@@ -652,7 +654,32 @@ public interface TargetManagement {
      * @return {@code true}: update of controller attributes triggered.
      *         {@code false}: update of controller attributes not requested.
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     boolean isControllerAttributesRequested(@NotEmpty String controllerId);
+
+    /**
+     * Retrieves {@link Target}s where
+     * {@link #isControllerAttributesRequested(String)}.
+     * 
+     * @param pageReq
+     *            page parameter
+     *
+     * @return the found {@link Target}s
+     * 
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageReq);
+
+    /**
+     * Verifies that {@link Target} with given controller ID exists in the
+     * repository.
+     * 
+     * @param controllerId
+     *            of target
+     * @return {@code true} if target with given ID exists
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
      * Creates a list of target meta data entries.

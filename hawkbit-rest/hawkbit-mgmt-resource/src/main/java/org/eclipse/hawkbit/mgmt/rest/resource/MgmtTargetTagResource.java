@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,14 +48,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetTagResource.class);
 
-    @Autowired
-    private TargetTagManagement tagManagement;
+    private final TargetTagManagement tagManagement;
 
-    @Autowired
-    private TargetManagement targetManagement;
+    private final TargetManagement targetManagement;
 
-    @Autowired
-    private EntityFactory entityFactory;
+    private final EntityFactory entityFactory;
+
+    MgmtTargetTagResource(final TargetTagManagement tagManagement, final TargetManagement targetManagement,
+            final EntityFactory entityFactory) {
+        this.tagManagement = tagManagement;
+        this.targetManagement = targetManagement;
+        this.entityFactory = entityFactory;
+    }
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
@@ -131,7 +134,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(targetManagement
-                .findByTag(new PageRequest(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
+                .findByTag(PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
                 .getContent()));
     }
 

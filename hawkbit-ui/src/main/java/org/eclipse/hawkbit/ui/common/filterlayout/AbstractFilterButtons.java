@@ -214,9 +214,11 @@ public abstract class AbstractFilterButtons extends Table {
         final Long id = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
         final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         final String desc = (String) item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue() != null
-                ? item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue().toString() : null;
+                ? item.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue().toString()
+                : null;
         final String color = (String) item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue() != null
-                ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString() : DEFAULT_GREEN;
+                ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString()
+                : DEFAULT_GREEN;
         final Button typeButton = createFilterButton(id, name, desc, color, itemId);
         typeButton.addClickListener(filterButtonClickBehaviour::processFilterButtonClick);
 

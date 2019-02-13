@@ -15,9 +15,10 @@ import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatistics
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * System management capabilities by REST.
@@ -33,7 +34,7 @@ public interface MgmtSystemManagementRestApi {
      *            to delete
      * @return HttpStatus.OK
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/tenants/{tenant}")
+    @DeleteMapping(value = "/tenants/{tenant}")
     ResponseEntity<Void> deleteTenant(@PathVariable("tenant") String tenant);
 
     /**
@@ -42,8 +43,7 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return system usage statistics
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/usage", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/usage", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats();
 
     /**
@@ -51,8 +51,7 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of caches for all tenants
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/caches", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/caches", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Collection<MgmtSystemCache>> getCaches();
 
     /**
@@ -60,7 +59,7 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of cache names which has been invalidated
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/caches")
+    @DeleteMapping(value = "/caches")
     ResponseEntity<Collection<String>> invalidateCaches();
 
 }

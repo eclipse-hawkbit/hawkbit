@@ -57,7 +57,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     private static final long serialVersionUID = 1L;
 
     private final TargetTagToken targetTagToken;
-    
+
     private final TargetMetadataDetailsLayout targetMetadataTable;
 
     private final TargetAddUpdateWindowLayout targetAddUpdateWindowLayout;
@@ -84,14 +84,12 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, managementUIState,
                 tagManagement, targetManagement);
         this.targetAddUpdateWindowLayout = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus,
-                uiNotification,
-                entityFactory, targetTable);
+                uiNotification, entityFactory, targetTable);
         this.uiNotification = uiNotification;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.targetMetadataPopupLayout = targetMetadataPopupLayout;
-        this.targetMetadataTable = new TargetMetadataDetailsLayout(i18n, targetManagement,
-                targetMetadataPopupLayout);
+        this.targetMetadataTable = new TargetMetadataDetailsLayout(i18n, targetManagement, targetMetadataPopupLayout);
         addDetailsTab();
         restoreState();
     }

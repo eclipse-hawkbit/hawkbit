@@ -20,7 +20,7 @@ public final class FileStreamingFailedException extends AbstractServerRtExceptio
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
+     * {@link SpServerError#SP_ARTIFACT_LOAD_FAILED} error.
      */
     public FileStreamingFailedException() {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED);

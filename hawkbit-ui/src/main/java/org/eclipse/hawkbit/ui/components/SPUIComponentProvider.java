@@ -236,8 +236,8 @@ public final class SPUIComponentProvider {
     }
 
     /**
-     * Create label which represents the
-     * {@link BaseEntity#getLastModifiedBy()()} by user name
+     * Create label which represents the {@link BaseEntity#getLastModifiedBy()}
+     * by user name
      *
      * @param i18n
      *            the i18n

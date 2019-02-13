@@ -16,19 +16,19 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  */
-@Component("thresholdRolloutGroupErrorCondition")
 public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditionEvaluator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupErrorCondition.class);
 
-    @Autowired
-    private ActionRepository actionRepository;
+    private final ActionRepository actionRepository;
+
+    public ThresholdRolloutGroupErrorCondition(final ActionRepository actionRepository) {
+        this.actionRepository = actionRepository;
+    }
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {

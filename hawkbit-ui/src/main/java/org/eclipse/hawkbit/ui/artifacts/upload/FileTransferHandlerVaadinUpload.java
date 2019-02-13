@@ -89,7 +89,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
                         fileUploadId);
                 interruptUploadDueToIllegalFilename();
                 event.getUpload().interruptUpload();
-            }else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
+            } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
                 LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
                 interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();

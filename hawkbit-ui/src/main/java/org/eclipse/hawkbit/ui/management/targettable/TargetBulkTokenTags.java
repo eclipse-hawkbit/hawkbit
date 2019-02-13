@@ -29,8 +29,9 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     private static final int MAX_TAGS = 500;
 
-    TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n, final UINotification uinotification,
-            final UIEventBus eventBus, final ManagementUIState managementUIState, final TargetTagManagement tagManagement) {
+    TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n,
+            final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
+            final TargetTagManagement tagManagement) {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }
 
@@ -76,7 +77,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     protected void populateContainer() {
         container.removeAllItems();
         tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAll(new PageRequest(0, MAX_TAGS))) {
+        for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
 

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -119,6 +120,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     @Override
     protected void init(final VaadinRequest request) {
+        setLocale(HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), getUI()));
         SpringContextHelper.setContext(context);
 
         params = UriComponentsBuilder.fromUri(Page.getCurrent().getLocation()).build().getQueryParams();
@@ -289,8 +291,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void buildSignInButton() {
-        final String caption = isDemo
-                ? i18n.getMessage("button.login.agreeandsignin")
+        final String caption = isDemo ? i18n.getMessage("button.login.agreeandsignin")
                 : i18n.getMessage("button.login.signin");
 
         signIn = new Button(caption);
@@ -306,7 +307,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         password.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         password.setId("login-password");
-        if(isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
+        if (isDemo && !uiProperties.getDemo().getPassword().isEmpty()) {
             password.setValue(uiProperties.getDemo().getPassword());
         }
     }
@@ -317,7 +318,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         username.addStyleName(
                 ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         username.setId("login-username");
-        if(isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
+        if (isDemo && !uiProperties.getDemo().getUser().isEmpty()) {
             username.setValue(uiProperties.getDemo().getUser());
         }
     }

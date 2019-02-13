@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
@@ -44,7 +44,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Entity Events")
-@SpringApplicationConfiguration(classes = RepositoryTestConfiguration.class)
+@SpringBootTest(classes = { RepositoryTestConfiguration.class })
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired

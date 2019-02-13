@@ -44,8 +44,7 @@ public class TargetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
      * @param targetMetadataPopupLayout
      *            the target metadata popup layout
      */
-    public TargetMetadataDetailsLayout(final VaadinMessageSource i18n,
-            final TargetManagement targetManagement,
+    public TargetMetadataDetailsLayout(final VaadinMessageSource i18n, final TargetManagement targetManagement,
             final TargetMetadataPopupLayout targetMetadataPopupLayout) {
         super(i18n);
         this.targetManagement = targetManagement;

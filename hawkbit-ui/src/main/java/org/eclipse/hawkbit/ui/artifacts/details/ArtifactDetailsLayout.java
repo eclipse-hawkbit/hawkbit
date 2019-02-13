@@ -155,6 +155,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private Optional<SoftwareModule> findSelectedSoftwareModule() {
         final Optional<Long> selectedBaseSwModuleId = artifactUploadState.getSelectedBaseSwModuleId();
+
         if (selectedBaseSwModuleId.isPresent()) {
             return softwareModuleManagement.get(selectedBaseSwModuleId.get());
         }
@@ -281,9 +282,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.getMessage("caption.delete.artifact.confirmbox"),
-                i18n.getMessage("message.delete.artifact", new Object[] { fileName }),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
-                ok -> {
+                i18n.getMessage("message.delete.artifact", fileName), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok) {
                         artifactManagement.delete(id);
                         uINotification.displaySuccess(i18n.getMessage("message.artifact.deleted", fileName));
@@ -297,8 +297,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void setTableColumnDetails(final Table table) {
 
-        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage("upload.file.name"));
-        table.setColumnHeader(SIZE, i18n.getMessage("upload.size"));
+        table.setColumnHeader(PROVIDED_FILE_NAME, i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_FILENAME));
+        table.setColumnHeader(SIZE, i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_FILESIZE_BYTES));
         if (fullWindowMode) {
             table.setColumnHeader(SHA1HASH, i18n.getMessage("upload.sha1"));
             table.setColumnHeader(MD5HASH, i18n.getMessage("upload.md5"));

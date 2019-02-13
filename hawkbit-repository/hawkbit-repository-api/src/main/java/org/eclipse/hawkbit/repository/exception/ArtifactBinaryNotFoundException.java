@@ -25,7 +25,7 @@ public final class ArtifactBinaryNotFoundException extends AbstractServerRtExcep
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_REST_BODY_NOT_READABLE} error.
+     * {@link SpServerError#SP_ARTIFACT_LOAD_FAILED} error.
      */
     public ArtifactBinaryNotFoundException() {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED);

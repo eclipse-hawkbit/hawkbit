@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
-import org.eclipse.hawkbit.repository.model.EntityInterceptor;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.After;

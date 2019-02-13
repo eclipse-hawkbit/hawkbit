@@ -83,12 +83,12 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         if (startIndex == 0) {
             if (firstPageActions == null) {
                 firstPageActions = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
-                        new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+                        PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
             }
             actionBeans = firstPageActions;
         } else {
             actionBeans = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
-                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         }
         return createProxyActions(actionBeans);
     }

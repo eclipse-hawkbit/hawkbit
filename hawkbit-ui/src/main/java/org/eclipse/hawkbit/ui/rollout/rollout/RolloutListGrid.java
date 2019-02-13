@@ -669,8 +669,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private StatusFontIcon createDeleteButtonMetadata(final RolloutStatus rolloutStatus) {
         final boolean isDisabled = hasToBeDisabled(rolloutStatus, DELETE_COPY_BUTTON_ENABLED);
-        return new StatusFontIcon(FontAwesome.TRASH_O, null,
-                i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE),
+        return new StatusFontIcon(FontAwesome.TRASH_O, null, i18n.getMessage(UIMessageIdProvider.TOOLTIP_DELETE),
                 UIComponentIdProvider.ROLLOUT_DELETE_BUTTON_ID, isDisabled);
     }
 

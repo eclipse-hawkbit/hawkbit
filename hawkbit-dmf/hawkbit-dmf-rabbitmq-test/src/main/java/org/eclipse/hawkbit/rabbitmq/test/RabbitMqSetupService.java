@@ -26,8 +26,9 @@ import com.rabbitmq.http.client.domain.UserPermissions;
  * Creates and deletes a new virtual host if the rabbit mq management api is
  * available.
  * 
- *
  */
+// exception squid:S2068 - Test instance passwd
+@SuppressWarnings("squid:S2068")
 public class RabbitMqSetupService {
 
     private static final String GUEST = "guest";
@@ -44,7 +45,7 @@ public class RabbitMqSetupService {
 
     private String password;
 
-    public RabbitMqSetupService(RabbitProperties properties) {
+    public RabbitMqSetupService(final RabbitProperties properties) {
         hostname = properties.getHost();
         username = properties.getUsername();
         if (StringUtils.isEmpty(username)) {
@@ -118,7 +119,7 @@ public class RabbitMqSetupService {
     static class AlivenessException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public AlivenessException(String hostname) {
+        public AlivenessException(final String hostname) {
             super("Aliveness test failed for " + hostname
                     + ":15672 guest/quest; rabbit mq management api not available");
         }

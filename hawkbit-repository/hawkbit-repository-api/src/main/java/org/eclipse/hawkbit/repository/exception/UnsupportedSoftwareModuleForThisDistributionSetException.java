@@ -16,17 +16,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Thrown if user tries to add a {@link SoftwareModule} to a
- * {@link DistributionSet} that is not defined by< the
+ * {@link DistributionSet} that is not defined by the
  * {@link DistributionSetType}.
- *
- *
- *
- *
  */
 public class UnsupportedSoftwareModuleForThisDistributionSetException extends AbstractServerRtException {
-    /**
-    *
-    */
+
     private static final long serialVersionUID = 1L;
 
     /**

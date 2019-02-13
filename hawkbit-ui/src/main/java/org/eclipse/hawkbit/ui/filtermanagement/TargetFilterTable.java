@@ -200,8 +200,8 @@ public class TargetFilterTable extends Table {
                          * of the deleted custom filter.
                          */
 
-                        notification.displaySuccess(
-                                i18n.getMessage("message.delete.filter.success", new Object[] { deletedFilterName }));
+                        notification
+                                .displaySuccess(i18n.getMessage("message.delete.filter.success", deletedFilterName));
                         refreshContainer();
                     }
                 });

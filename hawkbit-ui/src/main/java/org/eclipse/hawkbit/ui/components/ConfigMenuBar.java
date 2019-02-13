@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -101,13 +100,16 @@ public class ConfigMenuBar extends MenuBar {
 
     private void addMenuItems() {
         if (createPermission) {
-            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_CREATE, FontAwesome.PLUS, addButtonCommand);
+            config.addItem(i18n.getMessage(UIMessageIdProvider.CAPTION_CONFIG_CREATE), FontAwesome.PLUS,
+                    addButtonCommand);
         }
         if (updatePermission) {
-            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_UPDATE, FontAwesome.EDIT, updateButtonCommand);
+            config.addItem(i18n.getMessage(UIMessageIdProvider.CAPTION_CONFIG_EDIT), FontAwesome.EDIT,
+                    updateButtonCommand);
         }
         if (deletePermission) {
-            config.addItem(UIComponentIdProvider.CONFIG_MENU_BAR_DELETE, FontAwesome.TRASH_O, deleteButtonCommand);
+            config.addItem(i18n.getMessage(UIMessageIdProvider.CAPTION_CONFIG_DELETE), FontAwesome.TRASH_O,
+                    deleteButtonCommand);
         }
     }
 

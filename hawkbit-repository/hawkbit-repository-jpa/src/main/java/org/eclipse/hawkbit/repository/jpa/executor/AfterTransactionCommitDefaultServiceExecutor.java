@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -22,7 +21,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * A Service which calls register runnable. This runnables will executed after a
  * successful spring transaction commit.The class is thread safe.
  */
-@Service
 public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSynchronizationAdapter
         implements AfterTransactionCommitExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AfterTransactionCommitDefaultServiceExecutor.class);

@@ -61,8 +61,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
  *            M is the metadata
  * 
  */
-public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M extends MetaData>
-        extends CustomComponent {
+public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M extends MetaData> extends CustomComponent {
 
     private static final String DELETE_BUTTON = "DELETE_BUTTON";
 
@@ -136,13 +135,13 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
      *            entity for which metadata data is displayed
      * @param metaDatakey
      *            metadata key to be selected
-     * @return @link{CommonDialogWindow}
+     * @return {@link CommonDialogWindow}
      */
     public CommonDialogWindow getWindow(final E entity, final String metaDatakey) {
         selectedEntity = entity;
 
-        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .caption(getMetadataCaption()).content(this).cancelButtonClickListener(event -> onCancel())
+        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(getMetadataCaption())
+                .content(this).cancelButtonClickListener(event -> onCancel())
                 .id(UIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
 

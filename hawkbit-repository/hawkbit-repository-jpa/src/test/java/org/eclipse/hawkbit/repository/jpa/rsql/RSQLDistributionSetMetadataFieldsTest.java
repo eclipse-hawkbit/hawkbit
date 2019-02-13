@@ -73,7 +73,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<DistributionSetMetadata> findEnitity = distributionSetManagement
-                .findMetaDataByDistributionSetIdAndRsql(new PageRequest(0, 100), distributionSetId, rsqlParam);
+                .findMetaDataByDistributionSetIdAndRsql(PageRequest.of(0, 100), distributionSetId, rsqlParam);
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

@@ -85,8 +85,8 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(i18n.getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG))) {
-            notification.displayValidationError(i18n.getMessage("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.getMessage("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.getMessage("message.tag.cannot.be.assigned", i18n.getMessage("label.no.tag.assigned")));
             return false;
         }
         return true;
