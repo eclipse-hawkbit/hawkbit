@@ -582,15 +582,35 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         actionTypeOptionGroupLayout.selectDefaultOption();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
         assignmentTab.addComponent(enableMaintenanceWindowLayout());
+//        assignmentTab.addComponent(downloadOnlyOptionLayout());
         initMaintenanceWindow();
         assignmentTab.addComponent(maintenanceWindowLayout);
         return assignmentTab;
+    }
+
+    private HorizontalLayout downloadOnlyOptionLayout() {
+        final HorizontalLayout layout = new HorizontalLayout();
+        layout.addComponent(downloadOnlyOption());
+        return layout;
+    }
+
+    private CheckBox downloadOnlyOption() {
+        // TODO adapt to look like enableMaintenanceWindowControl
+        final CheckBox downloadOnlyOption = new CheckBox("DOWNLOAD_ONLY");
+        downloadOnlyOption.setId("DOWNLOAD_ONLY");
+        downloadOnlyOption.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        downloadOnlyOption.addStyleName("dist-window-maintenance-window-enable");
+        downloadOnlyOption.addValueChangeListener(event -> {
+            System.out.println("DOWNLOAD_ONLY clicked!");
+        });
+        return downloadOnlyOption;
     }
 
     private HorizontalLayout enableMaintenanceWindowLayout() {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.addComponent(enableMaintenanceWindowControl());
         layout.addComponent(maintenanceWindowHelpLinkControl());
+        layout.addComponent(downloadOnlyOption());
         return layout;
     }
 
