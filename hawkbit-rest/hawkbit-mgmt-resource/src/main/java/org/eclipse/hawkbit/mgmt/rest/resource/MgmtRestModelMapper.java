@@ -66,6 +66,8 @@ final class MgmtRestModelMapper {
             return ActionType.FORCED;
         case TIMEFORCED:
             return ActionType.TIMEFORCED;
+        case DOWNLOAD_ONLY:
+            return ActionType.DOWNLOAD_ONLY;
         default:
             throw new IllegalStateException("Action Type is not supported");
         }
@@ -92,6 +94,8 @@ final class MgmtRestModelMapper {
             return MgmtActionType.FORCED;
         case TIMEFORCED:
             return MgmtActionType.TIMEFORCED;
+        case DOWNLOAD_ONLY:
+            return MgmtActionType.DOWNLOAD_ONLY;
         default:
             throw new IllegalStateException("Action Type is not supported");
         }

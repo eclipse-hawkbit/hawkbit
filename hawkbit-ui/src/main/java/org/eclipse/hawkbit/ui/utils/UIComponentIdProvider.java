@@ -178,6 +178,10 @@ public final class UIComponentIdProvider {
      */
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
     /**
+     * Download Only Action Id.
+     */
+    public static final String ACTION_DETAILS_DOWNLOAD_ONLY_ID = "action.details.download_only.group";
+    /**
      * Start type of rollout manual radio button
      */
     public static final String ROLLOUT_START_MANUAL_ID = "rollout.start.manual.radio";

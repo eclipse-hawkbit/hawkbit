@@ -102,7 +102,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @ObjectTypeConverter(name = "actionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
             @ConversionValue(objectValue = "FORCED", dataValue = "0"),
             @ConversionValue(objectValue = "SOFT", dataValue = "1"),
-            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2") })
+            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2"),
+            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3") })
     @Convert("actionType")
     @NotNull
     private ActionType actionType = ActionType.FORCED;
