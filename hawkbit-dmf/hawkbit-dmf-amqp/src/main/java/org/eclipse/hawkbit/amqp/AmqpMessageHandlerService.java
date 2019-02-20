@@ -132,7 +132,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
             case THING_CREATED:
-                checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
                 registerTarget(message, virtualHost);
                 break;

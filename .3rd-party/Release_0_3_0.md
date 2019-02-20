@@ -13,6 +13,7 @@
 | com.fasterxml.jackson.core           | jackson-annotations            | 2.9.0          | [CQ18146](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18146) |
 | com.fasterxml.jackson.core           | jackson-core                   | 2.9.7          | [CQ18147](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18147) |
 | com.fasterxml.jackson.core           | jackson-databind               | 2.9.7          | [CQ18145](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18145) |
+| com.fasterxml.jackson.dataformat     | jackson-dataformat-cbor        | 2.9.8          | [CQ18974](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18974) |
 | com.github.ben-manes.caffeine        | caffeine                       | 2.6.2          | [CQ17377](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17377) |
 | com.github.gwtd3                     | gwt-d3-api                     | 1.2.0          | [CQ13029](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13029) |
 | com.github.gwtd3                     | gwt-d3-js                      | 3.5.11         | [CQ13030](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=13030) |
