@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.1.2.RELEASE</version>
+      <version>2.1.3.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -128,7 +128,7 @@
 
    <properties>
       <java.version>1.8</java.version>
-      <spring.boot.version>2.1.2.RELEASE</spring.boot.version>
+      <spring.boot.version>2.1.3.RELEASE</spring.boot.version>
       <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
@@ -324,6 +324,7 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                   </validHeaders>
                   <excludes>
+                     <exclude>**/helm/**</exclude>
                      <exclude>**/README</exclude>
                      <exclude>.3rd-party/**</exclude>
                      <exclude>.github/**</exclude>
