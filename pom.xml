@@ -137,7 +137,7 @@
          upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
-      <rabbitmq.http-client.version>2.1.0.RELEASE</rabbitmq.http-client.version>      
+      <rabbitmq.http-client.version>2.1.0.RELEASE</rabbitmq.http-client.version>
       <!-- Older versions needed than defined in Boot -->
       <!-- Piggy back existing Eclipse CQs -->
       <commons-lang3.version>3.7</commons-lang3.version>
