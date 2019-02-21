@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -75,6 +76,7 @@ import com.google.common.collect.Sets;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.springframework.hateoas.Identifiable;
 
 /**
  * Test class testing the functionality of triggering a deployment of
@@ -1086,11 +1088,17 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(event).isNotNull();
         assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-        assertThat(event.getActions()).isEqualTo(targets.stream()
-                .map(target -> deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
-                        .getContent())
+        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId).sorted()
+                .collect(Collectors.toList());
+
+        List<Long> targetActiveActionIds = targets.stream()
+                .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
                 .flatMap(List::stream)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
+                .map(Identifiable::getId)
+                .sorted()
+                .collect(Collectors.toList());
+
+        assertThat(eventActionIds).isEqualTo(targetActiveActionIds);
     }
 
     private class DeploymentResult {

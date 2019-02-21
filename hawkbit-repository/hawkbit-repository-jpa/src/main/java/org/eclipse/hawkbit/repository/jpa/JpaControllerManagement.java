@@ -597,6 +597,8 @@ public class JpaControllerManagement implements ControllerManagement {
         case FINISHED:
             controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
+        case DOWNLOADED:
+            controllerId = handleDownloadedEventForDownloadOnlyAction(action);
         default:
             // information status entry - check for a potential DOS attack
             assertActionStatusQuota(action);
@@ -613,6 +615,20 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         return savedAction;
+    }
+
+    private String handleDownloadedEventForDownloadOnlyAction(JpaAction action) {
+        if(!action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY)){
+            return null;
+        }
+
+        JpaTarget target = (JpaTarget) action.getTarget();
+        action.setActive(false);
+        action.setStatus(Status.FINISHED);
+        target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+        targetRepository.save(target);
+
+        return target.getControllerId();
     }
 
     private void requestControllerAttributes(final String controllerId) {

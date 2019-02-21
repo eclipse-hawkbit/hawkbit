@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 
 /**
  * TenantAwareEvent that gets sent when a distribution set gets assigned to a
@@ -28,7 +29,7 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     private boolean maintenanceWindowAvailable;
 
-    private final Map<String, Long> actions = new HashMap<>();
+    private final Map<String, ActionProperties> actions = new HashMap<>();
 
     /**
      * Default constructor.
@@ -57,12 +58,12 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
         this.distributionSetId = distributionSetId;
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;
         actions.putAll(a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
+                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
 
     }
 
     public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
-        this(action.getTenant(), action.getDistributionSet().getId(), Arrays.asList(action), applicationId,
+        this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), applicationId,
                 action.isMaintenanceWindowAvailable());
     }
 
@@ -74,7 +75,7 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
         return maintenanceWindowAvailable;
     }
 
-    public Map<String, Long> getActions() {
+    public Map<String, ActionProperties> getActions() {
         return actions;
     }
 

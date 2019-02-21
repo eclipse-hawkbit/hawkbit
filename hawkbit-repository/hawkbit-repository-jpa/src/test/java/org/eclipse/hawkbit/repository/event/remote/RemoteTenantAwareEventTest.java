@@ -10,14 +10,13 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
-import java.util.Map.Entry;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
@@ -69,10 +68,9 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     private void assertTargetAssignDistributionSetEvent(final Action action,
             final TargetAssignDistributionSetEvent underTest) {
 
-        final Entry<String, Long> entry = new SimpleImmutableEntry(action.getTarget().getControllerId(),
-                action.getId());
-
-        assertThat(underTest.getActions()).containsExactly(entry);
+        ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());
+        assertThat(actionProperties).isNotNull();
+        assertThat(actionProperties).isEqualToComparingFieldByField(new ActionProperties(action));
         assertThat(underTest.getDistributionSetId()).isEqualTo(action.getDistributionSet().getId());
     }
 
