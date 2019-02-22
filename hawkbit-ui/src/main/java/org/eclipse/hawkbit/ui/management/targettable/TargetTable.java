@@ -1013,8 +1013,7 @@ public class TargetTable extends AbstractTable<Target> {
         return assignmentTab;
     }
 
-    // TODO: check also what happens when leaving maintenance -> details box
-    // should close automatically (schedule and stuff like that)
+    // TODO comment this new method
     private void addValueChangeListener() {
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
@@ -1022,28 +1021,19 @@ public class TargetTable extends AbstractTable<Target> {
             @Override
             public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
                 if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
+                    enableMaintenanceWindow.setValue(false);
                     enableMaintenanceWindow.setEnabled(false);
                     maintenanceWindowLink.setEnabled(false);
-                    maintenanceWindowLayout.getDurationControl().setVisible(false);
-                    maintenanceWindowLayout.getScheduleControl().setVisible(false);
-                    maintenanceWindowLayout.getTimeZoneControl().setVisible(false);
 
                 } else {
                     enableMaintenanceWindow.setEnabled(true);
                     maintenanceWindowLink.setEnabled(true);
-                    maintenanceWindowLayout.getDurationControl().setVisible(true);
-                    maintenanceWindowLayout.getScheduleControl().setVisible(true);
-                    maintenanceWindowLayout.getTimeZoneControl().setVisible(true);
-
                 }
 
             }
         });
     }
 
-    // TODO check whether this part can disable dropDown on MaintenanceWindow by
-    // Declarin HorizontalLayout var at the top and just use it here and in the
-    // addValueChangeListenerMethod
     private HorizontalLayout enableMaintenanceWindowLayout() {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.addComponent(enableMaintenanceWindowControl());
@@ -1052,8 +1042,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private CheckBox enableMaintenanceWindowControl() {
-        enableMaintenanceWindow = new CheckBox(
-                getI18n().getMessage("caption.maintenancewindow.enabled"));
+        enableMaintenanceWindow = new CheckBox(getI18n().getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
         enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
@@ -1064,8 +1053,6 @@ public class TargetTable extends AbstractTable<Target> {
             enableSaveButton(!isMaintenanceWindowEnabled);
             maintenanceWindowLayout.clearAllControls();
         });
-        // TODO: clean comments
-        // enableMaintenanceWindow.setEnabled(false);
         return enableMaintenanceWindow;
     }
 
@@ -1082,13 +1069,6 @@ public class TargetTable extends AbstractTable<Target> {
                 .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
         maintenanceWindowLayout.getDurationControl()
                 .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
-        // TODO Delete this again -> put it into event listener (or just remove
-        // Assignment when download only is clicked)
-        // maintenanceWindowLayout.getDurationControl().setVisible(false);
-        // maintenanceWindowLayout.getScheduleControl().setVisible(false);
-        // maintenanceWindowLayout.getTimeZoneControl().setVisible(false);
-
-
     }
 
     private void enableSaveButton(final boolean enabled) {
