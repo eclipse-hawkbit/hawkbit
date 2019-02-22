@@ -565,8 +565,9 @@ public class JpaControllerManagement implements ControllerManagement {
         // permitted so by configuration. This is especially useful if the
         // action status feedback channel order from the device cannot be
         // guaranteed. However, if an action is closed we do not accept further
-        // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
+        // close messages, unless it was a DOWNLOAD_ONLY action
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())
+                && !wasDownloadOnly(action)) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getStatus(), action.getId());
             return action;
@@ -578,6 +579,10 @@ public class JpaControllerManagement implements ControllerManagement {
             final boolean actionActive) {
         return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
                 || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
+    }
+
+    private boolean wasDownloadOnly(JpaAction action) {
+        return action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
     }
 
     /**
