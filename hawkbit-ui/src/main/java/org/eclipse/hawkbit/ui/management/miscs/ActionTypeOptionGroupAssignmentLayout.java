@@ -120,6 +120,7 @@ public class ActionTypeOptionGroupAssignmentLayout extends AbstractActionTypeOpt
         downloadOnlyLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY));
         downloadOnlyLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DOWNLOAD_ONLY_ITEM));
         downloadOnlyLabel.setStyleName("padding-right-style");
+        downloadOnlyLabel.setIcon(FontAwesome.DOWNLOAD);
         addComponent(downloadOnlyLabel);
     }
 
