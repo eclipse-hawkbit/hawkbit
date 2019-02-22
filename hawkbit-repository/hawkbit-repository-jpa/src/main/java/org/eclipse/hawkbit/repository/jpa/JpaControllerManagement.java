@@ -624,8 +624,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
         JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
-        action.setStatus(Status.FINISHED);
+        action.setStatus(Status.DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+        target.setAssignedDistributionSet(null);
         targetRepository.save(target);
 
         return target.getControllerId();
