@@ -288,6 +288,7 @@ public class MaintenanceWindowLayout extends VerticalLayout {
         return isScheduleAndDurationValid();
     }
 
+    // TODO && downloadOnlyButtonIsNotClicked ???
     private boolean isScheduleAndDurationValid() {
         if (schedule.isEmpty() || duration.isEmpty()) {
             return false;
@@ -302,5 +303,9 @@ public class MaintenanceWindowLayout extends VerticalLayout {
 
     public TextField getDurationControl() {
         return duration;
+    }
+
+    public ComboBox getTimeZoneControl() {
+        return timeZone;
     }
 }
