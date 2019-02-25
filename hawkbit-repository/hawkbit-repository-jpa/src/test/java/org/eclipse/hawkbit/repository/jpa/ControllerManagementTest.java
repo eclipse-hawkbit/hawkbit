@@ -847,10 +847,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Checks if invalid values of attribute-key and attribute-value are handled correctly")
     public void updateTargetAttributesFailsForInvalidAttributes() {
-        final String keyTooLong = "123456789012345678901234567890123";
-        final String keyValid = "12345678901234567890123456789012";
-        final String valueTooLong = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-        final String valueValid = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+        final String keyTooLong = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1);
+        final String keyValid = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE);
+        final String valueTooLong = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1);
+        final String valueValid = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE);
         final String keyNull = null;
 
         final String controllerId = "targetId123";

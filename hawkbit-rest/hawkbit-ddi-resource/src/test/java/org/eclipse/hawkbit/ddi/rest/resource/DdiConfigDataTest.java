@@ -48,10 +48,11 @@ import io.qameta.allure.Story;
 @Story("Config Data Resource")
 public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
-    private static final String KEY_TOO_LONG = "123456789012345678901234567890123";
-    private static final String KEY_VALID = "12345678901234567890123456789012";
-    private static final String VALUE_TOO_LONG = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-    private static final String VALUE_VALID = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678";
+    private static final String KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1);
+    private static final String KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE);
+    private static final String VALUE_TOO_LONG = generateRandomStringWithLength(
+            Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1);
+    private static final String VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE);
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
