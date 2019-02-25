@@ -24,7 +24,7 @@
       <jaxb.api.version>2.3.0</jaxb.api.version>
       <javax.annotation.version>1.3.1</javax.annotation.version>
    </properties>
-   
+
    <dependencies>
       <!-- Hawkbit -->
       <dependency>
@@ -61,7 +61,7 @@
       <dependency>
          <groupId>cz.jirutka.rsql</groupId>
          <artifactId>rsql-parser</artifactId>
-      </dependency>      
+      </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
@@ -91,6 +91,24 @@
    </dependencies>
 
    <build>
+      <resources>
+         <!-- We need to add also the default-resources, as this configuration overwrites the defaults -->
+         <resource>
+            <directory>src/main/java</directory>
+         </resource>
+         <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+         <resource>
+            <directory>target/generated-sources/apt</directory>
+         </resource>
+         <resource>
+            <directory>src/test/java</directory>
+         </resource>
+         <resource>
+            <directory>src/test/resources</directory>
+         </resource>
+      </resources>
       <plugins>
          <!-- Static weaver for EclipseLink -->
          <plugin>
@@ -117,9 +135,9 @@
             </configuration>
             <dependencies>
                <dependency>
-                   <groupId>javax.xml.bind</groupId>
-                   <artifactId>jaxb-api</artifactId>
-                   <version>${jaxb.api.version}</version>
+                  <groupId>javax.xml.bind</groupId>
+                  <artifactId>jaxb-api</artifactId>
+                  <version>${jaxb.api.version}</version>
                </dependency>
                <dependency>
                   <groupId>org.eclipse.persistence</groupId>
@@ -138,7 +156,27 @@
                </dependency>
             </dependencies>
          </plugin>
+         <plugin>
+            <!-- Should be placed here below 'eclipselink-maven-plugin' as the plugin should be executed -->
+            <!-- after the code generation and the order of the plugins in the pom is relevant for maven -->
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>add-source</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                     <goal>add-source</goal>
+                  </goals>
+                  <configuration>
+                     <sources>
+                        <source>${project.build.directory}/generated-sources/apt/</source>
+                     </sources>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
       </plugins>
    </build>
-   
+
 </project>
