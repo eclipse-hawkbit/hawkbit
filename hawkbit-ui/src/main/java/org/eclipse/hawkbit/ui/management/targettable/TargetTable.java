@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
+import org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
@@ -869,10 +870,10 @@ public class TargetTable extends AbstractTable<Target> {
         Long distId;
         List<TargetIdName> targetIdSetList;
         List<TargetIdName> tempIdList;
-        final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
-                .getValue()).getActionType();
-        final long forcedTimeStamp = (((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
-                .getValue()) == ActionTypeOption.AUTO_FORCED)
+        final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
+                .getActionTypeOptionGroup().getValue()).getActionType();
+        final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
+                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
@@ -994,7 +995,8 @@ public class TargetTable extends AbstractTable<Target> {
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
-                        saveAllAssignments();
+                        AbstractDistributionTargetTable.saveAllAssignments(managementUIState,
+                                actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, this);
                     } else {
                         managementUIState.getAssignedList().clear();
                     }
