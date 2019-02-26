@@ -355,6 +355,18 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
+    private Long createTargetAndAssignDsAsDownloadOnly() {
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        testdataFactory.createTarget();
+        assignDistributionSetDownloadOnly(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        return deploymentManagement.findActiveActionsByTarget(PAGE, TestdataFactory.DEFAULT_CONTROLLER_ID).getContent()
+                .get(0).getId();
+    }
+
+    @Step
     private void simulateIntermediateStatusOnCancellation(final Long actionId) {
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
@@ -989,4 +1001,37 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
+    @Test
+    @Description("Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOADED")
+    public void controllerReportsDownloadedForDownloadOnlyAction() {
+        final Long actionId = createTargetAndAssignDsAsDownloadOnly();
+
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.DOWNLOADED, Action.Status.DOWNLOADED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test
+    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action.")
+    public void controllerReportsActionFinishedForDownloadOnlyAction() {
+        final Long actionId = createTargetAndAssignDsAsDownloadOnly();
+
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
 }

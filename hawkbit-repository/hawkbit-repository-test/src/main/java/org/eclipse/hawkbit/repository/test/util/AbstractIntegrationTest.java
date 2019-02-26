@@ -229,6 +229,11 @@ public abstract class AbstractIntegrationTest {
                 new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
+    protected DistributionSetAssignmentResult assignDistributionSetDownloadOnly(final long dsID, final String controllerId) {
+        return deploymentManagement.assignDistributionSet(dsID, Collections.singletonList(
+                new TargetWithActionType(controllerId, ActionType.DOWNLOAD_ONLY, RepositoryModelConstants.NO_FORCE_TIME)));
+    }
+
     /**
      * Test helper method to assign distribution set to a target with a
      * maintenance schedule.

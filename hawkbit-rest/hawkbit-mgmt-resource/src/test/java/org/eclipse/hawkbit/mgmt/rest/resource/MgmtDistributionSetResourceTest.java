@@ -1245,4 +1245,30 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         return created;
     }
 
+    @Test
+    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of DOWNLOAD_ONLY.")
+    public void assignMultipleTargetsToDistributionSetAsDownloadOnly() throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
+        }
+        // assign already one target to DS
+        assignDistributionSetDownloadOnly(createdDs.getId(), knownTargetIds[0]);
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
+                .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
+
+        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
+                .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
 }
