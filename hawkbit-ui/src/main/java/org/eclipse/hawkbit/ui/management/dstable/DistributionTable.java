@@ -23,18 +23,15 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
@@ -82,13 +79,11 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Distribution set table which is shown on the Deployment View.
@@ -466,12 +461,18 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
                 confirmQuestion, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && isMaintenanceWindowValid()) {
-                        saveAllAssignments();
+                    if (ok && AbstractDistributionTargetTable.isMaintenanceWindowValid(maintenanceWindowLayout, LOG,
+                            getNotification())) {
+                        AbstractDistributionTargetTable.saveAllAssignments(managementUIState,
+                                actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement,
+                                getNotification(), getEventBus(), getI18n(), this);
                     } else {
                         managementUIState.getAssignedList().clear();
                     }
-                }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+                },
+                AbstractDistributionTargetTable.createAssignmentTab(actionTypeOptionGroupLayout,
+                        enableMaintenanceWindowLayout(), maintenanceWindowLayout, confirmDialog),
+                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
     }
 
     private String createConfirmationQuestionForAssignment(final String distributionNameToAssign,
@@ -483,21 +484,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetDetailsList.size(), "targets",
                     distributionNameToAssign);
         }
-    }
-
-    private boolean isMaintenanceWindowValid() {
-        if (maintenanceWindowLayout.isEnabled()) {
-            try {
-                MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceWindowLayout.getMaintenanceSchedule(),
-                        maintenanceWindowLayout.getMaintenanceDuration(),
-                        maintenanceWindowLayout.getMaintenanceTimeZone());
-            } catch (final InvalidMaintenanceScheduleException e) {
-                LOG.error("Maintenance window is not valid", e);
-                getNotification().displayValidationError(e.getMessage());
-                return false;
-            }
-        }
-        return true;
     }
 
     private void saveAllAssignments() {
@@ -523,56 +509,24 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
-    private ConfirmationTab createAssignmentTab() {
-        final ConfirmationTab assignmentTab = new ConfirmationTab();
-        actionTypeOptionGroupLayout.selectDefaultOption();
-        assignmentTab.addComponent(actionTypeOptionGroupLayout);
-        assignmentTab.addComponent(enableMaintenanceWindowLayout());
-        initMaintenanceWindow();
-        assignmentTab.addComponent(maintenanceWindowLayout);
-        return assignmentTab;
-    }
-
     private HorizontalLayout enableMaintenanceWindowLayout() {
         final HorizontalLayout layout = new HorizontalLayout();
-        layout.addComponent(enableMaintenanceWindowControl());
+        layout.addComponent(AbstractDistributionTargetTable.enableMaintenanceWindowControl(getI18n(),
+                maintenanceWindowLayout, confirmDialog));
         layout.addComponent(maintenanceWindowHelpLinkControl());
         return layout;
     }
 
-    private CheckBox enableMaintenanceWindowControl() {
-        final CheckBox enableMaintenanceWindow = new CheckBox(
-                getI18n().getMessage("caption.maintenancewindow.enabled"));
-        enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
-        enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
-        enableMaintenanceWindow.addValueChangeListener(event -> {
-            final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
-            maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
-            maintenanceWindowLayout.setEnabled(isMaintenanceWindowEnabled);
-            enableSaveButton(!isMaintenanceWindowEnabled);
-            maintenanceWindowLayout.clearAllControls();
-        });
-        return enableMaintenanceWindow;
-    }
+
 
     private Link maintenanceWindowHelpLinkControl() {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
         return SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
     }
 
-    private void initMaintenanceWindow() {
-        maintenanceWindowLayout.setVisible(false);
-        maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl()
-                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event)));
-        maintenanceWindowLayout.getDurationControl()
-                .addTextChangeListener(event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event)));
-    }
 
-    private void enableSaveButton(final boolean enabled) {
-        confirmDialog.getOkButton().setEnabled(enabled);
-    }
+
+
 
     @Override
     protected List<String> hasMissingPermissionsForDrop() {

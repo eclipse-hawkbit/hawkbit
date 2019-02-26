@@ -3,54 +3,66 @@ package org.eclipse.hawkbit.ui.management;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
+import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus;
+import org.slf4j.Logger;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class AbstractDistributionTargetTable {
 
-    public static void saveAllAssigmentsTargetTable(final ManagementUIState managementUIState,
-            final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
-            final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
-            final TargetTable targetTable, final UINotification uiNotificationMethod,
-            final EventBus.UIEventBus getEventBusMethod,
-            final VaadinMessageSource getI18nMethod) {
+    // public static void saveAllAssignmentsTargetTable(final ManagementUIState
+    // managementUIState,
+    // final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+    // final MaintenanceWindowLayout maintenanceWindowLayout, final
+    // DeploymentManagement deploymentManagement,
+    // final UINotification notification, final UIEventBus eventBus, final
+    // VaadinMessageSource i18n,
+    // final TargetTable targetTable) {
+    //
+    // saveAllAssignments(managementUIState, actionTypeOptionGroupLayout,
+    // maintenanceWindowLayout,
+    // deploymentManagement, notification, eventBus, i18n, targetTable);
+    // // TODO pass EventBus as paramenter, as well as language and
+    // // notifications
+    //
+    //
+    //
+    //
+    //
+    // }
 
-        saveAllAssigmentsTargetTable(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
-                deploymentManagement, targetTable);
-        // TODO pass EventBus as paramenter, as well as language and
-        // notifications
-
-
-
-        managementUIState.getAssignedList().clear();
-        uiNotificationMethod.displaySuccess(getI18nMethod.getMessage("message.target.ds.assign.success"));
-        getEventBusMethod.publish(targetTable, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
-
-    }
-
-    private static void saveAllAssignments(final ManagementUIState managementUIState,
+    public static void saveAllAssignments(final ManagementUIState managementUIState,
             final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout,
-            final DeploymentManagement deploymentManagement, final VaadinMessageSource getI18nMethod) {
+            final DeploymentManagement deploymentManagement, final UINotification notification,
+            final UIEventBus eventBus, final VaadinMessageSource i18n, final Object eventSource) {
         final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
         Long distId;
         List<TargetIdName> targetIdSetList;
@@ -90,24 +102,103 @@ public class AbstractDistributionTargetTable {
                                             maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
                                     : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
                                     .collect(Collectors.toList()));
-            // TODO Check on Monday whether it is possible/make sence to
-            // abstract since the called once musst be defined in both classes
-            // so we would use different instances and i dont know what this
-            // does to the rest of the code
             if (distributionSetAssignmentResult.getAssigned() > 0) {
-                getNotification().displaySuccess(getI18nMethod.getMessage("message.target.assignment",
+                notification.displaySuccess(i18n.getMessage("message.target.assignment",
                         distributionSetAssignmentResult.getAssigned()));
             }
             if (distributionSetAssignmentResult.getAlreadyAssigned() > 0) {
-                getNotification().displaySuccess(getI18nMethod.getMessage("message.target.alreadyAssigned",
+                notification.displaySuccess(i18n.getMessage("message.target.alreadyAssigned",
                         distributionSetAssignmentResult.getAlreadyAssigned()));
             }
         }
-        resfreshPinnedDetails(saveAssignedList);
-        //
-        // managementUIState.getAssignedList().clear();
-        // getNotification().displaySuccess(getI18n().getMessage("message.target.ds.assign.success"));
-        // getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        refreshPinnedDetails(saveAssignedList, managementUIState, eventBus, eventSource);
+        managementUIState.getAssignedList().clear();
+        notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
+        eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
+
+
+    static private void refreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList,
+            final ManagementUIState managementUIState, final UIEventBus eventBus, final Object eventSource) {
+        final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
+        final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
+
+        if (pinnedDist.isPresent()) {
+            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
+                eventBus.publish(eventSource, PinUnpinEvent.PIN_DISTRIBUTION);
+            }
+        } else if (pinnedTarget.isPresent()) {
+            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
+            if (assignedTargetIds.contains(pinnedTarget.get())) {
+                eventBus.publish(eventSource, PinUnpinEvent.PIN_TARGET);
+            }
+        }
+    }
+
+    public static boolean isMaintenanceWindowValid(final MaintenanceWindowLayout maintenanceWindowLayout,
+            final Logger log, final UINotification notification) {
+        if (maintenanceWindowLayout.isEnabled()) {
+            try {
+                MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceWindowLayout.getMaintenanceSchedule(),
+                        maintenanceWindowLayout.getMaintenanceDuration(),
+                        maintenanceWindowLayout.getMaintenanceTimeZone());
+            } catch (final InvalidMaintenanceScheduleException e) {
+                log.error("Maintenance window is not valid", e);
+                notification.displayValidationError(e.getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+            final HorizontalLayout enableMaintenanceWindowLayout,
+            final MaintenanceWindowLayout maintenanceWindowLayout, final ConfirmationDialog confirmDialog) {
+        final ConfirmationTab assignmentTab = new ConfirmationTab();
+        actionTypeOptionGroupLayout.selectDefaultOption();
+        assignmentTab.addComponent(actionTypeOptionGroupLayout);
+        assignmentTab.addComponent(enableMaintenanceWindowLayout);
+        initMaintenanceWindow(maintenanceWindowLayout, confirmDialog);
+        assignmentTab.addComponent(maintenanceWindowLayout);
+        return assignmentTab;
+    }
+
+    private static void initMaintenanceWindow(final MaintenanceWindowLayout maintenanceWindowLayout,
+            final ConfirmationDialog confirmDialog) {
+        maintenanceWindowLayout.setVisible(false);
+        maintenanceWindowLayout.setEnabled(false);
+        maintenanceWindowLayout.getScheduleControl()
+                .addTextChangeListener(
+                        event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event), confirmDialog));
+        maintenanceWindowLayout.getDurationControl()
+                .addTextChangeListener(
+                        event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event), confirmDialog));
+    }
+
+    public static void enableSaveButton(final boolean enabled, final ConfirmationDialog confirmDialog) {
+        confirmDialog.getOkButton().setEnabled(enabled);
+    }
+    
+    public static CheckBox enableMaintenanceWindowControl(final VaadinMessageSource i18n,
+            final MaintenanceWindowLayout maintenanceWindowLayout,
+            final ConfirmationDialog confirmDialog) {
+        // TODO this is done to have the checkbox called enableMaintenanceWindow
+        // with state in Class TargetTable, but should be done in other way..
+        // like sonarQube also says..
+        final CheckBox enableMaintenanceWindow = new CheckBox(
+                i18n.getMessage("caption.maintenancewindow.enabled"));
+        enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
+        enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
+        enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
+        enableMaintenanceWindow.addValueChangeListener(event -> {
+            final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
+            maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
+            maintenanceWindowLayout.setEnabled(isMaintenanceWindowEnabled);
+            enableSaveButton(!isMaintenanceWindowEnabled, confirmDialog);
+            maintenanceWindowLayout.clearAllControls();
+        });
+        return enableMaintenanceWindow;
+    }
+
 
 }
