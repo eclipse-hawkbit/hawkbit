@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettag.CreateTargetTagLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
@@ -152,7 +153,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     }
 
     private Component getComplexFilterTab() {
-        targetFilterQueryButtonsTab.setCaption(i18n.getMessage("caption.filter.custom"));
+        targetFilterQueryButtonsTab.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_FILTER_CUSTOM));
         return targetFilterQueryButtonsTab;
     }
 

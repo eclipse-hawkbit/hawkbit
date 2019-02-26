@@ -38,7 +38,7 @@ public interface Target extends NamedEntity {
     /**
      * Maximum length of key of controller attribute
      */
-    int CONTROLLER_ATTRIBUTE_KEY_SIZE = 32;
+    int CONTROLLER_ATTRIBUTE_KEY_SIZE = 128;
 
     /**
      * Maximum length of value of controller attribute

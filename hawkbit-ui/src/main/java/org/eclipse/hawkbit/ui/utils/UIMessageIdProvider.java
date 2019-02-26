@@ -43,6 +43,8 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_FILTER_BY_TYPE = "caption.filter.by.type";
 
+    public static final String CAPTION_FILTER_CUSTOM = "caption.filter.custom";
+
     public static final String CAPTION_DISTRIBUTION_TAG = "caption.entity.distribution.tag";
 
     public static final String CAPTION_TARGET_TAG = "caption.entity.target.tag";
@@ -54,6 +56,12 @@ public final class UIMessageIdProvider {
     public static final String CAPTION_SELECT_AUTO_ASSIGN_DS = "caption.select.auto.assign.dist";
 
     public static final String CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES = "caption.confirm.assign.consequences";
+
+    public static final String CAPTION_CONFIG_CREATE = "caption.config.create";
+
+    public static final String CAPTION_CONFIG_EDIT = "caption.config.edit";
+
+    public static final String CAPTION_CONFIG_DELETE = "caption.config.delete";
 
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
@@ -150,6 +158,26 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_DELETE_CUSTOM_FILTER = "tooltip.delete.custom.filter";
 
     public static final String TOOLTIP_UPDATE_CUSTOM_FILTER = "tooltip.update.custom.filter";
+
+    public static final String CAPTION_ARTIFACT_UPLOAD_POPUP = "artifact.upload.popup.caption";
+
+    public static final String CAPTION_ARTIFACT_UPLOAD_STATUS = "artifact.upload.status.caption";
+
+    public static final String CAPTION_ARTIFACT_UPLOAD_PROGRESS = "artifact.upload.progress.caption";
+
+    public static final String CAPTION_ARTIFACT_UPLOAD_REASON = "artifact.upload.reason.caption";
+
+    public static final String CAPTION_ARTIFACT_FILENAME = "artifact.filename.caption";
+
+    public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
+
+    public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
+
+    public static final String CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE = "artifact.softwaremodule.type.caption";
+
+    public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
+
+    public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
 
     /**
      * Private Constructor.

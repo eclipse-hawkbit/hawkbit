@@ -4,7 +4,7 @@ weight: 40
 ---
 
 
-## Device and software repository
+## Device and Software Repository
 - Repository that holds the provisioning targets and assignable software distributions.
 - That includes a full software update history for every device.
 - Support for pre-commission devices in the repository and plug and play, i.e. device is created if it is authenticated for the first time.

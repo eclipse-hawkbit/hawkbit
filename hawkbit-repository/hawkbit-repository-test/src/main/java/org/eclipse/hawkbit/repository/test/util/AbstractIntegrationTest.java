@@ -18,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -413,5 +414,19 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
+    }
+
+    protected static String generateRandomStringWithLength(final int length) {
+        final StringBuilder randomStringBuilder = new StringBuilder(length);
+        final Random rand = new Random();
+        final int lowercaseACode = 97;
+        final int lowercaseZCode = 122;
+
+        for (int i = 0; i < length; i++) {
+            final char randomCharacter = (char) (rand.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
+            randomStringBuilder.append(randomCharacter);
+        }
+
+        return randomStringBuilder.toString();
     }
 }
