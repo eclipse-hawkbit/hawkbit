@@ -567,7 +567,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // guaranteed. However, if an action is closed we do not accept further
         // close messages, unless it was a DOWNLOAD_ONLY action
         if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())
-                && !wasDownloadOnly(action)) {
+                && !isDownloadOnly(action)) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getStatus(), action.getId());
             return action;
@@ -581,7 +581,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
     }
 
-    private boolean wasDownloadOnly(JpaAction action) {
+    private boolean isDownloadOnly(JpaAction action) {
         return action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
     }
 
@@ -631,7 +631,6 @@ public class JpaControllerManagement implements ControllerManagement {
         action.setActive(false);
         action.setStatus(Status.DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-        target.setAssignedDistributionSet(null);
         targetRepository.save(target);
 
         return target.getControllerId();
@@ -669,6 +668,10 @@ public class JpaControllerManagement implements ControllerManagement {
 
         target.setInstalledDistributionSet(ds);
         target.setInstallationDate(System.currentTimeMillis());
+
+        if(isDownloadOnly(action)){
+            target.setAssignedDistributionSet(action.getDistributionSet());
+        }
 
         // check if the assigned set is equal to the installed set (not
         // necessarily the case as another update might be pending already).
