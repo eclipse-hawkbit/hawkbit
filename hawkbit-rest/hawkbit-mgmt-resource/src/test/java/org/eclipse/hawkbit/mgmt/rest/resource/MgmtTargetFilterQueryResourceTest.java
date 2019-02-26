@@ -369,6 +369,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         verifyAutoAssignmentWithUnknownActionType(tfq, set);
 
         verifyAutoAssignmentWithIncompleteDs(tfq);
+
+        verifyAutoAssignmentWithSoftDeletedDs(tfq);
     }
 
     @Step
@@ -449,6 +451,21 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
+                        equalTo(InvalidAutoAssignDistributionSetException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE,
+                        equalTo(SpServerError.SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID.getKey())));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithSoftDeletedDs(final TargetFilterQuery tfq) throws Exception {
+        final DistributionSet softDeletedDs = testdataFactory.createDistributionSet("softDeleted");
+        assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
+        distributionSetManagement.delete(softDeletedDs.getId());
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
                         equalTo(InvalidAutoAssignDistributionSetException.class.getName())))

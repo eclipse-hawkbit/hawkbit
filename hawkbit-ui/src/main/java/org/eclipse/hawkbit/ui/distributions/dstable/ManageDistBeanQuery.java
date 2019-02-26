@@ -151,9 +151,10 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (StringUtils.isEmpty(filterString) && StringUtils.isEmpty(searchText) && distributionSetType == null) {
             return getDistributionSetManagement().findByCompleted(pageable, dsComplete);
         } else {
-            final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
-                    .setIsComplete(dsComplete).setSearchText(searchText).setFilterString(filterString)
-                    .setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
+            final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder()
+                    .setIsDeleted(Boolean.FALSE).setIsComplete(dsComplete).setSearchText(searchText)
+                    .setFilterString(filterString).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType)
+                    .build();
 
             return getDistributionSetManagement().findByDistributionSetFilter(pageable, distributionSetFilter);
         }

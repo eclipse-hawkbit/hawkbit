@@ -630,7 +630,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())) {
             final String[] dsFilterNameAndVersionEntries = getDsFilterNameAndVersionEntries(
-                    distributionSetFilter.getFilterString());
+                    distributionSetFilter.getFilterString().trim());
             spec = DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0],
                     dsFilterNameAndVersionEntries[1]);
             specList.add(spec);

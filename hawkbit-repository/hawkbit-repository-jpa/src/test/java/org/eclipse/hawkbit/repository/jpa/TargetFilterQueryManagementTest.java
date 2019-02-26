@@ -198,7 +198,9 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         verifyAutoAssignmentWithInvalidActionType(targetFilterQuery, distributionSet);
 
-        verifyAutoAssignmentWithInvalidDistributionSet(targetFilterQuery);
+        verifyAutoAssignmentWithIncompleteDs(targetFilterQuery);
+
+        verifyAutoAssignmentWithSoftDeletedDs(targetFilterQuery);
     }
 
     @Step
@@ -227,8 +229,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     }
 
     @Step
-    private void verifyAutoAssignmentWithInvalidDistributionSet(final TargetFilterQuery targetFilterQuery) {
-        // assigning an incomplete distribution set is supposed to fail
+    private void verifyAutoAssignmentWithIncompleteDs(final TargetFilterQuery targetFilterQuery) {
         final DistributionSet incompleteDistributionSet = distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("incomplete").version("1")
                         .type(testdataFactory.findOrCreateDefaultTestDsType()));
@@ -236,6 +237,16 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         assertThatExceptionOfType(InvalidAutoAssignDistributionSetException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(),
                         incompleteDistributionSet.getId()));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithSoftDeletedDs(final TargetFilterQuery targetFilterQuery) {
+        final DistributionSet softDeletedDs = testdataFactory.createDistributionSet("softDeleted");
+        assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
+        distributionSetManagement.delete(softDeletedDs.getId());
+
+        assertThatExceptionOfType(InvalidAutoAssignDistributionSetException.class).isThrownBy(
+                () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), softDeletedDs.getId()));
     }
 
     private void verifyAutoAssignDsAndActionType(final String filterName, final DistributionSet distributionSet,
