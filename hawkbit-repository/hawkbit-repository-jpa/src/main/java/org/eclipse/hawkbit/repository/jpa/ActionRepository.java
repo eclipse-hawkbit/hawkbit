@@ -313,17 +313,13 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the rollout the actions are belong to
      * @param rolloutGroup
      *            the rolloutgroup the actions are belong to
-     * @param notStatus1
-     *            the status the action should not have
-     * @param notStatus2
-     *            the status the action should not have
-     * @param notStatus3
-     *            the status the action should not have
+     * @param statuses
+     *            the list of statuses the action should not have
      * @return the count of actions referring the rollout and rolloutgroup and
      *         are not in given states
      */
-    Long countByRolloutAndRolloutGroupAndStatusNotAndStatusNotAndStatusNot(JpaRollout rollout,
-            JpaRolloutGroup rolloutGroup, Status notStatus1, Status notStatus2, Status notStatus3);
+    Long countByRolloutAndRolloutGroupAndStatusNotIn(JpaRollout rollout, JpaRolloutGroup rolloutGroup,
+                                                     List<Status> statuses);
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup.

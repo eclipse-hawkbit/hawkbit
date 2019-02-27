@@ -760,9 +760,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
+        Status finishedActionStatus = rollout.isDownloadOnly() ? Status.DOWNLOADED : Status.FINISHED;
         final Long actionsLeftForRollout = actionRepository
-                .countByRolloutAndRolloutGroupAndStatusNotAndStatusNotAndStatusNot(rollout, rolloutGroup,
-                        Action.Status.ERROR, Action.Status.FINISHED, Action.Status.CANCELED);
+                .countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
+                        Arrays.asList(Status.ERROR, finishedActionStatus, Status.CANCELED));
         return actionsLeftForRollout == 0;
     }
 
@@ -1070,7 +1071,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.get().getTotalTargets());
+                rollout.get().getTotalTargets(), rollout.get().isDownloadOnly());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
@@ -1112,7 +1113,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         if (allStatesForRollout != null) {
             rollouts.forEach(rollout -> {
                 final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
+                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.isDownloadOnly());
                 rollout.setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }

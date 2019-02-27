@@ -225,7 +225,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Override
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets, isDownloadOnly());
         }
         return totalTargetCountStatus;
     }
@@ -300,4 +300,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         this.approvalRemark = approvalRemark;
     }
 
+    @Override
+    public boolean isDownloadOnly() {
+        return actionType.equals(ActionType.DOWNLOAD_ONLY);
+    }
 }

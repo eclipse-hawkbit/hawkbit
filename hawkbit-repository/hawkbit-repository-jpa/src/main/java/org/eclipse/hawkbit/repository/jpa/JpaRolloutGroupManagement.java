@@ -151,7 +151,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                    allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()));
+                    allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()),
+                    rolloutGroup.getRollout().isDownloadOnly());
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         }
 
@@ -177,7 +178,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                Long.valueOf(jpaRolloutGroup.getTotalTargets()));
+                Long.valueOf(jpaRolloutGroup.getTotalTargets()), jpaRolloutGroup.getRollout().isDownloadOnly());
         jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 

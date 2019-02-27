@@ -58,18 +58,21 @@ public class TotalTargetCountStatus {
 
     private final Map<Status, Long> statusTotalCountMap = new EnumMap<>(Status.class);
     private final Long totalTargetCount;
+    private final boolean isDownloadOnly;
 
     /**
      * Create a new states map with the target count for each state.
-     *
-     * @param targetCountActionStatus
+     *  @param targetCountActionStatus
      *            the action state map
      * @param totalTargetCount
      *            the total target count
+     * @param isDownloadOnly
+     *            if rollout was created as a download_only rollout
      */
     public TotalTargetCountStatus(final List<TotalTargetCountActionStatus> targetCountActionStatus,
-            final Long totalTargetCount) {
+          final Long totalTargetCount, boolean isDownloadOnly) {
         this.totalTargetCount = totalTargetCount;
+        this.isDownloadOnly = isDownloadOnly;
         mapActionStatusToTotalTargetCountStatus(targetCountActionStatus);
     }
 
@@ -78,9 +81,11 @@ public class TotalTargetCountStatus {
      *
      * @param totalTargetCount
      *            the total target count
+     * @param isDownloadOnly
+     *            if rollout was created as a download_only rollout
      */
-    public TotalTargetCountStatus(final Long totalTargetCount) {
-        this(Collections.emptyList(), totalTargetCount);
+    public TotalTargetCountStatus(final Long totalTargetCount, boolean isDownloadOnly) {
+        this(Collections.emptyList(), totalTargetCount, isDownloadOnly);
     }
 
     /**
@@ -153,6 +158,10 @@ public class TotalTargetCountStatus {
         case WARNING:
         case DOWNLOAD:
         case DOWNLOADED:
+            if(isDownloadOnly){
+                statusTotalCountMap.put(Status.FINISHED, item.getCount());
+                break;
+            }
         case CANCELING:
             final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
             statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
