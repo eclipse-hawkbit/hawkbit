@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
@@ -53,6 +54,21 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     private static final String VALUE_TOO_LONG = generateRandomStringWithLength(
             Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1);
     private static final String VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE);
+
+    @Test
+    @Description("Verify that config data can be uploaded as CBOR")
+    public void putConfigDataAsCbor() throws Exception {
+        testdataFactory.createTarget("4717");
+
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put(KEY_VALID, VALUE_VALID);
+
+        mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
+                .content(jsonToCbor(JsonBuilder.configData("", attributes, "closed").toString()))
+                .contentType(DdiRestConstants.MEDIA_TYPE_CBOR)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+        assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
+    }
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "

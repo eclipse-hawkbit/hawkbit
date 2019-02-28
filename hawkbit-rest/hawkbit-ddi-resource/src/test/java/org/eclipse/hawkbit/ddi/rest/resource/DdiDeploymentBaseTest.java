@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Condition;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -70,6 +71,40 @@ import io.qameta.allure.Story;
 public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
+
+    @Test
+    @Description("Ensure that the deployment resource is available as CBOR")
+    public void deploymentResourceCbor() throws Exception {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
+
+        assignDistributionSet(distributionSet.getId(), target.getName());
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
+                .getContent().get(0);
+
+        // get deployment base
+        mvc.perform(get("/{tenant}/controller/v1/{target}/deploymentBase/" + uaction.getId(),
+                tenantAware.getCurrentTenant(), target.getControllerId()).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR_UTF8));
+
+        final Long softwareModuleId = distributionSet.getModules().stream().findAny().get().getId();
+        testdataFactory.createArtifacts(softwareModuleId);
+        // get artifacts
+        mvc.perform(get("/{tenant}/controller/v1/{target}/softwaremodules/{softwareModuleId}/artifacts",
+                tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId)
+                        .accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR_UTF8));
+
+        // submit feedback
+        final byte[] feedback = jsonToCbor(
+                JsonBuilder.deploymentActionFeedback(uaction.getId().toString(), "proceeding"));
+        mvc.perform(post("/{tenant}/controller/v1/{target}/deploymentBase/" + uaction.getId() + "/feedback",
+                tenantAware.getCurrentTenant(), target.getControllerId()).content(feedback)
+                        .contentType(DdiRestConstants.MEDIA_TYPE_CBOR).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+    }
 
     @Test
     @Description("Ensures that artifacts are not found, when softare module does not exists.")

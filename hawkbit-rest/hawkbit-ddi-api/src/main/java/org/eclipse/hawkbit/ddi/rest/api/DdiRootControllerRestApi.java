@@ -50,7 +50,7 @@ public interface DdiRootControllerRestApi {
      * @return the response
      */
     @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId);
@@ -66,7 +66,8 @@ public interface DdiRootControllerRestApi {
      *            the HTTP request injected by spring
      * @return the response
      */
-    @GetMapping(value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE,
+            DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId);
 
@@ -154,7 +155,7 @@ public interface DdiRootControllerRestApi {
      * @return the response
      */
     @GetMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
@@ -178,7 +179,8 @@ public interface DdiRootControllerRestApi {
      * @return the response
      */
     @PostMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, consumes = MediaType.APPLICATION_JSON_VALUE)
+            + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
@@ -197,8 +199,8 @@ public interface DdiRootControllerRestApi {
      *
      * @return status of the request
      */
-    @PutMapping(value = "/{controllerId}/"
-            + DdiRestConstants.CONFIG_DATA_ACTION, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION, consumes = {
+            MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 
@@ -217,7 +219,7 @@ public interface DdiRootControllerRestApi {
      * @return the {@link DdiCancel} response
      */
     @GetMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
@@ -241,7 +243,8 @@ public interface DdiRootControllerRestApi {
      */
 
     @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, consumes = MediaType.APPLICATION_JSON_VALUE)
+            + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
