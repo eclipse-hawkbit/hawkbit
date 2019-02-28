@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.data.Property;
+import com.vaadin.ui.Link;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
@@ -14,10 +16,11 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
@@ -36,27 +39,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class AbstractDistributionTargetTable {
-
-    // public static void saveAllAssignmentsTargetTable(final ManagementUIState
-    // managementUIState,
-    // final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
-    // final MaintenanceWindowLayout maintenanceWindowLayout, final
-    // DeploymentManagement deploymentManagement,
-    // final UINotification notification, final UIEventBus eventBus, final
-    // VaadinMessageSource i18n,
-    // final TargetTable targetTable) {
-    //
-    // saveAllAssignments(managementUIState, actionTypeOptionGroupLayout,
-    // maintenanceWindowLayout,
-    // deploymentManagement, notification, eventBus, i18n, targetTable);
-    // // TODO pass EventBus as paramenter, as well as language and
-    // // notifications
-    //
-    //
-    //
-    //
-    //
-    // }
 
     public static void saveAllAssignments(final ManagementUIState managementUIState,
             final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
@@ -152,41 +134,50 @@ public class AbstractDistributionTargetTable {
     }
 
     public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
-            final HorizontalLayout enableMaintenanceWindowLayout,
-            final MaintenanceWindowLayout maintenanceWindowLayout, final ConfirmationDialog confirmDialog) {
-        final ConfirmationTab assignmentTab = new ConfirmationTab();
+            final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler,
+            final VaadinMessageSource i18n, final UiProperties uiProperties) {
+
+        final CheckBox maintenanceWindowControl = maintenanceWindowControl(i18n, maintenanceWindowLayout, saveButtonEnabler);
+        final Link maintenanceWindowHelpLink = maintenanceWindowHelpLinkControl(uiProperties, i18n);
+        final HorizontalLayout layout = createHorizontalLayout(maintenanceWindowControl, maintenanceWindowHelpLink);
         actionTypeOptionGroupLayout.selectDefaultOption();
+
+        initMaintenanceWindow(maintenanceWindowLayout, saveButtonEnabler);
+        addValueChangeListener(actionTypeOptionGroupLayout, maintenanceWindowControl, maintenanceWindowHelpLink);
+        return createAssignmentTab(actionTypeOptionGroupLayout, layout, maintenanceWindowLayout);
+    }
+
+    private static HorizontalLayout createHorizontalLayout(CheckBox maintenanceWindowControl, Link maintenanceWindowHelpLink) {
+        final HorizontalLayout layout = new HorizontalLayout();
+        layout.addComponent(maintenanceWindowControl);
+        layout.addComponent(maintenanceWindowHelpLink);
+        return layout;
+    }
+
+    private static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+             final HorizontalLayout layout, final MaintenanceWindowLayout maintenanceWindowLayout) {
+        final ConfirmationTab assignmentTab = new ConfirmationTab();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
-        assignmentTab.addComponent(enableMaintenanceWindowLayout);
-        initMaintenanceWindow(maintenanceWindowLayout, confirmDialog);
+        assignmentTab.addComponent(layout);
         assignmentTab.addComponent(maintenanceWindowLayout);
         return assignmentTab;
     }
 
     private static void initMaintenanceWindow(final MaintenanceWindowLayout maintenanceWindowLayout,
-            final ConfirmationDialog confirmDialog) {
+            final SaveButtonEnabler saveButtonEnabler) {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
         maintenanceWindowLayout.getScheduleControl()
                 .addTextChangeListener(
-                        event -> enableSaveButton(maintenanceWindowLayout.onScheduleChange(event), confirmDialog));
+                        event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
         maintenanceWindowLayout.getDurationControl()
                 .addTextChangeListener(
-                        event -> enableSaveButton(maintenanceWindowLayout.onDurationChange(event), confirmDialog));
+                        event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
     }
 
-    public static void enableSaveButton(final boolean enabled, final ConfirmationDialog confirmDialog) {
-        confirmDialog.getOkButton().setEnabled(enabled);
-    }
-    
-    public static CheckBox enableMaintenanceWindowControl(final VaadinMessageSource i18n,
-            final MaintenanceWindowLayout maintenanceWindowLayout,
-            final ConfirmationDialog confirmDialog) {
-        // TODO this is done to have the checkbox called enableMaintenanceWindow
-        // with state in Class TargetTable, but should be done in other way..
-        // like sonarQube also says..
-        final CheckBox enableMaintenanceWindow = new CheckBox(
-                i18n.getMessage("caption.maintenancewindow.enabled"));
+    public static CheckBox maintenanceWindowControl(final VaadinMessageSource i18n,
+            final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler) {
+        final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
         enableMaintenanceWindow.addStyleName("dist-window-maintenance-window-enable");
@@ -194,11 +185,36 @@ public class AbstractDistributionTargetTable {
             final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
             maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
             maintenanceWindowLayout.setEnabled(isMaintenanceWindowEnabled);
-            enableSaveButton(!isMaintenanceWindowEnabled, confirmDialog);
+            saveButtonEnabler.setButtonEnabled(!isMaintenanceWindowEnabled);
             maintenanceWindowLayout.clearAllControls();
         });
         return enableMaintenanceWindow;
     }
 
+    private static void addValueChangeListener(ActionTypeOptionGroupLayout actionTypeOptionGroupLayout, CheckBox enableMaintenanceWindowControl, Link maintenanceWindowHelpLinkControl) {
+        actionTypeOptionGroupLayout.getActionTypeOptionGroup().addValueChangeListener(new Property.ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
+                    enableMaintenanceWindowControl.setValue(false);
+                    enableMaintenanceWindowControl.setEnabled(false);
+                    maintenanceWindowHelpLinkControl.setEnabled(false);
+
+                } else {
+                    enableMaintenanceWindowControl.setEnabled(true);
+                    maintenanceWindowHelpLinkControl.setEnabled(true);
+                }
+
+            }
+        });
+    }
+
+    private static Link maintenanceWindowHelpLinkControl(UiProperties uiProperties, VaadinMessageSource i18n) {
+        final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
+        Link maintenanceWindowLink = SPUIComponentProvider.getHelpLink(i18n, maintenanceWindowHelpUrl);
+        return maintenanceWindowLink;
+    }
 
 }

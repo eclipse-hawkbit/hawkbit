@@ -80,17 +80,13 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
-            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, /*
-                                                                                          * VIRT_PROP_DOWNLOADONLY,
-                                                                                          */
-            VIRT_PROP_ACTION_CANCEL,
+            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
             VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_FORCED,
-            VIRT_PROP_TIMEFORCED, /* VIRT_PROP_DOWNLOADONLY, */ VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE,
-            VIRT_PROP_ACTION_FORCE_QUIT };
+            VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final String[] leftAlignedColumns = new String[] { VIRT_PROP_TIMEFORCED };
 

@@ -29,17 +29,12 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
-import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -59,8 +54,8 @@ import org.eclipse.hawkbit.ui.management.event.TargetAddUpdateWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
-import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
@@ -107,6 +102,10 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.createAssignmentTab;
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.isMaintenanceWindowValid;
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.saveAllAssignments;
+
 /**
  * Concrete implementation of Target table which is displayed on the Deployment
  * View.
@@ -145,10 +144,6 @@ public class TargetTable extends AbstractTable<Target> {
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
-    private CheckBox enableMaintenanceWindow;
-
-    private Link maintenanceWindowLink;
-
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
@@ -169,7 +164,6 @@ public class TargetTable extends AbstractTable<Target> {
         addNewContainerDS();
         setColumnProperties();
         setDataAvailable(getContainerDataSource().size() != 0);
-        addValueChangeListener();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -528,7 +522,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private void tagAssignment(final DragAndDropEvent event) {
-        final List<Long> targetList = getDraggedTargetList(event).stream().collect(Collectors.toList());
+        final List<Long> targetList = new ArrayList<>(getDraggedTargetList(event));
 
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
@@ -903,61 +897,21 @@ public class TargetTable extends AbstractTable<Target> {
                 getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && AbstractDistributionTargetTable.isMaintenanceWindowValid(maintenanceWindowLayout, LOG,
-                            getNotification())) {
-                        AbstractDistributionTargetTable.saveAllAssignments(managementUIState,
-                                actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement,
-                                getNotification(), getEventBus(), getI18n(), this);
-                    } else {
-                        managementUIState.getAssignedList().clear();
-                    }
-                },
-                AbstractDistributionTargetTable.createAssignmentTab(actionTypeOptionGroupLayout,
-                        enableMaintenanceWindowLayout(), maintenanceWindowLayout, confirmDialog),
-                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+            if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, LOG, getNotification())) {
+                saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
+                        deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
+            } else {
+                managementUIState.getAssignedList().clear();
+            }
+        }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonEnabler(), getI18n(),
+                uiProperties), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private void addValueChangeListener() {
-        actionTypeOptionGroupLayout.getActionTypeOptionGroup().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
-                    enableMaintenanceWindow.setValue(false);
-                    enableMaintenanceWindow.setEnabled(false);
-                    maintenanceWindowLink.setEnabled(false);
-
-                } else {
-                    enableMaintenanceWindow.setEnabled(true);
-                    maintenanceWindowLink.setEnabled(true);
-                }
-
-            }
-        });
+    private SaveButtonEnabler saveButtonEnabler() {
+        return (enabled) -> confirmDialog.getOkButton().setEnabled(enabled);
     }
-
-    private HorizontalLayout enableMaintenanceWindowLayout() {
-        final HorizontalLayout layout = new HorizontalLayout();
-        enableMaintenanceWindow = AbstractDistributionTargetTable.enableMaintenanceWindowControl(getI18n(),
-                maintenanceWindowLayout, confirmDialog);
-        layout.addComponent(
-                enableMaintenanceWindow);
-        layout.addComponent(maintenanceWindowHelpLinkControl());
-        return layout;
-    }
-
-
-
-    private Link maintenanceWindowHelpLinkControl() {
-        final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        maintenanceWindowLink = SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
-        return maintenanceWindowLink;
-    }
-
-
 
     private void addNewTargetToAssignmentList(final TargetIdName createTargetIdName,
             final DistributionSet findDistributionSetAllById) {

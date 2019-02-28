@@ -88,6 +88,10 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.createAssignmentTab;
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.isMaintenanceWindowValid;
+import static org.eclipse.hawkbit.ui.management.AbstractDistributionTargetTable.saveAllAssignments;
+
 /**
  * Distribution set table which is shown on the Deployment View.
  */
@@ -464,18 +468,18 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
                 confirmQuestion, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && AbstractDistributionTargetTable.isMaintenanceWindowValid(maintenanceWindowLayout, LOG,
-                            getNotification())) {
-                        AbstractDistributionTargetTable.saveAllAssignments(managementUIState,
-                                actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement,
-                                getNotification(), getEventBus(), getI18n(), this);
-                    } else {
-                        managementUIState.getAssignedList().clear();
-                    }
-                },
-                AbstractDistributionTargetTable.createAssignmentTab(actionTypeOptionGroupLayout,
-                        enableMaintenanceWindowLayout(), maintenanceWindowLayout, confirmDialog),
-                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+            if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, LOG, getNotification())) {
+                saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
+                        deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
+            } else {
+                managementUIState.getAssignedList().clear();
+            }
+        }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonEnabler(), getI18n(),
+                uiProperties), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+    }
+
+    private SaveButtonEnabler saveButtonEnabler() {
+        return (enabled) -> confirmDialog.getOkButton().setEnabled(enabled);
     }
 
     private String createConfirmationQuestionForAssignment(final String distributionNameToAssign,
