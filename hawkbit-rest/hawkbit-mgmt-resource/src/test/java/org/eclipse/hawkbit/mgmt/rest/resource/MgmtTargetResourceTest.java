@@ -1288,6 +1288,27 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Verfies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
+    public void assignDownloadOnlyDistributionSetToTarget() throws Exception {
+
+        Target target = testdataFactory.createTarget();
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content("{\"id\":" + set.getId() + ",\"type\": \"download_only\"}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(1)))
+                .andExpect(jsonPath("alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("total", equalTo(1)));
+
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
+        Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
+        assertThat(actions.getSize()).isGreaterThan(0);
+        actions.stream().filter(a -> a.getDistributionSet().equals(set))
+                .forEach(a -> a.getActionType().equals(ActionType.DOWNLOAD_ONLY));
+    }
+
+    @Test
     @Description("Verfies that an offline DS to target assignment is reflected by the repository and that repeating "
             + "the assignment does not change the target.")
     public void offlineAssignDistributionSetToTarget() throws Exception {
