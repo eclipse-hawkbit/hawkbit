@@ -69,6 +69,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_NEUTRAL = "statusIconNeutral";
     private static final String STATUS_ICON_ACTIVE = "statusIconActive";
     private static final String STATUS_ICON_FORCED = "statusIconForced";
+    private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
 
     private static final String VIRT_PROP_FORCED = "forced";
     private static final String VIRT_PROP_TIMEFORCED = "timeForced";
@@ -79,13 +80,17 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
-            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, /*
+                                                                                          * VIRT_PROP_DOWNLOADONLY,
+                                                                                          */
+            VIRT_PROP_ACTION_CANCEL,
             VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_FORCED,
-            VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
+            VIRT_PROP_TIMEFORCED, /* VIRT_PROP_DOWNLOADONLY, */ VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE,
+            VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final String[] leftAlignedColumns = new String[] { VIRT_PROP_TIMEFORCED };
 
@@ -227,7 +232,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
                 new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
         getColumn(VIRT_PROP_FORCED).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(this::createForcedLabelMetadata));
+                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createForcedLabelMetadata));
         getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
                 new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
         getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
@@ -268,6 +273,19 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private StatusFontIcon createIsActiveLabelMetadata(final IsActiveDecoration isActiveDeco) {
         return activeStates.get(isActiveDeco);
+    }
+
+    private StatusFontIcon createTypeLabelMetadata(final Action action) {
+        StatusFontIcon result = null;
+        if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
+            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
+            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, "DownloadOnly",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        return result;
     }
 
     private StatusFontIcon createForcedLabelMetadata(final Action action) {
@@ -473,7 +491,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 
-        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.forced"));
+        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
         newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
                 .setText(i18n.getMessage("header.action"));
     }
