@@ -760,10 +760,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        Status finishedActionStatus = rollout.isDownloadOnly() ? Status.DOWNLOADED : Status.FINISHED;
-        final Long actionsLeftForRollout = actionRepository
-                .countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
-                        Arrays.asList(Status.ERROR, finishedActionStatus, Status.CANCELED));
+        List<Status> statuses = Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED);
+        if(rollout.isDownloadOnly()) {
+            // In case of DOWNLOAD_ONLY, actions can be finished with Status.DOWNLOADED
+            // as well as Status.FINISHED
+            statuses.add(Status.DOWNLOADED);
+        }
+        final Long actionsLeftForRollout = actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout,
+                rolloutGroup, statuses);
         return actionsLeftForRollout == 0;
     }
 

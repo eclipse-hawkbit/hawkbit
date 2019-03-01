@@ -268,11 +268,6 @@ public final class UIComponentIdProvider {
     public static final String ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID = "action.history.table.timedforceId";
 
     /**
-     * Action history table forced label Id.
-     */
-    public static final String ACTION_HISTORY_TABLE_DOWNLOADONLY_LABEL_ID = "action.history.table.forcedId";
-
-    /**
      * Action history table status label Id.
      */
     public static final String ACTION_HISTORY_TABLE_STATUS_LABEL_ID = "action.history.table.statusId";
