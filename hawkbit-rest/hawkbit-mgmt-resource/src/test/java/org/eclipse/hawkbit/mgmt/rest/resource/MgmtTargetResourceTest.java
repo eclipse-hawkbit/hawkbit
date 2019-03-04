@@ -1295,7 +1295,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                .content("{\"id\":" + set.getId() + ",\"type\": \"download_only\"}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + ",\"type\": \"downloadonly\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1)))
                 .andExpect(jsonPath("alreadyAssigned", equalTo(0)))

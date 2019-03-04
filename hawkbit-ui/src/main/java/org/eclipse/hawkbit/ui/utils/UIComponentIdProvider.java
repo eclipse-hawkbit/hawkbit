@@ -180,7 +180,7 @@ public final class UIComponentIdProvider {
     /**
      * Download Only Action Id.
      */
-    public static final String ACTION_DETAILS_DOWNLOAD_ONLY_ID = "action.details.download_only.group";
+    public static final String ACTION_DETAILS_DOWNLOAD_ONLY_ID = "action.details.downloadonly.group";
     /**
      * Start type of rollout manual radio button
      */

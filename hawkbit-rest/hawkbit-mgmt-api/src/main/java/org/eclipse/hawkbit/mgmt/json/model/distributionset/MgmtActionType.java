@@ -33,7 +33,7 @@ public enum MgmtActionType {
     /**
      * The Download-Only action type.
      */
-    DOWNLOAD_ONLY("download_only");
+    DOWNLOAD_ONLY("downloadonly");
 
     private final String name;
 
