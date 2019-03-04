@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -760,7 +761,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        List<Status> statuses = Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED);
+        List<Status> statuses = new LinkedList<>(Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED));
         if(rollout.isDownloadOnly()) {
             // In case of DOWNLOAD_ONLY, actions can be finished with Status.DOWNLOADED
             // as well as Status.FINISHED
