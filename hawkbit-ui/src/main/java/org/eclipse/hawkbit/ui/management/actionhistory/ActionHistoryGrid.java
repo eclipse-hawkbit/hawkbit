@@ -71,7 +71,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_FORCED = "statusIconForced";
     private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
 
-    private static final String VIRT_PROP_FORCED = "forced";
+    private static final String VIRT_PROP_TYPE = "forced";
     private static final String VIRT_PROP_TIMEFORCED = "timeForced";
     private static final String VIRT_PROP_ACTION_CANCEL = "cancel-action";
     private static final String VIRT_PROP_ACTION_FORCE = "force-action";
@@ -80,20 +80,20 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
-            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
             VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_FORCED,
+            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_TYPE,
             VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final String[] leftAlignedColumns = new String[] { VIRT_PROP_TIMEFORCED };
 
     private static final String[] centerAlignedColumns = new String[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_STATUS };
+            ProxyAction.PXY_ACTION_STATUS, VIRT_PROP_TYPE, ProxyAction.PXY_ACTION_ID };
 
-    private static final String[] rightAlignedColumns = new String[] { VIRT_PROP_FORCED, ProxyAction.PXY_ACTION_ID };
+    private static final String[] rightAlignedColumns = new String[] {};
 
     private final transient DeploymentManagement deploymentManagement;
     private final UINotification notification;
@@ -227,8 +227,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                 new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
                 new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
-        getColumn(VIRT_PROP_FORCED).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createForcedLabelMetadata));
+        getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
+                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createTypeLabelMetadata));
         getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
                 new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
         getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
@@ -484,10 +484,10 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
                 .setHeaderCaption(i18n.getMessage("header.maintenancewindow"));
-        getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
+        getColumn(VIRT_PROP_TYPE).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 
-        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
+        newHeaderRow.join(VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
         newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
                 .setText(i18n.getMessage("header.action"));
     }
@@ -499,7 +499,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         setColumnsSize(100.0, 130.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
         setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
         setColumnsSize(150.0, 200.0, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW);
-        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
                 VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
     }
 
@@ -583,7 +583,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         protected GeneratedPropertyContainer addGeneratedContainerProperties() {
             final GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
 
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_FORCED, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_TYPE, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_TIMEFORCED, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_CANCEL, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_FORCE, new GenericPropertyValueGenerator());
@@ -636,7 +636,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
             setColumnsSize(100.0, 150.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
             setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED,
+            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED,
                     VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
             setColumnsSize(FIXED_PIX_MIN, 500.0, ProxyAction.PXY_ACTION_ROLLOUT_NAME);
         }
