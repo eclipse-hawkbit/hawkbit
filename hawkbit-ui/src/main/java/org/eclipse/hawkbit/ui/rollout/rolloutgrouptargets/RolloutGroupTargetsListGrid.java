@@ -238,7 +238,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
         }
 
         private String processActionStatus(final Status status) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(status);
+            final StatusFontIcon statusFontIcon = isDownloadOnlyRollout() ? statusIconMap.get(Status.FINISHED)
+                    : statusIconMap.get(status);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
         }
@@ -257,6 +258,12 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
                     Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
         }
 
+    }
+
+    private boolean isDownloadOnlyRollout() {
+        return rolloutUIState.getRolloutGroup()
+                .map(rolloutGroup -> rolloutGroup.getRollout().isDownloadOnly())
+                .orElse(false);
     }
 
     private String getDescription(final CellReference cell) {
