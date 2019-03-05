@@ -8,7 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-public class ActionProperties {
+import java.io.Serializable;
+
+public class ActionProperties implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private boolean downloadOnly;

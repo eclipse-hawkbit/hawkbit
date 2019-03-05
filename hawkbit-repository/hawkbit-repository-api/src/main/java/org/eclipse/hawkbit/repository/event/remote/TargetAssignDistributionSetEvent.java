@@ -62,6 +62,14 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     }
 
+    /**
+     * Constructor.
+     *
+     * @param action
+     *            the action created for this assignment
+     * @param applicationId
+     *            the application id
+     */
     public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
         this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), applicationId,
                 action.isMaintenanceWindowAvailable());
