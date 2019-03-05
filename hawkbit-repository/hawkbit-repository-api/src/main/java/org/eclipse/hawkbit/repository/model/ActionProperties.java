@@ -22,14 +22,14 @@ public class ActionProperties implements Serializable {
     public ActionProperties() {
     }
 
-    public ActionProperties(Action action) {
+    public ActionProperties(final Action action) {
         this.id = action.getId();
         this.downloadOnly = action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
         this.tenant = action.getTenant();
         this.maintenanceWindowAvailable = action.isMaintenanceWindowAvailable();
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -37,7 +37,7 @@ public class ActionProperties implements Serializable {
         return id;
     }
 
-    public void setDownloadOnly(boolean downloadOnly) {
+    public void setDownloadOnly(final boolean downloadOnly) {
         this.downloadOnly = downloadOnly;
     }
 
@@ -45,7 +45,7 @@ public class ActionProperties implements Serializable {
         return downloadOnly;
     }
 
-    public void setTenant(String tenant) {
+    public void setTenant(final String tenant) {
         this.tenant = tenant;
     }
 
@@ -53,7 +53,7 @@ public class ActionProperties implements Serializable {
         return tenant;
     }
 
-    public void setMaintenanceWindowAvailable(boolean maintenanceWindowAvailable) {
+    public void setMaintenanceWindowAvailable(final boolean maintenanceWindowAvailable) {
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;
     }
 

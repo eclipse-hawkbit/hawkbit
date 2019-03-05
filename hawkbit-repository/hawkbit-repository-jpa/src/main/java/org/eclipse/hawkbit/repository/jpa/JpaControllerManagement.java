@@ -581,7 +581,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
     }
 
-    private boolean isDownloadOnly(JpaAction action) {
+    private boolean isDownloadOnly(final JpaAction action) {
         return action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
     }
 
@@ -622,7 +622,7 @@ public class JpaControllerManagement implements ControllerManagement {
         return savedAction;
     }
 
-    private String handleDownloadedEventForDownloadOnlyAction(JpaAction action) {
+    private String handleDownloadedEventForDownloadOnlyAction(final JpaAction action) {
         if(!action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY)){
             return null;
         }

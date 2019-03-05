@@ -107,7 +107,7 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
         totalTargetsPerStatus.put(status, totalTargetCountByStatus);
     }
 
-    public void setType(MgmtActionType type) {
+    public void setType(final MgmtActionType type) {
         this.type = type;
     }
 

@@ -319,7 +319,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *         are not in given states
      */
     Long countByRolloutAndRolloutGroupAndStatusNotIn(JpaRollout rollout, JpaRolloutGroup rolloutGroup,
-                                                     List<Status> statuses);
+            List<Status> statuses);
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup.

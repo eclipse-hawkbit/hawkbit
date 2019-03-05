@@ -70,7 +70,7 @@ public class TotalTargetCountStatus {
      *            if rollout was created as a download_only rollout
      */
     public TotalTargetCountStatus(final List<TotalTargetCountActionStatus> targetCountActionStatus,
-          final Long totalTargetCount, boolean isDownloadOnly) {
+            final Long totalTargetCount, final boolean isDownloadOnly) {
         this.totalTargetCount = totalTargetCount;
         this.isDownloadOnly = isDownloadOnly;
         mapActionStatusToTotalTargetCountStatus(targetCountActionStatus);
@@ -84,7 +84,7 @@ public class TotalTargetCountStatus {
      * @param isDownloadOnly
      *            if rollout was created as a download_only rollout
      */
-    public TotalTargetCountStatus(final Long totalTargetCount, boolean isDownloadOnly) {
+    public TotalTargetCountStatus(final Long totalTargetCount, final boolean isDownloadOnly) {
         this(Collections.emptyList(), totalTargetCount, isDownloadOnly);
     }
 

@@ -460,7 +460,7 @@ public abstract class JsonBuilder {
 
     public static String rollout(final String name, final String description, final Integer groupSize,
              final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-             final List<RolloutGroup> groups, String type) {
+             final List<RolloutGroup> groups, final String type) {
         final JSONObject json = new JSONObject();
         try {
             json.put("name", name);

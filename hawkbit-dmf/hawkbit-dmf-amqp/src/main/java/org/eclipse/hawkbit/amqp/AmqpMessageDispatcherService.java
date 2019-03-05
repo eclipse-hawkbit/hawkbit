@@ -144,10 +144,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                             PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
                                             .getContent()));
 
-            targetManagement.getByControllerID(assignedEvent.getActions().keySet())
-                    .forEach(target ->
-                            sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()), target,
-                                    modules));
+            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
+                    target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
+                            target, modules));
 
         });
     }
@@ -165,9 +164,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @return {@link EventTopic} to use for message.
      */
     private static EventTopic getEventTypeForTarget(final ActionProperties action) {
-        return action.isDownloadOnly() ? EventTopic.DOWNLOAD
-                : action.isMaintenanceWindowAvailable() ? EventTopic.DOWNLOAD_AND_INSTALL
-                : EventTopic.DOWNLOAD;
+        return (action.isDownloadOnly() || !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD
+                : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
     /**
@@ -209,8 +207,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 updateAttributesEvent.getTargetAddress());
     }
 
-    void sendUpdateMessageToTarget(ActionProperties action, Target target, Map<SoftwareModule,
-            List<SoftwareModuleMetadata>> modules) {
+    void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
 
         String tenant = action.getTenant();
 

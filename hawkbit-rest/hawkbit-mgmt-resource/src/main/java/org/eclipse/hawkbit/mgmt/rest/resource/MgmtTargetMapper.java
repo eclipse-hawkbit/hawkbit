@@ -190,10 +190,11 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        return actionStatus.stream().map(status -> toResponse(status,
-                deploymentManagement.findMessagesByActionStatusId(
-                        PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
-                        .getContent()))
+        return actionStatus.stream()
+                .map(status -> toResponse(status,
+                        deploymentManagement.findMessagesByActionStatusId(
+                                PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
+                                .getContent()))
                 .collect(Collectors.toList());
     }
 

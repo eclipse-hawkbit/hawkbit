@@ -301,7 +301,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+            amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, "vHost");
             fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }

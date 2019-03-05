@@ -38,13 +38,36 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AbstractDistributionTargetTable {
+public final class TargetAssignmentOperations {
 
+    private TargetAssignmentOperations() {
+    }
+
+    /**
+     * Save all target(s)-distributionSet assignments
+     * 
+     * @param managementUIState
+     *            the management UI state
+     * @param actionTypeOptionGroupLayout
+     *            the action Type Option Group Layout
+     * @param maintenanceWindowLayout
+     *            the Maintenance Window Layout
+     * @param deploymentManagement
+     *            the Deployment Management
+     * @param notification
+     *            the UI Notification
+     * @param eventBus
+     *            the UI Event Bus
+     * @param i18n
+     *            the Vaadin Message Source for multi language
+     * @param eventSource
+     *            the object to be used as an event source for UI events
+     */
     public static void saveAllAssignments(final ManagementUIState managementUIState,
             final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
-            final MaintenanceWindowLayout maintenanceWindowLayout,
-            final DeploymentManagement deploymentManagement, final UINotification notification,
-            final UIEventBus eventBus, final VaadinMessageSource i18n, final Object eventSource) {
+            final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
+            final UINotification notification, final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final Object eventSource) {
         final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
         Long distId;
         List<TargetIdName> targetIdSetList;
@@ -85,8 +108,8 @@ public class AbstractDistributionTargetTable {
                                     : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
                                     .collect(Collectors.toList()));
             if (distributionSetAssignmentResult.getAssigned() > 0) {
-                notification.displaySuccess(i18n.getMessage("message.target.assignment",
-                        distributionSetAssignmentResult.getAssigned()));
+                notification.displaySuccess(
+                        i18n.getMessage("message.target.assignment", distributionSetAssignmentResult.getAssigned()));
             }
             if (distributionSetAssignmentResult.getAlreadyAssigned() > 0) {
                 notification.displaySuccess(i18n.getMessage("message.target.alreadyAssigned",
@@ -98,7 +121,6 @@ public class AbstractDistributionTargetTable {
         notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
         eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
-
 
     static private void refreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList,
             final ManagementUIState managementUIState, final UIEventBus eventBus, final Object eventSource) {
@@ -117,6 +139,17 @@ public class AbstractDistributionTargetTable {
         }
     }
 
+    /**
+     * Check wether the maintenance window is valid or not
+     * 
+     * @param maintenanceWindowLayout
+     *            the maintenance window layout
+     * @param log
+     *            the logger for the calling class
+     * @param notification
+     *            the UI Notification
+     * @return boolean if maintenance window is valid or not
+     */
     public static boolean isMaintenanceWindowValid(final MaintenanceWindowLayout maintenanceWindowLayout,
             final Logger log, final UINotification notification) {
         if (maintenanceWindowLayout.isEnabled()) {
@@ -133,11 +166,28 @@ public class AbstractDistributionTargetTable {
         return true;
     }
 
+    /**
+     * Create the Assignment Confirmation Tab
+     *
+     * @param actionTypeOptionGroupLayout
+     *            the action Type Option Group Layout
+     * @param maintenanceWindowLayout
+     *            the Maintenance Window Layout
+     * @param saveButtonEnabler
+     *            The event listener to derimne if save button should be enabled
+     *            or not
+     * @param i18n
+     *            the Vaadin Message Source for multi language
+     * @param uiProperties
+     *            the UI Properties
+     * @return the Assignment Confirmation tab
+     */
     public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler,
             final VaadinMessageSource i18n, final UiProperties uiProperties) {
 
-        final CheckBox maintenanceWindowControl = maintenanceWindowControl(i18n, maintenanceWindowLayout, saveButtonEnabler);
+        final CheckBox maintenanceWindowControl = maintenanceWindowControl(i18n, maintenanceWindowLayout,
+                saveButtonEnabler);
         final Link maintenanceWindowHelpLink = maintenanceWindowHelpLinkControl(uiProperties, i18n);
         final HorizontalLayout layout = createHorizontalLayout(maintenanceWindowControl, maintenanceWindowHelpLink);
         actionTypeOptionGroupLayout.selectDefaultOption();
@@ -147,7 +197,8 @@ public class AbstractDistributionTargetTable {
         return createAssignmentTab(actionTypeOptionGroupLayout, layout, maintenanceWindowLayout);
     }
 
-    private static HorizontalLayout createHorizontalLayout(CheckBox maintenanceWindowControl, Link maintenanceWindowHelpLink) {
+    private static HorizontalLayout createHorizontalLayout(final CheckBox maintenanceWindowControl,
+            final Link maintenanceWindowHelpLink) {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.addComponent(maintenanceWindowControl);
         layout.addComponent(maintenanceWindowHelpLink);
@@ -155,7 +206,7 @@ public class AbstractDistributionTargetTable {
     }
 
     private static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
-             final HorizontalLayout layout, final MaintenanceWindowLayout maintenanceWindowLayout) {
+            final HorizontalLayout layout, final MaintenanceWindowLayout maintenanceWindowLayout) {
         final ConfirmationTab assignmentTab = new ConfirmationTab();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
         assignmentTab.addComponent(layout);
@@ -167,15 +218,13 @@ public class AbstractDistributionTargetTable {
             final SaveButtonEnabler saveButtonEnabler) {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl()
-                .addTextChangeListener(
-                        event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
-        maintenanceWindowLayout.getDurationControl()
-                .addTextChangeListener(
-                        event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
+                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getDurationControl().addTextChangeListener(
+                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
     }
 
-    public static CheckBox maintenanceWindowControl(final VaadinMessageSource i18n,
+    private static CheckBox maintenanceWindowControl(final VaadinMessageSource i18n,
             final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler) {
         final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
@@ -191,30 +240,32 @@ public class AbstractDistributionTargetTable {
         return enableMaintenanceWindow;
     }
 
-    private static void addValueChangeListener(ActionTypeOptionGroupLayout actionTypeOptionGroupLayout, CheckBox enableMaintenanceWindowControl, Link maintenanceWindowHelpLinkControl) {
-        actionTypeOptionGroupLayout.getActionTypeOptionGroup().addValueChangeListener(new Property.ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
+    private static void addValueChangeListener(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+            final CheckBox enableMaintenanceWindowControl, final Link maintenanceWindowHelpLinkControl) {
+        actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .addValueChangeListener(new Property.ValueChangeListener() {
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
-                    enableMaintenanceWindowControl.setValue(false);
-                    enableMaintenanceWindowControl.setEnabled(false);
-                    maintenanceWindowHelpLinkControl.setEnabled(false);
+                    @Override
+                    public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                        if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
+                            enableMaintenanceWindowControl.setValue(false);
+                            enableMaintenanceWindowControl.setEnabled(false);
+                            maintenanceWindowHelpLinkControl.setEnabled(false);
 
-                } else {
-                    enableMaintenanceWindowControl.setEnabled(true);
-                    maintenanceWindowHelpLinkControl.setEnabled(true);
-                }
+                        } else {
+                            enableMaintenanceWindowControl.setEnabled(true);
+                            maintenanceWindowHelpLinkControl.setEnabled(true);
+                        }
 
-            }
-        });
+                    }
+                });
     }
 
-    private static Link maintenanceWindowHelpLinkControl(UiProperties uiProperties, VaadinMessageSource i18n) {
+    private static Link maintenanceWindowHelpLinkControl(final UiProperties uiProperties,
+            final VaadinMessageSource i18n) {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        Link maintenanceWindowLink = SPUIComponentProvider.getHelpLink(i18n, maintenanceWindowHelpUrl);
-        return maintenanceWindowLink;
+        return SPUIComponentProvider.getHelpLink(i18n, maintenanceWindowHelpUrl);
     }
 
 }

@@ -215,10 +215,10 @@ public final class TargetSpecifications {
         );
     }
 
-    private static Predicate distributionSetAssignedButNotInstalled(@NotNull Long distId,
-        Root<JpaTarget> targetRoot, CriteriaBuilder cb) {
+    private static Predicate distributionSetAssignedButNotInstalled(@NotNull final Long distId,
+            final Root<JpaTarget> targetRoot, final CriteriaBuilder cb) {
         return cb.or(cb.isNull(targetRoot.get(JpaTarget_.installedDistributionSet)),
-            cb.notEqual(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distId));
+                cb.notEqual(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distId));
     }
 
     /**

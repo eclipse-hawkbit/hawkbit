@@ -38,8 +38,8 @@ public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupCondit
             return true;
         }
 
-        Action.Status completeActionStatus = rollout.isDownloadOnly() ? Action.Status.DOWNLOADED :
-                Action.Status.FINISHED;
+        Action.Status completeActionStatus = rollout.isDownloadOnly() ? Action.Status.DOWNLOADED
+                : Action.Status.FINISHED;
         final long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), completeActionStatus);
         try {
