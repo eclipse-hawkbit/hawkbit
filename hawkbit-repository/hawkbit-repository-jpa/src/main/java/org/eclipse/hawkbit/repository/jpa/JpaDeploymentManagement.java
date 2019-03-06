@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +67,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -342,6 +347,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private Set<Long> closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
             final List<List<Long>> targetIdsChunks) {
+
+        if (isMultiAssignmentsEnabled()) {
+            LOG.info(">>> multi-assignments are enabled: No need to close /cancel active actions.");
+            return Collections.emptySet();
+        }
+
         if (isActionsAutocloseEnabled()) {
             assignmentStrategy.closeActiveActions(targetIdsChunks);
             return Collections.emptySet();
@@ -350,18 +361,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
-    protected boolean isActionsAutocloseEnabled() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
-                .getValue());
-    }
-
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
-        actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
+        if (!isMultiAssignmentsEnabled()) {
+            actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
+        } else {
+            LOG.info(">>> multi-assignments are enabled: No need to cancel inactive scheduled actions.");
+        }
     }
 
     private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
@@ -782,4 +791,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     protected ActionRepository getActionRepository() {
         return actionRepository;
     }
+
+    protected boolean isActionsAutocloseEnabled() {
+        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class, Boolean.FALSE);
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class, Boolean.TRUE);
+    }
+
+    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType,
+            final T defaultValue) {
+        return systemSecurityContext.runAsSystem(() -> {
+            final TenantConfigurationValue<T> configEntry = tenantConfigurationManagement.getConfigurationValue(key,
+                    valueType);
+            return configEntry != null ? configEntry.getValue() : defaultValue;
+        });
+    }
+
 }
