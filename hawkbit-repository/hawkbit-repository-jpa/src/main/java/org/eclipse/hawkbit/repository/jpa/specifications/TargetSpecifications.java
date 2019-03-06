@@ -208,17 +208,10 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
             @NotNull final Long distributionId) {
-        return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs), cb.or(
-            cb.isNull(targetRoot.get(JpaTarget_.assignedDistributionSet)),
-            cb.notEqual(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id), distributionId),
-            distributionSetAssignedButNotInstalled(distributionId, targetRoot, cb))
-        );
-    }
-
-    private static Predicate distributionSetAssignedButNotInstalled(@NotNull final Long distId,
-            final Root<JpaTarget> targetRoot, final CriteriaBuilder cb) {
-        return cb.or(cb.isNull(targetRoot.get(JpaTarget_.installedDistributionSet)),
-                cb.notEqual(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distId));
+        return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
+                cb.or(cb.notEqual(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
+                        .get(JpaDistributionSet_.id), distributionId),
+                        cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
     }
 
     /**
