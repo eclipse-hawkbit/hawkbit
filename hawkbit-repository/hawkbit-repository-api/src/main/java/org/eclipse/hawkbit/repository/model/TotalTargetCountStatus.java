@@ -139,9 +139,9 @@ public class TotalTargetCountStatus {
         statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
     }
 
-    // Exception squid:MethodCyclomaticComplexity - simple state conversion, not
-    // really complex.
-    @SuppressWarnings("squid:MethodCyclomaticComplexity")
+    // Exception squid:MethodCyclomaticComplexity - simple state conversion, not really complex.
+    // Exception squid:S128 - No unconditional break needed in DOWNLOADED case for a non download_only assignment
+    @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S128"})
     private void convertStatus(final TotalTargetCountActionStatus item) {
         switch (item.getStatus()) {
         case SCHEDULED:

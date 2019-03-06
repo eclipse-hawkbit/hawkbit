@@ -588,6 +588,8 @@ public class JpaControllerManagement implements ControllerManagement {
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
      */
+    // Exception squid:S128 - No unconditional break needed in DOWNLOADED case for a non download_only assignment
+    @SuppressWarnings("squid:S128")
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
 
         String controllerId = null;
@@ -603,7 +605,10 @@ public class JpaControllerManagement implements ControllerManagement {
             controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
         case DOWNLOADED:
-            controllerId = handleDownloadedEventForDownloadOnlyAction(action);
+            if(action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY)){
+                controllerId = handleDownloadedEventForDownloadOnlyAction(action);
+                break;
+            }
         default:
             // information status entry - check for a potential DOS attack
             assertActionStatusQuota(action);
@@ -623,10 +628,6 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private String handleDownloadedEventForDownloadOnlyAction(final JpaAction action) {
-        if(!action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY)){
-            return null;
-        }
-
         JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.DOWNLOADED);
