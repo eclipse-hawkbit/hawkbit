@@ -103,6 +103,10 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
+    public static final String TOOLTIP_TIMEFORCED_FORCED_IN = "tooltip.timeforced.forced.in";
+
+    public static final String TOOLTIP_TIMEFORCED_FORCED_SINCE = "tooltip.timeforced.forced.since";
+
     public static final String TOOLTIP_SOFT_ITEM = "tooltip.soft.item";
 
     public static final String TOOLTIP_FORCED_ITEM = "tooltip.forced.item";
@@ -158,6 +162,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
+
+    public static final String TOOLTIP_ROLLOUT_STATUS_PREFIX = "tooltip.rollout.status.";
 
     /**
      * Private Constructor.
