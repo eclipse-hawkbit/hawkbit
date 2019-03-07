@@ -1233,6 +1233,12 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration checkbox for
+     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_ENABLED}.
+     */
+    public static final String REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX = "repositorymultiassignmentscheckbox";
+
+    /**
+     * Configuration checkbox for
      * {@link TenantConfigurationKey#ROLLOUT_APPROVAL_ENABLED}
      */
     public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
