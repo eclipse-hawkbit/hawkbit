@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
@@ -43,6 +44,7 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
             final UINotification notification, final DistributionSetTagManagement distributionSetTagManagement,
             final TargetTagManagement targetTagManagement, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final TenantConfigurationManagement configManagement,
             final UiProperties uiProperties) {
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
@@ -54,7 +56,7 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
 
         this.distributionTable = new DistributionTable(eventBus, i18n, permissionChecker, notification,
                 managementUIState, managementViewClientCriterion, targetManagement, distributionSetManagement,
-                deploymentManagement, targetTagManagement, uiProperties);
+                deploymentManagement, targetTagManagement, configManagement, uiProperties);
 
         super.init(i18n, new DistributionTableHeader(i18n, permissionChecker, eventBus, managementUIState),
                 distributionTable,

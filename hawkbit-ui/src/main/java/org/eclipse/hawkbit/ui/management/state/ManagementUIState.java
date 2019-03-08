@@ -10,9 +10,7 @@ package org.eclipse.hawkbit.ui.management.state;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,7 +38,7 @@ public class ManagementUIState implements ManagementEntityState, Serializable {
 
     private final TargetTableFilters targetTableFilters;
 
-    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<>();
+    private final AssignmentUIState assignmentState = new AssignmentUIState();
 
     private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
@@ -137,8 +135,8 @@ public class ManagementUIState implements ManagementEntityState, Serializable {
         return distributionTableFilters;
     }
 
-    public Map<TargetIdName, DistributionSetIdName> getAssignedList() {
-        return assignedList;
+    public AssignmentUIState getAssignmentState() {
+        return assignmentState;
     }
 
     public Set<DistributionSetIdName> getDeletedDistributionList() {

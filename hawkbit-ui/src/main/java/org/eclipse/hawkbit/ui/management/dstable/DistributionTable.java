@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -53,6 +55,7 @@ import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
+import org.eclipse.hawkbit.ui.management.state.AssignmentUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
@@ -117,6 +120,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final transient DeploymentManagement deploymentManagement;
 
+    private final transient TenantConfigurationManagement configManagement;
+
     private final String notAllowedMsg;
 
     private boolean distPinned;
@@ -136,7 +141,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
-            final TargetTagManagement targetTagManagement, final UiProperties uiProperties) {
+            final TargetTagManagement targetTagManagement, final TenantConfigurationManagement configManagement,
+            final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
@@ -145,6 +151,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.targetTagManagement = targetTagManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
+        this.configManagement = configManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
         this.uiProperties = uiProperties;
@@ -440,19 +447,18 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void addNewDistributionToAssignmentList(final List<Target> targetDetailsList,
             final DistributionSet distributionSet) {
-        String pendingActionMessage = null;
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
-
+        String pendingActionMessage = null;
+        final AssignmentUIState assignmentState = managementUIState.getAssignmentState();
         for (final Target target : targetDetailsList) {
-            final TargetIdName key = new TargetIdName(target);
-            if (managementUIState.getAssignedList().keySet().contains(key)
-                    && managementUIState.getAssignedList().get(key).equals(distributionSetIdName)) {
+            final TargetIdName targetIdName = new TargetIdName(target);
+            if (assignmentState.isAssignedTo(distributionSetIdName, targetIdName) && !isMultiAssignmentsEnabled()) {
                 pendingActionMessage = getPendingActionMessage(pendingActionMessage, target.getControllerId(),
                         HawkbitCommonUtil.getDistributionNameAndVersion(distributionSetIdName.getName(),
                                 distributionSetIdName.getVersion()));
                 getNotification().displayValidationError(pendingActionMessage);
             } else {
-                managementUIState.getAssignedList().put(key, distributionSetIdName);
+                assignmentState.addAssignment(distributionSetIdName, targetIdName);
             }
         }
     }
@@ -473,7 +479,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
                     } else {
-                        managementUIState.getAssignedList().clear();
+                        managementUIState.getAssignmentState().clear();
                     }
                 }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
     }
@@ -505,10 +511,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private void saveAllAssignments() {
-        final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
-        Long distId;
-        List<TargetIdName> targetIdSetList;
-        List<TargetIdName> tempIdList;
+
         final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
         final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
@@ -516,30 +519,16 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
-
-        for (final TargetIdName itemId : itemIds) {
-            final DistributionSetIdName distitem = managementUIState.getAssignedList().get(itemId);
-            distId = distitem.getId();
-
-            if (saveAssignedList.containsKey(distId)) {
-                targetIdSetList = saveAssignedList.get(distId);
-            } else {
-                targetIdSetList = new ArrayList<>();
-            }
-            targetIdSetList.add(itemId);
-            saveAssignedList.put(distId, targetIdSetList);
-        }
-
         final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
         final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
-        for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
-            tempIdList = saveAssignedList.get(mapEntry.getKey());
+        final AssignmentUIState assignmentState = managementUIState.getAssignmentState();
+        assignmentState.forEach(distributionSetIdName -> {
+            final Set<TargetIdName> targetIds = assignmentState.getAssignedTargets(distributionSetIdName);
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
-                    .assignDistributionSet(mapEntry.getKey(),
-                            tempIdList.stream().map(t -> maintenanceWindowLayout.isEnabled()
+                    .assignDistributionSet(distributionSetIdName.getId(),
+                            targetIds.stream().map(t -> maintenanceWindowLayout.isEnabled()
                                     ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
                                             maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
                                     : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
@@ -553,27 +542,26 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 getNotification().displaySuccess(getI18n().getMessage("message.target.alreadyAssigned",
                         distributionSetAssignmentResult.getAlreadyAssigned()));
             }
-        }
-        resfreshPinnedDetails(saveAssignedList);
+        });
 
-        managementUIState.getAssignedList().clear();
+        refreshPinnedDetails(assignmentState);
+
+        assignmentState.clear();
         getNotification().displaySuccess(getI18n().getMessage("message.target.ds.assign.success"));
         getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
-    private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
+    private void refreshPinnedDetails(final AssignmentUIState assignmentState) {
         final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
         final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
 
         if (pinnedDist.isPresent()) {
-            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
+            final Long pinnedDistSet = pinnedDist.get();
+            if (assignmentState.isAssigned(pinnedDistSet)) {
                 getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
-        } else if (pinnedTarget.isPresent()) {
-            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
-            if (assignedTargetIds.contains(pinnedTarget.get())) {
-                getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
-            }
+        } else if (pinnedTarget.isPresent() && assignmentState.hasAssignments(pinnedTarget.get())) {
+            getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
 
@@ -910,6 +898,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return distribution.get().getName();
         }
         return "";
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return configManagement
+                .getConfigurationValue(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
+                        Boolean.class)
+                .getValue();
     }
 
 }

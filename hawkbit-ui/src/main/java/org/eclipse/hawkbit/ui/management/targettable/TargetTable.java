@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -41,6 +42,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -63,6 +65,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
+import org.eclipse.hawkbit.ui.management.state.AssignmentUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
@@ -122,6 +125,8 @@ public class TargetTable extends AbstractTable<Target> {
 
     private static final int PROPERTY_DEPT = 3;
 
+    private static final String MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS = "message.confirm.assign.multiple.entities.multiple.distributions";
+
     private final transient TargetManagement targetManagement;
 
     private final transient DistributionSetManagement distributionSetManagement;
@@ -129,6 +134,8 @@ public class TargetTable extends AbstractTable<Target> {
     private final transient TargetTagManagement tagManagement;
 
     private final transient DeploymentManagement deploymentManagement;
+
+    private final transient TenantConfigurationManagement configManagement;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
 
@@ -150,7 +157,8 @@ public class TargetTable extends AbstractTable<Target> {
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiProperties) {
+            final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
+            final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -158,6 +166,7 @@ public class TargetTable extends AbstractTable<Target> {
         this.distributionSetManagement = distributionSetManagement;
         this.tagManagement = tagManagement;
         this.deploymentManagement = deploymentManagement;
+        this.configManagement = configManagement;
         this.uiProperties = uiProperties;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
@@ -860,10 +869,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     // Code for assignment start
     private void saveAllAssignments() {
-        final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
-        Long distId;
-        List<TargetIdName> targetIdSetList;
-        List<TargetIdName> tempIdList;
+
         final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
         final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
@@ -871,30 +877,16 @@ public class TargetTable extends AbstractTable<Target> {
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
-        final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
-
-        for (final TargetIdName itemId : itemIds) {
-            final DistributionSetIdName distitem = managementUIState.getAssignedList().get(itemId);
-            distId = distitem.getId();
-
-            if (saveAssignedList.containsKey(distId)) {
-                targetIdSetList = saveAssignedList.get(distId);
-            } else {
-                targetIdSetList = new ArrayList<>();
-            }
-            targetIdSetList.add(itemId);
-            saveAssignedList.put(distId, targetIdSetList);
-        }
-
         final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
         final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
-        for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
-            tempIdList = saveAssignedList.get(mapEntry.getKey());
+        final AssignmentUIState assignmentState = managementUIState.getAssignmentState();
+        assignmentState.forEach(distributionSetIdName -> {
+            final Set<TargetIdName> targetIds = assignmentState.getAssignedTargets(distributionSetIdName);
             final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
-                    .assignDistributionSet(mapEntry.getKey(),
-                            tempIdList.stream().map(t -> maintenanceWindowLayout.isEnabled()
+                    .assignDistributionSet(distributionSetIdName.getId(),
+                            targetIds.stream().map(t -> maintenanceWindowLayout.isEnabled()
                                     ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
                                             maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
                                     : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
@@ -908,27 +900,25 @@ public class TargetTable extends AbstractTable<Target> {
                 getNotification().displaySuccess(getI18n().getMessage("message.target.alreadyAssigned",
                         distributionSetAssignmentResult.getAlreadyAssigned()));
             }
-        }
-        resfreshPinnedDetails(saveAssignedList);
+        });
+        refreshPinnedDetails(assignmentState);
 
-        managementUIState.getAssignedList().clear();
+        assignmentState.clear();
         getNotification().displaySuccess(getI18n().getMessage("message.target.ds.assign.success"));
         getEventBus().publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
-    private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
+    private void refreshPinnedDetails(final AssignmentUIState assignmentState) {
         final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
         final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
 
         if (pinnedDist.isPresent()) {
-            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
+            final Long pinnedDistSet = pinnedDist.get();
+            if (assignmentState.isAssigned(pinnedDistSet)) {
                 getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
             }
-        } else if (pinnedTarget.isPresent()) {
-            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
-            if (assignedTargetIds.contains(pinnedTarget.get())) {
-                getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
-            }
+        } else if (pinnedTarget.isPresent() && assignmentState.hasAssignments(pinnedTarget.get())) {
+            getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
         }
     }
 
@@ -950,13 +940,17 @@ public class TargetTable extends AbstractTable<Target> {
     private void assignDsToTarget(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
-        final Set<Long> ids = source.getSelectedEntitiesByTransferable(transferable);
-        // only one distribution can be assigned to a target
-        final Long idToSelect = ids.iterator().next();
-        selectDraggedEntities(source, new HashSet<>(Arrays.asList(idToSelect)));
+
+        final Set<Long> dsIds = filterDistributionSetsToAssign(source.getSelectedEntitiesByTransferable(transferable));
+        if (dsIds.isEmpty()) {
+            getNotification().displayWarning(getI18n().getMessage(DISTRIBUTIONSET_NOT_EXISTS));
+            return;
+        }
+
+        selectDraggedEntities(source, dsIds);
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
-        LOG.debug("Adding a log to check if targetItemId is null : {} ", targetItemId);
+        LOG.debug("Drop target: {} ", targetItemId);
         if (targetItemId == null) {
             getNotification().displayWarning(getI18n().getMessage(TARGETS_NOT_EXISTS, ""));
             return;
@@ -970,28 +964,48 @@ public class TargetTable extends AbstractTable<Target> {
             return;
         }
 
-        final TargetIdName createTargetIdName = new TargetIdName(target.get());
-        final List<DistributionSet> findDistributionSetById = distributionSetManagement
-                .get(new HashSet<>(Arrays.asList(idToSelect)));
-
-        if (findDistributionSetById.isEmpty()) {
+        final List<DistributionSet> distributionSets = distributionSetManagement.get(dsIds);
+        if (distributionSets.isEmpty()) {
             getNotification().displayWarning(getI18n().getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
-        final DistributionSet distributionSetToAssign = findDistributionSetById.get(0);
-        addNewTargetToAssignmentList(createTargetIdName, distributionSetToAssign);
-        openConfirmationWindowForAssignment(distributionSetToAssign.getName(), createTargetIdName.getTargetName());
+        openConfirmationWindowForAssignments(target.get(), distributionSets);
     }
 
-    private void openConfirmationWindowForAssignment(final String distributionNameToAssign, final String targetName) {
+    private Set<Long> filterDistributionSetsToAssign(final Set<Long> ids) {
+        if (isMultiAssignmentsEnabled()) {
+            return new HashSet<>(ids);
+        }
+        if (!ids.isEmpty()) {
+            return Collections.singleton(ids.iterator().next());
+        }
+        return Collections.emptySet();
+    }
+
+    private void openConfirmationWindowForAssignments(final Target target,
+            final List<DistributionSet> distributionSets) {
+        final TargetIdName targetIdName = new TargetIdName(target);
+        addAssignments(targetIdName, distributionSets);
+        openConfirmationWindowForAssignment(targetIdName.getTargetName(),
+                distributionSets.stream().map(DistributionSet::getName).collect(Collectors.toList()));
+    }
+
+    private void openConfirmationWindowForAssignment(final String targetName, final List<String> distributionSetNames) {
+        final String confirmationMessage;
+        if (distributionSetNames.size() > 1) {
+            confirmationMessage = getI18n().getMessage(MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS, "target",
+                    targetName, String.join(", ", distributionSetNames));
+        } else {
+            confirmationMessage = getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionSetNames.get(0),
+                    "target", targetName);
+        }
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
-                getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
+                confirmationMessage, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
                     if (ok && isMaintenanceWindowValid()) {
                         saveAllAssignments();
                     } else {
-                        managementUIState.getAssignedList().clear();
+                        managementUIState.getAssignmentState().clear();
                     }
                 }, createAssignmentTab(), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -1049,10 +1063,10 @@ public class TargetTable extends AbstractTable<Target> {
         confirmDialog.getOkButton().setEnabled(enabled);
     }
 
-    private void addNewTargetToAssignmentList(final TargetIdName createTargetIdName,
-            final DistributionSet findDistributionSetAllById) {
-        final DistributionSetIdName distributionNameId = new DistributionSetIdName(findDistributionSetAllById);
-        managementUIState.getAssignedList().put(createTargetIdName, distributionNameId);
+    private void addAssignments(final TargetIdName targetIdName, final List<DistributionSet> distributionSets) {
+        final AssignmentUIState assignmentState = managementUIState.getAssignmentState();
+        distributionSets.stream().map(DistributionSetIdName::new)
+                .forEach(distributionSet -> assignmentState.addAssignment(distributionSet, targetIdName));
     }
 
     @Override
@@ -1102,6 +1116,13 @@ public class TargetTable extends AbstractTable<Target> {
             return target.get().getName();
         }
         return "";
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return configManagement
+                .getConfigurationValue(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
+                        Boolean.class)
+                .getValue();
     }
 
 }
