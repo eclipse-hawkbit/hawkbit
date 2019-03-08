@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -38,6 +40,7 @@ import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractGridButtonConverter;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractHtmlLabelConverter;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.GridButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
@@ -87,6 +90,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String VIRT_PROP_UPDATE = "update";
     private static final String VIRT_PROP_COPY = "copy";
     private static final String VIRT_PROP_DELETE = "delete";
+    private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
+    private static final String STATUS_ICON_FORCED = "statusIconForced";
+    private static final String VIRT_PROP_TYPE = "type";
 
     private final transient RolloutManagement rolloutManagement;
 
@@ -271,7 +277,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY, String.class, null,
                 false, false);
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TYPE, String.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TYPE, RolloutStatus.class, null, false,
+                false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_REMARK, String.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, String.class, null, false,
@@ -309,6 +316,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(60);
 
+        getColumn(SPUILabelDefinitions.VAR_TYPE).setMinimumWidth(25);
+        getColumn(SPUILabelDefinitions.VAR_TYPE).setMaximumWidth(25);
+
         getColumn(VIRT_PROP_RUN).setMinimumWidth(25);
         getColumn(VIRT_PROP_RUN).setMaximumWidth(25);
 
@@ -328,6 +338,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_DELETE).setMaximumWidth(40);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
+
     }
 
     @Override
@@ -416,10 +427,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 new TotalTargetCountStatusConverter());
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
-        // TODO test
-        // getColumn(SPUILabelDefinitions.VAR_TYPE).setRenderer(new
-        // HtmlLabelRenderer(), new RolloutStatusConverter());
-        // Does not work because of different types
+        // TODO adapt till no more error
+        getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
+                new HtmlVirtPropLabelConverter(RolloutListGrid::createTypeLabelMetadata));
 
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
@@ -816,6 +826,45 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
 
         setColumns(modifiableColumnsList.toArray());
+    }
+
+    // TODO think about how to get the set action type also here
+    private static StatusFontIcon createTypeLabelMetadata(final Action action) {
+        StatusFontIcon result = null;
+        if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
+            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
+            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, "DownloadOnly",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        return result;
+    }
+
+    /**
+     * Concrete html-label converter that handles Actions.
+     */
+    /**
+     * Concrete html-label converter that handles Actions.
+     */
+    class HtmlVirtPropLabelConverter extends AbstractHtmlLabelConverter<Action> {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Constructor that sets the appropriate adapter.
+         *
+         * @param adapter
+         *            adapts <code>Action</code> to <code>String</code>
+         */
+        public HtmlVirtPropLabelConverter(final LabelAdapter<Action> adapter) {
+            addAdapter(adapter);
+        }
+
+        @Override
+        public Class<Action> getModelType() {
+            return Action.class;
+        }
     }
 
 }
