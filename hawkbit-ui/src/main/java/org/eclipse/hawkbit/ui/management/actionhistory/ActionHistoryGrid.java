@@ -70,6 +70,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_ACTIVE = "statusIconActive";
     private static final String STATUS_ICON_FORCED = "statusIconForced";
     private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
+    private static final String STATUS_ICON_SOFT = "statusIconSoft";
 
     private static final String VIRT_PROP_TYPE = "type";
     private static final String VIRT_PROP_TIMEFORCED = "timeForced";
@@ -275,6 +276,10 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         StatusFontIcon result = null;
         if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
             result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.SOFT.equals(action.getActionType())) {
+            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, "Soft",
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
