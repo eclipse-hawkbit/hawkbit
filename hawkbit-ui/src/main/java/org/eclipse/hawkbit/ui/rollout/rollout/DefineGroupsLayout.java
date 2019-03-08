@@ -340,10 +340,12 @@ public class DefineGroupsLayout extends GridLayout {
                 continue;
             }
             row.resetError();
-            final Long count = groupsValidation.getTargetsPerGroup().get(i);
-            if (count != null && count > maxTargets) {
-                row.setError(i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxTargets));
-                setValidationStatus(ValidationStatus.INVALID);
+            if (groupsValidation != null) {
+                final Long count = groupsValidation.getTargetsPerGroup().get(i);
+                if (count != null && count > maxTargets) {
+                    row.setError(i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxTargets));
+                    setValidationStatus(ValidationStatus.INVALID);
+                }
             }
         }
 
@@ -462,12 +464,12 @@ public class DefineGroupsLayout extends GridLayout {
 
         private void validateMandatoryPercentage(final Object value) {
             if (value != null) {
-                final String message = i18n.getMessage("message.rollout.field.value.range", 0, 100);
+                final String message = i18n.getMessage("message.rollout.field.value.range", 1, 100);
                 if (value instanceof Float) {
-                    new FloatRangeValidator(message, 0F, 100F).validate(value);
+                    new FloatRangeValidator(message, 1F, 100F).validate(value);
                 }
                 if (value instanceof Integer) {
-                    new IntegerRangeValidator(message, 0, 100).validate(value);
+                    new IntegerRangeValidator(message, 1, 100).validate(value);
                 }
             } else {
                 throw new Validator.EmptyValueException(i18n.getMessage("message.enter.number"));
