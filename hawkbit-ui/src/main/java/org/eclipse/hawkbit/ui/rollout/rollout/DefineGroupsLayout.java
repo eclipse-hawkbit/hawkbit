@@ -331,24 +331,29 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         // validate the single groups
-        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
         final boolean hasRemainingTargetsError = validationStatus == ValidationStatus.INVALID;
+        singleGroupsValidation(validation, lastRow, hasRemainingTargetsError);
+    }
+
+    private void singleGroupsValidation(final RolloutGroupsValidation validation, final GroupRow lastRow,
+            final boolean remainingError) {
+        final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
+
         for (int i = 0; i < groupRows.size(); ++i) {
             final GroupRow row = groupRows.get(i);
             // do not mask the 'remaining targets' error
-            if (hasRemainingTargetsError && row.equals(lastRow)) {
+            if (remainingError && row.equals(lastRow)) {
                 continue;
             }
             row.resetError();
-            if (groupsValidation != null) {
-                final Long count = groupsValidation.getTargetsPerGroup().get(i);
+            if (validation != null) {
+                final Long count = validation.getTargetsPerGroup().get(i);
                 if (count != null && count > maxTargets) {
                     row.setError(i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxTargets));
                     setValidationStatus(ValidationStatus.INVALID);
                 }
             }
         }
-
     }
 
     private List<RolloutGroupCreate> getGroupsFromRows() {
