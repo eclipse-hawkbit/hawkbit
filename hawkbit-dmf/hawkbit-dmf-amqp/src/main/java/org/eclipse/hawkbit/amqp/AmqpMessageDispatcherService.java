@@ -207,7 +207,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 updateAttributesEvent.getTargetAddress());
     }
 
-    void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
+    public void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
 
         String tenant = action.getTenant();
