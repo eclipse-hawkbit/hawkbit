@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.UiProperties.Localization;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -571,7 +572,7 @@ public final class HawkbitCommonUtil {
      *            UI which settings are considered
      * @return Locale to be used according to UI and properties
      */
-    public static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties, final UI ui) {
+    private static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties, final UI ui) {
         final List<String> availableLocals = localizationProperties.getAvailableLocals();
         final Locale uiLocale = ui.getSession().getLocale();
         // ckeck if language code of UI locale matches an available local.
@@ -581,6 +582,23 @@ public final class HawkbitCommonUtil {
             return uiLocale;
         }
         return new Locale(localizationProperties.getDefaultLocal());
+    }
+
+    /**
+     * Set localization considering properties and UI settings.
+     * 
+     * @param ui
+     *            UI to setup
+     * @param localizationProperties
+     *            UI localization settings
+     * @param i18n
+     *            Localization message source
+     */
+    public static void initLocalization(final UI ui, final Localization localizationProperties,
+            final VaadinMessageSource i18n) {
+        ui.setLocale(HawkbitCommonUtil.getLocaleToBeUsed(localizationProperties, ui));
+        ui.getReconnectDialogConfiguration()
+                .setDialogText(i18n.getMessage(UIMessageIdProvider.VAADIN_SYSTEM_TRYINGRECONNECT));
     }
 
 }

@@ -171,6 +171,8 @@ public final class UIMessageIdProvider {
 
     public static final String VAADIN_SYSTEM_INTERNALERROR_MESSAGE = "vaadin.system.internalerror.message";
 
+    public static final String VAADIN_SYSTEM_TRYINGRECONNECT = "vaadin.system.tryingreconnect";
+
     /**
      * Private Constructor.
      */

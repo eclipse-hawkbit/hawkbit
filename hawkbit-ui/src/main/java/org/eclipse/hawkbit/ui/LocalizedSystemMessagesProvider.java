@@ -11,6 +11,8 @@ import com.vaadin.server.SystemMessagesInfo;
 import com.vaadin.server.SystemMessagesProvider;
 
 public class LocalizedSystemMessagesProvider implements SystemMessagesProvider {
+    private static final long serialVersionUID = 1L;
+
     private final VaadinMessageSource i18n;
 
     public LocalizedSystemMessagesProvider(final VaadinMessageSource i18n) {
