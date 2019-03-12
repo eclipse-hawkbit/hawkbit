@@ -8,16 +8,21 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import javax.servlet.ServletException;
+
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.atmosphere.cpr.ApplicationConfig;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.spring.boot.internal.VaadinServletConfiguration;
 import com.vaadin.spring.boot.internal.VaadinServletConfigurationProperties;
+import com.vaadin.spring.server.SpringVaadinServlet;
 
 /**
  * {@link VaadinServletConfiguration} that sets the context path for
@@ -28,6 +33,17 @@ import com.vaadin.spring.boot.internal.VaadinServletConfigurationProperties;
 @EnableConfigurationProperties(VaadinServletConfigurationProperties.class)
 @Import(VaadinServletConfiguration.class)
 public class AsyncVaadinServletConfiguration extends VaadinServletConfiguration {
+
+    @Bean
+    public VaadinServlet vaadinServlet(final VaadinMessageSource vaadinMessageSource) {
+        return new SpringVaadinServlet() {
+            @Override
+            public void servletInitialized() throws ServletException {
+                super.servletInitialized();
+                getService().setSystemMessagesProvider(new LocalizedSystemMessagesProvider(vaadinMessageSource));
+            }
+        };
+    }
 
     @Override
     @Bean
