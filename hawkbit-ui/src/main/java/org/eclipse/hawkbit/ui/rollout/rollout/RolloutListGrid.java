@@ -92,7 +92,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
     private static final String STATUS_ICON_SOFT = "statusIconSoft";
     private static final String STATUS_ICON_FORCED = "statusIconForced";
-    private static final String VIRT_PROP_TYPE = "type";
+    private static final String PROP_TYPE = "actionType";
 
     private final transient RolloutManagement rolloutManagement;
 
@@ -125,7 +125,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
-    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(SPUILabelDefinitions.VAR_TYPE,
+    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(PROP_TYPE,
             SPUILabelDefinitions.VAR_CREATED_DATE,
             SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
             SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
@@ -238,7 +238,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private void updateItem(final Rollout rollout, final Item item) {
         final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-        item.getItemProperty(SPUILabelDefinitions.VAR_TYPE).setValue(rollout.getActionType());
+        item.getItemProperty(PROP_TYPE).setValue(rollout.getActionType());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
         final Long groupCount = Long
                 .valueOf((Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
@@ -278,7 +278,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY, String.class, null,
                 false, false);
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TYPE, ActionType.class, null, false,
+        rolloutGridContainer.addContainerProperty(PROP_TYPE, ActionType.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_REMARK, String.class, null, false,
                 false);
@@ -317,8 +317,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(60);
 
-        getColumn(SPUILabelDefinitions.VAR_TYPE).setMinimumWidth(25);
-        getColumn(SPUILabelDefinitions.VAR_TYPE).setMaximumWidth(25);
+        getColumn(PROP_TYPE).setMinimumWidth(25);
+        getColumn(PROP_TYPE).setMaximumWidth(25);
 
         getColumn(VIRT_PROP_RUN).setMinimumWidth(25);
         getColumn(VIRT_PROP_RUN).setMaximumWidth(25);
@@ -349,7 +349,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 .setHeaderCaption(i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
-        getColumn(SPUILabelDefinitions.VAR_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
+        getColumn(PROP_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.getMessage("header.createdDate"));
         getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setHeaderCaption(i18n.getMessage("header.createdBy"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
@@ -391,7 +391,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 SPUILabelDefinitions.VAR_STATUS,
                 SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
-                SPUILabelDefinitions.VAR_TOTAL_TARGETS, SPUILabelDefinitions.VAR_TYPE, VIRT_PROP_APPROVE, VIRT_PROP_RUN,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS, PROP_TYPE, VIRT_PROP_APPROVE, VIRT_PROP_RUN,
                 VIRT_PROP_PAUSE,
                 VIRT_PROP_UPDATE, VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
                 SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
@@ -428,8 +428,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 new TotalTargetCountStatusConverter());
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
-        // TODO adapt till no more error
-        getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(), new RolloutTypeConverter());
+        // TODO adapt till no more error, remove virt
+        getColumn(PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
+                new RolloutTypeConverter(this::createTypeLabelAdapter));
 
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
@@ -741,54 +742,98 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
      * Converter to convert {@link RolloutStatus} to string.
      *
      */
-    class RolloutTypeConverter implements Converter<String, ActionType> {
 
-        private static final long serialVersionUID = 1L;
+    class RolloutTypeConverter extends AbstractHtmlLabelConverter<ActionType> {
 
-        @Override
-        public Class<String> getPresentationType() {
-            return String.class;
-        }
-
-        @Override
-        public ActionType convertToModel(final String value, final Class<? extends ActionType> targetType,
-                final Locale locale) throws ConversionException {
-
-            return null;
-        }
-
-        @Override
-        public String convertToPresentation(final ActionType actionType, final Class<? extends String> targetType,
-                final Locale locale) throws ConversionException {
-            if (actionType == null)
-                return null;
-
-            StatusFontIcon result = null;
-            if (ActionType.FORCED.equals(actionType) || ActionType.TIMEFORCED.equals(actionType)) {
-                result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
-                        UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-            }
-            if (ActionType.SOFT.equals(actionType)) {
-                result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, "Soft",
-                        UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-            }
-            if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
-                result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, "Download Only",
-                        UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-            }
-
-            final String codePoint = HawkbitCommonUtil.getCodePoint(result);
-            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, result.getStyle(),
-                    UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
-
+        public RolloutTypeConverter(final LabelAdapter<ActionType> adapter) {
+            addAdapter(adapter);
         }
 
         @Override
         public Class<ActionType> getModelType() {
-
             return ActionType.class;
         }
+
+
     }
+    // TODO camel case
+    // TODO use i18n
+    // TODO logic with timeforce black->green
+
+    private StatusFontIcon createTypeLabelAdapter(final ActionType actiontype) {
+        StatusFontIcon result = null;
+        if (ActionType.FORCED.equals(actiontype) || ActionType.TIMEFORCED.equals(actiontype)) {
+            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.SOFT.equals(actiontype)) {
+            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.DOWNLOAD_ONLY.equals(actiontype)) {
+            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        return result;
+    }
+
+    // class RolloutTypeConverter implements Converter<String, ActionType> {
+    //
+    // private static final long serialVersionUID = 1L;
+    //
+    // @Override
+    // public Class<String> getPresentationType() {
+    // return String.class;
+    // }
+    //
+    // @Override
+    // public ActionType convertToModel(final String value, final Class<?
+    // extends ActionType> targetType,
+    // final Locale locale) throws ConversionException {
+    //
+    // return null;
+    // }
+    //
+    // @Override
+    // public String convertToPresentation(final ActionType actionType, final
+    // Class<? extends String> targetType,
+    // final Locale locale) throws ConversionException {
+    // if (actionType == null)
+    // return null;
+    //
+    // StatusFontIcon result = null;
+    // if (ActionType.FORCED.equals(actionType) ||
+    // ActionType.TIMEFORCED.equals(actionType)) {
+    // result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+    // "Forced",
+    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+    // }
+    // if (ActionType.SOFT.equals(actionType)) {
+    // result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
+    // "Soft",
+    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+    // }
+    // if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
+    // result = new StatusFontIcon(FontAwesome.DOWNLOAD,
+    // STATUS_ICON_DOWNLOAD_ONLY, "Download Only",
+    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+    // }
+    //
+    // final String codePoint = HawkbitCommonUtil.getCodePoint(result);
+    // return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint,
+    // result.getStyle(),
+    // UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
+    //
+    // }
+    //
+    // @Override
+    // public Class<ActionType> getModelType() {
+    //
+    // return ActionType.class;
+    // }
+    // }
 
     /**
      * Converter to convert {@link TotalTargetCountStatus} to formatted string

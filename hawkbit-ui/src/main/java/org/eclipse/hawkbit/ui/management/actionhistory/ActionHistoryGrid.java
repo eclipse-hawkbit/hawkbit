@@ -229,7 +229,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
                 new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
         getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createTypeLabelMetadata));
+                new HtmlVirtPropLabelConverter(this::createTypeLabelMetadata));
         getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
                 new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
         getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
@@ -279,11 +279,11 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.SOFT.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, "Soft",
+            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, "DownloadOnly",
+            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         return result;
