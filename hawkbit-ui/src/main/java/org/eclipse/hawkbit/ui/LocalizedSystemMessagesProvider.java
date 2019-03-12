@@ -2,6 +2,7 @@ package org.eclipse.hawkbit.ui;
 
 import java.util.Locale;
 
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -14,26 +15,29 @@ public class LocalizedSystemMessagesProvider implements SystemMessagesProvider {
     private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
+    private final UiProperties uiProperties;
 
-    public LocalizedSystemMessagesProvider(final VaadinMessageSource i18n) {
+    public LocalizedSystemMessagesProvider(final UiProperties uiProperties, final VaadinMessageSource i18n) {
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
     }
 
     private SystemMessages getLocalizedSystemMessages(final VaadinMessageSource i18n, final Locale local) {
         final CustomizedSystemMessages messages = new CustomizedSystemMessages();
+        final Locale desiredLocal = HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), local);
 
         messages.setSessionExpiredCaption(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION));
         messages.setSessionExpiredMessage(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE));
         messages.setCommunicationErrorCaption(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION));
         messages.setCommunicationErrorMessage(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE));
         messages.setInternalErrorCaption(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_CAPTION));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_CAPTION));
         messages.setInternalErrorMessage(
-                i18n.getMessage(local, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_MESSAGE));
+                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_MESSAGE));
 
         return messages;
     }

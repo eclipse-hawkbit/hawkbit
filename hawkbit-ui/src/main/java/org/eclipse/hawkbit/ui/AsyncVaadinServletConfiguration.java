@@ -35,12 +35,18 @@ import com.vaadin.spring.server.SpringVaadinServlet;
 public class AsyncVaadinServletConfiguration extends VaadinServletConfiguration {
 
     @Bean
-    public VaadinServlet vaadinServlet(final VaadinMessageSource vaadinMessageSource) {
+    public LocalizedSystemMessagesProvider localizedSystemMessagesProvider(final UiProperties uiProperties,
+            final VaadinMessageSource i18n) {
+        return new LocalizedSystemMessagesProvider(uiProperties, i18n);
+    }
+
+    @Bean
+    public VaadinServlet vaadinServlet(final LocalizedSystemMessagesProvider localizedSystemMessagesProvider) {
         return new SpringVaadinServlet() {
             @Override
             public void servletInitialized() throws ServletException {
                 super.servletInitialized();
-                getService().setSystemMessagesProvider(new LocalizedSystemMessagesProvider(vaadinMessageSource));
+                getService().setSystemMessagesProvider(localizedSystemMessagesProvider);
             }
         };
     }
