@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
@@ -45,6 +46,16 @@ public class ProxyRollout {
     private TotalTargetCountStatus totalTargetCountStatus;
     private String approvalDecidedBy;
     private String approvalRemark;
+
+    private ActionType actionType;
+
+    public ActionType getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(final ActionType actionType) {
+        this.actionType = actionType;
+    }
 
     public RolloutRendererData getRolloutRendererData() {
         return rolloutRendererData;
