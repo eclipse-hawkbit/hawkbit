@@ -232,10 +232,10 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
             + SpPermission.READ_REPOSITORY + " and " + SpPermission.READ_TARGET)
     public void getAutoAssignTargetFilterQueries() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a").set(set));
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("filter2").query("name==b").set(set));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a")
+                .autoAssignDistributionSet(set));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter2").query("name==b")
+                .autoAssignDistributionSet(set));
 
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/autoAssignTargetFilters",
@@ -257,8 +257,8 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
             + SpPermission.READ_REPOSITORY + " and " + SpPermission.READ_TARGET)
     public void getAutoAssignTargetFilterQueriesWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a").set(set));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a")
+                .autoAssignDistributionSet(set));
 
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/autoAssignTargetFilters")

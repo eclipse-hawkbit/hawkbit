@@ -66,7 +66,7 @@ public class TargetMetadataPopupLayout extends AbstractMetadataPopupLayout<Targe
     @Override
     protected List<MetaData> getMetadataList() {
         return Collections.unmodifiableList(targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, 500), getSelectedEntity().getControllerId())
+                .findMetaDataByControllerId(PageRequest.of(0, 500), getSelectedEntity().getControllerId())
                 .getContent());
     }
 

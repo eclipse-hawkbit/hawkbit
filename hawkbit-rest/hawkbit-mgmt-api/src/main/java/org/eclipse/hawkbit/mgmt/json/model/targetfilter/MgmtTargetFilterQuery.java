@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -35,6 +36,9 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     @JsonProperty
     private Long autoAssignDistributionSet;
+
+    @JsonProperty
+    private MgmtActionType autoAssignActionType;
 
     public Long getFilterId() {
         return filterId;
@@ -66,6 +70,14 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     public void setAutoAssignDistributionSet(final Long autoAssignDistributionSet) {
         this.autoAssignDistributionSet = autoAssignDistributionSet;
+    }
+
+    public MgmtActionType getAutoAssignActionType() {
+        return autoAssignActionType;
+    }
+
+    public void setAutoAssignActionType(final MgmtActionType actionType) {
+        this.autoAssignActionType = actionType;
     }
 
 }
