@@ -23,8 +23,8 @@ import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -45,26 +45,24 @@ public final class TargetAssignmentOperations {
 
     /**
      * Save all target(s)-distributionSet assignments
-     * 
-     * @param managementUIState
+     *  @param managementUIState
      *            the management UI state
      * @param actionTypeOptionGroupLayout
      *            the action Type Option Group Layout
      * @param maintenanceWindowLayout
-     *            the Maintenance Window Layout
+ *            the Maintenance Window Layout
      * @param deploymentManagement
-     *            the Deployment Management
+*            the Deployment Management
      * @param notification
-     *            the UI Notification
+*            the UI Notification
      * @param eventBus
-     *            the UI Event Bus
+*            the UI Event Bus
      * @param i18n
-     *            the Vaadin Message Source for multi language
+*            the Vaadin Message Source for multi language
      * @param eventSource
-     *            the object to be used as an event source for UI events
      */
     public static void saveAllAssignments(final ManagementUIState managementUIState,
-            final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+            final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
             final UINotification notification, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final Object eventSource) {
@@ -72,10 +70,10 @@ public final class TargetAssignmentOperations {
         Long distId;
         List<TargetIdName> targetIdSetList;
         List<TargetIdName> tempIdList;
-        final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
+        final ActionType actionType = ((AbstractActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
+        final long forcedTimeStamp = (actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue()
+                == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
@@ -182,7 +180,7 @@ public final class TargetAssignmentOperations {
      *            the UI Properties
      * @return the Assignment Confirmation tab
      */
-    public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+    public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler,
             final VaadinMessageSource i18n, final UiProperties uiProperties) {
 
@@ -205,7 +203,7 @@ public final class TargetAssignmentOperations {
         return layout;
     }
 
-    private static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+    private static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final HorizontalLayout layout, final MaintenanceWindowLayout maintenanceWindowLayout) {
         final ConfirmationTab assignmentTab = new ConfirmationTab();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
@@ -240,7 +238,7 @@ public final class TargetAssignmentOperations {
         return enableMaintenanceWindow;
     }
 
-    private static void addValueChangeListener(final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout,
+    private static void addValueChangeListener(final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final CheckBox enableMaintenanceWindowControl, final Link maintenanceWindowHelpLinkControl) {
         actionTypeOptionGroupLayout.getActionTypeOptionGroup()
                 .addValueChangeListener(new Property.ValueChangeListener() {
@@ -248,7 +246,7 @@ public final class TargetAssignmentOperations {
 
                     @Override
                     public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                        if (event.getProperty().getValue().equals(ActionTypeOption.DOWNLOAD_ONLY)) {
+                        if (event.getProperty().getValue().equals(AbstractActionTypeOptionGroupLayout.ActionTypeOption.DOWNLOAD_ONLY)) {
                             enableMaintenanceWindowControl.setValue(false);
                             enableMaintenanceWindowControl.setEnabled(false);
                             maintenanceWindowHelpLinkControl.setEnabled(false);

@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,15 +41,12 @@ import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
+import org.eclipse.hawkbit.ui.management.SaveButtonEnabler;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
-import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
@@ -81,15 +81,10 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Link;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
 
 /**
@@ -493,48 +488,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                     distributionNameToAssign);
         }
     }
-
-    private void saveAllAssignments() {
-        final String parameter = getNotification().displaySuccess(
-                getI18n().getMessage("message.target.assignment", distributionSetAssignmentResult.getAssigned()));
-        AbstractDistributionTargetTable.saveAllAssignments(managementUIState, actionTypeOptionGroupLayout,
-                maintenanceWindowLayout, deploymentManagement);
-    }
-
-    private void resfreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList) {
-        final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
-        final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
-
-        if (pinnedDist.isPresent()) {
-            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
-                getEventBus().publish(this, PinUnpinEvent.PIN_DISTRIBUTION);
-            }
-        } else if (pinnedTarget.isPresent()) {
-            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
-            if (assignedTargetIds.contains(pinnedTarget.get())) {
-                getEventBus().publish(this, PinUnpinEvent.PIN_TARGET);
-            }
-        }
-    }
-
-    private HorizontalLayout enableMaintenanceWindowLayout() {
-        final HorizontalLayout layout = new HorizontalLayout();
-        layout.addComponent(AbstractDistributionTargetTable.enableMaintenanceWindowControl(getI18n(),
-                maintenanceWindowLayout, confirmDialog));
-        layout.addComponent(maintenanceWindowHelpLinkControl());
-        return layout;
-    }
-
-
-
-    private Link maintenanceWindowHelpLinkControl() {
-        final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
-        return SPUIComponentProvider.getHelpLink(getI18n(), maintenanceWindowHelpUrl);
-    }
-
-
-
-
 
     @Override
     protected List<String> hasMissingPermissionsForDrop() {

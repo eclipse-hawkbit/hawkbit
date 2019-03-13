@@ -289,16 +289,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         return result;
     }
 
-    private StatusFontIcon createForcedLabelMetadata(final Action action) {
-        StatusFontIcon result = null;
-        if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-        }
-        return result;
-    }
-
     private StatusFontIcon createTimeForcedLabelMetadata(final Action action) {
         StatusFontIcon result = null;
 
@@ -462,7 +452,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setHiddenColumns() {
-        getColumn(VIRT_PROP_FORCED).setHidable(false);
+        getColumn(VIRT_PROP_TYPE).setHidable(false);
         getColumn(VIRT_PROP_TIMEFORCED).setHidable(false);
         getColumn(VIRT_PROP_ACTION_CANCEL).setHidable(false);
         getColumn(VIRT_PROP_ACTION_FORCE).setHidable(false);

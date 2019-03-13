@@ -93,7 +93,8 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
      *
      */
     public enum ActionTypeOption {
-        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED);
+        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED),
+        DOWNLOAD_ONLY(ActionType.DOWNLOAD_ONLY);
 
         private final ActionType actionType;
 
