@@ -221,7 +221,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private void addDeleteButtonToColumnList(final List<TableColumn> columnList) {
         if (hasDeletePermission()) {
-            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, "", 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, i18n.getMessage("header.delete"), 0.0F));
         }
     }
 
