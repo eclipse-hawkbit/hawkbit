@@ -106,6 +106,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final RolloutUIState rolloutUIState;
 
+    private final AlignCellStyleGenerator alignGenerator;
+
     private static final List<RolloutStatus> DELETE_COPY_BUTTON_ENABLED = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
             RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED, RolloutStatus.FINISHED,
@@ -125,8 +127,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
-    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(PROP_TYPE,
-            SPUILabelDefinitions.VAR_CREATED_DATE,
+    private static final List<Object> HIDDEN_COLUMNS = Arrays.asList(PROP_TYPE, SPUILabelDefinitions.VAR_CREATED_DATE,
             SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
             SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
             SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
@@ -154,6 +155,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
+    private static final String[] centerAlignedColumns = new String[] { PROP_TYPE };
+
+    String[] rightAlignedColumns = new String[] {};
+
+    private static final String[] leftAlignedColumns = new String[] {};
+
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
@@ -170,6 +177,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 rolloutGroupManagement, quotaManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
+        alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);
 
         setGeneratedPropertySupport(new RolloutGeneratedPropertySupport());
         init();
@@ -278,8 +286,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY, String.class, null,
                 false, false);
-        rolloutGridContainer.addContainerProperty(PROP_TYPE, ActionType.class, null, false,
-                false);
+        rolloutGridContainer.addContainerProperty(PROP_TYPE, ActionType.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_APPROVAL_REMARK, String.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, String.class, null, false,
@@ -317,8 +324,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(60);
 
-        getColumn(PROP_TYPE).setMinimumWidth(25);
-        getColumn(PROP_TYPE).setMaximumWidth(25);
+        getColumn(PROP_TYPE).setMinimumWidth(45);
+        getColumn(PROP_TYPE).setMaximumWidth(45);
 
         getColumn(VIRT_PROP_RUN).setMinimumWidth(25);
         getColumn(VIRT_PROP_RUN).setMaximumWidth(25);
@@ -387,18 +394,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnProperties() {
 
         final List<String> columnsToShowInOrder = Arrays.asList(ROLLOUT_RENDERER_DATA,
-                SPUILabelDefinitions.VAR_DIST_NAME_VERSION,
-                SPUILabelDefinitions.VAR_STATUS,
-                SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
-                SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
-                SPUILabelDefinitions.VAR_TOTAL_TARGETS, PROP_TYPE, VIRT_PROP_APPROVE, VIRT_PROP_RUN,
-                VIRT_PROP_PAUSE,
+                SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
+                SPUILabelDefinitions.VAR_TOTAL_TARGETS, PROP_TYPE, VIRT_PROP_APPROVE, VIRT_PROP_RUN, VIRT_PROP_PAUSE,
                 VIRT_PROP_UPDATE, VIRT_PROP_COPY, VIRT_PROP_DELETE, SPUILabelDefinitions.VAR_CREATED_DATE,
                 SPUILabelDefinitions.VAR_CREATED_USER, SPUILabelDefinitions.VAR_MODIFIED_DATE,
                 SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
                 SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
 
         setColumns(columnsToShowInOrder.toArray());
+        alignColumns();
     }
 
     @Override
@@ -428,7 +433,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 new TotalTargetCountStatusConverter());
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
-        // TODO adapt till no more error, remove virt
+
         getColumn(PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
                 new RolloutTypeConverter(this::createTypeLabelAdapter));
 
@@ -472,6 +477,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         public Class<RolloutStatus> getType() {
             return RolloutStatus.class;
         }
+    }
+
+    /**
+     * Sets the alignment cell-style-generator that handles the alignment for
+     * the grid cells.
+     */
+    private void alignColumns() {
+        setCellStyleGenerator(alignGenerator);
     }
 
     /**
@@ -754,86 +767,32 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             return ActionType.class;
         }
 
-
     }
-    // TODO camel case
-    // TODO use i18n
-    // TODO logic with timeforce black->green
 
-    private StatusFontIcon createTypeLabelAdapter(final ActionType actiontype) {
+    private StatusFontIcon createTypeLabelAdapter(final ActionType actionType) {
         StatusFontIcon result = null;
-        if (ActionType.FORCED.equals(actiontype) || ActionType.TIMEFORCED.equals(actiontype)) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+        if (ActionType.FORCED.equals(actionType)) {
+            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
-        if (ActionType.SOFT.equals(actiontype)) {
+        if (ActionType.TIMEFORCED.equals(actionType)) {
+            result = new StatusFontIcon(FontAwesome.HISTORY, STATUS_ICON_FORCED,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+        }
+        if (ActionType.SOFT.equals(actionType)) {
             result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
-        if (ActionType.DOWNLOAD_ONLY.equals(actiontype)) {
+        if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
             result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         return result;
     }
-
-    // class RolloutTypeConverter implements Converter<String, ActionType> {
-    //
-    // private static final long serialVersionUID = 1L;
-    //
-    // @Override
-    // public Class<String> getPresentationType() {
-    // return String.class;
-    // }
-    //
-    // @Override
-    // public ActionType convertToModel(final String value, final Class<?
-    // extends ActionType> targetType,
-    // final Locale locale) throws ConversionException {
-    //
-    // return null;
-    // }
-    //
-    // @Override
-    // public String convertToPresentation(final ActionType actionType, final
-    // Class<? extends String> targetType,
-    // final Locale locale) throws ConversionException {
-    // if (actionType == null)
-    // return null;
-    //
-    // StatusFontIcon result = null;
-    // if (ActionType.FORCED.equals(actionType) ||
-    // ActionType.TIMEFORCED.equals(actionType)) {
-    // result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
-    // "Forced",
-    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-    // }
-    // if (ActionType.SOFT.equals(actionType)) {
-    // result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
-    // "Soft",
-    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-    // }
-    // if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
-    // result = new StatusFontIcon(FontAwesome.DOWNLOAD,
-    // STATUS_ICON_DOWNLOAD_ONLY, "Download Only",
-    // UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-    // }
-    //
-    // final String codePoint = HawkbitCommonUtil.getCodePoint(result);
-    // return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint,
-    // result.getStyle(),
-    // UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
-    //
-    // }
-    //
-    // @Override
-    // public Class<ActionType> getModelType() {
-    //
-    // return ActionType.class;
-    // }
-    // }
 
     /**
      * Converter to convert {@link TotalTargetCountStatus} to formatted string
@@ -927,23 +886,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         setColumns(modifiableColumnsList.toArray());
     }
 
-    // TODO think about how to get the set action type also here
-    private static StatusFontIcon createTypeLabelMetadata(final ActionType actionType) {
-        StatusFontIcon result = null;
-        if (ActionType.FORCED.equals(actionType) || ActionType.TIMEFORCED.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-        }
-        if (ActionType.SOFT.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, "Soft",
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-        }
-        if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, "DownloadOnly",
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
-        }
-        return result;
-    }
 
     /**
      * Concrete html-label converter that handles ActionTypes.
