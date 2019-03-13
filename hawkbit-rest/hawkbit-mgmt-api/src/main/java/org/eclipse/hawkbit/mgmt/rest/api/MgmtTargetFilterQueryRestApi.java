@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.springframework.hateoas.MediaTypes;
@@ -135,15 +135,16 @@ public interface MgmtTargetFilterQueryRestApi {
      *
      * @param filterId
      *            of the target to change
-     * @param dsId
-     *            of the Id of the auto assign distribution set
+     * @param dsIdWithActionType
+     *            id of the distribution set and the action type for auto
+     *            assignment
      * @return http status
      */
     @PostMapping(value = "/{filterId}/autoAssignDS", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") Long filterId,
-            @RequestBody MgmtId dsId);
+            @RequestBody MgmtDistributionSetAutoAssignment dsIdWithActionType);
 
     /**
      * Handles the DELETE request for removing the distribution set for auto

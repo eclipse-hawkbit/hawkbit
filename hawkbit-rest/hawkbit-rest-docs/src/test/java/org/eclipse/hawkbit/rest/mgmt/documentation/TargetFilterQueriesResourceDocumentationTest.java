@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -76,7 +77,11 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         fieldWithPath("content[].query").description(MgmtApiModelProperties.TARGET_FILTER_QUERY),
                         fieldWithPath("content[].autoAssignDistributionSet")
                                 .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_AUTO_ASSIGN_DS_ID)
-                                .type("Number"),
+                                .type(JsonFieldType.NUMBER.toString()),
+                        fieldWithPath("content[].autoAssignActionType")
+                                .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                                .type(JsonFieldType.STRING.toString())
+                                .attributes(key("value").value("['forced', 'soft']")),
                         fieldWithPath("content[].createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                         fieldWithPath("content[].createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                         fieldWithPath("content[].lastModifiedAt")
@@ -180,7 +185,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     public void postAutoAssignDS() throws Exception {
         final TargetFilterQuery tfq = createTargetFilterQuery();
         final DistributionSet distributionSet = createDistributionSet();
-        final String filterByDistSet = "{\"id\":\"" + distributionSet.getId() + "\"}";
+        final String filterByDistSet = "{\"id\":\"" + distributionSet.getId() + "\", \"type\":\""
+                + MgmtActionType.SOFT.getName() + "\"}";
 
         this.mockMvc
                 .perform(
@@ -190,7 +196,10 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetFilterQueryId")
                                 .description(ApiModelPropertiesGeneric.ITEM_ID)),
-                        requestFields(requestFieldWithPath("id").description(MgmtApiModelProperties.DS_ID)),
+                        requestFields(requestFieldWithPath("id").description(MgmtApiModelProperties.DS_ID),
+                                optionalRequestFieldWithPath("type")
+                                        .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                                        .attributes(key("value").value("['forced', 'soft']"))),
                         getResponseFieldTargetFilterQuery(false)));
     }
 
@@ -213,7 +222,11 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "name").description(ApiModelPropertiesGeneric.NAME),
                 fieldWithPath(arrayPrefix + "query").description(MgmtApiModelProperties.TARGET_FILTER_QUERY),
                 fieldWithPath(arrayPrefix + "autoAssignDistributionSet")
-                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_AUTO_ASSIGN_DS_ID).type("Number"),
+                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_AUTO_ASSIGN_DS_ID)
+                        .type(JsonFieldType.NUMBER.toString()),
+                fieldWithPath(arrayPrefix + "autoAssignActionType")
+                        .description(MgmtApiModelProperties.ACTION_FORCE_TYPE).type(JsonFieldType.STRING.toString())
+                        .attributes(key("value").value("['forced', 'soft']")),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),

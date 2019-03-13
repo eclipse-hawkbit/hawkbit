@@ -108,6 +108,7 @@ Custom target filter overview and filter management.
 - Custom target filter allows user to filter targets by defining custom query.
 - Displays custom target filter list and user can search any particular filter.
 - Create, update and delete features are supported for target filters.
+- Auto assignment of a distribution set to filtered targets.
 
 ### How to Filter
 The basic syntax to filter is: `field<basic_operator>value <composite_operator> field<basic_operator>value <...>`
@@ -139,3 +140,12 @@ name==CCU* and updatestatus==pending                                            
 (updatestatus!=error or updatestatus!=pending) and (name==\*CCU\* or description==\*CCU\*) | Gives all targets that either have the term ‘CCU’ in their name or their description and that either have the _update status_ not in state error or pending.
 
 ![Target Filter Management view](../images/ui/target_filter.png)
+
+### Auto assignment
+It is possible to assign some distribution set with different action types (_forced_ or _soft_) to all targets that belong to the corresponding custom target filter, including the ones, that are registered later on.
+
+In order to activate the auto-assignment, one should first click on _Auto assignment_ cell in Custom Filters table, and then check the corresponding checkbox. After that, the action type and distribution set for auto-assignment should be selected and confirmed.
+
+As long as the auto-assignment stays active, the scheduler will try to assign selected distribution set to corresponding custom filter targets, that have never seen it before. 
+
+![Auto assignment](../images/ui/target_filter_auto_assignment.png)

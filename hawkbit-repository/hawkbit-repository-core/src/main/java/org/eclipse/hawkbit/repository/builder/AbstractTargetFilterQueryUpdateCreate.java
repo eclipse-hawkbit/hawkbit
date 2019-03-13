@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ValidString;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,15 +27,26 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     @ValidString
     protected String query;
 
-    protected Long set;
+    protected Long distributionSetId;
 
-    public T set(final long set) {
-        this.set = set;
+    protected ActionType actionType;
+
+    public T autoAssignDistributionSet(final Long distributionSetId) {
+        this.distributionSetId = distributionSetId;
         return (T) this;
     }
 
-    public Optional<Long> getSet() {
-        return Optional.ofNullable(set);
+    public Optional<Long> getAutoAssignDistributionSetId() {
+        return Optional.ofNullable(distributionSetId);
+    }
+
+    public T autoAssignActionType(final ActionType actionType) {
+        this.actionType = actionType;
+        return (T) this;
+    }
+
+    public Optional<ActionType> getAutoAssignActionType() {
+        return Optional.ofNullable(actionType);
     }
 
     public T name(final String name) {

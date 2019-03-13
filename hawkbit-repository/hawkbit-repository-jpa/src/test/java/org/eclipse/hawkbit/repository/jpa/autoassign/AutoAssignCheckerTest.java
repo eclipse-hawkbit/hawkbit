@@ -9,11 +9,13 @@
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -80,7 +82,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final Action rolloutCreatedAction = actionsByKnownTarget.stream()
                     .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
             assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
-
+            assertThat(rolloutCreatedAction.getActionType()).isEqualTo(ActionType.FORCED);
         } finally {
             tenantConfigurationManagement
                     .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
@@ -149,9 +151,13 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
-                .getId(), setF.getId());
+        assertThatExceptionOfType(
+                InvalidAutoAssignDistributionSetException.class)
+                        .isThrownBy(
+                                () -> targetFilterQueryManagement.updateAutoAssignDS(
+                                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
+                                                .name("filterA").query("id==" + targetDsFIdPref + "*")).getId(),
+                                        setF.getId()));
 
         // target filter query that matches failed bunch of targets
         targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement.create(
@@ -202,6 +208,49 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             }
         }
 
+    }
+
+    @Test
+    @Description("Test auto assignment of a distribution set with FORCED and SOFT action types")
+    public void checkAutoAssignWithDifferentActionTypes() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final String targetDsAIdPref = "targA";
+        final String targetDsBIdPref = "targB";
+
+        final List<Target> targetsA = testdataFactory.createTargets(5, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
+        final List<Target> targetsB = testdataFactory.createTargets(10, targetDsBIdPref,
+                targetDsBIdPref.concat(" description"));
+        final int targetsCount = targetsA.size() + targetsB.size();
+
+        targetFilterQueryManagement
+                .updateAutoAssignDSWithActionType(
+                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterA")
+                                .query("id==" + targetDsAIdPref + "*")).getId(),
+                        distributionSet.getId(), ActionType.FORCED);
+        targetFilterQueryManagement
+                .updateAutoAssignDSWithActionType(
+                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
+                                .query("id==" + targetDsBIdPref + "*")).getId(),
+                        distributionSet.getId(), ActionType.SOFT);
+
+        autoAssignChecker.check();
+
+        verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsA, targetsCount);
+        verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsB, targetsCount);
+
+        verifyThatTargetsHaveAssignmentActionType(ActionType.FORCED, targetsA);
+        verifyThatTargetsHaveAssignmentActionType(ActionType.SOFT, targetsB);
+    }
+
+    @Step
+    private void verifyThatTargetsHaveAssignmentActionType(final ActionType actionType, final List<Target> targets) {
+        final List<Action> actions = targets.stream().map(Target::getControllerId).flatMap(
+                controllerId -> deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent().stream())
+                .collect(Collectors.toList());
+
+        assertThat(actions).hasSize(targets.size());
+        assertThat(actions).allMatch(action -> action.getActionType().equals(actionType));
     }
 
 }

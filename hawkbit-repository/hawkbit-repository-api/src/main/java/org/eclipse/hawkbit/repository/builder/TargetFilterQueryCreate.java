@@ -13,6 +13,7 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -40,20 +41,27 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String query);
 
     /**
-     * @param set
+     * @param distributionSet
      *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return updated builder instance
      */
-    default TargetFilterQueryCreate set(final DistributionSet set) {
-        return set(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
+    default TargetFilterQueryCreate autoAssignDistributionSet(final DistributionSet distributionSet) {
+        return autoAssignDistributionSet(Optional.ofNullable(distributionSet).map(DistributionSet::getId).orElse(null));
     }
 
     /**
-     * @param setId
+     * @param dsId
      *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return updated builder instance
      */
-    TargetFilterQueryCreate set(long setId);
+    TargetFilterQueryCreate autoAssignDistributionSet(Long dsId);
+
+    /**
+     * @param actionType
+     *            for {@link TargetFilterQuery#getAutoAssignActionType()}
+     * @return updated builder instance
+     */
+    TargetFilterQueryCreate autoAssignActionType(ActionType actionType);
 
     /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder

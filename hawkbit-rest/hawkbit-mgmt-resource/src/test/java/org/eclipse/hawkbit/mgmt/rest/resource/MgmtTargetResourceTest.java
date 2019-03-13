@@ -1674,9 +1674,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mvc.perform(
-                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
+        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -1697,14 +1696,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
             metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
         }
 
-        mvc.perform(
-                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
         // verify that the number of meta data entries has not changed
         // (we cannot use the PAGE constant here as it tries to sort by ID)
-        assertThat(targetManagement.findMetaDataByControllerId(new PageRequest(0, Integer.MAX_VALUE), knownControllerId)
+        assertThat(targetManagement.findMetaDataByControllerId(PageRequest.of(0, Integer.MAX_VALUE), knownControllerId)
                 .getTotalElements()).isEqualTo(metaData1.length());
 
     }

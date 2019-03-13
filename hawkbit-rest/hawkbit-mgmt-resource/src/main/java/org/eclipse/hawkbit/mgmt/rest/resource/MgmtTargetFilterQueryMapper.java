@@ -57,6 +57,7 @@ public final class MgmtTargetFilterQueryMapper {
         final DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
+            targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(filter.getAutoAssignActionType()));
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
