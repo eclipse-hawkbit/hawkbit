@@ -527,6 +527,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
             // need to start the scheduled action, just finish it.
+            LOG.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
+                    action.getDistributionSet().getName());
             action.setStatus(Status.FINISHED);
             action.setActive(false);
             setSkipActionStatus(action);
@@ -541,15 +543,19 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // check if we need to override running update actions
         final List<Long> overrideObsoleteUpdateActions;
 
-        if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
-                .getValue())) {
-            overrideObsoleteUpdateActions = Collections.emptyList();
-            onlineDsAssignmentStrategy
-                    .closeObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+        if (!isMultiAssignmentsEnabled()) {
+            if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                    .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
+                    .getValue())) {
+                overrideObsoleteUpdateActions = Collections.emptyList();
+                onlineDsAssignmentStrategy
+                        .closeObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+            } else {
+                overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
+                        .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+            }
         } else {
-            overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
-                    .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
+            overrideObsoleteUpdateActions = Collections.emptyList();
         }
 
         action.setActive(true);
