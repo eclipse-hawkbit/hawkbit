@@ -157,10 +157,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private static final String[] centerAlignedColumns = new String[] { PROP_TYPE };
 
-    String[] rightAlignedColumns = new String[] {};
-
-    private static final String[] leftAlignedColumns = new String[] {};
-
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
@@ -758,7 +754,9 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     class RolloutTypeConverter extends AbstractHtmlLabelConverter<ActionType> {
 
-        public RolloutTypeConverter(final LabelAdapter<ActionType> adapter) {
+        private static final long serialVersionUID = 1L;
+
+        RolloutTypeConverter(final LabelAdapter<ActionType> adapter) {
             addAdapter(adapter);
         }
 

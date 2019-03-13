@@ -216,10 +216,10 @@ public final class TargetAssignmentOperations {
             final SaveButtonEnabler saveButtonEnabler) {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
-                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(event ->
+                saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
         maintenanceWindowLayout.getDurationControl().addTextChangeListener(
-                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onDurationChange(event)));
     }
 
     private static CheckBox maintenanceWindowControl(final VaadinMessageSource i18n,
