@@ -77,7 +77,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
     private final UiProperties uiProperties;
 
-    final VaadinMessageSource i18n;
+    private final VaadinMessageSource i18n;
 
     protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
             final SpringViewProvider viewProvider, final ApplicationContext context, final DashboardMenu dashboardMenu,

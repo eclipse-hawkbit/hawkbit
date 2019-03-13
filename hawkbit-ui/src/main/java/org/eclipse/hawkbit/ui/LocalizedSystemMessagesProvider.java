@@ -19,6 +19,10 @@ import com.vaadin.server.SystemMessages;
 import com.vaadin.server.SystemMessagesInfo;
 import com.vaadin.server.SystemMessagesProvider;
 
+/**
+ * {@link SystemMessagesProvider} that localizes Vaadin system messages.
+ *
+ */
 public class LocalizedSystemMessagesProvider implements SystemMessagesProvider {
     private static final long serialVersionUID = 1L;
 
@@ -32,20 +36,20 @@ public class LocalizedSystemMessagesProvider implements SystemMessagesProvider {
 
     private SystemMessages getLocalizedSystemMessages(final VaadinMessageSource i18n, final Locale local) {
         final CustomizedSystemMessages messages = new CustomizedSystemMessages();
-        final Locale desiredLocal = HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), local);
+        final Locale desiredLocale = HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), local);
 
         messages.setSessionExpiredCaption(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION));
         messages.setSessionExpiredMessage(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE));
         messages.setCommunicationErrorCaption(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION));
         messages.setCommunicationErrorMessage(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE));
         messages.setInternalErrorCaption(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_CAPTION));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_CAPTION));
         messages.setInternalErrorMessage(
-                i18n.getMessage(desiredLocal, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_MESSAGE));
+                i18n.getMessage(desiredLocale, UIMessageIdProvider.VAADIN_SYSTEM_INTERNALERROR_MESSAGE));
 
         return messages;
     }
