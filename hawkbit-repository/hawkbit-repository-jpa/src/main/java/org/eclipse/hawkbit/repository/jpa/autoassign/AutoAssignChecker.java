@@ -17,7 +17,8 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -28,12 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Checks if targets need a new distribution set (DS) based on the target filter
@@ -52,7 +50,7 @@ public class AutoAssignChecker {
 
     private final DeploymentManagement deploymentManagement;
 
-    private final TransactionTemplate transactionTemplate;
+    private final PlatformTransactionManager transactionManager;
 
     /**
      * Maximum for target filter queries with auto assign DS Maximum for targets
@@ -84,13 +82,7 @@ public class AutoAssignChecker {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
-
-        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("autoAssignDSToTargets");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        def.setReadOnly(false);
-        def.setIsolationLevel(Isolation.READ_COMMITTED.value());
-        transactionTemplate = new TransactionTemplate(transactionManager, def);
+        this.transactionManager = transactionManager;
     }
 
     /**
@@ -104,8 +96,7 @@ public class AutoAssignChecker {
 
         final PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE);
 
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement
-                .findWithAutoAssignDS(pageRequest);
+        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(pageRequest);
 
         for (final TargetFilterQuery filterQuery : filterQueries) {
             checkByTargetFilterQueryAndAssignDS(filterQuery);
@@ -149,15 +140,17 @@ public class AutoAssignChecker {
      */
     private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId) {
         final String actionMessage = String.format(ACTION_MESSAGE, targetFilterQuery.getName());
-        return transactionTemplate.execute(status -> {
-            final List<TargetWithActionType> targets = getTargetsWithActionType(targetFilterQuery.getQuery(), dsId,
-                    PAGE_SIZE);
-            final int count = targets.size();
-            if (count > 0) {
-                deploymentManagement.assignDistributionSet(dsId, targets, actionMessage);
-            }
-            return count;
-        });
+
+        return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
+                Isolation.READ_COMMITTED.value(), status -> {
+                    final List<TargetWithActionType> targets = getTargetsWithActionType(targetFilterQuery.getQuery(),
+                            dsId, targetFilterQuery.getAutoAssignActionType(), PAGE_SIZE);
+                    final int count = targets.size();
+                    if (count > 0) {
+                        deploymentManagement.assignDistributionSet(dsId, targets, actionMessage);
+                    }
+                    return count;
+                });
     }
 
     /**
@@ -169,17 +162,22 @@ public class AutoAssignChecker {
      * @param dsId
      *            dsId the targets are not allowed to have in their action
      *            history
+     * @param type
+     *            action type for targets auto assignment
      * @param count
      *            maximum amount of targets to retrieve
      * @return list of targets with action type
      */
     private List<TargetWithActionType> getTargetsWithActionType(final String targetFilterQuery, final Long dsId,
-            final int count) {
-        final Page<Target> targets = targetManagement
-                .findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId, targetFilterQuery);
+            final ActionType type, final int count) {
+        final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId,
+                targetFilterQuery);
+        // the action type is set to FORCED per default (when not explicitly
+        // specified)
+        final ActionType autoAssignActionType = type == null ? ActionType.FORCED : type;
 
         return targets.getContent().stream().map(t -> new TargetWithActionType(t.getControllerId(),
-                Action.ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());
+                autoAssignActionType, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());
     }
 
 }

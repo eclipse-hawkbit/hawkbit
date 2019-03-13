@@ -134,6 +134,10 @@ public final class SPUILabelDefinitions {
      */
     public static final String AUTO_ASSIGN_DISTRIBUTION_SET = "autoAssignDistributionSet";
     /**
+     * AUTO ASSIGN ACTION TYPE
+     */
+    public static final String AUTO_ASSIGN_ACTION_TYPE = "autoAssignActionType";
+    /**
      * ASSIGNED DISTRIBUTION Name and Version.
      */
     public static final String ASSIGNED_DISTRIBUTION_NAME_VER = "assignedDistNameVersion";

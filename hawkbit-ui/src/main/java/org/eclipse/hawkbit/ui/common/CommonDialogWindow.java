@@ -292,7 +292,7 @@ public class CommonDialogWindow extends Window {
             if (field instanceof CheckBox && originalValue == null) {
                 originalValue = Boolean.FALSE;
             }
-            final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
+            final Object currentValue = getCurrentValue(currentChangedComponent, newValue, field);
 
             if (!Objects.equals(originalValue, currentValue)) {
                 return true;
@@ -301,7 +301,7 @@ public class CommonDialogWindow extends Window {
         return false;
     }
 
-    private static Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
+    private static Object getCurrentValue(final Component currentChangedComponent, final Object newValue,
             final AbstractField<?> field) {
         Object currentValue = field.getValue();
         if (field instanceof Table) {
@@ -333,7 +333,7 @@ public class CommonDialogWindow extends Window {
         requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
 
         for (final AbstractField field : requiredComponents) {
-            Object value = getCurrentVaue(currentChangedComponent, newValue, field);
+            Object value = getCurrentValue(currentChangedComponent, newValue, field);
 
             if (Set.class.equals(field.getType())) {
                 value = emptyToNull((Collection<?>) value);
@@ -343,10 +343,12 @@ public class CommonDialogWindow extends Window {
                 return false;
             }
 
-            // We need to loop through the entire loop for validity testing.
-            // Otherwise the UI will only mark the
-            // first field with errors and then stop. If there are several
-            // fields with errors, this is bad.
+            // We need to loop through all of components for validity testing.
+            // Otherwise the UI will only mark the first field with errors and
+            // then stop. Setting the value is necessary because not all
+            // required input fields have empty string validator, but emptiness
+            // is checked during isValid() call. Setting the value could be
+            // redundant, check if it could be removed in the future.
             field.setValue(value);
             if (!field.isValid()) {
                 valid = false;
