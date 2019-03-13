@@ -29,6 +29,12 @@ public class LocalizedSystemMessagesProvider implements SystemMessagesProvider {
     private final VaadinMessageSource i18n;
     private final UiProperties uiProperties;
 
+    /**
+     * @param uiProperties
+     *            Properties to determine the available Locales
+     * @param i18n
+     *            Message source used for localization
+     */
     public LocalizedSystemMessagesProvider(final UiProperties uiProperties, final VaadinMessageSource i18n) {
         this.i18n = i18n;
         this.uiProperties = uiProperties;
