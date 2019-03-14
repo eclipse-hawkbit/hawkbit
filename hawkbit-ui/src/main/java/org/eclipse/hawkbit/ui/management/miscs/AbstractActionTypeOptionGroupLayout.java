@@ -78,6 +78,7 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
         softLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT));
         softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
         softLabel.setStyleName("padding-right-style");
+        softLabel.setIcon(FontAwesome.STEP_FORWARD);
         addComponent(softLabel);
     }
 
