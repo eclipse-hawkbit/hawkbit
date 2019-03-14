@@ -183,6 +183,20 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
 
+    public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
+
+    public static final String VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE = "vaadin.system.sessionexpired.message";
+
+    public static final String VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION = "vaadin.system.communicationerror.caption";
+
+    public static final String VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE = "vaadin.system.communicationerror.message";
+
+    public static final String VAADIN_SYSTEM_INTERNALERROR_CAPTION = "vaadin.system.internalerror.caption";
+
+    public static final String VAADIN_SYSTEM_INTERNALERROR_MESSAGE = "vaadin.system.internalerror.message";
+
+    public static final String VAADIN_SYSTEM_TRYINGRECONNECT = "vaadin.system.tryingreconnect";
+
     public static final String TOOLTIP_ROLLOUT_STATUS_PREFIX = "tooltip.rollout.status.";
 
     /**
