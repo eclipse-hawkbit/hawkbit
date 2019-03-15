@@ -514,26 +514,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
             assignDistributionSet(ds1, targets);
 
-            List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive)
-                    .as("Is assigned to DS " + ds1.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is running")
-                    .allMatch(action -> action.getStatus() == Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
 
             // Second assignment
             final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
             assignDistributionSet(ds2, targets);
 
-            final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
-            assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive)
-                    .as("Is assigned to DS " + ds2.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds2.getId())).as("Is running")
-                    .allMatch(action -> action.getStatus() == Status.RUNNING);
-            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
-                    .as("Is assigned to DS " + ds1.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is cancelled")
-                    .allMatch(action -> action.getStatus() == Status.CANCELED);
+            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), false, Status.CANCELED);
 
             assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
                     .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
@@ -542,6 +530,42 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             tenantConfigurationManagement
                     .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
         }
+    }
+
+    @Test
+    public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        try {
+            final List<Target> targets = testdataFactory.createTargets(10);
+
+            // First assignment
+            final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
+            assignDistributionSet(ds1, targets);
+
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+
+            // Second assignment
+            final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
+            assignDistributionSet(ds2, targets);
+
+            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+
+        } finally {
+            setMultiAssignmentsEnabled(false);
+        }
+    }
+
+    private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
+            final Status status) {
+        final List<Action> assignment = actionRepository.findByDistributionSetId(PAGE, dsId).getContent();
+
+        assertThat(assignment).hasSize(10).as("Active = " + active).allMatch(action -> action.isActive() == active)
+                .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
+                .as("State is " + status).allMatch(action -> action.getStatus() == status);
+        final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
+        assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
+                assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
     }
 
     /**
@@ -1209,6 +1233,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             events.add(event);
             latch.countDown();
         }
+    }
+
+    private void setMultiAssignmentsEnabled(final boolean enable) {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
+                enable);
     }
 
 }
