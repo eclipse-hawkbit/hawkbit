@@ -533,6 +533,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that if multi assignment is enabled previous Distribution is not canceled when a new one is assigned.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         setMultiAssignmentsEnabled(true);
         try {
