@@ -16,7 +16,7 @@ public final class SPUILabelDefinitions {
     /**
      * Delay - Notification.
      */
-    public static final int SP_DELAY = 1000;
+    public static final int SP_DELAY = 3000;
 
     /**
      * NAME.
