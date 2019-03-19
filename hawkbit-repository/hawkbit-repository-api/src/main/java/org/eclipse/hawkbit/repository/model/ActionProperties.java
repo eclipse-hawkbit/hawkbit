@@ -25,7 +25,6 @@ public class ActionProperties implements Serializable {
     public ActionProperties() {
     }
 
-
     /**
      * Constructor
      * @param action
