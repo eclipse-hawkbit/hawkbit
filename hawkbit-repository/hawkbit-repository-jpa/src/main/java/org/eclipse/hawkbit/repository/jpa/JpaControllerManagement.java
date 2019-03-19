@@ -626,7 +626,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private String handleDownloadedActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        if(isDownloadOnly(action) && DOWNLOADED.equals(action.getStatus())){
+        if(isDownloadOnly(action) && DOWNLOADED.equals(actionStatus.getStatus())){
             return handleDownloadedActionStatusForDownloadOnlyAction(action);
         }
         // information status entry - check for a potential DOS attack
