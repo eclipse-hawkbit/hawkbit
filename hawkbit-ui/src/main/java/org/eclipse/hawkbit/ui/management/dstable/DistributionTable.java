@@ -475,7 +475,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private SaveButtonEnabler saveButtonEnabler() {
-        return (enabled) -> confirmDialog.getOkButton().setEnabled(enabled);
+        return enabled -> confirmDialog.getOkButton().setEnabled(enabled);
     }
 
     private String createConfirmationQuestionForAssignment(final String distributionNameToAssign,

@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -164,8 +165,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @return {@link EventTopic} to use for message.
      */
     private static EventTopic getEventTypeForTarget(final ActionProperties action) {
-        return (action.isDownloadOnly() || !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD
-                : EventTopic.DOWNLOAD_AND_INSTALL;
+        return (Action.ActionType.DOWNLOAD_ONLY.equals(action.getActionType()) ||
+                !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
     /**
@@ -207,7 +208,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 updateAttributesEvent.getTargetAddress());
     }
 
-    public void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
+    protected void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
 
         String tenant = action.getTenant();

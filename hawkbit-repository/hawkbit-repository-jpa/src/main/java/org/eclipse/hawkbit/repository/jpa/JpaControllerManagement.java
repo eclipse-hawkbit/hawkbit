@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
@@ -581,15 +583,13 @@ public class JpaControllerManagement implements ControllerManagement {
                 || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
     }
 
-    private boolean isDownloadOnly(final JpaAction action) {
-        return action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
+    private static boolean isDownloadOnly(final JpaAction action) {
+        return DOWNLOAD_ONLY.equals(action.getActionType());
     }
 
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
      */
-    // Exception squid:S128 - No unconditional break needed in DOWNLOADED case for a non download_only assignment
-    @SuppressWarnings("squid:S128")
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
 
         String controllerId = null;
@@ -604,15 +604,14 @@ public class JpaControllerManagement implements ControllerManagement {
         case FINISHED:
             controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
-        case DOWNLOADED:
-            if(action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY)){
-                controllerId = handleDownloadedEventForDownloadOnlyAction(action);
-                break;
-            }
         default:
-            // information status entry - check for a potential DOS attack
-            assertActionStatusQuota(action);
-            assertActionStatusMessageQuota(actionStatus);
+            if(DOWNLOAD_ONLY.equals(action.getActionType()) && DOWNLOADED.equals(actionStatus.getStatus())){
+                controllerId = handleDownloadedEventForDownloadOnlyAction(action);
+            } else {
+                // information status entry - check for a potential DOS attack
+                assertActionStatusQuota(action);
+                assertActionStatusMessageQuota(actionStatus);
+            }
             break;
         }
 
@@ -630,7 +629,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private String handleDownloadedEventForDownloadOnlyAction(final JpaAction action) {
         JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
-        action.setStatus(Status.DOWNLOADED);
+        action.setStatus(DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         targetRepository.save(target);
 
@@ -670,6 +669,7 @@ public class JpaControllerManagement implements ControllerManagement {
         target.setInstalledDistributionSet(ds);
         target.setInstallationDate(System.currentTimeMillis());
 
+        // Target installed a DOWNLOAD_ONLY distributionSet, set distributionSet as assigned
         if(isDownloadOnly(action)){
             target.setAssignedDistributionSet(action.getDistributionSet());
         }

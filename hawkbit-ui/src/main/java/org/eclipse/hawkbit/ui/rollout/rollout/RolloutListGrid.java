@@ -132,6 +132,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
             SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
 
+    private static final String[] centerAlignedColumns = new String[] { PROP_TYPE };
+
     static {
         statusIconMap.put(RolloutStatus.FINISHED,
                 new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
@@ -154,8 +156,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
-
-    private static final String[] centerAlignedColumns = new String[] { PROP_TYPE };
 
     RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final RolloutManagement rolloutManagement, final UINotification uiNotification,
@@ -342,7 +342,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_DELETE).setMaximumWidth(40);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
-
     }
 
     @Override
@@ -768,28 +767,27 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createTypeLabelAdapter(final ActionType actionType) {
-        StatusFontIcon result = null;
         if (ActionType.FORCED.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+            return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.TIMEFORCED.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.HISTORY, STATUS_ICON_FORCED,
+            return new StatusFontIcon(FontAwesome.HISTORY, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.SOFT.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
+            return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
-            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
+            return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
-        return result;
+        return null;
     }
 
     /**

@@ -38,6 +38,9 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * Helper Class for Target Assignment Operations from the Deployment View
+ */
 public final class TargetAssignmentOperations {
 
     private TargetAssignmentOperations() {
@@ -45,20 +48,21 @@ public final class TargetAssignmentOperations {
 
     /**
      * Save all target(s)-distributionSet assignments
-     *  @param managementUIState
+     * 
+     * @param managementUIState
      *            the management UI state
      * @param actionTypeOptionGroupLayout
      *            the action Type Option Group Layout
      * @param maintenanceWindowLayout
- *            the Maintenance Window Layout
+     *            the Maintenance Window Layout
      * @param deploymentManagement
-*            the Deployment Management
+     *            the Deployment Management
      * @param notification
-*            the UI Notification
+     *            the UI Notification
      * @param eventBus
-*            the UI Event Bus
+     *            the UI Event Bus
      * @param i18n
-*            the Vaadin Message Source for multi language
+     *            the Vaadin Message Source for multi language
      * @param eventSource
      */
     public static void saveAllAssignments(final ManagementUIState managementUIState,
@@ -72,8 +76,8 @@ public final class TargetAssignmentOperations {
         List<TargetIdName> tempIdList;
         final ActionType actionType = ((AbstractActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = (actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue()
-                == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED)
+        final long forcedTimeStamp = (actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue() == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
@@ -120,7 +124,7 @@ public final class TargetAssignmentOperations {
         eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
-    static private void refreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList,
+    private static void refreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList,
             final ManagementUIState managementUIState, final UIEventBus eventBus, final Object eventSource) {
         final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
         final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
@@ -180,7 +184,8 @@ public final class TargetAssignmentOperations {
      *            the UI Properties
      * @return the Assignment Confirmation tab
      */
-    public static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
+    public static ConfirmationTab createAssignmentTab(
+            final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler,
             final VaadinMessageSource i18n, final UiProperties uiProperties) {
 
@@ -203,8 +208,9 @@ public final class TargetAssignmentOperations {
         return layout;
     }
 
-    private static ConfirmationTab createAssignmentTab(final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
-            final HorizontalLayout layout, final MaintenanceWindowLayout maintenanceWindowLayout) {
+    private static ConfirmationTab createAssignmentTab(
+            final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout, final HorizontalLayout layout,
+            final MaintenanceWindowLayout maintenanceWindowLayout) {
         final ConfirmationTab assignmentTab = new ConfirmationTab();
         assignmentTab.addComponent(actionTypeOptionGroupLayout);
         assignmentTab.addComponent(layout);
@@ -216,8 +222,8 @@ public final class TargetAssignmentOperations {
             final SaveButtonEnabler saveButtonEnabler) {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
-        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(event ->
-                saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+        maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
+                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
         maintenanceWindowLayout.getDurationControl().addTextChangeListener(
                 event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onDurationChange(event)));
     }
@@ -245,8 +251,9 @@ public final class TargetAssignmentOperations {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                        if (event.getProperty().getValue().equals(AbstractActionTypeOptionGroupLayout.ActionTypeOption.DOWNLOAD_ONLY)) {
+                    public void valueChange(final Property.ValueChangeEvent event) {
+                        if (event.getProperty().getValue()
+                                .equals(AbstractActionTypeOptionGroupLayout.ActionTypeOption.DOWNLOAD_ONLY)) {
                             enableMaintenanceWindowControl.setValue(false);
                             enableMaintenanceWindowControl.setEnabled(false);
                             maintenanceWindowHelpLinkControl.setEnabled(false);

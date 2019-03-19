@@ -102,12 +102,6 @@ public interface Rollout extends NamedEntity {
     String getApprovalRemark();
 
     /**
-     * @return <code>true</code> if the rollout is created as a DOWNLOAD_ONLY rollout.
-     * This is true when getActionType returns ActionType.DOWNLOAD_ONLY
-     */
-    boolean isDownloadOnly();
-
-    /**
      *
      * State machine for rollout.
      *

@@ -111,7 +111,7 @@ import com.google.common.collect.Lists;
  */
 @Validated
 @Transactional(readOnly = true)
-public class JpaRolloutManagement extends AbstractRolloutManagement {
+public class  JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     /**
@@ -762,7 +762,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
         List<Status> statuses = new LinkedList<>(Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED));
-        if(rollout.isDownloadOnly()) {
+        if(ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())) {
             // In case of DOWNLOAD_ONLY, actions can be finished with Status.DOWNLOADED
             // as well as Status.FINISHED
             statuses.add(Status.DOWNLOADED);
@@ -1076,7 +1076,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.get().getTotalTargets(), rollout.get().isDownloadOnly());
+                rollout.get().getTotalTargets(), rollout.get().getActionType());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
@@ -1118,7 +1118,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         if (allStatesForRollout != null) {
             rollouts.forEach(rollout -> {
                 final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.isDownloadOnly());
+                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.getActionType());
                 rollout.setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }

@@ -46,7 +46,6 @@ public class ProxyRollout {
     private TotalTargetCountStatus totalTargetCountStatus;
     private String approvalDecidedBy;
     private String approvalRemark;
-
     private ActionType actionType;
 
     public ActionType getActionType() {

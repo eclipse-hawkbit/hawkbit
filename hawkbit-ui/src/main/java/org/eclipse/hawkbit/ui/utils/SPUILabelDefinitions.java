@@ -197,11 +197,6 @@ public final class SPUILabelDefinitions {
     public static final String VAR_STATUS = "status";
 
     /**
-     * Type of the assigment.
-     */
-    public static final String VAR_TYPE = "type";
-
-    /**
      * Distribution name and version - column property.
      */
     public static final String VAR_DIST_NAME_VERSION = "distributionSetNameVersion";

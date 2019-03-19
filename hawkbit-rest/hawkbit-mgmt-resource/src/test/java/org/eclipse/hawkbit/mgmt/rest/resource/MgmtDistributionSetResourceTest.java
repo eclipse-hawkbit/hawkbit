@@ -33,6 +33,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -1246,7 +1247,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of DOWNLOAD_ONLY.")
+    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of " +
+            "DOWNLOAD_ONLY.")
     public void assignMultipleTargetsToDistributionSetAsDownloadOnly() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
@@ -1258,7 +1260,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         // assign already one target to DS
-        assignDistributionSetDownloadOnly(createdDs.getId(), knownTargetIds[0]);
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
         mvc.perform(post(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")

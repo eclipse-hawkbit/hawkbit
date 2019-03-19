@@ -10,21 +10,30 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 
+/**
+ * Holds properties for {@link Action}
+ */
 public class ActionProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private boolean downloadOnly;
+    private Action.ActionType actionType;
     private String tenant;
     private boolean maintenanceWindowAvailable;
 
     public ActionProperties() {
     }
 
+
+    /**
+     * Constructor
+     * @param action
+     *              the action to populate the properties from
+     */
     public ActionProperties(final Action action) {
         this.id = action.getId();
-        this.downloadOnly = action.getActionType().equals(Action.ActionType.DOWNLOAD_ONLY);
+        this.actionType = action.getActionType();
         this.tenant = action.getTenant();
         this.maintenanceWindowAvailable = action.isMaintenanceWindowAvailable();
     }
@@ -35,14 +44,6 @@ public class ActionProperties implements Serializable {
 
     public Long getId() {
         return id;
-    }
-
-    public void setDownloadOnly(final boolean downloadOnly) {
-        this.downloadOnly = downloadOnly;
-    }
-
-    public boolean isDownloadOnly() {
-        return downloadOnly;
     }
 
     public void setTenant(final String tenant) {
@@ -59,5 +60,13 @@ public class ActionProperties implements Serializable {
 
     public boolean isMaintenanceWindowAvailable() {
         return maintenanceWindowAvailable;
+    }
+
+    public Action.ActionType getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(final Action.ActionType actionType) {
+        this.actionType = actionType;
     }
 }

@@ -954,7 +954,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
-            final String targetFilterQuery, final int targets, Action.ActionType type) throws Exception {
+            final String targetFilterQuery, final int targets, final Action.ActionType type) throws Exception {
         String actionType = MgmtRestModelMapper.convertActionType(type).getName();
         String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType);

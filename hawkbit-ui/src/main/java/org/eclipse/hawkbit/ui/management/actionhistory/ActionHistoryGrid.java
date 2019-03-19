@@ -273,20 +273,22 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createTypeLabelMetadata(final Action action) {
-        StatusFontIcon result = null;
         if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+            return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.SOFT.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT, i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
+            return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY, i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
+            return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
-        return result;
+        return null;
     }
 
     private StatusFontIcon createTimeForcedLabelMetadata(final Action action) {

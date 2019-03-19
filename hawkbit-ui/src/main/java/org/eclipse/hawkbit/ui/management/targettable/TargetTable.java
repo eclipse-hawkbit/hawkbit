@@ -905,7 +905,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private SaveButtonEnabler saveButtonEnabler() {
-        return (enabled) -> confirmDialog.getOkButton().setEnabled(enabled);
+        return enabled -> confirmDialog.getOkButton().setEnabled(enabled);
     }
 
     private void addNewTargetToAssignmentList(final TargetIdName createTargetIdName,

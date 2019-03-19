@@ -58,7 +58,7 @@ public class TotalTargetCountStatus {
 
     private final Map<Status, Long> statusTotalCountMap = new EnumMap<>(Status.class);
     private final Long totalTargetCount;
-    private final boolean isDownloadOnly;
+    private final Action.ActionType rolloutType;
 
     /**
      * Create a new states map with the target count for each state.
@@ -66,13 +66,13 @@ public class TotalTargetCountStatus {
      *            the action state map
      * @param totalTargetCount
      *            the total target count
-     * @param isDownloadOnly
-     *            if rollout was created as a download_only rollout
+     * @param rolloutType
+     *            the type of the rollout
      */
     public TotalTargetCountStatus(final List<TotalTargetCountActionStatus> targetCountActionStatus,
-            final Long totalTargetCount, final boolean isDownloadOnly) {
+            final Long totalTargetCount, final Action.ActionType rolloutType) {
         this.totalTargetCount = totalTargetCount;
-        this.isDownloadOnly = isDownloadOnly;
+        this.rolloutType = rolloutType;
         mapActionStatusToTotalTargetCountStatus(targetCountActionStatus);
     }
 
@@ -81,11 +81,11 @@ public class TotalTargetCountStatus {
      *
      * @param totalTargetCount
      *            the total target count
-     * @param isDownloadOnly
-     *            if rollout was created as a download_only rollout
+     * @param rolloutType
+     *            the type of the rollout
      */
-    public TotalTargetCountStatus(final Long totalTargetCount, final boolean isDownloadOnly) {
-        this(Collections.emptyList(), totalTargetCount, isDownloadOnly);
+    public TotalTargetCountStatus(final Long totalTargetCount, final Action.ActionType rolloutType) {
+        this(Collections.emptyList(), totalTargetCount, rolloutType);
     }
 
     /**
@@ -139,9 +139,9 @@ public class TotalTargetCountStatus {
         statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
     }
 
-    // Exception squid:MethodCyclomaticComplexity - simple state conversion, not really complex.
-    // Exception squid:S128 - No unconditional break needed in DOWNLOADED case for a non download_only assignment
-    @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S128"})
+    // Exception squid:MethodCyclomaticComplexity - simple state conversion, not
+    // really complex.
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
     private void convertStatus(final TotalTargetCountActionStatus item) {
         switch (item.getStatus()) {
         case SCHEDULED:
@@ -158,19 +158,23 @@ public class TotalTargetCountStatus {
         case WARNING:
         case DOWNLOAD:
         case DOWNLOADED:
-            if(isDownloadOnly){
-                statusTotalCountMap.put(Status.FINISHED, item.getCount());
-                break;
-            }
         case CANCELING:
-            final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
-            statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
+            mapItemStatus(item);
             break;
         case CANCELED:
             statusTotalCountMap.put(Status.CANCELLED, item.getCount());
             break;
         default:
             throw new IllegalArgumentException("State " + item.getStatus() + "is not valid");
+        }
+    }
+
+    private void mapItemStatus(final TotalTargetCountActionStatus item) {
+        if(Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) && Action.Status.DOWNLOADED.equals(item.getStatus())){
+            statusTotalCountMap.put(Status.FINISHED, item.getCount());
+        } else {
+            final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
+            statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
         }
     }
 

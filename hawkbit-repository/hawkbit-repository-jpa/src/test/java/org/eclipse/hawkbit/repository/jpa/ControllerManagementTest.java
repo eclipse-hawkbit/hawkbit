@@ -358,7 +358,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private Long createTargetAndAssignDsAsDownloadOnly() {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
-        assignDistributionSetDownloadOnly(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID, Action.ActionType.DOWNLOAD_ONLY);
         assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 

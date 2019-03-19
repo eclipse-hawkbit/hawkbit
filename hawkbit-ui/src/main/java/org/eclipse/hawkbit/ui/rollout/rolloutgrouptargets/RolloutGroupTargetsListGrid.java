@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
@@ -244,6 +245,12 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
         }
 
+        private boolean isDownloadOnlyRollout() {
+            return rolloutUIState.getRolloutGroup()
+                    .map(rolloutGroup -> Action.ActionType.DOWNLOAD_ONLY.equals(rolloutGroup.getRollout().getActionType()))
+                    .orElse(false);
+        }
+
         private String getStatus() {
             final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().orElse(null);
             if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
@@ -258,12 +265,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
                     Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
         }
 
-    }
-
-    private boolean isDownloadOnlyRollout() {
-        return rolloutUIState.getRolloutGroup()
-                .map(rolloutGroup -> rolloutGroup.getRollout().isDownloadOnly())
-                .orElse(false);
     }
 
     private String getDescription(final CellReference cell) {
