@@ -1094,11 +1094,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         List<Long> targetActiveActionIds = targets.stream()
                 .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
                 .flatMap(List::stream)
-                .map(Identifiable::getId)
-                .sorted()
+                .map(Action::getId)
                 .collect(Collectors.toList());
-
-        assertThat(eventActionIds).isEqualTo(targetActiveActionIds);
+        assertThat(eventActionIds).containsOnlyElementsOf(targetActiveActionIds);
     }
 
     private class DeploymentResult {

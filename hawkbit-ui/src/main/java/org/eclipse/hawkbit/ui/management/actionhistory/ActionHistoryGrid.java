@@ -109,19 +109,9 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
 
-    boolean forceClientRefreshToggle = true;
+    private boolean forceClientRefreshToggle = true;
 
-    /**
-     * Constructor.
-     *
-     * @param i18n
-     * @param deploymentManagement
-     * @param eventBus
-     * @param notification
-     * @param managementUIState
-     * @param permissionChecker
-     */
-    protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
+    ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
             final SpPermissionChecker permissionChecker) {
         super(i18n, eventBus, permissionChecker);
@@ -222,7 +212,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setConverter(new LongToFormattedDateStringConverter());
         getColumn(ProxyAction.PXY_ACTION_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
@@ -276,17 +266,17 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
             return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         if (ActionType.SOFT.equals(action.getActionType())) {
             return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
             return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         return null;
     }
@@ -419,9 +409,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
             }
         });
-        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            return;
-        }
     }
 
     // service call to cancel the active action

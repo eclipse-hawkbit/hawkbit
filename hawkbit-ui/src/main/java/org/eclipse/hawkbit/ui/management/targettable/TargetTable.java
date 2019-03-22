@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,7 +46,6 @@ import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.management.SaveButtonEnabler;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
@@ -897,15 +897,15 @@ public class TargetTable extends AbstractTable<Target> {
                     } else {
                         managementUIState.getAssignedList().clear();
                     }
-                }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonEnabler(),
+                }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(),
                         getI18n(), uiProperties),
                 UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private SaveButtonEnabler saveButtonEnabler() {
-        return enabled -> confirmDialog.getOkButton().setEnabled(enabled);
+    private Consumer<Boolean> saveButtonToggle() {
+        return isEnabled -> confirmDialog.getOkButton().setEnabled(isEnabled);
     }
 
     private void addNewTargetToAssignmentList(final TargetIdName createTargetIdName,

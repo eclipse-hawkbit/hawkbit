@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,6 +43,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -355,15 +357,13 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
-    private Long createTargetAndAssignDsAsDownloadOnly() {
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        testdataFactory.createTarget();
-        assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID, Action.ActionType.DOWNLOAD_ONLY);
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+    private Long createAndAssignDsAsDownloadOnly(final String defaultControllerId) {
+        final Long dsId = testdataFactory.createDistributionSet("downloadOnly").getId();
+        assignDistributionSet(dsId, defaultControllerId, Action.ActionType.DOWNLOAD_ONLY);
+        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        return deploymentManagement.findActiveActionsByTarget(PAGE, TestdataFactory.DEFAULT_CONTROLLER_ID).getContent()
-                .get(0).getId();
+        return deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent().get(0).getId();
     }
 
     @Step
@@ -1004,8 +1004,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOADED")
     public void controllerReportsDownloadedForDownloadOnlyAction() {
-        final Long actionId = createTargetAndAssignDsAsDownloadOnly();
-
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
@@ -1018,12 +1019,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action.")
-    public void controllerReportsActionFinishedForDownloadOnlyAction() {
-        final Long actionId = createTargetAndAssignDsAsDownloadOnly();
-
+    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY non-active action.")
+    public void controllerReportsActionFinishedForDownloadOnlyActionThatIsNotActive() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Status.DOWNLOADED, Status.DOWNLOADED, false);
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
@@ -1034,4 +1040,115 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
                 .isEqualTo(false);
     }
+
+    @Test
+    @Description("Verifies that multiple DOWNLOADED events for a DOWNLOAD_ONLY action are handled.")
+    public void controllerReportsMultipleDownloadedForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        IntStream.range(0, 3).forEach(i -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Status.DOWNLOADED, Status.DOWNLOADED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(4);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(4);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test(expected = QuotaExceededException.class)
+    @Description("Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a " +
+            "DOWNLOAD_ONLY action.")
+    public void quotaExceptionWhencontrollerReportsTooManyDownloadedMessagesForDownloadOnlyAction() {
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+
+        IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+    }
+
+    @Test
+    @Description("Verifies that no quota exceptions are thrown when a controller reports too many FINISHED events for "
+            + "a DOWNLOAD_ONLY action.")
+    public void noQuotaExceptionWhencontrollerReportsTooManyFinishedMessagesForDownloadOnlyAction() {
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
+        } catch (QuotaExceededException e) {
+            fail();
+        }
+
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Status.FINISHED, Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+    }
+
+    @Test
+    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action.")
+    public void controllerReportsFinishedForOldDownloadOnlyActionAfterSuccessfulForcedAssignment() {
+        // assign DS as download only assignment
+        testdataFactory.createTarget();
+        final Long downloadOnlyActionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(downloadOnlyActionId).isNotNull();
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(downloadOnlyActionId)
+                        .status(Status.DOWNLOADED));
+        assertActionStatus(downloadOnlyActionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Status.DOWNLOADED, Status.DOWNLOADED, false);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+        Optional<Action> action = actionRepository.getById(downloadOnlyActionId);
+        Optional<Target> target = targetRepository.findByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(action.isPresent() && target.isPresent() && action.get().getDistributionSet().getId()
+                .equals(((JpaTarget) target.get()).getAssignedDistributionSet().getId())
+                && ((JpaTarget) target.get()).getInstalledDistributionSet() == null).isTrue();
+
+
+        // assign DS as forced assignment
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+        final Long actionId = deploymentManagement.findActiveActionsByTarget(PAGE,
+                TestdataFactory.DEFAULT_CONTROLLER_ID).getContent().get(0).getId();
+
+        assertThat(actionId).isNotNull();
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Status.FINISHED));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+        action = actionRepository.getById(actionId);
+        target = targetRepository.findByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(action.isPresent() && target.isPresent() && action.get().getDistributionSet().getId()
+                .equals(((JpaTarget) target.get()).getInstalledDistributionSet().getId())
+                && ((JpaTarget) target.get()).getInstalledDistributionSet().getId()
+                .equals(action.get().getDistributionSet().getId())).isTrue();
+
+
+        // report FINISHED for the download only assignment
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(downloadOnlyActionId)
+                .status(Status.FINISHED));
+        action = actionRepository.getById(downloadOnlyActionId);
+        target = targetRepository.findByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(action.isPresent() && target.isPresent() && action.get().getDistributionSet().getId()
+                .equals(((JpaTarget) target.get()).getInstalledDistributionSet().getId())
+                && ((JpaTarget) target.get()).getInstalledDistributionSet().getId()
+                .equals(action.get().getDistributionSet().getId())).isTrue();
+
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
 }

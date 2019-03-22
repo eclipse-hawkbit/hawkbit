@@ -260,7 +260,7 @@ public final class UIComponentIdProvider {
     /**
      * Action history table forced label Id.
      */
-    public static final String ACTION_HISTORY_TABLE_FORCED_LABEL_ID = "action.history.table.forcedId";
+    public static final String ACTION_HISTORY_TABLE_TYPE_LABEL_ID = "action.history.table.typeId";
 
     /**
      * Action history table time-forced label Id.

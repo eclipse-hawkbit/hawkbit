@@ -111,7 +111,7 @@ import com.google.common.collect.Lists;
  */
 @Validated
 @Transactional(readOnly = true)
-public class  JpaRolloutManagement extends AbstractRolloutManagement {
+public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     /**
@@ -761,14 +761,13 @@ public class  JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        List<Status> statuses = new LinkedList<>(Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED));
+        List<Status> terminalStatuses = new LinkedList<>(Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED));
         if(ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())) {
-            // In case of DOWNLOAD_ONLY, actions can be finished with Status.DOWNLOADED
-            // as well as Status.FINISHED
-            statuses.add(Status.DOWNLOADED);
+            // In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
+            terminalStatuses.add(Status.DOWNLOADED);
         }
         final Long actionsLeftForRollout = actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout,
-                rolloutGroup, statuses);
+                rolloutGroup, terminalStatuses);
         return actionsLeftForRollout == 0;
     }
 

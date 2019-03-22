@@ -124,7 +124,7 @@ public class TotalTargetCountStatus {
      * @param rolloutStatusCountItems
      *            all target {@link Status} with total count
      */
-    private final void mapActionStatusToTotalTargetCountStatus(
+    private void mapActionStatusToTotalTargetCountStatus(
             final List<TotalTargetCountActionStatus> targetCountActionStatus) {
         if (targetCountActionStatus == null) {
             statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
+import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
@@ -569,12 +570,18 @@ public class JpaControllerManagement implements ControllerManagement {
         // guaranteed. However, if an action is closed we do not accept further
         // close messages, unless it was a DOWNLOAD_ONLY action
         if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())
-                && !isDownloadOnly(action)) {
+                && !actionIsDownloadOnlyAndTargetReportsFinished(action, actionStatus)) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getStatus(), action.getId());
             return action;
         }
         return handleAddUpdateActionStatus(actionStatus, action);
+    }
+
+    private static boolean actionIsDownloadOnlyAndTargetReportsFinished(final JpaAction action,
+            final JpaActionStatus actionStatus) {
+        return isDownloadOnly(action) && FINISHED.equals(actionStatus.getStatus())
+                && !FINISHED.equals(action.getStatus());
     }
 
     private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
@@ -626,13 +633,11 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private String handleDownloadedActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        if(isDownloadOnly(action) && DOWNLOADED.equals(actionStatus.getStatus())){
-            return handleDownloadedActionStatusForDownloadOnlyAction(action);
-        }
         // information status entry - check for a potential DOS attack
         assertActionStatusQuota(action);
         assertActionStatusMessageQuota(actionStatus);
-        return null;
+
+        return isDownloadOnly(action) ? handleDownloadedActionStatusForDownloadOnlyAction(action) : null;
     }
 
     private String handleDownloadedActionStatusForDownloadOnlyAction(final JpaAction action) {
@@ -678,7 +683,8 @@ public class JpaControllerManagement implements ControllerManagement {
         target.setInstalledDistributionSet(ds);
         target.setInstallationDate(System.currentTimeMillis());
 
-        // Target installed a DOWNLOAD_ONLY distributionSet, set distributionSet as assigned
+        // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
+        // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)
         if(isDownloadOnly(action)){
             target.setAssignedDistributionSet(action.getDistributionSet());
         }

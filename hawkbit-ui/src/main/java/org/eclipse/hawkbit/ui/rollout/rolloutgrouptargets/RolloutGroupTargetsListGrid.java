@@ -174,7 +174,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new StatusConverter());
     }
 

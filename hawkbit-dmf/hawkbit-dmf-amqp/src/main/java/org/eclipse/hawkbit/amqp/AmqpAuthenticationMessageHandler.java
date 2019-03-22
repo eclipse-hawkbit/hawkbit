@@ -133,7 +133,6 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             checkByTargetId(sha1Hash, secruityToken.getTargetId());
         } else {
             LOG.info("anonymous download no authentication check for artifact {}", sha1Hash);
-            return;
         }
 
     }

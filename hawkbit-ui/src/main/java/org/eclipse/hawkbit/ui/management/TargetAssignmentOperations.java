@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.ArrayList;
@@ -5,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.vaadin.data.Property;
@@ -64,6 +73,7 @@ public final class TargetAssignmentOperations {
      * @param i18n
      *            the Vaadin Message Source for multi language
      * @param eventSource
+     *            the source object for sending potential events
      */
     public static void saveAllAssignments(final ManagementUIState managementUIState,
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
@@ -76,8 +86,8 @@ public final class TargetAssignmentOperations {
         List<TargetIdName> tempIdList;
         final ActionType actionType = ((AbstractActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = (actionTypeOptionGroupLayout.getActionTypeOptionGroup()
-                .getValue() == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED)
+        final long forcedTimeStamp = actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue() == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 
@@ -175,9 +185,8 @@ public final class TargetAssignmentOperations {
      *            the action Type Option Group Layout
      * @param maintenanceWindowLayout
      *            the Maintenance Window Layout
-     * @param saveButtonEnabler
-     *            The event listener to derimne if save button should be enabled
-     *            or not
+     * @param saveButtonToggle
+     *            The event listener to derimne if save button should be enabled or not
      * @param i18n
      *            the Vaadin Message Source for multi language
      * @param uiProperties
@@ -186,16 +195,16 @@ public final class TargetAssignmentOperations {
      */
     public static ConfirmationTab createAssignmentTab(
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
-            final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler,
+            final MaintenanceWindowLayout maintenanceWindowLayout, final Consumer<Boolean> saveButtonToggle,
             final VaadinMessageSource i18n, final UiProperties uiProperties) {
 
         final CheckBox maintenanceWindowControl = maintenanceWindowControl(i18n, maintenanceWindowLayout,
-                saveButtonEnabler);
+                saveButtonToggle);
         final Link maintenanceWindowHelpLink = maintenanceWindowHelpLinkControl(uiProperties, i18n);
         final HorizontalLayout layout = createHorizontalLayout(maintenanceWindowControl, maintenanceWindowHelpLink);
         actionTypeOptionGroupLayout.selectDefaultOption();
 
-        initMaintenanceWindow(maintenanceWindowLayout, saveButtonEnabler);
+        initMaintenanceWindow(maintenanceWindowLayout, saveButtonToggle);
         addValueChangeListener(actionTypeOptionGroupLayout, maintenanceWindowControl, maintenanceWindowHelpLink);
         return createAssignmentTab(actionTypeOptionGroupLayout, layout, maintenanceWindowLayout);
     }
@@ -219,17 +228,17 @@ public final class TargetAssignmentOperations {
     }
 
     private static void initMaintenanceWindow(final MaintenanceWindowLayout maintenanceWindowLayout,
-            final SaveButtonEnabler saveButtonEnabler) {
+            final Consumer<Boolean> saveButtonToggle) {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
         maintenanceWindowLayout.getScheduleControl().addTextChangeListener(
-                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onScheduleChange(event)));
+                event -> saveButtonToggle.accept(maintenanceWindowLayout.onScheduleChange(event)));
         maintenanceWindowLayout.getDurationControl().addTextChangeListener(
-                event -> saveButtonEnabler.setButtonEnabled(maintenanceWindowLayout.onDurationChange(event)));
+                event -> saveButtonToggle.accept(maintenanceWindowLayout.onDurationChange(event)));
     }
 
     private static CheckBox maintenanceWindowControl(final VaadinMessageSource i18n,
-            final MaintenanceWindowLayout maintenanceWindowLayout, final SaveButtonEnabler saveButtonEnabler) {
+            final MaintenanceWindowLayout maintenanceWindowLayout, final Consumer<Boolean> saveButtonToggle) {
         final CheckBox enableMaintenanceWindow = new CheckBox(i18n.getMessage("caption.maintenancewindow.enabled"));
         enableMaintenanceWindow.setId(UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID);
         enableMaintenanceWindow.addStyleName(ValoTheme.CHECKBOX_SMALL);
@@ -238,7 +247,7 @@ public final class TargetAssignmentOperations {
             final Boolean isMaintenanceWindowEnabled = enableMaintenanceWindow.getValue();
             maintenanceWindowLayout.setVisible(isMaintenanceWindowEnabled);
             maintenanceWindowLayout.setEnabled(isMaintenanceWindowEnabled);
-            saveButtonEnabler.setButtonEnabled(!isMaintenanceWindowEnabled);
+            saveButtonToggle.accept(!isMaintenanceWindowEnabled);
             maintenanceWindowLayout.clearAllControls();
         });
         return enableMaintenanceWindow;

@@ -117,7 +117,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING, RolloutStatus.PAUSED, RolloutStatus.READY,
             RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
 
-    private static final List<RolloutStatus> PAUSE_BUTTON_ENABLED = Arrays.asList(RolloutStatus.RUNNING);
+    private static final List<RolloutStatus> PAUSE_BUTTON_ENABLED = Collections.singletonList(RolloutStatus.RUNNING);
 
     private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
             RolloutStatus.PAUSED);
@@ -194,7 +194,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             refreshContainer();
             break;
         default:
-            return;
+            break;
         }
     }
 
@@ -398,7 +398,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
 
         setColumns(columnsToShowInOrder.toArray());
-        alignColumns();
+        setCellStyleGenerator(alignGenerator);
     }
 
     @Override
@@ -421,7 +421,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setRenderer(new HtmlRenderer(),
                 new TotalTargetGroupsConverter());
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
@@ -475,14 +475,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Sets the alignment cell-style-generator that handles the alignment for
-     * the grid cells.
-     */
-    private void alignColumns() {
-        setCellStyleGenerator(alignGenerator);
-    }
-
-    /**
      * Adds support for virtual properties (aka generated properties)
      */
     class RolloutGeneratedPropertySupport extends AbstractGeneratedPropertySupport {
@@ -494,7 +486,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         @Override
         public LazyQueryContainer getRawContainer() {
-            return (LazyQueryContainer) (getDecoratedContainer()).getWrappedContainer();
+            return (LazyQueryContainer) getDecoratedContainer().getWrappedContainer();
         }
 
         @Override
@@ -579,7 +571,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
             rolloutManagement.resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.resumed", rolloutName));
-            return;
         }
     }
 
@@ -637,7 +628,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
         final Long runningActions = statusTotalCount.get(Status.RUNNING);
         String rolloutDetailsMessage = "";
-        if ((scheduledActions > 0) || (runningActions > 0)) {
+        if (scheduledActions > 0 || runningActions > 0) {
             rolloutDetailsMessage = i18n.getMessage("message.delete.rollout.details", runningActions, scheduledActions);
         }
 
@@ -770,22 +761,22 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (ActionType.FORCED.equals(actionType)) {
             return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         if (ActionType.TIMEFORCED.equals(actionType)) {
             return new StatusFontIcon(FontAwesome.HISTORY, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         if (ActionType.SOFT.equals(actionType)) {
             return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
             return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
         return null;
     }
@@ -856,7 +847,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
     }
 
-    private final void hideColumnsDueToInsufficientPermissions() {
+    private void hideColumnsDueToInsufficientPermissions() {
 
         final List<Object> modifiableColumnsList = getColumns().stream().map(Column::getPropertyId)
                 .collect(Collectors.toList());
@@ -880,32 +871,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
 
         setColumns(modifiableColumnsList.toArray());
-    }
-
-
-    /**
-     * Concrete html-label converter that handles ActionTypes.
-     */
-    /**
-     * Concrete html-label converter that handles ActionTypes.
-     */
-    class HtmlVirtPropLabelConverter extends AbstractHtmlLabelConverter<ActionType> {
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Constructor that sets the appropriate adapter.
-         *
-         * @param actionType
-         *            adapts <code>Action</code> to <code>String</code>
-         */
-        public HtmlVirtPropLabelConverter(final LabelAdapter<ActionType> actionType) {
-            addAdapter(actionType);
-        }
-
-        @Override
-        public Class<ActionType> getModelType() {
-            return ActionType.class;
-        }
     }
 
 }

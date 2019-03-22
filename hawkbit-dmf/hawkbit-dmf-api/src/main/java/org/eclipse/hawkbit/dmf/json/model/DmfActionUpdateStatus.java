@@ -34,8 +34,8 @@ public class DmfActionUpdateStatus {
     @JsonProperty
     private List<String> message;
 
-    public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) Long actionId,
-            @JsonProperty(value = "actionStatus", required = true) DmfActionStatus actionStatus) {
+    public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) final Long actionId,
+            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus) {
         this.actionId = actionId;
         this.actionStatus = actionStatus;
     }
