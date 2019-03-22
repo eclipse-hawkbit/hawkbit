@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.validation.ConstraintViolationException;
 
@@ -38,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.Test;
 
@@ -273,7 +275,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
     public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
-
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
         final JpaSoftwareModule sm2 = softwareModuleRepository
@@ -303,6 +304,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                             .isNotNull();
 
             artifactManagement.delete(artifact1.getId());
+
+            assertThat(artifactRepository.findAll()).hasSize(1);
 
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
@@ -347,16 +350,92 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                             .isNotNull();
+
             artifactManagement.delete(artifact1.getId());
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                             .isNotNull();
+            assertThat(artifactRepository.findAll()).hasSize(1);
+            assertThat(artifactRepository.existsById(artifact1.getId())).isFalse();
 
             artifactManagement.delete(artifact2.getId());
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
                             .isNull();
+            assertThat(artifactRepository.findAll()).hasSize(0);
         }
+    }
+
+    @Test
+    @Description("Verifies that you cannot delete an artifact which exists with the same hash, in the same tenant and the SoftwareModule is not deleted .")
+    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInSameTenants()
+            throws NoSuchAlgorithmException, IOException {
+
+        final JpaSoftwareModule sm = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
+        final JpaSoftwareModule sm2 = softwareModuleRepository
+                .save(new JpaSoftwareModule(osType, "name 2", "version 2", null, null));
+
+        final int artifactSize = 5 * 1024;
+        final byte[] randomBytes = randomBytes(artifactSize);
+
+        try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
+                final InputStream inputStream2 = new ByteArrayInputStream(randomBytes)) {
+
+            final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
+                    inputStream2);
+
+            assertThat(artifactRepository.findAll()).hasSize(2);
+
+            assertThat(artifact1.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
+
+            assertThat(artifactRepository
+                    .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
+                            artifact1.getSha1Hash(), artifact1.getTenant())).isTrue();
+
+            artifactRepository.deleteById(artifact1.getId());
+            assertThat(artifactRepository.findAll()).hasSize(1);
+
+            assertThat(artifactRepository
+                    .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
+                            artifact2.getSha1Hash(), artifact2.getTenant())).isFalse();
+
+            artifactRepository.deleteById(artifact2.getId());
+            assertThat(artifactRepository.findAll()).hasSize(0);
+        }
+    }
+
+    @Test
+    @Description(value = "Verifies that you can not delete artifacts from another tenant which exists in another tenant with the same hash and the SoftwareModule is not deleted")
+    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInDifferentTenants() throws Exception {
+        final String tenant1 = "mytenant";
+        final String tenant2 = "tenant2";
+
+        final SoftwareModule module = createSoftwareModuleForTenant(tenant1);
+        final SoftwareModule module2 = createSoftwareModuleForTenant(tenant2);
+
+        createArtifactForTenant(tenant1, "myInput", module.getId(), "myFirstFile");
+        createArtifactForTenant(tenant2, "myInput", module2.getId(), "mySecondFile");
+        final Artifact artifactTenant2 = createArtifactForTenant(tenant2, "myInput", module2.getId(), "myThirdFile");
+
+        verifyTenantArtifactCountIs(tenant1, 1);
+        verifyTenantArtifactCountIs(tenant2, 2);
+
+        assertThat(runAsTenant(tenant2,
+                () -> artifactRepository
+                        .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
+                                artifactTenant2.getSha1Hash(), tenant2))).isTrue();
+        assertThat(runAsTenant(tenant1,
+                () -> artifactRepository
+                        .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
+                                artifactTenant2.getSha1Hash(), tenant2))).isFalse();
+        runAsTenant(tenant2, () -> {
+            artifactRepository.deleteById(artifactTenant2.getId());
+            return null;
+        });
+        verifyTenantArtifactCountIs(tenant1, 1);
+        verifyTenantArtifactCountIs(tenant2, 1);
     }
 
     @Test
@@ -425,7 +504,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             createArtifactForSoftwareModule("file2", sm.getId(), artifactSize, inputStream2);
             assertThat(artifactManagement.getByFilenameAndSoftwareModule("file1", sm.getId())).isPresent();
         }
-
     }
 
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize)
@@ -443,5 +521,22 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     private static byte[] randomBytes(final int len) {
         return RandomStringUtils.randomAlphanumeric(len).getBytes();
+    }
+
+    private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
+        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
+    }
+
+    private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {
+        return runAsTenant(tenant, () -> testdataFactory.createSoftwareModuleApp());
+    }
+
+    private Artifact createArtifactForTenant(final String tenant, final String artifactData, final long moduleId,
+            final String filename) throws Exception {
+        return runAsTenant(tenant, () -> testdataFactory.createArtifact(artifactData, moduleId, filename));
+    }
+
+    private void verifyTenantArtifactCountIs(final String tenant, final int count) throws Exception {
+        assertThat(runAsTenant(tenant, () -> artifactRepository.findAll())).hasSize(count);
     }
 }

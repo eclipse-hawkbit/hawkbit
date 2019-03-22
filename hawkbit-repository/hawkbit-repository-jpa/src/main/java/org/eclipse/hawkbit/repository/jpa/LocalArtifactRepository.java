@@ -56,19 +56,19 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     List<Artifact> findBySha1Hash(String sha1Hash);
 
     /**
-     * Verifies if an artifact exists that has given hash and is still related
-     * to a {@link SoftwareModule} other than a given one and not
-     * {@link SoftwareModule#isDeleted()}.
+     * Verifies if in the same tenant one then more {@link Artifact}s with the
+     * same hash exists and the {@link SoftwareModule} is not deleted
      * 
      * @param sha1
-     *            to search for
-     * @param moduleId
-     *            to ignore in relationship check
+     *            to ensure that it is the same {@link Artifact}
+     * @param tenant
+     *            to ensure that the {@link Artifact} is in the same tenant
      * 
-     * @return <code>true</code> if such an artifact exists
+     * @return <code> true </code>
      */
-    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaArtifact a WHERE a.sha1Hash = :sha1 AND a.softwareModule.id != :moduleId AND a.softwareModule.deleted = 0")
-    boolean existsWithSha1HashAndSoftwareModuleIdIsNot(@Param("sha1") String sha1, @Param("moduleId") Long moduleId);
+    @Query("SELECT CASE WHEN COUNT (a)>1 THEN 'true' ELSE 'false' END FROM JpaArtifact a WHERE a.sha1Hash = :sha1 AND a.tenant = :tenant AND a.softwareModule.deleted = 0")
+    boolean existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
+            @Param("sha1") String sha1, @Param("tenant") String tenant);
 
     /**
      * Searches for a {@link Artifact} based on given gridFsFileName.

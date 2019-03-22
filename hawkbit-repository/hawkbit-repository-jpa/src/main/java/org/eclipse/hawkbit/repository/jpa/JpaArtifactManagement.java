@@ -102,8 +102,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
-        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(),
-                softwareModule);
+        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
@@ -166,8 +165,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public boolean clearArtifactBinary(final String sha1Hash, final long moduleId) {
-
-        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+        if (localArtifactRepository.existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(sha1Hash,
+                tenantAware.getCurrentTenant())) {
             // there are still other artifacts that need the binary
             return false;
         }
