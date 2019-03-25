@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractDistributionSetDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
@@ -31,10 +32,12 @@ public class DistributionDetails extends AbstractDistributionSetDetails {
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement,
-            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout) {
+            final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, uiNotification, distributionSetTagManagement,
-                createSoftwareModuleDetailsTable(i18n, permissionChecker, uiNotification));
+                createSoftwareModuleDetailsTable(i18n, permissionChecker, uiNotification),
+                tenantConfigurationManagement);
         restoreState();
     }
 

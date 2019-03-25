@@ -44,12 +44,11 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
             final UINotification notification, final DistributionSetTagManagement distributionSetTagManagement,
             final TargetTagManagement targetTagManagement, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement configManagement,
-            final UiProperties uiProperties) {
+            final TenantConfigurationManagement configManagement, final UiProperties uiProperties) {
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, notification, eventBus, distributionSetManagement, distributionSetTypeManagement,
-                systemManagement, entityFactory, null);
+                systemManagement, entityFactory, null, configManagement);
 
         final DsMetadataPopupLayout dsMetadataPopupLayout = new DsMetadataPopupLayout(i18n, notification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
@@ -62,7 +61,7 @@ public class DistributionTableLayout extends AbstractTableLayout<DistributionTab
                 distributionTable,
                 new DistributionDetails(i18n, eventBus, permissionChecker, managementUIState, distributionSetManagement,
                         dsMetadataPopupLayout, notification, distributionSetTagManagement,
-                        distributionAddUpdateWindowLayout));
+                        distributionAddUpdateWindowLayout, configManagement));
     }
 
     public DistributionTable getDistributionTable() {
