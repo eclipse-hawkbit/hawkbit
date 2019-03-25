@@ -119,6 +119,36 @@ public interface TenantConfigurationManagement {
             Class<T> propertyType);
 
     /**
+     * Retrieves a configuration value from the e.g. tenant overwritten
+     * configuration values or in case the tenant does not a have a specific
+     * configuration the global default value hold in the {@link Environment} or
+     * the {@code defaultValue} if no global default is set.
+     * 
+     * @param <T>
+     *            the type of the configuration value
+     * @param configurationKeyName
+     *            the key of the configuration
+     * @param propertyType
+     *            the type of the configuration value, e.g. {@code String.class}
+     *            , {@code Integer.class}, etc
+     * @param defaultValue
+     *            the value to return in case no configuration is found
+     * @return the converted configuration value either from the tenant specific
+     *         configuration stored or from the fallback default values or
+     *         {@code defaultValue} in case key has not been configured and no
+     *         default value exists
+     * @throws TenantConfigurationValidatorException
+     *             if the {@code propertyType} and the value in general does not
+     *             match the expected type and format defined by the Key
+     * @throws ConversionFailedException
+     *             if the property cannot be converted to the given
+     *             {@code propertyType}
+     */
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    <T extends Serializable> T getConfigurationValue(String configurationKeyName, Class<T> propertyType,
+            final T defaultValue);
+
+    /**
      * returns the global configuration property either defined in the property
      * file or an default value otherwise.
      * 

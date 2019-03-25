@@ -67,7 +67,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -808,11 +807,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType,
             final T defaultValue) {
-        return systemSecurityContext.runAsSystem(() -> {
-            final TenantConfigurationValue<T> configEntry = tenantConfigurationManagement.getConfigurationValue(key,
-                    valueType);
-            return configEntry != null ? configEntry.getValue() : defaultValue;
-        });
+        return systemSecurityContext
+                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType, defaultValue));
     }
-
 }

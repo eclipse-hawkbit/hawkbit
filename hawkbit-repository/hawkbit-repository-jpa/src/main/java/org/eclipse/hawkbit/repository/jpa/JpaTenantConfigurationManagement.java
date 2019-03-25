@@ -63,6 +63,13 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         return buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration);
     }
 
+    @Override
+    public <T extends Serializable> T getConfigurationValue(final String configurationKeyName,
+            final Class<T> propertyType, final T defaultValue) {
+        final TenantConfigurationValue<T> configEntry = getConfigurationValue(configurationKeyName, propertyType);
+        return configEntry != null ? configEntry.getValue() : defaultValue;
+    }
+
     /**
      * Validates the data type of the tenant configuration. If it is possible to
      * cast to the given data type.
