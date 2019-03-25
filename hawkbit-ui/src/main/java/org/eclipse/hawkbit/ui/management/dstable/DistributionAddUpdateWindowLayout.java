@@ -66,9 +66,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
     private final transient SystemManagement systemManagement;
     private final transient EntityFactory entityFactory;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
     private final DistributionSetTable distributionSetTable;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
