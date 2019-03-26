@@ -227,7 +227,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
                 new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
         getColumn(VIRT_PROP_FORCED).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createForcedLabelMetadata));
+                new HtmlVirtPropLabelConverter(this::createForcedLabelMetadata));
         getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
                 new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
         getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
@@ -270,10 +270,11 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         return activeStates.get(isActiveDeco);
     }
 
-    private static StatusFontIcon createForcedLabelMetadata(final Action action) {
+    private StatusFontIcon createForcedLabelMetadata(final Action action) {
         StatusFontIcon result = null;
         if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
+            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
         }
         return result;
@@ -288,12 +289,14 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             String title;
             if (action.isHitAutoForceTime(currentTimeMillis)) {
                 style = STATUS_ICON_GREEN;
-                title = "auto forced since "
-                        + SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(), currentTimeMillis, i18n);
+                final String duration = SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(),
+                        currentTimeMillis, i18n);
+                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_SINCE, duration);
             } else {
                 style = STATUS_ICON_PENDING;
-                title = "auto forcing in "
-                        + SPDateTimeUtil.getDurationFormattedString(currentTimeMillis, action.getForcedTime(), i18n);
+                final String duration = SPDateTimeUtil.getDurationFormattedString(currentTimeMillis,
+                        action.getForcedTime(), i18n);
+                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_IN, duration);
             }
             result = new StatusFontIcon(FontAwesome.HISTORY, style, title,
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID);
@@ -466,7 +469,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                 .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
-                .setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_MAINTENANCE_WINDOW);
+                .setHeaderCaption(i18n.getMessage("header.maintenancewindow"));
         getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
         forceClientRefreshToggle = !forceClientRefreshToggle;
 

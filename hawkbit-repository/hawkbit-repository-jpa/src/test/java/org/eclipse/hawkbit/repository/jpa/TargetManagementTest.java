@@ -1036,10 +1036,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target2 = createTargetWithMetadata("target2", 8);
 
         final Page<TargetMetadata> metadataOfTarget1 = targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, 100), target1.getControllerId());
+                .findMetaDataByControllerId(PageRequest.of(0, 100), target1.getControllerId());
 
         final Page<TargetMetadata> metadataOfTarget2 = targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, 100), target2.getControllerId());
+                .findMetaDataByControllerId(PageRequest.of(0, 100), target2.getControllerId());
 
         assertThat(metadataOfTarget1.getNumberOfElements()).isEqualTo(10);
         assertThat(metadataOfTarget1.getTotalElements()).isEqualTo(10);

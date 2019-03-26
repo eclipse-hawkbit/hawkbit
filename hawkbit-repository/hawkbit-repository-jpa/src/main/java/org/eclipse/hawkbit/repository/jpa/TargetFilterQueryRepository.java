@@ -45,15 +45,16 @@ public interface TargetFilterQueryRepository
     Page<JpaTargetFilterQuery> findAll();
 
     /**
-     * Sets the auto assign distribution sets to null which match the ds ids.
+     * Sets the auto assign distribution sets and action types to null which
+     * match the ds ids.
      *
      * @param dsIds
      *            distribution set ids to be set to null
      */
     @Modifying
     @Transactional
-    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL where d.autoAssignDistributionSet in :ids")
-    void unsetAutoAssignDistributionSet(@Param("ids") Long... dsIds);
+    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL where d.autoAssignDistributionSet in :ids")
+    void unsetAutoAssignDistributionSetAndActionType(@Param("ids") Long... dsIds);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

@@ -62,33 +62,24 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
  * 
  */
 public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M extends MetaData> extends CustomComponent {
+    private static final long serialVersionUID = 1L;
 
     private static final String DELETE_BUTTON = "DELETE_BUTTON";
-
-    private static final long serialVersionUID = -1491218218453167613L;
+    private static final int INPUT_DEBOUNCE_TIMEOUT = 250;
 
     protected static final String VALUE = "value";
-
     protected static final String KEY = "key";
-
     protected static final int MAX_METADATA_QUERY = 500;
 
     protected VaadinMessageSource i18n;
-
     private final UINotification uiNotification;
-
     protected transient EventBus.UIEventBus eventBus;
 
     private TextField keyTextField;
-
     private TextArea valueTextArea;
-
     private Button addIcon;
-
     private Grid metaDataGrid;
-
     private Label headerCaption;
-
     private CommonDialogWindow metadataWindow;
 
     private E selectedEntity;
@@ -238,7 +229,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
         final TextField keyField = new TextFieldBuilder(MetaData.KEY_MAX_SIZE).caption(i18n.getMessage("textfield.key"))
                 .required(true, i18n).id(UIComponentIdProvider.METADATA_KEY_FIELD_ID).buildTextComponent();
         keyField.addTextChangeListener(this::onKeyChange);
-        keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
+        keyField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        keyField.setTextChangeTimeout(INPUT_DEBOUNCE_TIMEOUT);
         keyField.setWidth("100%");
         return keyField;
     }
@@ -249,7 +241,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
         valueTextArea.setSizeFull();
         valueTextArea.setHeight(100, Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(this::onValueChange);
-        valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
+        valueTextArea.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        valueTextArea.setTextChangeTimeout(INPUT_DEBOUNCE_TIMEOUT);
         return valueTextArea;
     }
 

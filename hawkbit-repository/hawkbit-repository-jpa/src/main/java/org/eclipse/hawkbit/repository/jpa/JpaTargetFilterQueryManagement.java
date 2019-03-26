@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -88,7 +91,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         // enforce the 'max targets per auto assign' quota right here even if
         // the result of the filter query can vary over time
-        create.getSet().flatMap(set -> create.getQuery()).ifPresent(this::assertMaxTargetsQuota);
+        if (create.getAutoAssignDistributionSetId().isPresent()) {
+            create.getQuery().ifPresent(this::assertMaxTargetsQuota);
+        }
 
         return targetFilterQueryRepository.save(create.build());
     }
@@ -217,24 +222,53 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
+    public TargetFilterQuery updateAutoAssignDSWithActionType(final long queryId, final Long dsId,
+            final ActionType actionType) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
 
-        targetFilterQuery.setAutoAssignDistributionSet(
-                Optional.ofNullable(dsId).map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null));
-
-        // we cannot be sure that the quota was enforced at creation time
-        // because the Target Filter Query REST API does not allow to specify an
-        // auto-assign distribution set when creating a target filter query
-        if (dsId != null) {
+        if (dsId == null) {
+            targetFilterQuery.setAutoAssignDistributionSet(null);
+            targetFilterQuery.setAutoAssignActionType(null);
+        } else {
+            // we cannot be sure that the quota was enforced at creation time
+            // because the Target Filter Query REST API does not allow to
+            // specify an
+            // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
+
+            final JpaDistributionSet distributionSetToAutoAssign = findDistributionSetAndThrowExceptionIfNotFound(dsId);
+            // must be completed and not soft deleted
+            verifyDistributionSetAndThrowExceptionIfNotValid(distributionSetToAutoAssign);
+
+            targetFilterQuery.setAutoAssignDistributionSet(distributionSetToAutoAssign);
+            // the action type is set to FORCED per default (when not explicitly
+            // specified)
+            targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(actionType));
         }
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
+    private static void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
+        if (!distributionSet.isComplete() || distributionSet.isDeleted()) {
+            throw new InvalidAutoAssignDistributionSetException();
+        }
+    }
+
+    private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
+        if (actionType == null) {
+            return ActionType.FORCED;
+        }
+
+        if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
+            throw new InvalidAutoAssignActionTypeException();
+        }
+
+        return actionType;
+    }
+
     private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) distributionSetManagement.getWithDetails(setId)
+        return (JpaDistributionSet) distributionSetManagement.get(setId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 

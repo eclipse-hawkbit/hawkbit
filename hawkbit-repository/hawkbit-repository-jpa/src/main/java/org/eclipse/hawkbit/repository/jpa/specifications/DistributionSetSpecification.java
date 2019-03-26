@@ -121,6 +121,22 @@ public final class DistributionSetSpecification {
     }
 
     /**
+     * {@link Specification} for retrieving {@link DistributionSet}s by "like
+     * name and like version".
+     * 
+     * @param name
+     *            to be filtered on
+     * @param version
+     *            to be filtered on
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> likeNameAndVersion(final String name, final String version) {
+        return (targetRoot, query, cb) -> cb.and(
+                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.name)), name.toLowerCase()),
+                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.version)), version.toLowerCase()));
+    }
+
+    /**
      * {@link Specification} for retrieving {@link DistributionSet}s by "has at
      * least one of the given tag names".
      * 

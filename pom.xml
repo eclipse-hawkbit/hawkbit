@@ -396,8 +396,7 @@
                <artifactId>maven-surefire-plugin</artifactId>
                <configuration>
                   <systemPropertyVariables>
-                     <!-- Set output directory according to allure-framework 
-                        recommendation -->
+                     <!-- Set output directory according to allure-framework recommendation -->
                      <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                      <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
                      <allure.serve.timeout>650</allure.serve.timeout>
@@ -407,7 +406,7 @@
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
                   <argLine>
-                     ${jacoco.agent.ut.arg} --illegal-access=warn --add-modules=java.xml.bind
+                     ${jacoco.agent.ut.arg}
                   </argLine>
                   <properties>
                      <property>
@@ -471,27 +470,6 @@
       </pluginManagement>
    </build>
    <profiles>
-      <profile>
-         <id>jdk-8</id>
-         <activation>
-            <jdk>1.8</jdk>
-         </activation>
-         <build>
-            <pluginManagement>
-               <plugins>
-                  <plugin>
-                     <groupId>org.apache.maven.plugins</groupId>
-                     <artifactId>maven-surefire-plugin</artifactId>
-                     <configuration>
-                        <argLine>
-                           ${jacoco.agent.ut.arg}
-                        </argLine>
-                     </configuration>
-                  </plugin>
-               </plugins>
-            </pluginManagement>
-         </build>
-      </profile>
       <profile>
          <id>nexus_staging</id>
          <activation>

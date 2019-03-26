@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.footer.TargetFilterCountMessageLabel;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
@@ -68,11 +67,10 @@ public class FilterManagementView extends VerticalLayout implements View {
             final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final AutoCompleteTextFieldComponent queryTextField, final ManageDistUIState manageDistUIState,
-            final TargetManagement targetManagement) {
+            final AutoCompleteTextFieldComponent queryTextField, final TargetManagement targetManagement) {
         this.targetFilterHeader = new TargetFilterHeader(eventBus, filterManagementUIState, permissionChecker, i18n);
         this.targetFilterTable = new TargetFilterTable(i18n, notification, eventBus, filterManagementUIState,
-                targetFilterQueryManagement, manageDistUIState, targetManagement, permissionChecker);
+                targetFilterQueryManagement, targetManagement, permissionChecker);
         this.createNewFilterHeader = new CreateOrUpdateFilterHeader(i18n, eventBus, filterManagementUIState,
                 targetFilterQueryManagement, permissionChecker, notification, uiProperties, entityFactory,
                 queryTextField);
@@ -113,10 +111,10 @@ public class FilterManagementView extends VerticalLayout implements View {
         if (custFilterUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
             viewTargetFilterDetailLayout();
         } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            this.getUI().access(() -> viewCreateTargetFilterLayout());
+            this.getUI().access(this::viewCreateTargetFilterLayout);
         } else if (custFilterUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
                 || custFilterUIEvent == CustomFilterUIEvent.SHOW_FILTER_MANAGEMENT) {
-            UI.getCurrent().access(() -> viewListView());
+            UI.getCurrent().access(this::viewListView);
         }
     }
 

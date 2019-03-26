@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+
 /**
  * 
  *
@@ -15,7 +17,7 @@ package org.eclipse.hawkbit.ui.components;
  */
 public class ProxyTargetFilter {
 
-    private static final long serialVersionUID = 6622060929679084419L;
+    private static final long serialVersionUID = 1L;
 
     private String createdDate;
 
@@ -27,6 +29,7 @@ public class ProxyTargetFilter {
     private String lastModifiedBy;
     private String query;
     private ProxyDistribution autoAssignDistributionSet;
+    private ActionType autoAssignActionType;
 
     public String getCreatedDate() {
         return createdDate;
@@ -95,7 +98,15 @@ public class ProxyTargetFilter {
         return autoAssignDistributionSet;
     }
 
-    public void setAutoAssignDistributionSet(ProxyDistribution autoAssignDistributionSet) {
+    public void setAutoAssignDistributionSet(final ProxyDistribution autoAssignDistributionSet) {
         this.autoAssignDistributionSet = autoAssignDistributionSet;
+    }
+
+    public ActionType getAutoAssignActionType() {
+        return autoAssignActionType;
+    }
+
+    public void setAutoAssignActionType(final ActionType autoAssignActionType) {
+        this.autoAssignActionType = autoAssignActionType;
     }
 }
