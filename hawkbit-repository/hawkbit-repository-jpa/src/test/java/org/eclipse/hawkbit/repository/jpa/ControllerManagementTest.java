@@ -1075,7 +1075,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that no quota exceptions are thrown when a controller reports too many FINISHED events for "
             + "a DOWNLOAD_ONLY action.")
-    public void noQuotaExceptionWhencontrollerReportsTooManyFinishedMessagesForDownloadOnlyAction() {
+    public void noQuotaExceptionWhenControllerReportsTooManyFinishedMessagesForDownloadOnlyAction() {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
         testdataFactory.createTarget();
         final Long actionId = createAndAssignDsAsDownloadOnly(TestdataFactory.DEFAULT_CONTROLLER_ID);
@@ -1085,7 +1085,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
         } catch (QuotaExceededException e) {
-            fail();
+            fail("No QuotaExceededException should be thrown in this context!");
         }
 
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
