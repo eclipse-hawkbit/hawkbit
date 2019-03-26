@@ -10,23 +10,23 @@ package org.eclipse.hawkbit.repository.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * A singleton bean which holds the event publisher to have to the cache manager
  * in beans not instantiated by spring e.g. JPA entities or
  * CacheFieldEntityListener which cannot be autowired.
- *
  */
-public final class EventPublisherHolder {
+public final class EventPublisherHolder implements ApplicationContextAware {
 
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private BusProperties bus;
+    private String applicationId;
 
     private EventPublisherHolder() {
 
@@ -47,7 +47,11 @@ public final class EventPublisherHolder {
     }
 
     public String getApplicationId() {
-        return bus.getId();
+        return applicationId;
     }
 
+    @Override
+    public void setApplicationContext(final ApplicationContext applicationContext) {
+        applicationId = applicationContext.getBean(BusProperties.class).getId();
+    }
 }
