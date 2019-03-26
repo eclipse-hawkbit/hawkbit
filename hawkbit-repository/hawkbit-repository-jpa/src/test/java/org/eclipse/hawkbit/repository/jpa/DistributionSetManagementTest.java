@@ -14,10 +14,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.ConstraintViolationException;
 
@@ -627,9 +629,10 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.tag().create().name("DistributionSetTag-C"));
         distributionSetTagManagement.create(entityFactory.tag().create().name("DistributionSetTag-D"));
 
-        List<DistributionSet> ds5Group1 = testdataFactory.createDistributionSets("", 5);
-        List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets("test2", 5);
-        DistributionSet dsDeleted = testdataFactory.createDistributionSet("deleted");
+        List<DistributionSet> dsGroup1 = testdataFactory.createDistributionSets("", 5);
+        final String dsGroup2Prefix = "test";
+        List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets(dsGroup2Prefix, 5);
+        DistributionSet dsDeleted = testdataFactory.createDistributionSet("testDeleted");
         final DistributionSet dsInComplete = distributionSetManagement.create(entityFactory.distributionSet().create()
                 .name("notcomplete").version("1").type(standardDsType.getKey()));
 
@@ -649,183 +652,266 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.delete(dsDeleted.getId());
         dsDeleted = distributionSetManagement.get(dsDeleted.getId()).get();
 
-        ds5Group1 = toggleTagAssignment(ds5Group1, dsTagA).getAssignedEntity();
+        dsGroup1 = toggleTagAssignment(dsGroup1, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
-        ds5Group1 = toggleTagAssignment(ds5Group1, dsTagB).getAssignedEntity();
+        dsGroup1 = toggleTagAssignment(dsGroup1, dsTagB).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
         dsGroup2 = toggleTagAssignment(dsGroup2, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName()).get();
 
+        final List<DistributionSet> allDistributionSets = Stream
+                .of(dsGroup1, dsGroup2, Arrays.asList(dsDeleted, dsInComplete, dsNewType)).flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        final List<DistributionSet> dsGroup1WithGroup2 = Stream.of(dsGroup1, dsGroup2).flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        final int sizeOfAllDistributionSets = allDistributionSets.size();
+
         // check setup
-        assertThat(distributionSetRepository.findAll()).hasSize(13);
+        assertThat(distributionSetRepository.findAll()).hasSize(sizeOfAllDistributionSets);
 
-        // Find all
-        List<DistributionSet> expected = Lists.newArrayListWithExpectedSize(13);
-        expected.addAll(ds5Group1);
-        expected.addAll(dsGroup2);
-        expected.add(dsDeleted);
-        expected.add(dsInComplete);
-        expected.add(dsNewType);
+        validateFindAll(allDistributionSets);
+        validateDeleted(dsDeleted, sizeOfAllDistributionSets - 1);
+        validateCompleted(dsInComplete, sizeOfAllDistributionSets - 1);
+        validateType(newType, dsNewType, sizeOfAllDistributionSets - 1);
+        validateSearchText(dsGroup2, "%" + dsGroup2Prefix);
+        validateFilterString(allDistributionSets, dsGroup2Prefix);
+        validateTags(dsTagA, dsTagB, dsTagC, dsGroup1WithGroup2, dsGroup1);
+        validateDeletedAndCompleted(dsGroup1WithGroup2, dsNewType, dsDeleted);
+        validateDeletedAndCompletedAndType(dsGroup1WithGroup2, dsDeleted, newType, dsNewType);
+        validateDeletedAndCompletedAndTypeAndSearchText(dsGroup2, newType, "%" + dsGroup2Prefix);
+        validateDeletedAndCompletedAndTypeAndFilterString(dsGroup1WithGroup2, dsDeleted, dsInComplete, dsNewType,
+                newType, ":1");
+        validateDeletedAndCompletedAndTypeAndSearchTextAndTag(dsGroup2, dsTagA, "%" + dsGroup2Prefix);
+    }
 
-        assertThat(distributionSetManagement
-                .findByDistributionSetFilter(PAGE, getDistributionSetFilterBuilder().build()).getContent()).hasSize(13)
-                        .containsOnly(expected.toArray(new DistributionSet[0]));
+    @Step
+    private void validateFindAll(final List<DistributionSet> expectedDistributionsets) {
 
-        DistributionSetFilterBuilder distributionSetFilterBuilder;
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder(), expectedDistributionsets);
+    }
 
-        // search for not deleted
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1);
+    @Step
+    private void validateDeleted(final DistributionSet deletedDistributionSet, final int notDeletedSize) {
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(false);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(12);
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE),
+                Arrays.asList(deletedDistributionSet));
 
-        // search for completed
-        expected = new ArrayList<>();
-        expected.addAll(ds5Group1);
-        expected.addAll(dsGroup2);
-        expected.add(dsDeleted);
-        expected.add(dsNewType);
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE), notDeletedSize, deletedDistributionSet);
+    }
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(12).containsOnly(expected.toArray(new DistributionSet[0]));
+    @Step
+    private void validateCompleted(final DistributionSet dsIncomplete, final int completedSize) {
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
-        expected = new ArrayList<>();
-        expected.add(dsInComplete);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE), completedSize, dsIncomplete);
 
-        // search for type
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setType(newType);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE), Arrays.asList(dsIncomplete));
+    }
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setType(standardDsType);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(12);
+    @Step
+    private void validateType(final DistributionSetType newType, final DistributionSet dsNewType,
+            final int standardDsTypeSize) {
 
-        // search for text
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setSearchText("%test2");
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(5);
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(newType),
+                Arrays.asList(dsNewType));
 
-        // search for tags
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagA.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(10);
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                getDistributionSetFilterBuilder().setType(standardDsType), standardDsTypeSize, dsNewType);
+    }
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagB.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(5);
+    @Step
+    private void validateSearchText(final List<DistributionSet> withText, final String text) {
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder()
-                .setTagNames(Arrays.asList(dsTagA.getName(), dsTagB.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(10);
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setSearchText(text),
+                withText);
+    }
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder()
-                .setTagNames(Arrays.asList(dsTagC.getName(), dsTagB.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(5);
+    @Step
+    private void validateFilterString(final List<DistributionSet> allDistributionSets, final String dsNamePrefix) {
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagC.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        final List<DistributionSet> withTestNamePrefix = allDistributionSets.stream()
+                .filter(ds -> ds.getName().startsWith(dsNamePrefix)).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setFilterString(dsNamePrefix), withTestNamePrefix);
 
-        // combine deleted and complete
-        expected = new ArrayList<>();
-        expected.addAll(ds5Group1);
-        expected.addAll(dsGroup2);
-        expected.add(dsNewType);
+        final List<DistributionSet> withTestNameExact = withTestNamePrefix.stream()
+                .filter(ds -> ds.getName().equals(dsNamePrefix)).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setFilterString(dsNamePrefix + ":"), withTestNameExact);
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setIsDeleted(Boolean.FALSE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(11).containsOnly(expected.toArray(new DistributionSet[0]));
+        final List<DistributionSet> withTestNameExactAndVersionPrefix = withTestNameExact.stream()
+                .filter(ds -> ds.getVersion().startsWith("1")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setFilterString(dsNamePrefix + ":1"),
+                withTestNameExactAndVersionPrefix);
 
-        expected = Arrays.asList(dsInComplete);
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
+        final List<DistributionSet> dsWithExactNameAndVersion = withTestNameExactAndVersionPrefix.stream()
+                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
+        assertThat(dsWithExactNameAndVersion).hasSize(1);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setFilterString(dsNamePrefix + ":1.0.0"), dsWithExactNameAndVersion);
 
-        expected = Arrays.asList(dsDeleted);
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setIsDeleted(Boolean.TRUE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
+        final List<DistributionSet> withVersionPrefix = allDistributionSets.stream()
+                .filter(ds -> ds.getVersion().startsWith("1.0.")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setFilterString(":1.0."),
+                withVersionPrefix);
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE)
-                .setIsComplete(Boolean.FALSE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        final List<DistributionSet> withVersionExact = withVersionPrefix.stream()
+                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setFilterString(":1.0.0"),
+                withVersionExact);
 
-        // combine deleted and complete and type
-        expected = new ArrayList<>();
-        expected.addAll(ds5Group1);
-        expected.addAll(dsGroup2);
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
-                .setIsComplete(Boolean.TRUE).setType(standardDsType);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(10).containsOnly(expected.toArray(new DistributionSet[0]));
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setFilterString(":"),
+                allDistributionSets);
 
-        expected = Arrays.asList(dsDeleted);
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setType(standardDsType).setIsDeleted(Boolean.TRUE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setFilterString(" : "),
+                allDistributionSets);
+    }
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE)
-                .setIsComplete(Boolean.FALSE).setType(standardDsType);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+    @Step
+    private void validateTags(final DistributionSetTag dsTagA, final DistributionSetTag dsTagB,
+            final DistributionSetTag dsTagC, final List<DistributionSet> dsWithTagA,
+            final List<DistributionSet> dsWithTagB) {
 
-        expected = Arrays.asList(dsNewType);
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(newType);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(1).containsOnly(expected.toArray(new DistributionSet[0]));
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagA.getName())), dsWithTagA);
 
-        // combine deleted and complete and type and text
-        expected = dsGroup2;
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setType(standardDsType).setSearchText("%test2");
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(5).containsOnly(expected.toArray(new DistributionSet[0]));
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagB.getName())), dsWithTagB);
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setIsDeleted(Boolean.TRUE).setType(standardDsType).setSearchText("%test2");
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagA.getName(), dsTagB.getName())),
+                dsWithTagA);
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setType(standardDsType).setSearchText("%test2")
-                .setIsComplete(false).setIsDeleted(false);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagC.getName(), dsTagB.getName())),
+                dsWithTagB);
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setType(newType).setSearchText("%test2")
-                .setIsComplete(Boolean.TRUE).setIsDeleted(false);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                getDistributionSetFilterBuilder().setTagNames(Arrays.asList(dsTagC.getName())));
+    }
 
-        // combine deleted and complete and type and text and tag
-        expected = dsGroup2;
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setType(standardDsType)
-                .setSearchText("%test2").setTagNames(Arrays.asList(dsTagA.getName()));
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(5).containsOnly(expected.toArray(new DistributionSet[0]));
+    @Step
+    private void validateDeletedAndCompleted(final List<DistributionSet> completedStandardType,
+            final DistributionSet dsNewType, final DistributionSet dsDeleted) {
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setType(standardDsType).setSearchText("%test2")
-                .setTagNames(Arrays.asList(dsTagA.getName())).setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE);
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                .getContent()).hasSize(0);
+        final List<DistributionSet> completedNotDeleted = new ArrayList<>(completedStandardType);
+        completedNotDeleted.add(dsNewType);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE),
+                completedNotDeleted);
 
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.TRUE),
+                Arrays.asList(dsDeleted));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.TRUE));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndType(final List<DistributionSet> deletedAndCompletedAndStandardType,
+            final DistributionSet dsDeleted, final DistributionSetType newType, final DistributionSet dsNewType) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
+                .setIsComplete(Boolean.TRUE).setType(standardDsType), deletedAndCompletedAndStandardType);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
+                .setType(standardDsType).setIsDeleted(Boolean.TRUE), Arrays.asList(dsDeleted));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE)
+                .setIsComplete(Boolean.FALSE).setType(standardDsType));
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(newType),
+                Arrays.asList(dsNewType));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndSearchText(
+            final List<DistributionSet> completedAndStandardTypeAndSearchText, final DistributionSetType newType,
+            final String text) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
+                .setType(standardDsType).setSearchText(text), completedAndStandardTypeAndSearchText);
+
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
+                .setIsDeleted(Boolean.TRUE).setType(standardDsType).setSearchText(text));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(standardDsType)
+                .setSearchText(text).setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(newType)
+                .setSearchText(text).setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndFilterString(
+            final List<DistributionSet> completedAndNotDeletedStandardTypeAndFilterString,
+            final DistributionSet dsDeleted, final DistributionSet dsInComplete, final DistributionSet dsNewType,
+            final DistributionSetType newType, final String filterString) {
+
+        final List<DistributionSet> completedAndStandardTypeAndFilterString = new ArrayList<>(
+                completedAndNotDeletedStandardTypeAndFilterString);
+        completedAndStandardTypeAndFilterString.add(dsDeleted);
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
+                .setType(standardDsType).setFilterString(filterString), completedAndStandardTypeAndFilterString);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE)
+                        .setType(standardDsType).setFilterString(filterString),
+                completedAndNotDeletedStandardTypeAndFilterString);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
+                .setIsDeleted(Boolean.TRUE).setType(standardDsType).setFilterString(filterString),
+                Arrays.asList(dsDeleted));
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(standardDsType)
+                .setFilterString(filterString).setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE),
+                Arrays.asList(dsInComplete));
+
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(newType)
+                .setFilterString(filterString).setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE),
+                Arrays.asList(dsNewType));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndSearchTextAndTag(
+            final List<DistributionSet> completedAndStandartTypeAndSearchTextAndTagA, final DistributionSetTag dsTagA,
+            final String text) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(standardDsType)
+                        .setSearchText(text).setTagNames(Arrays.asList(dsTagA.getName())),
+                completedAndStandartTypeAndSearchTextAndTagA);
+
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(standardDsType)
+                .setSearchText(text).setTagNames(Arrays.asList(dsTagA.getName())).setIsComplete(Boolean.FALSE)
+                .setIsDeleted(Boolean.FALSE));
     }
 
     private DistributionSetFilterBuilder getDistributionSetFilterBuilder() {
         return new DistributionSetFilterBuilder();
+    }
+
+    private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,
+            final List<DistributionSet> distributionSets) {
+        final int expectedDsSize = distributionSets.size();
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .hasSize(expectedDsSize).containsOnly(distributionSets.toArray(new DistributionSet[expectedDsSize]));
+    }
+
+    private void assertThatFilterDoesNotContainAnyDistributionSet(final DistributionSetFilterBuilder filterBuilder) {
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .hasSize(0);
+    }
+
+    private void assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+            final DistributionSetFilterBuilder filterBuilder, final int size, final DistributionSet ds) {
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .hasSize(size).doesNotContain(ds);
     }
 
     @Test

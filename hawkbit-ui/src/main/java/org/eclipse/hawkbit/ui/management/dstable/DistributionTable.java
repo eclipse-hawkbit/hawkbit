@@ -52,8 +52,8 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.AssignmentUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -130,7 +130,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private ConfirmationDialog confirmDialog;
 
-    private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
+    private final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout;
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
@@ -152,7 +152,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
         this.configManagement = configManagement;
-        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
         this.uiProperties = uiProperties;
         notAllowedMsg = i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
@@ -512,10 +512,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private void saveAllAssignments() {
 
-        final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
+        final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()).getActionType();
+        final long forcedTimeStamp = (((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 

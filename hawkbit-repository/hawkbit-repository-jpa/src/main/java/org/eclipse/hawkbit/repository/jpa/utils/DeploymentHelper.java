@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -83,10 +84,30 @@ public final class DeploymentHelper {
      */
     public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
             final String transactionName, @NotNull final TransactionCallback<T> action) {
+        return runInNewTransaction(txManager, transactionName, Isolation.DEFAULT.value(), action);
+    }
+
+    /**
+     * Executes the modifying action in new transaction
+     *
+     * @param txManager
+     *            transaction manager interface
+     * @param transactionName
+     *            the name of the new transaction
+     * @param isolationLevel
+     *            isolation level of the new transaction
+     * @param action
+     *            the callback to execute in new tranaction
+     *
+     * @return the result of the action
+     */
+    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
+            final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        def.setIsolationLevel(isolationLevel);
         return new TransactionTemplate(txManager, def).execute(action);
     }
 }

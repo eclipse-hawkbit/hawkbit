@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -76,10 +77,12 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
     private final UiProperties uiProperties;
 
+    private final VaadinMessageSource i18n;
+
     protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
             final SpringViewProvider viewProvider, final ApplicationContext context, final DashboardMenu dashboardMenu,
             final ErrorView errorview, final NotificationUnreadButton notificationUnreadButton,
-            final UiProperties uiProperties) {
+            final UiProperties uiProperties, final VaadinMessageSource i18n) {
         this.pushStrategy = pushStrategy;
         this.eventBus = eventBus;
         this.viewProvider = viewProvider;
@@ -88,6 +91,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         this.errorview = errorview;
         this.notificationUnreadButton = notificationUnreadButton;
         this.uiProperties = uiProperties;
+        this.i18n = i18n;
     }
 
     @Override
@@ -115,7 +119,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         final HorizontalLayout rootLayout = new HorizontalLayout();
         rootLayout.setSizeFull();
 
-        setLocale(HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), getUI()));
+        HawkbitCommonUtil.initLocalization(this, uiProperties.getLocalization(), i18n);
 
         dashboardMenu.init();
         dashboardMenu.setResponsive(true);

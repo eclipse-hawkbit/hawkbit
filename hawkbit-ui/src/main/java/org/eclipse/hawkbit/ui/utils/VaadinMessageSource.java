@@ -55,8 +55,26 @@ public class VaadinMessageSource implements Serializable {
      * @see HawkbitCommonUtil#getCurrentLocale()
      */
     public String getMessage(final String code, final Object... args) {
+        return getMessage(HawkbitCommonUtil.getCurrentLocale(), code, args);
+    }
+
+    /**
+     * Tries to resolve the message based on the provided Local. Returns message
+     * code if fitting message could not be found.
+     * 
+     * @param local
+     *            to determinate the Language.
+     * @param code
+     *            the code to lookup up.
+     * @param args
+     *            Array of arguments that will be filled in for params within
+     *            the message.
+     * 
+     * @return the resolved message, or the message code if the lookup fails.
+     */
+    public String getMessage(final Locale local, final String code, final Object... args) {
         try {
-            return source.getMessage(code, args, HawkbitCommonUtil.getCurrentLocale());
+            return source.getMessage(code, args, local);
         } catch (final NoSuchMessageException ex) {
             LOG.error("Failed to retrieve message!", ex);
             return code;

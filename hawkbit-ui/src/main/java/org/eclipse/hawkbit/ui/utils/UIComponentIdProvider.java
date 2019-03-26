@@ -1179,9 +1179,9 @@ public final class UIComponentIdProvider {
     public static final String FILTER_SEARCH_ICON_ID = "filter.search.icon";
 
     /**
-     * Distribution set select table id
+     * Distribution set select combobox id
      */
-    public static final String DIST_SET_SELECT_TABLE_ID = "distribution.set.select.table";
+    public static final String DIST_SET_SELECT_COMBO_ID = "distribution.set.select.combo";
 
     /**
      * Distribution set select window id

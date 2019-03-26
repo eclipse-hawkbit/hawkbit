@@ -18,9 +18,12 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
@@ -213,13 +216,14 @@ public interface TargetFilterQueryManagement {
     TargetFilterQuery update(@NotNull @Valid TargetFilterQueryUpdate update);
 
     /**
-     * Updates the the auto-assign {@link DistributionSet} of the addressed
-     * {@link TargetFilterQuery}.
+     * Updates the the auto-assign {@link DistributionSet} and sets default
+     * (FORCED) {@link ActionType} of the addressed {@link TargetFilterQuery}.
      *
      * @param queryId
      *            of the target filter query to be updated
      * @param dsId
      *            to be updated or <code>null</code> in order to remove it
+     *            together with the auto-assign {@link ActionType}
      * 
      * @return the updated {@link TargetFilterQuery}
      * 
@@ -230,8 +234,47 @@ public interface TargetFilterQueryManagement {
      * @throws QuotaExceededException
      *             if the query that is already associated with this filter
      *             query addresses too many targets (auto-assignments only)
+     * 
+     * @throws InvalidAutoAssignDistributionSetException
+     *             if the provided auto-assign {@link DistributionSet} is not
+     *             valid (incomplete or soft deleted)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetFilterQuery updateAutoAssignDS(long queryId, Long dsId);
+    default TargetFilterQuery updateAutoAssignDS(final long queryId, final Long dsId) {
+        return updateAutoAssignDSWithActionType(queryId, dsId, null);
+    }
 
+    /**
+     * Updates the the auto-assign {@link DistributionSet} and
+     * {@link ActionType} of the addressed {@link TargetFilterQuery}.
+     *
+     * @param queryId
+     *            of the target filter query to be updated
+     * @param dsId
+     *            to be updated or <code>null</code> in order to remove it
+     *            together with the auto-assign {@link ActionType}
+     * @param actionType
+     *            to be updated or <code>null</code> for default (FORCED) if
+     *            distribution set Id is present
+     * 
+     * @return the updated {@link TargetFilterQuery}
+     * 
+     * @throws EntityNotFoundException
+     *             if either {@link TargetFilterQuery} and/or autoAssignDs are
+     *             provided but not found
+     * 
+     * @throws QuotaExceededException
+     *             if the query that is already associated with this filter
+     *             query addresses too many targets (auto-assignments only)
+     * 
+     * @throws InvalidAutoAssignActionTypeException
+     *             if the provided auto-assign {@link ActionType} is not valid
+     *             (neither FORCED, nor SOFT)
+     * 
+     * @throws InvalidAutoAssignDistributionSetException
+     *             if the provided auto-assign {@link DistributionSet} is not
+     *             valid (incomplete or soft deleted)
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetFilterQuery updateAutoAssignDSWithActionType(long queryId, Long dsId, ActionType actionType);
 }

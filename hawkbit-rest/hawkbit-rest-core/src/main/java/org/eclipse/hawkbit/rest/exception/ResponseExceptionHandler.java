@@ -76,7 +76,8 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_ATTRIBUTES_INVALID, HttpStatus.BAD_REQUEST);
-
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID, HttpStatus.BAD_REQUEST);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {

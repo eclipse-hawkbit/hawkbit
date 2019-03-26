@@ -120,7 +120,7 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     @Override
     protected void init(final VaadinRequest request) {
-        setLocale(HawkbitCommonUtil.getLocaleToBeUsed(uiProperties.getLocalization(), getUI()));
+        HawkbitCommonUtil.initLocalization(this, uiProperties.getLocalization(), i18n);
         SpringContextHelper.setContext(context);
 
         params = UriComponentsBuilder.fromUri(Page.getCurrent().getLocation()).build().getQueryParams();

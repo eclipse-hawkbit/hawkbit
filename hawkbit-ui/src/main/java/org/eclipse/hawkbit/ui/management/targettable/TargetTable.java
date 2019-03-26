@@ -62,8 +62,8 @@ import org.eclipse.hawkbit.ui.management.event.TargetAddUpdateWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.AssignmentUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -149,7 +149,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     private ConfirmationDialog confirmDialog;
 
-    private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
+    private final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout;
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
@@ -168,7 +168,7 @@ public class TargetTable extends AbstractTable<Target> {
         this.deploymentManagement = deploymentManagement;
         this.configManagement = configManagement;
         this.uiProperties = uiProperties;
-        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
@@ -869,11 +869,10 @@ public class TargetTable extends AbstractTable<Target> {
 
     // Code for assignment start
     private void saveAllAssignments() {
-
-        final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
+        final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()).getActionType();
+        final long forcedTimeStamp = (((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
 

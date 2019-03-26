@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -126,9 +126,11 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
-            @PathVariable("filterId") final Long filterId, @RequestBody final MgmtId dsId) {
+            @PathVariable("filterId") final Long filterId,
+            @RequestBody final MgmtDistributionSetAutoAssignment dsIdWithActionType) {
 
-        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(filterId, dsId.getId());
+        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDSWithActionType(filterId,
+                dsIdWithActionType.getId(), MgmtRestModelMapper.convertActionType(dsIdWithActionType.getType()));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
         MgmtTargetFilterQueryMapper.addLinks(response);
