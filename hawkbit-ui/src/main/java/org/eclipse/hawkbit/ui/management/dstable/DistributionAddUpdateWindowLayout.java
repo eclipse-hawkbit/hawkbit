@@ -364,7 +364,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             populateValuesOfDistribution(editDistId);
         }
 
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(caption).content(this).layout(formLayout)
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(caption).content(this)
+                .id(UIComponentIdProvider.CREATE_POPUP_ID).layout(formLayout)
                 .i18n(i18n).saveDialogCloseListener(saveDialogCloseListener).buildCommonDialogWindow();
     }
 
