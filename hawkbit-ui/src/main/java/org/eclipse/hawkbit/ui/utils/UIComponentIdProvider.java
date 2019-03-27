@@ -605,6 +605,11 @@ public final class UIComponentIdProvider {
     public static final String DETAILS_TYPE_LABEL_ID = "details.type";
 
     /**
+     * Table details Required Migration Step label id.
+     */
+    public static final String DETAILS_REQUIRED_MIGRATION_STEP_LABEL_ID = "details.required.migration.step";
+
+    /**
      * Id of show filter button in software module table.
      */
     public static final String SM_SHOW_FILTER_BUTTON_ID = "show.filter.layout";
@@ -1144,6 +1149,11 @@ public final class UIComponentIdProvider {
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
+
+    /**
+     * Create popup id.
+     */
+    public static final String CREATE_POPUP_ID = "create.popup.id";
 
     /**
      * DistributionSet table details tab id in Distributions .

@@ -181,10 +181,12 @@ public abstract class AbstractDistributionSetDetails
         typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
         detailsTabLayout.addComponent(typeLabel);
 
+        final Label requiredMigrationStepLabel = SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("checkbox.dist.migration.required"),
+                getMigrationRequiredValue(isMigrationRequired));
+        requiredMigrationStepLabel.setId(UIComponentIdProvider.DETAILS_REQUIRED_MIGRATION_STEP_LABEL_ID);
         if (!isMultiAssignmentEnabled()) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("checkbox.dist.migration.required"),
-                            getMigrationRequiredValue(isMigrationRequired)));
+            detailsTabLayout.addComponent(requiredMigrationStepLabel);
         }
 
     }
