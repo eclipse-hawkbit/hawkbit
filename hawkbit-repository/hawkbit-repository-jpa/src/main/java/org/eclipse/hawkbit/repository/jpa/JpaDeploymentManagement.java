@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -177,11 +178,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
             final Collection<String> controllerIDs) {
-        return assignDistributionSetToTargets(dsID,
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
                 controllerIDs.stream()
                         .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                         .collect(Collectors.toList()),
                 null, offlineDsAssignmentStrategy);
+        return offlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
     }
 
     @Override
@@ -191,12 +193,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final long dsID, final ActionType actionType,
             final long forcedTimestamp, final Collection<String> controllerIDs) {
 
-        return assignDistributionSetToTargets(dsID,
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
                 controllerIDs.stream()
                         .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
                         .collect(Collectors.toList()),
                 null, onlineDsAssignmentStrategy);
-
+        return onlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
     }
 
     @Override
@@ -210,13 +212,25 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
+    public DistributionSetAssignmentResultMap assignDistributionSets(final Set<Long> dsIDs,
+            final Collection<TargetWithActionType> targets) {
+
+        final DistributionSetAssignmentResultMap results = new DistributionSetAssignmentResultMap();
+        dsIDs.forEach(dsID -> results.putResult(dsID,
+                assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy)));
+        return onlineDsAssignmentStrategy.sendDistributionSetsAssignedEvent(results);
+    }
+
+    @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
 
-        return assignDistributionSetToTargets(dsID, targets, actionMessage, onlineDsAssignmentStrategy);
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, actionMessage,
+                onlineDsAssignmentStrategy);
+        return onlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
     }
 
     /**
@@ -261,8 +275,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             // detaching as it is not necessary to persist the set itself
             entityManager.detach(distributionSetEntity);
             // return with nothing as all targets had the DS already assigned
-            return new DistributionSetAssignmentResult(Collections.emptyList(), 0, targetsWithActionType.size(),
-                    Collections.emptyList(), targetManagement);
+            return new DistributionSetAssignmentResult(distributionSetEntity, Collections.emptyList(), 0,
+                    targetsWithActionType.size(), Collections.emptyList(), targetManagement);
         }
 
         // split tIDs length into max entries in-statement because many database
@@ -273,12 +287,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        // override all active actions and set them into canceling state, we
-        // need to remember which one we have been switched to canceling state
-        // because for targets which we have changed to canceling we don't want
-        // to publish the new action update event.
-        final Set<Long> cancelingTargetEntitiesIds = closeOrCancelActiveActions(assignmentStrategy,
-                targetEntitiesIdsChunks);
+        closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels them
@@ -295,10 +304,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // action history.
         createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
 
-        detachEntitiesAndSendAssignmentEvents(distributionSetEntity, targetEntities, assignmentStrategy,
-                cancelingTargetEntitiesIds, controllerIdsToActions);
+        detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
 
-        return new DistributionSetAssignmentResult(
+        return new DistributionSetAssignmentResult(distributionSetEntity,
                 targetEntities.stream().map(Target::getControllerId).collect(Collectors.toList()),
                 targetEntities.size(), controllerIDs.size() - targetEntities.size(),
                 Lists.newArrayList(controllerIdsToActions.values()), targetManagement);
@@ -375,7 +383,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
         final String currentUser = auditorProvider.getCurrentAuditor().orElse(null);
-        assignmentStrategy.updateTargetStatus(set, targetIdsChunks, currentUser);
+        assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
     }
 
     private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
@@ -396,15 +404,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                         .collect(Collectors.toList()));
     }
 
-    private void detachEntitiesAndSendAssignmentEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
-            final AbstractDsAssignmentStrategy assignmentStrategy, final Set<Long> targetIdsCancellList,
-            final Map<String, JpaAction> controllerIdsToActions) {
+    private void detachEntitiesAndSendTargetUpdatedEvents(final JpaDistributionSet set, final List<JpaTarget> targets,
+            final AbstractDsAssignmentStrategy assignmentStrategy) {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
         // detaching as the entity has been updated by the JPQL query above
         targets.forEach(entityManager::detach);
-
-        assignmentStrategy.sendAssignmentEvents(set, targets, targetIdsCancellList, controllerIdsToActions);
+        // send out TargetUpdated events
+        assignmentStrategy.sendTargetUpdatedEvents(set, targets);
     }
 
     @Override
@@ -810,4 +817,5 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return systemSecurityContext
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType, defaultValue));
     }
+
 }

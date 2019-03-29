@@ -122,11 +122,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         registerTargetAndAssignDistributionSet(distributionSet2.getId(), TargetUpdateStatus.PENDING,
                 getDistributionSet().getModules(), controllerId);
-        assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
+        assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
 
         createAndSendTarget(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertCancelActionMessage(assignmentResult.getActions().get(0), controllerId);
+        assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
 
     }
 
@@ -179,7 +179,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Target target = controllerManagement.getByControllerId(controllerId).get();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final long actionId1 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        final long actionId1 = assignDistributionSet(distributionSet, target).getActionIds().get(0);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId1,
                 DmfActionStatus.ERROR);
@@ -188,7 +188,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         assertRequestAttributesUpdateMessageAbsent();
 
-        final long actionId2 = assignDistributionSet(distributionSet, target).getActions().get(0);
+        final long actionId2 = assignDistributionSet(distributionSet, target).getActionIds().get(0);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId2,
                 DmfActionStatus.FINISHED);
