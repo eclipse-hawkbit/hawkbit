@@ -910,7 +910,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
         final List<Target> testTarget = testdataFactory.createTargets(1);
 
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 1")));
@@ -939,7 +939,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // test for informational status
         final Long actionId1 = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
-                testdataFactory.createTargets(1, "t1")).getActions().get(0);
+                testdataFactory.createTargets(1, "t1")).getActionIds().get(0);
         assertThat(actionId1).isNotNull();
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
@@ -950,7 +950,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // test for update status (and mixed case)
         final Long actionId2 = assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
-                testdataFactory.createTargets(1, "t2")).getActions().get(0);
+                testdataFactory.createTargets(1, "t2")).getActionIds().get(0);
         assertThat(actionId2).isNotEqualTo(actionId1);
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
@@ -973,7 +973,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
         final Long actionId = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
-                testdataFactory.createTargets(1)).getActions().get(0);
+                testdataFactory.createTargets(1)).getActionIds().get(0);
         assertThat(actionId).isNotNull();
 
         final List<String> messages = Lists.newArrayList();

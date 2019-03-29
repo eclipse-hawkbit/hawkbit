@@ -145,7 +145,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         final Action action = deploymentManagement.findActionWithDetails(actionId).get();
 
         assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
@@ -162,7 +162,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
 
         // act
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
@@ -211,7 +211,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
                 PAGE);
         final ActionStatus expectedActionStatus = ((JpaAction) actions.getContent().get(0)).getActionStatus().get(0);
@@ -230,7 +230,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         // create action-status entry with one message
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.FINISHED).messages(Arrays.asList("finished message")));
@@ -1021,7 +1021,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.SOFT,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActions().get(0);
+        final Long actionId = assignDistributionSet.getActionIds().get(0);
         // verify preparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.SOFT);
@@ -1045,7 +1045,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActions().get(0);
+        final Long actionId = assignDistributionSet.getActionIds().get(0);
         // verify perparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);

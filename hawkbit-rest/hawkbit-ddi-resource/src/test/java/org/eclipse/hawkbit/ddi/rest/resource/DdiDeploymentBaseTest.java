@@ -267,7 +267,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
         final Long actionId = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis() + 2_000, Arrays.asList(target.getControllerId())).getActions().get(0);
+                System.currentTimeMillis() + 2_000, Arrays.asList(target.getControllerId())).getActionIds().get(0);
 
         MvcResult mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -566,7 +566,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Arrays.asList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
-        final Long actionId = assignDistributionSet(savedSet, toAssign).getActions().get(0);
+        final Long actionId = assignDistributionSet(savedSet, toAssign).getActionIds().get(0);
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + actionId, tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + actionId, tenantAware.getCurrentTenant())
@@ -639,9 +639,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget1);
 
-        final Long actionId1 = assignDistributionSet(ds1.getId(), "4712").getActions().get(0);
-        final Long actionId2 = assignDistributionSet(ds2.getId(), "4712").getActions().get(0);
-        final Long actionId3 = assignDistributionSet(ds3.getId(), "4712").getActions().get(0);
+        final Long actionId1 = assignDistributionSet(ds1.getId(), "4712").getActionIds().get(0);
+        final Long actionId2 = assignDistributionSet(ds2.getId(), "4712").getActionIds().get(0);
+        final Long actionId3 = assignDistributionSet(ds3.getId(), "4712").getActionIds().get(0);
 
         Target myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);

@@ -27,6 +27,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
@@ -50,13 +52,25 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendAssignmentEvents(final DistributionSet set, final List<JpaTarget> targets,
-            final Set<Long> targetIdsCancellList, final Map<String, JpaAction> targetIdsToActions) {
-
+    void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
         targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
             sendTargetUpdatedEvent(target);
         });
+    }
+
+    @Override
+    DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
+            final DistributionSetAssignmentResult assignmentResult) {
+        // no need to send an event in the offline case
+        return assignmentResult;
+    }
+
+    @Override
+    DistributionSetAssignmentResultMap sendDistributionSetsAssignedEvent(
+            final DistributionSetAssignmentResultMap assignmentResults) {
+        // no need to send an event in the offline case
+        return assignmentResults;
     }
 
     @Override
@@ -79,7 +93,8 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void updateTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+            final String currentUser) {
         targetIds.forEach(tIds -> targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
                 TargetUpdateStatus.IN_SYNC, set, System.currentTimeMillis(), currentUser, tIds));
     }

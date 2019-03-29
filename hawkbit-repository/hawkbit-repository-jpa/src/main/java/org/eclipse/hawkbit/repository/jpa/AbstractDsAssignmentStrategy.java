@@ -30,6 +30,8 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
@@ -80,6 +82,13 @@ public abstract class AbstractDsAssignmentStrategy {
     abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
 
     /**
+     * 
+     * @param set
+     * @param targets
+     */
+    abstract void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets);
+
+    /**
      * Update status and DS fields of given target.
      * 
      * @param distributionSet
@@ -89,8 +98,8 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param currentUser
      *            for auditing
      */
-    abstract void updateTargetStatus(final JpaDistributionSet distributionSet, final List<List<Long>> targetIds,
-            final String currentUser);
+    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet,
+            final List<List<Long>> targetIds, final String currentUser);
 
     /**
      * Cancels actions that can be canceled (i.e.
@@ -117,20 +126,24 @@ public abstract class AbstractDsAssignmentStrategy {
     abstract void closeActiveActions(List<List<Long>> targetIds);
 
     /**
-     * Handles event sending related to the assignment.
+     * Sends the assignment events for the given
+     * {@link DistributionSetAssignmentResult}.
      * 
-     * @param set
-     *            that has been assigned
-     * @param targets
-     *            to send events for
-     * @param targetIdsCancelList
-     *            targets where an action was canceled
-     * @param controllerIdsToActions
-     *            mapping of {@link Target#getControllerId()} to new
-     *            {@link Action} that was created as part of the assignment.
+     * @param assignmentResult
+     *            the assignment result
      */
-    abstract void sendAssignmentEvents(DistributionSet set, final List<JpaTarget> targets,
-            final Set<Long> targetIdsCancelList, final Map<String, JpaAction> controllerIdsToActions);
+    abstract DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
+            final DistributionSetAssignmentResult assignmentResult);
+
+    /**
+     * Sends the assignment events for the given
+     * {@link DistributionSetAssignmentResultMap}.
+     * 
+     * @param assignmentResults
+     *            the results of multiple assignments
+     */
+    abstract DistributionSetAssignmentResultMap sendDistributionSetsAssignedEvent(
+            final DistributionSetAssignmentResultMap assignmentResult);
 
     protected void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
             final List<Action> actions) {

@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -102,6 +103,33 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(long dsID,
+            @NotEmpty Collection<TargetWithActionType> targets);
+
+    /**
+     * Assigns the given set of {@link DistributionSet} entities to the given
+     * {@link Target}s using the specified {@link ActionType} and
+     * {@code forcetime}.
+     *
+     * @param dsIDs
+     *            the set of IDs of the distribution sets to assign
+     * @param targets
+     *            a list of all targets and their action type
+     * @return the assignment result map
+     *
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             defined by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of targets the distribution set can be
+     *             assigned to at once is exceeded
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    DistributionSetAssignmentResultMap assignDistributionSets(@NotEmpty Set<Long> dsIDs,
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**

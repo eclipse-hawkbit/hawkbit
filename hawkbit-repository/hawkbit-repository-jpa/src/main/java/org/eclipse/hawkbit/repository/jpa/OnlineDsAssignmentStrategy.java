@@ -25,7 +25,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
@@ -48,19 +49,32 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendAssignmentEvents(final DistributionSet set, final List<JpaTarget> targets,
-            final Set<Long> targetIdsCancellList, final Map<String, JpaAction> targetIdsToActions) {
-
-        final List<Action> actions = targets.stream().map(target -> {
+    void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
+        targets.stream().forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.PENDING);
             sendTargetUpdatedEvent(target);
+        });
+    }
 
-            return target;
-        }).filter(target -> !targetIdsCancellList.contains(target.getId())).map(Target::getControllerId)
-                .map(targetIdsToActions::get).collect(Collectors.toList());
+    @Override
+    DistributionSetAssignmentResult sendDistributionSetAssignedEvent(final DistributionSetAssignmentResult assignmentResult) {
 
-        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), actions);
+        final List<Action> filtered = assignmentResult.getActions().stream().filter(action -> {
+            final Status actionStatus = action.getStatus();
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+        }).collect(Collectors.toList());
 
+        final DistributionSet set = assignmentResult.getDistributionSet();
+        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filtered);
+
+        return assignmentResult;
+    }
+
+    @Override
+    DistributionSetAssignmentResultMap sendDistributionSetsAssignedEvent(
+            final DistributionSetAssignmentResultMap assignmentResult) {
+        // TODO implement this method
+        return null;
     }
 
     @Override
@@ -83,7 +97,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void updateTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+            final String currentUser) {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
 
