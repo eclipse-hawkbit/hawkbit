@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -137,17 +138,16 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
      *            the table to retrieve the selected ID(s)
      * @return the ID(s) which are selected in the table
      */
+    @SuppressWarnings("unchecked")
     public static <T> Set<T> getTableValue(final Table table) {
         final Object value = table.getValue();
         Set<T> idsReturn;
         if (value == null) {
             idsReturn = Collections.emptySet();
-        } else if (value instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<T> ids = (Set<T>) value;
+        } else if (value instanceof Collection) {
+            final Collection<T> ids = (Collection<T>) value;
             idsReturn = ids.stream().filter(Objects::nonNull).collect(Collectors.toSet());
         } else {
-            @SuppressWarnings("unchecked")
             final T id = (T) value;
             idsReturn = Collections.singleton(id);
         }
