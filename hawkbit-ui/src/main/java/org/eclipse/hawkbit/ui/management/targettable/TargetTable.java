@@ -371,23 +371,18 @@ public class TargetTable extends AbstractTable<Target> {
 
     private Map<String, Object> prepareQueryConfigFilters() {
         final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(7);
-        managementUIState.getTargetTableFilters().getSearchText().ifPresent(
+        managementUIState.getTargetTableFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+        managementUIState.getTargetTableFilters().getDistributionSet()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION, value.getId()));
+        managementUIState.getTargetTableFilters().getPinnedDistId()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, value));
+        managementUIState.getTargetTableFilters().getTargetFilterQuery()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY, value));
 
-                value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-        managementUIState.getTargetTableFilters().getDistributionSet().ifPresent(
-
-                value -> queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION, value.getId()));
-        managementUIState.getTargetTableFilters().getPinnedDistId().ifPresent(
-
-                value -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, value));
-        managementUIState.getTargetTableFilters().getTargetFilterQuery().ifPresent(
-
-                value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY, value));
         queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getTargetTableFilters().isNoTagSelected());
 
-        if (
-
-        isFilteredByTags()) {
+        if (isFilteredByTags()) {
             final List<String> list = new ArrayList<>();
             list.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
             queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list.toArray(new String[list.size()]));

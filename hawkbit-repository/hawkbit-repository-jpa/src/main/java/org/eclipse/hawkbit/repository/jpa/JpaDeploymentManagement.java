@@ -362,7 +362,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final List<List<Long>> targetIdsChunks) {
 
         if (isMultiAssignmentsEnabled()) {
-            LOG.info(">>> multi-assignments are enabled: No need to close /cancel active actions.");
+            LOG.debug("Multi Assignments feature is enabled: No need to close /cancel active actions.");
             return Collections.emptySet();
         }
 
@@ -382,7 +382,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         if (!isMultiAssignmentsEnabled()) {
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
         } else {
-            LOG.info(">>> multi-assignments are enabled: No need to cancel inactive scheduled actions.");
+            LOG.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
         }
     }
 
