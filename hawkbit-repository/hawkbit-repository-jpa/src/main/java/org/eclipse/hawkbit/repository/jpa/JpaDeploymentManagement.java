@@ -62,7 +62,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -183,7 +182,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                         .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                         .collect(Collectors.toList()),
                 null, offlineDsAssignmentStrategy);
-        return offlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
+        offlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        return result;
     }
 
     @Override
@@ -198,7 +198,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                         .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
                         .collect(Collectors.toList()),
                 null, onlineDsAssignmentStrategy);
-        return onlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        return result;
     }
 
     @Override
@@ -208,17 +209,21 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
             final Collection<TargetWithActionType> targets) {
 
-        return assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy);
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, null,
+                onlineDsAssignmentStrategy);
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        return result;
     }
 
     @Override
-    public DistributionSetAssignmentResultMap assignDistributionSets(final Set<Long> dsIDs,
+    public List<DistributionSetAssignmentResult> assignDistributionSets(final Set<Long> dsIDs,
             final Collection<TargetWithActionType> targets) {
 
-        final DistributionSetAssignmentResultMap results = new DistributionSetAssignmentResultMap();
-        dsIDs.forEach(dsID -> results.putResult(dsID,
-                assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy)));
-        return onlineDsAssignmentStrategy.sendDistributionSetsAssignedEvent(results);
+        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
+                .map(dsID -> assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy))
+                .collect(Collectors.toList());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(results, isMultiAssignmentsEnabled());
+        return results;
     }
 
     @Override
@@ -230,7 +235,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, actionMessage,
                 onlineDsAssignmentStrategy);
-        return onlineDsAssignmentStrategy.sendDistributionSetAssignedEvent(result);
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        return result;
     }
 
     /**

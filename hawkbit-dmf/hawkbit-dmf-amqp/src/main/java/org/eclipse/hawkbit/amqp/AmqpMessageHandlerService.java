@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +30,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -34,6 +38,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +74,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final EntityFactory entityFactory;
 
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+
+    private final SystemSecurityContext systemSecurityContext;
+
     /**
      * Constructor.
      * 
@@ -83,11 +92,15 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
+        this.systemSecurityContext = systemSecurityContext;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
@@ -190,11 +203,19 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
-        lookIfUpdateAvailable(target);
+        checkIfUpdatesAvailable(target);
     }
 
-    private void lookIfUpdateAvailable(final Target target) {
+    private void checkIfUpdatesAvailable(final Target target) {
+        if (isMultiAssignmentsEnabled()) {
+            amqpMessageDispatcherService.sendMultiActionRequestMessages(target.getTenant(),
+                    Collections.singletonList(target.getControllerId()));
+        } else {
+            checkIfUpdateAvailable(target);
+        }
+    }
 
+    private void checkIfUpdateAvailable(final Target target) {
         final Optional<Action> actionOptional = controllerManagement
                 .findOldestActiveActionByTarget(target.getControllerId());
 
@@ -278,7 +299,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         if (!addUpdateActionStatus.isActive() || (addUpdateActionStatus.hasMaintenanceSchedule()
                 && addUpdateActionStatus.isMaintenanceWindowAvailable())) {
-            lookIfUpdateAvailable(action.getTarget());
+            checkIfUpdatesAvailable(action.getTarget());
         }
     }
 
@@ -370,6 +391,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return UpdateMode.valueOf(mode.name());
         }
         return null;
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class, Boolean.TRUE);
+    }
+
+    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType,
+            final T defaultValue) {
+        return systemSecurityContext
+                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType, defaultValue));
     }
 
 }

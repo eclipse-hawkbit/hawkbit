@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -114,7 +113,7 @@ public interface DeploymentManagement {
      *            the set of IDs of the distribution sets to assign
      * @param targets
      *            a list of all targets and their action type
-     * @return the assignment result map
+     * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
      *             if mandatory {@link SoftwareModuleType} are not assigned as
@@ -129,7 +128,7 @@ public interface DeploymentManagement {
      *             assigned to at once is exceeded
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResultMap assignDistributionSets(@NotEmpty Set<Long> dsIDs,
+    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Set<Long> dsIDs,
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**
