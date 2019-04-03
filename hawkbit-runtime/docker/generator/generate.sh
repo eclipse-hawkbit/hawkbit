@@ -18,7 +18,7 @@ BASE_IMAGE="openjdk:8u201-jre-alpine"
 mkdir -p "../$HAWKBIT_VERSION" && mkdir -p "../$HAWKBIT_VERSION-mysql"
 
 cp ./template/KEY "../$HAWKBIT_VERSION/KEY"
-cp ./template/KEY "../$HAWKBIT_VERSION-mysql/KEY"
+cp ./template/KEY-mysql "../$HAWKBIT_VERSION-mysql/KEY"
 
 cp ./template/Dockerfile "../$HAWKBIT_VERSION/Dockerfile"
 cp ./template/Dockerfile-mysql "../$HAWKBIT_VERSION-mysql/Dockerfile"
