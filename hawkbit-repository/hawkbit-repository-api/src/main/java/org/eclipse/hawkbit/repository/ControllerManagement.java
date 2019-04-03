@@ -136,6 +136,22 @@ public interface ControllerManagement {
     Action addUpdateActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
+     * Retrieves all active {@link Action}s of a specific target.
+     * 
+     * @param controllerId
+     *            identifies the target to retrieve the actions from
+     * @param distributionSetId
+     *            associated with the actions
+     * @return an action associated with the given target and distributionSetId
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Optional<Action> findActiveActionsByTargetAndDistributionSet(@NotEmpty String controllerId,
+            @NotNull Long distributionSetId);
+
+    /**
      * Retrieves oldest {@link Action} that is active and assigned to a
      * {@link Target}.
      * 

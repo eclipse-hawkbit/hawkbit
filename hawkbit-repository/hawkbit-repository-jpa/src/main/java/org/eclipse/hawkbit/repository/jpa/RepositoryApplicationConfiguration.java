@@ -854,4 +854,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
         return new RolloutScheduler(systemManagement, rolloutManagement, systemSecurityContext);
     }
+
+    @Bean
+    ActionStatusUpdateHandlerService actionStatusHandlerService(final ControllerManagement controllerManagement,
+            final EntityFactory entityFactory) {
+        return new ActionStatusUpdateHandlerService(controllerManagement, entityFactory);
+    }
 }

@@ -186,6 +186,27 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("Select a from JpaAction a where a.target.controllerId = :controllerId and a.active = :active")
     Page<Action> findByActiveAndTarget(Pageable pageable, @Param("controllerId") String controllerId,
             @Param("active") boolean active);
+    
+    /**
+     * Retrieves all {@link Action}s of a specific target and given active flag
+     * ordered by action ID. Loads also the lazy
+     * {@link Action#getDistributionSet()} field.
+     *
+     * @param pageable
+     *            page parameters
+     * @param controllerId
+     *            to search for
+     * @param distributionSetId
+     *            action containing the distributionSetId           
+     * @param active
+     *            {@code true} for all actions which are currently active,
+     *            {@code false} for inactive
+     * @return action that matches the criteria 
+     */
+    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
+    @Query("Select a from JpaAction a where a.target.controllerId = :controllerId and a.distributionSet.id = :distributionSetId and a.active = :active")
+    Optional<Action> findByActiveAndTargetAndDistributionSet(@Param("controllerId") String controllerId,
+            @Param("distributionSetId") Long distributionSetId, @Param("active") boolean active);
 
     /**
      * Switches the status of actions from one specific status into another,
