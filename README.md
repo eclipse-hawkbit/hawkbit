@@ -8,7 +8,7 @@ Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](
  [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 
-Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.4.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.4-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
+Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.3.0M2.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.3.0M2-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
 # Documentation
 
