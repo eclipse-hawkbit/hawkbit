@@ -9,12 +9,15 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -26,11 +29,11 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
 
@@ -57,24 +60,37 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    DistributionSetAssignmentResult sendDistributionSetAssignedEvent(final DistributionSetAssignmentResult assignmentResult) {
-
-        final List<Action> filtered = assignmentResult.getActions().stream().filter(action -> {
-            final Status actionStatus = action.getStatus();
-            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
-        }).collect(Collectors.toList());
-
-        final DistributionSet set = assignmentResult.getDistributionSet();
-        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filtered);
-
-        return assignmentResult;
+    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
+            final boolean deviceCanProcessMultipleActions) {
+        if (deviceCanProcessMultipleActions) {
+            sendDeploymentEvents(Collections.singletonList(assignmentResult), deviceCanProcessMultipleActions);
+        } else {
+            sendDistributionSetAssignedEvent(assignmentResult);
+        }
     }
 
     @Override
-    DistributionSetAssignmentResultMap sendDistributionSetsAssignedEvent(
-            final DistributionSetAssignmentResultMap assignmentResult) {
-        // TODO implement this method
-        return null;
+    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
+            final boolean deviceCanProcessMultipleActions) {
+
+        final List<Action> actions = assignmentResults.stream().flatMap(result -> result.getActions().stream())
+                .filter(action -> {
+                    final Status actionStatus = action.getStatus();
+                    return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+                }).collect(Collectors.toList());
+
+        if (deviceCanProcessMultipleActions) {
+            final List<String> controllerIds = actions.stream().map(action -> action.getTarget().getControllerId())
+                    .collect(Collectors.toList());
+            if (!actions.isEmpty()) {
+                final String tenant = actions.get(0).getTenant();
+                afterCommit.afterCommit(
+                        () -> eventPublisher.publishEvent(new DeploymentEvent(tenant, bus.getId(), controllerIds)));
+            }
+        } else {
+            assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
+        }
+
     }
 
     @Override
@@ -119,6 +135,30 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
         result.setStatus(Status.RUNNING);
         return result;
+    }
+
+    private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
+            final DistributionSetAssignmentResult assignmentResult) {
+
+        final List<Action> filtered = assignmentResult.getActions().stream().filter(action -> {
+            final Status actionStatus = action.getStatus();
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+        }).collect(Collectors.toList());
+
+        final DistributionSet set = assignmentResult.getDistributionSet();
+        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filtered);
+
+        return assignmentResult;
+    }
+
+    private void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
+            final List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
+                distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
 }

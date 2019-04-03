@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -31,14 +30,12 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResultMap;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.util.CollectionUtils;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -125,35 +122,11 @@ public abstract class AbstractDsAssignmentStrategy {
      */
     abstract void closeActiveActions(List<List<Long>> targetIds);
 
-    /**
-     * Sends the assignment events for the given
-     * {@link DistributionSetAssignmentResult}.
-     * 
-     * @param assignmentResult
-     *            the assignment result
-     */
-    abstract DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
-            final DistributionSetAssignmentResult assignmentResult);
+    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
+            final boolean deviceCanProcessMultipleActions);
 
-    /**
-     * Sends the assignment events for the given
-     * {@link DistributionSetAssignmentResultMap}.
-     * 
-     * @param assignmentResults
-     *            the results of multiple assignments
-     */
-    abstract DistributionSetAssignmentResultMap sendDistributionSetsAssignedEvent(
-            final DistributionSetAssignmentResultMap assignmentResult);
-
-    protected void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
-            final List<Action> actions) {
-        if (CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
-    }
+    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
+            final boolean deviceCanProcessMultipleActions);
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
         afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId())));

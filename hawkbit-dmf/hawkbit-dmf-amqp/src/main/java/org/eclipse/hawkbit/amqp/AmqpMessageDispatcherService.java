@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,17 +29,22 @@ import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
+import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -70,6 +76,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
+    private static final int MAX_ACTIONS = 100;
+
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
@@ -77,6 +85,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
+    private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
 
     /**
@@ -105,7 +114,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
             final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement) {
+            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -115,6 +124,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
+        this.deploymentManagement = deploymentManagement;
     }
 
     /**
@@ -152,6 +162,91 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
+     * Method to send a message to a RabbitMQ exchange after the Distribution
+     * set has been assign to a Target.
+     *
+     * @param e
+     *            the object to be send.
+     */
+    @EventListener(classes = DeploymentEvent.class)
+    protected void onDeployment(final DeploymentEvent e) {
+        if (isNotFromSelf(e)) {
+            return;
+        }
+        sendMultiActionRequestMessages(e.getTenant(), e.getControllerIds());
+    }
+
+    protected void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
+
+        final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModuleMetadata = new HashMap<>();
+        targetManagement.getByControllerID(controllerIds).stream().forEach(target -> {
+
+            final List<Action> activeActions = deploymentManagement
+                    .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTIONS), target.getControllerId()).getContent();
+
+            activeActions.forEach(action -> {
+                final DistributionSet distributionSet = action.getDistributionSet();
+                softwareModuleMetadata.computeIfAbsent(distributionSet.getId(),
+                        id -> getSoftwareModuleMetadata(distributionSet));
+            });
+
+            if (!activeActions.isEmpty()) {
+                sendMultiActionRequestToTarget(tenant, target, activeActions, softwareModuleMetadata);
+            }
+
+        });
+
+    }
+
+    protected void sendMultiActionRequestToTarget(final String tenant, final Target target, final List<Action> actions,
+            final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet) {
+
+        final URI targetAdress = target.getAddress();
+        if (!IpUtil.isAmqpUri(targetAdress)) {
+            return;
+        }
+
+        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
+        actions.forEach(action -> {
+            final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
+                    softwareModulesPerDistributionSet.get(action.getDistributionSet().getId()));
+            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest);
+        });
+
+        final Message message = getMessageConverter().toMessage(multiActionRequest,
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
+        amqpSenderService.sendMessage(message, targetAdress);
+
+    }
+
+    private DmfActionRequest createDmfActionRequest(final Target target, final Action action,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        if (action.isCancelingOrCanceled()) {
+            return createPlainActionRequest(action);
+        }
+        return createDownloadAndUpdateRequest(target, action, softwareModules);
+
+    }
+
+    private DmfActionRequest createPlainActionRequest(final Action action) {
+        final DmfActionRequest actionRequest = new DmfActionRequest();
+        actionRequest.setActionId(action.getId());
+        return actionRequest;
+    }
+    
+    private DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Action action,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
+        request.setActionId(action.getId());
+        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+        if (softwareModules != null) {
+            softwareModules.entrySet()
+                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
+        }
+        return request;
+    }
+
+    /**
      * Method to get the type of event depending on whether the action has a
      * valid maintenance window available or not based on defined maintenance
      * schedule. In case of no maintenance schedule or if there is a valid
@@ -165,6 +260,25 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     private static EventTopic getEventTypeForTarget(final boolean maintenanceWindowAvailable) {
         return maintenanceWindowAvailable ? EventTopic.DOWNLOAD_AND_INSTALL : EventTopic.DOWNLOAD;
+    }
+
+    /**
+     * Method to get the type of event depending on whether the action has a
+     * valid maintenance window available or not based on defined maintenance
+     * schedule. In case of no maintenance schedule or if there is a valid
+     * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
+     * returned else {@link EventTopic#DOWNLOAD} is returned.
+     *
+     * @param maintenanceWindowAvailable
+     *            valid maintenance window or not.
+     *
+     * @return {@link EventTopic} to use for message.
+     */
+    private static EventTopic getEventTypeForAction(final Action action) {
+        if (action.isCancelingOrCanceled()) {
+            return EventTopic.CANCEL_DOWNLOAD;
+        }
+        return getEventTypeForTarget(action.isMaintenanceWindowAvailable());
     }
 
     /**
@@ -356,6 +470,19 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setHashes(new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
+    }
+
+    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata(
+            final DistributionSet distributionSet) {
+        final Map<SoftwareModule, List<SoftwareModuleMetadata>> moduleMetadata = Maps
+                .newHashMapWithExpectedSize(distributionSet.getModules().size());
+        distributionSet.getModules()
+                .forEach(
+                        module -> moduleMetadata.put(module,
+                                softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
+                                        PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
+                                        .getContent()));
+        return moduleMetadata;
     }
 
 }

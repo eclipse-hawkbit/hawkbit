@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
@@ -51,7 +52,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,6 +104,9 @@ public class AmqpMessageHandlerServiceTest {
     private ArtifactManagement artifactManagementMock;
 
     @Mock
+    private TenantConfigurationManagement tenantConfigurationManagement;
+
+    @Mock
     private AmqpControllerAuthentication authenticationManagerMock;
 
     @Mock
@@ -133,11 +139,11 @@ public class AmqpMessageHandlerServiceTest {
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
+                controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
                 controllerManagementMock, tenantAwareMock);

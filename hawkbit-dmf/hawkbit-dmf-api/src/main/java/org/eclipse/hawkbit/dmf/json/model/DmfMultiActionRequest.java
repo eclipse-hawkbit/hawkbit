@@ -41,19 +41,26 @@ public class DmfMultiActionRequest {
         }
     }
 
+    public void addElement(final EventTopic actionType, final DmfActionRequest action) {
+        final DmfMultiActionElement element = new DmfMultiActionElement();
+        element.setActionType(actionType);
+        element.setAction(action);
+        addElement(element);
+    }
+
     public static class DmfMultiActionElement {
 
         @JsonProperty
         private EventTopic actionType;
 
         @JsonProperty
-        private DmfDownloadAndUpdateRequest action;
+        private DmfActionRequest action;
 
-        public DmfDownloadAndUpdateRequest getAction() {
+        public DmfActionRequest getAction() {
             return action;
         }
 
-        public void setAction(final DmfDownloadAndUpdateRequest action) {
+        public void setAction(final DmfActionRequest action) {
             this.action = action;
         }
 
