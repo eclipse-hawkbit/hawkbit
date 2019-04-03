@@ -173,6 +173,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (isNotFromSelf(e)) {
             return;
         }
+
+        LOG.debug("DeploymentEvent received. I will forward it to DMF broker.");
         sendMultiActionRequestMessages(e.getTenant(), e.getControllerIds());
     }
 
@@ -228,7 +230,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     }
 
-    private DmfActionRequest createPlainActionRequest(final Action action) {
+    private static DmfActionRequest createPlainActionRequest(final Action action) {
         final DmfActionRequest actionRequest = new DmfActionRequest();
         actionRequest.setActionId(action.getId());
         return actionRequest;
