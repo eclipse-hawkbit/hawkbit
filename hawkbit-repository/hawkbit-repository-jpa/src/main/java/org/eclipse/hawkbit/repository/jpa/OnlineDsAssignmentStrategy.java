@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
@@ -59,6 +60,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         });
     }
 
+    void sendDeploymentEvent(final Target target) {
+        sendDeploymentEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
+    }
+
     @Override
     void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
             final boolean deviceCanProcessMultipleActions) {
@@ -84,8 +89,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                     .collect(Collectors.toList());
             if (!actions.isEmpty()) {
                 final String tenant = actions.get(0).getTenant();
-                afterCommit.afterCommit(
-                        () -> eventPublisher.publishEvent(new DeploymentEvent(tenant, bus.getId(), controllerIds)));
+                sendDeploymentEvent(tenant, controllerIds);
             }
         } else {
             assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
@@ -159,6 +163,11 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
         afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
                 distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
+    }
+
+    private void sendDeploymentEvent(final String tenant, final List<String> controllerIds) {
+        afterCommit.afterCommit(
+                () -> eventPublisher.publishEvent(new DeploymentEvent(tenant, bus.getId(), controllerIds)));
     }
 
 }
