@@ -41,9 +41,9 @@ public class DmfMultiActionRequest {
         }
     }
 
-    public void addElement(final EventTopic actionType, final DmfActionRequest action) {
+    public void addElement(final EventTopic topic, final DmfActionRequest action) {
         final DmfMultiActionElement element = new DmfMultiActionElement();
-        element.setActionType(actionType);
+        element.setTopic(topic);
         element.setAction(action);
         addElement(element);
     }
@@ -51,7 +51,7 @@ public class DmfMultiActionRequest {
     public static class DmfMultiActionElement {
 
         @JsonProperty
-        private EventTopic actionType;
+        private EventTopic topic;
 
         @JsonProperty
         private DmfActionRequest action;
@@ -64,12 +64,12 @@ public class DmfMultiActionRequest {
             this.action = action;
         }
 
-        public EventTopic getActionType() {
-            return actionType;
+        public EventTopic getTopic() {
+            return topic;
         }
 
-        public void setActionType(final EventTopic actionType) {
-            this.actionType = actionType;
+        public void setTopic(final EventTopic actionType) {
+            this.topic = actionType;
         }
 
     }
