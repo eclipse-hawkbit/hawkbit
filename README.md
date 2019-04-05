@@ -5,8 +5,9 @@
 Eclipse [hawkBit](http://www.eclipse.org/hawkbit/index.html) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](https://circleci.com/gh/eclipse/hawkbit)
- [![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
+[![SonarQuality](https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent)](https://sonar.ops.bosch-iot-rollouts.com)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
+[![Lines of code](https://img.shields.io/badge/dynamic/xml.svg?label=Lines%20of%20code&url=https%3A%2F%2Fwww.openhub.net%2Fprojects%2Fhawkbit.xml%3Fapi_key%3D30bc3f3fad087c2c5a6a67a8071665ba0fbe3b6236ffbf71b7d20849f4a5e35a&query=%2Fresponse%2Fresult%2Fproject%2Fanalysis%2Ftotal_code_lines&colorB=lightgrey)](https://www.openhub.net/p/hawkbit)
 
 Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.4.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.2.4-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
@@ -16,9 +17,9 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/)
 
 # Contact us
 
-* Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-* Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
-* You can also check out our [Project Homepage](https://www.eclipse.org/hawkbit) for further contact options.
+- Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+- Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
+- You can also check out our [Project Homepage](https://www.eclipse.org/hawkbit) for further contact options.
 
 # Examples and Extensions
 
@@ -41,8 +42,8 @@ hawkBit does not provide off the shelf clients for devices as part of the projec
 
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
-* [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
-* [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
+- [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
+- [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 
 # Runtime dependencies and support
 
@@ -50,14 +51,14 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 ## SQL database
 
-| Database |  H2 |  MySQL/MariaDB | MS SQL Server | IBM DB2 |
-|---|:---:|:---:|:---:|:---:|
-| DDLs maintained by project  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Test dependencies defined | :white_check_mark: | :white_check_mark: | :white_check_mark: |  |
-| Versions tested | 1.4 | MySQL 5.6/5.7, AWS Aurora | MS SQL Server 2017 | DB2 Server v11.1 |
-| Docker image with driver provided  | :white_check_mark: | :white_check_mark: (Tag: "-mysql") | :white_check_mark: |  |
-| JDBC driver | [H2 1.4](https://github.com/h2database/h2database)  | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc)  |  |
-| Status | Test, Dev, Trial | Production grade  | Production grade | Test, Dev |
+| Database                          |                         H2                         |                               MySQL/MariaDB                               |                       MS SQL Server                       |      IBM DB2       |
+| --------------------------------- | :------------------------------------------------: | :-----------------------------------------------------------------------: | :-------------------------------------------------------: | :----------------: |
+| DDLs maintained by project        |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     | :white_check_mark: |
+| Test dependencies defined         |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     |                    |
+| Versions tested                   |                        1.4                         |                         MySQL 5.6/5.7, AWS Aurora                         |                    MS SQL Server 2017                     |  DB2 Server v11.1  |
+| Docker image with driver provided |                 :white_check_mark:                 |                    :white_check_mark: (Tag: "-mysql")                     |                    :white_check_mark:                     |                    |
+| JDBC driver                       | [H2 1.4](https://github.com/h2database/h2database) | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc) |                    |
+| Status                            |                  Test, Dev, Trial                  |                             Production grade                              |                     Production grade                      |     Test, Dev      |
 
 ## (Optional) RabbitMQ: 3.6,3.7
 
