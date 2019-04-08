@@ -139,44 +139,14 @@ public class TotalTargetCountStatus {
         statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
     }
 
+    private void addToTotalCount(final TotalTargetCountActionStatus item) {
+        final Status status = convertStatus(item.getStatus());
+        statusTotalCountMap.merge(status, item.getCount(), Long::sum);
+    }
+
     // Exception squid:MethodCyclomaticComplexity - simple state conversion, not
     // really complex.
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private void convertStatus(final TotalTargetCountActionStatus item) {
-        switch (item.getStatus()) {
-        case SCHEDULED:
-            statusTotalCountMap.put(Status.SCHEDULED, item.getCount());
-            break;
-        case ERROR:
-            statusTotalCountMap.put(Status.ERROR, item.getCount());
-            break;
-        case FINISHED:
-            statusTotalCountMap.put(Status.FINISHED, item.getCount());
-            break;
-        case RETRIEVED:
-        case RUNNING:
-        case WARNING:
-        case DOWNLOAD:
-        case DOWNLOADED:
-        case CANCELING:
-            addToTotalCount(item);
-            break;
-        case CANCELED:
-            statusTotalCountMap.put(Status.CANCELLED, item.getCount());
-            break;
-        default:
-            throw new IllegalArgumentException("State " + item.getStatus() + "is not valid");
-        }
-    }
-
-    private void addToTotalCount(final TotalTargetCountActionStatus item) {
-        final Status status = convertStatus(item.getStatus());
-        long count = status.equals(Status.RUNNING)
-                ? statusTotalCountMap.get(Status.RUNNING) + item.getCount()
-                : item.getCount();
-        statusTotalCountMap.put(status, count);
-    }
-
     private Status convertStatus(final Action.Status status){
         switch (status) {
         case SCHEDULED:

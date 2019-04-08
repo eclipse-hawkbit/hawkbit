@@ -455,7 +455,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
                         + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
-        paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
+        paramMapping.forEach((key, value) -> updateQuery.setParameter(key, value));
         updateQuery.setParameter("last_target_query", currentTimeMillis);
         updateQuery.setParameter("tenant", tenant);
 
@@ -564,30 +564,31 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus actionStatus = create.build();
 
-        // if action is already closed we accept further status updates if
-        // permitted so by configuration. This is especially useful if the
-        // action status feedback channel order from the device cannot be
-        // guaranteed. However, if an action is closed we do not accept further
-        // close messages, unless it was a DOWNLOAD_ONLY action (but only once)
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())
-                && !actionIsDownloadOnlyAndTargetReportsFinished(action, actionStatus)) {
-            LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getStatus(), action.getId());
-            return action;
+        if (isUpdatingActionStatusAllowed(action, actionStatus)) {
+            return handleAddUpdateActionStatus(actionStatus, action);
         }
-        return handleAddUpdateActionStatus(actionStatus, action);
+
+        LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
+                actionStatus.getStatus(), action.getId());
+        return action;
     }
 
-    private static boolean actionIsDownloadOnlyAndTargetReportsFinished(final JpaAction action,
-            final JpaActionStatus actionStatus) {
-        return isDownloadOnly(action) && FINISHED.equals(actionStatus.getStatus())
-                && !FINISHED.equals(action.getStatus());
-    }
+    /**
+     * ActionStatus updates are allowed mainly if the action is active. If the
+     * action is not active we accept further status updates if permitted so
+     * by repository configuration. In this case, only the values: Status.ERROR
+     * and Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action,
+     * we accept status updates only once.
+     */
+    private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
-    private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
-            final boolean actionActive) {
-        return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
-                || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
+        final boolean isIntermediateFeedback = !FINISHED.equals(actionStatus.getStatus())
+                && !Status.ERROR.equals(actionStatus.getStatus());
+
+        final boolean isIntermediateFeedbackAllowed = !repositoryProperties.isRejectActionStatusForClosedAction();
+
+        return action.isActive() || isIntermediateFeedbackAllowed && isIntermediateFeedback
+                || isDownloadOnly(action) && !isIntermediateFeedback;
     }
 
     private static boolean isDownloadOnly(final JpaAction action) {
@@ -602,6 +603,10 @@ public class JpaControllerManagement implements ControllerManagement {
         String controllerId = null;
         LOG.debug("handleAddUpdateActionStatus for action {}", action.getId());
 
+        // information status entry - check for a potential DOS attack
+        assertActionStatusQuota(action);
+        assertActionStatusMessageQuota(actionStatus);
+
         switch (actionStatus.getStatus()) {
         case ERROR:
             final JpaTarget target = (JpaTarget) action.getTarget();
@@ -612,12 +617,9 @@ public class JpaControllerManagement implements ControllerManagement {
             controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
         case DOWNLOADED:
-            controllerId = handleDownloadedActionStatus(actionStatus, action);
+            controllerId = handleDownloadedActionStatus(action);
             break;
         default:
-            // information status entry - check for a potential DOS attack
-            assertActionStatusQuota(action);
-            assertActionStatusMessageQuota(actionStatus);
             break;
         }
 
@@ -632,15 +634,11 @@ public class JpaControllerManagement implements ControllerManagement {
         return savedAction;
     }
 
-    private String handleDownloadedActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-        // information status entry - check for a potential DOS attack
-        assertActionStatusQuota(action);
-        assertActionStatusMessageQuota(actionStatus);
+    private String handleDownloadedActionStatus(final JpaAction action) {
+        if(!isDownloadOnly(action)){
+            return null;
+        }
 
-        return isDownloadOnly(action) ? handleDownloadedActionStatusForDownloadOnlyAction(action) : null;
-    }
-
-    private String handleDownloadedActionStatusForDownloadOnlyAction(final JpaAction action) {
         JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
