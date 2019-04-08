@@ -62,7 +62,8 @@ public class TotalTargetCountStatus {
 
     /**
      * Create a new states map with the target count for each state.
-     *  @param targetCountActionStatus
+     *
+     * @param targetCountActionStatus
      *            the action state map
      * @param totalTargetCount
      *            the total target count
@@ -73,7 +74,7 @@ public class TotalTargetCountStatus {
             final Long totalTargetCount, final Action.ActionType rolloutType) {
         this.totalTargetCount = totalTargetCount;
         this.rolloutType = rolloutType;
-        mapActionStatusToTotalTargetCountStatus(targetCountActionStatus);
+        addToTotalCount(targetCountActionStatus);
     }
 
     /**
@@ -124,8 +125,7 @@ public class TotalTargetCountStatus {
      * @param rolloutStatusCountItems
      *            all target {@link Status} with total count
      */
-    private void mapActionStatusToTotalTargetCountStatus(
-            final List<TotalTargetCountActionStatus> targetCountActionStatus) {
+    private void addToTotalCount(final List<TotalTargetCountActionStatus> targetCountActionStatus) {
         if (targetCountActionStatus == null) {
             statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);
             return;
@@ -133,7 +133,7 @@ public class TotalTargetCountStatus {
         statusTotalCountMap.put(Status.RUNNING, 0L);
         Long notStartedTargetCount = totalTargetCount;
         for (final TotalTargetCountActionStatus item : targetCountActionStatus) {
-            convertStatus(item);
+            addToTotalCount(item);
             notStartedTargetCount -= item.getCount();
         }
         statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
@@ -159,7 +159,7 @@ public class TotalTargetCountStatus {
         case DOWNLOAD:
         case DOWNLOADED:
         case CANCELING:
-            mapItemStatus(item);
+            addToTotalCount(item);
             break;
         case CANCELED:
             statusTotalCountMap.put(Status.CANCELLED, item.getCount());
@@ -169,32 +169,14 @@ public class TotalTargetCountStatus {
         }
     }
 
-    private void addToTotalCount(
-            final List<TotalTargetCountActionStatus> targetCountActionStatus) {
-        if (targetCountActionStatus == null) {
-            statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);
-            return;
-        }
-        statusTotalCountMap.put(Status.RUNNING, 0L);
-        Long notStartedTargetCount = totalTargetCount;
-        for (final TotalTargetCountActionStatus item : targetCountActionStatus) {
-            addToTotalCount(item);
-            notStartedTargetCount -= item.getCount();
-        }
-        statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
-    }
-
     private void addToTotalCount(final TotalTargetCountActionStatus item) {
         final Status status = convertStatus(item.getStatus());
-        long count;
-        if (status.equals(Status.RUNNING)) {
-            count = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
-        } else {
-            count = item.getCount();
-        }
+        long count = status.equals(Status.RUNNING)
+                ? statusTotalCountMap.get(Status.RUNNING) + item.getCount()
+                : item.getCount();
         statusTotalCountMap.put(status, count);
     }
-    
+
     private Status convertStatus(final Action.Status status){
         switch (status) {
         case SCHEDULED:
@@ -217,12 +199,6 @@ public class TotalTargetCountStatus {
             throw new IllegalArgumentException("State " + status + "is not valid");
         }
     }
-        if(Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) && Action.Status.DOWNLOADED.equals(item.getStatus())){
-            statusTotalCountMap.put(Status.FINISHED, item.getCount());
-        } else {
-            final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
-            statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
-        }
-    }
+//    TODO write int test, add to the existing int test
 
 }

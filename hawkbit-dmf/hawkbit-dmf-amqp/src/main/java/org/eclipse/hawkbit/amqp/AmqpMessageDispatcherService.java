@@ -160,7 +160,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * returned else {@link EventTopic#DOWNLOAD} is returned.
      *
      * @param action
-     *            current rollout action properties.
+     *            current action properties.
      *
      * @return {@link EventTopic} to use for message.
      */

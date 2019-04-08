@@ -25,7 +25,7 @@ public class RepositoryProperties {
      * Set to <code>true</code> if the repository has to reject
      * {@link ActionStatus} entries for actions that are closed. Note: if this
      * is enforced you have to make sure that the feedback channel from the
-     * devices i in order.
+     * devices is in order.
      */
     private boolean rejectActionStatusForClosedAction;
 
