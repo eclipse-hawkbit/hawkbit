@@ -87,7 +87,6 @@ import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
-import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 import org.vaadin.spring.security.web.authentication.VaadinAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSuccessHandler;
@@ -179,9 +178,9 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-        public FilterRegistrationBean dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
+        public FilterRegistrationBean<DosFilter> dosDDiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHERS),
+            final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(Arrays.asList(DDI_ANT_MATCHERS),
                     securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosDDiFilter");
@@ -295,9 +294,9 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-        public FilterRegistrationBean dosDDiDlFilter(final HawkbitSecurityProperties securityProperties) {
+        public FilterRegistrationBean<DosFilter> dosDDiDlFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(Arrays.asList(DDI_DL_ANT_MATCHER),
+            final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(Arrays.asList(DDI_DL_ANT_MATCHER),
                     securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosDDiDlFilter");
@@ -385,9 +384,9 @@ public class SecurityManagedConfiguration {
      */
     @Bean
     @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-    public FilterRegistrationBean dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
+    public FilterRegistrationBean<DosFilter> dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
 
-        final FilterRegistrationBean filterRegBean = dosFilter(Collections.emptyList(),
+        final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(Collections.emptyList(),
                 securityProperties.getDos().getFilter(), securityProperties.getClients());
         filterRegBean.setUrlPatterns(Arrays.asList("/system/*"));
         filterRegBean.setOrder(DOS_FILTER_ORDER);
@@ -396,11 +395,11 @@ public class SecurityManagedConfiguration {
         return filterRegBean;
     }
 
-    private static FilterRegistrationBean dosFilter(final Collection<String> includeAntPaths,
+    private static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
             final HawkbitSecurityProperties.Dos.Filter filterProperties,
             final HawkbitSecurityProperties.Clients clientProperties) {
 
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
+        final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();
 
         filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
                 filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
@@ -479,10 +478,10 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-        public FilterRegistrationBean dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
+        public FilterRegistrationBean<DosFilter> dosMgmtFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getFilter(),
-                    securityProperties.getClients());
+            final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(null,
+                    securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setUrlPatterns(Arrays.asList("/rest/*", "/api/*"));
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosMgmtFilter");
@@ -545,6 +544,15 @@ public class SecurityManagedConfiguration {
         @Autowired
         private HawkbitSecurityProperties hawkbitSecurityProperties;
 
+        private final VaadinUrlAuthenticationSuccessHandler handler;
+
+        public UISecurityConfigurationAdapter(final VaadinRedirectStrategy redirectStrategy) {
+            handler = new TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler();
+            handler.setRedirectStrategy(redirectStrategy);
+            handler.setDefaultTargetUrl("/UI/");
+            handler.setTargetUrlParameter("r");
+        }
+
         /**
          * Filter to protect the hawkBit management UI against to many requests.
          * 
@@ -556,10 +564,10 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.ui-filter", name = "enabled", matchIfMissing = true)
-        public FilterRegistrationBean dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
+        public FilterRegistrationBean<DosFilter> dosMgmtUiFilter(final HawkbitSecurityProperties securityProperties) {
 
-            final FilterRegistrationBean filterRegBean = dosFilter(null, securityProperties.getDos().getUiFilter(),
-                    securityProperties.getClients());
+            final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(null,
+                    securityProperties.getDos().getUiFilter(), securityProperties.getClients());
             // All URLs that can be called anonymous
             filterRegBean.setUrlPatterns(Arrays.asList("/UI/login", "/UI/login/*", "/UI/logout", "/UI/logout/*"));
             filterRegBean.setOrder(DOS_FILTER_ORDER);
@@ -574,21 +582,13 @@ public class SecurityManagedConfiguration {
          */
         @PostConstruct
         public void afterPropertiesSet() {
-            this.vaadinSecurityContext.addAuthenticationSuccessHandler(redirectSaveHandler());
+            this.vaadinSecurityContext.addAuthenticationSuccessHandler(handler);
         }
 
-        @Bean(name = "authenticationManager")
         @Override
+        @Bean(name = "authenticationManager")
         public AuthenticationManager authenticationManagerBean() throws Exception {
             return super.authenticationManagerBean();
-        }
-
-        /**
-         * @return The VaadinRedirectStategy
-         */
-        @Bean
-        public VaadinRedirectStrategy vaadinRedirectStrategy() {
-            return new VaadinDefaultRedirectStrategy();
         }
 
         /**
@@ -596,13 +596,6 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         public VaadinAuthenticationSuccessHandler redirectSaveHandler() {
-
-            final VaadinUrlAuthenticationSuccessHandler handler = new TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler();
-
-            handler.setRedirectStrategy(vaadinRedirectStrategy());
-            handler.setDefaultTargetUrl("/UI/");
-            handler.setTargetUrlParameter("r");
-
             return handler;
         }
 
