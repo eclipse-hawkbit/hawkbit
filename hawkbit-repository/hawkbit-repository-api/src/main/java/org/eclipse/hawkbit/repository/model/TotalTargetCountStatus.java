@@ -169,7 +169,54 @@ public class TotalTargetCountStatus {
         }
     }
 
-    private void mapItemStatus(final TotalTargetCountActionStatus item) {
+    private void addToTotalCount(
+            final List<TotalTargetCountActionStatus> targetCountActionStatus) {
+        if (targetCountActionStatus == null) {
+            statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);
+            return;
+        }
+        statusTotalCountMap.put(Status.RUNNING, 0L);
+        Long notStartedTargetCount = totalTargetCount;
+        for (final TotalTargetCountActionStatus item : targetCountActionStatus) {
+            addToTotalCount(item);
+            notStartedTargetCount -= item.getCount();
+        }
+        statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
+    }
+
+    private void addToTotalCount(final TotalTargetCountActionStatus item) {
+        final Status status = convertStatus(item.getStatus());
+        long count;
+        if (status.equals(Status.RUNNING)) {
+            count = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
+        } else {
+            count = item.getCount();
+        }
+        statusTotalCountMap.put(status, count);
+    }
+    
+    private Status convertStatus(final Action.Status status){
+        switch (status) {
+        case SCHEDULED:
+            return Status.SCHEDULED;
+        case ERROR:
+            return Status.ERROR;
+        case FINISHED:
+            return Status.FINISHED;
+        case CANCELED:
+            return Status.CANCELLED;
+        case RETRIEVED:
+        case RUNNING:
+        case WARNING:
+        case DOWNLOAD:
+        case CANCELING:
+            return Status.RUNNING;
+        case DOWNLOADED:
+            return Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) ? Status.FINISHED : Status.RUNNING;
+        default:
+            throw new IllegalArgumentException("State " + status + "is not valid");
+        }
+    }
         if(Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) && Action.Status.DOWNLOADED.equals(item.getStatus())){
             statusTotalCountMap.put(Status.FINISHED, item.getCount());
         } else {
