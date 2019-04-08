@@ -455,7 +455,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
                         + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
-        paramMapping.forEach((key, value) -> updateQuery.setParameter(key, value));
+        paramMapping.forEach(updateQuery::setParameter);
         updateQuery.setParameter("last_target_query", currentTimeMillis);
         updateQuery.setParameter("tenant", tenant);
 
@@ -585,10 +585,12 @@ public class JpaControllerManagement implements ControllerManagement {
         final boolean isIntermediateFeedback = !FINISHED.equals(actionStatus.getStatus())
                 && !Status.ERROR.equals(actionStatus.getStatus());
 
-        final boolean isIntermediateFeedbackAllowed = !repositoryProperties.isRejectActionStatusForClosedAction();
+        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
+                && isIntermediateFeedback;
 
-        return action.isActive() || isIntermediateFeedbackAllowed && isIntermediateFeedback
-                || isDownloadOnly(action) && !isIntermediateFeedback;
+        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
+
+        return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
     }
 
     private static boolean isDownloadOnly(final JpaAction action) {

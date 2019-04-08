@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,8 +62,6 @@ import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.eclipse.hawkbit.ui.view.filter.OnlyEventsFromDeploymentViewFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -85,16 +84,12 @@ import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
-
 /**
  * Distribution set table which is shown on the Deployment View.
  */
 public class DistributionTable extends AbstractNamedVersionTable<DistributionSet> {
 
     private static final long serialVersionUID = 1L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionTable.class);
 
     private final SpPermissionChecker permissionChecker;
 
@@ -463,7 +458,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
                 confirmQuestion, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, LOG, getNotification())) {
+                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                         saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
                                 deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
                     } else {

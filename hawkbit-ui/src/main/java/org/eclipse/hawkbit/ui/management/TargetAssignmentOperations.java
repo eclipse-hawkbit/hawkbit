@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Property;
-import com.vaadin.ui.Link;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
@@ -40,17 +38,22 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Maps;
+import com.vaadin.data.Property;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Helper Class for Target Assignment Operations from the Deployment View
  */
 public final class TargetAssignmentOperations {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TargetAssignmentOperations.class);
 
     private TargetAssignmentOperations() {
     }
@@ -156,21 +159,19 @@ public final class TargetAssignmentOperations {
      * 
      * @param maintenanceWindowLayout
      *            the maintenance window layout
-     * @param log
-     *            the logger for the calling class
      * @param notification
      *            the UI Notification
      * @return boolean if maintenance window is valid or not
      */
     public static boolean isMaintenanceWindowValid(final MaintenanceWindowLayout maintenanceWindowLayout,
-            final Logger log, final UINotification notification) {
+            final UINotification notification) {
         if (maintenanceWindowLayout.isEnabled()) {
             try {
                 MaintenanceScheduleHelper.validateMaintenanceSchedule(maintenanceWindowLayout.getMaintenanceSchedule(),
                         maintenanceWindowLayout.getMaintenanceDuration(),
                         maintenanceWindowLayout.getMaintenanceTimeZone());
             } catch (final InvalidMaintenanceScheduleException e) {
-                log.error("Maintenance window is not valid", e);
+                LOG.error("Maintenance window is not valid", e);
                 notification.displayValidationError(e.getMessage());
                 return false;
             }

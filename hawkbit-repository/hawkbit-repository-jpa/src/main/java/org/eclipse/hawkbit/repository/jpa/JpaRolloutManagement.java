@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -126,6 +126,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING);
+
+    // In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR,
+            Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR, Status.FINISHED,
+            Status.CANCELED);
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -761,13 +767,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        List<Status> terminalStatuses = new LinkedList<>(Arrays.asList(Status.ERROR, Status.FINISHED, Status.CANCELED));
-        if(ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())) {
-            // In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
-            terminalStatuses.add(Status.DOWNLOADED);
-        }
-        final Long actionsLeftForRollout = actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout,
-                rolloutGroup, terminalStatuses);
+        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())
+                ? actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
+                        DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES)
+                : actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
+                        DEFAULT_ACTION_TERMINATION_STATUSES);
         return actionsLeftForRollout == 0;
     }
 

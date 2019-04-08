@@ -68,6 +68,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     private void assertTargetAssignDistributionSetEvent(final Action action,
             final TargetAssignDistributionSetEvent underTest) {
 
+        assertThat(underTest.getActions().size()).isEqualTo(1);
         ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());
         assertThat(actionProperties).isNotNull();
         assertThat(actionProperties).isEqualToComparingFieldByField(new ActionProperties(action));

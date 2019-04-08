@@ -76,7 +76,6 @@ import com.google.common.collect.Sets;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Test class testing the functionality of triggering a deployment of
@@ -1088,7 +1087,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(event).isNotNull();
         assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId).sorted()
+        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
                 .collect(Collectors.toList());
 
         List<Long> targetActiveActionIds = targets.stream()

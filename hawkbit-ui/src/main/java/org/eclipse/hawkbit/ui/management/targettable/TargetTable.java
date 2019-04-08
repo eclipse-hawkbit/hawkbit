@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -96,10 +100,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
-
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
 
 /**
  * Concrete implementation of Target table which is displayed on the Deployment
@@ -891,7 +891,7 @@ public class TargetTable extends AbstractTable<Target> {
                 getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target", targetName),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
                 getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, LOG, getNotification())) {
+                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                         saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
                                 deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
                     } else {

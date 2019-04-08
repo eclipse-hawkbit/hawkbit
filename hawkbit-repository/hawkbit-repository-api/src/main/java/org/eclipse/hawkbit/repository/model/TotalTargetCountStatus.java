@@ -169,6 +169,5 @@ public class TotalTargetCountStatus {
             throw new IllegalArgumentException("State " + status + "is not valid");
         }
     }
-//    TODO write int test, add to the existing int test
 
 }

@@ -1002,6 +1002,23 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOAD")
+    public void controllerReportsDownloadForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", TestdataFactory.DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOAD));
+        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
+        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
+                .isEqualTo(true);
+    }
+
+    @Test
     @Description("Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOADED")
     public void controllerReportsDownloadedForDownloadOnlyAction() {
         testdataFactory.createTarget();
@@ -1024,14 +1041,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget();
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", TestdataFactory.DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
-        assertThat(actionRepository.activeActionExistsForControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID))
-                .isEqualTo(false);
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
-                Status.DOWNLOADED, Status.DOWNLOADED, false);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId, Status.FINISHED);
+
         assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 

@@ -1304,7 +1304,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
         assertThat(actions.getSize()).isGreaterThan(0);
         actions.stream().filter(a -> a.getDistributionSet().equals(set))
-                .forEach(a -> a.getActionType().equals(ActionType.DOWNLOAD_ONLY));
+                .forEach(a -> ActionType.DOWNLOAD_ONLY.equals(a.getActionType()));
     }
 
     @Test

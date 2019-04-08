@@ -1262,8 +1262,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
-        mvc.perform(post(
-                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
                 .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
