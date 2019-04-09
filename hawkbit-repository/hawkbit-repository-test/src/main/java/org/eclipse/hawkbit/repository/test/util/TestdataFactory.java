@@ -481,10 +481,10 @@ public class TestdataFactory {
      * @param moduleId
      *            the {@link Artifact} belongs to
      * 
-     * @param the
-     *            filename that was provided during upload.
+     * @param filename
+     *            that was provided during upload.
      * 
-     * @return{@link Artifact} entity.
+     * @return {@link Artifact} entity.
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
         final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));

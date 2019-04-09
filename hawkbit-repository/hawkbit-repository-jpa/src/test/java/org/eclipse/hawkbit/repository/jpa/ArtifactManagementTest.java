@@ -407,7 +407,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description(value = "Verifies that you can not delete artifacts from another tenant which exists in another tenant with the same hash and the SoftwareModule is not deleted")
+    @Description("Verifies that you can not delete artifacts from another tenant which exists in another tenant with the same hash and the SoftwareModule is not deleted")
     public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInDifferentTenants() throws Exception {
         final String tenant1 = "mytenant";
         final String tenant2 = "tenant2";

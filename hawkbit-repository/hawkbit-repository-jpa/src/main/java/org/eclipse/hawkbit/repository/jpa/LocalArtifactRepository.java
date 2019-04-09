@@ -64,7 +64,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      * @param tenant
      *            to ensure that the {@link Artifact} is in the same tenant
      * 
-     * @return <code> true </code>
+     * @return <code>true</code>
      */
     @Query("SELECT CASE WHEN COUNT (a)>1 THEN 'true' ELSE 'false' END FROM JpaArtifact a WHERE a.sha1Hash = :sha1 AND a.tenant = :tenant AND a.softwareModule.deleted = 0")
     boolean existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
