@@ -205,7 +205,7 @@ public final class MgmtTargetMapper {
         if (ActionType.TIMEFORCED.equals(action.getActionType())) {
             result.setForceTime(action.getForcedTime());
         }
-        result.setForceType(MgmtRestModelMapper.convertActionType(action.getActionType()));
+        result.setActionType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
         if (action.isActive()) {
             result.setStatus(MgmtAction.ACTION_PENDING);

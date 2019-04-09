@@ -19,14 +19,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtActionRequestBodyPut {
 
     @JsonProperty
-    private MgmtActionType forceType;
+    private MgmtActionType actionType;
 
-    public MgmtActionType getForceType() {
-        return forceType;
+    public MgmtActionType getActionType() {
+        return actionType;
     }
 
-    public void setForceType(final MgmtActionType forceType) {
-        this.forceType = forceType;
+    public void setActionType(final MgmtActionType actionType) {
+        this.actionType = actionType;
     }
 
 }

@@ -83,8 +83,8 @@ public class MgmtAction extends MgmtBaseEntity {
         return actionType;
     }
 
-    public void setForceType(final MgmtActionType forceType) {
-        this.actionType = forceType;
+    public void setActionType(final MgmtActionType actionType) {
+        this.actionType = actionType;
     }
 
     public String getStatus() {
