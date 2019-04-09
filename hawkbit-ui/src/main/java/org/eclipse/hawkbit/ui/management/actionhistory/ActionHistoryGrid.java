@@ -109,8 +109,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
 
-    private boolean forceClientRefreshToggle = true;
-
     ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
             final SpPermissionChecker permissionChecker) {
@@ -468,8 +466,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
                 .setHeaderCaption(i18n.getMessage("header.maintenancewindow"));
-        getColumn(VIRT_PROP_TYPE).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
-        forceClientRefreshToggle = !forceClientRefreshToggle;
 
         newHeaderRow.join(VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
         newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
