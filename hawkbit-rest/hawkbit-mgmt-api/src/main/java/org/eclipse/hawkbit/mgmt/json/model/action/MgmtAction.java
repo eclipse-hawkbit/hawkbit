@@ -58,7 +58,7 @@ public class MgmtAction extends MgmtBaseEntity {
     private Long forceTime;
 
     @JsonProperty
-    private MgmtActionType forceType;
+    private MgmtActionType actionType;
 
     @JsonProperty
     private MgmtMaintenanceWindow maintenanceWindow;
@@ -79,12 +79,12 @@ public class MgmtAction extends MgmtBaseEntity {
         this.forceTime = forceTime;
     }
 
-    public MgmtActionType getForceType() {
-        return forceType;
+    public MgmtActionType getActionType() {
+        return actionType;
     }
 
     public void setForceType(final MgmtActionType forceType) {
-        this.forceType = forceType;
+        this.actionType = forceType;
     }
 
     public String getStatus() {
