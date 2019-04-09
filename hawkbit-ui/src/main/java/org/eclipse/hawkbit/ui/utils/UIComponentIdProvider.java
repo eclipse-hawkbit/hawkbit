@@ -1150,6 +1150,11 @@ public final class UIComponentIdProvider {
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
 
     /**
+     * Rollout popup id.
+     */
+    public static final String ROLLOUT_POPUP_ID = "add.update.rollout.popup";
+
+    /**
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
