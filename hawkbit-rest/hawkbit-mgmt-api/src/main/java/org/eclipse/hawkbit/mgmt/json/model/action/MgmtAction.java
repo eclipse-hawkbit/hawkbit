@@ -57,7 +57,7 @@ public class MgmtAction extends MgmtBaseEntity {
     @JsonProperty
     private Long forceTime;
 
-    @JsonProperty
+    @JsonProperty(value="forceType")
     private MgmtActionType actionType;
 
     @JsonProperty

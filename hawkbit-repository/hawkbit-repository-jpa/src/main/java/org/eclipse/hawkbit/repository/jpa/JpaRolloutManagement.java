@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,6 +104,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
+
+import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 /**
  * JPA implementation of {@link RolloutManagement}.
@@ -258,17 +259,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
 
-            group.setSuccessCondition(conditions.getSuccessCondition());
-            group.setSuccessConditionExp(conditions.getSuccessConditionExp());
-
-            group.setSuccessAction(conditions.getSuccessAction());
-            group.setSuccessActionExp(conditions.getSuccessActionExp());
-
-            group.setErrorCondition(conditions.getErrorCondition());
-            group.setErrorConditionExp(conditions.getErrorConditionExp());
-
-            group.setErrorAction(conditions.getErrorAction());
-            group.setErrorActionExp(conditions.getErrorActionExp());
+            addSuccessAndErrorConditionsAndActions(group, conditions);
 
             group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
 
@@ -317,17 +308,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 group.setTargetFilterQuery("");
             }
 
-            group.setSuccessCondition(srcGroup.getSuccessCondition());
-            group.setSuccessConditionExp(srcGroup.getSuccessConditionExp());
-
-            group.setSuccessAction(srcGroup.getSuccessAction());
-            group.setSuccessActionExp(srcGroup.getSuccessActionExp());
-
-            group.setErrorCondition(srcGroup.getErrorCondition());
-            group.setErrorConditionExp(srcGroup.getErrorConditionExp());
-
-            group.setErrorAction(srcGroup.getErrorAction());
-            group.setErrorActionExp(srcGroup.getErrorActionExp());
+            addSuccessAndErrorConditionsAndActions(group, srcGroup.getSuccessCondition(),
+                    srcGroup.getSuccessConditionExp(), srcGroup.getSuccessAction(), srcGroup.getSuccessActionExp(),
+                    srcGroup.getErrorCondition(), srcGroup.getErrorConditionExp(), srcGroup.getErrorAction(),
+                    srcGroup.getErrorActionExp());
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);

@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import org.eclipse.hawkbit.repository.builder.AbstractRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 
 public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGroupCreate>
         implements RolloutGroupCreate {
@@ -30,20 +32,36 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
         group.setTargetPercentage(targetPercentage);
 
         if (conditions != null) {
-            group.setSuccessCondition(conditions.getSuccessCondition());
-            group.setSuccessConditionExp(conditions.getSuccessConditionExp());
-
-            group.setSuccessAction(conditions.getSuccessAction());
-            group.setSuccessActionExp(conditions.getSuccessActionExp());
-
-            group.setErrorCondition(conditions.getErrorCondition());
-            group.setErrorConditionExp(conditions.getErrorConditionExp());
-
-            group.setErrorAction(conditions.getErrorAction());
-            group.setErrorActionExp(conditions.getErrorActionExp());
+            addSuccessAndErrorConditionsAndActions(group, conditions);
         }
 
         return group;
+    }
+
+    public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
+            final RolloutGroupConditions conditions) {
+        addSuccessAndErrorConditionsAndActions(group, conditions.getSuccessCondition(),
+                conditions.getSuccessConditionExp(), conditions.getSuccessAction(), conditions.getSuccessActionExp(),
+                conditions.getErrorCondition(), conditions.getErrorConditionExp(), conditions.getErrorAction(),
+                conditions.getErrorActionExp());
+    }
+
+    public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
+            final RolloutGroup.RolloutGroupSuccessCondition successCondition, final String successConditionExp,
+            final RolloutGroup.RolloutGroupSuccessAction successAction, final String successActionExp,
+            final RolloutGroup.RolloutGroupErrorCondition errorCondition, final String errorConditionExp,
+            final RolloutGroup.RolloutGroupErrorAction errorAction, final String errorActionExp) {
+        group.setSuccessCondition(successCondition);
+        group.setSuccessConditionExp(successConditionExp);
+
+        group.setSuccessAction(successAction);
+        group.setSuccessActionExp(successActionExp);
+
+        group.setErrorCondition(errorCondition);
+        group.setErrorConditionExp(errorConditionExp);
+
+        group.setErrorAction(errorAction);
+        group.setErrorActionExp(errorActionExp);
     }
 
 }

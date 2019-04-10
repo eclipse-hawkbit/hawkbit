@@ -335,7 +335,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("type").description(MgmtApiModelProperties.ACTION_TYPE)
                                         .attributes(key("value").value("['update', 'cancel']")),
-                                fieldWithPath("actionType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                                fieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                         .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
                                 fieldWithPath("forceTime").description(MgmtApiModelProperties.ACTION_FORCE_TIME)
                                         .type("String"),
@@ -368,7 +368,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("type").description(MgmtApiModelProperties.ACTION_TYPE)
                                         .attributes(key("value").value("['update', 'cancel']")),
-                                fieldWithPath("actionType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                                fieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                         .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
                                 fieldWithPath("forceTime").description(MgmtApiModelProperties.ACTION_FORCE_TIME)
                                         .type("String"),
@@ -401,7 +401,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();
-        body.put("actionType", "forced");
+        body.put("forceType", "forced");
 
         mockMvc.perform(
                 put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
@@ -412,7 +412,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(
-                                requestFieldWithPath("actionType").description(MgmtApiModelProperties.ACTION_FORCED)),
+                                requestFieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCED)),
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
@@ -422,7 +422,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("type").description(MgmtApiModelProperties.ACTION_TYPE)
                                         .attributes(key("value").value("['update', 'cancel']")),
-                                fieldWithPath("actionType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                                fieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                         .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),

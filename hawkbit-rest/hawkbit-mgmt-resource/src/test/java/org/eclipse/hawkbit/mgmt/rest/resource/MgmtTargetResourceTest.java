@@ -870,7 +870,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("actionType", equalTo("forced")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
                 .andExpect(jsonPath("maintenanceWindow").doesNotExist())
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
@@ -895,7 +895,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("type", equalTo("update"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("actionType", equalTo("forced")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
                 .andExpect(jsonPath("maintenanceWindow.schedule", equalTo(schedule)))
                 .andExpect(jsonPath("maintenanceWindow.duration", equalTo(duration)))
                 .andExpect(jsonPath("maintenanceWindow.timezone", equalTo(timezone)))
@@ -920,7 +920,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("type", equalTo("cancel"))).andExpect(jsonPath("status", equalTo("pending")))
-                .andExpect(jsonPath("actionType", equalTo("forced")))
+                .andExpect(jsonPath("forceType", equalTo("forced")))
                 .andExpect(jsonPath("maintenanceWindow").doesNotExist())
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
@@ -944,7 +944,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
-                .andExpect(jsonPath("actionType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
+                .andExpect(jsonPath("forceType", equalTo("forced"))).andExpect(jsonPath("type", equalTo("cancel")))
                 .andExpect(jsonPath("status", equalTo("pending")))
                 .andExpect(jsonPath("maintenanceWindow.schedule", equalTo(schedule)))
                 .andExpect(jsonPath("maintenanceWindow.duration", equalTo(duration)))
@@ -1242,13 +1242,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .getActions().get(0);
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
-        final String body = new JSONObject().put("actionType", "forced").toString();
+        final String body = new JSONObject().put("forceType", "forced").toString();
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actionId.intValue()))).andExpect(jsonPath("type", equalTo("update")))
-                .andExpect(jsonPath("status", equalTo("pending"))).andExpect(jsonPath("actionType", equalTo("forced")))
+                .andExpect(jsonPath("status", equalTo("pending"))).andExpect(jsonPath("forceType", equalTo("forced")))
                 .andExpect(jsonPath("_links.self.href",
                         equalTo(generateActionSelfLink(target.getControllerId(), actionId))))
                 .andExpect(jsonPath("_links.distributionset.href",
