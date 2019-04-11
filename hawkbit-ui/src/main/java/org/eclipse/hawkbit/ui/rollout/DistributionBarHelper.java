@@ -41,7 +41,7 @@ public final class DistributionBarHelper {
      *
      * @return string of format "status1:count,status2:count"
      */
-    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap, VaadinMessageSource i18n) {
+    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap, final VaadinMessageSource i18n) {
         final StringBuilder htmlString = new StringBuilder();
         final Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
         final Long totalValue = getTotalSizes(statusTotalCountMap);
@@ -80,7 +80,7 @@ public final class DistributionBarHelper {
      *            map with status and count details
      * @return tool tip
      */
-    public static String getTooltip(final Map<Status, Long> statusCountMap, VaadinMessageSource i18n) {
+    public static String getTooltip(final Map<Status, Long> statusCountMap, final VaadinMessageSource i18n) {
         final Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper
                 .getStatusMapWithNonZeroValues(statusCountMap);
         final StringBuilder tooltip = new StringBuilder();
@@ -91,7 +91,7 @@ public final class DistributionBarHelper {
         return tooltip.toString();
     }
 
-    private static String getLabel(Status status, VaadinMessageSource i18n) {
+    private static String getLabel(final Status status, final VaadinMessageSource i18n) {
 
         String label;
 
