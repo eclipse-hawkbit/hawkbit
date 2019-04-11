@@ -39,6 +39,9 @@ public final class DistributionBarHelper {
      * @param statusTotalCountMap
      *            map with status and count
      *
+     * @param i18n
+     *            the i18n
+     *
      * @return string of format "status1:count,status2:count"
      */
     public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap, final VaadinMessageSource i18n) {
@@ -78,6 +81,10 @@ public final class DistributionBarHelper {
      *
      * @param statusCountMap
      *            map with status and count details
+     *
+     * @param i18n
+     *            the i18n
+     *            
      * @return tool tip
      */
     public static String getTooltip(final Map<Status, Long> statusCountMap, final VaadinMessageSource i18n) {
