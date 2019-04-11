@@ -58,7 +58,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         detailLayout = new VerticalLayout();
         detailLayout.setImmediate(true);
 
-        final Button gatewaytokenBtn = SPUIComponentProvider.getButton("TODO-ID", "Regenerate Key", "",
+        final Button gatewaytokenBtn = SPUIComponentProvider.getButton("TODO-ID", i18n.getMessage("configuration.button.regenerateKey"), "",
                 ValoTheme.BUTTON_TINY + " " + "redicon", true, null, SPUIButtonStyleSmall.class);
         gatewaytokenBtn.setImmediate(true);
         gatewaytokenBtn.setIcon(FontAwesome.REFRESH);

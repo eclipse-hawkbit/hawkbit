@@ -49,9 +49,9 @@ public class CertificateAuthenticationConfigurationItem extends AbstractBooleanT
         final HorizontalLayout caRootAuthorityLayout = new HorizontalLayout();
         caRootAuthorityLayout.setSpacing(true);
 
-        final Label caRootAuthorityLabel = new LabelBuilder().name("SSL Issuer Hash:").buildLabel();
+        final Label caRootAuthorityLabel = new LabelBuilder().name(i18n.getMessage("label.configuration.auth.hashField")).buildLabel();
         caRootAuthorityLabel.setDescription(
-                "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
+                i18n.getMessage("label.configuration.auth.hashField.tooltip"));
         caRootAuthorityLabel.setWidthUndefined();
 
         caRootAuthorityTextField = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();
