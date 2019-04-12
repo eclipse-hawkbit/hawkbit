@@ -28,7 +28,7 @@ public final class DistributionBarHelper {
     private static final String DISTRIBUTION_BAR_PART_MAIN_STYLE = GwtDistributionBar.CLASSNAME + "-part";
     private static final String DISTRIBUTION_BAR_PART_CLASSNAME_PREFIX = GwtDistributionBar.CLASSNAME + "-part-";
     private static final String DISTRIBUTION_BAR_PART_VALUE_CLASSNAME = GwtDistributionBar.CLASSNAME + "-value";
-    private static final String UNINITIALIZED_VALUE_CLASSNAME = GwtDistributionBar.CLASSNAME + "-uninitialized";
+    private static final String UNINITIALIZED_VALUE_CLASSNAME = GwtDistributionBar.CLASSNAME + "-uninitizalized";
 
     private DistributionBarHelper() {
     }
@@ -104,24 +104,29 @@ public final class DistributionBarHelper {
 
         switch (status) {
 
-            case SCHEDULED: label = "label.scheduled";
+            case SCHEDULED :
+                label = "label.scheduled";
                 break;
-            case RUNNING: label = "label.running";
+            case RUNNING :
+                label = "label.running";
                 break;
-            case ERROR: label = "label.error";
+            case ERROR :
+                label = "label.error";
                 break;
-            case FINISHED: label = "label.finished";
+            case FINISHED :
+                label = "label.finished";
                 break;
-            case CANCELLED: label = "label.cancelled";
+            case CANCELLED :
+                label = "label.cancelled";
                 break;
-            case NOTSTARTED: label = "label.notStarted";
+            case NOTSTARTED :
+                label = "label.notStarted";
                 break;
-            default:
-                label = "label.unknown";
+            default :
+                throw new IllegalStateException("The status " + status + " is not supported.");
         }
 
         return i18n.getMessage(label);
-
     }
 
     private static String getPartStyle(final int partIndex, final int noOfParts, final String customStyle) {
