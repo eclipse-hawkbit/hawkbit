@@ -38,6 +38,14 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
         return group;
     }
 
+    /**
+     * Set the Success And Error conditions for the rollout group
+     *
+     * @param group
+     *          The Rollout group
+     * @param conditions
+     *          The Rollout Success and Error Conditions
+     */
     public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
             final RolloutGroupConditions conditions) {
         addSuccessAndErrorConditionsAndActions(group, conditions.getSuccessCondition(),
@@ -46,6 +54,28 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
                 conditions.getErrorActionExp());
     }
 
+    /**
+     * Set the Success And Error conditions for the rollout group
+     *
+     * @param group
+     *          The Rollout group
+     * @param successCondition
+     *          The Rollout group success condition
+     * @param successConditionExp
+     *          The Rollout group success expression
+     * @param successAction
+     *          The Rollout group success action
+     * @param successActionExp
+     *          The Rollout group success action expression
+     * @param errorCondition
+     *          The Rollout group error condition
+     * @param errorConditionExp
+     *          The Rollout group error expression
+     * @param errorAction
+     *          The Rollout group error action
+     * @param errorActionExp
+     *          The Rollout group error action expression
+     */
     public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
             final RolloutGroup.RolloutGroupSuccessCondition successCondition, final String successConditionExp,
             final RolloutGroup.RolloutGroupSuccessAction successAction, final String successActionExp,
