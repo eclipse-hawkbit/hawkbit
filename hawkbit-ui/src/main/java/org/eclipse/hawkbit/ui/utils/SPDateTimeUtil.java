@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
-import org.eclipse.hawkbit.ui.UiProperties;
 
 /**
  * Common Util to get date/time related information.
@@ -28,6 +27,7 @@ public final class SPDateTimeUtil {
 
     private static final String DURATION_FORMAT = "y','M','d','H','m','s";
     private static final Map<Integer, CalendarI18N> DURATION_I18N = Maps.newHashMapWithExpectedSize(6);
+    private static String fixedTimeZoneProperty;
 
     static {
         DURATION_I18N.put(0, CalendarI18N.YEAR);
@@ -42,15 +42,26 @@ public final class SPDateTimeUtil {
 
     }
 
+
+    /**
+     * Set fixed UI timezone
+     *
+     * @param fixedTimeZoneProperty
+     *      time zone e.g. Europe/Berlin. If time zone is unknown, it will default to GMT
+     */
+    public static void initializeFixedTimeZoneProperty(String fixedTimeZoneProperty) {
+        SPDateTimeUtil.fixedTimeZoneProperty = fixedTimeZoneProperty;
+    }
+
     /**
      * Get browser time zone.
      *
      * @return TimeZone
      */
-    public static TimeZone getBrowserTimeZone(UiProperties uiProperties) {
+    public static TimeZone getBrowserTimeZone() {
 
-        if (!uiProperties.getTimezone().getFixedTimezone().isEmpty()) {
-            return TimeZone.getTimeZone(uiProperties.getTimezone().getFixedTimezone());
+        if (!fixedTimeZoneProperty.isEmpty()) {
+            return TimeZone.getTimeZone(fixedTimeZoneProperty);
         }
 
         final WebBrowser webBrowser = com.vaadin.server.Page.getCurrent().getWebBrowser();
