@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,8 @@ public class UiProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean gravatar;
+
+    private final Timezone timezone = new Timezone();
 
     private final Localization localization = new Localization();
 
@@ -41,6 +44,28 @@ public class UiProperties implements Serializable {
 
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
+    }
+
+    public Timezone getTimezone() {
+        return timezone;
+    }
+
+
+    public static class Timezone implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Provide a static timezone for the UI
+         */
+        private String fixedTimezone = "";
+
+        public String getFixedTimezone() {
+            return fixedTimezone;
+        }
+
+        public void setFixedTimezone(final String fixedTimezone) {
+            this.fixedTimezone = fixedTimezone;
+        }
     }
 
     /**

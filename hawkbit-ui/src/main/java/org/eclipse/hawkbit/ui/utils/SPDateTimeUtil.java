@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
+import org.eclipse.hawkbit.ui.UiProperties;
 
 /**
  * Common Util to get date/time related information.
@@ -46,7 +47,12 @@ public final class SPDateTimeUtil {
      *
      * @return TimeZone
      */
-    public static TimeZone getBrowserTimeZone() {
+    public static TimeZone getBrowserTimeZone(UiProperties uiProperties) {
+
+        if (!uiProperties.getTimezone().getFixedTimezone().isEmpty()) {
+            return TimeZone.getTimeZone(uiProperties.getTimezone().getFixedTimezone());
+        }
+
         final WebBrowser webBrowser = com.vaadin.server.Page.getCurrent().getWebBrowser();
         final String[] timeZones = TimeZone.getAvailableIDs(webBrowser.getRawTimezoneOffset());
         TimeZone tz = TimeZone.getDefault();
