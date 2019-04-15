@@ -62,7 +62,7 @@ public final class SPDateTimeUtil {
     public static TimeZone getBrowserTimeZone() {
 
 
-        if (StringUtils.isEmpty(fixedTimeZoneProperty)) {
+        if (!StringUtils.isEmpty(fixedTimeZoneProperty)) {
             return TimeZone.getTimeZone(fixedTimeZoneProperty);
         }
 
