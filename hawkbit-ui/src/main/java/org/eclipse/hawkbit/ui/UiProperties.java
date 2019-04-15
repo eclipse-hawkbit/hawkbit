@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +50,9 @@ public class UiProperties implements Serializable {
     }
 
 
+    /**
+     * Time zone information
+     */
     public static class Timezone implements Serializable {
         private static final long serialVersionUID = 1L;
 
