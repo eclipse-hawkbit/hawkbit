@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
+import org.springframework.util.StringUtils;
 
 /**
  * Common Util to get date/time related information.
@@ -54,13 +55,14 @@ public final class SPDateTimeUtil {
     }
 
     /**
-     * Get browser time zone.
+     * Get browser time zone or fixed time zone if configured
      *
      * @return TimeZone
      */
     public static TimeZone getBrowserTimeZone() {
 
-        if (!fixedTimeZoneProperty.isEmpty()) {
+
+        if (StringUtils.isEmpty(fixedTimeZoneProperty)) {
             return TimeZone.getTimeZone(fixedTimeZoneProperty);
         }
 
