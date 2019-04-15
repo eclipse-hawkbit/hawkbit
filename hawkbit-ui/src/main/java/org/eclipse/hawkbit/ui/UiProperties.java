@@ -25,7 +25,7 @@ public class UiProperties implements Serializable {
 
     private boolean gravatar;
 
-    private String timezone;
+    private String fixedTimeZone;
 
     private final Localization localization = new Localization();
 
@@ -45,12 +45,12 @@ public class UiProperties implements Serializable {
         this.gravatar = gravatar;
     }
 
-    public String getTimezone() {
-        return timezone;
+    public String getFixedTimeZone() {
+        return fixedTimeZone;
     }
 
-    public void setTimezone(final String timezone) {
-        this.timezone = timezone;
+    public void setFixedTimeZone(final String fixedTimeZone) {
+        this.fixedTimeZone = fixedTimeZone;
     }
 
 
