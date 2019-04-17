@@ -15,13 +15,18 @@ import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.security.aop.FilterChainProxyAdvice;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.RequestRejectedException;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for security.
@@ -80,6 +85,24 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public SecurityTokenGenerator securityTokenGenerator() {
         return new SecurityTokenGenerator();
+    }
+
+    /**
+     * @return {@link FilterChainProxyAdvice} to handle {@link RequestRejectedException}
+     */
+    @Bean
+    public FilterChainProxyAdvice strictHttpFirewallAdvice() {
+        return new FilterChainProxyAdvice();
+    }
+
+    /**
+     * Set {@link StrictHttpFirewall} to be the default firewall
+     * @return {@link HttpFirewall}
+     */
+    @Bean
+    @Primary
+    public HttpFirewall httpFirewall(){
+        return new StrictHttpFirewall();
     }
 
 }

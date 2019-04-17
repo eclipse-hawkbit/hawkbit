@@ -232,7 +232,12 @@ public enum SpServerError {
      * invalid.
      */
     SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
-            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted");
+            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted"),
+
+    /**
+     * Error message informing that the current request url contains malicious characters
+     */
+    SP_MALICIOUS_URL_STRING("hawkbit.server.error.rest.maliciousUrl", "The given url contains malicious characters");
 
     private final String key;
     private final String message;

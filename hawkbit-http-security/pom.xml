@@ -56,6 +56,10 @@
          <artifactId>allure-junit4</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>org.aspectj</groupId>
+         <artifactId>aspectjrt</artifactId>
+      </dependency>
    </dependencies>
 
 </project>
