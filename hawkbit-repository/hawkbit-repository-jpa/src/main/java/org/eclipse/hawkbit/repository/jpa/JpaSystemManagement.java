@@ -333,8 +333,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
-                    LOGGER.error("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
+                    LOGGER.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
                             tenant, ex);
+                    LOGGER.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
+                            + "Continue with next tenant.", tenant, ex.getMessage());
                 }
                 return null;
             }));
