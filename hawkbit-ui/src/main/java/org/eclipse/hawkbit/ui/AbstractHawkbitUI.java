@@ -34,6 +34,7 @@ import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -201,7 +202,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         return cssLayout;
     }
 
-    private class ManagementViewProvider implements ViewProvider {
+    private class ManagementViewProvider extends SpringNavigator implements ViewProvider {
 
         private static final long serialVersionUID = 1L;
 
