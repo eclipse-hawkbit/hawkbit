@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
  * back.
  *
  */
-final class MgmtRestModelMapper {
+public final class MgmtRestModelMapper {
 
     // private constructor, utility class
     private MgmtRestModelMapper() {

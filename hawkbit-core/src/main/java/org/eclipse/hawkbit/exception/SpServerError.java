@@ -225,7 +225,7 @@ public enum SpServerError {
      * invalid.
      */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
-            "The given action type for auto-assignment is invalid: allowed values are FORCED and SOFT"),
+            "The given action type for auto-assignment is invalid: allowed values are ['forced', 'soft', 'downloadonly']"),
 
     /**
      * Error message informing that the distribution set for auto-assignment is

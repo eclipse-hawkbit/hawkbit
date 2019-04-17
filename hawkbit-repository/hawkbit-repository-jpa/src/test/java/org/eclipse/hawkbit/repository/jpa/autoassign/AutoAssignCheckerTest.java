@@ -211,36 +211,46 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test auto assignment of a distribution set with FORCED and SOFT action types")
+    @Description("Test auto assignment of a distribution set with FORCED, SOFT and DOWNLOAD_ONLY action types")
     public void checkAutoAssignWithDifferentActionTypes() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final String targetDsAIdPref = "targA";
-        final String targetDsBIdPref = "targB";
+        final String targetDsAIdPref = "A";
+        final String targetDsBIdPref = "B";
+        final String targetDsCIdPref = "C";
 
-        final List<Target> targetsA = testdataFactory.createTargets(5, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
-        final List<Target> targetsB = testdataFactory.createTargets(10, targetDsBIdPref,
-                targetDsBIdPref.concat(" description"));
-        final int targetsCount = targetsA.size() + targetsB.size();
+        List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet,
+                ActionType.FORCED);
+        List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSet,
+                ActionType.SOFT);
+        List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSet,
+                ActionType.DOWNLOAD_ONLY);
 
-        targetFilterQueryManagement
-                .updateAutoAssignDSWithActionType(
-                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterA")
-                                .query("id==" + targetDsAIdPref + "*")).getId(),
-                        distributionSet.getId(), ActionType.FORCED);
-        targetFilterQueryManagement
-                .updateAutoAssignDSWithActionType(
-                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
-                                .query("id==" + targetDsBIdPref + "*")).getId(),
-                        distributionSet.getId(), ActionType.SOFT);
+        final int targetsCount = targetsA.size() + targetsB.size() + targetsC.size();
 
         autoAssignChecker.check();
 
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsA, targetsCount);
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsB, targetsCount);
+        verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsC, targetsCount);
 
         verifyThatTargetsHaveAssignmentActionType(ActionType.FORCED, targetsA);
         verifyThatTargetsHaveAssignmentActionType(ActionType.SOFT, targetsB);
+        verifyThatTargetsHaveAssignmentActionType(ActionType.DOWNLOAD_ONLY, targetsC);
+    }
+
+    @Step
+    private List<Target> createTargetsAndAutoAssignDistSet(final String prefix, final int targetCount,
+            final DistributionSet distributionSet, final ActionType actionType) {
+
+        final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix,
+                prefix.concat(" description"));
+
+        targetFilterQueryManagement
+                .updateAutoAssignDSWithActionType(
+                        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
+                                .name("filter" + prefix).query("id==target" + prefix + "*")).getId(),
+                        distributionSet.getId(), actionType);
+        return targets;
     }
 
     @Step

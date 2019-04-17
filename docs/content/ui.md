@@ -142,7 +142,7 @@ name==CCU* and updatestatus==pending                                            
 ![Target Filter Management view](../images/ui/target_filter.png)
 
 ### Auto assignment
-It is possible to assign some distribution set with different action types (_forced_ or _soft_) to all targets that belong to the corresponding custom target filter, including the ones, that are registered later on.
+It is possible to assign some distribution set with different action types (_forced_, _soft_, or _download only_) to all targets that belong to the corresponding custom target filter, including the ones, that are registered later on.
 
 In order to activate the auto-assignment, one should first click on _Auto assignment_ cell in Custom Filters table, and then check the corresponding checkbox. After that, the action type and distribution set for auto-assignment should be selected and confirmed.
 
