@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -121,6 +122,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         rootLayout.setSizeFull();
 
         HawkbitCommonUtil.initLocalization(this, uiProperties.getLocalization(), i18n);
+        SPDateTimeUtil.initializeFixedTimeZoneProperty(uiProperties.getFixedTimeZone());
 
         dashboardMenu.init();
         dashboardMenu.setResponsive(true);
