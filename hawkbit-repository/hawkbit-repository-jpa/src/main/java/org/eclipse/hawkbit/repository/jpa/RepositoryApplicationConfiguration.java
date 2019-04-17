@@ -855,9 +855,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new RolloutScheduler(systemManagement, rolloutManagement, systemSecurityContext);
     }
 
+    
+    /** activates a event handler which listens to {@link ActionStatusUpdateEvent} and updates the status for an action.
+     * @param controllerManagement to set the updated status for an action
+     * @param entityFactory to create action status
+     * @param securityContext to run the queries which are protected for specific authorities.
+     * @return a new {@link ActionStatusUpdateHandlerService} bean.
+     */
     @Bean
-    ActionStatusUpdateHandlerService actionStatusHandlerService(final ControllerManagement controllerManagement,
-            final EntityFactory entityFactory) {
-        return new ActionStatusUpdateHandlerService(controllerManagement, entityFactory);
+    ActionStatusUpdateHandlerService actionStatusUpdate(final ControllerManagement controllerManagement,
+            final EntityFactory entityFactory, final SystemSecurityContext securityContext) {
+        return new ActionStatusUpdateHandlerService(controllerManagement, entityFactory, securityContext);
     }
 }

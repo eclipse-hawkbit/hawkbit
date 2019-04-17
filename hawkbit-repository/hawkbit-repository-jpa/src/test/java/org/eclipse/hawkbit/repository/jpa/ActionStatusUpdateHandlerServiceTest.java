@@ -47,24 +47,24 @@ public class ActionStatusUpdateHandlerServiceTest extends AbstractJpaIntegration
         JpaSoftwareModule swModule = this.generateSoftwareModule(tenant);
         JpaDistributionSet ds = generateDistributionSet(swModule, tenant);
         JpaTarget target = generateSampleTarget(1L, controllerId, tenant);
-        JpaAction action = generateAction(ds, target, tenant);
+        JpaAction action = generateAction(101L,ds, target, tenant);
 
         ActionStatusUpdateHandlerService rolloutStatusHandlerService = new ActionStatusUpdateHandlerService(
                 this.controllerManagement, this.entityFactory);
 
         // initiate the test
-        ActionStatusUpdateEvent targetStatus = new ActionStatusUpdateEvent("default",
-                ds.getId(), controllerId, Status.FINISHED, new ArrayList<>());
+        ActionStatusUpdateEvent targetStatus = new ActionStatusUpdateEvent("default", action.getId(), Status.FINISHED,
+                new ArrayList<>());
         rolloutStatusHandlerService.handle(targetStatus);
 
         // verify if intended dataSetId is really installed
         Long installedId = this.targetRepository.findById(target.getId()).get().getInstalledDistributionSet().getId();
         assertEquals("Status update for a given distirbution set has failed", installedId, ds.getId());
-        
+
         // verify that action is database is marked inactive.
-        Optional<Action> activeAction = this.actionRepository.findByActiveAndTargetAndDistributionSet(target.getControllerId(), ds.getId(), true);
+        Optional<JpaAction> activeAction = this.actionRepository.findById(action.getId());
         assertFalse(activeAction.isPresent());
-        
+
         // clean up data - start
         this.actionRepository.deleteById(action.getId());
         this.softwareModuleRepository.deleteById(swModule.getId());
@@ -94,8 +94,9 @@ public class ActionStatusUpdateHandlerServiceTest extends AbstractJpaIntegration
         return this.softwareModuleRepository.save(swMod);
     }
 
-    private JpaAction generateAction(DistributionSet distributionSet, Target target, String tenant) {
+    private JpaAction generateAction(Long actionId, DistributionSet distributionSet, Target target, String tenant) {
         final JpaAction action = new JpaAction();
+        action.setId(actionId);
         action.setActive(true);
         action.setDistributionSet(distributionSet);
         action.setActionType(ActionType.FORCED);
