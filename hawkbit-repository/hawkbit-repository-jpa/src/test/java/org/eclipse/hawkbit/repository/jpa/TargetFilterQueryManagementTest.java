@@ -196,6 +196,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         verifyAutoAssignmentWithSoftActionType(filterName, targetFilterQuery, distributionSet);
 
+        verifyAutoAssignmentWithDownloadOnlyActionType(filterName, targetFilterQuery, distributionSet);
+
         verifyAutoAssignmentWithInvalidActionType(targetFilterQuery, distributionSet);
 
         verifyAutoAssignmentWithIncompleteDs(targetFilterQuery);
@@ -216,6 +218,14 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement.updateAutoAssignDSWithActionType(targetFilterQuery.getId(), distributionSet.getId(),
                 ActionType.SOFT);
         verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.SOFT);
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithDownloadOnlyActionType(final String filterName,
+            final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
+        targetFilterQueryManagement.updateAutoAssignDSWithActionType(targetFilterQuery.getId(), distributionSet.getId(),
+                ActionType.DOWNLOAD_ONLY);
+        verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.DOWNLOAD_ONLY);
     }
 
     @Step

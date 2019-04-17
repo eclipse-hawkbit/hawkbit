@@ -346,7 +346,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return ResponseEntity.notFound().build();
         }
 
-        if (!MgmtActionType.FORCED.equals(actionUpdate.getForceType())) {
+        if (!MgmtActionType.FORCED.equals(actionUpdate.getActionType())) {
             throw new ValidationException("Resource supports only switch to FORCED.");
         }
 

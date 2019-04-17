@@ -225,8 +225,14 @@ public abstract class AbstractIntegrationTest {
     };
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
-        return deploymentManagement.assignDistributionSet(dsID, Arrays.asList(
-                new TargetWithActionType(controllerId, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME)));
+        return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
+            final ActionType actionType) {
+        return deploymentManagement.assignDistributionSet(dsID,
+                Collections.singletonList(new TargetWithActionType(controllerId, actionType,
+                        RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
     /**
@@ -316,8 +322,8 @@ public abstract class AbstractIntegrationTest {
             final boolean isRequiredMigrationStep) {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
+                .getAssignedEntity().iterator().next();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 

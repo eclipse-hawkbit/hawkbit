@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -46,6 +45,7 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -301,7 +301,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+            amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, "vHost");
             fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
@@ -462,19 +462,16 @@ public class AmqpMessageHandlerServiceTest {
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
-        final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<ActionProperties> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionProperties.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
-        final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
-        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class), anyBoolean());
-        final String tenant = tenantCaptor.getValue();
-        final String controllerId = targetCaptor.getValue().getControllerId();
-        final Long actionId = actionIdCaptor.getValue();
-
-        assertThat(tenant).as("event has tenant").isEqualTo("DEFAULT");
-        assertThat(controllerId).as("event has wrong controller id").isEqualTo("target1");
-        assertThat(actionId).as("event has wrong action id").isEqualTo(22L);
+        verify(amqpMessageDispatcherServiceMock, times(1))
+                .sendUpdateMessageToTarget(actionPropertiesCaptor.capture(), targetCaptor.capture(), any(Map.class));
+        final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
+        assertThat(actionProperties).isNotNull();
+        assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
+        assertThat(targetCaptor.getValue().getControllerId()).as("event has wrong controller id").isEqualTo("target1");
+        assertThat(actionProperties.getId()).as("event has wrong action id").isEqualTo(22L);
 
     }
 
@@ -516,6 +513,7 @@ public class AmqpMessageHandlerServiceTest {
         when(actionMock.getId()).thenReturn(targetId);
         when(actionMock.getTenant()).thenReturn("DEFAULT");
         when(actionMock.getTarget()).thenReturn(targetMock);
+        when(actionMock.getActionType()).thenReturn(Action.ActionType.SOFT);
         when(targetMock.getControllerId()).thenReturn("target1");
         return actionMock;
     }

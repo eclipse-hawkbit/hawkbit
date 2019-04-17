@@ -130,6 +130,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 fieldWithPath(arrayPrefix + "distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "status").description(MgmtApiModelProperties.ROLLOUT_STATUS)
                 .attributes(key("value").value("['creating','ready','paused','running','finished']")));
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "type").description(MgmtApiModelProperties.ROLLOUT_TYPE)
+                .attributes(key("value").value("['forced','soft','timeforced','downloadonly']")));
         allFieldDescriptor.add(
                 fieldWithPath(arrayPrefix + "totalTargets").description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.self").ignored());

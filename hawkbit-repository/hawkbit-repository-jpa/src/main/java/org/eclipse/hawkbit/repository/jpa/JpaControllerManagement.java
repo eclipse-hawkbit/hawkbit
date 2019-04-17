@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
+import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
@@ -452,7 +455,7 @@ public class JpaControllerManagement implements ControllerManagement {
                 "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
                         + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
 
-        paramMapping.entrySet().forEach(entry -> updateQuery.setParameter(entry.getKey(), entry.getValue()));
+        paramMapping.forEach(updateQuery::setParameter);
         updateQuery.setParameter("last_target_query", currentTimeMillis);
         updateQuery.setParameter("tenant", tenant);
 
@@ -561,23 +564,37 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus actionStatus = create.build();
 
-        // if action is already closed we accept further status updates if
-        // permitted so by configuration. This is especially useful if the
-        // action status feedback channel order from the device cannot be
-        // guaranteed. However, if an action is closed we do not accept further
-        // close messages.
-        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action.isActive())) {
-            LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                    actionStatus.getStatus(), action.getId());
-            return action;
+        if (isUpdatingActionStatusAllowed(action, actionStatus)) {
+            return handleAddUpdateActionStatus(actionStatus, action);
         }
-        return handleAddUpdateActionStatus(actionStatus, action);
+
+        LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
+                actionStatus.getStatus(), action.getId());
+        return action;
     }
 
-    private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
-            final boolean actionActive) {
-        return !actionActive && (repositoryProperties.isRejectActionStatusForClosedAction()
-                || Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus()));
+    /**
+     * ActionStatus updates are allowed mainly if the action is active. If the
+     * action is not active we accept further status updates if permitted so
+     * by repository configuration. In this case, only the values: Status.ERROR
+     * and Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action,
+     * we accept status updates only once.
+     */
+    private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
+
+        final boolean isIntermediateFeedback = !FINISHED.equals(actionStatus.getStatus())
+                && !Status.ERROR.equals(actionStatus.getStatus());
+
+        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
+                && isIntermediateFeedback;
+
+        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
+
+        return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
+    }
+
+    private static boolean isDownloadOnly(final JpaAction action) {
+        return DOWNLOAD_ONLY.equals(action.getActionType());
     }
 
     /**
@@ -588,6 +605,10 @@ public class JpaControllerManagement implements ControllerManagement {
         String controllerId = null;
         LOG.debug("handleAddUpdateActionStatus for action {}", action.getId());
 
+        // information status entry - check for a potential DOS attack
+        assertActionStatusQuota(action);
+        assertActionStatusMessageQuota(actionStatus);
+
         switch (actionStatus.getStatus()) {
         case ERROR:
             final JpaTarget target = (JpaTarget) action.getTarget();
@@ -597,10 +618,10 @@ public class JpaControllerManagement implements ControllerManagement {
         case FINISHED:
             controllerId = handleFinishedAndStoreInTargetStatus(action);
             break;
+        case DOWNLOADED:
+            controllerId = handleDownloadedActionStatus(action);
+            break;
         default:
-            // information status entry - check for a potential DOS attack
-            assertActionStatusQuota(action);
-            assertActionStatusMessageQuota(actionStatus);
             break;
         }
 
@@ -613,6 +634,20 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         return savedAction;
+    }
+
+    private String handleDownloadedActionStatus(final JpaAction action) {
+        if(!isDownloadOnly(action)){
+            return null;
+        }
+
+        JpaTarget target = (JpaTarget) action.getTarget();
+        action.setActive(false);
+        action.setStatus(DOWNLOADED);
+        target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+        targetRepository.save(target);
+
+        return target.getControllerId();
     }
 
     private void requestControllerAttributes(final String controllerId) {
@@ -647,6 +682,12 @@ public class JpaControllerManagement implements ControllerManagement {
 
         target.setInstalledDistributionSet(ds);
         target.setInstallationDate(System.currentTimeMillis());
+
+        // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
+        // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)
+        if(isDownloadOnly(action)){
+            target.setAssignedDistributionSet(action.getDistributionSet());
+        }
 
         // check if the assigned set is equal to the installed set (not
         // necessarily the case as another update might be pending already).

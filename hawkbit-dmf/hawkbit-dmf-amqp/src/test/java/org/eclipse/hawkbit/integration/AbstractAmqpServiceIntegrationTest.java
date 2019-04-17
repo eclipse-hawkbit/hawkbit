@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
 import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -235,7 +236,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         assertThat(targetManagement.count()).isEqualTo(expectedTargetsCount);
     }
 
-    private Message assertReplyMessageHeader(final EventTopic eventTopic, final String controllerId) {
+    protected Message assertReplyMessageHeader(final EventTopic eventTopic, final String controllerId) {
         verifyReplyToListener();
         final Message replyMessage = replyToListener.getEventTopicMessages().get(eventTopic);
         assertAllTargetsCount(1);
@@ -377,6 +378,18 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     @Override
     protected String getExchange() {
         return AmqpSettings.DMF_EXCHANGE;
+    }
+
+    @Step
+    protected DistributionSet createTargetAndDistributionSetAndAssign(final String controllerId,
+            final Action.ActionType actionType) {
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+
+        assignDistributionSet(distributionSet.getId(), controllerId, actionType);
+        return distributionSet;
     }
 
 }

@@ -65,7 +65,9 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Column(name = "auto_assign_action_type", nullable = true)
     @ObjectTypeConverter(name = "autoAssignActionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
             @ConversionValue(objectValue = "FORCED", dataValue = "0"),
-            @ConversionValue(objectValue = "SOFT", dataValue = "1") })
+            @ConversionValue(objectValue = "SOFT", dataValue = "1"),
+            // Conversion for 'TIMEFORCED' is disabled because it is not permitted in autoAssignment
+            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3")})
     @Convert("autoAssignActionType")
     private ActionType autoAssignActionType;
 
