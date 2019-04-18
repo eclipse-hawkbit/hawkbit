@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -34,11 +34,10 @@ public class DmfMultiActionRequest {
     }
 
     public void addElement(final DmfMultiActionElement element) {
-        if (elements != null) {
-            elements.add(element);
-        } else {
-            elements = Arrays.asList(element);
+        if (elements == null) {
+            elements = new ArrayList<>();
         }
+        elements.add(element);
     }
 
     public void addElement(final EventTopic topic, final DmfActionRequest action) {
