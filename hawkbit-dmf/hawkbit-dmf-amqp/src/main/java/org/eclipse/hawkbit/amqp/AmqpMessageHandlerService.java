@@ -13,9 +13,11 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,7 @@ import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -46,6 +49,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -77,6 +81,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
     private final SystemSecurityContext systemSecurityContext;
+
+    private static final int MAX_ACTIONS = 100;
 
     /**
      * Constructor.
@@ -208,11 +214,35 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void checkIfUpdatesAvailable(final Target target) {
         if (isMultiAssignmentsEnabled()) {
-            amqpMessageDispatcherService.sendMultiActionRequestMessages(target.getTenant(),
-                    Collections.singletonList(target.getControllerId()));
+            final List<Action> actions = controllerManagement
+                    .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTIONS), target.getControllerId()).getContent();
+
+            final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
+                    .collect(Collectors.toSet());
+            final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet = distributionSets
+                    .stream().collect(Collectors.toMap(DistributionSet::getId, this::getSoftwareModulesWithMetadata));
+
+            amqpMessageDispatcherService.sendMultiActionRequestToTarget(target.getTenant(), target, actions,
+                    softwareModulesPerDistributionSet);
         } else {
             checkIfUpdateAvailable(target);
         }
+    }
+
+    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(
+            final DistributionSet distributionSet) {
+        final Map<Long, SoftwareModule> softwareModules = distributionSet.getModules().stream()
+                .collect(Collectors.toMap(SoftwareModule::getId, sm -> sm));
+
+        final Map<Long, List<SoftwareModuleMetadata>> metadataBySm = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(softwareModules.keySet());
+
+        final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModulesWithMetadata = new HashMap<>();
+        softwareModules.forEach((id, sm) -> {
+            final List<SoftwareModuleMetadata> metadata = metadataBySm.get(id);
+            softwareModulesWithMetadata.put(sm, metadata != null ? metadata : Collections.emptyList());
+        });
+        return softwareModulesWithMetadata;
     }
 
     private void checkIfUpdateAvailable(final Target target) {

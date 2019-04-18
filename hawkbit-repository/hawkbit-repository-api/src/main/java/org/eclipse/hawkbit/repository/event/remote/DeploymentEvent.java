@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class DeploymentEvent extends RemoteTenantAwareEvent implements Iterable<
 
     private static final long serialVersionUID = 1L;
 
-    private final List<String> controllerIds = Arrays.asList();
+    private final List<String> controllerIds = new ArrayList<>();
 
     /**
      * Default constructor.

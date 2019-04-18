@@ -142,20 +142,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
 
-        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(set -> {
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
 
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
-                    .newHashMapWithExpectedSize(set.getModules().size());
-            set.getModules()
-                    .forEach(
-                            module -> modules.put(module,
-                                    softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                                            PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId())
-                                            .getContent()));
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
+                    ds);
 
             targetManagement.getByControllerID(assignedEvent.getActions().keySet())
                     .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                            assignedEvent.getActions().get(target.getControllerId()), modules,
+                            assignedEvent.getActions().get(target.getControllerId()), softwareModules,
                             assignedEvent.isMaintenanceWindowAvailable()));
 
         });
@@ -189,7 +183,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             activeActions.forEach(action -> {
                 final DistributionSet distributionSet = action.getDistributionSet();
                 softwareModuleMetadata.computeIfAbsent(distributionSet.getId(),
-                        id -> getSoftwareModuleMetadata(distributionSet));
+                        id -> getSoftwareModulesWithMetadata(distributionSet));
             });
 
             if (!activeActions.isEmpty()) {
@@ -474,7 +468,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return artifact;
     }
 
-    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata(
+    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(
             final DistributionSet distributionSet) {
         final Map<SoftwareModule, List<SoftwareModuleMetadata>> moduleMetadata = Maps
                 .newHashMapWithExpectedSize(distributionSet.getModules().size());

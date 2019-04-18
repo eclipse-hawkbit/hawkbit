@@ -356,6 +356,14 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
+    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
+            return Page.empty();
+        }
+        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
+    }
+
+    @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }

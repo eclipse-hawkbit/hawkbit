@@ -151,6 +151,9 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
 
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
     /**
      * Get the {@link Action} entity for given actionId with all lazy
      * attributes.
