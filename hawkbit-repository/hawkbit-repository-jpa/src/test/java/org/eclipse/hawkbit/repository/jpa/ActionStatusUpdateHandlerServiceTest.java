@@ -3,6 +3,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class ActionStatusUpdateHandlerServiceTest extends AbstractJpaIntegration
         JpaAction action = generateAction(101L,ds, target, tenant);
 
         ActionStatusUpdateHandlerService rolloutStatusHandlerService = new ActionStatusUpdateHandlerService(
-                this.controllerManagement, this.entityFactory);
+                this.controllerManagement, this.entityFactory,this.systemSecurityContext);
 
         // initiate the test
         ActionStatusUpdateEvent targetStatus = new ActionStatusUpdateEvent("default", action.getId(), Status.FINISHED,
@@ -63,7 +64,8 @@ public class ActionStatusUpdateHandlerServiceTest extends AbstractJpaIntegration
 
         // verify that action is database is marked inactive.
         Optional<JpaAction> activeAction = this.actionRepository.findById(action.getId());
-        assertFalse(activeAction.isPresent());
+        assertTrue(activeAction.isPresent());
+        assertFalse(activeAction.get().isActive());
 
         // clean up data - start
         this.actionRepository.deleteById(action.getId());

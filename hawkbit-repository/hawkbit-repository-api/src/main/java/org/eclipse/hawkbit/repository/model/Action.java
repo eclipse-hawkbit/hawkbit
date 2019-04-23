@@ -33,6 +33,11 @@ public interface Action extends TenantAwareBaseEntity {
     int MAINTENANCE_WINDOW_TIMEZONE_LENGTH = 8;
 
     /**
+     * Maximum length of external reference.
+     */
+    int EXTERNAL_REF_LENGTH = 64;
+    
+    /**
      * @return the distributionSet
      */
     DistributionSet getDistributionSet();
@@ -97,6 +102,16 @@ public interface Action extends TenantAwareBaseEntity {
      * @return maintenance window time zone related to this {@link Action}.
      */
     String getMaintenanceWindowTimeZone();
+
+    /**
+     * @param externalRef associated with this action
+     */
+    void setExternalRef(String externalRef);
+    
+    /**
+     * @return externalRef of the action
+     */
+    String getExternalRef();
 
     /**
      * checks if the {@link #getForcedTime()} is hit by the given

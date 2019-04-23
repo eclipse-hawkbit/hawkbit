@@ -372,6 +372,10 @@ public class JpaControllerManagement implements ControllerManagement {
         return actionRepository.getById(actionId);
     }
 
+    public List<Action> getActiveActionsByExternalRef(final List<String> externalRefs) {
+        return actionRepository.findByExternalRefInAndIsActive(externalRefs, true);
+    }
+
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -1040,6 +1044,11 @@ public class JpaControllerManagement implements ControllerManagement {
             throw new CancelActionNotAllowedException(
                     "Action [id: " + action.getId() + "] is not active and cannot be canceled");
         }
+    }
+
+    @Override
+    public void updateActionExternalRef(final long actionId, final String externalRef) {
+        actionRepository.updateExternalRef(actionId, externalRef);
     }
 
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {

@@ -22,8 +22,8 @@ public class ActionStatusUpdateEvent implements TenantAwareEvent {
     private final List<String> messages;
     private final Status status;
 
-    public ActionStatusUpdateEvent(String tenant, Long actionId, Status status,
-            List<String> messages) {
+    public ActionStatusUpdateEvent(final String tenant, final Long actionId, final Status status,
+            final List<String> messages) {
         this.actionId = actionId;
         this.tenant = tenant;
         this.messages = messages;

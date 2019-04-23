@@ -225,6 +225,17 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     List<Long> findByTargetIdInAndIsActiveAndActionStatusAndDistributionSetNotRequiredMigrationStep(
             @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
             @Param("currentStatus") Action.Status currentStatus);
+    
+    /** Retrieves all {@link Action}s that matches the queried externalRefs.
+     * @param externalRefs
+     *            for which the actions need to be found
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @return list of actions 
+     */
+    @Query("SELECT a FROM JpaAction a WHERE a.externalRef IN :externalRefs AND a.active = :active")
+    List<Action> findByExternalRefInAndIsActive(@Param("externalRefs") List<String> externalRefs,
+            @Param("active") boolean active);
 
     /**
      * Switches the status of actions from one specific status into another for
@@ -490,4 +501,12 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
     void deleteByIdIn(Collection<Long> actionIDs);
 
+    /** Updates the externalRef of an action by its actionId.
+     * @param actionId for which the externalRef is being updated.
+     * @param externalRef value of the external reference for the given action id.
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JpaAction a SET a.externalRef = :externalRef WHERE a.id = :actionId")
+    void updateExternalRef(@Param("actionId") Long actionId, @Param("externalRef") String externalRef);
 }

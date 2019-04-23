@@ -429,4 +429,22 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action cancelAction(long actionId);
+    
+    /** Updates given {@link Action} with its external id.
+     * @param actionId to be updated
+     * @param externalRef of the action
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void updateActionExternalRef(long actionId,String externalRef);
+    
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    /**
+     * Retrieves list of {@link Action}s which matches the provided
+     * externalRefs.
+     * 
+     * @param externalRefs
+     *            for which the actions need to be fetched.
+     * @return
+     */
+    List<Action> getActiveActionsByExternalRef(List<String> externalRefs);
 }
