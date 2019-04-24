@@ -497,16 +497,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Description("Register a controller which does not exist")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void findOrRegisterTargetIfItDoesNotexist() {
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+    public void findOrRegisterTargetIfItDoesNotExist() {
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
-        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotexist("", LOCALHOST))
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
     }
 
@@ -533,7 +533,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 0) })
     public void targetPollEventNotSendIfDisabled() {
         repositoryProperties.setPublishTargetPollEvent(false);
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         repositoryProperties.setPublishTargetPollEvent(true);
     }
 

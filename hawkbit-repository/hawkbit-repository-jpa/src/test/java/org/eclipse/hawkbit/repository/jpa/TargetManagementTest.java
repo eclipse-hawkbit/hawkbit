@@ -472,7 +472,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Target target = createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist("4711", LOCALHOST);
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
@@ -858,7 +858,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 1) })
     public void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
         final String knownTargetControllerId = "readTarget";
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
         securityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();

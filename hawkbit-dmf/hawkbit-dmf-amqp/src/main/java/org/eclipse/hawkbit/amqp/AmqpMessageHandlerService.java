@@ -188,7 +188,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
         lookIfUpdateAvailable(target);
