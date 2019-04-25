@@ -171,9 +171,4 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     public void deleteConfiguration(final String configurationKeyName) {
         tenantConfigurationRepository.deleteByKey(configurationKeyName);
     }
-
-    // for testing
-    public void setTenantConfigurationRepository(final TenantConfigurationRepository tenantConfigurationRepository) {
-        this.tenantConfigurationRepository = tenantConfigurationRepository;
-    }
 }
