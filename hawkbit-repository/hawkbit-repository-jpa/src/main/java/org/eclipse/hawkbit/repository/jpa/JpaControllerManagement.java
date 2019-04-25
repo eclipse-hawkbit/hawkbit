@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
@@ -90,9 +91,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.validation.annotation.Validated;
@@ -364,27 +367,71 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target findOrRegisterTargetIfItDoesNotexist(final String controllerId, final URI address) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class,
+            maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        final Optional<JpaTarget> target = targetRepository.findOne(spec);
+        return targetRepository.findOne(spec)
+                .map(target -> updateTargetStatus(target, address))
+                .orElseGet(() -> createTarget(controllerId, address));
+    }
 
-        if (!target.isPresent()) {
-            final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                    .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
-                    .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+    private Target createTarget(final String controllerId, final URI address) {
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
 
-            return result;
-        }
+        return result;
+    }
 
-        return updateTargetStatus(target.get(), address);
+    /**
+     * Recovery method for findOrRegisterTargetIfItDoesNotExist() method. To be
+     * called only by the Retry framework and should not be called directly.
+     * 
+     * Will be called if the Retryable method fails with an
+     * {@link EntityAlreadyExistsException}
+     *
+     * @param e
+     *            The {@link EntityAlreadyExistsException}, will be provided by
+     *            the Retry framework
+     * @param controllerId
+     *            The ControllerId to find, will be passed from original method
+     *            call arguments
+     * @param address
+     *            The URI address of the controller, will be passed from
+     *            original method call arguments
+     *
+     * @return The Target, or throw an IllegalStateException if it was not found
+     */
+    @Recover
+    /*
+     We need to create a new Transaction to make sure that this execution is
+     completely separate from previous executions, and that any database
+     queries are executed in it's own Transaction
+    */
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+    public Target recoverFindOrRegisterTargetIfItDoesNotExist(final EntityAlreadyExistsException e,
+            final String controllerId, final URI address) {
+
+        LOG.warn("Caught EntityAlreadExistsException while creating target [controllerId: {}, address: {}] for "
+                + "tenant [{}]", controllerId, address, tenantAware.getCurrentTenant(), e);
+
+        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
+                .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
+
+        final Target target = targetRepository.findOne(spec)
+                .orElseThrow(() -> new IllegalStateException("Target with ControllerId [" + controllerId + "] Should"
+                        + " be persisted in Database, but was not found!"));
+
+        LOG.warn("Found target [controllerId: {}, address: {}, tenant: {}]", target.getControllerId(),
+                target.getAddress(), target.getTenant());
+        return target;
     }
 
     /**
@@ -1028,5 +1075,10 @@ public class JpaControllerManagement implements ControllerManagement {
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
+    }
+
+    // for testing
+    public void setTargetRepository(final TargetRepository targetRepositorySpy) {
+        this.targetRepository = targetRepositorySpy;
     }
 }

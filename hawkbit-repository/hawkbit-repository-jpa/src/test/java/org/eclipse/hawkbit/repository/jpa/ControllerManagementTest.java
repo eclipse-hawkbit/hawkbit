@@ -11,9 +11,18 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
@@ -43,6 +52,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -61,6 +71,7 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -70,6 +81,8 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.retry.ExhaustedRetryException;
 
 @Feature("Component Tests - Repository")
 @Story("Controller Management")
@@ -508,6 +521,126 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("", LOCALHOST))
                 .as("register target with empty controllerId should fail");
+    }
+
+    @Test
+    @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the Recover" +
+            " method is not invoked, and the exception is rethrown after max retries")
+    public void findOrRegisterTargetIfItDoesNotExistInvokesRecoverMethodAfterMaxRetries() {
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        when(mockTargetRepository.findOne(any())).thenThrow(new ConcurrencyFailureException("oops!"));
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        try {
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
+        } catch (ExhaustedRetryException e) {
+            assertTrue("Root cause should be a ConcurrencyFailureException",
+                    e.getCause() instanceof ConcurrencyFailureException);
+            verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
+        }
+    }
+
+    @Test
+    @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the Recover" +
+            " method is not invoked, and the exception is not rethrown when the max retries are not reached")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    public void findOrRegisterTargetIfItDoesNotExistDoesNotInvokeRecoverMethodIfNotMaxRetries() {
+
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+        final Target target = testdataFactory.createTarget();
+
+        when(mockTargetRepository.findOne(any()))
+                .thenThrow(new ConcurrencyFailureException("oops!"))
+                .thenThrow(new ConcurrencyFailureException("oops!"))
+                .thenReturn(Optional.of((JpaTarget) target));
+        when(mockTargetRepository.save(any())).thenReturn(target);
+
+
+        final Target targetFromControllerManagement = controllerManagement
+                .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
+
+        verify(mockTargetRepository, times(3)).findOne(any());
+        verify(mockTargetRepository, times(1)).save(any());
+        assertEquals(target, targetFromControllerManagement);
+    }
+
+    @Test
+    @Description("Register a controller which does not exist, a EntityAlreadyExistsException is raised and the Recover" +
+            " method is invoked")
+    public void findOrRegisterTargetIfItDoesNotExistInvokesRecoverMethodWhenEntityAlreadyExistsException() {
+
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+        final Target target = testdataFactory.createTarget();
+
+        when(mockTargetRepository.findOne(any()))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of((JpaTarget) target));
+        when(mockTargetRepository.save(any())).thenThrow(new EntityAlreadyExistsException());
+
+        final Target targetFromControllerManagement = controllerManagement
+                .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
+
+        verify(mockTargetRepository, times(2)).findOne(any());
+        verify(mockTargetRepository, times(1)).save(any());
+        assertEquals(target, targetFromControllerManagement);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    @Description("recoverFindOrRegisterTargetIfItDoesNotExist should throw an IllegalStateException when unable to find" +
+            " target after an EntityAlreadyExistsException is caught")
+    public void recoverFindOrRegisterTargetIfItDoesNotExistThrowsExceptionWhenEntityIsNotFound() {
+
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        when(mockTargetRepository.findOne(any())).thenReturn(Optional.empty());
+        when(mockTargetRepository.save(any())).thenThrow(new EntityAlreadyExistsException());
+
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST);
+    }
+
+    @Test
+    @Description("retry is aborted when an unchecked exception is thrown and the " +
+            "recoverFindOrRegisterTargetIfItDoesNotExist method is not invoked. The exception should also be rethrown")
+    public void recoverFindOrRegisterTargetIfItDoesNotExistIsNotInvokedForOtherExceptions() {
+
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        when(mockTargetRepository.findOne(any())).thenThrow(new RuntimeException("Oops!"));
+
+        try {
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST);
+            fail("Expected a RuntimeException to be thrown!");
+        } catch (RuntimeException e){
+            verify(mockTargetRepository, times(1)).findOne(any());
+        }
+    }
+
+    @Test
+    @Description("recoverFindOrRegisterTargetIfItDoesNotExist should not be called for other Failing Retry Methods")
+    public void recoverFindOrRegisterTargetIfItDoesNotExistIsNotCalledForOtherFailingRetryMethods() {
+
+        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        when(mockTargetRepository.findOne(any())).thenReturn(Optional.of(Mockito.mock(JpaTarget.class)));
+
+        TenantConfigurationRepository configurationRepository = Mockito.mock(TenantConfigurationRepository.class);
+        doThrow(new EntityAlreadyExistsException()).when(configurationRepository).deleteByKey(any());
+
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+        ((JpaTenantConfigurationManagement) tenantConfigurationManagement).setTenantConfigurationRepository(configurationRepository);
+
+        try {
+            // any retryable method
+            tenantConfigurationManagement.deleteConfiguration("key");
+            fail("Expecting EntityAlreadyExistsException to be thrown!");
+        } catch (EntityAlreadyExistsException e){
+            verify(configurationRepository, times(1)).deleteByKey(eq("key"));
+            verify(mockTargetRepository, times(0)).findOne(any());
+        }
     }
 
     @Test
