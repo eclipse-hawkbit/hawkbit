@@ -856,7 +856,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     
-    /** activates a event handler which listens to {@link ActionStatusUpdateEvent} and updates the status for an action.
+    /** 
+     * activates a event handler which listens to {@link ActionStatusUpdateEvent} and updates the status for an action.
      * @param controllerManagement to set the updated status for an action
      * @param entityFactory to create action status
      * @param securityContext to run the queries which are protected for specific authorities.

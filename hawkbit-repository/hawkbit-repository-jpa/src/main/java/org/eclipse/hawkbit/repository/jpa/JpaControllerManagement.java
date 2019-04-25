@@ -36,6 +36,8 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -372,8 +374,9 @@ public class JpaControllerManagement implements ControllerManagement {
         return actionRepository.getById(actionId);
     }
 
-    public List<Action> getActiveActionsByExternalRef(final List<String> externalRefs) {
-        return actionRepository.findByExternalRefInAndIsActive(externalRefs, true);
+    @Override
+    public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
+        return actionRepository.findByExternalRefInAndActive(externalRefs, true);
     }
 
     @Override
@@ -1047,7 +1050,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public void updateActionExternalRef(final long actionId, final String externalRef) {
+    public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
         actionRepository.updateExternalRef(actionId, externalRef);
     }
 

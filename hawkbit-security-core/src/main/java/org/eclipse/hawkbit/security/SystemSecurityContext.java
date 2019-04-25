@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -119,20 +122,21 @@ public class SystemSecurityContext {
      * the provided {@link GrantedAuthority}s to successfully run the
      * {@link Callable}.
      * 
-     * The security context will be switched to the a new {@link SecurityContext} and back after
-     * the callable is called.
+     * The security context will be switched to the a new
+     * {@link SecurityContext} and back after the callable is called.
      * 
-     * @param callable
-     *            to call within the security context
-     * @param authorities
-     *            with which the code block needs to be executed
      * @param tenant
      *            to act as system code
-     * @return
+     * @param callable
+     *            to call within the security context
+     * @return the return value of the {@link Callable#call()} method.
      */
-    public <T> T runWithAuthority(final Callable<T> callable, final Collection<? extends GrantedAuthority> authorities,
-            final String tenant) {
+    // The callable API throws a Exception and not a specific one
+    @SuppressWarnings({ "squid:S2221", "squid:S00112" })
+    public <T> T runAsControllerAsTenant(@NotEmpty final String tenant, @NotNull final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
+        List<SimpleGrantedAuthority> authorities = Collections
+                .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
         try {
             LOG.debug("entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
@@ -140,8 +144,6 @@ public class SystemSecurityContext {
                     setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
                     return callable.call();
 
-                } catch (final RuntimeException e) {
-                    throw e;
                 } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }

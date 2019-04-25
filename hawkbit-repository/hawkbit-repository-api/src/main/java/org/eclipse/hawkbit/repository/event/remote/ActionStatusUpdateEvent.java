@@ -10,7 +10,11 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 
 /**
@@ -22,8 +26,14 @@ public class ActionStatusUpdateEvent implements TenantAwareEvent {
     private final List<String> messages;
     private final Status status;
 
-    public ActionStatusUpdateEvent(final String tenant, final Long actionId, final Status status,
-            final List<String> messages) {
+    /** parameterized constructor.
+     * @param tenant to which the status belongs
+     * @param actionId of the {@link Action}
+     * @param status associated with {@link Action}
+     * @param messages associated with the status. See {@link ActionStatusCreate}
+     */
+    public ActionStatusUpdateEvent(@NotEmpty final String tenant, @NotNull final Long actionId,
+            @NotNull final Status status, @NotNull final List<String> messages) {
         this.actionId = actionId;
         this.tenant = tenant;
         this.messages = messages;

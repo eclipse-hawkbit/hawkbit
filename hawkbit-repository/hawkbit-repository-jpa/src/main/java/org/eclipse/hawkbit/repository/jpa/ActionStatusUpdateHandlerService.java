@@ -8,11 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
@@ -21,10 +17,9 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
- * A service that listens and processes the TargetStatusForDistributionSetEvent
+ * A service that listens and processes the {@link ActionStatusUpdateEvent}
  *
  */
 public class ActionStatusUpdateHandlerService {
@@ -33,24 +28,18 @@ public class ActionStatusUpdateHandlerService {
     private final EntityFactory entityFactory;
     private final SystemSecurityContext securityContext;
 
-    public ActionStatusUpdateHandlerService(final ControllerManagement controllerManagement,
-            final EntityFactory entityFactory, final SystemSecurityContext securityContext) {
+    ActionStatusUpdateHandlerService(final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext securityContext) {
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
         this.securityContext = securityContext;
     }
 
     @EventListener(classes = ActionStatusUpdateEvent.class)
-    public void handle(final ActionStatusUpdateEvent event) {
-        List<SimpleGrantedAuthority> authorities = Collections
-                .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
-        securityContext.runWithAuthority(() -> {
-            Optional<Action> action = controllerManagement.findActionWithDetails(event.getActionId());
-            if (action.isPresent() && action.get().isActive()) {
-                return this.updateStatus(action.get(), event.getMessages(), event.getStatus());
-            }
-            return action;
-        }, authorities, event.getTenant());
+    void handle(final ActionStatusUpdateEvent event) {
+        securityContext.runAsControllerAsTenant(event.getTenant(),
+                () -> controllerManagement.findActionWithDetails(event.getActionId()).filter(Action::isActive)
+                        .map(action -> updateStatus(action, event.getMessages(), event.getStatus())));
     }
 
     private Action updateStatus(final Action action, final List<String> messages, final Status status) {
@@ -58,9 +47,8 @@ public class ActionStatusUpdateHandlerService {
                 .messages(messages);
         if (Status.CANCELED.equals(status)) {
             return controllerManagement.addCancelActionStatus(actionStatus);
-        } else {
-            return controllerManagement.addUpdateActionStatus(actionStatus);
         }
+        return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
 }

@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * Update operations to be executed by the target.
  */
@@ -35,7 +37,7 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * Maximum length of external reference.
      */
-    int EXTERNAL_REF_LENGTH = 64;
+    int EXTERNAL_REF_MAX_LENGTH = 64;
     
     /**
      * @return the distributionSet
@@ -106,7 +108,7 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * @param externalRef associated with this action
      */
-    void setExternalRef(String externalRef);
+    void setExternalRef(@NotEmpty String externalRef);
     
     /**
      * @return externalRef of the action
