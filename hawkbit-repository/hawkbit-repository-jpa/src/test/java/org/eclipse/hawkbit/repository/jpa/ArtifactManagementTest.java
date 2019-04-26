@@ -422,10 +422,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         verifyTenantArtifactCountIs(tenant1, 1);
         verifyTenantArtifactCountIs(tenant2, 2);
 
-        assertThat(runAsTenant(tenant2,
-                () -> artifactRepository
-                        .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
-                                artifactTenant2.getSha1Hash(), tenant2))).isTrue();
         assertThat(runAsTenant(tenant1,
                 () -> artifactRepository
                         .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
