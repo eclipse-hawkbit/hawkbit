@@ -523,14 +523,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the " +
             "exception is rethrown after max retries")
     public void findOrRegisterTargetIfItDoesNotExistThrowsExceptionAfterMaxRetries() {
-        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+       final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         when(mockTargetRepository.findOne(any())).thenThrow(ConcurrencyFailureException.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
         try {
             controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
             fail("Expected an ConcurrencyFailureException to be thrown!");
-        } catch (ConcurrencyFailureException e) {
+        } catch (final ConcurrencyFailureException e) {
             verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
         } finally {
             // revert
