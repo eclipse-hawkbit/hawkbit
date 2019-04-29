@@ -14,12 +14,11 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
@@ -559,12 +558,12 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Target targetFromControllerManagement = controllerManagement
                 .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
 
-        verify(mockTargetRepository, times(3)).findOne(any());
-        verify(mockTargetRepository, times(1)).save(any());
-        assertThat(target).isEqualTo(targetFromControllerManagement)
-
         // revert
         ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+
+        verify(mockTargetRepository, times(3)).findOne(any());
+        verify(mockTargetRepository, times(1)).save(any());
+        assertThat(target).isEqualTo(targetFromControllerManagement);
     }
 
     @Test

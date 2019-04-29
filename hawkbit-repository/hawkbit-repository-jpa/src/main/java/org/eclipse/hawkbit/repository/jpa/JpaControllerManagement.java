@@ -372,12 +372,12 @@ public class JpaControllerManagement implements ControllerManagement {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        return targetRepository.findOne(spec)
-                .map(target -> updateTargetStatus(target, address))
+        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
                 .orElseGet(() -> createTarget(controllerId, address));
     }
 
     private Target createTarget(final String controllerId, final URI address) {
+        LOG.warn("Creating non existing target [controllerId:{}, address:{}]", controllerId, address);
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
@@ -473,7 +473,7 @@ public class JpaControllerManagement implements ControllerManagement {
     /**
      * Stores target directly to DB in case either {@link Target#getAddress()}
      * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
-     * 
+     *
      */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
         boolean storeEager = isStoreEager(toUpdate, address);
@@ -1032,7 +1032,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     // for testing
-    public void setTargetRepository(final TargetRepository targetRepositorySpy) {
+    void setTargetRepository(final TargetRepository targetRepositorySpy) {
         this.targetRepository = targetRepositorySpy;
     }
 }
