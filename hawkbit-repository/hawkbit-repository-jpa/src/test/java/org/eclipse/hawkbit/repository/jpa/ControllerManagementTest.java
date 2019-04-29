@@ -554,16 +554,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .thenReturn(Optional.of((JpaTarget) target));
         when(mockTargetRepository.save(any())).thenReturn(target);
 
-
-        final Target targetFromControllerManagement = controllerManagement
-                .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
-
-        // revert
-        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
-
-        verify(mockTargetRepository, times(3)).findOne(any());
-        verify(mockTargetRepository, times(1)).save(any());
-        assertThat(target).isEqualTo(targetFromControllerManagement);
+        try {
+            final Target targetFromControllerManagement = controllerManagement
+                    .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
+            verify(mockTargetRepository, times(3)).findOne(any());
+            verify(mockTargetRepository, times(1)).save(any());
+            assertThat(target).isEqualTo(targetFromControllerManagement);
+        } finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
     }
 
     @Test
