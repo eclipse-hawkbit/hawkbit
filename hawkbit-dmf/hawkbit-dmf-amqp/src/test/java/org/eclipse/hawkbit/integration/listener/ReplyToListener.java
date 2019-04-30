@@ -10,8 +10,12 @@ package org.eclipse.hawkbit.integration.listener;
 
 import static org.junit.Assert.fail;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -26,21 +30,24 @@ public class ReplyToListener implements TestRabbitListener {
     public static final String LISTENER_ID = "replyto";
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
-    private final Map<EventTopic, Message> eventTopicMessages = new EnumMap<>(EventTopic.class);
+    private final Map<EventTopic, List<Message>> eventMessages = new EnumMap<>(EventTopic.class);
     private final Map<String, Message> deleteMessages = new HashMap<>();
     private final Map<String, Message> pingResponseMessages = new HashMap<>();
 
     @Override
     @RabbitListener(id = LISTENER_ID, queues = REPLY_TO_QUEUE)
     public void handleMessage(final Message message) {
-
         final MessageType messageType = MessageType
                 .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE).toString());
 
         if (messageType == MessageType.EVENT) {
             final EventTopic eventTopic = EventTopic
                     .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
-            eventTopicMessages.put(eventTopic, message);
+            eventMessages.merge(eventTopic, Collections.singletonList(message), (oldList, listToAdd) -> {
+                final List<Message> newList = new ArrayList<>(oldList);
+                newList.addAll(listToAdd);
+                return newList;
+            });
             return;
         }
 
@@ -62,8 +69,19 @@ public class ReplyToListener implements TestRabbitListener {
 
     }
 
-    public Map<EventTopic, Message> getEventTopicMessages() {
-        return eventTopicMessages;
+    public void purge() {
+        eventMessages.clear();
+        deleteMessages.clear();
+        pingResponseMessages.clear();
+    }
+
+    public Message getLatestEventMessage(final EventTopic eventTopic) {
+        final List<Message> messages = getEventMessages().get(eventTopic);
+        return messages == null ? null : messages.get(messages.size() - 1);
+    }
+
+    public Map<EventTopic, List<Message>> getEventMessages() {
+        return eventMessages;
     }
 
     public Map<String, Message> getDeleteMessages() {

@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,6 +28,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public class DmfMultiActionRequest {
 
     private List<DmfMultiActionElement> elements;
+
+    public DmfMultiActionRequest() {
+    }
+
+    @JsonCreator
+    public DmfMultiActionRequest(final List<DmfMultiActionElement> elements) {
+        this.elements = elements;
+    }
 
     @JsonValue
     public List<DmfMultiActionElement> getElements() {

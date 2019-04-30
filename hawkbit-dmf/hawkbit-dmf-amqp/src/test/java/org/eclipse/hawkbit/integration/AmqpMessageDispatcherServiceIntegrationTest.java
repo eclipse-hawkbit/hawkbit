@@ -8,6 +8,13 @@
  */
 package org.eclipse.hawkbit.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +22,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -34,6 +42,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
@@ -41,11 +50,6 @@ import org.springframework.amqp.core.Message;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
-import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")
@@ -133,10 +137,138 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 getDistributionSet().getModules(), controllerId);
         assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
 
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
 
+    }
+
+    @Test
+    @Description("If multi assignment is enabled multi-action message are sent.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void assignMultipleDsInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "assignMultipleDsInMultiAssignMode";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        final Long actionId1 = assignNewDsToTarget(controllerId);
+        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<Long, EventTopic>(actionId1,
+                EventTopic.DOWNLOAD_AND_INSTALL);
+        waitUntilEventMessagesAreSent(1);
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install));
+
+        final Long actionId2 = assignNewDsToTarget(controllerId);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<Long, EventTopic>(actionId2,
+                EventTopic.DOWNLOAD_AND_INSTALL);
+        waitUntilEventMessagesAreSent(2);
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
+    }
+
+    @Test
+    @Description("Handle cancelation process of an action in multi assignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void cancelActionInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        final long actionId1 = assignNewDsToTarget(controllerId);
+        final long actionId2 = assignNewDsToTarget(controllerId);
+        waitUntilEventMessagesAreSent(2);
+        deploymentManagement.cancelAction(actionId1);
+        waitUntilEventMessagesAreSent(3);
+
+        final SimpleEntry<Long, EventTopic> action1Cancel = new SimpleEntry<Long, EventTopic>(actionId1,
+                EventTopic.CANCEL_DOWNLOAD);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<Long, EventTopic>(actionId2,
+                EventTopic.DOWNLOAD_AND_INSTALL);
+
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Cancel, action2Install));
+        updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.CANCELED);
+        createAndSendThingCreated(controllerId, TENANT_EXIST);
+        waitUntilEventMessagesAreSent(4);
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
+    }
+
+    @Test
+    @Description("Handle finishing an action in multi assignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void finishActionInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        final long actionId1 = assignNewDsToTarget(controllerId);
+        final long actionId2 = assignNewDsToTarget(controllerId);
+        waitUntilEventMessagesAreSent(2);
+
+        updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
+        waitUntilEventMessagesAreSent(3);
+        assertRequestAttributesUpdateMessage(controllerId);
+
+        createAndSendThingCreated(controllerId, TENANT_EXIST);
+        waitUntilEventMessagesAreSent(4);
+        assertLatestMultiActionMessage(controllerId, actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
+    @Test
+    @Description("If multi assignment is enabled assigning a DS multiple times creates a new action every time.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void assignDsMultipleTimesInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+
+        final Long actionId1 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        waitUntilEventMessagesAreSent(1);
+        final Long actionId2 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        waitUntilEventMessagesAreSent(2);
+        
+        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1,
+                EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2,
+                EventTopic.DOWNLOAD_AND_INSTALL);
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
+    }
+
+    private void updateActionViaDmfClient(final String controllerId, final long actionId,
+            final DmfActionStatus status) {
+        createAndSendActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId, status);
+    }
+
+    private Long assignNewDsToTarget(final String controllerId) {
+        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        return assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
     }
 
     @Test
@@ -154,7 +286,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         final Long actionId = registerTargetAndCancelActionId(controllerId);
 
-        createAndSendTarget(controllerId, TENANT_EXIST);
+        createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(actionId, controllerId);
     }
@@ -177,33 +309,23 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 2), @Expect(type = ActionCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     public void attributeRequestAfterSuccessfulUpdate() {
         final String controllerId = TARGET_PREFIX + "attributeUpdateRequest";
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final Target target = controllerManagement.getByControllerId(controllerId).get();
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final long actionId1 = assignDistributionSet(distributionSet, target).getActionIds().get(0);
-        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        final Message messageError = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId1,
-                DmfActionStatus.ERROR);
-        getDmfClient().send(messageError);
+        final long actionId1 = assignNewDsToTarget(controllerId);
+        updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.ERROR);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.ERROR);
-
         assertRequestAttributesUpdateMessageAbsent();
 
-        final long actionId2 = assignDistributionSet(distributionSet, target).getActionIds().get(0);
-        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        final Message messageFin = createActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId2,
-                DmfActionStatus.FINISHED);
-        getDmfClient().send(messageFin);
+        final long actionId2 = assignNewDsToTarget(controllerId);
+        updateActionViaDmfClient(controllerId, actionId2, DmfActionStatus.FINISHED);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.IN_SYNC);
-
         assertRequestAttributesUpdateMessage(controllerId);
     }
 
@@ -248,5 +370,10 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private void waitUntil(final Callable<Boolean> callable) {
         createConditionFactory().until(() -> securityRule.runAsPrivileged(callable));
+    }
+
+    private void setMultiAssignmentsEnabled(final boolean enable) {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
+                enable);
     }
 }
