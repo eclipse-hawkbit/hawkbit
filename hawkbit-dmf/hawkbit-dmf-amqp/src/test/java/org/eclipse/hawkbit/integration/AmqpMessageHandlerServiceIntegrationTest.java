@@ -104,7 +104,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target withy empty controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerEmptyTarget() {
-        createAndSendTarget("", TENANT_EXIST);
+        createAndSendThingCreated("", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -114,7 +114,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with whitspace controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerWhitespaceTarget() {
-        createAndSendTarget("Invalid Invalid", TENANT_EXIST);
+        createAndSendThingCreated("Invalid Invalid", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -124,7 +124,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with null controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerInvalidNullTargets() {
-        createAndSendTarget(null, TENANT_EXIST);
+        createAndSendThingCreated(null, TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
