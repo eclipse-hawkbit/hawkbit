@@ -1640,7 +1640,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private Target createSingleTarget(final String controllerId, final String name) {
         targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name)
                 .description(TARGET_DESCRIPTION_TEST));
-        return controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, LOCALHOST);
+        return controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
     }
 
     /**
@@ -1656,7 +1656,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             targetManagement.create(entityFactory.target().create().controllerId(str).name(str).description(str));
-            controllerManagement.findOrRegisterTargetIfItDoesNotexist(str, LOCALHOST);
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist(str, LOCALHOST);
             character++;
         }
     }

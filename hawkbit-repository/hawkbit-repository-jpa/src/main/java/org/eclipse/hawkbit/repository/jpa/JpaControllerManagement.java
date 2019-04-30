@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
@@ -364,16 +365,19 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target findOrRegisterTargetIfItDoesNotexist(final String controllerId, final URI address) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class,
+            maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        final Optional<JpaTarget> target = targetRepository.findOne(spec);
+        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
+                .orElseGet(() -> createTarget(controllerId, address));
+    }
 
-        if (!target.isPresent()) {
+    private Target createTarget(final String controllerId, final URI address) {
+        try {
             final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                     .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                     .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
@@ -382,9 +386,11 @@ public class JpaControllerManagement implements ControllerManagement {
             afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
 
             return result;
+        } catch (final EntityAlreadyExistsException e){
+            LOG.warn("Caught an EntityAlreadyExistsException while creating non existing target " +
+                    "[controllerId:{}, address:{}, tenant: {}]", controllerId, address, tenantAware.getCurrentTenant());
+            throw e;
         }
-
-        return updateTargetStatus(target.get(), address);
     }
 
     /**
@@ -472,7 +478,7 @@ public class JpaControllerManagement implements ControllerManagement {
     /**
      * Stores target directly to DB in case either {@link Target#getAddress()}
      * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
-     * 
+     *
      */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
         boolean storeEager = isStoreEager(toUpdate, address);
@@ -1028,5 +1034,10 @@ public class JpaControllerManagement implements ControllerManagement {
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
+    }
+
+    // for testing
+    void setTargetRepository(final TargetRepository targetRepositorySpy) {
+        this.targetRepository = targetRepositorySpy;
     }
 }

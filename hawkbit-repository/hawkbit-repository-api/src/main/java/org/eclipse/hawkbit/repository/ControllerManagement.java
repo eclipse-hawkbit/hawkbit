@@ -192,7 +192,7 @@ public interface ControllerManagement {
      * @return target reference
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty String controllerId, @NotNull URI address);
+    Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given
