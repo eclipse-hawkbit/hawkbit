@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -47,9 +48,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
+            final Supplier<Boolean> multiAssignmentsConfig) {
         super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
-                quotaManagement);
+                quotaManagement, multiAssignmentsConfig);
     }
 
     @Override
@@ -65,19 +67,17 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
-            final boolean deviceCanProcessMultipleActions) {
-        if (deviceCanProcessMultipleActions) {
-            sendDeploymentEvents(Collections.singletonList(assignmentResult), deviceCanProcessMultipleActions);
+    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
+        if (isMultiAssignmentsEnabled()) {
+            sendDeploymentEvents(Collections.singletonList(assignmentResult));
         } else {
             sendDistributionSetAssignedEvent(assignmentResult);
         }
     }
 
     @Override
-    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
-            final boolean deviceCanProcessMultipleActions) {
-        if (deviceCanProcessMultipleActions) {
+    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
+        if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getActions().stream())
                     .collect(Collectors.toList()));
         } else {

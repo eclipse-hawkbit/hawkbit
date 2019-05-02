@@ -160,9 +160,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher, bus,
-                actionRepository, actionStatusRepository, quotaManagement);
+                actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                bus, actionRepository, actionStatusRepository, quotaManagement);
+                bus, actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -181,7 +181,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                         .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                         .collect(Collectors.toList()),
                 null, offlineDsAssignmentStrategy);
-        offlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        offlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 
@@ -197,7 +197,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                         .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
                         .collect(Collectors.toList()),
                 null, onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 
@@ -210,7 +210,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, null,
                 onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 
@@ -221,7 +221,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<DistributionSetAssignmentResult> results = dsIDs.stream()
                 .map(dsID -> assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy))
                 .collect(Collectors.toList());
-        onlineDsAssignmentStrategy.sendDeploymentEvents(results, isMultiAssignmentsEnabled());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(results);
         return results;
     }
 
@@ -234,7 +234,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, actionMessage,
                 onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result, isMultiAssignmentsEnabled());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 

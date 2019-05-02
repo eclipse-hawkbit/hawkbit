@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -54,10 +55,13 @@ public abstract class AbstractDsAssignmentStrategy {
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
 
+    private final Supplier<Boolean> multiAssignmentsConfig;
+
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
+            final Supplier<Boolean> multiAssignmentsConfig) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisher = eventPublisher;
@@ -65,6 +69,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
+        this.multiAssignmentsConfig = multiAssignmentsConfig;
     }
 
     /**
@@ -121,11 +126,9 @@ public abstract class AbstractDsAssignmentStrategy {
      */
     abstract void closeActiveActions(List<List<Long>> targetIds);
 
-    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
-            final boolean deviceCanProcessMultipleActions);
+    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult);
 
-    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
-            final boolean deviceCanProcessMultipleActions);
+    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults);
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
         afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId())));
@@ -237,6 +240,10 @@ public abstract class AbstractDsAssignmentStrategy {
         }
 
         return actionStatus;
+    }
+
+    boolean isMultiAssignmentsEnabled() {
+        return multiAssignmentsConfig.get();
     }
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {

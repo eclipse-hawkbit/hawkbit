@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -45,9 +46,10 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
+            final Supplier<Boolean> multiAssignmentsConfig) {
         super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
-                quotaManagement);
+                quotaManagement, multiAssignmentsConfig);
     }
 
     @Override
@@ -104,14 +106,12 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult,
-            final boolean deviceCanProcessMultipleActions) {
+    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
         // no need to send deployment events in the offline case
     }
 
     @Override
-    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
-            final boolean deviceCanProcessMultipleActions) {
+    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
         // no need to send deployment events in the offline case
     }
 
