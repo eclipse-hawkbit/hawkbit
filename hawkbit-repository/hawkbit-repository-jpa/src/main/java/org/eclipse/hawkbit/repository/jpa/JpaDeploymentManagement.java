@@ -89,7 +89,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -507,18 +506,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 return 0L;
             }
 
-            final String tenant = rolloutGroupActions.getContent().get(0).getTenant();
-            final boolean maintenanceWindowAvailable = rolloutGroupActions.getContent().get(0)
-                    .isMaintenanceWindowAvailable();
-
             final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
                     .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
                     .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
                     .filter(Objects::nonNull).collect(Collectors.toList());
 
-            if (!CollectionUtils.isEmpty(targetAssignments)) {
-                afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                        distributionSetId, targetAssignments, bus.getId(), maintenanceWindowAvailable)));
+            if (!targetAssignments.isEmpty()) {
+                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments,
+                        isMultiAssignmentsEnabled());
             }
 
             return rolloutGroupActions.getTotalElements();
