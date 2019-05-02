@@ -118,7 +118,6 @@ public abstract class AbstractDsAssignmentStrategy {
      * 
      * @param targetIds
      *            to cancel actions for
-     * @return {@link Set} of {@link Target#getId()}s
      */
     abstract void closeActiveActions(List<List<Long>> targetIds);
 
