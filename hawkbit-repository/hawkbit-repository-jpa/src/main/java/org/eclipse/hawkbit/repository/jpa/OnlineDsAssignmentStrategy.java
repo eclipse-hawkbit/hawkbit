@@ -77,24 +77,42 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults,
             final boolean deviceCanProcessMultipleActions) {
-
-        final List<Action> actions = assignmentResults.stream().flatMap(result -> result.getActions().stream())
-                .filter(action -> {
-                    final Status actionStatus = action.getStatus();
-                    return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
-                }).collect(Collectors.toList());
-
         if (deviceCanProcessMultipleActions) {
-            final List<String> controllerIds = actions.stream().map(action -> action.getTarget().getControllerId())
-                    .collect(Collectors.toList());
-            if (!actions.isEmpty()) {
-                final String tenant = actions.get(0).getTenant();
-                sendDeploymentEvent(tenant, controllerIds);
-            }
+            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getActions().stream())
+                    .collect(Collectors.toList()));
         } else {
             assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
         }
+    }
 
+    void sendDeploymentEvents(final long distributionSetId, final List<Action> actions,
+            final boolean deviceCanProcessMultipleActions) {
+        if (deviceCanProcessMultipleActions) {
+            sendDeploymentEvent(actions);
+        } else {
+            final List<Action> filteredActions = actions.stream().filter(action -> {
+                final Status actionStatus = action.getStatus();
+                return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+            }).collect(Collectors.toList());
+            if (filteredActions.isEmpty()) {
+                return;
+            }
+            sendTargetAssignDistributionSetEvent(filteredActions.get(0).getTenant(), distributionSetId,
+                    filteredActions);
+        }
+    }
+
+    private void sendDeploymentEvent(final List<Action> actions) {
+        final List<Action> filteredActions = actions.stream().filter(action -> {
+            final Status actionStatus = action.getStatus();
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+        }).collect(Collectors.toList());
+        if (filteredActions.isEmpty()) {
+            return;
+        }
+        final String tenant = filteredActions.get(0).getTenant();
+        sendDeploymentEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -143,15 +161,12 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
-
-        final List<Action> filtered = assignmentResult.getActions().stream().filter(action -> {
+        final List<Action> filteredActions = assignmentResult.getActions().stream().filter(action -> {
             final Status actionStatus = action.getStatus();
             return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
         }).collect(Collectors.toList());
-
         final DistributionSet set = assignmentResult.getDistributionSet();
-        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filtered);
-
+        sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
         return assignmentResult;
     }
 
