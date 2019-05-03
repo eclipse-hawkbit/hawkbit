@@ -17,8 +17,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
@@ -38,6 +40,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -180,7 +184,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 2) })
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelActionInMultiAssignMode() {
         setMultiAssignmentsEnabled(true);
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
@@ -199,7 +203,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Cancel, action2Install));
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.CANCELED);
-        createAndSendThingCreated(controllerId, TENANT_EXIST);
+
         waitUntilEventMessagesAreSent(4);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
     }
@@ -214,7 +218,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 2) })
+            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 1) })
     public void finishActionInMultiAssignMode() {
         setMultiAssignmentsEnabled(true);
         final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
@@ -225,11 +229,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         waitUntilEventMessagesAreSent(2);
 
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
-        waitUntilEventMessagesAreSent(3);
-        assertRequestAttributesUpdateMessage(controllerId);
-
-        createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilEventMessagesAreSent(4);
+        assertRequestAttributesUpdateMessage(controllerId);
         assertLatestMultiActionMessage(controllerId, actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
     }
 
@@ -269,6 +270,43 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     private Long assignNewDsToTarget(final String controllerId) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         return assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+    }
+
+    @Test
+    @Description("If multi assignment is enabled a running rollout sends multi-action messages.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void startRolloutInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final Set<Long> smIds1 = ds1.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toSet());
+        final String filterQuery = "controllerId==" + controllerId;
+        final Rollout rollout1 = testdataFactory.createRolloutByVariables("multiassignRollout1", "", 1, filterQuery,
+                ds1,
+                "50", "5");
+        final Rollout rollout2 = testdataFactory.createRolloutByVariables("multiassignRollout2", "", 1, filterQuery,
+                ds1,
+                "50", "5");
+
+        rolloutManagement.start(rollout1.getId());
+        rolloutManagement.handleRollouts();
+        waitUntilEventMessagesAreSent(1);
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1));
+
+        rolloutManagement.start(rollout2.getId());
+        rolloutManagement.handleRollouts();
+        waitUntilEventMessagesAreSent(2);
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId,
+        Arrays.asList(smIds1, smIds1));
     }
 
     @Test

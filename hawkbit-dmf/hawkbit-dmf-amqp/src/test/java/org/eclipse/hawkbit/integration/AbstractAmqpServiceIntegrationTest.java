@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -224,16 +225,49 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     }
 
+    protected void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,
+            final List<Set<Long>> smIdsOfActionsExpected) {
+        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(controllerId);
+        final DmfMultiActionRequest multiActionRequest = (DmfMultiActionRequest) getDmfClient().getMessageConverter()
+                .fromMessage(multiactionMessage);
+
+        final List<Set<Long>> smIdsOfActionsFound = getDownloadAndUpdateRequests(multiActionRequest).stream()
+                .map(AbstractAmqpServiceIntegrationTest::getSmIds).collect(Collectors.toList());
+        assertThat(smIdsOfActionsFound).containsExactlyElementsOf(smIdsOfActionsExpected);
+    }
+
+    private static Set<Long> getSmIds(final DmfDownloadAndUpdateRequest request) {
+        return request.getSoftwareModules().stream().map(DmfSoftwareModule::getModuleId).collect(Collectors.toSet());
+    }
+
+    private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(
+            final DmfMultiActionRequest request) {
+        return request.getElements().stream()
+                .filter(AbstractAmqpServiceIntegrationTest::isDownloadAndUpdateRequest)
+                .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
+    }
+
+    private static List<DmfMultiActionElement> getNonDownloadAndUpdateRequests(
+            final DmfMultiActionRequest request) {
+        return request.getElements().stream()
+                .filter(multiaction -> !isDownloadAndUpdateRequest(multiaction)).collect(Collectors.toList());
+    }
+
+    private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
+        return multiActionElement.getTopic().equals(EventTopic.DOWNLOAD)
+                || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
     protected void assertLatestMultiActionMessage(final String controllerId,
             final List<SimpleEntry<Long, EventTopic>> actionsExpected) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
         assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
                 .isEqualTo(controllerId);
         
-        final DmfMultiActionRequest dmfMultiActionRequest = (DmfMultiActionRequest) getDmfClient().getMessageConverter()
-                .fromMessage(multiactionMessage);
-        
-        final List<DmfMultiActionElement> multiActionRequest = dmfMultiActionRequest.getElements();
+        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
+                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
         final List<Entry<Long, EventTopic>> actionsFromMessage = multiActionRequest.stream()
                 .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
                 .collect(Collectors.toList());

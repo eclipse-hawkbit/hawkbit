@@ -198,7 +198,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet) {
 
         final URI targetAdress = target.getAddress();
-        if (!IpUtil.isAmqpUri(targetAdress) || actions == null || actions.isEmpty()) {
+        if (!IpUtil.isAmqpUri(targetAdress) || CollectionUtils.isEmpty(actions)) {
             return;
         }
 
