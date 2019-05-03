@@ -242,6 +242,11 @@ public abstract class AbstractDsAssignmentStrategy {
         return actionStatus;
     }
 
+    boolean hasPendingCancellations(final Target target) {
+        return actionRepository.findByActiveAndTarget(null, target.getControllerId(), true).getContent().stream()
+                .anyMatch(action -> action.getStatus() == Status.CANCELING);
+    }
+
     boolean isMultiAssignmentsEnabled() {
         return multiAssignmentsConfig.get();
     }
