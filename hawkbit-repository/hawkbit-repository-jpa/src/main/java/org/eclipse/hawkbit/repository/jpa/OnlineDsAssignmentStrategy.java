@@ -169,8 +169,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final DistributionSetAssignmentResult assignmentResult) {
         final List<Action> filteredActions = assignmentResult.getActions().stream().filter(action -> {
             final Status actionStatus = action.getStatus();
-            return !hasPendingCancellations(action.getTarget()) && Status.CANCELING != actionStatus
-                    && Status.CANCELED != actionStatus;
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
         }).collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
