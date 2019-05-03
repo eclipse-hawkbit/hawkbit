@@ -534,6 +534,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private JpaAction closeActionIfSetWasAlreadyAssigned(final JpaAction action) {
+
+        if (isMultiAssignmentsEnabled()) {
+            return action;
+        }
+
         final JpaTarget target = (JpaTarget) action.getTarget();
         if (target.getAssignedDistributionSet() != null
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
