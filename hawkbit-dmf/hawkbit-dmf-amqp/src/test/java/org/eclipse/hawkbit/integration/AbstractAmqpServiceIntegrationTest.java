@@ -112,12 +112,12 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void waitUntilEventMessagesAreSent(final int numberOfMessages) {
-        createConditionFactory().until(() -> {
+        createConditionFactory().untilAsserted(() -> {
             int messagesReceived = 0;
             for (final List<Message> messages : replyToListener.getEventMessages().values()) {
                 messagesReceived += messages.size();
             }
-            return messagesReceived == numberOfMessages;
+            assertThat(messagesReceived).isEqualTo(numberOfMessages);
         });
     }
 
@@ -242,17 +242,14 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         return request.getSoftwareModules().stream().map(DmfSoftwareModule::getModuleId).collect(Collectors.toSet());
     }
 
-    private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(
-            final DmfMultiActionRequest request) {
-        return request.getElements().stream()
-                .filter(AbstractAmqpServiceIntegrationTest::isDownloadAndUpdateRequest)
+    private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
+        return request.getElements().stream().filter(AbstractAmqpServiceIntegrationTest::isDownloadAndUpdateRequest)
                 .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
     }
 
-    private static List<DmfMultiActionElement> getNonDownloadAndUpdateRequests(
-            final DmfMultiActionRequest request) {
-        return request.getElements().stream()
-                .filter(multiaction -> !isDownloadAndUpdateRequest(multiaction)).collect(Collectors.toList());
+    private static List<DmfMultiActionElement> getNonDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
+        return request.getElements().stream().filter(multiaction -> !isDownloadAndUpdateRequest(multiaction))
+                .collect(Collectors.toList());
     }
 
     private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
@@ -265,7 +262,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
         assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
                 .isEqualTo(controllerId);
-        
+
         final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
                 .getMessageConverter().fromMessage(multiactionMessage)).getElements();
         final List<Entry<Long, EventTopic>> actionsFromMessage = multiActionRequest.stream()
