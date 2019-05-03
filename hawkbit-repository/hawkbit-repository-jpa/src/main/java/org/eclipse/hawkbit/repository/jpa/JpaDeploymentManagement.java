@@ -292,7 +292,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        final Set<Long> cancellingTargetIds = closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
+        closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels them
@@ -314,10 +314,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return new DistributionSetAssignmentResult(distributionSetEntity,
                 targetEntities.stream().map(Target::getControllerId).collect(Collectors.toList()),
                 targetEntities.size(), controllerIDs.size() - targetEntities.size(),
-                controllerIdsToActions.values().stream()
-                        .filter(action -> !cancellingTargetIds.contains(action.getTarget().getId()))
-                        .collect(Collectors.toList()),
-                targetManagement);
+                Lists.newArrayList(controllerIdsToActions.values()), targetManagement);
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {
