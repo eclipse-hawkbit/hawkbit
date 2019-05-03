@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -539,28 +540,24 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
+            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         setMultiAssignmentsEnabled(true);
-        try {
-            final List<Target> targets = testdataFactory.createTargets(10);
+        final List<Target> targets = testdataFactory.createTargets(10);
 
-            // First assignment
-            final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
-            assignDistributionSet(ds1, targets);
+        // First assignment
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
+        assignDistributionSet(ds1, targets);
 
-            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
 
-            // Second assignment
-            final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
-            assignDistributionSet(ds2, targets);
+        // Second assignment
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
+        assignDistributionSet(ds2, targets);
 
-            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
-            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
-
-        } finally {
-            setMultiAssignmentsEnabled(false);
-        }
+        assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
     }
 
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
@@ -1117,10 +1114,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(event).isNotNull();
         assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
+        final List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
                 .collect(Collectors.toList());
 
-        List<Long> targetActiveActionIds = targets.stream()
+        final List<Long> targetActiveActionIds = targets.stream()
                 .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
                 .flatMap(List::stream)
                 .map(Action::getId)
