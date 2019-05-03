@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -117,9 +118,14 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
-        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository
-                        .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId)))
+        final Function<List<String>, List<JpaTarget>> mapper;
+        if (isMultiAssignmentsEnabled()) {
+            mapper = targetRepository::findAllByControllerId;
+        } else {
+            mapper = ids -> targetRepository
+                    .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId));
+        }
+        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 
