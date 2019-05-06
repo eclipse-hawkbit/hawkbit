@@ -310,8 +310,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Description("If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DeploymentEvent.class, count = 3),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
-            @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
