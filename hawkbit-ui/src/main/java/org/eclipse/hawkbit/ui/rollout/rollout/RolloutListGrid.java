@@ -647,7 +647,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
             description = ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
-            description = getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
+            description = getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap(), i18n);
         }
 
         return description;
@@ -799,7 +799,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale) {
-            return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
+            return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap(), i18n);
         }
 
         @Override
