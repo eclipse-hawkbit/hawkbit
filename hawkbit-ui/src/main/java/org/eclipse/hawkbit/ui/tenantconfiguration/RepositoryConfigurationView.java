@@ -99,6 +99,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         multiAssignmentsCheckBox.setId(UIComponentIdProvider.REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX);
         multiAssignmentsCheckBox.setValue(multiAssignmentsConfigurationItem.isConfigEnabled());
         multiAssignmentsCheckBox.addValueChangeListener(this);
+        multiAssignmentsCheckBox.setEnabled(!isMultiAssignmentsEnabled);
+        multiAssignmentsConfigurationItem.setEnabled(!isMultiAssignmentsEnabled);
         multiAssignmentsConfigurationItem.addChangeListener(this);
         gridLayout.addComponent(multiAssignmentsCheckBox, 0, 1);
         gridLayout.addComponent(multiAssignmentsConfigurationItem, 1, 1);
@@ -121,6 +123,10 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         actionAutocloseConfigurationItem.save();
         actionAutocleanupConfigurationItem.save();
         multiAssignmentsConfigurationItem.save();
+
+        final boolean isMultiAssignmentsEnabled = multiAssignmentsConfigurationItem.isConfigEnabled();
+        multiAssignmentsCheckBox.setEnabled(!isMultiAssignmentsEnabled);
+        multiAssignmentsConfigurationItem.setEnabled(!isMultiAssignmentsEnabled);
     }
 
     @Override
