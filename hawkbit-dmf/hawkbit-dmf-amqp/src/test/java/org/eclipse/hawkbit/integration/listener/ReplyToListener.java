@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.integration.listener;
 
 import static org.junit.Assert.fail;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
