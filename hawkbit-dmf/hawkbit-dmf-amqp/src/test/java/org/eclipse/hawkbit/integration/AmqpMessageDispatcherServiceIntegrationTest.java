@@ -15,7 +15,9 @@ import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ON
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +35,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -163,14 +169,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         registerAndAssertTargetWithExistingTenant(controllerId);
 
         final Long actionId1 = assignNewDsToTarget(controllerId);
-        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<Long, EventTopic>(actionId1,
-                EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreSent(1);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install));
 
         final Long actionId2 = assignNewDsToTarget(controllerId);
-        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<Long, EventTopic>(actionId2,
-                EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreSent(2);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
@@ -196,10 +200,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         deploymentManagement.cancelAction(actionId1);
         waitUntilEventMessagesAreSent(3);
 
-        final SimpleEntry<Long, EventTopic> action1Cancel = new SimpleEntry<Long, EventTopic>(actionId1,
-                EventTopic.CANCEL_DOWNLOAD);
-        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<Long, EventTopic>(actionId2,
-                EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action1Cancel = new SimpleEntry<>(actionId1, EventTopic.CANCEL_DOWNLOAD);
+        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
 
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Cancel, action2Install));
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.CANCELED);
@@ -226,12 +228,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         final long actionId1 = assignNewDsToTarget(controllerId);
         final long actionId2 = assignNewDsToTarget(controllerId);
+        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreSent(2);
 
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
         waitUntilEventMessagesAreSent(4);
         assertRequestAttributesUpdateMessage(controllerId);
-        assertLatestMultiActionMessage(controllerId, actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+        assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
     }
 
     @Test
@@ -255,10 +258,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Long actionId2 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
         waitUntilEventMessagesAreSent(2);
         
-        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1,
-                EventTopic.DOWNLOAD_AND_INSTALL);
-        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2,
-                EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
 
@@ -272,41 +273,95 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         return assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
     }
 
+    // TODO: check rollout event counts
     @Test
-    @Description("If multi assignment is enabled a running rollout sends multi-action messages.")
+    @Description("If multi assignment is enabled multiple rollouts with the same DS lead to multiple actions.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DeploymentEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void startRolloutInMultiAssignMode() {
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = RolloutCreatedEvent.class, count = 2), @Expect(type = RolloutUpdatedEvent.class, count = 6),
+            @Expect(type = RolloutGroupCreatedEvent.class, count = 2),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 4) })
+    public void startRolloutsWithSameDsInMultiAssignMode() {
         setMultiAssignmentsEnabled(true);
-        final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
+        final String controllerId = TARGET_PREFIX + "startRolloutsWithSameDsInMultiAssignMode";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Set<Long> smIds1 = ds1.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toSet());
+        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final Set<Long> smIds = getSoftwareModuleIds(ds);
         final String filterQuery = "controllerId==" + controllerId;
-        final Rollout rollout1 = testdataFactory.createRolloutByVariables("multiassignRollout1", "", 1, filterQuery,
-                ds1,
-                "50", "5");
-        final Rollout rollout2 = testdataFactory.createRolloutByVariables("multiassignRollout2", "", 1, filterQuery,
-                ds1,
-                "50", "5");
 
-        rolloutManagement.start(rollout1.getId());
-        rolloutManagement.handleRollouts();
+        startRollout(ds, filterQuery);
         waitUntilEventMessagesAreSent(1);
-        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1));
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds));
 
-        rolloutManagement.start(rollout2.getId());
-        rolloutManagement.handleRollouts();
+        startRollout(ds, filterQuery);
         waitUntilEventMessagesAreSent(2);
-        assertLatestMultiActionMessageContainsInstallMessages(controllerId,
-        Arrays.asList(smIds1, smIds1));
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds, smIds));
+    }
+
+    // TODO: check rollout event counts
+    @Test
+    @Description("If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DeploymentEvent.class, count = 3),
+            @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 5),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 5), @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
+            @Expect(type = RolloutCreatedEvent.class, count = 3),
+            @Expect(type = RolloutUpdatedEvent.class, count = 9),
+            @Expect(type = RolloutGroupCreatedEvent.class, count = 3),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 6) })
+    public void stratMultipleRolloutsAndFinishInMultiAssignMode() {
+        setMultiAssignmentsEnabled(true);
+        final String controllerId = TARGET_PREFIX + "stratMultipleRolloutsAndFinishInMultiAssignMode";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final String filterQuery = "controllerId==" + controllerId;
+        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final Set<Long> smIds1 = getSoftwareModuleIds(ds1);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
+
+        startRollout(ds1, filterQuery);
+        startRollout(ds2, filterQuery);
+        waitUntilEventMessagesAreSent(2);
+        startRollout(ds1, filterQuery);
+        waitUntilEventMessagesAreSent(3);
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
+        
+        final List<Long> installActions = getLatestLatestMultiActionMessageActions(controllerId).stream()
+                .filter(entry -> entry.getValue().equals(EventTopic.DOWNLOAD_AND_INSTALL)).map(Entry::getKey)
+                .collect(Collectors.toList());
+
+        updateActionViaDmfClient(controllerId, installActions.get(0), DmfActionStatus.FINISHED);
+        // sends REQUEST_ATTRIBUTES_UPDATE
+        waitUntilEventMessagesAreSent(5);
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds2, smIds1));
+
+        updateActionViaDmfClient(controllerId, installActions.get(1), DmfActionStatus.FINISHED);
+        // sends REQUEST_ATTRIBUTES_UPDATE
+        waitUntilEventMessagesAreSent(7);
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1));
+    }
+
+    private Set<Long> getSoftwareModuleIds(final DistributionSet ds) {
+        return ds.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toSet());
+    }
+
+    private Rollout startRollout(final DistributionSet ds, final String filterQuery) {
+        final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
+                filterQuery, ds, "50", "5");
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+        return rollout;
     }
 
     @Test

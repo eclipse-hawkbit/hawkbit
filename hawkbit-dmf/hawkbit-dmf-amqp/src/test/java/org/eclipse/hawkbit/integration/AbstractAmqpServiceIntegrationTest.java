@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -111,6 +110,15 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         }
     }
 
+    /**
+     * Checks the total number of {@link Message} with type
+     * {@link MessageType#EVENT} that has been received by the
+     * {@link ReplyToListener} since the beginning of the test. Waits for the
+     * exact number, times out when there are more messages than expected.
+     * 
+     * @param numberOfMessages
+     *            exact number of expected messages
+     */
     protected void waitUntilEventMessagesAreSent(final int numberOfMessages) {
         createConditionFactory().untilAsserted(() -> {
             int messagesReceived = 0;
@@ -258,23 +266,21 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void assertLatestMultiActionMessage(final String controllerId,
-            final List<SimpleEntry<Long, EventTopic>> actionsExpected) {
-        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(controllerId);
-
-        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
-                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
-        final List<Entry<Long, EventTopic>> actionsFromMessage = multiActionRequest.stream()
-                .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
-                .collect(Collectors.toList());
+            final List<Entry<Long, EventTopic>> actionsExpected) {
+        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestLatestMultiActionMessageActions(controllerId);
         assertThat(actionsFromMessage).containsExactlyElementsOf(actionsExpected);
     }
 
-    protected void assertLatestMultiActionMessage(final String controllerId, final long actionId,
-            final EventTopic topic) {
-        final SimpleEntry<Long, EventTopic> action = new SimpleEntry<>(actionId, topic);
-        assertLatestMultiActionMessage(controllerId, Collections.singletonList(action));
+    protected List<Entry<Long, EventTopic>> getLatestLatestMultiActionMessageActions(
+            final String expectedControllerId) {
+        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(expectedControllerId);
+        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
+                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
+        return multiActionRequest.stream()
+                .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
+                .collect(Collectors.toList());
     }
 
     protected void assertDownloadMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
