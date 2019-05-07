@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import com.vaadin.data.Property;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
@@ -61,24 +61,26 @@ public class RolloutConfigurationView extends BaseConfigurationView
         header.addStyleName("config-panel-header");
         vLayout.addComponent(header);
 
-        final HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setSpacing(true);
-        hLayout.setImmediate(true);
+        final GridLayout gridLayout = new GridLayout(3, 1);
+        gridLayout.setSpacing(true);
+        gridLayout.setImmediate(true);
+        gridLayout.setColumnExpandRatio(1, 1.0F);
+        gridLayout.setSizeFull();
 
         approvalCheckbox = SPUIComponentProvider.getCheckBox("", "", null, false, "");
         approvalCheckbox.setId(UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX);
         approvalCheckbox.setValue(approvalConfigurationItem.isConfigEnabled());
         approvalCheckbox.addValueChangeListener(this);
         approvalConfigurationItem.addChangeListener(this);
-        hLayout.addComponent(approvalCheckbox);
-        hLayout.addComponent(approvalConfigurationItem);
+        gridLayout.addComponent(approvalCheckbox, 0, 0);
+        gridLayout.addComponent(approvalConfigurationItem, 1, 0);
 
         final Link linkToApprovalHelp = SPUIComponentProvider.getHelpLink(i18n,
                 uiProperties.getLinks().getDocumentation().getRollout());
-        hLayout.addComponent(linkToApprovalHelp);
-        hLayout.setComponentAlignment(linkToApprovalHelp, Alignment.BOTTOM_RIGHT);
+        gridLayout.addComponent(linkToApprovalHelp, 2, 0);
+        gridLayout.setComponentAlignment(linkToApprovalHelp, Alignment.BOTTOM_RIGHT);
 
-        vLayout.addComponent(hLayout);
+        vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
     }

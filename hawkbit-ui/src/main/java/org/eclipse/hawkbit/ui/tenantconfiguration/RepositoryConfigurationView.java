@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.generic.BooleanConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutocleanupConfigurationItem;
@@ -19,9 +20,11 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -37,6 +40,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView
 
     private final VaadinMessageSource i18n;
 
+    private final UiProperties uiProperties;
+
     private final ActionAutocloseConfigurationItem actionAutocloseConfigurationItem;
 
     private final ActionAutocleanupConfigurationItem actionAutocleanupConfigurationItem;
@@ -50,8 +55,9 @@ public class RepositoryConfigurationView extends BaseConfigurationView
     private CheckBox multiAssignmentsCheckBox;
 
     RepositoryConfigurationView(final VaadinMessageSource i18n,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final UiProperties uiProperties) {
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
         this.actionAutocloseConfigurationItem = new ActionAutocloseConfigurationItem(tenantConfigurationManagement,
                 i18n);
         this.actionAutocleanupConfigurationItem = new ActionAutocleanupConfigurationItem(tenantConfigurationManagement,
@@ -77,7 +83,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         header.addStyleName("config-panel-header");
         vLayout.addComponent(header);
 
-        final GridLayout gridLayout = new GridLayout(2, 3);
+        final GridLayout gridLayout = new GridLayout(3, 3);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
@@ -112,6 +118,11 @@ public class RepositoryConfigurationView extends BaseConfigurationView
         actionAutocleanupConfigurationItem.addChangeListener(this);
         gridLayout.addComponent(actionAutocleanupCheckBox, 0, 2);
         gridLayout.addComponent(actionAutocleanupConfigurationItem, 1, 2);
+
+        final Link linkToProvisioningHelp = SPUIComponentProvider.getHelpLink(i18n,
+                uiProperties.getLinks().getDocumentation().getProvisioningStateMachine());
+        gridLayout.addComponent(linkToProvisioningHelp, 2, 2);
+        gridLayout.setComponentAlignment(linkToProvisioningHelp, Alignment.BOTTOM_RIGHT);
 
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);

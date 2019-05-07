@@ -91,7 +91,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
                 securityTokenGenerator, uiProperties);
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
                 tenantConfigurationManagement);
-        this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement);
+        this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement,
+                uiProperties);
         this.rolloutConfigurationView = new RolloutConfigurationView(i18n, tenantConfigurationManagement, uiProperties);
 
         this.i18n = i18n;
