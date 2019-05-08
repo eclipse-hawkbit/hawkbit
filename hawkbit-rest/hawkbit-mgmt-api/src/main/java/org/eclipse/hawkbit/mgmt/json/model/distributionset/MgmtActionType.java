@@ -28,7 +28,12 @@ public enum MgmtActionType {
     /**
      * The time forced action type.
      */
-    TIMEFORCED("timeforced");
+    TIMEFORCED("timeforced"),
+
+    /**
+     * The Download-Only action type.
+     */
+    DOWNLOAD_ONLY("downloadonly");
 
     private final String name;
 

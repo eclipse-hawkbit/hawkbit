@@ -84,6 +84,7 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_TOTAL_TARGETS = "the total targets of a rollout";
     public static final String ROLLOUT_TOTAL_TARGETS_PER_STATUS = "the total targets per status";
     public static final String ROLLOUT_STATUS = "the status of this rollout";
+    public static final String ROLLOUT_TYPE = "the type of this rollout";
     public static final String ROLLOUT_GROUP_STATUS = "the status of this rollout group";
     public static final String ROLLOUT_AMOUNT_GROUPS = "the amount of groups the rollout should split targets into";
     public static final String ROLLOUT_GROUPS = "the list of group definitions";

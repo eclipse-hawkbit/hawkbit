@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -1116,11 +1117,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(event).isNotNull();
         assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-        assertThat(event.getActions()).isEqualTo(targets.stream()
-                .map(target -> deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
-                        .getContent())
+        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
+                .collect(Collectors.toList());
+
+        List<Long> targetActiveActionIds = targets.stream()
+                .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
                 .flatMap(List::stream)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Action::getId)));
+                .map(Action::getId)
+                .collect(Collectors.toList());
+        assertThat(eventActionIds).containsOnlyElementsOf(targetActiveActionIds);
     }
 
     private class DeploymentResult {

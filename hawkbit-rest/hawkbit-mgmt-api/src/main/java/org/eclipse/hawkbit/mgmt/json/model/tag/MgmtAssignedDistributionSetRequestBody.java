@@ -28,9 +28,8 @@ public class MgmtAssignedDistributionSetRequestBody {
         return distributionSetId;
     }
 
-    public MgmtAssignedDistributionSetRequestBody setDistributionSetId(final Long distributionSetId) {
+    public void setDistributionSetId(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
-        return this;
     }
 
 }

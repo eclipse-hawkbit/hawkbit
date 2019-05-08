@@ -33,6 +33,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -1243,6 +1244,32 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
             character++;
         }
         return created;
+    }
+
+    @Test
+    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of " +
+            "DOWNLOAD_ONLY.")
+    public void assignMultipleTargetsToDistributionSetAsDownloadOnly() throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
+                .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
+
+        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
+                .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
 }

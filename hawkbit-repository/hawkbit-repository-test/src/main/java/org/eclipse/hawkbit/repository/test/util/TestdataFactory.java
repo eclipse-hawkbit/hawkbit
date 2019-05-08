@@ -1003,14 +1003,41 @@ public class TestdataFactory {
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet, successCondition, errorCondition, Action.ActionType.FORCED);
+    }
+
+    /**
+     * Creates rollout based on given parameters.
+     *
+     * @param rolloutName
+     *            of the {@link Rollout}
+     * @param rolloutDescription
+     *            of the {@link Rollout}
+     * @param groupSize
+     *            of the {@link Rollout}
+     * @param filterQuery
+     *            to identify the {@link Target}s
+     * @param distributionSet
+     *            to assign
+     * @param successCondition
+     *            to switch to next group
+     * @param errorCondition
+     *            to switch to next group
+     * @param actionType
+     *            the type of the Rollout
+     * @return created {@link Rollout}
+     */
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition, final Action.ActionType actionType) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create().name(rolloutName)
-                .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet), groupSize,
-                conditions);
+                        .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet)
+                        .actionType(actionType), groupSize, conditions);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();

@@ -178,6 +178,10 @@ public final class UIComponentIdProvider {
      */
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
     /**
+     * Download Only Action Id.
+     */
+    public static final String ACTION_DETAILS_DOWNLOAD_ONLY_ID = "action.details.downloadonly.group";
+    /**
      * Start type of rollout manual radio button
      */
     public static final String ROLLOUT_START_MANUAL_ID = "rollout.start.manual.radio";
@@ -256,7 +260,7 @@ public final class UIComponentIdProvider {
     /**
      * Action history table forced label Id.
      */
-    public static final String ACTION_HISTORY_TABLE_FORCED_LABEL_ID = "action.history.table.forcedId";
+    public static final String ACTION_HISTORY_TABLE_TYPE_LABEL_ID = "action.history.table.typeId";
 
     /**
      * Action history table time-forced label Id.
@@ -1149,6 +1153,11 @@ public final class UIComponentIdProvider {
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
+
+    /**
+     * Rollout popup id.
+     */
+    public static final String ROLLOUT_POPUP_ID = "add.update.rollout.popup";
 
     /**
      * Create popup id.

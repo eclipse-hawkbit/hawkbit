@@ -261,7 +261,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Override
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(Long.valueOf(totalTargets));
+            totalTargetCountStatus = new TotalTargetCountStatus(Long.valueOf(totalTargets), rollout.getActionType());
         }
         return totalTargetCountStatus;
     }

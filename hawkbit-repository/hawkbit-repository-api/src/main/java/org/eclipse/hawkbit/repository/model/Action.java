@@ -229,7 +229,12 @@ public interface Action extends TenantAwareBaseEntity {
          * {@link Action#isHitAutoForceTime(long)} is reached, {@link #FORCED}
          * after that.
          */
-        TIMEFORCED;
+        TIMEFORCED,
+
+        /**
+         * Target is only advised to download, but not install
+         */
+        DOWNLOAD_ONLY;
     }
 
     /**

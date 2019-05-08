@@ -78,7 +78,23 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
         softLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT));
         softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
         softLabel.setStyleName("padding-right-style");
+        softLabel.setIcon(FontAwesome.STEP_FORWARD);
         addComponent(softLabel);
+    }
+
+    protected void addDownloadOnlyItemWithLabel() {
+        final FlexibleOptionGroupItemComponent downloadOnlyItem = actionTypeOptionGroup
+                .getItemComponent(ActionTypeOption.DOWNLOAD_ONLY);
+        downloadOnlyItem.setId(UIComponentIdProvider.ACTION_DETAILS_DOWNLOAD_ONLY_ID);
+        downloadOnlyItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
+        addComponent(downloadOnlyItem);
+        final Label downloadOnlyLabel = new Label();
+        downloadOnlyLabel.setSizeFull();
+        downloadOnlyLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY));
+        downloadOnlyLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DOWNLOAD_ONLY_ITEM));
+        downloadOnlyLabel.setStyleName("padding-right-style");
+        downloadOnlyLabel.setIcon(FontAwesome.DOWNLOAD);
+        addComponent(downloadOnlyLabel);
     }
 
     /**
@@ -93,7 +109,8 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
      *
      */
     public enum ActionTypeOption {
-        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED);
+        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED),
+        DOWNLOAD_ONLY(ActionType.DOWNLOAD_ONLY);
 
         private final ActionType actionType;
 

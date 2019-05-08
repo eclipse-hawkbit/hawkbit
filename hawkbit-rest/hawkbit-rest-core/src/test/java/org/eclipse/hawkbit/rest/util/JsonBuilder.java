@@ -449,12 +449,18 @@ public abstract class JsonBuilder {
 
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
-            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups) {
+             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+             final List<RolloutGroup> groups) {
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null);
+    }
+
+    public static String rollout(final String name, final String description, final Integer groupSize,
+             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+             final List<RolloutGroup> groups, final String type) {
         final JSONObject json = new JSONObject();
         try {
             json.put("name", name);
@@ -462,6 +468,10 @@ public abstract class JsonBuilder {
             json.put("amountGroups", groupSize);
             json.put("distributionSetId", distributionSetId);
             json.put("targetFilterQuery", targetFilterQuery);
+
+            if(type != null){
+                json.put("type", type);
+            }
 
             if (conditions != null) {
                 final JSONObject successCondition = new JSONObject();

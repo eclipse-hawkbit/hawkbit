@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
+import org.springframework.util.StringUtils;
 
 /**
  * Common Util to get date/time related information.
@@ -27,6 +28,7 @@ public final class SPDateTimeUtil {
 
     private static final String DURATION_FORMAT = "y','M','d','H','m','s";
     private static final Map<Integer, CalendarI18N> DURATION_I18N = Maps.newHashMapWithExpectedSize(6);
+    private static String fixedTimeZoneProperty;
 
     static {
         DURATION_I18N.put(0, CalendarI18N.YEAR);
@@ -41,12 +43,29 @@ public final class SPDateTimeUtil {
 
     }
 
+
     /**
-     * Get browser time zone.
+     * Set fixed UI timezone
+     *
+     * @param fixedTimeZoneProperty
+     *      time zone e.g. Europe/Berlin. If time zone is unknown, it will default to GMT
+     */
+    public static void initializeFixedTimeZoneProperty(String fixedTimeZoneProperty) {
+        SPDateTimeUtil.fixedTimeZoneProperty = fixedTimeZoneProperty;
+    }
+
+    /**
+     * Get browser time zone or fixed time zone if configured
      *
      * @return TimeZone
      */
     public static TimeZone getBrowserTimeZone() {
+
+
+        if (!StringUtils.isEmpty(fixedTimeZoneProperty)) {
+            return TimeZone.getTimeZone(fixedTimeZoneProperty);
+        }
+
         final WebBrowser webBrowser = com.vaadin.server.Page.getCurrent().getWebBrowser();
         final String[] timeZones = TimeZone.getAvailableIDs(webBrowser.getRawTimezoneOffset());
         TimeZone tz = TimeZone.getDefault();

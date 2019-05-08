@@ -58,6 +58,7 @@ public class TotalTargetCountStatus {
 
     private final Map<Status, Long> statusTotalCountMap = new EnumMap<>(Status.class);
     private final Long totalTargetCount;
+    private final Action.ActionType rolloutType;
 
     /**
      * Create a new states map with the target count for each state.
@@ -66,11 +67,14 @@ public class TotalTargetCountStatus {
      *            the action state map
      * @param totalTargetCount
      *            the total target count
+     * @param rolloutType
+     *            the type of the rollout
      */
     public TotalTargetCountStatus(final List<TotalTargetCountActionStatus> targetCountActionStatus,
-            final Long totalTargetCount) {
+            final Long totalTargetCount, final Action.ActionType rolloutType) {
         this.totalTargetCount = totalTargetCount;
-        mapActionStatusToTotalTargetCountStatus(targetCountActionStatus);
+        this.rolloutType = rolloutType;
+        addToTotalCount(targetCountActionStatus);
     }
 
     /**
@@ -78,9 +82,11 @@ public class TotalTargetCountStatus {
      *
      * @param totalTargetCount
      *            the total target count
+     * @param rolloutType
+     *            the type of the rollout
      */
-    public TotalTargetCountStatus(final Long totalTargetCount) {
-        this(Collections.emptyList(), totalTargetCount);
+    public TotalTargetCountStatus(final Long totalTargetCount, final Action.ActionType rolloutType) {
+        this(Collections.emptyList(), totalTargetCount, rolloutType);
     }
 
     /**
@@ -119,8 +125,7 @@ public class TotalTargetCountStatus {
      * @param rolloutStatusCountItems
      *            all target {@link Status} with total count
      */
-    private final void mapActionStatusToTotalTargetCountStatus(
-            final List<TotalTargetCountActionStatus> targetCountActionStatus) {
+    private void addToTotalCount(final List<TotalTargetCountActionStatus> targetCountActionStatus) {
         if (targetCountActionStatus == null) {
             statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);
             return;
@@ -128,40 +133,40 @@ public class TotalTargetCountStatus {
         statusTotalCountMap.put(Status.RUNNING, 0L);
         Long notStartedTargetCount = totalTargetCount;
         for (final TotalTargetCountActionStatus item : targetCountActionStatus) {
-            convertStatus(item);
+            addToTotalCount(item);
             notStartedTargetCount -= item.getCount();
         }
         statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
     }
 
+    private void addToTotalCount(final TotalTargetCountActionStatus item) {
+        final Status status = convertStatus(item.getStatus());
+        statusTotalCountMap.merge(status, item.getCount(), Long::sum);
+    }
+
     // Exception squid:MethodCyclomaticComplexity - simple state conversion, not
     // really complex.
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private void convertStatus(final TotalTargetCountActionStatus item) {
-        switch (item.getStatus()) {
+    private Status convertStatus(final Action.Status status){
+        switch (status) {
         case SCHEDULED:
-            statusTotalCountMap.put(Status.SCHEDULED, item.getCount());
-            break;
+            return Status.SCHEDULED;
         case ERROR:
-            statusTotalCountMap.put(Status.ERROR, item.getCount());
-            break;
+            return Status.ERROR;
         case FINISHED:
-            statusTotalCountMap.put(Status.FINISHED, item.getCount());
-            break;
+            return Status.FINISHED;
+        case CANCELED:
+            return Status.CANCELLED;
         case RETRIEVED:
         case RUNNING:
         case WARNING:
         case DOWNLOAD:
-        case DOWNLOADED:
         case CANCELING:
-            final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
-            statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
-            break;
-        case CANCELED:
-            statusTotalCountMap.put(Status.CANCELLED, item.getCount());
-            break;
+            return Status.RUNNING;
+        case DOWNLOADED:
+            return Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) ? Status.FINISHED : Status.RUNNING;
         default:
-            throw new IllegalArgumentException("State " + item.getStatus() + "is not valid");
+            throw new IllegalArgumentException("State " + status + "is not valid");
         }
     }
 
