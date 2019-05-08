@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
@@ -18,6 +21,8 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,6 +41,8 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaTenantConfigurationManagement.class);
 
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
@@ -155,6 +162,14 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), value.toString());
         } else {
             tenantConfiguration.setValue(value.toString());
+        }
+
+        // prevent the Multi-Assignment feature from being disabled; this code
+        // path can be removed once we support this case
+        if (MULTI_ASSIGNMENTS_ENABLED.equals(configurationKeyName)
+                && !Boolean.parseBoolean(tenantConfiguration.getValue())) {
+            LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", configurationKeyName);
+            throw new TenantConfigurationValueChangeNotAllowedException();
         }
 
         final JpaTenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository
