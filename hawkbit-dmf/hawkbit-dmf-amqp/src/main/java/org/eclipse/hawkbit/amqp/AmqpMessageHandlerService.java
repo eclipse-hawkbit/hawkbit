@@ -259,7 +259,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .findTargetVisibleMetaDataBySoftwareModuleId(smIds);
 
         return distributionSet.getModules().stream()
-                .collect(Collectors.toMap(sm -> sm, sm -> metadata.get(sm.getId())));
+                .collect(Collectors.toMap(sm -> sm,
+                        sm -> metadata.containsKey(sm.getId()) ? metadata.get(sm.getId()) : Collections.emptyList()));
     }
 
     /**
