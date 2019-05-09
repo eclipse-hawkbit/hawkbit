@@ -126,9 +126,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final ActionStatusRepository actionStatusRepository;
     private final TargetManagement targetManagement;
     private final AuditorAware<String> auditorProvider;
-    private final ApplicationEventPublisher eventPublisher;
-    private final BusProperties bus;
-    private final AfterTransactionCommitExecutor afterCommit;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
@@ -154,9 +151,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.actionStatusRepository = actionStatusRepository;
         this.targetManagement = targetManagement;
         this.auditorProvider = auditorProvider;
-        this.eventPublisher = eventPublisher;
-        this.bus = bus;
-        this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher, bus,
