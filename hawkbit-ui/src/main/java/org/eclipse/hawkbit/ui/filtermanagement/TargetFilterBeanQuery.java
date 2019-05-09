@@ -105,6 +105,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             final DistributionSet distributionSet = tarFilterQuery.getAutoAssignDistributionSet();
             if (distributionSet != null) {
                 proxyTarFilter.setAutoAssignDistributionSet(new ProxyDistribution(distributionSet));
+                // for backwards compatibility reasons we need to apply a
+                // fallback to ActionType.FORCED
                 final ActionType autoAssignActionType = tarFilterQuery.getAutoAssignActionType();
                 proxyTarFilter.setAutoAssignActionType(
                         autoAssignActionType != null ? autoAssignActionType : ActionType.FORCED);
