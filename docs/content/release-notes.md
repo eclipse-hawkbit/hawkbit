@@ -3,6 +3,18 @@ title: Release notes
 weight: 100
 ---
 
+## 0.3.0M2
+
+**Release Date:** Tuesday, April 2, 2019 <br />
+[Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M2) /
+[Release](https://github.com/eclipse/hawkbit/milestone/17?closed=1)
+
+## 0.3.0M1
+
+**Release Date:** Saturday, February 2, 2019 <br />
+[Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M1) /
+[Release](https://github.com/eclipse/hawkbit/milestone/16?closed=1)
+
 ## 0.2.5
 
 **Release Date:** Friday, November 30, 2018 <br />
@@ -53,4 +65,3 @@ First Eclipse hawkBit release including:
 [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.2.0) /
 [Release](https://github.com/eclipse/hawkbit/milestone/1?closed=1) /
 [Eclipse](https://projects.eclipse.org/projects/iot.hawkbit/releases/0.2.0)
- 

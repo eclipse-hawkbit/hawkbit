@@ -392,6 +392,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private CommonDialogWindow createWindow() {
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.rollout"))).content(this)
+                .id(UIComponentIdProvider.ROLLOUT_POPUP_ID)
                 .layout(this).i18n(i18n).helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
     }

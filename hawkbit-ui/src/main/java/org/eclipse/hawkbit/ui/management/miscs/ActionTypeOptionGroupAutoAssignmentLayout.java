@@ -32,9 +32,11 @@ public class ActionTypeOptionGroupAutoAssignmentLayout extends AbstractActionTyp
         actionTypeOptionGroup = new FlexibleOptionGroup();
         actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
         actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
+        actionTypeOptionGroup.addItem(ActionTypeOption.DOWNLOAD_ONLY);
         selectDefaultOption();
 
         addForcedItemWithLabel();
         addSoftItemWithLabel();
+        addDownloadOnlyItemWithLabel();
     }
 }

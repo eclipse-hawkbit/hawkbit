@@ -81,7 +81,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         fieldWithPath("content[].autoAssignActionType")
                                 .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                 .type(JsonFieldType.STRING.toString())
-                                .attributes(key("value").value("['forced', 'soft']")),
+                                .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
                         fieldWithPath("content[].createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                         fieldWithPath("content[].createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                         fieldWithPath("content[].lastModifiedAt")
@@ -199,7 +199,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         requestFields(requestFieldWithPath("id").description(MgmtApiModelProperties.DS_ID),
                                 optionalRequestFieldWithPath("type")
                                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
-                                        .attributes(key("value").value("['forced', 'soft']"))),
+                                        .attributes(key("value").value("['forced', 'soft', 'downloadonly']"))),
                         getResponseFieldTargetFilterQuery(false)));
     }
 
@@ -226,7 +226,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         .type(JsonFieldType.NUMBER.toString()),
                 fieldWithPath(arrayPrefix + "autoAssignActionType")
                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE).type(JsonFieldType.STRING.toString())
-                        .attributes(key("value").value("['forced', 'soft']")),
+                        .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),

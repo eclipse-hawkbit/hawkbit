@@ -25,6 +25,8 @@ public class UiProperties implements Serializable {
 
     private boolean gravatar;
 
+    private String fixedTimeZone;
+
     private final Localization localization = new Localization();
 
     private final Links links = new Links();
@@ -42,6 +44,15 @@ public class UiProperties implements Serializable {
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
     }
+
+    public String getFixedTimeZone() {
+        return fixedTimeZone;
+    }
+
+    public void setFixedTimeZone(final String fixedTimeZone) {
+        this.fixedTimeZone = fixedTimeZone;
+    }
+
 
     /**
      * Localization information

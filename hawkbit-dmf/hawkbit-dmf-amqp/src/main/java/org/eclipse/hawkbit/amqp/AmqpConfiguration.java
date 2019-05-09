@@ -273,6 +273,12 @@ public class AmqpConfiguration {
         return new DefaultAmqpMessageSenderService(rabbitTemplate());
     }
 
+    /**
+     * Create RabbitListenerContainerFactory bean if no listenerContainerFactory
+     * bean found
+     *
+     * @return RabbitListenerContainerFactory bean
+     */
     @Bean
     @ConditionalOnMissingBean(name = "listenerContainerFactory")
     public RabbitListenerContainerFactory<SimpleMessageListenerContainer> listenerContainerFactory(

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 /**
  *
@@ -42,6 +43,9 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     @JsonProperty
     private boolean deleted;
+
+    @JsonProperty
+    private MgmtActionType type;
 
     public boolean isDeleted() {
         return deleted;
@@ -101,5 +105,13 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
         }
 
         totalTargetsPerStatus.put(status, totalTargetCountByStatus);
+    }
+
+    public void setType(final MgmtActionType type) {
+        this.type = type;
+    }
+
+    public MgmtActionType getType() {
+        return type;
     }
 }

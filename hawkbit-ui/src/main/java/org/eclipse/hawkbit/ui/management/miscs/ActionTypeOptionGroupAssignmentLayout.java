@@ -70,12 +70,16 @@ public class ActionTypeOptionGroupAssignmentLayout extends AbstractActionTypeOpt
         actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
         actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
         actionTypeOptionGroup.addItem(ActionTypeOption.AUTO_FORCED);
+        actionTypeOptionGroup.addItem(ActionTypeOption.DOWNLOAD_ONLY);
         selectDefaultOption();
 
         addForcedItemWithLabel();
         addSoftItemWithLabel();
         addAutoForceItemWithLabelAndDateField();
+        addDownloadOnlyItemWithLabel();
     }
+
+
 
     private void addAutoForceItemWithLabelAndDateField() {
         final FlexibleOptionGroupItemComponent autoForceItem = actionTypeOptionGroup

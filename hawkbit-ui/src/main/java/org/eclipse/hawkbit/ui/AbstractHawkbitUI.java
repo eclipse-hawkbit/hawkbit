@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -120,6 +122,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         rootLayout.setSizeFull();
 
         HawkbitCommonUtil.initLocalization(this, uiProperties.getLocalization(), i18n);
+        SPDateTimeUtil.initializeFixedTimeZoneProperty(uiProperties.getFixedTimeZone());
 
         dashboardMenu.init();
         dashboardMenu.setResponsive(true);
@@ -201,7 +204,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         return cssLayout;
     }
 
-    private class ManagementViewProvider implements ViewProvider {
+    private class ManagementViewProvider extends SpringNavigator implements ViewProvider {
 
         private static final long serialVersionUID = 1L;
 

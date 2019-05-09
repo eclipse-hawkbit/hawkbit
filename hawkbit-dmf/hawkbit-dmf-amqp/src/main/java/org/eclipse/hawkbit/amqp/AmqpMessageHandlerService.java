@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -269,8 +270,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
 
-        amqpMessageDispatcherService.sendUpdateMessageToTarget(action.getTenant(), action.getTarget(), action.getId(),
-                modules, action.isMaintenanceWindowAvailable());
+        amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
+                modules);
     }
 
     /**

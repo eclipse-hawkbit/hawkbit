@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -147,10 +148,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
 
-            targetManagement.getByControllerID(assignedEvent.getActions().keySet())
-                    .forEach(target -> sendUpdateMessageToTarget(assignedEvent.getTenant(), target,
-                            assignedEvent.getActions().get(target.getControllerId()), softwareModules,
-                            assignedEvent.isMaintenanceWindowAvailable()));
+            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
+                    target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
+                            target, softwareModules));
 
         });
     }
@@ -243,19 +243,20 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to get the type of event depending on whether the action has a
-     * valid maintenance window available or not based on defined maintenance
-     * schedule. In case of no maintenance schedule or if there is a valid
-     * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
+     * Method to get the type of event depending on whether the action is a
+     * DOWNLOAD_ONLY action or if it has a valid maintenance window available
+     * or not based on defined maintenance schedule. In case of no maintenance
+     * schedule or if there is a valid window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
      * returned else {@link EventTopic#DOWNLOAD} is returned.
      *
-     * @param maintenanceWindowAvailable
-     *            valid maintenance window or not.
+     * @param action
+     *            current action properties.
      *
      * @return {@link EventTopic} to use for message.
      */
-    private static EventTopic getEventTypeForTarget(final boolean maintenanceWindowAvailable) {
-        return maintenanceWindowAvailable ? EventTopic.DOWNLOAD_AND_INSTALL : EventTopic.DOWNLOAD;
+    private static EventTopic getEventTypeForTarget(final ActionProperties action) {
+        return (Action.ActionType.DOWNLOAD_ONLY.equals(action.getActionType()) ||
+                !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
     /**
@@ -274,7 +275,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (action.isCancelingOrCanceled()) {
             return EventTopic.CANCEL_DOWNLOAD;
         }
-        return getEventTypeForTarget(action.isMaintenanceWindowAvailable());
+        return getEventTypeForTarget(new ActionProperties(action));
     }
 
     /**
@@ -316,8 +317,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 updateAttributesEvent.getTargetAddress());
     }
 
-    protected void sendUpdateMessageToTarget(final String tenant, final Target target, final Long actionId,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules, final boolean maintenanceWindowAvailable) {
+    protected void sendUpdateMessageToTarget(final ActionProperties action, final Target target,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
+
+        final String tenant = action.getTenant();
 
         final URI targetAdress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAdress)) {
@@ -325,7 +328,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = new DmfDownloadAndUpdateRequest();
-        downloadAndUpdateRequest.setActionId(actionId);
+        downloadAndUpdateRequest.setActionId(action.getId());
 
         final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
         downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
@@ -337,8 +340,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         });
 
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(),
-                        getEventTypeForTarget(maintenanceWindowAvailable)));
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), getEventTypeForTarget(action)));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 

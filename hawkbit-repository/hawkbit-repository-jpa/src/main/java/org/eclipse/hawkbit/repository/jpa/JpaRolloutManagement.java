@@ -105,6 +105,8 @@ import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
 
+import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
+
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
@@ -125,6 +127,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING);
+
+    // In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR,
+            Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR, Status.FINISHED,
+            Status.CANCELED);
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -251,17 +259,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
 
-            group.setSuccessCondition(conditions.getSuccessCondition());
-            group.setSuccessConditionExp(conditions.getSuccessConditionExp());
-
-            group.setSuccessAction(conditions.getSuccessAction());
-            group.setSuccessActionExp(conditions.getSuccessActionExp());
-
-            group.setErrorCondition(conditions.getErrorCondition());
-            group.setErrorConditionExp(conditions.getErrorConditionExp());
-
-            group.setErrorAction(conditions.getErrorAction());
-            group.setErrorActionExp(conditions.getErrorActionExp());
+            addSuccessAndErrorConditionsAndActions(group, conditions);
 
             group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
 
@@ -310,17 +308,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 group.setTargetFilterQuery("");
             }
 
-            group.setSuccessCondition(srcGroup.getSuccessCondition());
-            group.setSuccessConditionExp(srcGroup.getSuccessConditionExp());
-
-            group.setSuccessAction(srcGroup.getSuccessAction());
-            group.setSuccessActionExp(srcGroup.getSuccessActionExp());
-
-            group.setErrorCondition(srcGroup.getErrorCondition());
-            group.setErrorConditionExp(srcGroup.getErrorConditionExp());
-
-            group.setErrorAction(srcGroup.getErrorAction());
-            group.setErrorActionExp(srcGroup.getErrorActionExp());
+            addSuccessAndErrorConditionsAndActions(group, srcGroup.getSuccessCondition(),
+                    srcGroup.getSuccessConditionExp(), srcGroup.getSuccessAction(), srcGroup.getSuccessActionExp(),
+                    srcGroup.getErrorCondition(), srcGroup.getErrorConditionExp(), srcGroup.getErrorAction(),
+                    srcGroup.getErrorActionExp());
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -760,9 +751,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout = actionRepository
-                .countByRolloutAndRolloutGroupAndStatusNotAndStatusNotAndStatusNot(rollout, rolloutGroup,
-                        Action.Status.ERROR, Action.Status.FINISHED, Action.Status.CANCELED);
+        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())
+                ? actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
+                        DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES)
+                : actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
+                        DEFAULT_ACTION_TERMINATION_STATUSES);
         return actionsLeftForRollout == 0;
     }
 
@@ -1070,7 +1063,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.get().getTotalTargets());
+                rollout.get().getTotalTargets(), rollout.get().getActionType());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
@@ -1112,7 +1105,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         if (allStatesForRollout != null) {
             rollouts.forEach(rollout -> {
                 final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
+                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.getActionType());
                 rollout.setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }

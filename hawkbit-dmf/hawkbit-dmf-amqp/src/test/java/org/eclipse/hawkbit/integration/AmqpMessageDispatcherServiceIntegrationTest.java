@@ -8,10 +8,12 @@
  */
 package org.eclipse.hawkbit.integration;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -25,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -32,11 +35,17 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")
@@ -196,6 +205,37 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.IN_SYNC);
 
         assertRequestAttributesUpdateMessage(controllerId);
+    }
+
+    @Test
+    @Description("Tests the download_only assignment: asserts correct dmf Message topic, and assigned DS")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void downloadOnlyAssignmentSendsDownloadMessageTopic() {
+        final String controllerId = TARGET_PREFIX + "registerTargets_1";
+        final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
+
+        // verify
+        final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+
+        assertThat(message).isNotNull();
+        final Map<String, Object> headers = message.getMessageProperties().getHeaders();
+        assertThat(headers).containsEntry("thingId", controllerId);
+        assertThat(headers).containsEntry("type", EVENT.toString());
+        assertThat(headers).containsEntry("topic", DOWNLOAD.toString());
+
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+
+        // verify the DS was assigned to the Target
+        final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
+        assertThat(assignedDistributionSet.getId()).isEqualTo(distributionSet.getId());
     }
 
     private void waitUntilTargetHasStatus(final String controllerId, final TargetUpdateStatus status) {

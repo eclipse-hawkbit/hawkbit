@@ -134,7 +134,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
         setColumnProperties();
         setColumnHeaderNames();
         setColumnsHidable();
-        addColumnRenderes();
+        addColumnRenderers();
         setColumnExpandRatio();
 
         setHiddenColumns();
@@ -327,7 +327,7 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * Template method invoked by {@link #addNewContainerDS()} for adding
      * special column renderers if needed.
      */
-    protected abstract void addColumnRenderes();
+    protected abstract void addColumnRenderers();
 
     /**
      * Template method invoked by {@link #addNewContainerDS()} that hides

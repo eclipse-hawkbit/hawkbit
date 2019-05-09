@@ -48,7 +48,7 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * Allowed values for auto-assign action type
      */
     Set<ActionType> ALLOWED_AUTO_ASSIGN_ACTION_TYPES = Collections
-            .unmodifiableSet(EnumSet.of(ActionType.FORCED, ActionType.SOFT));
+            .unmodifiableSet(EnumSet.of(ActionType.FORCED, ActionType.SOFT, ActionType.DOWNLOAD_ONLY));
 
     /**
      * @return name of the {@link TargetFilterQuery}.

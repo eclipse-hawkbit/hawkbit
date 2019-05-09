@@ -519,7 +519,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 requestFieldWithPath("maintenanceWindow.timezone")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE).optional(),
                                 requestFieldWithPath("type").description(MgmtApiModelProperties.FORCETIME_TYPE)
-                                        .attributes(key("value").value("['soft', 'forced','timeforced']"))),
+                                        .attributes(key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
                         responseFields(
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)

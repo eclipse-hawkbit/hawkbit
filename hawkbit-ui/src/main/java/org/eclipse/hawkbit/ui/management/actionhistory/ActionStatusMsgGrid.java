@@ -146,7 +146,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         // no specific column renderers
     }
 

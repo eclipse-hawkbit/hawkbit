@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,19 +45,20 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +152,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(7);
@@ -199,7 +203,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
@@ -224,7 +228,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             // expected
         }
 
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.RUNNING, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(1);
@@ -245,14 +249,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         deploymentManagement.cancelAction(actionId);
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.CANCELING, true);
 
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(8);
@@ -272,14 +276,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         deploymentManagement.cancelAction(actionId);
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.CANCELING, true);
 
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.CANCELED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.CANCELED, Action.Status.CANCELED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(8);
@@ -300,14 +304,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         deploymentManagement.cancelAction(actionId);
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.CANCELING, true);
 
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement.addCancelActionStatus(
                 entityFactory.actionStatus().create(actionId).status(Action.Status.CANCEL_REJECTED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.CANCEL_REJECTED, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(8);
@@ -328,14 +332,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         deploymentManagement.cancelAction(actionId);
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.CANCELING, true);
 
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.ERROR, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(8);
@@ -346,39 +350,64 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private Long createTargetAndAssignDs() {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
-        assignDistributionSet(dsId, TestdataFactory.DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
+        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        return deploymentManagement.findActiveActionsByTarget(PAGE, TestdataFactory.DEFAULT_CONTROLLER_ID).getContent()
+        return deploymentManagement.findActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID).getContent()
                 .get(0).getId();
+    }
+
+    @Step
+    private Long createAndAssignDsAsDownloadOnly(final String dsName, final String defaultControllerId) {
+        final Long dsId = testdataFactory.createDistributionSet(dsName).getId();
+        assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
+        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent()
+                .get(0).getId();
+        assertThat(id).isNotNull();
+        return id;
+    }
+
+    @Step
+    private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
+        assignDistributionSet(dsId, defaultControllerId, actionType);
+        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent()
+                .get(0).getId();
+        assertThat(id).isNotNull();
+        return id;
     }
 
     @Step
     private void simulateIntermediateStatusOnCancellation(final Long actionId) {
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.RUNNING, true);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.DOWNLOAD, true);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.DOWNLOADED, true);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.RETRIEVED, true);
 
         controllerManagement
                 .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.CANCELING, Action.Status.WARNING, true);
     }
 
@@ -386,26 +415,26 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void simulateIntermediateStatusOnUpdate(final Long actionId) {
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.RUNNING, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.DOWNLOADED, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.RETRIEVED, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.WARNING, true);
     }
 
@@ -509,7 +538,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Controller trys to finish an update process after it has been finished by an error action status.")
+    @Description("Controller tries to finish an update process after it has been finished by an error action status.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
@@ -522,12 +551,12 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // test and verify
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
                 Action.Status.RUNNING, Action.Status.RUNNING, true);
 
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
                 Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with disabled late feedback
@@ -536,7 +565,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
                 Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with enabled late feedback - should not make a difference as it
@@ -546,7 +575,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR,
                 Action.Status.ERROR, Action.Status.ERROR, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
@@ -572,7 +601,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         // try with enabled late feedback - should not make a difference as it
@@ -582,7 +611,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, TestdataFactory.DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
                 Action.Status.FINISHED, Action.Status.FINISHED, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
@@ -609,7 +638,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
@@ -635,7 +664,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // however, additional action status has been stored
@@ -987,6 +1016,320 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
                         entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
 
+    }
+
+    @Test
+    @Description("Verifies that a DOWNLOAD_ONLY action is not marked complete when the controller reports DOWNLOAD")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerReportsDownloadForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOAD));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING,
+                Action.Status.RUNNING, Action.Status.DOWNLOAD, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
+        assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID))
+                .isEqualTo(true);
+    }
+
+    @Test
+    @Description("Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOADED")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerReportsDownloadedForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.DOWNLOADED, Action.Status.DOWNLOADED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
+        assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test
+    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY non-active action.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerReportsActionFinishedForDownloadOnlyActionThatIsNotActive() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId, Status.FINISHED);
+
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Action.Status.FINISHED, Action.Status.FINISHED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(3);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
+        assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test
+    @Description("Verifies that multiple DOWNLOADED events for a DOWNLOAD_ONLY action are handled.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 3),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void controllerReportsMultipleDownloadedForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        IntStream.range(0, 3).forEach(i -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC,
+                Status.DOWNLOADED, Status.DOWNLOADED, false);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(4);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(4);
+        assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test(expected = QuotaExceededException.class)
+    @Description("Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a " +
+            "DOWNLOAD_ONLY action.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 9),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void quotaExceptionWhencontrollerReportsTooManyDownloadedMessagesForDownloadOnlyAction() {
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+
+        IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+    }
+
+    @Test
+    @Description("Verifies that quota is enforced for UpdateActionStatus events for DOWNLOAD_ONLY assignments.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 9),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void quotaEceededExceptionWhenControllerReportsTooManyUpdateActionStatusMessagesForDownloadOnlyAction() {
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+            fail("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR)));
+            fail("No QuotaExceededException thrown for too many ERROR updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
+            fail("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+    }
+
+    @Test
+    @Description("Verifies that quota is enforced for UpdateActionStatus events for FORCED assignments.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void quotaEceededExceptionWhenControllerReportsTooManyUpdateActionStatusMessagesForForced() {
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+        final Long actionId = createTargetAndAssignDs();
+        assertThat(actionId).isNotNull();
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+            fail("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR)));
+            fail("No QuotaExceededException thrown for too many ERROR updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+
+        try {
+            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
+            fail("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates");
+        } catch (final QuotaExceededException e) {
+        }
+    }
+
+    @Test
+    @Description("Verifies that a target can report FINISHED/ERROR updates for DOWNLOAD_ONLY assignments regardless of " +
+            "repositoryProperties.rejectActionStatusForClosedAction value.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 4),
+            @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = TargetUpdatedEvent.class, count = 12),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 4),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 6),
+            @Expect(type = ActionUpdatedEvent.class, count = 8),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 12) })
+    public void targetCanAlwaysReportFinishedOrErrorAfterActionIsClosedForDownloadOnlyAssignments() {
+
+        testdataFactory.createTarget();
+
+        // allow actionStatusUpdates for closed actions
+        repositoryProperties.setRejectActionStatusForClosedAction(false);
+
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs1", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId, Status.FINISHED);
+
+        final Long actionId2 = createAndAssignDsAsDownloadOnly("downloadOnlyDs2", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId2, Status.ERROR);
+
+        // disallow actionStatusUpdates for closed actions
+        repositoryProperties.setRejectActionStatusForClosedAction(true);
+
+        final Long actionId3 = createAndAssignDsAsDownloadOnly("downloadOnlyDs3", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId3, Status.FINISHED);
+
+
+        final Long actionId4 = createAndAssignDsAsDownloadOnly("downloadOnlyDs4", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId4, Status.ERROR);
+
+        // actionStatusRepository should have 12 ActionStatusUpdates, 3 from each action
+        assertThat(actionStatusRepository.count()).isEqualTo(12L);
+    }
+
+    @Step
+    private void finishDownloadOnlyUpdateAndSendUpdateActionStatus(final Long actionId, final Status status) {
+        // finishing action
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Status.DOWNLOADED));
+
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(status));
+        assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID))
+                .isEqualTo(false);
+    }
+
+    @Test
+    @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action after having" +
+            " installed an intermediate update.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 5),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 3),
+            @Expect(type = ActionUpdatedEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+    public void controllerReportsFinishedForOldDownloadOnlyActionAfterSuccessfulForcedAssignment() {
+
+        testdataFactory.createTarget();
+        final DistributionSet downloadOnlyDs = testdataFactory.createDistributionSet("downloadOnlyDs1");
+
+        // assign DOWNLOAD_ONLY Distribution set
+        final Long downloadOnlyActionId = assignDs(downloadOnlyDs.getId(), DEFAULT_CONTROLLER_ID, DOWNLOAD_ONLY);
+        addUpdateActionStatus(downloadOnlyActionId, DEFAULT_CONTROLLER_ID, Status.DOWNLOADED);
+        assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, downloadOnlyDs.getId());
+        assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, null);
+        assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);
+
+        // assign distributionSet as FORCED assignment
+        final Long forcedDistributionSetId = testdataFactory.createDistributionSet("forcedDs1").getId();
+        final DistributionSetAssignmentResult assignmentResult =
+                assignDistributionSet(forcedDistributionSetId, DEFAULT_CONTROLLER_ID, Action.ActionType.SOFT);
+        addUpdateActionStatus(assignmentResult.getActions().get(0).getId(), DEFAULT_CONTROLLER_ID, Status.FINISHED);
+        assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
+        assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
+        assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);
+
+        // report FINISHED for the DOWNLOAD_ONLY action
+        addUpdateActionStatus(downloadOnlyActionId, DEFAULT_CONTROLLER_ID, Status.FINISHED);
+        assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, downloadOnlyDs.getId());
+        assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, downloadOnlyDs.getId());
+        assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);
+    }
+
+    @Step
+    private void addUpdateActionStatus(final Long actionId, final String controllerId, final Status actionStatus) {
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(actionStatus));
+        assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
+    }
+
+    private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+        final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
+        assertThat(assignedDistributionSet.getId()).isEqualTo(dsId);
+    }
+
+    private void assertInstalledDistributionSetId(final String controllerId, final Long dsId) {
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+        final DistributionSet installedDistributionSet = ((JpaTarget) target.get()).getInstalledDistributionSet();
+        if(dsId == null){
+            assertThat(installedDistributionSet).isNull();
+        } else {
+            assertThat(installedDistributionSet.getId()).isEqualTo(dsId);
+        }
+    }
+
+    private void assertNoActiveActionsExistsForControllerId(final String controllerId) {
+        assertThat(actionRepository.activeActionExistsForControllerId(controllerId)).isEqualTo(false);
     }
 
 }
