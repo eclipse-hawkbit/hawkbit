@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -104,8 +105,11 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             final DistributionSet distributionSet = tarFilterQuery.getAutoAssignDistributionSet();
             if (distributionSet != null) {
                 proxyTarFilter.setAutoAssignDistributionSet(new ProxyDistribution(distributionSet));
-                proxyTarFilter.setAutoAssignActionType(tarFilterQuery.getAutoAssignActionType());
+                final ActionType autoAssignActionType = tarFilterQuery.getAutoAssignActionType();
+                proxyTarFilter.setAutoAssignActionType(
+                        autoAssignActionType != null ? autoAssignActionType : ActionType.FORCED);
             }
+
             proxyTargetFilter.add(proxyTarFilter);
         }
         return proxyTargetFilter;
