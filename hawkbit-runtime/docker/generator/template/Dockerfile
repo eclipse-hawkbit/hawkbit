@@ -1,7 +1,8 @@
 FROM {{BASE_IMAGE}}
 
 ENV HAWKBIT_VERSION={{HAWKBIT_VERSION}} \
-    HAWKBIT_HOME=/opt/hawkbit
+    HAWKBIT_HOME=/opt/hawkbit \
+    JAVA_TOOL_OPTIONS="-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
 
 EXPOSE 8080
 
@@ -20,4 +21,4 @@ RUN set -x \
 VOLUME "$HAWKBIT_HOME/data"
 
 WORKDIR $HAWKBIT_HOME
-ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
+ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","${JAVA_TOOL_OPTIONS}"]
