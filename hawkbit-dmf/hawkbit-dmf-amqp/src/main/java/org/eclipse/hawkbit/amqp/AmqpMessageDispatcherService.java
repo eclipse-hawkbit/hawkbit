@@ -77,7 +77,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
-    private static final int MAX_ACTIONS = 100;
+    private static final int MAX_ACTIONS = RepositoryConstants.MAX_ACTION_COUNT;
 
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
@@ -229,7 +229,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         actionRequest.setActionId(action.getId());
         return actionRequest;
     }
-    
+
     private DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Action action,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
@@ -244,10 +244,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     /**
      * Method to get the type of event depending on whether the action is a
-     * DOWNLOAD_ONLY action or if it has a valid maintenance window available
-     * or not based on defined maintenance schedule. In case of no maintenance
-     * schedule or if there is a valid window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
-     * returned else {@link EventTopic#DOWNLOAD} is returned.
+     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or
+     * not based on defined maintenance schedule. In case of no maintenance
+     * schedule or if there is a valid window available, the topic
+     * {@link EventTopic#DOWNLOAD_AND_INSTALL} is returned else
+     * {@link EventTopic#DOWNLOAD} is returned.
      *
      * @param action
      *            current action properties.
@@ -255,8 +256,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @return {@link EventTopic} to use for message.
      */
     private static EventTopic getEventTypeForTarget(final ActionProperties action) {
-        return (Action.ActionType.DOWNLOAD_ONLY.equals(action.getActionType()) ||
-                !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD : EventTopic.DOWNLOAD_AND_INSTALL;
+        return (Action.ActionType.DOWNLOAD_ONLY.equals(action.getActionType())
+                || !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
     /**

@@ -70,6 +70,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
 
+    private static final int MAX_ACTIONS = RepositoryConstants.MAX_ACTION_COUNT;
+
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private final ControllerManagement controllerManagement;
@@ -79,8 +81,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
     private final SystemSecurityContext systemSecurityContext;
-
-    private static final int MAX_ACTIONS = 100;
 
     /**
      * Constructor.
@@ -243,8 +243,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
                     action.getId(), target.getAddress());
-        }
-        else {
+        } else {
             amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
                     getSoftwareModulesWithMetadata(action.getDistributionSet()));
         }
@@ -258,9 +257,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(smIds);
 
-        return distributionSet.getModules().stream()
-                .collect(Collectors.toMap(sm -> sm,
-                        sm -> metadata.containsKey(sm.getId()) ? metadata.get(sm.getId()) : Collections.emptyList()));
+        return distributionSet.getModules().stream().collect(Collectors.toMap(sm -> sm,
+                sm -> metadata.containsKey(sm.getId()) ? metadata.get(sm.getId()) : Collections.emptyList()));
     }
 
     /**

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
 
@@ -169,6 +170,16 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         if (MULTI_ASSIGNMENTS_ENABLED.equals(configurationKeyName)
                 && !Boolean.parseBoolean(tenantConfiguration.getValue())) {
             LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", configurationKeyName);
+            throw new TenantConfigurationValueChangeNotAllowedException();
+        }
+
+        // prevent the Auto-Close property from being changed if
+        // Multi-Assignments is enabled
+        if (REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED.equals(configurationKeyName)
+                && getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue()) {
+            LOG.debug(
+                    "The property '{}' must not be changed because the Multi-Assignments feature is currently enabled.",
+                    configurationKeyName);
             throw new TenantConfigurationValueChangeNotAllowedException();
         }
 
