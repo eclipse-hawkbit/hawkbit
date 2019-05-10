@@ -110,23 +110,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         }
     }
 
-    /**
-     * Checks the total number of {@link Message} with type
-     * {@link MessageType#EVENT} that has been received by the
-     * {@link ReplyToListener} since the beginning of the test. Waits for the
-     * exact number, times out when there are more messages than expected.
-     * 
-     * @param numberOfMessages
-     *            exact number of expected messages
-     */
-    protected void waitUntilEventMessagesAreSent(final int numberOfMessages) {
+    protected void waitUntilEventMessagesAreDispatchedToTarget(final EventTopic... eventTopics) {
         createConditionFactory().untilAsserted(() -> {
-            int messagesReceived = 0;
-            for (final List<Message> messages : replyToListener.getEventMessages().values()) {
-                messagesReceived += messages.size();
-            }
-            assertThat(messagesReceived).isEqualTo(numberOfMessages);
+            assertThat(eventTopics).containsExactlyInAnyOrderElementsOf(replyToListener.getLatestEventMessageTopics());
         });
+        replyToListener.resetLatestEventMessageTopics();
     }
 
     protected void purgeReplyToListener() {
