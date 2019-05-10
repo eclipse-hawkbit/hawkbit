@@ -34,6 +34,8 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      *
      * Constructor.
      *
+     * @param distributionSet
+     *            that has been assigned
      * @param assignedTargets
      *            the target objects which have been assigned to the
      *            distribution set
@@ -41,15 +43,14 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      *            count of the assigned targets
      * @param alreadyAssigned
      *            the count of the already assigned targets
-     * @param targetManagement
-     *            to retrieve the assigned targets
      * @param actions
      *            of the assignment
-     *
+     * @param targetManagement
+     *            to retrieve the assigned targets
      */
     public DistributionSetAssignmentResult(final DistributionSet distributionSet, final List<String> assignedTargets,
-            final int assigned,
-            final int alreadyAssigned, final List<Action> actions, final TargetManagement targetManagement) {
+            final int assigned, final int alreadyAssigned, final List<Action> actions,
+            final TargetManagement targetManagement) {
         super(assigned, alreadyAssigned, 0, Collections.emptyList(), Collections.emptyList());
         this.distributionSet = distributionSet;
         this.assignedTargets = assignedTargets;

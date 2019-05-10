@@ -261,16 +261,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to get the type of event depending on whether the action has a
-     * valid maintenance window available or not based on defined maintenance
-     * schedule. In case of no maintenance schedule or if there is a valid
-     * window available, the topic {@link EventTopic#DOWNLOAD_AND_INSTALL} is
-     * returned else {@link EventTopic#DOWNLOAD} is returned.
+     * Determines the {@link EventTopic} for the given {@link Action}, depending
+     * on its action type.
      *
-     * @param maintenanceWindowAvailable
-     *            valid maintenance window or not.
+     * @param action
+     *            to obtain the corresponding {@link EventTopic} for
      *
-     * @return {@link EventTopic} to use for message.
+     * @return the {@link EventTopic} for this action
      */
     private static EventTopic getEventTypeForAction(final Action action) {
         if (action.isCancelingOrCanceled()) {
@@ -284,7 +281,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * the Distribution set to a Target has been canceled.
      *
      * @param cancelEvent
-     *            the object to be send.
+     *            that is to be converted to a DMF message
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {

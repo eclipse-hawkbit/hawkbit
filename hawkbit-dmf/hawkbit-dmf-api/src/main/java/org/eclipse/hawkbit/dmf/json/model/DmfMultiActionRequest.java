@@ -59,6 +59,9 @@ public class DmfMultiActionRequest {
         addElement(element);
     }
 
+    /**
+     * Represents an element within a {@link DmfMultiActionRequest}.
+     */
     public static class DmfMultiActionElement {
 
         @JsonProperty

@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * Represents a map of {@link DistributionSetAssignmentResultMap} entities.
+ */
 public class DistributionSetAssignmentResultMap {
 
     private final Map<Long, DistributionSetAssignmentResult> results = new HashMap<>();

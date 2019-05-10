@@ -34,6 +34,14 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
     private boolean isMultiAssignmentsEnabled;
     private boolean multiAssignmentsEnabledChanged;
 
+    /**
+     * Constructor.
+     * 
+     * @param tenantConfigurationManagement
+     *            to read /write tenant-specific configuration properties
+     * @param i18n
+     *            to obtain localized strings
+     */
     public MultiAssignmentsConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
             final VaadinMessageSource i18n) {
         super(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, tenantConfigurationManagement, i18n);
