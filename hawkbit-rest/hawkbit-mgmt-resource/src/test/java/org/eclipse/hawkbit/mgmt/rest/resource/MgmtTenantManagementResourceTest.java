@@ -32,16 +32,42 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     @Description("Multiassignment can not be deactivated.")
     public void deactivateMultiassignment() throws Exception {
-        final String multiassignmentKey = "multi.assignments.enabled";
+        final String multiAssignmentKey = "multi.assignments.enabled";
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiassignmentKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
                 .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiassignmentKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
                 .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @Description("The 'repository.actions.autoclose.enabled' property must not be modified if Multi-Assignments is enabled.")
+    public void autoCloseCannotBeModifiedIfMultiAssignmentIsEnabled() throws Exception {
+        final String multiAssignmentKey = "multi.assignments.enabled";
+        final String autoCloseKey = "repository.actions.autoclose.enabled";
+
+        final String bodyActivate = new JSONObject().put("value", true).toString();
+        final String bodyDeactivate = new JSONObject().put("value", false).toString();
+
+        // enable Multi-Assignments
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
+                .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // try to enable Auto-Close
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", autoCloseKey)
+                .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
+
+        // try to disable Auto-Close
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", autoCloseKey)
+                .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden());
+    }
+
 }
