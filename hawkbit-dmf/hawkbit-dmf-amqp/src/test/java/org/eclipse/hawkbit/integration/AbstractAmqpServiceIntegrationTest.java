@@ -255,11 +255,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected void assertLatestMultiActionMessage(final String controllerId,
             final List<Entry<Long, EventTopic>> actionsExpected) {
-        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestLatestMultiActionMessageActions(controllerId);
-        assertThat(actionsFromMessage).containsExactlyElementsOf(actionsExpected);
+        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestMultiActionMessageActions(controllerId);
+        assertThat(actionsFromMessage).containsExactlyInAnyOrderElementsOf(actionsExpected);
     }
 
-    protected List<Entry<Long, EventTopic>> getLatestLatestMultiActionMessageActions(
+    protected List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(
             final String expectedControllerId) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
         assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))

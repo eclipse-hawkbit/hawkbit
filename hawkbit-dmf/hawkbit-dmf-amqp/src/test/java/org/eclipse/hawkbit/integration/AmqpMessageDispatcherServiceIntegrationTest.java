@@ -154,7 +154,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     @Test
-    @Description("If multi assignment is enabled multi-action message are sent.")
+    @Description("If multi assignment is enabled multi-action messages are sent.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DeploymentEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -164,7 +164,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void assignMultipleDsInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "assignMultipleDsInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
@@ -190,7 +190,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void cancelActionInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
@@ -222,7 +222,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 1) })
     public void finishActionInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
@@ -249,7 +249,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void assignDsMultipleTimesInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
@@ -271,10 +271,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Long assignNewDsToTarget(final String controllerId) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        return assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        final Long actionId = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
+        return actionId;
     }
 
-    // TODO: check rollout event counts
     @Test
     @Description("If multi assignment is enabled multiple rollouts with the same DS lead to multiple actions.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -289,7 +290,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = RolloutGroupCreatedEvent.class, count = 2),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 4) })
     public void startRolloutsWithSameDsInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "startRolloutsWithSameDsInMultiAssignMode";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -297,16 +298,15 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Set<Long> smIds = getSoftwareModuleIds(ds);
         final String filterQuery = "controllerId==" + controllerId;
 
-        startRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds));
 
-        startRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds, smIds));
     }
 
-    // TODO: check rollout event counts
     @Test
     @Description("If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -321,7 +321,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = RolloutGroupCreatedEvent.class, count = 3),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 6) })
     public void startMultipleRolloutsAndFinishInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "startMultipleRolloutsAndFinishInMultiAssignMode";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -331,14 +331,14 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
 
-        startRollout(ds1, filterQuery);
-        startRollout(ds2, filterQuery);
+        createAndStartRollout(ds1, filterQuery);
+        createAndStartRollout(ds2, filterQuery);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
-        startRollout(ds1, filterQuery);
+        createAndStartRollout(ds1, filterQuery);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
         
-        final List<Long> installActions = getLatestLatestMultiActionMessageActions(controllerId).stream()
+        final List<Long> installActions = getLatestMultiActionMessageActions(controllerId).stream()
                 .filter(entry -> entry.getValue().equals(EventTopic.DOWNLOAD_AND_INSTALL)).map(Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -357,7 +357,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         return ds.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toSet());
     }
 
-    private Rollout startRollout(final DistributionSet ds, final String filterQuery) {
+    private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
                 filterQuery, ds, "50", "5");
         rolloutManagement.start(rollout.getId());
@@ -465,8 +465,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         createConditionFactory().until(() -> securityRule.runAsPrivileged(callable));
     }
 
-    private void setMultiAssignmentsEnabled(final boolean enable) {
+    private void enableMultiAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                enable);
+                true);
     }
 }
