@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,8 +78,6 @@ import com.google.common.collect.Maps;
 public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
-
-    private static final int MAX_ACTIONS = RepositoryConstants.MAX_ACTION_COUNT;
 
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
@@ -178,7 +178,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         targetManagement.getByControllerID(controllerIds).stream().forEach(target -> {
 
             final List<Action> activeActions = deploymentManagement
-                    .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTIONS), target.getControllerId()).getContent();
+                    .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId())
+                    .getContent();
 
             activeActions.forEach(action -> {
                 final DistributionSet distributionSet = action.getDistributionSet();

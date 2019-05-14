@@ -192,8 +192,8 @@ public abstract class AbstractDistributionSetDetails
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                Boolean.class, false);
+        return tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 
     private String getMigrationRequiredValue(final Boolean isMigrationRequired) {

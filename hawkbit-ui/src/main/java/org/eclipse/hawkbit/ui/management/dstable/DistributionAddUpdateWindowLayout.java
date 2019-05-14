@@ -295,7 +295,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private boolean isMultiAssignmentEnabled() {
         return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                Boolean.class, false);
+                Boolean.class).getValue();
     }
 
     private void populateValuesOfDistribution(final Long editDistId) {

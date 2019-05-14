@@ -810,17 +810,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     protected boolean isActionsAutocloseEnabled() {
-        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class, Boolean.FALSE);
+        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class, Boolean.TRUE);
+        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
-    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType,
-            final T defaultValue) {
+    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
         return systemSecurityContext
-                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType, defaultValue));
+                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
 }

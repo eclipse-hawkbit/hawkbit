@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 
 import java.io.Serializable;
@@ -69,8 +70,6 @@ import org.springframework.util.StringUtils;
 public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
-
-    private static final int MAX_ACTIONS = RepositoryConstants.MAX_ACTION_COUNT;
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
@@ -207,10 +206,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
-        sendCurrentUpdateCommandToTarget(target);
+        sendUpdateCommandToTarget(target);
     }
 
-    private void sendCurrentUpdateCommandToTarget(final Target target) {
+    private void sendUpdateCommandToTarget(final Target target) {
         if (isMultiAssignmentsEnabled()) {
             sendCurrentActionsAsMultiActionToTarget(target);
         } else {
@@ -220,7 +219,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
         final List<Action> actions = controllerManagement
-                .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTIONS), target.getControllerId()).getContent();
+                .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId()).getContent();
 
         final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
                 .collect(Collectors.toSet());
@@ -257,8 +256,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(smIds);
 
-        return distributionSet.getModules().stream().collect(Collectors.toMap(sm -> sm,
-                sm -> metadata.containsKey(sm.getId()) ? metadata.get(sm.getId()) : Collections.emptyList()));
+        return distributionSet.getModules().stream()
+                .collect(Collectors.toMap(sm -> sm, sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));
+
     }
 
     /**
@@ -317,10 +317,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 ? controllerManagement.addCancelActionStatus(actionStatus)
                 : controllerManagement.addUpdateActionStatus(actionStatus);
 
-        if (!updatedAction.isActive()
-                || (updatedAction.hasMaintenanceSchedule() && updatedAction.isMaintenanceWindowAvailable())) {
-            sendCurrentUpdateCommandToTarget(action.getTarget());
+        if (shouldTargetProceed(updatedAction)) {
+            sendUpdateCommandToTarget(action.getTarget());
         }
+    }
+
+    private static boolean shouldTargetProceed(final Action action) {
+        return !action.isActive() || (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable());
     }
 
     private static boolean isCorrelationIdNotEmpty(final Message message) {
@@ -407,13 +410,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class, Boolean.FALSE);
+        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
-    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType,
-            final T defaultValue) {
+    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
         return systemSecurityContext
-                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType, defaultValue));
+                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
 }
