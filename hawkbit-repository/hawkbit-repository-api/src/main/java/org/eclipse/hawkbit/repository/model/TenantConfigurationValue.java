@@ -16,7 +16,7 @@ import java.io.Serializable;
  * @param <T>
  *            type of the configuration value
  */
-public class TenantConfigurationValue<T extends Serializable> implements Serializable {
+public final class TenantConfigurationValue<T extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private T value;

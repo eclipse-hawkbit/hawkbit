@@ -135,17 +135,16 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
-    @Mock
-    private TenantConfigurationValue<Boolean> multiAssignmentConfig;
-
     @Before
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
+        final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
+                .global(Boolean.FALSE).build();
         when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
                 .thenReturn(multiAssignmentConfig);
-        when(multiAssignmentConfig.getValue()).thenReturn(false);
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
