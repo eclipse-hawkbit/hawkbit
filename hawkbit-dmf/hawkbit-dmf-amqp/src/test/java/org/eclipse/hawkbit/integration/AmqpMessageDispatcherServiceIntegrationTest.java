@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
-import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -156,7 +156,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("If multi assignment is enabled multi-action messages are sent.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
@@ -182,7 +182,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("Handle cancelation process of an action in multi assignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 3),
+            @Expect(type = MultiActionEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
@@ -213,7 +213,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("Handle finishing an action in multi assignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
@@ -232,8 +232,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
 
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE,
-                EventTopic.MULTI_ACTION);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);
         assertRequestAttributesUpdateMessage(controllerId);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
     }
@@ -241,7 +240,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("If multi assignment is enabled assigning a DS multiple times creates a new action every time.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 0),
@@ -258,7 +257,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         final Long actionId2 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        
+
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
@@ -279,7 +278,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("If multi assignment is enabled multiple rollouts with the same DS lead to multiple actions.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
@@ -310,14 +309,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DeploymentEvent.class, count = 3),
-            @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 5),
+            @Expect(type = MultiActionEvent.class, count = 3), @Expect(type = ActionCreatedEvent.class, count = 3),
+            @Expect(type = ActionUpdatedEvent.class, count = 5),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 5), @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
-            @Expect(type = RolloutCreatedEvent.class, count = 3),
-            @Expect(type = RolloutUpdatedEvent.class, count = 9),
+            @Expect(type = RolloutCreatedEvent.class, count = 3), @Expect(type = RolloutUpdatedEvent.class, count = 9),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 3),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 6) })
     public void startMultipleRolloutsAndFinishInMultiAssignMode() {
@@ -337,19 +335,17 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         createAndStartRollout(ds1, filterQuery);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
-        
+
         final List<Long> installActions = getLatestMultiActionMessageActions(controllerId).stream()
                 .filter(entry -> entry.getValue().equals(EventTopic.DOWNLOAD_AND_INSTALL)).map(Entry::getKey)
                 .collect(Collectors.toList());
 
         updateActionViaDmfClient(controllerId, installActions.get(0), DmfActionStatus.FINISHED);
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE,
-                EventTopic.MULTI_ACTION);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds2, smIds1));
 
         updateActionViaDmfClient(controllerId, installActions.get(1), DmfActionStatus.FINISHED);
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE,
-                EventTopic.MULTI_ACTION);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1));
     }
 
@@ -396,7 +392,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         targetManagement.deleteByControllerID(controllerId);
         assertDeleteMessage(controllerId);
     }
-
 
     @Test
     @Description("Verify that attribute update is requested after device successfully closed software update.")
@@ -466,7 +461,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private void enableMultiAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                true);
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 }

@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
@@ -134,13 +135,17 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
+    @Mock
+    private TenantConfigurationValue<Boolean> multiAssignmentConfig;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
-        when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue())
-                .thenReturn(false);
+        when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
+                .thenReturn(multiAssignmentConfig);
+        when(multiAssignmentConfig.getValue()).thenReturn(false);
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);

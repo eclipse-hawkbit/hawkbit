@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -156,19 +156,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ exchange after the Distribution
-     * set has been assign to a Target.
+     * Listener for Multi-Action events.
      *
      * @param e
-     *            the object to be send.
+     *            the Multi-Action event to be processed
      */
-    @EventListener(classes = DeploymentEvent.class)
-    protected void onDeployment(final DeploymentEvent e) {
+    @EventListener(classes = MultiActionEvent.class)
+    protected void onMultiAction(final MultiActionEvent e) {
         if (isNotFromSelf(e)) {
             return;
         }
-
-        LOG.debug("DeploymentEvent received. I will forward it to DMF broker.");
+        LOG.debug("MultiActionEvent received for {}", e.getControllerIds());
         sendMultiActionRequestMessages(e.getTenant(), e.getControllerIds());
     }
 

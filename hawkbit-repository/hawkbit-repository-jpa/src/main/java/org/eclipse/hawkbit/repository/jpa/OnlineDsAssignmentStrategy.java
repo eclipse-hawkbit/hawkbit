@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -64,7 +64,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     void sendDeploymentEvent(final Target target) {
-        sendDeploymentEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
+        sendMultiActionEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
         final String tenant = filteredActions.get(0).getTenant();
-        sendDeploymentEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
+        sendMultiActionEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
                 .collect(Collectors.toList()));
     }
 
@@ -186,9 +186,18 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                 distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
-    private void sendDeploymentEvent(final String tenant, final List<String> controllerIds) {
+    /**
+     * Helper to fire a {@link MultiActionEvent}. This method may only be called
+     * if the Multi-Assignments feature is enabled.
+     * 
+     * @param tenant
+     *            the event is scoped to
+     * @param controllerIds
+     *            of the targets the event refers to
+     */
+    private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
         afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new DeploymentEvent(tenant, bus.getId(), controllerIds)));
+                () -> eventPublisher.publishEvent(new MultiActionEvent(tenant, bus.getId(), controllerIds)));
     }
 
 }

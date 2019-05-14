@@ -16,7 +16,7 @@ import java.util.List;
  * TenantAwareEvent that gets sent when a distribution set gets assigned to a
  * target.
  */
-public class DeploymentEvent extends RemoteTenantAwareEvent implements Iterable<String> {
+public abstract class DeploymentEvent extends RemoteTenantAwareEvent implements Iterable<String> {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,8 +39,7 @@ public class DeploymentEvent extends RemoteTenantAwareEvent implements Iterable<
      * @param controllerIds
      *            the controller IDs
      */
-    public DeploymentEvent(final String tenant, final String applicationId,
-            final List<String> controllerIds) {
+    public DeploymentEvent(final String tenant, final String applicationId, final List<String> controllerIds) {
         super(applicationId, tenant, applicationId);
         this.controllerIds.addAll(controllerIds);
     }

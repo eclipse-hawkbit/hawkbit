@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.event.remote.DeploymentEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
@@ -134,8 +134,8 @@ public class EventType {
         // target attributes requested flag
         TYPES.put(37, TargetAttributesRequestedEvent.class);
 
-        // generic deployment event for assignments and cancellations
-        TYPES.put(38, DeploymentEvent.class);
+        // deployment event for assignments and /or cancellations
+        TYPES.put(38, MultiActionEvent.class);
     }
 
     private int value;

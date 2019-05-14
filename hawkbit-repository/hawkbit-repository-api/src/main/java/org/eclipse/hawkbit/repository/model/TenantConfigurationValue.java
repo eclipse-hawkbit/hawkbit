@@ -11,12 +11,12 @@ package org.eclipse.hawkbit.repository.model;
 import java.io.Serializable;
 
 /**
- * represents a tenant configuration value including some meta data
+ * Represents a tenant configuration value including some meta data
  * 
  * @param <T>
  *            type of the configuration value
  */
-public final class TenantConfigurationValue<T extends Serializable> implements Serializable {
+public class TenantConfigurationValue<T extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private T value;

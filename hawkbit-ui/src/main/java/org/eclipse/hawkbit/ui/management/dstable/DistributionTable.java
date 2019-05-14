@@ -493,15 +493,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return false;
     }
 
-    private String getPendingActionMessage(final String message, final String controllerId,
-            final String distNameVersion) {
-        String pendActionMsg = getI18n().getMessage("message.target.assigned.pending");
-        if (null == message) {
-            pendActionMsg = getI18n().getMessage("message.dist.pending.action", controllerId, distNameVersion);
-        }
-        return pendActionMsg;
-    }
-
     private void updateDistributionInTable(final DistributionSet editedDs) {
         final Item item = getContainerDataSource().getItem(editedDs.getId());
         if (item == null) {
