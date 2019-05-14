@@ -117,16 +117,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         replyToListener.resetLatestEventMessageTopics();
     }
 
-    protected void purgeReplyToListener() {
-        replyToListener.purge();
-    }
-
-    protected void verifyDeadLetterMessages(final int expectedMessages) {
-        createConditionFactory().untilAsserted(() -> {
-            Mockito.verify(getDeadletterListener(), Mockito.times(expectedMessages)).handleMessage(Mockito.any());
-        });
-    }
-
     protected DeadletterListener getDeadletterListener() {
         return deadletterListener;
     }
@@ -243,11 +233,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
                 .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
     }
 
-    private static List<DmfMultiActionElement> getNonDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
-        return request.getElements().stream().filter(multiaction -> !isDownloadAndUpdateRequest(multiaction))
-                .collect(Collectors.toList());
-    }
-
     private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
         return multiActionElement.getTopic().equals(EventTopic.DOWNLOAD)
                 || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
@@ -259,8 +244,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         assertThat(actionsFromMessage).containsExactlyInAnyOrderElementsOf(actionsExpected);
     }
 
-    protected List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(
-            final String expectedControllerId) {
+    protected List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
         assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
                 .isEqualTo(expectedControllerId);

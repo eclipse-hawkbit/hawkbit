@@ -30,8 +30,8 @@ import io.qameta.allure.Story;
 public class MgmtTenantManagementResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
-    @Description("Multiassignment can not be deactivated.")
-    public void deactivateMultiassignment() throws Exception {
+    @Description("The 'multi.assignments.enabled' property must not be changed to false.")
+    public void deactivateMultiAssignment() throws Exception {
         final String multiAssignmentKey = "multi.assignments.enabled";
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();

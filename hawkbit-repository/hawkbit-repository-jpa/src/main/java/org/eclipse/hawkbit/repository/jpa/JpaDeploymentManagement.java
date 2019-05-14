@@ -70,7 +70,6 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.BusProperties;
@@ -409,7 +408,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         entityManager.detach(set);
         // detaching as the entity has been updated by the JPQL query above
         targets.forEach(entityManager::detach);
-        // send out TargetUpdated events
         assignmentStrategy.sendTargetUpdatedEvents(set, targets);
     }
 
@@ -553,19 +551,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // check if we need to override running update actions
         final List<Long> overrideObsoleteUpdateActions;
 
-        if (!isMultiAssignmentsEnabled()) {
-            if (systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                    .getConfigurationValue(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class)
-                    .getValue())) {
-                overrideObsoleteUpdateActions = Collections.emptyList();
-                onlineDsAssignmentStrategy
-                        .closeObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
-            } else {
-                overrideObsoleteUpdateActions = onlineDsAssignmentStrategy
-                        .overrideObsoleteUpdateActions(Collections.singletonList(action.getTarget().getId()));
-            }
-        } else {
+        if (isMultiAssignmentsEnabled()) {
             overrideObsoleteUpdateActions = Collections.emptyList();
+        } else {
+            final List<Long> targetId = Collections.singletonList(action.getTarget().getId());
+            if (isActionsAutocloseEnabled()) {
+                overrideObsoleteUpdateActions = Collections.emptyList();
+                onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetId);
+            } else {
+                overrideObsoleteUpdateActions = onlineDsAssignmentStrategy.overrideObsoleteUpdateActions(targetId);
+            }
         }
 
         action.setActive(true);

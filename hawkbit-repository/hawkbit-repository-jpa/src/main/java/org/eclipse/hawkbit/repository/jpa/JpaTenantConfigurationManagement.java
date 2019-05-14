@@ -201,7 +201,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         }
     }
 
-    private void assertMultiAssignmentsValueChange(final String key, final JpaTenantConfiguration valueChange) {
+    private static void assertMultiAssignmentsValueChange(final String key, final JpaTenantConfiguration valueChange) {
         if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && !Boolean.parseBoolean(valueChange.getValue())) {
             LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", key);
             throw new TenantConfigurationValueChangeNotAllowedException();
