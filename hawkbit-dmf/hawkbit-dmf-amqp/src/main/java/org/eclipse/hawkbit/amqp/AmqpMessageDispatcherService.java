@@ -173,23 +173,24 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
 
         final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModuleMetadata = new HashMap<>();
-        targetManagement.getByControllerID(controllerIds).stream().forEach(target -> {
+        targetManagement.getByControllerID(controllerIds).stream()
+                .filter(target -> IpUtil.isAmqpUri(target.getAddress())).forEach(target -> {
 
-            final List<Action> activeActions = deploymentManagement
-                    .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId())
-                    .getContent();
+                    final List<Action> activeActions = deploymentManagement
+                            .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId())
+                            .getContent();
 
-            activeActions.forEach(action -> {
-                final DistributionSet distributionSet = action.getDistributionSet();
-                softwareModuleMetadata.computeIfAbsent(distributionSet.getId(),
-                        id -> getSoftwareModulesWithMetadata(distributionSet));
-            });
+                    activeActions.forEach(action -> {
+                        final DistributionSet distributionSet = action.getDistributionSet();
+                        softwareModuleMetadata.computeIfAbsent(distributionSet.getId(),
+                                id -> getSoftwareModulesWithMetadata(distributionSet));
+                    });
 
-            if (!activeActions.isEmpty()) {
-                sendMultiActionRequestToTarget(tenant, target, activeActions, softwareModuleMetadata);
-            }
+                    if (!activeActions.isEmpty()) {
+                        sendMultiActionRequestToTarget(tenant, target, activeActions, softwareModuleMetadata);
+                    }
 
-        });
+                });
 
     }
 
