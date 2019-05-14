@@ -61,7 +61,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
-import org.eclipse.hawkbit.ui.management.state.AssignmentUIState;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.push.CancelTargetAssignmentEventContainer;
@@ -901,45 +900,37 @@ public class TargetTable extends AbstractTable<Target> {
 
     private void openConfirmationWindowForAssignments(final Target target,
             final List<DistributionSet> distributionSets) {
-        final TargetIdName targetIdName = new TargetIdName(target);
-        addAssignments(targetIdName, distributionSets);
-        openConfirmationWindowForAssignment(targetIdName.getTargetName(),
-                distributionSets.stream().map(DistributionSet::getName).collect(Collectors.toList()));
-    }
 
-    private void openConfirmationWindowForAssignment(final String targetName, final List<String> distributionSetNames) {
-        final String confirmationMessage;
-        if (distributionSetNames.size() > 1) {
-            confirmationMessage = getI18n().getMessage(MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS, "target",
-                    targetName, String.join(", ", distributionSetNames));
-        } else {
-            confirmationMessage = getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionSetNames.get(0),
-                    "target", targetName);
-        }
-        confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                confirmationMessage, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
-                getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
-                        saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
-                                deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
-                    } else {
-                        managementUIState.getAssignmentState().clear();
-                    }
-                }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(),
-                        getI18n(), uiProperties),
-                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+        final String confirmationMessage = getConfirmationMessage(target, distributionSets);
+        final String caption = getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX);
+        final String okLabel = getI18n().getMessage(UIMessageIdProvider.BUTTON_OK);
+        final String cancelLabel = getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL);
+
+        confirmDialog = new ConfirmationDialog(caption, confirmationMessage, okLabel, cancelLabel, ok -> {
+            if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
+                saveAllAssignments(Collections.singletonList(target), distributionSets, managementUIState,
+                        actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
+                        getEventBus(), getI18n(), this);
+            }
+        }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
+                uiProperties), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private Consumer<Boolean> saveButtonToggle() {
-        return isEnabled -> confirmDialog.getOkButton().setEnabled(isEnabled);
+    private String getConfirmationMessage(final Target target, final List<DistributionSet> distributionSets) {
+        final String targetName = target.getName();
+        final int dsCount = distributionSets.size();
+        if (dsCount > 1) {
+            return getI18n().getMessage(MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS, dsCount, "target", targetName);
+        }
+        return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionSets.get(0).getName(), "target",
+                targetName);
     }
 
-    private void addAssignments(final TargetIdName targetIdName, final List<DistributionSet> distributionSets) {
-        final AssignmentUIState assignmentState = managementUIState.getAssignmentState();
-        distributionSets.stream().map(DistributionSetIdName::new)
-                .forEach(distributionSet -> assignmentState.addAssignment(distributionSet, targetIdName));
+    private Consumer<Boolean> saveButtonToggle() {
+        return isEnabled -> confirmDialog.getOkButton().setEnabled(isEnabled);
     }
 
     @Override

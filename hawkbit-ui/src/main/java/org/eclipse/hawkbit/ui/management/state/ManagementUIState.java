@@ -38,8 +38,6 @@ public class ManagementUIState implements ManagementEntityState, Serializable {
 
     private final TargetTableFilters targetTableFilters;
 
-    private final AssignmentUIState assignmentState = new AssignmentUIState();
-
     private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
     private final Set<TargetIdName> deletedTargetList = new HashSet<>();
@@ -133,10 +131,6 @@ public class ManagementUIState implements ManagementEntityState, Serializable {
 
     public DistributionTableFilters getDistributionTableFilters() {
         return distributionTableFilters;
-    }
-
-    public AssignmentUIState getAssignmentState() {
-        return assignmentState;
     }
 
     public Set<DistributionSetIdName> getDeletedDistributionList() {
