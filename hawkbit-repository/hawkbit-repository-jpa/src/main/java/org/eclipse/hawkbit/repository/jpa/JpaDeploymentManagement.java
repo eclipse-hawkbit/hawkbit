@@ -155,7 +155,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher, bus,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisher,
-                bus, actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled);
+                bus, actionRepository, actionStatusRepository, quotaManagement);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -350,19 +350,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 quotaManagement.getMaxTargetsPerManualAssignment(), Target.class, DistributionSet.class, null);
     }
 
-    private Set<Long> closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
+    private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
             final List<List<Long>> targetIdsChunks) {
 
         if (isMultiAssignmentsEnabled()) {
             LOG.debug("Multi Assignments feature is enabled: No need to close /cancel active actions.");
-            return Collections.emptySet();
+            return;
         }
 
         if (isActionsAutocloseEnabled()) {
             assignmentStrategy.closeActiveActions(targetIdsChunks);
-            return Collections.emptySet();
         } else {
-            return assignmentStrategy.cancelActiveActions(targetIdsChunks);
+            assignmentStrategy.cancelActiveActions(targetIdsChunks);
         }
     }
 

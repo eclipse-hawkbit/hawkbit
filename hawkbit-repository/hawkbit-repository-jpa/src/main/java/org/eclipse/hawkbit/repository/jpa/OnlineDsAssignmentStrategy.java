@@ -46,13 +46,16 @@ import com.google.common.collect.Lists;
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
+    private final Supplier<Boolean> multiAssignmentsConfig;
+
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
             final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final Supplier<Boolean> multiAssignmentsConfig) {
         super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig);
+                quotaManagement);
+        this.multiAssignmentsConfig = multiAssignmentsConfig;
     }
 
     @Override
@@ -186,6 +189,11 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                 distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
+    private boolean hasPendingCancellations(final Target target) {
+        return actionRepository.findByActiveAndTarget(null, target.getControllerId(), true).getContent().stream()
+                .anyMatch(action -> action.getStatus() == Status.CANCELING);
+    }
+
     /**
      * Helper to fire a {@link MultiActionEvent}. This method may only be called
      * if the Multi-Assignments feature is enabled.
@@ -198,6 +206,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
         afterCommit.afterCommit(
                 () -> eventPublisher.publishEvent(new MultiActionEvent(tenant, bus.getId(), controllerIds)));
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return multiAssignmentsConfig.get();
     }
 
 }

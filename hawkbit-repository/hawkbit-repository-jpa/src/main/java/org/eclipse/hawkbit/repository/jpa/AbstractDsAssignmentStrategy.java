@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -51,17 +50,14 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final AfterTransactionCommitExecutor afterCommit;
     protected final ApplicationEventPublisher eventPublisher;
     protected final BusProperties bus;
-    private final ActionRepository actionRepository;
+    protected final ActionRepository actionRepository;
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
-
-    private final Supplier<Boolean> multiAssignmentsConfig;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
-            final Supplier<Boolean> multiAssignmentsConfig) {
+            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisher = eventPublisher;
@@ -69,7 +65,6 @@ public abstract class AbstractDsAssignmentStrategy {
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
-        this.multiAssignmentsConfig = multiAssignmentsConfig;
     }
 
     /**
@@ -240,15 +235,6 @@ public abstract class AbstractDsAssignmentStrategy {
         }
 
         return actionStatus;
-    }
-
-    boolean hasPendingCancellations(final Target target) {
-        return actionRepository.findByActiveAndTarget(null, target.getControllerId(), true).getContent().stream()
-                .anyMatch(action -> action.getStatus() == Status.CANCELING);
-    }
-
-    boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.get();
     }
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
