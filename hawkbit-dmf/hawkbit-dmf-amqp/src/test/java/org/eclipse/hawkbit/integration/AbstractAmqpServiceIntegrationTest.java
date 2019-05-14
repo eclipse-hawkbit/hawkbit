@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +35,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
-import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -76,8 +76,8 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
 
+    protected ReplyToListener replyToListener;
     private DeadletterListener deadletterListener;
-    private ReplyToListener replyToListener;
     private DistributionSet distributionSet;
 
     @Autowired
@@ -93,12 +93,12 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         Mockito.reset(deadletterListener);
         replyToListener = harness.getSpy(ReplyToListener.LISTENER_ID);
         assertThat(replyToListener).isNotNull();
-        Mockito.reset(replyToListener);
         replyToListener.purge();
+        Mockito.reset(replyToListener);
         getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
     }
 
-    protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
+    private <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
         createConditionFactory().until(() -> {
             return securityRule.runAsPrivileged(() -> callable.call().isPresent());
         });
@@ -112,7 +112,8 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected void waitUntilEventMessagesAreDispatchedToTarget(final EventTopic... eventTopics) {
         createConditionFactory().untilAsserted(() -> {
-            assertThat(eventTopics).containsExactlyInAnyOrderElementsOf(replyToListener.getLatestEventMessageTopics());
+            assertThat(replyToListener.getLatestEventMessageTopics())
+                    .containsExactlyInAnyOrderElementsOf(Arrays.asList(eventTopics));
         });
         replyToListener.resetLatestEventMessageTopics();
     }
@@ -209,33 +210,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
             final String controllerId) {
         assertAssignmentMessage(softwareModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL);
 
-    }
-
-    protected void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,
-            final List<Set<Long>> smIdsOfActionsExpected) {
-        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(controllerId);
-        final DmfMultiActionRequest multiActionRequest = (DmfMultiActionRequest) getDmfClient().getMessageConverter()
-                .fromMessage(multiactionMessage);
-
-        final List<Set<Long>> smIdsOfActionsFound = getDownloadAndUpdateRequests(multiActionRequest).stream()
-                .map(AbstractAmqpServiceIntegrationTest::getSmIds).collect(Collectors.toList());
-        assertThat(smIdsOfActionsFound).containsExactlyElementsOf(smIdsOfActionsExpected);
-    }
-
-    private static Set<Long> getSmIds(final DmfDownloadAndUpdateRequest request) {
-        return request.getSoftwareModules().stream().map(DmfSoftwareModule::getModuleId).collect(Collectors.toSet());
-    }
-
-    private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
-        return request.getElements().stream().filter(AbstractAmqpServiceIntegrationTest::isDownloadAndUpdateRequest)
-                .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
-    }
-
-    private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
-        return multiActionElement.getTopic().equals(EventTopic.DOWNLOAD)
-                || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
     }
 
     protected void assertLatestMultiActionMessage(final String controllerId,

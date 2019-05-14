@@ -30,7 +30,7 @@ public class ReplyToListener implements TestRabbitListener {
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
     private final Map<EventTopic, List<Message>> eventMessages = new EnumMap<>(EventTopic.class);
-    private final List<EventTopic> latestEventMessageTopics = new ArrayList<>();
+    private final List<EventTopic> eventMessageTopics = new ArrayList<>();
     private final Map<String, Message> deleteMessages = new HashMap<>();
     private final Map<String, Message> pingResponseMessages = new HashMap<>();
 
@@ -43,7 +43,7 @@ public class ReplyToListener implements TestRabbitListener {
         if (messageType == MessageType.EVENT) {
             final EventTopic eventTopic = EventTopic
                     .valueOf(message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
-            latestEventMessageTopics.add(eventTopic);
+            eventMessageTopics.add(eventTopic);
             eventMessages.merge(eventTopic, Collections.singletonList(message), (oldList, listToAdd) -> {
                 final List<Message> newList = new ArrayList<>(oldList);
                 newList.addAll(listToAdd);
@@ -74,15 +74,15 @@ public class ReplyToListener implements TestRabbitListener {
         eventMessages.clear();
         deleteMessages.clear();
         pingResponseMessages.clear();
-        latestEventMessageTopics.clear();
+        eventMessageTopics.clear();
     }
 
     public List<EventTopic> getLatestEventMessageTopics() {
-        return latestEventMessageTopics;
+        return eventMessageTopics;
     }
 
     public void resetLatestEventMessageTopics() {
-        latestEventMessageTopics.clear();
+        eventMessageTopics.clear();
     }
 
     public Message getLatestEventMessage(final EventTopic eventTopic) {

@@ -25,7 +25,12 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
+import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -463,4 +468,33 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     private void enableMultiAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
+
+    private void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,
+            final List<Set<Long>> smIdsOfActionsExpected) {
+        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(controllerId);
+        final DmfMultiActionRequest multiActionRequest = (DmfMultiActionRequest) getDmfClient().getMessageConverter()
+                .fromMessage(multiactionMessage);
+
+        final List<Set<Long>> smIdsOfActionsFound = getDownloadAndUpdateRequests(multiActionRequest).stream()
+                .map(AmqpMessageDispatcherServiceIntegrationTest::getSmIds).collect(Collectors.toList());
+        assertThat(smIdsOfActionsFound).containsExactlyInAnyOrderElementsOf(smIdsOfActionsExpected);
+    }
+
+    private static Set<Long> getSmIds(final DmfDownloadAndUpdateRequest request) {
+        return request.getSoftwareModules().stream().map(DmfSoftwareModule::getModuleId).collect(Collectors.toSet());
+    }
+
+    private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
+        return request.getElements().stream()
+                .filter(AmqpMessageDispatcherServiceIntegrationTest::isDownloadAndUpdateRequest)
+                .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
+    }
+
+    private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
+        return multiActionElement.getTopic().equals(EventTopic.DOWNLOAD)
+                || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
 }
