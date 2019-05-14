@@ -506,8 +506,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     .filter(Objects::nonNull).collect(Collectors.toList());
 
             if (!targetAssignments.isEmpty()) {
-                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments,
-                        isMultiAssignmentsEnabled());
+                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
             }
 
             return rolloutGroupActions.getTotalElements();

@@ -30,12 +30,10 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -107,8 +105,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final transient DeploymentManagement deploymentManagement;
 
-    private final transient TenantConfigurationManagement configManagement;
-
     private final String notAllowedMsg;
 
     private boolean distPinned;
@@ -128,8 +124,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
-            final TargetTagManagement targetTagManagement, final TenantConfigurationManagement configManagement,
-            final UiProperties uiProperties) {
+            final TargetTagManagement targetTagManagement, final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
@@ -138,7 +133,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.targetTagManagement = targetTagManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.configManagement = configManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
         this.uiProperties = uiProperties;
@@ -749,13 +743,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return distribution.get().getName();
         }
         return "";
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return configManagement
-                .getConfigurationValue(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                        Boolean.class)
-                .getValue();
     }
 
 }

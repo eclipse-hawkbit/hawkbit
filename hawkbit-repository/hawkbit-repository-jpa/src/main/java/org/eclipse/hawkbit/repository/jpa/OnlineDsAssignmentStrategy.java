@@ -86,9 +86,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         }
     }
 
-    void sendDeploymentEvents(final long distributionSetId, final List<Action> actions,
-            final boolean deviceCanProcessMultipleActions) {
-        if (deviceCanProcessMultipleActions) {
+    void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
+        if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvent(actions);
         } else {
             final List<Action> filteredActions = actions.stream().filter(action -> {

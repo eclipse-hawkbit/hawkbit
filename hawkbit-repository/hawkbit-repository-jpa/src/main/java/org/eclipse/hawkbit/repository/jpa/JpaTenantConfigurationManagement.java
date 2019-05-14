@@ -158,23 +158,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             tenantConfiguration.setValue(value.toString());
         }
 
-        // prevent the Multi-Assignment feature from being disabled; this code
-        // path can be removed once we support this case
-        if (MULTI_ASSIGNMENTS_ENABLED.equals(configurationKeyName)
-                && !Boolean.parseBoolean(tenantConfiguration.getValue())) {
-            LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", configurationKeyName);
-            throw new TenantConfigurationValueChangeNotAllowedException();
-        }
-
-        // prevent the Auto-Close property from being changed if
-        // Multi-Assignments is enabled
-        if (REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED.equals(configurationKeyName)
-                && getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue()) {
-            LOG.debug(
-                    "The property '{}' must not be changed because the Multi-Assignments feature is currently enabled.",
-                    configurationKeyName);
-            throw new TenantConfigurationValueChangeNotAllowedException();
-        }
+        assertValueChangeIsAllowed(configurationKeyName, tenantConfiguration);
 
         final JpaTenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository
                 .save(tenantConfiguration);
@@ -187,6 +171,41 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                 .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
                 .lastModifiedBy(updatedTenantConfiguration.getLastModifiedBy())
                 .value(conversionService.convert(updatedTenantConfiguration.getValue(), clazzT)).build();
+    }
+
+    /**
+     * Asserts that the requested configuration value change is allowed. Throws
+     * a {@link TenantConfigurationValueChangeNotAllowedException} otherwise.
+     * 
+     * @param configurationKeyName
+     *            The configuration key.
+     * @param tenantConfiguration
+     *            The configuration to be validated.
+     * 
+     * @throws TenantConfigurationValueChangeNotAllowedException
+     *             if the requested configuration change is not allowed.
+     */
+    private void assertValueChangeIsAllowed(final String key, final JpaTenantConfiguration valueChange) {
+        assertMultiAssignmentsValueChange(key, valueChange);
+        assertAutoCloseValueChange(key, valueChange);
+    }
+
+    @SuppressWarnings("squid:S1172")
+    private void assertAutoCloseValueChange(final String key, final JpaTenantConfiguration valueChange) {
+        if (REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED.equals(key)
+                && getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue()) {
+            LOG.debug(
+                    "The property '{}' must not be changed because the Multi-Assignments feature is currently enabled.",
+                    key);
+            throw new TenantConfigurationValueChangeNotAllowedException();
+        }
+    }
+
+    private void assertMultiAssignmentsValueChange(final String key, final JpaTenantConfiguration valueChange) {
+        if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && !Boolean.parseBoolean(valueChange.getValue())) {
+            LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", key);
+            throw new TenantConfigurationValueChangeNotAllowedException();
+        }
     }
 
     @Override
