@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -112,10 +113,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact getOrCreateArtifact(final ArtifactUpload artifactUpload) {
-        if (artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(),
-                artifactUpload.getProvidedSha1Sum())) {
-            return artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(),
-                    artifactUpload.getProvidedSha1Sum());
+        final String providedSha1Sum = artifactUpload.getProvidedSha1Sum();
+        if (!StringUtils.isEmpty(providedSha1Sum)
+                && artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(), providedSha1Sum)) {
+            return artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum);
         }
         return storeArtifact(artifactUpload);
     }
