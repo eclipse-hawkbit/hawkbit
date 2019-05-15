@@ -433,11 +433,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
 
-            if (isMultiAssignmentsEnabled()) {
-                onlineDsAssignmentStrategy.sendDeploymentEvent(action.getTarget());
-            } else {
-                onlineDsAssignmentStrategy.cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
-            }
+            onlineDsAssignmentStrategy.cancelAssignment(action);
 
             return saveAction;
         } else {

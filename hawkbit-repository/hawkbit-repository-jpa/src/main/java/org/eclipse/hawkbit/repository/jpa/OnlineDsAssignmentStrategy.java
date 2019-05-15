@@ -66,10 +66,6 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         });
     }
 
-    void sendDeploymentEvent(final Target target) {
-        sendMultiActionEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
-    }
-
     @Override
     void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
         if (isMultiAssignmentsEnabled()) {
@@ -103,19 +99,6 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             sendTargetAssignDistributionSetEvent(filteredActions.get(0).getTenant(), distributionSetId,
                     filteredActions);
         }
-    }
-
-    private void sendDeploymentEvent(final List<Action> actions) {
-        final List<Action> filteredActions = actions.stream().filter(action -> {
-            final Status actionStatus = action.getStatus();
-            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
-        }).collect(Collectors.toList());
-        if (filteredActions.isEmpty()) {
-            return;
-        }
-        final String tenant = filteredActions.get(0).getTenant();
-        sendMultiActionEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
-                .collect(Collectors.toList()));
     }
 
     @Override
@@ -165,6 +148,31 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
         result.setStatus(Status.RUNNING);
         return result;
+    }
+
+    void cancelAssignment(final JpaAction action) {
+        if (isMultiAssignmentsEnabled()) {
+            sendMultiActionEvent(action.getTarget());
+        } else {
+            cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
+        }
+    }
+
+    private void sendMultiActionEvent(final Target target) {
+        sendMultiActionEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
+    }
+
+    private void sendDeploymentEvent(final List<Action> actions) {
+        final List<Action> filteredActions = actions.stream().filter(action -> {
+            final Status actionStatus = action.getStatus();
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+        }).collect(Collectors.toList());
+        if (filteredActions.isEmpty()) {
+            return;
+        }
+        final String tenant = filteredActions.get(0).getTenant();
+        sendMultiActionEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
+                .collect(Collectors.toList()));
     }
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
