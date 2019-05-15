@@ -334,23 +334,22 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         // validate the single groups
-        final boolean hasRemainingTargetsError = validationStatus == ValidationStatus.INVALID;
-        singleGroupsValidation(validation, lastRow, hasRemainingTargetsError);
+        singleGroupsValidation(lastRow);
     }
 
-    private void singleGroupsValidation(final RolloutGroupsValidation validation, final GroupRow lastRow,
-            final boolean remainingError) {
+    private void singleGroupsValidation(final GroupRow lastRow) {
+        final boolean hasRemainingTargetsError = validationStatus == ValidationStatus.INVALID;
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
 
         for (int i = 0; i < groupRows.size(); ++i) {
             final GroupRow row = groupRows.get(i);
             // do not mask the 'remaining targets' error
-            if (remainingError && row.equals(lastRow)) {
+            if (hasRemainingTargetsError && row.equals(lastRow)) {
                 continue;
             }
             row.resetError();
-            if (validation != null) {
-                final Long count = validation.getTargetsPerGroup().get(i);
+            if (groupsValidation != null) {
+                final Long count = groupsValidation.getTargetsPerGroup().get(i);
                 if (count != null && count > maxTargets) {
                     row.setError(i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxTargets));
                     setValidationStatus(ValidationStatus.INVALID);
@@ -476,12 +475,10 @@ public class DefineGroupsLayout extends GridLayout {
                 RangeValidator rangeValidator;
                 if (value instanceof Float) {
                     rangeValidator = new FloatRangeValidator(message, 0F, 100F);
-                }
-                else if (value instanceof Integer) {
+                } else if (value instanceof Integer) {
                     rangeValidator = new IntegerRangeValidator(message, 0, 100);
-                }
-                else {
-                    throw new Validator.InvalidValueException(i18n.getMessage("message.rollout.field.value.type"));
+                } else {
+                    throw new Validator.InvalidValueException(i18n.getMessage("message.enter.number"));
                 }
                 rangeValidator.setMinValueIncluded(false);
                 rangeValidator.validate(value);
