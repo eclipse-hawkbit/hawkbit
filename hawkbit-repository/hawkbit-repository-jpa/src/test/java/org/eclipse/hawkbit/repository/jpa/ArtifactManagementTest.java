@@ -17,14 +17,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
@@ -100,7 +101,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
-    public void createArtifact() throws NoSuchAlgorithmException, IOException {
+    public void createArtifact() throws IOException {
 
         // check baseline
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
@@ -164,7 +165,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
-    public void createArtifactsUntilQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
+    public void createArtifactsUntilQuotaIsExceeded() throws IOException {
 
         // create a software module
         final long smId = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0", null, null))
@@ -195,7 +196,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
-    public void createArtifactsUntilStorageQuotaIsExceeded() throws NoSuchAlgorithmException, IOException {
+    public void createArtifactsUntilStorageQuotaIsExceeded() throws IOException {
 
         // create as many small artifacts as possible w/o violating the storage
         // quota
@@ -226,7 +227,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
-    public void createArtifactWhichExceedsMaxStorage() throws NoSuchAlgorithmException, IOException {
+    public void createArtifactWhichExceedsMaxStorage() throws IOException {
 
         // create one artifact which exceeds the storage quota at once
         final long maxBytes = quotaManagement.getMaxArtifactStorage();
@@ -238,7 +239,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that you cannot create artifacts which exceed the configured maximum size.")
-    public void createArtifactFailsIfTooLarge() throws NoSuchAlgorithmException, IOException {
+    public void createArtifactFailsIfTooLarge() {
 
         // create a software module
         final JpaSoftwareModule sm1 = softwareModuleRepository
@@ -252,7 +253,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests hard delete directly on repository.")
-    public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
+    public void hardDeleteSoftwareModule() throws IOException {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
@@ -270,11 +271,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      * .
      * 
      * @throws IOException
-     * @throws NoSuchAlgorithmException
      */
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
-    public void deleteArtifact() throws NoSuchAlgorithmException, IOException {
+    public void deleteArtifact() throws IOException {
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
         final JpaSoftwareModule sm2 = softwareModuleRepository
@@ -326,7 +326,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
             + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
-    public void deleteDuplicateArtifacts() throws NoSuchAlgorithmException, IOException {
+    public void deleteDuplicateArtifacts() throws IOException {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
@@ -368,8 +368,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that you cannot delete an artifact which exists with the same hash, in the same tenant and the SoftwareModule is not deleted .")
-    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInSameTenants()
-            throws NoSuchAlgorithmException, IOException {
+    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInSameTenants() throws IOException {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1", null, null));
@@ -386,23 +385,24 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
                     inputStream2);
 
+            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact2.getSha1Hash()), randomBytes);
+
             assertThat(artifactRepository.findAll()).hasSize(2);
 
             assertThat(artifact1.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
-            assertThat(artifactRepository
-                    .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
-                            artifact1.getSha1Hash(), artifact1.getTenant())).isTrue();
+            assertThat(artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
+                    artifact1.getSha1Hash(), artifact1.getTenant())).isGreaterThan(1);
 
             artifactRepository.deleteById(artifact1.getId());
             assertThat(artifactRepository.findAll()).hasSize(1);
 
-            assertThat(artifactRepository
-                    .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
-                            artifact2.getSha1Hash(), artifact2.getTenant())).isFalse();
+            assertThat(artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
+                    artifact2.getSha1Hash(), artifact2.getTenant())).isLessThanOrEqualTo(1);
 
             artifactRepository.deleteById(artifact2.getId());
             assertThat(artifactRepository.findAll()).hasSize(0);
+
         }
     }
 
@@ -422,10 +422,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         verifyTenantArtifactCountIs(tenant1, 1);
         verifyTenantArtifactCountIs(tenant2, 2);
 
-        assertThat(runAsTenant(tenant1,
-                () -> artifactRepository
-                        .existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
-                                artifactTenant2.getSha1Hash(), tenant2))).isFalse();
+        assertThat(runAsTenant(tenant1, () -> artifactRepository
+                .countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(artifactTenant2.getSha1Hash(), tenant2)))
+                        .isLessThanOrEqualTo(1);
         runAsTenant(tenant2, () -> {
             artifactRepository.deleteById(artifactTenant2.getId());
             return null;
@@ -436,7 +435,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Loads an local artifact based on given ID.")
-    public void findArtifact() throws NoSuchAlgorithmException, IOException {
+    public void findArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream = new RandomGeneratedInputStream(artifactSize)) {
             final Artifact artifact = createArtifactForSoftwareModule("file1",
@@ -447,17 +446,13 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Loads an artifact binary based on given ID.")
-    public void loadStreamOfArtifact() throws NoSuchAlgorithmException, IOException {
+    public void loadStreamOfArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         final byte[] randomBytes = randomBytes(artifactSize);
         try (final InputStream input = new ByteArrayInputStream(randomBytes)) {
             final Artifact artifact = createArtifactForSoftwareModule("file1",
                     testdataFactory.createSoftwareModuleOs().getId(), artifactSize, input);
-            try (final InputStream inputStream = artifactManagement.loadArtifactBinary(artifact.getSha1Hash()).get()
-                    .getFileInputStream()) {
-                assertTrue("The stored binary matches the given binary",
-                        IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream));
-            }
+            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact.getSha1Hash()), randomBytes);
         }
     }
 
@@ -511,7 +506,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize,
-            final InputStream inputStream) throws IOException {
+            final InputStream inputStream) {
         return artifactManagement.create(new ArtifactUpload(inputStream, moduleId, filename, false, artifactSize));
     }
 
@@ -535,4 +530,14 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     private void verifyTenantArtifactCountIs(final String tenant, final int count) throws Exception {
         assertThat(runAsTenant(tenant, () -> artifactRepository.findAll())).hasSize(count);
     }
+
+    private void assertEqualFileContents(final Optional<AbstractDbArtifact> artifact, final byte[] randomBytes)
+            throws IOException {
+        try (final InputStream inputStream = artifactManagement.loadArtifactBinary(artifact.get().getHashes().getSha1())
+                .get().getFileInputStream()) {
+            assertTrue("The stored binary matches the given binary",
+                    IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream));
+        }
+    }
+
 }

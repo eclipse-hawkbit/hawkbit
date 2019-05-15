@@ -165,12 +165,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public boolean clearArtifactBinary(final String sha1Hash, final long moduleId) {
-        if (localArtifactRepository.existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(sha1Hash,
-                tenantAware.getCurrentTenant())) {
+        final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
+                tenantAware.getCurrentTenant());
+        if (count > 1) {
             // there are still other artifacts that need the binary
             return false;
         }
-
         try {
             LOG.debug("deleting artifact from repository {}", sha1Hash);
             artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
