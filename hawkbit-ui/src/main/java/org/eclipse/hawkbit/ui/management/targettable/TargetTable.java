@@ -889,13 +889,13 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private Set<Long> filterDistributionSetsToAssign(final Set<Long> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptySet();
+        }
         if (isMultiAssignmentsEnabled()) {
             return new HashSet<>(ids);
         }
-        if (!ids.isEmpty()) {
-            return Collections.singleton(ids.iterator().next());
-        }
-        return Collections.emptySet();
+        return Collections.singleton(ids.iterator().next());
     }
 
     private void openConfirmationWindowForAssignments(final Target target,

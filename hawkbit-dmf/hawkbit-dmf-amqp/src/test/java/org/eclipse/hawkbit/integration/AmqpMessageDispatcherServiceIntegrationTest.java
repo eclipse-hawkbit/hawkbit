@@ -482,6 +482,23 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertThat(smIdsOfActionsFound).containsExactlyInAnyOrderElementsOf(smIdsOfActionsExpected);
     }
 
+    private void assertLatestMultiActionMessage(final String controllerId,
+            final List<Entry<Long, EventTopic>> actionsExpected) {
+        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestMultiActionMessageActions(controllerId);
+        assertThat(actionsFromMessage).containsExactlyInAnyOrderElementsOf(actionsExpected);
+    }
+
+    private List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
+        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(expectedControllerId);
+        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
+                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
+        return multiActionRequest.stream()
+                .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
+                .collect(Collectors.toList());
+    }
+
     private static Set<Long> getSmIds(final DmfDownloadAndUpdateRequest request) {
         return request.getSoftwareModules().stream().map(DmfSoftwareModule::getModuleId).collect(Collectors.toSet());
     }

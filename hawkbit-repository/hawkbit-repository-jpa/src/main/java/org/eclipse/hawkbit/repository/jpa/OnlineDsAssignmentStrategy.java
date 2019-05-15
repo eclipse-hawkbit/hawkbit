@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
@@ -36,6 +39,8 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
@@ -45,6 +50,8 @@ import com.google.common.collect.Lists;
  *
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
+
+    private static final Pageable ACTION_PAGE_REQUEST = PageRequest.of(0, MAX_ACTION_COUNT);
 
     private final Supplier<Boolean> multiAssignmentsConfig;
 
@@ -88,17 +95,14 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
         if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvent(actions);
-        } else {
-            final List<Action> filteredActions = actions.stream().filter(action -> {
-                final Status actionStatus = action.getStatus();
-                return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
-            }).collect(Collectors.toList());
-            if (filteredActions.isEmpty()) {
-                return;
-            }
-            sendTargetAssignDistributionSetEvent(filteredActions.get(0).getTenant(), distributionSetId,
-                    filteredActions);
+            return;
         }
+
+        final List<Action> filteredActions = getActionsWithoutCancellations(actions);
+        if (filteredActions.isEmpty()) {
+            return;
+        }
+        sendTargetAssignDistributionSetEvent(filteredActions.get(0).getTenant(), distributionSetId, filteredActions);
     }
 
     @Override
@@ -163,10 +167,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     private void sendDeploymentEvent(final List<Action> actions) {
-        final List<Action> filteredActions = actions.stream().filter(action -> {
-            final Status actionStatus = action.getStatus();
-            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
-        }).collect(Collectors.toList());
+        final List<Action> filteredActions = getActionsWithoutCancellations(actions);
         if (filteredActions.isEmpty()) {
             return;
         }
@@ -177,11 +178,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
-        final List<Action> filteredActions = assignmentResult.getActions().stream().filter(action -> {
-            final Status actionStatus = action.getStatus();
-            return !hasPendingCancellations(action.getTarget()) && Status.CANCELING != actionStatus
-                    && Status.CANCELED != actionStatus;
-        }).collect(Collectors.toList());
+        final List<Action> filteredActions = filterCancellations(assignmentResult.getActions())
+                .filter(action -> !hasPendingCancellations(action.getTarget())).collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
         return assignmentResult;
@@ -198,8 +196,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     private boolean hasPendingCancellations(final Target target) {
-        return actionRepository.findByActiveAndTarget(null, target.getControllerId(), true).getContent().stream()
-                .anyMatch(action -> action.getStatus() == Status.CANCELING);
+        return actionRepository.findByActiveAndTarget(ACTION_PAGE_REQUEST, target.getControllerId(), true).getContent()
+                .stream().anyMatch(action -> action.getStatus() == Status.CANCELING);
     }
 
     /**
@@ -218,6 +216,20 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private boolean isMultiAssignmentsEnabled() {
         return multiAssignmentsConfig.get();
+    }
+
+    private static Stream<Action> filterCancellations(final List<Action> actions) {
+        return actions.stream().filter(action -> {
+            final Status actionStatus = action.getStatus();
+            return Status.CANCELING != actionStatus && Status.CANCELED != actionStatus;
+        });
+    }
+
+    private static List<Action> getActionsWithoutCancellations(final List<Action> actions) {
+        if (actions == null || actions.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return filterCancellations(actions).collect(Collectors.toList());
     }
 
 }

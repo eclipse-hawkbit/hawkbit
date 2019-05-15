@@ -29,18 +29,21 @@ import io.qameta.allure.Story;
 @Story("Tenant Management Resource")
 public class MgmtTenantManagementResourceTest extends AbstractManagementApiIntegrationTest {
 
+    private static final String KEY_MULTI_ASSIGNMENTS = "multi.assignments.enabled";
+
+    private static final String KEY_AUTO_CLOSE = "repository.actions.autoclose.enabled";
+
     @Test
     @Description("The 'multi.assignments.enabled' property must not be changed to false.")
     public void deactivateMultiAssignment() throws Exception {
-        final String multiAssignmentKey = "multi.assignments.enabled";
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
                 .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
                 .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
@@ -48,24 +51,21 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     @Description("The 'repository.actions.autoclose.enabled' property must not be modified if Multi-Assignments is enabled.")
     public void autoCloseCannotBeModifiedIfMultiAssignmentIsEnabled() throws Exception {
-        final String multiAssignmentKey = "multi.assignments.enabled";
-        final String autoCloseKey = "repository.actions.autoclose.enabled";
-
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
         // enable Multi-Assignments
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", multiAssignmentKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
                 .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // try to enable Auto-Close
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", autoCloseKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_AUTO_CLOSE)
                 .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
         // try to disable Auto-Close
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", autoCloseKey)
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_AUTO_CLOSE)
                 .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }

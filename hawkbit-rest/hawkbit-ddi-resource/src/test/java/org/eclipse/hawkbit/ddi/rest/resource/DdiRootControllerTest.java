@@ -260,7 +260,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 etagWithFirstUpdate)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // now lets finish the update
-        sendDeploymentActionFeedback(target, updateAction, "closed", null, null).andDo(MockMvcResultPrinter.print())
+        sendDeploymentActionFeedback(target, updateAction, "closed", null).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // we are again at the original state
@@ -373,14 +373,14 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
-        sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null, null)
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "failure", null)
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "failure").andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
-        sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", null)
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isGone());
+        sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success").andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isGone());
     }
 
     @Test
@@ -416,7 +416,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
-        sendDeploymentActionFeedback(target, action, "closed", "failure", null).andExpect(status().isOk());
+        sendDeploymentActionFeedback(target, action, "closed", "failure").andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(target.getControllerId());
     }
 
@@ -426,7 +426,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
-        sendDeploymentActionFeedback(target, action, "closed", null, null).andExpect(status().isOk());
+        sendDeploymentActionFeedback(target, action, "closed", null).andExpect(status().isOk());
         assertThatAttributesUpdateIsRequested(target.getControllerId());
     }
 
@@ -444,15 +444,22 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     private ResultActions sendDeploymentActionFeedback(final Target target, final Action action, final String execution,
             String finished, String message) throws Exception {
-        if (finished == null)
+        if (finished == null) {
             finished = "none";
-        if (message == null)
+        }
+        if (message == null) {
             message = RandomStringUtils.randomAlphanumeric(1000);
+        }
         final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
                 message);
         return mvc.perform(post("/{tenant}/controller/v1/{controllerId}/deploymentBase/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), action.getId()).content(feedback)
                         .contentType(MediaType.APPLICATION_JSON));
+    }
+
+    private ResultActions sendDeploymentActionFeedback(final Target target, final Action action, final String execution,
+            final String finished) throws Exception {
+        return sendDeploymentActionFeedback(target, action, execution, finished, null);
     }
 
     @Test
@@ -473,16 +480,13 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null, TARGET_PROCEEDING_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=3",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
@@ -512,16 +516,13 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null, TARGET_PROCEEDING_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-2",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
@@ -547,16 +548,13 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null, TARGET_PROCEEDING_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
-                .andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         mvc.perform(get("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "?actionHistory=-1",
                 tenantAware.getCurrentTenant()).contentType(MediaType.APPLICATION_JSON)
@@ -658,8 +656,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Assign multiple DS in multiassignment mode. The earliest active Action is exposed to the target.")
-    public void earliestActionIsExposedToTargetInMultiAssignMode() throws Exception {
+    @Description("Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.")
+    public void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
         setMultiAssignmentsEnabled();
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
@@ -668,7 +666,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Action action2 = assignDistributionSet(ds2, target).getActions().get(0);
 
         assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
-        sendDeploymentActionFeedback(target, action1, "closed", "success", null);
+        sendDeploymentActionFeedback(target, action1, "closed", "success");
         assertDeploymentActionIsExposedToTarget(target.getControllerId(), action2.getId());
 
     }
@@ -677,9 +675,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             throws Exception {
         final String expectedDeploymentBaseLink = String.format("/%s/controller/v1/%s/deploymentBase/%d",
                 tenantAware.getCurrentTenant(), controllerId, expectedActionId);
-        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(),
-                controllerId).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), controllerId)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)));
 
     }

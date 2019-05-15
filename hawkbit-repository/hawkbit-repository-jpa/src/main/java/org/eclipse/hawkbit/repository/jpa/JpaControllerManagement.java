@@ -649,7 +649,7 @@ public class JpaControllerManagement implements ControllerManagement {
             return null;
         }
 
-        JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);

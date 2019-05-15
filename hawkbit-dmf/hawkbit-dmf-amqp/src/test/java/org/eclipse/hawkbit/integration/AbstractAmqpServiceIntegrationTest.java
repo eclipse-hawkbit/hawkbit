@@ -11,16 +11,12 @@ package org.eclipse.hawkbit.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -33,8 +29,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
-import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
-import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -210,23 +204,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
             final String controllerId) {
         assertAssignmentMessage(softwareModules, controllerId, EventTopic.DOWNLOAD_AND_INSTALL);
 
-    }
-
-    protected void assertLatestMultiActionMessage(final String controllerId,
-            final List<Entry<Long, EventTopic>> actionsExpected) {
-        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestMultiActionMessageActions(controllerId);
-        assertThat(actionsFromMessage).containsExactlyInAnyOrderElementsOf(actionsExpected);
-    }
-
-    protected List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
-        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(expectedControllerId);
-        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
-                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
-        return multiActionRequest.stream()
-                .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
-                .collect(Collectors.toList());
     }
 
     protected void assertDownloadMessage(final Set<SoftwareModule> dsModules, final String controllerId) {

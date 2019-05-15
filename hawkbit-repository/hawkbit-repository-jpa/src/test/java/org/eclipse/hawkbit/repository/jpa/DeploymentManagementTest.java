@@ -86,6 +86,10 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Repository")
 @Story("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
+
+    private static final boolean STATE_ACTIVE = true;
+    private static final boolean STATE_INACTIVE = false;
+
     private EventHandlerStub eventHandlerStub;
 
     private CancelEventHandlerStub cancelEventHandlerStub;
@@ -486,8 +490,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
                 .getAssignedEntity();
         assertThat(actionRepository.count()).isEqualTo(20);
-        assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId()))
-				.as("Offline actions are not active").allMatch(action -> !action.isActive());
+        assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
+                .allMatch(action -> !action.isActive());
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent()).containsAll(targets)
                 .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
@@ -516,14 +520,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
             assignDistributionSet(ds1, targets);
 
-            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
 
             // Second assignment
             final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
             assignDistributionSet(ds2, targets);
 
-            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
-            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), false, Status.CANCELED);
+            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_INACTIVE, Status.CANCELED);
 
             assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
                     .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
@@ -535,7 +539,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that if multi assignment is enabled previous Distribution is not canceled when a new one is assigned.")
+    @Description("If multi-assignment is enabled, verify that the previous Distribution Set assignment is not canceled when a new one is assigned.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
@@ -543,28 +547,28 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = MultiActionEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
-        setMultiAssignmentsEnabled(true);
+        enableMultiAssignments();
         final List<Target> targets = testdataFactory.createTargets(10);
 
         // First assignment
         final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
         assignDistributionSet(ds1, targets);
 
-        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
 
         // Second assignment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
         assignDistributionSet(ds2, targets);
 
-        assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), true, Status.RUNNING);
-        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), true, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
     }
 
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
             final Status status) {
         final List<Action> assignment = actionRepository.findByDistributionSetId(PAGE, dsId).getContent();
 
-        assertThat(assignment).hasSize(10).as("Active = " + active).allMatch(action -> action.isActive() == active)
+        assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
                 .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
                 .as("State is " + status).allMatch(action -> action.getStatus() == status);
         final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
@@ -1119,9 +1123,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Long> targetActiveActionIds = targets.stream()
                 .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
-                .flatMap(List::stream)
-                .map(Action::getId)
-                .collect(Collectors.toList());
+                .flatMap(List::stream).map(Action::getId).collect(Collectors.toList());
         assertThat(eventActionIds).containsOnlyElementsOf(targetActiveActionIds);
     }
 
@@ -1243,9 +1245,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private void setMultiAssignmentsEnabled(final boolean enable) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                enable);
+    private void enableMultiAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
 }
