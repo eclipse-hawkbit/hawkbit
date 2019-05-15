@@ -84,4 +84,16 @@ public interface ArtifactRepository {
      *            to erase
      */
     void deleteByTenant(@NotEmpty String tenant);
+
+    /**
+     * Checks if an artifact exists for a given tenant by its sha1 hash
+     *
+     * @param tenant
+     *            the tenant
+     * @param sha1Hash
+     *            the sha1-hash of the file to lookup.
+     *
+     * @return the boolean whether the atrifact exists or not
+     */
+    boolean existsByTenantAndSha1(@NotEmpty String Tenant, @NotEmpty String sha1Hash);
 }

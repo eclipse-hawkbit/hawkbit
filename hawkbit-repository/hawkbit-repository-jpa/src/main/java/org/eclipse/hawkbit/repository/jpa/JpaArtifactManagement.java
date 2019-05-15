@@ -98,7 +98,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Artifact create(final ArtifactUpload artifactUpload) {
         final String filename = artifactUpload.getFilename();
         final long moduleId = artifactUpload.getModuleId();
-        AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
@@ -108,9 +107,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
         assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
         assertMaxArtifactStorageQuota(filename, artifactUpload.getFilesize());
 
+        AbstractDbArtifact result = getOrCreateArtifact(artifactUpload);
+        return result == null ? null : storeArtifactMetadata(softwareModule, filename, result, existing);
+    }
+
+    private AbstractDbArtifact getOrCreateArtifact(final ArtifactUpload artifactUpload) {
+        if (artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(),
+                artifactUpload.getProvidedSha1Sum())) {
+            return artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(),
+                    artifactUpload.getProvidedSha1Sum());
+        }
+        return storeArtifact(artifactUpload);
+    }
+
+    private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
         try {
-            result = artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(), filename,
-                    artifactUpload.getContentType(),
+            return artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
+                    artifactUpload.getFilename(), artifactUpload.getContentType(),
                     new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum()));
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
@@ -121,11 +134,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 throw new InvalidMD5HashException(e.getMessage(), e);
             }
         }
-        if (result == null) {
-            return null;
-        }
-
-        return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
     private void assertArtifactQuota(final long id, final int requested) {
