@@ -609,6 +609,11 @@ public final class UIComponentIdProvider {
     public static final String DETAILS_TYPE_LABEL_ID = "details.type";
 
     /**
+     * Table details Required Migration Step label id.
+     */
+    public static final String DETAILS_REQUIRED_MIGRATION_STEP_LABEL_ID = "details.required.migration.step";
+
+    /**
      * Id of show filter button in software module table.
      */
     public static final String SM_SHOW_FILTER_BUTTON_ID = "show.filter.layout";
@@ -1155,6 +1160,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_POPUP_ID = "add.update.rollout.popup";
 
     /**
+     * Create popup id.
+     */
+    public static final String CREATE_POPUP_ID = "create.popup.id";
+
+    /**
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
@@ -1239,6 +1249,12 @@ public final class UIComponentIdProvider {
      * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
      */
     public static final String REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX = "repositoryactionsautocleanupcheckbox";
+
+    /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_ENABLED}.
+     */
+    public static final String REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX = "repositorymultiassignmentscheckbox";
 
     /**
      * Configuration checkbox for

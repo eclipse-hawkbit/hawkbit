@@ -404,84 +404,61 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         assignTargetToDs(getItem(distItemId), targetManagement.get(targetIdSet));
     }
 
-    private void assignTargetToDs(final Item item, final List<Target> targetDetailsList) {
+    private void assignTargetToDs(final Item item, final List<Target> targets) {
         if (item == null || item.getItemProperty("id") == null) {
             return;
         }
 
-        if (targetDetailsList.isEmpty()) {
+        if (targets.isEmpty()) {
             getNotification().displayWarning(getI18n().getMessage(TARGETS_NOT_EXISTS));
             return;
         }
 
         final Long distId = (Long) item.getItemProperty("id").getValue();
         selectDroppedEntities(distId);
-        final Optional<DistributionSet> findDistributionSetById = distributionSetManagement.get(distId);
-        if (!findDistributionSetById.isPresent()) {
+        final Optional<DistributionSet> distributionSet = distributionSetManagement.get(distId);
+        if (!distributionSet.isPresent()) {
             getNotification().displayWarning(getI18n().getMessage(DISTRIBUTIONSET_NOT_EXISTS));
             return;
         }
 
-        addNewDistributionToAssignmentList(targetDetailsList, findDistributionSetById.get());
-        openConfirmationWindowForAssignment(findDistributionSetById.get().getName(), targetDetailsList);
+        openConfirmationWindowForAssignment(distributionSet.get(), targets);
     }
 
-    private void addNewDistributionToAssignmentList(final List<Target> targetDetailsList,
-            final DistributionSet distributionSet) {
-        String pendingActionMessage = null;
-        final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distributionSet);
+    private void openConfirmationWindowForAssignment(final DistributionSet distributionSet,
+            final List<Target> targets) {
 
-        for (final Target target : targetDetailsList) {
-            final TargetIdName key = new TargetIdName(target);
-            if (managementUIState.getAssignedList().keySet().contains(key)
-                    && managementUIState.getAssignedList().get(key).equals(distributionSetIdName)) {
-                pendingActionMessage = getPendingActionMessage(pendingActionMessage, target.getControllerId(),
-                        HawkbitCommonUtil.getDistributionNameAndVersion(distributionSetIdName.getName(),
-                                distributionSetIdName.getVersion()));
-                getNotification().displayValidationError(pendingActionMessage);
-            } else {
-                managementUIState.getAssignedList().put(key, distributionSetIdName);
+        final String question = getAssignmentConfirmationMessage(distributionSet, targets);
+        final String caption = getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX);
+        final String okLabel = getI18n().getMessage(UIMessageIdProvider.BUTTON_OK);
+        final String cancelLabel = getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL);
+
+        confirmDialog = new ConfirmationDialog(caption, question, okLabel, cancelLabel, ok -> {
+            if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
+                saveAllAssignments(targets, Collections.singletonList(distributionSet), managementUIState,
+                        actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
+                        getEventBus(), getI18n(), this);
             }
-        }
-    }
+        }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
+                uiProperties), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
 
-    private void openConfirmationWindowForAssignment(final String distributionNameToAssign,
-            final List<Target> targetDetailsList) {
-        final String confirmQuestion = createConfirmationQuestionForAssignment(distributionNameToAssign,
-                targetDetailsList);
-        createConfirmationWindowForAssignment(confirmQuestion);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
-    }
-
-    private void createConfirmationWindowForAssignment(final String confirmQuestion) {
-        confirmDialog = new ConfirmationDialog(getI18n().getMessage(CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX),
-                confirmQuestion, getI18n().getMessage(UIMessageIdProvider.BUTTON_OK),
-                getI18n().getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
-                        saveAllAssignments(managementUIState, actionTypeOptionGroupLayout, maintenanceWindowLayout,
-                                deploymentManagement, getNotification(), getEventBus(), getI18n(), this);
-                    } else {
-                        managementUIState.getAssignedList().clear();
-                    }
-                }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(),
-                        getI18n(), uiProperties),
-                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
     }
 
     private Consumer<Boolean> saveButtonToggle() {
         return isEnabled -> confirmDialog.getOkButton().setEnabled(isEnabled);
     }
 
-    private String createConfirmationQuestionForAssignment(final String distributionNameToAssign,
-            final List<Target> targetDetailsList) {
-        if (targetDetailsList.size() == 1) {
-            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionNameToAssign, "target",
-                    targetDetailsList.get(0).getName());
-        } else {
-            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetDetailsList.size(), "targets",
-                    distributionNameToAssign);
+    private String getAssignmentConfirmationMessage(final DistributionSet distributionSet, final List<Target> targets) {
+        final String distributionName = distributionSet.getName();
+        final int targetCount = targets.size();
+        if (targetCount > 1) {
+            return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES, targetCount, "targets",
+                    distributionName);
         }
+        return getI18n().getMessage(MESSAGE_CONFIRM_ASSIGN_ENTITY, distributionName, "target",
+                targets.get(0).getName());
     }
 
     @Override
@@ -514,15 +491,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             return true;
         }
         return false;
-    }
-
-    private String getPendingActionMessage(final String message, final String controllerId,
-            final String distNameVersion) {
-        String pendActionMsg = getI18n().getMessage("message.target.assigned.pending");
-        if (null == message) {
-            pendActionMsg = getI18n().getMessage("message.dist.pending.action", controllerId, distNameVersion);
-        }
-        return pendActionMsg;
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {

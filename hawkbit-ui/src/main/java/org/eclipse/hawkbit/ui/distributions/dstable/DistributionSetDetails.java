@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -58,11 +59,12 @@ public class DistributionSetDetails extends AbstractDistributionSetDetails {
             final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout,
             final DistributionSetManagement distributionSetManagement, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement,
-            final DsMetadataPopupLayout dsMetadataPopupLayout) {
+            final DsMetadataPopupLayout dsMetadataPopupLayout, final TenantConfigurationManagement configManagement) {
         super(i18n, eventBus, permissionChecker, managementUIState, distributionAddUpdateWindowLayout,
                 distributionSetManagement, dsMetadataPopupLayout, uiNotification, distributionSetTagManagement,
                 createSoftwareModuleDetailsTable(i18n, permissionChecker, distributionSetManagement, eventBus,
-                        manageDistUIState, uiNotification));
+                        manageDistUIState, uiNotification),
+                configManagement);
         this.manageDistUIState = manageDistUIState;
 
         tfqDetailsTable = new TargetFilterQueryDetailsTable(i18n);

@@ -105,6 +105,33 @@ public interface DeploymentManagement {
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**
+     * Assigns the given set of {@link DistributionSet} entities to the given
+     * {@link Target}s using the specified {@link ActionType} and
+     * {@code forcetime}.
+     *
+     * @param dsIDs
+     *            the set of IDs of the distribution sets to assign
+     * @param targets
+     *            a list of all targets and their action type
+     * @return the list of assignment results
+     *
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             defined by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of targets the distribution set can be
+     *             assigned to at once is exceeded
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Set<Long> dsIDs,
+            @NotEmpty Collection<TargetWithActionType> targets);
+
+    /**
      * Assigns the addressed {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and an action message.
      *

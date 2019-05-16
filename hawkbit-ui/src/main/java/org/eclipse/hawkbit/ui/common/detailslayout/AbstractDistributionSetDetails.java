@@ -12,7 +12,9 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -56,6 +58,8 @@ public abstract class AbstractDistributionSetDetails
 
     private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
 
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
+
     private VerticalLayout softwareModuleTab;
 
     protected AbstractDistributionSetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -64,7 +68,8 @@ public abstract class AbstractDistributionSetDetails
             final DistributionSetManagement distributionSetManagement,
             final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement,
-            final SoftwareModuleDetailsTable softwareModuleDetailsTable) {
+            final SoftwareModuleDetailsTable softwareModuleDetailsTable,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
         this.uiNotification = uiNotification;
@@ -73,6 +78,7 @@ public abstract class AbstractDistributionSetDetails
         this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
                 managementUIState, distributionSetTagManagement, distributionSetManagement);
         this.softwareModuleDetailsTable = softwareModuleDetailsTable;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
 
         dsMetadataTable = new DistributionSetMetadataDetailsLayout(i18n, distributionSetManagement,
                 dsMetadataPopupLayout);
@@ -175,9 +181,19 @@ public abstract class AbstractDistributionSetDetails
         typeLabel.setId(UIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
         detailsTabLayout.addComponent(typeLabel);
 
-        detailsTabLayout.addComponent(
-                SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("checkbox.dist.migration.required"),
-                        getMigrationRequiredValue(isMigrationRequired)));
+        final Label requiredMigrationStepLabel = SPUIComponentProvider.createNameValueLabel(
+                getI18n().getMessage("checkbox.dist.migration.required"),
+                getMigrationRequiredValue(isMigrationRequired));
+        requiredMigrationStepLabel.setId(UIComponentIdProvider.DETAILS_REQUIRED_MIGRATION_STEP_LABEL_ID);
+        if (!isMultiAssignmentEnabled()) {
+            detailsTabLayout.addComponent(requiredMigrationStepLabel);
+        }
+
+    }
+
+    private boolean isMultiAssignmentEnabled() {
+        return tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 
     private String getMigrationRequiredValue(final Boolean isMigrationRequired) {

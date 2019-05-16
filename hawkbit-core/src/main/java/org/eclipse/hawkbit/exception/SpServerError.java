@@ -191,6 +191,7 @@ public enum SpServerError {
      */
     SP_CONFIGURATION_VALUE_INVALID("hawkbit.server.error.configValueInvalid",
             "The given configuration value is invalid."),
+
     /**
      * 
      */
@@ -232,7 +233,14 @@ public enum SpServerError {
      * invalid.
      */
     SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
-            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted");
+            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted"),
+
+    /**
+     * Error message informing the user that the requested tenant configuration
+     * change is not allowed.
+     */
+    SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED("hawkbit.server.error.repo.tenantConfigurationValueChangeNotAllowed",
+            "The requested tenant configuration value modification is not allowed.");
 
     private final String key;
     private final String message;

@@ -1239,7 +1239,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet();
         final Long actionId = deploymentManagement
                 .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getActions().get(0);
+                .getActionIds().get(0);
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();

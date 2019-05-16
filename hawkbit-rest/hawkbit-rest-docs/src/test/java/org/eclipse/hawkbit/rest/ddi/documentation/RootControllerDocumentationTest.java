@@ -138,7 +138,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActions()
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActionIds()
                 .get(0);
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -171,7 +171,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActions()
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActionIds()
                 .get(0);
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -265,7 +265,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getActions().get(0);
+                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getActionIds().get(0);
 
         controllerManagement.addInformationalActionStatus(
                 entityFactory.actionStatus().create(actionId).message("Started download").status(Status.DOWNLOAD));
@@ -347,7 +347,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getActions().get(0);
+                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getActionIds().get(0);
 
         mockMvc.perform(get(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
@@ -388,7 +388,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActions()
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getActionIds()
                 .get(0);
 
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"

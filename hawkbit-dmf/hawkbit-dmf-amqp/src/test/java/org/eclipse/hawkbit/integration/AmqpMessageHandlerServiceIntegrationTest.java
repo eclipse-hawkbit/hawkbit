@@ -104,7 +104,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target withy empty controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerEmptyTarget() {
-        createAndSendTarget("", TENANT_EXIST);
+        createAndSendThingCreated("", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -114,7 +114,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with whitspace controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerWhitespaceTarget() {
-        createAndSendTarget("Invalid Invalid", TENANT_EXIST);
+        createAndSendThingCreated("Invalid Invalid", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -124,7 +124,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with null controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerInvalidNullTargets() {
-        createAndSendTarget(null, TENANT_EXIST);
+        createAndSendThingCreated(null, TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -571,13 +571,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
-        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
+        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActionIds().get(0));
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0), controllerId);
+        assertCancelActionMessage(distributionSetAssignmentResult.getActionIds().get(0), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -908,7 +908,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = assignmentResult.getActions().get(0);
+        final Long actionId = assignmentResult.getActionIds().get(0);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }

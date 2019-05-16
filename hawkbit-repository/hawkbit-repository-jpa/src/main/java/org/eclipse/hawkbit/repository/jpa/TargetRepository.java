@@ -224,6 +224,17 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     List<JpaTarget> findAllById(Iterable<Long> ids);
 
     /**
+     * Finds all targets for the given list of controller IDs.
+     * 
+     * @param controllerIds
+     *            The controller IDs to look for.
+     * 
+     * @return The list of matching targets.
+     */
+    @Query("SELECT t FROM JpaTarget t WHERE t.controllerId IN ?1")
+    List<JpaTarget> findAllByControllerId(Iterable<String> controllerIds);
+
+    /**
      * 
      * Finds all targets of a rollout group.
      * 

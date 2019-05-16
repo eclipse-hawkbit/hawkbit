@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -127,6 +128,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
+            final TenantConfigurationManagement configManagement,
             final NotificationUnreadButton notificationUnreadButton,
             final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
         super(eventBus, notificationUnreadButton);
@@ -147,7 +149,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement, deploymentManagement, uiProperties);
+                    targetTagManagement, deploymentManagement, configManagement, uiProperties);
             this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                     targetTable);
 
@@ -175,7 +177,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             this.distributionTableLayout = new DistributionTableLayout(i18n, eventBus, permChecker, managementUIState,
                     distributionSetManagement, distributionSetTypeManagement, managementViewClientCriterion,
                     entityFactory, uiNotification, distributionSetTagManagement, targetTagManagement, systemManagement,
-                    targetManagement, deploymentManagement, uiProperties);
+                    targetManagement, deploymentManagement, configManagement, uiProperties);
         } else {
             this.distributionTagLayout = null;
             this.distributionTableLayout = null;

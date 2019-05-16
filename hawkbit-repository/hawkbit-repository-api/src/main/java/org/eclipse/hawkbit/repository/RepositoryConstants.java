@@ -33,6 +33,11 @@ public final class RepositoryConstants {
     public static final int DEFAULT_DS_TYPES_IN_TENANT = 3;
 
     /**
+     * Maximum number of actions that can be retrieved.
+     */
+    public static final int MAX_ACTION_COUNT = 100;
+
+    /**
      * Maximum number of messages that can be retrieved by a controller for an
      * {@link Action}.
      */
