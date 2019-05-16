@@ -58,7 +58,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     /**
      * Counts current elements based on the sha1 and tenant, as well as having
      * the {@link SoftwareModule} property 'deleted' with value 'false
-     * 
+     *
      * @param sha1
      *            the sha1 of the {@link Artifact}
      * @param tenant
@@ -66,11 +66,6 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      * 
      * @return the count of the elements
      */
-    default boolean existsForMoreThenOneArtifactInTheSameTenantWithSha1HashAndSoftwareModuleIsNotDeleted(
-            @Param("sha1") final String sha1, @Param("tenant") final String tenant) {
-        return countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1, tenant) > 1;
-    }
-
     long countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(@Param("sha1") String sha1,
             @Param("tenant") String tenant);
 
