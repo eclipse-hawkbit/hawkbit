@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
@@ -42,7 +43,8 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
             final EntityFactory entityFactory, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final SystemManagement systemManagement, final TenantConfigurationManagement configManagement) {
+            final SystemManagement systemManagement, final TenantConfigurationManagement configManagement,
+            final SystemSecurityContext systemSecurityContext) {
 
         this.distributionSetTable = new DistributionSetTable(eventBus, i18n, uiNotification, permissionChecker,
                 manageDistUIState, distributionSetManagement, softwareManagement, distributionsViewClientCriterion,
@@ -50,7 +52,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
 
         final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout = new DistributionAddUpdateWindowLayout(
                 i18n, uiNotification, eventBus, distributionSetManagement, distributionSetTypeManagement,
-                systemManagement, entityFactory, distributionSetTable, configManagement);
+                systemManagement, entityFactory, distributionSetTable, configManagement, systemSecurityContext);
 
         final DsMetadataPopupLayout popupLayout = new DsMetadataPopupLayout(i18n, uiNotification, eventBus,
                 distributionSetManagement, entityFactory, permissionChecker);
@@ -61,7 +63,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 distributionSetTable,
                 new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
                         distributionAddUpdateWindowLayout, distributionSetManagement, uiNotification,
-                        distributionSetTagManagement, popupLayout, configManagement));
+                        distributionSetTagManagement, popupLayout, configManagement, systemSecurityContext));
     }
 
     public DistributionSetTable getDistributionSetTable() {

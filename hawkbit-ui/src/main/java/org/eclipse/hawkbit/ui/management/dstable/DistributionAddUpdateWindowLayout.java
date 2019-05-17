@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -78,6 +79,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private FormLayout formLayout;
 
+    private final SystemSecurityContext systemSecurityContext;
+
     /**
      * Constructor for DistributionAddUpdateWindowLayout
      * 
@@ -104,7 +107,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetTable distributionSetTable,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.i18n = i18n;
         this.notificationMessage = notificationMessage;
         this.eventBus = eventBus;
@@ -114,6 +118,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         this.entityFactory = entityFactory;
         this.distributionSetTable = distributionSetTable;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
         createRequiredComponents();
         buildLayout();
     }
@@ -294,8 +299,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                Boolean.class).getValue();
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
     private void populateValuesOfDistribution(final Long editDistId) {

@@ -41,7 +41,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -145,12 +146,14 @@ public class TargetTable extends AbstractTable<Target> {
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
+    private final SystemSecurityContext systemSecurityContext;
+
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
-            final UiProperties uiProperties) {
+            final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -162,6 +165,7 @@ public class TargetTable extends AbstractTable<Target> {
         this.uiProperties = uiProperties;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
+        this.systemSecurityContext = systemSecurityContext;
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
         addNewContainerDS();
@@ -892,7 +896,7 @@ public class TargetTable extends AbstractTable<Target> {
         if (ids.isEmpty()) {
             return Collections.emptySet();
         }
-        if (isMultiAssignmentsEnabled()) {
+        if (isMultiAssignmentEnabled()) {
             return new HashSet<>(ids);
         }
         return Collections.singleton(ids.iterator().next());
@@ -982,11 +986,9 @@ public class TargetTable extends AbstractTable<Target> {
         return "";
     }
 
-    private boolean isMultiAssignmentsEnabled() {
-        return configManagement
-                .getConfigurationValue(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
-                        Boolean.class)
-                .getValue();
+    private boolean isMultiAssignmentEnabled() {
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
 }
