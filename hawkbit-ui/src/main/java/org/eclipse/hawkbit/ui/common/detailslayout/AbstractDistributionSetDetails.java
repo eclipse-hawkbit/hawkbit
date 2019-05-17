@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
@@ -44,21 +45,16 @@ public abstract class AbstractDistributionSetDetails
 
     private static final long serialVersionUID = 1L;
 
-    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
-    private final DistributionSetMetadataDetailsLayout dsMetadataTable;
-
-    private final UINotification uiNotification;
-
     private final transient DistributionSetManagement distributionSetManagement;
-
-    private final DsMetadataPopupLayout dsMetadataPopupLayout;
-
-    private final DistributionTagToken distributionTagToken;
-
-    private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
-
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
+
+    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private final DistributionSetMetadataDetailsLayout dsMetadataTable;
+    private final UINotification uiNotification;
+    private final DsMetadataPopupLayout dsMetadataPopupLayout;
+    private final DistributionTagToken distributionTagToken;
+    private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
 
     private VerticalLayout softwareModuleTab;
 
@@ -69,7 +65,8 @@ public abstract class AbstractDistributionSetDetails
             final DsMetadataPopupLayout dsMetadataPopupLayout, final UINotification uiNotification,
             final DistributionSetTagManagement distributionSetTagManagement,
             final SoftwareModuleDetailsTable softwareModuleDetailsTable,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         super(i18n, eventBus, permissionChecker, managementUIState);
         this.distributionAddUpdateWindowLayout = distributionAddUpdateWindowLayout;
         this.uiNotification = uiNotification;
@@ -79,6 +76,7 @@ public abstract class AbstractDistributionSetDetails
                 managementUIState, distributionSetTagManagement, distributionSetManagement);
         this.softwareModuleDetailsTable = softwareModuleDetailsTable;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
 
         dsMetadataTable = new DistributionSetMetadataDetailsLayout(i18n, distributionSetManagement,
                 dsMetadataPopupLayout);
@@ -192,8 +190,8 @@ public abstract class AbstractDistributionSetDetails
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
     private String getMigrationRequiredValue(final Boolean isMigrationRequired) {
