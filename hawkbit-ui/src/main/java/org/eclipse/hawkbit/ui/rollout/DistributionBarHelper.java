@@ -44,7 +44,7 @@ public final class DistributionBarHelper {
      *
      * @return string of format "status1:count,status2:count"
      */
-    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap, final VaadinMessageSource i18n) {
+    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap) {
         final StringBuilder htmlString = new StringBuilder();
         final Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
         final Long totalValue = getTotalSizes(statusTotalCountMap);
@@ -55,7 +55,7 @@ public final class DistributionBarHelper {
         htmlString.append(getParentDivStart());
         for (final Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
             if (entry.getValue() > 0) {
-                htmlString.append(getPart(partIndex, getLabel(entry.getKey(), i18n), entry.getValue(), totalValue,
+                htmlString.append(getPart(partIndex, entry.getKey(), entry.getValue(), totalValue,
                         statusMapWithNonZeroValues.size()));
                 partIndex++;
             }
@@ -129,7 +129,7 @@ public final class DistributionBarHelper {
         return i18n.getMessage(label);
     }
 
-    private static String getPartStyle(final int partIndex, final int noOfParts, final String customStyle) {
+    private static String getPartStyle(final int partIndex, final int noOfParts, final Status status) {
         final StringBuilder mainStyle = new StringBuilder();
         final StringBuilder styleName = new StringBuilder(GwtDistributionBar.CLASSNAME);
         if (noOfParts == 1) {
@@ -144,8 +144,8 @@ public final class DistributionBarHelper {
         mainStyle.append(styleName).append(" ");
         mainStyle.append(DISTRIBUTION_BAR_PART_MAIN_STYLE).append(" ");
         mainStyle.append(DISTRIBUTION_BAR_PART_CLASSNAME_PREFIX).append(partIndex);
-        if (customStyle != null) {
-            mainStyle.append(" ").append("status-bar-part-").append(customStyle);
+        if (status != null) {
+            mainStyle.append(" ").append("status-bar-part-").append(status.toString().toLowerCase());
         }
         return mainStyle.toString();
     }
@@ -159,7 +159,7 @@ public final class DistributionBarHelper {
         return String.format(Locale.ENGLISH, "%.3f", val) + "%";
     }
 
-    private static String getPart(final int partIndex, final String status, final Long value, final Long totalValue,
+    private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,
             final int noOfParts) {
         return "<div class=\"" + getPartStyle(partIndex, noOfParts, status) + "\" style=\"width: "
                 + getPartWidth(value, totalValue, noOfParts) + ";\"><span class=\""
