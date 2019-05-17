@@ -65,6 +65,6 @@ public class MgmtRolloutSuccessAction {
     }
 
     public enum SuccessAction {
-        NEXTGROUP;
+        NEXTGROUP
     }
 }

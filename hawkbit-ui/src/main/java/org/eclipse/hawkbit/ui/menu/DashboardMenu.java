@@ -340,11 +340,7 @@ public final class DashboardMenu extends CustomComponent {
         final Optional<DashboardMenuItem> findFirst = dashboardVaadinViews.stream()
                 .filter(view -> view.getViewName().equals(viewName)).findAny();
 
-        if (!findFirst.isPresent()) {
-            return null;
-        }
-
-        return findFirst.get();
+        return findFirst.orElse(null);
     }
 
     /**

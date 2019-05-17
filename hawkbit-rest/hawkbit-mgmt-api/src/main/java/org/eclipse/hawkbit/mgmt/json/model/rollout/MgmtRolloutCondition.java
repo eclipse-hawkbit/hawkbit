@@ -65,6 +65,6 @@ public class MgmtRolloutCondition {
     }
 
     public enum Condition {
-        THRESHOLD;
+        THRESHOLD
     }
 }

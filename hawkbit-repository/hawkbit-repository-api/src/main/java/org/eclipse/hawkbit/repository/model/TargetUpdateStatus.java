@@ -40,5 +40,5 @@ public enum TargetUpdateStatus {
     /**
      * Controller registered at SP but no {@link DistributionSet} assigned.
      */
-    REGISTERED;
+    REGISTERED
 }
