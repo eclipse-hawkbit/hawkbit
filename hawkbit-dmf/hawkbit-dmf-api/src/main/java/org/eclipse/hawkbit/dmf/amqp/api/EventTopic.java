@@ -46,6 +46,6 @@ public enum EventTopic {
     /**
      * Topic to send multiple actions to the device.
      */
-    MULTI_ACTION;
+    MULTI_ACTION
 
 }
