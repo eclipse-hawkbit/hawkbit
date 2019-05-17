@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -56,7 +55,7 @@ public interface RepositoryManagement<T, C, U> {
     List<T> create(@NotNull @Valid Collection<C> creates);
 
     /**
-     * Creates new {@link SoftwareModuleType}.
+     * Creates new {@link BaseEntity}.
      *
      * @param create
      *            to create

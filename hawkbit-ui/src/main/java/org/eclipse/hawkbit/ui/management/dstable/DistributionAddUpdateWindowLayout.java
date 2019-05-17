@@ -15,10 +15,13 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
@@ -64,6 +67,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;
     private final transient SystemManagement systemManagement;
     private final transient EntityFactory entityFactory;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
 
     private final DistributionSetTable distributionSetTable;
 
@@ -94,11 +99,15 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      *            EntityFactory
      * @param distributionSetTable
      *            DistributionSetTable
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
      */
     public DistributionAddUpdateWindowLayout(final VaadinMessageSource i18n, final UINotification notificationMessage,
             final UIEventBus eventBus, final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final SystemManagement systemManagement,
-            final EntityFactory entityFactory, final DistributionSetTable distributionSetTable) {
+            final EntityFactory entityFactory, final DistributionSetTable distributionSetTable,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.i18n = i18n;
         this.notificationMessage = notificationMessage;
         this.eventBus = eventBus;
@@ -107,6 +116,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
         this.distributionSetTable = distributionSetTable;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
         createRequiredComponents();
         buildLayout();
     }
@@ -134,8 +145,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 final DistributionSet currentDS = distributionSetManagement.update(entityFactory.distributionSet()
                         .update(editDistId).name(distNameTextField.getValue()).description(descTextArea.getValue())
                         .version(distVersionTextField.getValue()).requiredMigrationStep(isMigStepReq));
-                notificationMessage.displaySuccess(i18n.getMessage("message.new.dist.save.success",
-                        new Object[] { currentDS.getName(), currentDS.getVersion() }));
+                notificationMessage.displaySuccess(
+                        i18n.getMessage("message.new.dist.save.success", currentDS.getName(), currentDS.getVersion()));
                 // update table row+details layout
                 eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
             });
@@ -283,6 +294,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setEnabled(true);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
+        reqMigStepCheckbox.setVisible(!isMultiAssignmentEnabled());
+    }
+
+    private boolean isMultiAssignmentEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
     private void populateValuesOfDistribution(final Long editDistId) {
@@ -351,7 +368,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             populateValuesOfDistribution(editDistId);
         }
 
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(caption).content(this).layout(formLayout)
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).caption(caption).content(this)
+                .id(UIComponentIdProvider.CREATE_POPUP_ID).layout(formLayout)
                 .i18n(i18n).saveDialogCloseListener(saveDialogCloseListener).buildCommonDialogWindow();
     }
 

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -131,19 +132,26 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
     }
 
     /**
-     * Gets the selected item id or in multiselect mode a set of selected ids.
+     * Gets the selected item id or in multiselect mode the selected ids.
      * 
      * @param table
      *            the table to retrieve the selected ID(s)
      * @return the ID(s) which are selected in the table
      */
+    @SuppressWarnings("unchecked")
     public static <T> Set<T> getTableValue(final Table table) {
-        @SuppressWarnings("unchecked")
-        Set<T> values = (Set<T>) table.getValue();
-        if (values == null) {
-            values = Collections.emptySet();
+        final Object value = table.getValue();
+        Set<T> idsReturn;
+        if (value == null) {
+            idsReturn = Collections.emptySet();
+        } else if (value instanceof Collection) {
+            final Collection<T> ids = (Collection<T>) value;
+            idsReturn = ids.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+        } else {
+            final T id = (T) value;
+            idsReturn = Collections.singleton(id);
         }
-        return values.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+        return idsReturn;
     }
 
     private void onValueChange() {
@@ -221,7 +229,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private void addDeleteButtonToColumnList(final List<TableColumn> columnList) {
         if (hasDeletePermission()) {
-            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, "", 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.DELETE_ENTITY, i18n.getMessage("header.delete"), 0.0F));
         }
     }
 

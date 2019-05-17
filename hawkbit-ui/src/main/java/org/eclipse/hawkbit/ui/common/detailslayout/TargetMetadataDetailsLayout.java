@@ -64,7 +64,7 @@ public class TargetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
         }
         selectedTargetId = target.getId();
         final List<TargetMetadata> targetMetadataList = targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, MAX_METADATA_QUERY), target.getControllerId())
+                .findMetaDataByControllerId(PageRequest.of(0, MAX_METADATA_QUERY), target.getControllerId())
                 .getContent();
         if (targetMetadataList != null && !targetMetadataList.isEmpty()) {
             targetMetadataList.forEach(this::setMetadataProperties);

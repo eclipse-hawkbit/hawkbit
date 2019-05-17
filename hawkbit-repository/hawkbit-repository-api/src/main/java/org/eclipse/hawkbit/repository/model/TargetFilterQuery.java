@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+
 /**
  * Managed filter entity.
  * 
@@ -39,6 +45,12 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     int QUERY_MAX_SIZE = 1024;
 
     /**
+     * Allowed values for auto-assign action type
+     */
+    Set<ActionType> ALLOWED_AUTO_ASSIGN_ACTION_TYPES = Collections
+            .unmodifiableSet(EnumSet.of(ActionType.FORCED, ActionType.SOFT, ActionType.DOWNLOAD_ONLY));
+
+    /**
      * @return name of the {@link TargetFilterQuery}.
      */
     String getName();
@@ -52,5 +64,10 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * @return the auto assign {@link DistributionSet} if given.
      */
     DistributionSet getAutoAssignDistributionSet();
+
+    /**
+     * @return the auto assign {@link ActionType} if given.
+     */
+    ActionType getAutoAssignActionType();
 
 }

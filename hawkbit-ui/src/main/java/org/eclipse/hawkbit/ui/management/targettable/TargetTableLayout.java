@@ -36,10 +36,6 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
 
     private final transient EventBus.UIEventBus eventBus;
 
-    private final TargetDetails targetDetails;
-
-    private final TargetTableHeader targetTableHeader;
-
     public TargetTableLayout(final UIEventBus eventBus, final TargetTable targetTable,
             final TargetManagement targetManagement, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final UINotification uiNotification, final ManagementUIState managementUIState,
@@ -50,10 +46,10 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
         final TargetMetadataPopupLayout targetMetadataPopupLayout = new TargetMetadataPopupLayout(i18n, uiNotification,
                 eventBus, targetManagement, entityFactory, permissionChecker);
         this.eventBus = eventBus;
-        this.targetDetails = new TargetDetails(i18n, eventBus, permissionChecker, managementUIState, uiNotification,
+        TargetDetails targetDetails = new TargetDetails(i18n, eventBus, permissionChecker, managementUIState, uiNotification,
                 tagManagement, targetManagement, targetMetadataPopupLayout, deploymentManagement, entityFactory,
                 targetTable);
-        this.targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, uiNotification,
+        TargetTableHeader targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, uiNotification,
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiProperties,
                 entityFactory, uiNotification, tagManagement, distributionSetManagement, uiExecutor, targetTable);
 

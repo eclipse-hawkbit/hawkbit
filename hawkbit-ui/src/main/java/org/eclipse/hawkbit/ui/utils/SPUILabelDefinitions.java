@@ -16,7 +16,7 @@ public final class SPUILabelDefinitions {
     /**
      * Delay - Notification.
      */
-    public static final int SP_DELAY = 1000;
+    public static final int SP_DELAY = 3000;
 
     /**
      * NAME.
@@ -133,6 +133,10 @@ public final class SPUILabelDefinitions {
      * AUTO ASSIGN DISTRIBUTION SET ID
      */
     public static final String AUTO_ASSIGN_DISTRIBUTION_SET = "autoAssignDistributionSet";
+    /**
+     * AUTO ASSIGN ACTION TYPE
+     */
+    public static final String AUTO_ASSIGN_ACTION_TYPE = "autoAssignActionType";
     /**
      * ASSIGNED DISTRIBUTION Name and Version.
      */

@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
@@ -173,7 +174,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new StatusConverter());
     }
 
@@ -238,9 +239,18 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid<LazyQueryContainer
         }
 
         private String processActionStatus(final Status status) {
-            final StatusFontIcon statusFontIcon = statusIconMap.get(status);
+            final StatusFontIcon statusFontIcon = mapActionStatusToPresentation(status);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
+        }
+
+        private StatusFontIcon mapActionStatusToPresentation(final Status status) {
+            final boolean isFinishedDownloadOnlyAssignment = Status.DOWNLOADED.equals(status)
+                    && rolloutUIState.getRolloutGroup()
+                    .map(group -> Action.ActionType.DOWNLOAD_ONLY.equals(group.getRollout().getActionType()))
+                    .orElse(false);
+
+            return isFinishedDownloadOnlyAssignment ? statusIconMap.get(Status.FINISHED) : statusIconMap.get(status);
         }
 
         private String getStatus() {

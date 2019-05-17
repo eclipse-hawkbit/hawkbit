@@ -472,12 +472,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Target target = createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist("4711", LOCALHOST);
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(result.getActions().get(0)).status(Status.FINISHED));
+                entityFactory.actionStatus().create(result.getActionIds().get(0)).status(Status.FINISHED));
         assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.getByControllerID("4711").get();
@@ -858,7 +858,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 1) })
     public void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
         final String knownTargetControllerId = "readTarget";
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
         securityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();
@@ -1036,10 +1036,10 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target2 = createTargetWithMetadata("target2", 8);
 
         final Page<TargetMetadata> metadataOfTarget1 = targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, 100), target1.getControllerId());
+                .findMetaDataByControllerId(PageRequest.of(0, 100), target1.getControllerId());
 
         final Page<TargetMetadata> metadataOfTarget2 = targetManagement
-                .findMetaDataByControllerId(new PageRequest(0, 100), target2.getControllerId());
+                .findMetaDataByControllerId(PageRequest.of(0, 100), target2.getControllerId());
 
         assertThat(metadataOfTarget1.getNumberOfElements()).isEqualTo(10);
         assertThat(metadataOfTarget1.getTotalElements()).isEqualTo(10);

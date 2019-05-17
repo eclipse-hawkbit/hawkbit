@@ -133,7 +133,7 @@ public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(ProxyActionStatus.PXY_AS_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
         getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setConverter(new LongToFormattedDateStringConverter());

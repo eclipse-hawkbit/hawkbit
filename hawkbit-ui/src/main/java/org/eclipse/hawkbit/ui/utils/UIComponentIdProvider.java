@@ -178,6 +178,10 @@ public final class UIComponentIdProvider {
      */
     public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
     /**
+     * Download Only Action Id.
+     */
+    public static final String ACTION_DETAILS_DOWNLOAD_ONLY_ID = "action.details.downloadonly.group";
+    /**
      * Start type of rollout manual radio button
      */
     public static final String ROLLOUT_START_MANUAL_ID = "rollout.start.manual.radio";
@@ -256,7 +260,7 @@ public final class UIComponentIdProvider {
     /**
      * Action history table forced label Id.
      */
-    public static final String ACTION_HISTORY_TABLE_FORCED_LABEL_ID = "action.history.table.forcedId";
+    public static final String ACTION_HISTORY_TABLE_TYPE_LABEL_ID = "action.history.table.typeId";
 
     /**
      * Action history table time-forced label Id.
@@ -603,6 +607,11 @@ public final class UIComponentIdProvider {
      * Software module table details type label id.
      */
     public static final String DETAILS_TYPE_LABEL_ID = "details.type";
+
+    /**
+     * Table details Required Migration Step label id.
+     */
+    public static final String DETAILS_REQUIRED_MIGRATION_STEP_LABEL_ID = "details.required.migration.step";
 
     /**
      * Id of show filter button in software module table.
@@ -1146,6 +1155,16 @@ public final class UIComponentIdProvider {
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
 
     /**
+     * Rollout popup id.
+     */
+    public static final String ROLLOUT_POPUP_ID = "add.update.rollout.popup";
+
+    /**
+     * Create popup id.
+     */
+    public static final String CREATE_POPUP_ID = "create.popup.id";
+
+    /**
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
@@ -1179,9 +1198,9 @@ public final class UIComponentIdProvider {
     public static final String FILTER_SEARCH_ICON_ID = "filter.search.icon";
 
     /**
-     * Distribution set select table id
+     * Distribution set select combobox id
      */
-    public static final String DIST_SET_SELECT_TABLE_ID = "distribution.set.select.table";
+    public static final String DIST_SET_SELECT_COMBO_ID = "distribution.set.select.combo";
 
     /**
      * Distribution set select window id
@@ -1230,6 +1249,12 @@ public final class UIComponentIdProvider {
      * {@link TenantConfigurationKey#REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED}.
      */
     public static final String REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX = "repositoryactionsautocleanupcheckbox";
+
+    /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_ENABLED}.
+     */
+    public static final String REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX = "repositorymultiassignmentscheckbox";
 
     /**
      * Configuration checkbox for

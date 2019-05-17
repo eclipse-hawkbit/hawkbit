@@ -16,12 +16,13 @@ import java.util.Map;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -68,7 +69,7 @@ public class TargetFilterTable extends Table {
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
-    private final DistributionSetSelectWindow dsSelectWindow;
+    private final transient DistributionSetSelectWindow dsSelectWindow;
 
     private final SpPermissionChecker permChecker;
 
@@ -78,8 +79,8 @@ public class TargetFilterTable extends Table {
 
     public TargetFilterTable(final VaadinMessageSource i18n, final UINotification notification,
             final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ManageDistUIState manageDistUIState,
-            final TargetManagement targetManagement, final SpPermissionChecker permChecker) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
+            final SpPermissionChecker permChecker) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
@@ -87,8 +88,8 @@ public class TargetFilterTable extends Table {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.permChecker = permChecker;
 
-        this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, targetManagement,
-                targetFilterQueryManagement, manageDistUIState);
+        this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, notification, targetManagement,
+                targetFilterQueryManagement);
 
         setStyleName("sp-table");
         setSizeFull();
@@ -110,7 +111,7 @@ public class TargetFilterTable extends Table {
                 || filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE
                 || filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY
                 || filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
-            UI.getCurrent().access(() -> refreshContainer());
+            UI.getCurrent().access(this::refreshContainer);
         }
     }
 
@@ -237,14 +238,25 @@ public class TargetFilterTable extends Table {
         final Item row1 = getItem(itemId);
         final ProxyDistribution distSet = (ProxyDistribution) row1
                 .getItemProperty(SPUILabelDefinitions.AUTO_ASSIGN_DISTRIBUTION_SET).getValue();
+        final ActionType actionType = (ActionType) row1.getItemProperty(SPUILabelDefinitions.AUTO_ASSIGN_ACTION_TYPE)
+                .getValue();
+
         final String buttonId = "distSetButton";
         Button updateIcon;
         if (distSet == null) {
-            updateIcon = SPUIComponentProvider.getButton(buttonId, i18n.getMessage("button.no.auto.assignment"),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
+            updateIcon = SPUIComponentProvider.getButton(buttonId,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_NO_AUTO_ASSIGNMENT),
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION), null, false, null,
+                    SPUIButtonStyleNoBorder.class);
         } else {
-            updateIcon = SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
-                    i18n.getMessage("button.auto.assignment.desc"), null, false, null, SPUIButtonStyleNoBorder.class);
+            updateIcon = actionType.equals(ActionType.FORCED)
+                    ? SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
+                            i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION), null, false,
+                            FontAwesome.BOLT, SPUIButtonStyleNoBorderWithIcon.class)
+                    : SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
+                            i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION), null, false, null,
+                            SPUIButtonStyleNoBorder.class);
+            updateIcon.setSizeUndefined();
         }
 
         updateIcon.addClickListener(this::onClickOfDistributionSetButton);

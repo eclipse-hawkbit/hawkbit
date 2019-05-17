@@ -9,14 +9,20 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -37,6 +43,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -96,7 +104,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target withy empty controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerEmptyTarget() {
-        createAndSendTarget("", TENANT_EXIST);
+        createAndSendThingCreated("", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -106,7 +114,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with whitspace controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerWhitespaceTarget() {
-        createAndSendTarget("Invalid Invalid", TENANT_EXIST);
+        createAndSendThingCreated("Invalid Invalid", TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -116,7 +124,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests register invalid target with null controller id. Tests register invalid target with null controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void registerInvalidNullTargets() {
-        createAndSendTarget(null, TENANT_EXIST);
+        createAndSendThingCreated(null, TENANT_EXIST);
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
 
@@ -563,13 +571,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
-        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActions().get(0));
+        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActionIds().get(0));
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(distributionSetAssignmentResult.getActions().get(0), controllerId);
+        assertCancelActionMessage(distributionSetAssignmentResult.getActionIds().get(0), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -797,6 +805,99 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         verifyNumberOfDeadLetterMessages(3);
     }
 
+
+    @Test
+    @Description("Tests the download_only assignment: tests the handling of a target reporting DOWNLOADED")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void downloadOnlyAssignmentFinishesActionWhenTargetReportsDownloaded()
+            throws IOException {
+        // create target
+        final String controllerId = TARGET_PREFIX + "registerTargets_1";
+        final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
+
+        // verify
+        final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+
+        // get actionId from Message
+        Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
+
+        // Send DOWNLOADED message
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+
+        verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
+    }
+
+    @Test
+    @Description("Tests the download_only assignment: tests the handling of a target reporting FINISHED")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
+            @Expect(type = TargetPollEvent.class, count = 1) })
+    public void downloadOnlyAssignmentAllowsActionStatusUpdatesWhenTargetReportsFinishedAndUpdatesInstalledDS()
+            throws IOException {
+
+        // create target
+        final String controllerId = TARGET_PREFIX + "registerTargets_1";
+        final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
+
+        // verify
+        final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+
+        // get actionId from Message
+        Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
+
+        // Send DOWNLOADED message, should result in the action being closed
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+
+        verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
+
+        // Send FINISHED message
+        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.FINISHED));
+        assertAction(actionId, 2, Status.RUNNING, Status.DOWNLOADED, Status.FINISHED);
+        Mockito.verifyZeroInteractions(getDeadletterListener());
+        
+        verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), distributionSet.getId());
+    }
+
+    @Step
+    private void verifyAssignedDsAndInstalledDs(final String controllerId, final Long assignedDsId,
+            final Long installedDsId) {
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+
+        // verify the DS was assigned to the Target
+        final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
+        assertThat(assignedDsId).isNotNull();
+        assertThat(assignedDistributionSet.getId()).isEqualTo(assignedDsId);
+
+        // verify that the installed DS was not affected
+        final JpaDistributionSet installedDistributionSet = ((JpaTarget) target.get()).getInstalledDistributionSet();
+        if (installedDsId == null) {
+            assertThat(installedDistributionSet).isNull();
+        } else {
+            assertThat(installedDistributionSet.getId()).isEqualTo(installedDsId);
+        }
+    }
+
     private void sendUpdateAttributesMessageWithGivenAttributes(final String target, final String key,
             final String value) {
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
@@ -807,7 +908,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = assignmentResult.getActions().get(0);
+        final Long actionId = assignmentResult.getActionIds().get(0);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
@@ -886,5 +987,12 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         assertEmptyReceiverQueueCount();
         createConditionFactory().untilAsserted(() -> Mockito
                 .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
+    }
+
+    private static String getJsonFieldFromBody(final byte[] body, final String fieldName) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
+        assertThat(node.has(fieldName)).isTrue();
+        return node.get(fieldName).asText();
     }
 }

@@ -267,7 +267,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!assigned.isEmpty()) {
             final Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
             distributionSetRepository.deleteDistributionSet(dsIds);
-            targetFilterQueryRepository.unsetAutoAssignDistributionSet(dsIds);
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(dsIds);
         }
 
         // mark the rest as hard delete
@@ -276,6 +276,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // hard delete the rest if exists
         if (!toHardDelete.isEmpty()) {
+            targetFilterQueryRepository
+                    .unsetAutoAssignDistributionSetAndActionType(toHardDelete.toArray(new Long[toHardDelete.size()]));
             // don't give the delete statement an empty list, JPA/Oracle cannot
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
@@ -602,7 +604,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(7);
+        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(8);
 
         Specification<JpaDistributionSet> spec;
 
@@ -626,6 +628,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
+        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())) {
+            final String[] dsFilterNameAndVersionEntries = getDsFilterNameAndVersionEntries(
+                    distributionSetFilter.getFilterString().trim());
+            spec = DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0],
+                    dsFilterNameAndVersionEntries[1]);
+            specList.add(spec);
+        }
+
         if (isDSWithNoTagSelected(distributionSetFilter) || isTagsSelected(distributionSetFilter)) {
             spec = DistributionSetSpecification.hasTags(distributionSetFilter.getTagNames(),
                     distributionSetFilter.getSelectDSWithNoTag());
@@ -640,6 +650,19 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
         return specList;
+    }
+
+    // the format of filter string is 'name:version'. 'name' and 'version'
+    // fields follow the starts_with semantic, that changes to equal for 'name'
+    // field when the semicolon is present
+    private static String[] getDsFilterNameAndVersionEntries(final String filterString) {
+        final int semicolonIndex = filterString.indexOf(':');
+
+        final String dsFilterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
+                : (filterString + "%");
+        final String dsFilterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
+
+        return new String[] { !StringUtils.isEmpty(dsFilterName) ? dsFilterName : "%", dsFilterVersion };
     }
 
     private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {

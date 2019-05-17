@@ -25,6 +25,8 @@ public class UiProperties implements Serializable {
 
     private boolean gravatar;
 
+    private String fixedTimeZone;
+
     private final Localization localization = new Localization();
 
     private final Links links = new Links();
@@ -42,6 +44,15 @@ public class UiProperties implements Serializable {
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
     }
+
+    public String getFixedTimeZone() {
+        return fixedTimeZone;
+    }
+
+    public void setFixedTimeZone(final String fixedTimeZone) {
+        this.fixedTimeZone = fixedTimeZone;
+    }
+
 
     /**
      * Localization information
@@ -198,6 +209,8 @@ public class UiProperties implements Serializable {
              */
             private String rolloutView = "";
 
+            private String provisioningStateMachine = "";
+
             public String getDeploymentView() {
                 return deploymentView;
             }
@@ -238,6 +251,10 @@ public class UiProperties implements Serializable {
                 return maintenanceWindowView;
             }
 
+            public String getProvisioningStateMachine() {
+                return provisioningStateMachine;
+            }
+
             public void setDeploymentView(final String deploymentView) {
                 this.deploymentView = deploymentView;
             }
@@ -276,6 +293,10 @@ public class UiProperties implements Serializable {
 
             public void setMaintenanceWindowView(final String maintenanceWindowView) {
                 this.maintenanceWindowView = maintenanceWindowView;
+            }
+
+            public void setProvisioningStateMachine(final String provisioningStateMachine) {
+                this.provisioningStateMachine = provisioningStateMachine;
             }
 
         }

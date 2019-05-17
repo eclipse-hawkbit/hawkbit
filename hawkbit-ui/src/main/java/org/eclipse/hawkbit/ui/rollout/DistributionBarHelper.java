@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
 
 /**
@@ -38,9 +39,12 @@ public final class DistributionBarHelper {
      * @param statusTotalCountMap
      *            map with status and count
      *
+     * @param i18n
+     *            the i18n
+     *
      * @return string of format "status1:count,status2:count"
      */
-    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap) {
+    public static String getDistributionBarAsHTMLString(final Map<Status, Long> statusTotalCountMap, final VaadinMessageSource i18n) {
         final StringBuilder htmlString = new StringBuilder();
         final Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
         final Long totalValue = getTotalSizes(statusTotalCountMap);
@@ -51,7 +55,7 @@ public final class DistributionBarHelper {
         htmlString.append(getParentDivStart());
         for (final Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
             if (entry.getValue() > 0) {
-                htmlString.append(getPart(partIndex, entry.getKey(), entry.getValue(), totalValue,
+                htmlString.append(getPart(partIndex, getLabel(entry.getKey(), i18n), entry.getValue(), totalValue,
                         statusMapWithNonZeroValues.size()));
                 partIndex++;
             }
@@ -69,7 +73,7 @@ public final class DistributionBarHelper {
      */
     public static Map<Status, Long> getStatusMapWithNonZeroValues(final Map<Status, Long> statusTotalCountMap) {
         return statusTotalCountMap.entrySet().stream().filter(p -> p.getValue() > 0)
-                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
@@ -77,17 +81,52 @@ public final class DistributionBarHelper {
      *
      * @param statusCountMap
      *            map with status and count details
+     *
+     * @param i18n
+     *            the i18n
+     *            
      * @return tool tip
      */
-    public static String getTooltip(final Map<Status, Long> statusCountMap) {
+    public static String getTooltip(final Map<Status, Long> statusCountMap, final VaadinMessageSource i18n) {
         final Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper
                 .getStatusMapWithNonZeroValues(statusCountMap);
         final StringBuilder tooltip = new StringBuilder();
         for (final Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
-            tooltip.append(entry.getKey().toString().toLowerCase()).append(" : ").append(entry.getValue())
+            tooltip.append(getLabel(entry.getKey(), i18n)).append(" : ").append(entry.getValue())
                     .append("<br>");
         }
         return tooltip.toString();
+    }
+
+    private static String getLabel(final Status status, final VaadinMessageSource i18n) {
+
+        String label;
+
+        switch (status) {
+
+            case SCHEDULED :
+                label = "label.scheduled";
+                break;
+            case RUNNING :
+                label = "label.running";
+                break;
+            case ERROR :
+                label = "label.error";
+                break;
+            case FINISHED :
+                label = "label.finished";
+                break;
+            case CANCELLED :
+                label = "label.cancelled";
+                break;
+            case NOTSTARTED :
+                label = "label.notStarted";
+                break;
+            default :
+                throw new IllegalStateException("The status " + status + " is not supported.");
+        }
+
+        return i18n.getMessage(label);
     }
 
     private static String getPartStyle(final int partIndex, final int noOfParts, final String customStyle) {
@@ -104,9 +143,9 @@ public final class DistributionBarHelper {
         }
         mainStyle.append(styleName).append(" ");
         mainStyle.append(DISTRIBUTION_BAR_PART_MAIN_STYLE).append(" ");
-        mainStyle.append(DISTRIBUTION_BAR_PART_CLASSNAME_PREFIX + partIndex);
+        mainStyle.append(DISTRIBUTION_BAR_PART_CLASSNAME_PREFIX).append(partIndex);
         if (customStyle != null) {
-            mainStyle.append(" ").append("status-bar-part-" + customStyle);
+            mainStyle.append(" ").append("status-bar-part-").append(customStyle);
         }
         return mainStyle.toString();
     }
@@ -120,10 +159,9 @@ public final class DistributionBarHelper {
         return String.format(Locale.ENGLISH, "%.3f", val) + "%";
     }
 
-    private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,
+    private static String getPart(final int partIndex, final String status, final Long value, final Long totalValue,
             final int noOfParts) {
-        final String partValue = status.toString().toLowerCase();
-        return "<div class=\"" + getPartStyle(partIndex, noOfParts, partValue) + "\" style=\"width: "
+        return "<div class=\"" + getPartStyle(partIndex, noOfParts, status) + "\" style=\"width: "
                 + getPartWidth(value, totalValue, noOfParts) + ";\"><span class=\""
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">" + value + "</span></div>";
     }

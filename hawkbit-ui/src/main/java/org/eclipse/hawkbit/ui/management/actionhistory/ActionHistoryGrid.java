@@ -69,8 +69,10 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_NEUTRAL = "statusIconNeutral";
     private static final String STATUS_ICON_ACTIVE = "statusIconActive";
     private static final String STATUS_ICON_FORCED = "statusIconForced";
+    private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
+    private static final String STATUS_ICON_SOFT = "statusIconSoft";
 
-    private static final String VIRT_PROP_FORCED = "forced";
+    private static final String VIRT_PROP_TYPE = "type";
     private static final String VIRT_PROP_TIMEFORCED = "timeForced";
     private static final String VIRT_PROP_ACTION_CANCEL = "cancel-action";
     private static final String VIRT_PROP_ACTION_FORCE = "force-action";
@@ -79,20 +81,20 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
             ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
-            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
             VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
     private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
             ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_FORCED,
+            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_TYPE,
             VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
 
-    private static final String[] leftAlignedColumns = new String[] { VIRT_PROP_TIMEFORCED };
+    private static final String[] leftAlignedColumns = new String[] {};
 
     private static final String[] centerAlignedColumns = new String[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_STATUS };
+            ProxyAction.PXY_ACTION_STATUS, VIRT_PROP_TYPE, ProxyAction.PXY_ACTION_ID, VIRT_PROP_TIMEFORCED };
 
-    private static final String[] rightAlignedColumns = new String[] { VIRT_PROP_FORCED, ProxyAction.PXY_ACTION_ID };
+    private static final String[] rightAlignedColumns = new String[] {};
 
     private final transient DeploymentManagement deploymentManagement;
     private final UINotification notification;
@@ -107,19 +109,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
 
-    boolean forceClientRefreshToggle = true;
-
-    /**
-     * Constructor.
-     *
-     * @param i18n
-     * @param deploymentManagement
-     * @param eventBus
-     * @param notification
-     * @param managementUIState
-     * @param permissionChecker
-     */
-    protected ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
+    ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
             final SpPermissionChecker permissionChecker) {
         super(i18n, eventBus, permissionChecker);
@@ -220,14 +210,14 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     @Override
-    protected void addColumnRenderes() {
+    protected void addColumnRenderers() {
         getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setConverter(new LongToFormattedDateStringConverter());
         getColumn(ProxyAction.PXY_ACTION_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
         getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
                 new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
-        getColumn(VIRT_PROP_FORCED).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(ActionHistoryGrid::createForcedLabelMetadata));
+        getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
+                new HtmlVirtPropLabelConverter(this::createTypeLabelMetadata));
         getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
                 new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
         getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
@@ -270,13 +260,23 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         return activeStates.get(isActiveDeco);
     }
 
-    private static StatusFontIcon createForcedLabelMetadata(final Action action) {
-        StatusFontIcon result = null;
+    private StatusFontIcon createTypeLabelMetadata(final Action action) {
         if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
-            result = new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED, "Forced",
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCED_LABEL_ID);
+            return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        return result;
+        if (ActionType.SOFT.equals(action.getActionType())) {
+            return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
+        }
+        if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
+            return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
+                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
+        }
+        return null;
     }
 
     private StatusFontIcon createTimeForcedLabelMetadata(final Action action) {
@@ -288,12 +288,14 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             String title;
             if (action.isHitAutoForceTime(currentTimeMillis)) {
                 style = STATUS_ICON_GREEN;
-                title = "auto forced since "
-                        + SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(), currentTimeMillis, i18n);
+                final String duration = SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(),
+                        currentTimeMillis, i18n);
+                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_SINCE, duration);
             } else {
                 style = STATUS_ICON_PENDING;
-                title = "auto forcing in "
-                        + SPDateTimeUtil.getDurationFormattedString(currentTimeMillis, action.getForcedTime(), i18n);
+                final String duration = SPDateTimeUtil.getDurationFormattedString(currentTimeMillis,
+                        action.getForcedTime(), i18n);
+                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_IN, duration);
             }
             result = new StatusFontIcon(FontAwesome.HISTORY, style, title,
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID);
@@ -405,9 +407,6 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
             }
         });
-        if (!managementUIState.getDistributionTableFilters().getPinnedTarget().isPresent()) {
-            return;
-        }
     }
 
     // service call to cancel the active action
@@ -440,7 +439,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setHiddenColumns() {
-        getColumn(VIRT_PROP_FORCED).setHidable(false);
+        getColumn(VIRT_PROP_TYPE).setHidable(false);
         getColumn(VIRT_PROP_TIMEFORCED).setHidable(false);
         getColumn(VIRT_PROP_ACTION_CANCEL).setHidable(false);
         getColumn(VIRT_PROP_ACTION_FORCE).setHidable(false);
@@ -466,11 +465,9 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
                 .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
         getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
         getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
-                .setHeaderCaption(SPUIDefinitions.ACTION_HIS_TBL_MAINTENANCE_WINDOW);
-        getColumn(VIRT_PROP_FORCED).setHeaderCaption(String.valueOf(forceClientRefreshToggle));
-        forceClientRefreshToggle = !forceClientRefreshToggle;
+                .setHeaderCaption(i18n.getMessage("header.maintenancewindow"));
 
-        newHeaderRow.join(VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.forced"));
+        newHeaderRow.join(VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
         newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
                 .setText(i18n.getMessage("header.action"));
     }
@@ -482,7 +479,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         setColumnsSize(100.0, 130.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
         setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
         setColumnsSize(150.0, 200.0, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW);
-        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
                 VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
     }
 
@@ -566,7 +563,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         protected GeneratedPropertyContainer addGeneratedContainerProperties() {
             final GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
 
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_FORCED, new GenericPropertyValueGenerator());
+            decoratedContainer.addGeneratedProperty(VIRT_PROP_TYPE, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_TIMEFORCED, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_CANCEL, new GenericPropertyValueGenerator());
             decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_FORCE, new GenericPropertyValueGenerator());
@@ -619,7 +616,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
             setColumnsSize(100.0, 150.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
             setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_FORCED, VIRT_PROP_TIMEFORCED,
+            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED,
                     VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
             setColumnsSize(FIXED_PIX_MIN, 500.0, ProxyAction.PXY_ACTION_ROLLOUT_NAME);
         }

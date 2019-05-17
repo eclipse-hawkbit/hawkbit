@@ -1239,7 +1239,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet();
         final Long actionId = deploymentManagement
                 .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getActions().get(0);
+                .getActionIds().get(0);
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();
@@ -1285,6 +1285,26 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // ...but does not change the target
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
+    }
+
+    @Test
+    @Description("Verfies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
+    public void assignDownloadOnlyDistributionSetToTarget() throws Exception {
+
+        Target target = testdataFactory.createTarget();
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
+                .content("{\"id\":" + set.getId() + ",\"type\": \"downloadonly\"}")
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("total", equalTo(1)));
+
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
+        Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
+        assertThat(actions.getSize()).isGreaterThan(0);
+        actions.stream().filter(a -> a.getDistributionSet().equals(set))
+                .forEach(a -> ActionType.DOWNLOAD_ONLY.equals(a.getActionType()));
     }
 
     @Test
@@ -1620,7 +1640,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private Target createSingleTarget(final String controllerId, final String name) {
         targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name)
                 .description(TARGET_DESCRIPTION_TEST));
-        return controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, LOCALHOST);
+        return controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
     }
 
     /**
@@ -1636,7 +1656,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             targetManagement.create(entityFactory.target().create().controllerId(str).name(str).description(str));
-            controllerManagement.findOrRegisterTargetIfItDoesNotexist(str, LOCALHOST);
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist(str, LOCALHOST);
             character++;
         }
     }
@@ -1674,9 +1694,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mvc.perform(
-                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
+        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
@@ -1697,14 +1716,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
             metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
         }
 
-        mvc.perform(
-                post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden());
 
         // verify that the number of meta data entries has not changed
         // (we cannot use the PAGE constant here as it tries to sort by ID)
-        assertThat(targetManagement.findMetaDataByControllerId(new PageRequest(0, Integer.MAX_VALUE), knownControllerId)
+        assertThat(targetManagement.findMetaDataByControllerId(PageRequest.of(0, Integer.MAX_VALUE), knownControllerId)
                 .getTotalElements()).isEqualTo(metaData1.length());
 
     }

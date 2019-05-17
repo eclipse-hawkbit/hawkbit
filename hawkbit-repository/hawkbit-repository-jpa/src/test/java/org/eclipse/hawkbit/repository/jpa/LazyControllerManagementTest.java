@@ -41,11 +41,11 @@ public class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void lazyFindOrRegisterTargetIfItDoesNotexist() throws InterruptedException {
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
         TimeUnit.MILLISECONDS.sleep(10);
-        controllerManagement.findOrRegisterTargetIfItDoesNotexist("AA", LOCALHOST);
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         TimeUnit.MILLISECONDS.sleep(repositoryProperties.getPollPersistenceFlushTime() + 1);
 
         final Target updated = targetManagement.get(target.getId()).get();

@@ -104,7 +104,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(knownControllerId);
         final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                 knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-        final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+        final Long manuallyAssignedActionId = assignmentResult.getActionIds().get(0);
 
         // create rollout with the same distribution set already assigned
         // start rollout
@@ -144,7 +144,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long manuallyAssignedActionId = assignmentResult.getActions().get(0);
+            final Long manuallyAssignedActionId = assignmentResult.getActionIds().get(0);
 
             // create rollout with the same distribution set already assigned
             // start rollout
@@ -584,6 +584,69 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.handleRollouts();
         // 0 targets are ready, 8 are finished and 0 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 8L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+    }
+
+    @Test
+    @Description("Verify that the targets have the right status during a download_only rollout.")
+    public void countCorrectStatusForEachTargetDuringDownloadOnlyRollout() {
+
+        final int amountTargetsForRollout = 8;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 4;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition, ActionType.DOWNLOAD_ONLY);
+
+        // targets have not started
+        Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.NOTSTARTED, 8L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+        rolloutManagement.start(createdRollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        // 6 targets are ready and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+        changeStatusForAllRunningActions(createdRollout, Status.DOWNLOADED);
+        rolloutManagement.handleRollouts();
+        // 4 targets are ready, 2 are finished(with DOWNLOADED action status) and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 4L);
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+        changeStatusForAllRunningActions(createdRollout, Status.DOWNLOADED);
+        rolloutManagement.handleRollouts();
+        // 2 targets are ready, 4 are finished(with DOWNLOADED action status) and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 4L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+        changeStatusForAllRunningActions(createdRollout, Status.DOWNLOADED);
+        rolloutManagement.handleRollouts();
+        // 0 targets are ready, 6 are finished(with DOWNLOADED action status) and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.handleRollouts();
+        // 0 targets are ready, 6 are finished(with DOWNLOADED action status), 2 are finished and 0 are running
         validationMap = createInitStatusMap();
         validationMap.put(TotalTargetCountStatus.Status.FINISHED, 8L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
@@ -1727,12 +1790,19 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int amountOtherTargets, final int groupSize, final String successCondition,
             final String errorCondition) {
+        return createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                groupSize, successCondition, errorCondition, ActionType.FORCED);
+    }
+
+    private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int amountOtherTargets, final int groupSize, final String successCondition,
+            final String errorCondition, final ActionType actionType) {
         final DistributionSet rolloutDS = testdataFactory.createDistributionSet("rolloutDS");
         testdataFactory.createTargets(amountTargetsForRollout, "rollout-", "rollout");
         testdataFactory.createTargets(amountOtherTargets, "others-", "rollout");
         final String filterQuery = "controllerId==rollout-*";
         return testdataFactory.createRolloutByVariables("test-rollout-name-1", "test-rollout-description-1", groupSize,
-                filterQuery, rolloutDS, successCondition, errorCondition);
+                filterQuery, rolloutDS, successCondition, errorCondition, actionType);
     }
 
     private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,

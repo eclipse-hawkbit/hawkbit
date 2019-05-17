@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -40,18 +40,23 @@ import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,6 +106,9 @@ public class AmqpMessageHandlerServiceTest {
     private ArtifactManagement artifactManagementMock;
 
     @Mock
+    private TenantConfigurationManagement tenantConfigurationManagement;
+
+    @Mock
     private AmqpControllerAuthentication authenticationManagerMock;
 
     @Mock
@@ -128,16 +136,21 @@ public class AmqpMessageHandlerServiceTest {
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
     @Before
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
+        final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
+                .global(Boolean.FALSE).build();
+        when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
+                .thenReturn(multiAssignmentConfig);
+
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
-
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock);
+                controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
                 controllerManagementMock, tenantAwareMock);
@@ -168,7 +181,7 @@ public class AmqpMessageHandlerServiceTest {
 
         final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
-        when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
+        when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
@@ -301,7 +314,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+            amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, "vHost");
             fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
         } catch (final AmqpRejectAndDontRequeueException e) {
         }
@@ -462,19 +475,16 @@ public class AmqpMessageHandlerServiceTest {
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
-        final ArgumentCaptor<String> tenantCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<ActionProperties> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionProperties.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
-        final ArgumentCaptor<Long> actionIdCaptor = ArgumentCaptor.forClass(Long.class);
 
-        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(tenantCaptor.capture(),
-                targetCaptor.capture(), actionIdCaptor.capture(), any(Map.class), anyBoolean());
-        final String tenant = tenantCaptor.getValue();
-        final String controllerId = targetCaptor.getValue().getControllerId();
-        final Long actionId = actionIdCaptor.getValue();
-
-        assertThat(tenant).as("event has tenant").isEqualTo("DEFAULT");
-        assertThat(controllerId).as("event has wrong controller id").isEqualTo("target1");
-        assertThat(actionId).as("event has wrong action id").isEqualTo(22L);
+        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionPropertiesCaptor.capture(),
+                targetCaptor.capture(), any(Map.class));
+        final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
+        assertThat(actionProperties).isNotNull();
+        assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
+        assertThat(targetCaptor.getValue().getControllerId()).as("event has wrong controller id").isEqualTo("target1");
+        assertThat(actionProperties.getId()).as("event has wrong action id").isEqualTo(22L);
 
     }
 
@@ -516,6 +526,7 @@ public class AmqpMessageHandlerServiceTest {
         when(actionMock.getId()).thenReturn(targetId);
         when(actionMock.getTenant()).thenReturn("DEFAULT");
         when(actionMock.getTarget()).thenReturn(targetMock);
+        when(actionMock.getActionType()).thenReturn(Action.ActionType.SOFT);
         when(targetMock.getControllerId()).thenReturn("target1");
         return actionMock;
     }

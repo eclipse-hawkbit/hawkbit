@@ -21,9 +21,17 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_SAVE = "button.save";
 
+    public static final String BUTTON_NO_AUTO_ASSIGNMENT = "button.no.auto.assignment";
+
+    public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
+
+    public static final String HEADER_DISTRIBUTION_SET = "header.distributionset";
+
     public static final String CAPTION_ACTION_FORCED = "label.action.forced";
 
     public static final String CAPTION_ACTION_SOFT = "label.action.soft";
+
+    public static final String CAPTION_ACTION_DOWNLOAD_ONLY = "label.action.downloadonly";
 
     public static final String CAPTION_ACTION_TIME_FORCED = "label.action.time.forced";
 
@@ -47,6 +55,10 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ARTIFACT_DETAILS_OF = "caption.artifact.details.of";
 
+    public static final String CAPTION_SELECT_AUTO_ASSIGN_DS = "caption.select.auto.assign.dist";
+
+    public static final String CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES = "caption.confirm.assign.consequences";
+
     public static final String CAPTION_CONFIG_CREATE = "caption.config.create";
 
     public static final String CAPTION_CONFIG_EDIT = "caption.config.edit";
@@ -59,6 +71,10 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
 
+    public static final String LABEL_AUTO_ASSIGNMENT_DESC = "label.auto.assign.description";
+
+    public static final String LABEL_AUTO_ASSIGNMENT_ENABLE = "label.auto.assign.enable";
+
     public static final String MESSAGE_NO_DATA = "message.no.data";
 
     public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
@@ -66,6 +82,12 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_UPLOAD_ACTION = "upload.action";
 
     public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
+
+    public static final String MESSAGE_SELECTED_DS_NOT_FOUND = "message.selected.distributionset.not.found";
+
+    public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE = "message.confirm.assign.consequences.none";
+
+    public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT = "message.confirm.assign.consequences.text";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";
 
@@ -103,7 +125,13 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
+    public static final String TOOLTIP_TIMEFORCED_FORCED_IN = "tooltip.timeforced.forced.in";
+
+    public static final String TOOLTIP_TIMEFORCED_FORCED_SINCE = "tooltip.timeforced.forced.since";
+
     public static final String TOOLTIP_SOFT_ITEM = "tooltip.soft.item";
+
+    public static final String TOOLTIP_DOWNLOAD_ONLY_ITEM = "tooltip.downloadonly.item";
 
     public static final String TOOLTIP_FORCED_ITEM = "tooltip.forced.item";
 
@@ -158,6 +186,22 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
+
+    public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
+
+    public static final String VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE = "vaadin.system.sessionexpired.message";
+
+    public static final String VAADIN_SYSTEM_COMMUNICATIONERROR_CAPTION = "vaadin.system.communicationerror.caption";
+
+    public static final String VAADIN_SYSTEM_COMMUNICATIONERROR_MESSAGE = "vaadin.system.communicationerror.message";
+
+    public static final String VAADIN_SYSTEM_INTERNALERROR_CAPTION = "vaadin.system.internalerror.caption";
+
+    public static final String VAADIN_SYSTEM_INTERNALERROR_MESSAGE = "vaadin.system.internalerror.message";
+
+    public static final String VAADIN_SYSTEM_TRYINGRECONNECT = "vaadin.system.tryingreconnect";
+
+    public static final String TOOLTIP_ROLLOUT_STATUS_PREFIX = "tooltip.rollout.status.";
 
     /**
      * Private Constructor.

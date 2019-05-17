@@ -48,8 +48,8 @@ import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout;
-import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
+import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -112,7 +112,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final String DENY_BUTTON_LABEL = "button.deny";
 
-    private final ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
+    private final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout;
 
     private final AutoStartOptionGroupLayout autoStartOptionGroupLayout;
 
@@ -190,7 +190,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
-        actionTypeOptionGroupLayout = new ActionTypeOptionGroupLayout(i18n);
+        actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -371,8 +371,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private ActionType getActionType() {
-            return ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                    .getActionTypeOptionGroup().getValue()).getActionType();
+            return ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
+                    .getActionType();
         }
 
         private AutoStartOptionGroupLayout.AutoStartOption getAutoStartOption() {
@@ -392,6 +392,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private CommonDialogWindow createWindow() {
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.rollout"))).content(this)
+                .id(UIComponentIdProvider.ROLLOUT_POPUP_ID)
                 .layout(this).i18n(i18n).helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
     }
@@ -1078,8 +1079,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void setActionType(final Rollout rollout) {
-        for (final ActionTypeOptionGroupLayout.ActionTypeOption groupAction : ActionTypeOptionGroupLayout.ActionTypeOption
-                .values()) {
+        for (final ActionTypeOption groupAction : ActionTypeOption.values()) {
             if (groupAction.getActionType() == rollout.getActionType()) {
                 actionTypeOptionGroupLayout.getActionTypeOptionGroup().setValue(groupAction);
                 final SimpleDateFormat format = new SimpleDateFormat(SPUIDefinitions.LAST_QUERY_DATE_FORMAT);

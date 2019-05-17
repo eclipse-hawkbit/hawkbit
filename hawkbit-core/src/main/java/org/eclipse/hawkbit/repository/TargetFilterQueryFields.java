@@ -30,7 +30,7 @@ public enum TargetFilterQueryFields implements FieldNameProvider {
     NAME("name"),
 
     /**
-     * distribution set which is set as auto assign distribution set
+     * Distribution set for auto-assignment.
      */
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 

@@ -48,7 +48,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                 .name("targetName123").description("targetDesc123"));
         attributes.put("revision", "1.1");
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), attributes, null);
-        target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target.getControllerId(), LOCALHOST);
+        target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
         createTargetMetadata(target.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "metaValue"));
 
         target2 = targetManagement
@@ -56,7 +56,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         attributes.put("revision", "1.2");
         Thread.sleep(1);
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes, null);
-        target2 = controllerManagement.findOrRegisterTargetIfItDoesNotexist(target2.getControllerId(), LOCALHOST);
+        target2 = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target2.getControllerId(), LOCALHOST);
         createTargetMetadata(target2.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "value"));
 
         final Target target3 = testdataFactory.createTarget("targetId1235");

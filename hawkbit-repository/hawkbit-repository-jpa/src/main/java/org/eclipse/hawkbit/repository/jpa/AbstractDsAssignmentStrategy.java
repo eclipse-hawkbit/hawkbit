@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -30,13 +29,13 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.util.CollectionUtils;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -51,7 +50,7 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final AfterTransactionCommitExecutor afterCommit;
     protected final ApplicationEventPublisher eventPublisher;
     protected final BusProperties bus;
-    private final ActionRepository actionRepository;
+    protected final ActionRepository actionRepository;
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
 
@@ -80,6 +79,13 @@ public abstract class AbstractDsAssignmentStrategy {
     abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
 
     /**
+     * 
+     * @param set
+     * @param targets
+     */
+    abstract void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets);
+
+    /**
      * Update status and DS fields of given target.
      * 
      * @param distributionSet
@@ -89,8 +95,8 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param currentUser
      *            for auditing
      */
-    abstract void updateTargetStatus(final JpaDistributionSet distributionSet, final List<List<Long>> targetIds,
-            final String currentUser);
+    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet,
+            final List<List<Long>> targetIds, final String currentUser);
 
     /**
      * Cancels actions that can be canceled (i.e.
@@ -112,35 +118,12 @@ public abstract class AbstractDsAssignmentStrategy {
      * 
      * @param targetIds
      *            to cancel actions for
-     * @return {@link Set} of {@link Target#getId()}s
      */
     abstract void closeActiveActions(List<List<Long>> targetIds);
 
-    /**
-     * Handles event sending related to the assignment.
-     * 
-     * @param set
-     *            that has been assigned
-     * @param targets
-     *            to send events for
-     * @param targetIdsCancelList
-     *            targets where an action was canceled
-     * @param controllerIdsToActions
-     *            mapping of {@link Target#getControllerId()} to new
-     *            {@link Action} that was created as part of the assignment.
-     */
-    abstract void sendAssignmentEvents(DistributionSet set, final List<JpaTarget> targets,
-            final Set<Long> targetIdsCancelList, final Map<String, JpaAction> controllerIdsToActions);
+    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult);
 
-    protected void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,
-            final List<Action> actions) {
-        if (CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
-    }
+    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults);
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
         afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId())));

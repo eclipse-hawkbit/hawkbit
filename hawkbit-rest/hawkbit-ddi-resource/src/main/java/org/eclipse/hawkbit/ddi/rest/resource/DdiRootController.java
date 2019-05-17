@@ -143,7 +143,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId) {
         LOG.debug("getControllerBase({})", controllerId);
 
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(controllerId, IpUtil
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action action = controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null);
 
