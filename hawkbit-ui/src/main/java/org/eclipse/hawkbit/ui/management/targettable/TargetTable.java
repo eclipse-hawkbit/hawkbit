@@ -111,42 +111,27 @@ import com.vaadin.ui.themes.ValoTheme;
 public class TargetTable extends AbstractTable<Target> {
 
     private static final long serialVersionUID = 1L;
-
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
-
     private static final String TARGET_PINNED = "targetPinned";
-
     private static final int PROPERTY_DEPT = 3;
-
     private static final String MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS = "message.confirm.assign.multiple.entities.multiple.distributions";
 
     private final transient TargetManagement targetManagement;
-
     private final transient DistributionSetManagement distributionSetManagement;
-
     private final transient TargetTagManagement tagManagement;
-
     private final transient DeploymentManagement deploymentManagement;
-
     private final transient TenantConfigurationManagement configManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
-
     private final ManagementUIState managementUIState;
-
-    private Button targetPinnedBtn;
-
-    private boolean targetPinned;
-
     private final UiProperties uiProperties;
-
-    private ConfirmationDialog confirmDialog;
-
     private final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout;
-
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
-    private final SystemSecurityContext systemSecurityContext;
+    private Button targetPinnedBtn;
+    private boolean targetPinned;
+    private ConfirmationDialog confirmDialog;
 
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,

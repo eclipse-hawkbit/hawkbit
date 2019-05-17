@@ -45,25 +45,18 @@ public abstract class AbstractDistributionSetDetails
 
     private static final long serialVersionUID = 1L;
 
-    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
-    private final DistributionSetMetadataDetailsLayout dsMetadataTable;
-
-    private final UINotification uiNotification;
-
     private final transient DistributionSetManagement distributionSetManagement;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
 
+    private final DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
+    private final DistributionSetMetadataDetailsLayout dsMetadataTable;
+    private final UINotification uiNotification;
     private final DsMetadataPopupLayout dsMetadataPopupLayout;
-
     private final DistributionTagToken distributionTagToken;
-
     private final SoftwareModuleDetailsTable softwareModuleDetailsTable;
 
-    private final transient TenantConfigurationManagement tenantConfigurationManagement;
-
     private VerticalLayout softwareModuleTab;
-
-    private final SystemSecurityContext systemSecurityContext;
 
     protected AbstractDistributionSetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,

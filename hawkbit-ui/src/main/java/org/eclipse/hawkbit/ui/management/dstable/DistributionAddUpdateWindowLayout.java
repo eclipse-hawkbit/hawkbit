@@ -68,6 +68,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private final transient SystemManagement systemManagement;
     private final transient EntityFactory entityFactory;
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
 
     private final DistributionSetTable distributionSetTable;
 
@@ -78,8 +79,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private ComboBox distsetTypeNameComboBox;
 
     private FormLayout formLayout;
-
-    private final SystemSecurityContext systemSecurityContext;
 
     /**
      * Constructor for DistributionAddUpdateWindowLayout
