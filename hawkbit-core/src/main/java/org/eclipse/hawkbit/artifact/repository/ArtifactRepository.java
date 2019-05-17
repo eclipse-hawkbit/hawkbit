@@ -95,5 +95,5 @@ public interface ArtifactRepository {
      *
      * @return the boolean whether the atrifact exists or not
      */
-    boolean existsByTenantAndSha1(@NotEmpty String Tenant, @NotEmpty String sha1Hash);
+    boolean existsByTenantAndSha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 }
