@@ -114,11 +114,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private AbstractDbArtifact getOrCreateArtifact(final ArtifactUpload artifactUpload) {
         final String providedSha1Sum = artifactUpload.getProvidedSha1Sum();
-        if (!StringUtils.isEmpty(providedSha1Sum)
-                && artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(), providedSha1Sum)) {
-            return artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum);
+        AbstractDbArtifact artifact = null;
+
+        if (!StringUtils.isEmpty(providedSha1Sum)) {
+            artifact = artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum);
         }
-        return storeArtifact(artifactUpload);
+        return artifact == null ? storeArtifact(artifactUpload) : artifact;
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
