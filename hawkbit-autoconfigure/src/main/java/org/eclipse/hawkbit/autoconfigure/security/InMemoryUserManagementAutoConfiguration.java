@@ -42,6 +42,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @EnableConfigurationProperties({ MultiUserProperties.class })
 public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
+    private static final String DEFAULT_TENANT = "DEFAULT";
+
     private final SecurityProperties securityProperties;
 
     private final MultiUserProperties multiUserProperties;
@@ -65,12 +67,12 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     @Bean
     @ConditionalOnMissingBean
     UserDetailsService userDetailsService() {
-        final String defaultTenant = "DEFAULT";
+
         final List<UserPrincipal> userPrincipals = new ArrayList<>();
-        for (MultiUserProperties.User user : multiUserProperties.getUsers()) {
+        for (final MultiUserProperties.User user : multiUserProperties.getUsers()) {
             List<GrantedAuthority> authorityList;
             // Allows ALL as a shorthand for all permissions
-            if (user.getPermissions().size() == 1 && user.getPermissions().get(0).equals("ALL")) {
+            if (user.getPermissions().size() == 1 && "ALL".equals(user.getPermissions().get(0))) {
                 authorityList = PermissionUtils.createAllAuthorityList();
             } else {
                 authorityList = new ArrayList<>(user.getPermissions().size());
@@ -81,7 +83,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
             }
 
             final UserPrincipal userPrincipal = new UserPrincipal(user.getUsername(), user.getPassword(),
-                    user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), defaultTenant,
+                    user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), DEFAULT_TENANT,
                     authorityList);
             userPrincipals.add(userPrincipal);
         }
@@ -91,7 +93,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         if (userPrincipals.isEmpty()) {
             final String name = securityProperties.getUser().getName();
             final String password = securityProperties.getUser().getPassword();
-            userPrincipals.add(new UserPrincipal(name, password, name, name, name, null, defaultTenant,
+            userPrincipals.add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT,
                     PermissionUtils.createAllAuthorityList()));
         }
 
@@ -101,22 +103,23 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     private static class FixedInMemoryUserPrincipalUserDetailsService implements UserDetailsService {
         private final HashMap<String, UserPrincipal> userPrincipalMap = new HashMap<>();
 
-        public FixedInMemoryUserPrincipalUserDetailsService(Collection<UserPrincipal> userPrincipals) {
-            for (UserPrincipal user : userPrincipals) {
+        public FixedInMemoryUserPrincipalUserDetailsService(final Collection<UserPrincipal> userPrincipals) {
+            for (final UserPrincipal user : userPrincipals) {
                 userPrincipalMap.put(user.getUsername(), user);
             }
         }
 
-        private static UserPrincipal clone(UserPrincipal a) {
+        private static UserPrincipal clone(final UserPrincipal a) {
             return new UserPrincipal(a.getUsername(), a.getPassword(), a.getFirstname(), a.getLastname(),
                     a.getLoginname(), a.getEmail(), a.getTenant(), a.getAuthorities());
         }
 
         @Override
-        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-            UserPrincipal userPrincipal = userPrincipalMap.get(username);
-            if (userPrincipal == null)
+        public UserDetails loadUserByUsername(final String username) {
+            final UserPrincipal userPrincipal = userPrincipalMap.get(username);
+            if (userPrincipal == null) {
                 throw new UsernameNotFoundException("No such user");
+            }
             // Spring mutates the data, so we must return a copy here
             return clone(userPrincipal);
         }
