@@ -340,7 +340,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 }
                 return null;
             }));
-        } while (tenants.hasNext() && (query = tenants.nextPageable()) != null);
+        } while ((query = tenants.nextPageable()) != Pageable.unpaged());
 
     }
 }
