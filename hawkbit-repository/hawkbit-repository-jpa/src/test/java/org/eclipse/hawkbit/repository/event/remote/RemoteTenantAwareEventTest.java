@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -29,15 +30,36 @@ import io.qameta.allure.Story;
 @Story("RemoteTenantAwareEvent Tests")
 public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
+    private static final String TENANT_DEFAULT = "DEFAULT";
+
+    private static final String APPLICATION_ID_DEFAULT = "Node";
+
+    @Test
+    @Description("Verifies that multi action event works")
+    public void testMultiActionEvent() {
+
+        final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
+                "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
+        final MultiActionEvent event = new MultiActionEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT, controllerIds);
+
+        final MultiActionEvent remoteEventProtoStuff = createProtoStuffEvent(event);
+        assertThat(event).isEqualTo(remoteEventProtoStuff);
+
+        final MultiActionEvent remoteEventJackson = createJacksonEvent(event);
+        assertThat(event).isEqualTo(remoteEventJackson);
+
+    }
+
     @Test
     @Description("Verifies that the download progress reloading by remote events works")
     public void reloadDownloadProgessByRemoteEvent() {
-        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent("DEFAULT", 1L, 3L, "Node");
+        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent(TENANT_DEFAULT, 1L, 3L,
+                APPLICATION_ID_DEFAULT);
 
-        DownloadProgressEvent remoteEvent = (DownloadProgressEvent) createProtoStuffEvent(downloadProgressEvent);
+        DownloadProgressEvent remoteEvent = createProtoStuffEvent(downloadProgressEvent);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
 
-        remoteEvent = (DownloadProgressEvent) createJacksonEvent(downloadProgressEvent);
+        remoteEvent = createJacksonEvent(downloadProgressEvent);
         assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
     }
 
@@ -57,11 +79,10 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
                 action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId(),
                 action.isMaintenanceWindowAvailable());
 
-        TargetAssignDistributionSetEvent underTest = (TargetAssignDistributionSetEvent) createProtoStuffEvent(
-                assignmentEvent);
+        TargetAssignDistributionSetEvent underTest = createProtoStuffEvent(assignmentEvent);
         assertTargetAssignDistributionSetEvent(action, underTest);
 
-        underTest = (TargetAssignDistributionSetEvent) createJacksonEvent(assignmentEvent);
+        underTest = createJacksonEvent(assignmentEvent);
         assertTargetAssignDistributionSetEvent(action, underTest);
     }
 
@@ -69,7 +90,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
             final TargetAssignDistributionSetEvent underTest) {
 
         assertThat(underTest.getActions().size()).isEqualTo(1);
-        ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());
+        final ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());
         assertThat(actionProperties).isNotNull();
         assertThat(actionProperties).isEqualToComparingFieldByField(new ActionProperties(action));
         assertThat(underTest.getDistributionSetId()).isEqualTo(action.getDistributionSet().getId());
