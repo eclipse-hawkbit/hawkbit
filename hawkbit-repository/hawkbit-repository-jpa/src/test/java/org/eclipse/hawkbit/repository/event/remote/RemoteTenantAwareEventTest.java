@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 
 import io.qameta.allure.Description;
@@ -35,7 +34,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     private static final String APPLICATION_ID_DEFAULT = "Node";
 
     @Test
-    @Description("Verifies that multi action event works")
+    @Description("Verifies that a MultiActionEvent can be properly serialized and deserialized")
     public void testMultiActionEvent() {
 
         final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
@@ -44,46 +43,50 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
         final MultiActionEvent remoteEventProtoStuff = createProtoStuffEvent(event);
         assertThat(event).isEqualTo(remoteEventProtoStuff);
+        assertThat(remoteEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
 
         final MultiActionEvent remoteEventJackson = createJacksonEvent(event);
         assertThat(event).isEqualTo(remoteEventJackson);
+        assertThat(remoteEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
 
     }
 
     @Test
-    @Description("Verifies that the download progress reloading by remote events works")
+    @Description("Verifies that a DownloadProgressEvent can be properly serialized and deserialized")
     public void reloadDownloadProgessByRemoteEvent() {
         final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent(TENANT_DEFAULT, 1L, 3L,
                 APPLICATION_ID_DEFAULT);
 
-        DownloadProgressEvent remoteEvent = createProtoStuffEvent(downloadProgressEvent);
-        assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
+        final DownloadProgressEvent remoteEventProtoStuff = createProtoStuffEvent(downloadProgressEvent);
+        assertThat(downloadProgressEvent).isEqualTo(remoteEventProtoStuff);
 
-        remoteEvent = createJacksonEvent(downloadProgressEvent);
-        assertThat(downloadProgressEvent).isEqualTo(remoteEvent);
+        final DownloadProgressEvent remoteEventJackson = createJacksonEvent(downloadProgressEvent);
+        assertThat(downloadProgressEvent).isEqualTo(remoteEventJackson);
     }
 
     @Test
-    @Description("Verifies that target assignment event works")
+    @Description("Verifies that a TargetAssignDistributionSetEvent can be properly serialized and deserialized")
     public void testTargetAssignDistributionSetEvent() {
+
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
         final JpaAction generateAction = new JpaAction();
         generateAction.setActionType(ActionType.FORCED);
-        final Target target = testdataFactory.createTarget("Test");
-        generateAction.setTarget(target);
+        generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
+
         final Action action = actionRepository.save(generateAction);
 
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(
                 action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId(),
                 action.isMaintenanceWindowAvailable());
 
-        TargetAssignDistributionSetEvent underTest = createProtoStuffEvent(assignmentEvent);
-        assertTargetAssignDistributionSetEvent(action, underTest);
+        final TargetAssignDistributionSetEvent remoteEventProtoStuff = createProtoStuffEvent(assignmentEvent);
+        assertTargetAssignDistributionSetEvent(action, remoteEventProtoStuff);
 
-        underTest = createJacksonEvent(assignmentEvent);
-        assertTargetAssignDistributionSetEvent(action, underTest);
+        final TargetAssignDistributionSetEvent remoteEventJackson = createJacksonEvent(assignmentEvent);
+        assertTargetAssignDistributionSetEvent(action, remoteEventJackson);
     }
 
     private void assertTargetAssignDistributionSetEvent(final Action action,
