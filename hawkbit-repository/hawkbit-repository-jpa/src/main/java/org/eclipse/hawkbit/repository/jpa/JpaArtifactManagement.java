@@ -108,18 +108,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
         assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
         assertMaxArtifactStorageQuota(filename, artifactUpload.getFilesize());
 
-        AbstractDbArtifact result = getOrCreateArtifact(artifactUpload);
-        return result == null ? null : storeArtifactMetadata(softwareModule, filename, result, existing);
+        return  getOrCreateArtifact(artifactUpload)
+                .map(artifact -> storeArtifactMetadata(softwareModule, filename, artifact, existing))
+                .orElse(null);
     }
 
-    private AbstractDbArtifact getOrCreateArtifact(final ArtifactUpload artifactUpload) {
+    private Optional<AbstractDbArtifact> getOrCreateArtifact(final ArtifactUpload artifactUpload) {
         final String providedSha1Sum = artifactUpload.getProvidedSha1Sum();
         AbstractDbArtifact artifact = null;
 
         if (!StringUtils.isEmpty(providedSha1Sum)) {
             artifact = artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum);
         }
-        return artifact == null ? storeArtifact(artifactUpload) : artifact;
+        return Optional.ofNullable(artifact == null ? storeArtifact(artifactUpload) : artifact);
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
