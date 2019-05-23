@@ -227,7 +227,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .stream().collect(Collectors.toMap(DistributionSet::getId, this::getSoftwareModulesWithMetadata));
 
         amqpMessageDispatcherService.sendMultiActionRequestToTarget(target.getTenant(), target, actions,
-                softwareModulesPerDistributionSet);
+                action -> softwareModulesPerDistributionSet.get(action.getDistributionSet().getId()));
     }
 
     private void sendOldestActionToTarget(final Target target) {
