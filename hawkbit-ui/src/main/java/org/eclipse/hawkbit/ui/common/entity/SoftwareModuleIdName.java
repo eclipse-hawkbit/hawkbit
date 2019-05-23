@@ -61,7 +61,7 @@ public class SoftwareModuleIdName implements Serializable {
     }
 
     @Override
-    public int hashCode() {// NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (id == null ? 0 : id.hashCode());
@@ -69,7 +69,7 @@ public class SoftwareModuleIdName implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) {// NOSONAR - as this is generated
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

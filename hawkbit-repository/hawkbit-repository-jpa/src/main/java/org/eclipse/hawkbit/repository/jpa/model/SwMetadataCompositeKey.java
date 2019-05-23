@@ -79,8 +79,8 @@ public final class SwMetadataCompositeKey implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+    public boolean equals(final Object obj) {
+
         if (this == obj) {
             return true;
         }
