@@ -350,14 +350,8 @@ public final class DashboardMenu extends CustomComponent {
      * @return <code>true</code> = denied, <code>false</code> = accessible
      */
     public boolean isAccessDenied(final String viewName) {
-        final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
-        boolean accessDeined = Boolean.TRUE.booleanValue();
-        for (final DashboardMenuItem dashboardViewType : accessibleViews) {
-            if (dashboardViewType.getViewName().equals(viewName)) {
-                accessDeined = Boolean.FALSE.booleanValue();
-            }
-        }
-        return accessDeined;
+        return getAccessibleViews().stream()
+                .noneMatch(dashboardMenuItem -> dashboardMenuItem.getViewName().equals(viewName));
     }
 
     private class MenuToggleClickListenerMyClickListener implements ClickListener {
