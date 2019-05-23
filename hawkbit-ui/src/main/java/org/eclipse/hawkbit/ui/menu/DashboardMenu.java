@@ -337,10 +337,9 @@ public final class DashboardMenu extends CustomComponent {
      *         with given viewname does not exists
      */
     public DashboardMenuItem getByViewName(final String viewName) {
-        final Optional<DashboardMenuItem> findFirst = dashboardVaadinViews.stream()
-                .filter(view -> view.getViewName().equals(viewName)).findAny();
 
-        return findFirst.orElse(null);
+        return dashboardVaadinViews.stream()
+                .filter(view -> view.getViewName().equals(viewName)).findAny().orElse(null);
     }
 
     /**
