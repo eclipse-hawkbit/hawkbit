@@ -52,6 +52,8 @@ public class ActionTypeOptionGroupAssignmentLayout extends AbstractActionTypeOpt
             private static final long serialVersionUID = 1L;
 
             @Override
+            // Vaadin is returning object so "==" might not work
+            @SuppressWarnings("squid:S4551")
             public void valueChange(final ValueChangeEvent event) {
                 if (event.getProperty().getValue().equals(ActionTypeOption.AUTO_FORCED)) {
                     forcedTimeDateField.setEnabled(true);
@@ -78,8 +80,6 @@ public class ActionTypeOptionGroupAssignmentLayout extends AbstractActionTypeOpt
         addAutoForceItemWithLabelAndDateField();
         addDownloadOnlyItemWithLabel();
     }
-
-
 
     private void addAutoForceItemWithLabelAndDateField() {
         final FlexibleOptionGroupItemComponent autoForceItem = actionTypeOptionGroup

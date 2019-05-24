@@ -250,7 +250,10 @@ public final class TargetAssignmentOperations {
                     private static final long serialVersionUID = 1L;
 
                     @Override
+                    // Vaadin is returning object so "==" might not work
+                    @SuppressWarnings("squid:S4551")
                     public void valueChange(final Property.ValueChangeEvent event) {
+
                         if (event.getProperty().getValue()
                                 .equals(AbstractActionTypeOptionGroupLayout.ActionTypeOption.DOWNLOAD_ONLY)) {
                             enableMaintenanceWindowControl.setValue(false);

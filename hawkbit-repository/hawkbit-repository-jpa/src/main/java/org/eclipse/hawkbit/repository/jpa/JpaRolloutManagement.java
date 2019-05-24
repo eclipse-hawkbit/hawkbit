@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -104,8 +106,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
-
-import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 /**
  * JPA implementation of {@link RolloutManagement}.
@@ -336,14 +336,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         int readyGroups = 0;
         int totalTargets = 0;
         for (final RolloutGroup group : rolloutGroups) {
-            if (RolloutGroupStatus.READY.equals(group.getStatus())) {
+            if (RolloutGroupStatus.READY == group.getStatus()) {
                 readyGroups++;
                 totalTargets += group.getTotalTargets();
                 continue;
             }
 
             final RolloutGroup filledGroup = fillRolloutGroupWithTargets(rollout, group);
-            if (RolloutGroupStatus.READY.equals(filledGroup.getStatus())) {
+            if (RolloutGroupStatus.READY == filledGroup.getStatus()) {
                 readyGroups++;
                 totalTargets += filledGroup.getTotalTargets();
             }

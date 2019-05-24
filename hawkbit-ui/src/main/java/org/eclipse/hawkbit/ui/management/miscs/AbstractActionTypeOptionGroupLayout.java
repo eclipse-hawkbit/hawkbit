@@ -109,8 +109,8 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
      *
      */
     public enum ActionTypeOption {
-        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED),
-        DOWNLOAD_ONLY(ActionType.DOWNLOAD_ONLY);
+        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED), DOWNLOAD_ONLY(
+                ActionType.DOWNLOAD_ONLY);
 
         private final ActionType actionType;
 
@@ -130,7 +130,7 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
          * @return action type option if matches, otherwise empty Optional
          */
         public static Optional<ActionTypeOption> getOptionForActionType(final ActionType actionType) {
-            return Arrays.stream(ActionTypeOption.values()).filter(option -> option.getActionType().equals(actionType))
+            return Arrays.stream(ActionTypeOption.values()).filter(option -> option.getActionType() == actionType)
                     .findFirst();
         }
     }
