@@ -631,7 +631,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
+        if (RolloutStatus.RUNNING != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -650,7 +650,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
+        if (RolloutStatus.PAUSED != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -751,7 +751,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())
+        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY == rollout.getActionType()
                 ? actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
                         DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES)
                 : actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
@@ -887,7 +887,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }
 
-        if (RolloutStatus.DELETING.equals(jpaRollout.getStatus())) {
+        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
             return;
         }
 
@@ -1028,7 +1028,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private static void checkIfDeleted(final Long rolloutId, final RolloutStatus status) {
-        if (RolloutStatus.DELETING.equals(status) || RolloutStatus.DELETED.equals(status)) {
+        if (RolloutStatus.DELETING == status || RolloutStatus.DELETED == status) {
             throw new EntityReadOnlyException("Rollout " + rolloutId + " is soft deleted and cannot be changed");
         }
     }

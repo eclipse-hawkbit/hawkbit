@@ -348,10 +348,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private long getForcedTimeStamp() {
-            return ActionTypeOption.AUTO_FORCED
-                    .equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
-                            ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
-                            : RepositoryModelConstants.NO_FORCE_TIME;
+            return ActionTypeOption.AUTO_FORCED == actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue()
+                    ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
+                    : RepositoryModelConstants.NO_FORCE_TIME;
         }
 
         private Long getScheduledStartTime() {
