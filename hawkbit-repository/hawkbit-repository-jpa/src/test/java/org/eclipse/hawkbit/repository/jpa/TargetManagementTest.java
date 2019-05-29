@@ -102,7 +102,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findByQueryAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
 
         verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL),
                 "DistributionSet");
@@ -402,9 +402,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .isEmpty();
         findTargetTag = targetTagManagement.getByName("Tag1").get();
         assertThat(targetManagement.findByTag(PAGE, targetTag.getId())).as("Assigned targets are wrong").hasSize(3);
-        assertThat(targetManagement.findByRsqlAndTag(PAGE, "controllerId==targetId123", targetTag.getId()))
+        assertThat(targetManagement.findByQueryAndTag(PAGE, "controllerId==targetId123", targetTag.getId()))
                 .as("Assigned targets are wrong").isEmpty();
-        assertThat(targetManagement.findByRsqlAndTag(PAGE, "controllerId==targetId1234", targetTag.getId()))
+        assertThat(targetManagement.findByQueryAndTag(PAGE, "controllerId==targetId1234", targetTag.getId()))
                 .as("Assigned targets are wrong").hasSize(1);
 
     }

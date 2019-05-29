@@ -440,20 +440,20 @@ public class JpaTargetManagement implements TargetManagement {
         if (!filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
-        filterParams.getOverdueState().ifPresent(s -> { //
-            specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
-        });
+        filterParams.getOverdueState().ifPresent(s -> //
+            specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())) //
+        );
         filterParams.getFilterByDistributionId().ifPresent(id -> {
             throwEntityNotFoundIfDsDoesNotExist(id);
             specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(id));
         });
-        filterParams.getFilterBySearchText().ifPresent(text -> {//
-            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text));
-        });
+        filterParams.getFilterBySearchText().ifPresent(text -> //
+            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)) //
+        );
 
         if (filterParams.hasTagsFilterActive()) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
-                    filterParams.getSelectTargetWithNoTag()));
+                    filterParams.isSelectTargetWithNoTag()));
         }
         return specList;
     }
@@ -707,7 +707,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String query, final long tagId) {
+    public Page<Target> findByQueryAndTag(final Pageable pageable, final String query, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
         Set<String> targetIds = targetRepository.findControllerIdsByTag(tagId);
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, targetIds), pageable);

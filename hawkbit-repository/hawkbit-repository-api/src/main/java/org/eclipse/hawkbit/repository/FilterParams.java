@@ -124,13 +124,13 @@ public class FilterParams implements Serializable {
      *
      * @return the flag indicating if tagging filter is used
      */
-    public boolean getSelectTargetWithNoTag() {
+    public boolean isSelectTargetWithNoTag() {
         return selectTargetWithNoTag;
     }
 
     /**
      * Gets the tags that are used to filter for. The activation of this filter
-     * is done by {@link #getSelectTargetWithNoTag()}.
+     * is done by {@link #isSelectTargetWithNoTag()}.
      *
      * @return the tags that are used to filter for or an empty array if non are present
      */
@@ -149,10 +149,12 @@ public class FilterParams implements Serializable {
                 || !hasTagsFilterActive();
     }
 
+    /**
+     * Check if a filter by tag should be applied.
+     * Returns also true when tags should be explicitly ignored.
+     * @return true when a tag-filter should be applied, false otherwise
+     */
     public boolean hasTagsFilterActive() {
         return selectTargetWithNoTag || filterByTagNames.length > 0;
-        // Original code:
-//        return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
-//                || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
 }

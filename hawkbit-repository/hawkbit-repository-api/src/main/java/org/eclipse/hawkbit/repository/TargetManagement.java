@@ -388,37 +388,6 @@ public interface TargetManagement {
     Page<Target> findByUpdateStatus(@NotNull Pageable pageable, @NotNull TargetUpdateStatus status);
 
     /**
-     * Retrieves all targets.
-     *
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link Target}s
-     */
-//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-//    Slice<Target> findAll(@NotNull Pageable pageable);
-
-    /**
-     * Retrieves all targets.
-     * 
-     * @param pageable
-     *            pagination parameter
-     * @param rsqlParam
-     *            in RSQL notation
-     *
-     * @return the found {@link Target}s, never {@code null}
-     * 
-     * 
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-//    Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
-
-
-    /**
      * method retrieves all {@link Target}s from the repo in the following
      * order:
      * <p>
@@ -482,7 +451,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
+    Page<Target> findByQueryAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
