@@ -209,7 +209,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<Target> findTargetPage = targetManagement.findByRsql(PAGE, rsqlParam);
+        final Page<? extends Target> findTargetPage = targetQueryExecutionManagement.findByQuery(PAGE, rsqlParam);
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

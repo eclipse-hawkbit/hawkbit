@@ -215,6 +215,15 @@ public final class TargetSpecifications {
     }
 
     /**
+     * Limit the result to all target in the provided controller-id list.
+     * @param controllerIds list of controller-IDs
+     * @return the {@link Specification}
+     */
+    public static Specification<JpaTarget> hasControllerId(final Collection<String> controllerIds) {
+        return  (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.controllerId).in(controllerIds);
+    }
+
+    /**
      * {@link Specification} for retrieving {@link Target}s by "has no tag
      * names"or "has at least on of the given tag names".
      *
@@ -237,7 +246,7 @@ public final class TargetSpecifications {
         final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
         final Path<String> exp = tags.get(JpaTargetTag_.name);
         if (selectTargetWithNoTag) {
-            if (tagNames != null) {
+            if (tagNames != null && tagNames.length > 0) {
                 return cb.or(exp.isNull(), exp.in(tagNames));
             } else {
                 return exp.isNull();
@@ -245,20 +254,6 @@ public final class TargetSpecifications {
         } else {
             return exp.in(tagNames);
         }
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
-     *
-     * @param distributionSetId
-     *            the ID of the distribution set which must be assigned
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
-        return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
-                distributionSetId);
     }
 
     /**
@@ -278,6 +273,7 @@ public final class TargetSpecifications {
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
     }
+
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are not in the

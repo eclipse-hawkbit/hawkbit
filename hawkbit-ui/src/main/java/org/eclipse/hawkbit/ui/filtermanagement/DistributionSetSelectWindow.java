@@ -249,7 +249,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
             layout.setMargin(true);
             setContent(layout);
 
-            final Long targetsCount = targetManagement.countByRsqlAndNonDS(distributionSetId,
+            final Long targetsCount = targetManagement.countByNotAssignedDistributionSetAndQuery(distributionSetId,
                     targetFilterQuery.getQuery());
             Label mainTextLabel;
             if (targetsCount == 0) {

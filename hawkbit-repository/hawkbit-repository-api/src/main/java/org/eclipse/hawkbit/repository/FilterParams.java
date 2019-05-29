@@ -1,6 +1,5 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +7,12 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -17,45 +21,58 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
  * Encapsulates a set of filters that may be specified (optionally). Properties
  * that are not specified (e.g. <code>null</code> for simple properties) When
  * applied, these filters are AND-gated.
- *
  */
-public class FilterParams {
+public class FilterParams implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final Collection<TargetUpdateStatus> filterByStatus;
     private final Boolean overdueState;
     private final String filterBySearchText;
-    private final Boolean selectTargetWithNoTag;
+    private final boolean selectTargetWithNoTag;
     private final String[] filterByTagNames;
     private final Long filterByDistributionId;
 
+    private FilterParams(@NotNull Long filterByDistributionId) {
+        this(Collections.emptyList(), null, null, filterByDistributionId, null);
+    }
+
     /**
-     * Constructor.
+     * Constructor for creating filter-objects.
      *
-     * @param filterByInstalledOrAssignedDistributionSetId
-     *            if set, a filter is added for the given
-     *            {@link DistributionSet#getId()}
-     * @param filterByStatus
-     *            if set, a filter is added for target states included by the
-     *            collection
-     * @param overdueState
-     *            if set, a filter is added for overdued devices
-     * @param filterBySearchText
-     *            if set, a filter is added for the given search text
      * @param selectTargetWithNoTag
-     *            if set, tag-filtering is enabled
+     *            flag to select targets with no tag assigned
+     * @param filterByInstalledOrAssignedDistributionSetId
+     *         filter by installed or assigned {@link DistributionSet#getId()}
+     * @param filterByStatus
+     *         if set, a filter is added for target states included by the
+     *         collection
+     * @param overdueState
+     *         if set, a filter is added for overdued devices
+     * @param filterBySearchText
+     *         to find targets having the text anywhere in name or description.
+     * @param selectTargetWithNoTag
+     *         flag to select targets with no tag assigned, if set, tag-filtering is enabled
      * @param filterByTagNames
-     *            if tag-filtering is enabled, a filter is added for the given
-     *            tag-names
+     *         if tag-filtering is enabled, a filter is added for the given
+     *         tag-names
      */
     public FilterParams(final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
             final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
             final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
-        this.filterByStatus = filterByStatus;
+        this.filterByStatus = (filterByStatus == null) ? Collections.emptyList() : filterByStatus;
         this.overdueState = overdueState;
         this.filterBySearchText = filterBySearchText;
         this.filterByDistributionId = filterByInstalledOrAssignedDistributionSetId;
-        this.selectTargetWithNoTag = selectTargetWithNoTag;
-        this.filterByTagNames = filterByTagNames;
+        this.selectTargetWithNoTag = (selectTargetWithNoTag == null) ? false : selectTargetWithNoTag;
+        this.filterByTagNames = (filterByTagNames == null) ? new String[0] : filterByTagNames;
+    }
+
+    public static FilterParams forDistributionSet(Long distributionId) {
+        return new FilterParams(distributionId);
+    }
+
+    public static FilterParams forTags(String... tagNames) {
+        return new FilterParams(null, null, null, null, false, tagNames);
     }
 
     /**
@@ -64,8 +81,8 @@ public class FilterParams {
      *
      * @return {@link DistributionSet#getId()} to filter the result
      */
-    public Long getFilterByDistributionId() {
-        return filterByDistributionId;
+    public Optional<Long> getFilterByDistributionId() {
+        return Optional.ofNullable(filterByDistributionId);
     }
 
     /**
@@ -86,8 +103,8 @@ public class FilterParams {
      *
      * @return flag for overdue filter activation
      */
-    public Boolean getOverdueState() {
-        return overdueState;
+    public Optional<Boolean> getOverdueState() {
+        return Optional.ofNullable(overdueState);
     }
 
     /**
@@ -97,8 +114,8 @@ public class FilterParams {
      *
      * @return the search text to filter for
      */
-    public String getFilterBySearchText() {
-        return filterBySearchText;
+    public Optional<String> getFilterBySearchText() {
+        return Optional.ofNullable(filterBySearchText);
     }
 
     /**
@@ -107,17 +124,35 @@ public class FilterParams {
      *
      * @return the flag indicating if tagging filter is used
      */
-    public Boolean getSelectTargetWithNoTag() {
+    public boolean getSelectTargetWithNoTag() {
         return selectTargetWithNoTag;
     }
 
     /**
      * Gets the tags that are used to filter for. The activation of this filter
-     * is done by {@link #setSelectTargetWithNoTag(Boolean)}.
+     * is done by {@link #getSelectTargetWithNoTag()}.
      *
-     * @return the tags that are used to filter for
+     * @return the tags that are used to filter for or an empty array if non are present
      */
     public String[] getFilterByTagNames() {
         return filterByTagNames;
+    }
+
+    public boolean isEmpty() {
+        return isEmpty(filterByDistributionId);
+    }
+
+    public boolean isEmpty(Long filterByDistributionId) {
+        return filterByStatus.isEmpty() //
+                || getFilterBySearchText().isPresent() //
+                || filterByDistributionId != null //
+                || !hasTagsFilterActive();
+    }
+
+    public boolean hasTagsFilterActive() {
+        return selectTargetWithNoTag || filterByTagNames.length > 0;
+        // Original code:
+//        return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
+//                || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
 }

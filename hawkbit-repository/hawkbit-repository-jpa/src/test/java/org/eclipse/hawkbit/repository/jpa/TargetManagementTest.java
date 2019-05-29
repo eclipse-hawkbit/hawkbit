@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,27 +109,28 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> targetManagement.countByTargetFilterQuery(NOT_EXIST_IDL), "TargetFilterQuery");
-        verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDS(NOT_EXIST_IDL, "name==*"),
+        verifyThrownExceptionBy(
+                () -> targetManagement.countByNotAssignedDistributionSetAndQuery(NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.deleteByControllerID(NOT_EXIST_ID), "Target");
         verifyThrownExceptionBy(() -> targetManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.findByTargetFilterQueryAndNonDS(PAGE, NOT_EXIST_IDL, "name==*"),
+        verifyThrownExceptionBy(
+                () -> targetManagement.findByNoActionWithDistributionSetExistsAndQuery(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
         verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
                 "RolloutGroup");
         verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> targetManagement.findByAssignedDistributionSetAndQuery(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> targetManagement.findByInstalledDistributionSetAndQuery(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement
@@ -499,6 +501,99 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Checks if an target can be found by an assigned distribution set")
+    public void shouldFindTargetByAssignedDistributionSetAndQuery() {
+        DistributionSet set1 = testdataFactory.createDistributionSet("test1");
+        DistributionSet set2 = testdataFactory.createDistributionSet("test2");
+        Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9").forEach(this::createTargetWithAttributes);
+
+        Page<Target> result1 = targetManagement.findByAssignedDistributionSetAndQuery(PAGE, set1.getId(),
+                "id==1 or id==2");
+
+        assertThat(result1.getTotalElements()).as("No target should be found when non is installed.").isEqualTo(0);
+
+        Arrays.asList("1", "2", "3").forEach(id -> assignDistributionSet(set1.getId(), id));
+        Arrays.asList("7", "8", "9").forEach(id -> assignDistributionSet(set2.getId(), id));
+
+        Page<Target> result2 = targetManagement.findByAssignedDistributionSetAndQuery(PAGE, set1.getId(),
+                "id==1,id==2,id==9");
+
+        assertThat(result2.getTotalElements())
+                .as("Only targets matching ID and assigned distribution set should be found").isEqualTo(2);
+        result2.getContent().forEach(t -> assertThat(((JpaTarget) t).getAssignedDistributionSet().getId())
+                .as("Distribution set should match the specified one").isEqualTo(set1.getId()));
+    }
+
+    @Test
+    @Description("Checks if an target can be found by an installed distribution set")
+    public void shouldFindTargetByInstalledDistributionSetAndQuery() {
+        DistributionSet set1 = testdataFactory.createDistributionSet("test1");
+        DistributionSet set2 = testdataFactory.createDistributionSet("test2");
+        Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9").forEach(this::createTargetWithAttributes);
+        List<Long> actionIds = new LinkedList();
+        Arrays.asList("1", "2", "3", "4", "5").forEach(id -> {
+            DistributionSetAssignmentResult assignment = assignDistributionSet(set1.getId(), id);
+            actionIds.add(assignment.getActions().get(0).getId());
+        });
+        Arrays.asList("6", "7").forEach(id -> assignDistributionSet(set1.getId(), id));
+        Arrays.asList("8", "9").forEach(id -> {
+            DistributionSetAssignmentResult r = assignDistributionSet(set2.getId(), id);
+            controllerManagement.addUpdateActionStatus(
+                    entityFactory.actionStatus().create(r.getActions().get(0).getId()).status(Status.FINISHED));
+        });
+
+        Page<Target> result1 = targetManagement.findByInstalledDistributionSetAndQuery(PAGE, set1.getId(), "id=le=9");
+        assertThat(result1.getTotalElements()).as("No target should be found when non is installed.").isEqualTo(0);
+
+        actionIds.forEach(id -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(id).status(Status.FINISHED)));
+
+        Page<Target> result2 = targetManagement.findByInstalledDistributionSetAndQuery(PAGE, set1.getId(),
+                "id=lt=4,id=gt=5");
+        assertThat(result2.getTotalElements()).as("3 target should be found when a distribution set is installed.")
+                .isEqualTo(3);
+    }
+
+    @Test
+    @Description("Query for targets which do not have a certain distribution set assigned")
+    public void shouldFindByNotAssignedDistributionSetAndQuery() {
+        DistributionSet set1 = testdataFactory.createDistributionSet("test1");
+        DistributionSet set2 = testdataFactory.createDistributionSet("test2");
+        Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9").forEach(this::createTargetWithAttributes);
+        Arrays.asList("1", "2", "3", "4", "5").forEach(id -> assignDistributionSet(set1.getId(), id));
+        // "6" has intentionally no DS assigned at all => Should be found!
+        Arrays.asList("7", "8", "9").forEach(id -> assignDistributionSet(set2.getId(), id));
+
+        Page<Target> result = targetManagement.findByNoActionWithDistributionSetExistsAndQuery(PAGE, set1.getId(), "id=ge=5");
+
+        assertThat(result.getTotalElements())
+                .as("Only targets where distribution set is NOT assigned and RSQL is matching should be returned")
+                .isEqualTo(4);
+
+        result.getContent().forEach(t -> {
+            DistributionSet ds = ((JpaTarget) t).getAssignedDistributionSet();
+            if (ds != null) {
+                assertThat(ds.getId()).isNotEqualTo(set1.getId());
+            }
+        });
+
+    }
+
+    @Test
+    @Description("Count for targets which do not have a certain distribution set assigned")
+    public void shouldCountTargetsWhenDistributionSetIsNotAssigned() {
+        DistributionSet set1 = testdataFactory.createDistributionSet("test1");
+        DistributionSet set2 = testdataFactory.createDistributionSet("test2");
+        Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9").forEach(this::createTargetWithAttributes);
+        Arrays.asList("1", "2", "3").forEach(id -> assignDistributionSet(set1.getId(), id));
+        Arrays.asList("7", "8", "9").forEach(id -> assignDistributionSet(set2.getId(), id));
+
+        long count = targetManagement.countByNotAssignedDistributionSetAndQuery(set1.getId(), "id=gt=5");
+
+        assertThat(count).isEqualTo(4);
+    }
+
+    @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if the targets with the same controller ID are created twice.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5) })
     public void createMultipleTargetsDuplicate() {
@@ -524,14 +619,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted
-     * that the target have additional tags assigned to them which are not
-     * contained within parameter tags.
+     * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted that
+     * the target have additional tags assigned to them which are not contained
+     * within parameter tags.
      *
      * @param strict
-     *            if true, the given targets MUST contain EXACTLY ALL given
-     *            tags, AND NO OTHERS. If false, the given targets MUST contain
-     *            ALL given tags, BUT MAY CONTAIN FURTHER ONE
+     *            if true, the given targets MUST contain EXACTLY ALL given tags,
+     *            AND NO OTHERS. If false, the given targets MUST contain ALL given
+     *            tags, BUT MAY CONTAIN FURTHER ONE
      * @param targets
      *            targets to be verified
      * @param tags
@@ -661,16 +756,18 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final int numberToDelete = 50;
         final Collection<Target> targetsToDelete = firstList.subList(0, numberToDelete);
-        final Target[] deletedTargets = Iterables.toArray(targetsToDelete, Target.class);
         final List<Long> targetsIdsToDelete = targetsToDelete.stream().map(Target::getId).collect(Collectors.toList());
 
         targetManagement.delete(targetsIdsToDelete);
 
-        final List<Target> targetsLeft = targetManagement.findAll(PageRequest.of(0, 200)).getContent();
+        final List<Target> targetsLeft = (List<Target>) targetQueryExecutionManagement.findAll(PageRequest.of(0, 200))
+                .getContent();
         assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of split list")
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 
-        assertThat(targetsLeft).as("Not all undeleted found").doesNotContain(deletedTargets);
+        assertThat(targetsLeft).as("Not all undeleted found").doesNotContainAnyElementsOf(targetsToDelete);
+
+        targetsLeft.containsAll(targetsIdsToDelete);
     }
 
     @Test
@@ -734,9 +831,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         toggleTagAssignment(tagABCTargets, tagB);
         toggleTagAssignment(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "X"))
-                .as("Target count is wrong").isEqualTo(0);
-
         // search for targets with tag tagA
         final List<Target> targetWithTagA = new ArrayList<>();
         final List<Target> targetWithTagB = new ArrayList<>();
@@ -764,12 +858,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "A"))
-                .as("Target count is wrong").isEqualTo(targetWithTagA.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "B"))
-                .as("Target count is wrong").isEqualTo(targetWithTagB.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "C"))
-                .as("Target count is wrong").isEqualTo(targetWithTagC.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("A"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagA.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("B"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagB.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("C"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagC.size());
     }
 
     @Test
@@ -847,8 +941,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetsListWithNoTag = targetManagement
                 .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.TRUE, tagNames)).getContent();
 
-        assertThat(50L).as("Total targets").isEqualTo(targetManagement.count());
-        assertThat(25).as("Targets with no tag").isEqualTo(targetsListWithNoTag.size());
+        assertThat(targetManagement.count()).as("Total targets").isEqualTo(50);
+        assertThat(targetsListWithNoTag.size()).as("Targets with no tag").isEqualTo(25);
 
     }
 
@@ -880,7 +974,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
-        final Page<Target> foundTargets = targetManagement.findByRsql(PAGE, rsqlFilter);
+        final Page<? extends Target> foundTargets = targetQueryExecutionManagement.findByQuery(PAGE, rsqlFilter);
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
@@ -1058,36 +1152,4 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         return target;
     }
 
-    @Test
-    @Description("Test that RSQL filter finds targets with metadata and/or controllerId.")
-    public void findTargetsByRsqlWithMetadata() {
-        final String controllerId1 = "target1";
-        final String controllerId2 = "target2";
-        createTargetWithMetadata(controllerId1, 2);
-        createTargetWithMetadata(controllerId2, 2);
-
-        final String rsqlAndControllerIdFilter = "id==target1 and metadata.key1==target1-value1";
-        final String rsqlAndControllerIdWithWrongKeyFilter = "id==* and metadata.unknown==value1";
-        final String rsqlAndControllerIdNotEqualFilter = "id==* and metadata.key2!=target1-value2";
-        final String rsqlOrControllerIdFilter = "id==target1 or metadata.key1==*value1";
-        final String rsqlOrControllerIdWithWrongKeyFilter = "id==target2 or metadata.unknown==value1";
-        final String rsqlOrControllerIdNotEqualFilter = "id==target1 or metadata.key1!=target1-value1";
-
-        assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
-        validateFoundTargetsByRsql(rsqlAndControllerIdFilter, controllerId1);
-        validateFoundTargetsByRsql(rsqlAndControllerIdWithWrongKeyFilter);
-        validateFoundTargetsByRsql(rsqlAndControllerIdNotEqualFilter, controllerId2);
-        validateFoundTargetsByRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
-        validateFoundTargetsByRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
-        validateFoundTargetsByRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
-    }
-
-    private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {
-        final Page<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
-
-        assertThat(foundTargetsByMetadataAndControllerId.getTotalElements()).as("Targets count in RSQL filter is wrong")
-                .isEqualTo(controllerIds.length);
-        assertThat(foundTargetsByMetadataAndControllerId.getContent().stream().map(Target::getControllerId))
-                .as("Targets found by RSQL filter have wrong controller ids").containsExactlyInAnyOrder(controllerIds);
-    }
 }

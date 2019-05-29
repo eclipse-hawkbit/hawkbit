@@ -187,7 +187,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(pageable, distributionSetId,
+            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndQuery(pageable, distributionSetId,
                     rsqlParam);
         } else {
             targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(pageable, distributionSetId);
@@ -215,7 +215,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {
-            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSetAndRsql(pageable,
+            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSetAndQuery(pageable,
                     distributionSetId, rsqlParam);
         } else {
             targetsInstalledDS = this.targetManagement.findByInstalledDistributionSet(pageable, distributionSetId);

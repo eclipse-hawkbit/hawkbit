@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 
@@ -128,6 +125,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<JpaTarget> findByTag(Pageable page, @Param("tag") Long tagId);
 
     /**
+     * Finds {@link Target} IDs by assigned {@link Tag}.
+     *
+     * @param tagId
+     *            to be found
+     * @return all controller IDs of found targets
+     */
+    @Query(value = "SELECT t.controllerId FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
+    Set<String> findControllerIdsByTag(@Param("tag") Long tagId);
+
+    /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
      * list and assigned {@link Tag#getName()}.
      *
@@ -154,8 +161,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByUpdateStatus(Pageable pageable, TargetUpdateStatus status);
 
     /**
-     * retrieves the {@link Target}s which has the {@link DistributionSet}
-     * installed with the given ID.
+     * retrieves the {@link Target}s which has the {@link DistributionSet} installed
+     * with the given ID.
      * 
      * @param pageable
      *            parameter
@@ -178,10 +185,23 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * Finds all target-controller IDs that have a {@link DistributionSet}
+     * <em>not</em> assigned in either action
+     *
+     * @param setId
+     *            is the ID of the {@linkplain DistributionSet} to filter for.
+     *
+     * @return a list of target controller-IDs
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget  t where t.controllerId not in ("
+            + "SELECT t.controllerId FROM JpaTarget t JOIN t.actions a where a.distributionSet.id = :setId)")
+    Set<String> findByNoActionWithDistributionSetExisits(Long setId);
+
+    /**
      * retrieves {@link Target}s where
      * {@link JpaTarget#isRequestControllerAttributes()}.
      * 
-     * @param pageReq
+     * @param pageable
      *            page parameter
      *
      * @return the found {@link Target}s
@@ -261,8 +281,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * manually to query even if this will by done by {@link EntityManager} anyhow.
+     * The DB should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from

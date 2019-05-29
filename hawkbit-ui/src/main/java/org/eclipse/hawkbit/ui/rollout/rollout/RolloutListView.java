@@ -1,6 +1,5 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,13 +32,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 public class RolloutListView extends AbstractGridComponentLayout {
     private static final long serialVersionUID = -2703552177439393208L;
 
-    private final transient RolloutManagement rolloutManagement;
-    private final transient RolloutGroupManagement rolloutGroupManagement;
-    private final transient TargetManagement targetManagement;
-    private final transient EntityFactory entityFactory;
-    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
-    private final transient QuotaManagement quotaManagement;
-    private final transient TenantConfigurationManagement tenantConfigManagement;
+    private final transient RolloutServiceContext serviceContext;
 
     private final SpPermissionChecker permissionChecker;
     private final RolloutUIState rolloutUIState;
@@ -47,24 +40,15 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final UiProperties uiProperties;
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigManagement) {
+            final UIEventBus eventBus, final UINotification uiNotification,
+            final UiProperties uiProperties, final VaadinMessageSource i18n,
+            final RolloutServiceContext serviceContext ) {
         super(i18n, eventBus);
+        this.serviceContext = serviceContext;
         this.permissionChecker = permissionChecker;
         this.rolloutUIState = rolloutUIState;
-        this.rolloutManagement = rolloutManagement;
-        this.rolloutGroupManagement = rolloutGroupManagement;
-        this.quotaManagement = quotaManagement;
-        this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
-        this.entityFactory = entityFactory;
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.tenantConfigManagement = tenantConfigManagement;
 
         init();
     }
@@ -76,16 +60,14 @@ public class RolloutListView extends AbstractGridComponentLayout {
 
     @Override
     public AbstractOrderedLayout createGridHeader() {
-        return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+        return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(),
+                 uiNotification, uiProperties, getI18n(), serviceContext);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
-        return new RolloutListGrid(getI18n(), getEventBus(), rolloutManagement, uiNotification, rolloutUIState,
-                permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
+        return new RolloutListGrid(getI18n(), getEventBus(), uiNotification, rolloutUIState,
+                permissionChecker, uiProperties, serviceContext);
     }
 
 }

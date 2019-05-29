@@ -13,19 +13,15 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.*;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.rollout.RolloutListView;
+import org.eclipse.hawkbit.ui.rollout.rollout.RolloutServiceContext;
 import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupsListView;
 import org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets.RolloutGroupTargetsListView;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
@@ -64,22 +60,28 @@ public class RolloutView extends VerticalLayout implements View {
 
     private final RolloutUIState rolloutUIState;
 
-    private final transient RolloutManagement rolloutManagement;
-
     private final transient EventBus.UIEventBus eventBus;
+
+    private final transient RolloutServiceContext serviceContext;
 
     @Autowired
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigManagement) {
+
+        this.serviceContext = new RolloutServiceContext(
+                rolloutManagement, rolloutGroupManagement, targetManagement, targetQueryExecutionManagement,
+                entityFactory, targetFilterQueryManagement, quotaManagement, tenantConfigManagement);
+
         this.permChecker = permissionChecker;
-        this.rolloutManagement = rolloutManagement;
-        this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
+
+        this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus,
+                uiNotification, uiProperties, i18n, serviceContext );
+
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);
         this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);
@@ -173,7 +175,7 @@ public class RolloutView extends VerticalLayout implements View {
             return true;
         }
 
-        final Optional<Rollout> rollout = rolloutManagement.get(rolloutIdInState.get());
+        final Optional<Rollout> rollout = serviceContext.rolloutManagement.get(rolloutIdInState.get());
         return !rollout.isPresent() || rollout.get().isDeleted();
     }
 

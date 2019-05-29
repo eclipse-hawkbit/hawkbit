@@ -16,12 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -116,27 +110,17 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final AutoStartOptionGroupLayout autoStartOptionGroupLayout;
 
-    private final transient RolloutManagement rolloutManagement;
-
-    private final transient RolloutGroupManagement rolloutGroupManagement;
-
-    private final transient QuotaManagement quotaManagement;
-
-    private final transient TargetManagement targetManagement;
-
-    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
-
     private final UINotification uiNotification;
 
     private final transient UiProperties uiProperties;
-
-    private final transient EntityFactory entityFactory;
 
     private final DefineGroupsLayout defineGroupsLayout;
 
     private final VaadinMessageSource i18n;
 
     private final transient EventBus.UIEventBus eventBus;
+
+    private final RolloutGroupConditions defaultRolloutGroupConditions;
 
     private TextField rolloutName;
 
@@ -180,31 +164,21 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField approvalRemarkField;
 
-    private final transient RolloutGroupConditions defaultRolloutGroupConditions;
+    private final transient RolloutServiceContext   serviceContext;
 
     private final NullValidator nullValidator = new NullValidator(null, false);
 
     @SuppressWarnings("squid:S00107")
-    AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
-            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
+    public AddUpdateRolloutWindowLayout(UINotification uiNotification, UiProperties uiProperties, VaadinMessageSource i18n, UIEventBus eventBus, RolloutServiceContext serviceContext) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
-        this.rolloutManagement = rolloutManagement;
-        this.rolloutGroupManagement = rolloutGroupManagement;
-        this.quotaManagement = quotaManagement;
-        this.targetManagement = targetManagement;
+        this.serviceContext = serviceContext;
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
-        this.entityFactory = entityFactory;
         this.i18n = i18n;
         this.eventBus = eventBus;
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
 
-        defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+        defineGroupsLayout = new DefineGroupsLayout(i18n, serviceContext );
 
         defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -228,7 +202,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             if (editRolloutEnabled) {
                 editRollout();
                 if (rollout.getStatus() == Rollout.RolloutStatus.WAITING_FOR_APPROVAL) {
-                    rolloutManagement.approveOrDeny(rollout.getId(),
+                    serviceContext.rolloutManagement.approveOrDeny(rollout.getId(),
                             (Rollout.ApprovalDecision) approveButtonsGroup.getValue(), approvalRemarkField.getValue());
                     eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
                 }
@@ -255,9 +229,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
                 return false;
             }
-            if (rolloutManagement.getByName(getRolloutName()).isPresent()) {
-                uiNotification
-                        .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
+            if (serviceContext.rolloutManagement.getByName(getRolloutName()).isPresent()) {
+                uiNotification.displayValidationError(
+                        i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
                 return false;
             }
             return true;
@@ -270,9 +244,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             final Long distributionSetId = (Long) distributionSet.getValue();
 
-            final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId())
-                    .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
-                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
+            final RolloutUpdate rolloutUpdate = serviceContext.entityFactory.rollout()
+                    .update(rollout.getId())
+                    .name(rolloutName.getValue())
+                    .description(description.getValue())
+                    .set(distributionSetId)
+                    .actionType(getActionType())
+                    .forcedTime(getForcedTimeStamp());
 
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutUpdate.startAt(System.currentTimeMillis());
@@ -283,7 +261,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             Rollout updatedRollout;
             try {
-                updatedRollout = rolloutManagement.update(rolloutUpdate);
+                updatedRollout = serviceContext.rolloutManagement.update(rolloutUpdate);
             } catch (final EntityNotFoundException | EntityReadOnlyException e) {
                 LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
                 uiNotification.displayWarning(
@@ -302,9 +280,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 return false;
             }
             final String rolloutNameVal = getRolloutName();
-            if (!rollout.getName().equals(rolloutNameVal) && rolloutManagement.getByName(rolloutNameVal).isPresent()) {
-                uiNotification
-                        .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
+            if (!rollout.getName().equals(rolloutNameVal) && serviceContext.rolloutManagement.getByName(rolloutNameVal).isPresent()) {
+                uiNotification.displayValidationError(
+                        i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
             }
             return true;
@@ -320,15 +298,21 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             final int amountGroup = Integer.parseInt(noOfGroups.getValue());
             final int errorThresholdPercent = getErrorThresholdPercentage(amountGroup);
-            final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
-                    .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
+            final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().successAction(
+                    RolloutGroupSuccessAction.NEXTGROUP, null)
                     .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
                     .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresholdPercent))
-                    .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+                    .errorAction(RolloutGroupErrorAction.PAUSE, null)
+                    .build();
 
-            final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
-                    .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
-                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
+            final RolloutCreate rolloutCreate = serviceContext.entityFactory.rollout()
+                    .create()
+                    .name(rolloutName.getValue())
+                    .description(description.getValue())
+                    .set(distributionId)
+                    .targetFilterQuery(getTargetFilterQuery())
+                    .actionType(getActionType())
+                    .forcedTime(getForcedTimeStamp());
 
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutCreate.startAt(System.currentTimeMillis());
@@ -338,10 +322,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
 
             if (isNumberOfGroups()) {
-                return rolloutManagement.create(rolloutCreate, amountGroup, conditions);
+                return serviceContext.rolloutManagement.create(rolloutCreate, amountGroup, conditions);
             } else if (isGroupsDefinition()) {
                 final List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
-                return rolloutManagement.create(rolloutCreate, groups, conditions);
+                return serviceContext.rolloutManagement.create(rolloutCreate, groups, conditions);
             }
 
             throw new IllegalStateException("Either of the Tabs must be selected");
@@ -370,8 +354,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private ActionType getActionType() {
-            return ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
-                    .getActionType();
+            return ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                    .getValue()).getActionType();
         }
 
         private AutoStartOptionGroupLayout.AutoStartOption getAutoStartOption() {
@@ -673,7 +657,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static TextArea createTargetFilterQuery() {
         final TextArea filterField = new TextAreaBuilder(TargetFilterQuery.QUERY_MAX_SIZE).style("text-area-style")
-                .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD).buildTextComponent();
+                .id(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD)
+                .buildTextComponent();
 
         filterField.setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setEnabled(false);
@@ -746,7 +731,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void updateGroupsChart(final List<RolloutGroup> savedGroups, final long totalTargetsCount) {
-        final List<Long> targetsPerGroup = savedGroups.stream().map(group -> (long) group.getTotalTargets())
+        final List<Long> targetsPerGroup = savedGroups.stream()
+                .map(group -> (long) group.getTotalTargets())
                 .collect(Collectors.toList());
 
         groupsPieChart.setChartState(targetsPerGroup, totalTargetsCount);
@@ -775,7 +761,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private ComboBox createTargetFilterQueryCombo() {
         return new ComboBoxBuilder().setValueChangeListener(this::onTargetFilterChange)
                 .setPrompt(i18n.getMessage("prompt.target.filter"))
-                .setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID).buildCombBox();
+                .setId(UIComponentIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID)
+                .buildCombBox();
     }
 
     private void onTargetFilterChange(final ValueChangeEvent event) {
@@ -785,7 +772,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);
         } else {
-            totalTargetsCount = targetManagement.countByRsql(filterQueryString);
+            totalTargetsCount = serviceContext.targetQueryExecutionManagement.countByQuery(filterQueryString);
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
             defineGroupsLayout.setTargetFilter(filterQueryString);
         }
@@ -803,7 +790,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
+        final Page<TargetFilterQuery> filterQueries = serviceContext.targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
                 rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
@@ -834,7 +821,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static TextArea createDescription() {
         final TextArea descriptionField = new TextAreaBuilder(Rollout.DESCRIPTION_MAX_SIZE).style("text-area-style")
-                .id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID).buildTextComponent();
+                .id(UIComponentIdProvider.ROLLOUT_DESCRIPTION_ID)
+                .buildTextComponent();
         descriptionField.setSizeUndefined();
         return descriptionField;
     }
@@ -885,7 +873,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private ComboBox createDistributionSetCombo() {
         return new ComboBoxBuilder().setPrompt(i18n.getMessage("prompt.distribution.set"))
-                .setId(UIComponentIdProvider.ROLLOUT_DS_ID).buildCombBox();
+                .setId(UIComponentIdProvider.ROLLOUT_DS_ID)
+                .buildCombBox();
     }
 
     private void populateDistributionSet() {
@@ -901,9 +890,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createRolloutNameField() {
-        final TextField rolloutNameField = new TextFieldBuilder(Rollout.NAME_MAX_SIZE)
-                .prompt(i18n.getMessage("textfield.name")).id(UIComponentIdProvider.ROLLOUT_NAME_FIELD_ID)
-                .required(true, i18n).buildTextComponent();
+        final TextField rolloutNameField = new TextFieldBuilder(Rollout.NAME_MAX_SIZE).prompt(
+                i18n.getMessage("textfield.name"))
+                .id(UIComponentIdProvider.ROLLOUT_NAME_FIELD_ID)
+                .required(true, i18n)
+                .buildTextComponent();
 
         rolloutNameField.setSizeUndefined();
         return rolloutNameField;
@@ -915,8 +906,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (isNoOfGroupsOrTargetFilterEmpty()) {
-                uiNotification
-                        .displayValidationError(i18n.getMessage("message.rollout.noofgroups.or.targetfilter.missing"));
+                uiNotification.displayValidationError(
+                        i18n.getMessage("message.rollout.noofgroups.or.targetfilter.missing"));
             } else {
                 if (value != null) {
                     final int groupSize = getGroupSize();
@@ -927,9 +918,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private boolean isNoOfGroupsOrTargetFilterEmpty() {
-            return !StringUtils.hasText(noOfGroups.getValue())
-                    || (!StringUtils.hasText((String) targetFilterQueryCombo.getValue())
-                            && !StringUtils.hasText(targetFilterQuery.getValue()));
+            return !StringUtils.hasText(noOfGroups.getValue()) || (
+                    !StringUtils.hasText((String) targetFilterQueryCombo.getValue()) && !StringUtils.hasText(
+                            targetFilterQuery.getValue()));
         }
     }
 
@@ -944,8 +935,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                new LongRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS), 1L, null)
-                        .validate(totalTargetsCount);
+                new LongRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FILTER_TARGET_EXISTS), 1L, null).validate(
+                        totalTargetsCount);
             }
         }
     }
@@ -956,8 +947,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
-                        .validate(Integer.valueOf(value.toString()));
+                new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100).validate(
+                        Integer.valueOf(value.toString()));
             }
         }
     }
@@ -968,7 +959,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
+                final int maxGroups = serviceContext.quotaManagement.getMaxRolloutGroupsPerRollout();
                 new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 1, maxGroups), 1,
                         maxGroups).validate(Integer.valueOf(value.toString()));
             }
@@ -981,7 +972,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null && totalTargetsCount != null) {
-                final int maxGroupSize = quotaManagement.getMaxTargetsPerRolloutGroup();
+                final int maxGroupSize = serviceContext.quotaManagement.getMaxTargetsPerRolloutGroup();
                 if (getGroupSize() > maxGroupSize) {
                     final String msg = i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxGroupSize);
                     throw new InvalidValueException(msg);
@@ -995,7 +986,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final Optional<Rollout> rolloutFound = rolloutManagement.get(rolloutId);
+        final Optional<Rollout> rolloutFound = serviceContext.rolloutManagement.get(rolloutId);
         if (!rolloutFound.isPresent()) {
             return;
         }
@@ -1014,7 +1005,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
-            totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+            totalTargetsCount = serviceContext.targetQueryExecutionManagement.countByQuery(rollout.getTargetFilterQuery());
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
         } else {
             editRolloutEnabled = true;
@@ -1043,9 +1034,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(rolloutGroupManagement
-                    .findByRollout(PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
-                    .getContent(), rollout.getTotalTargets());
+            updateGroupsChart(serviceContext.rolloutGroupManagement.findByRollout(
+                    PageRequest.of(0, serviceContext.quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId()).getContent(),
+                    rollout.getTotalTargets());
 
             totalTargetsCount = rollout.getTotalTargets();
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
@@ -1106,7 +1097,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private enum ERROR_THRESHOLD_OPTIONS {
 
-        PERCENT("label.errorthreshold.option.percent"), COUNT("label.errorthreshold.option.count");
+        PERCENT("label.errorthreshold.option.percent"),
+        COUNT("label.errorthreshold.option.count");
 
         private final String value;
 

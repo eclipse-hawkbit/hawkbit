@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -162,14 +163,21 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private final Database database;
 
-    JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+    JpaRolloutManagement(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
+            final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
-            final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
+            final DistributionSetManagement distributionSetManagement,
+            final ApplicationContext context,
+            final BusProperties bus,
+            final ApplicationEventPublisher eventPublisher,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager,
+            final TenantAware tenantAware,
+            final LockRegistry lockRegistry,
+            final Database database,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
-        super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
+        super(targetManagement, targetQueryExecutionManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
                 eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
         this.database = database;
         this.bus = bus;
@@ -230,7 +238,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
 
-        final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+        final Long totalTargets = targetQueryExecutionManagement.countByQuery(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
@@ -384,7 +392,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
+                count -> targetManagement.countByQueryAndNotInRolloutGroups(readyGroups, groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
                 "countRolloutTargetGroupByRolloutGroup",
@@ -427,7 +435,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
+            final Page<Target> targets = targetManagement.findByQueryAndNotInRolloutGroups(pageRequest,
                     readyGroups, targetFilter);
 
             createAssignmentOfTargetsToGroup(targets, group);
@@ -446,7 +454,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
+        final long totalTargets = targetQueryExecutionManagement.countByQuery(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
@@ -1115,8 +1123,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
      * Enforces the quota defining the maximum number of {@link Target}s per
      * {@link RolloutGroup}.
      *
-     * @param group
-     *            The rollout group
      * @param requested
      *            number of targets to check
      */

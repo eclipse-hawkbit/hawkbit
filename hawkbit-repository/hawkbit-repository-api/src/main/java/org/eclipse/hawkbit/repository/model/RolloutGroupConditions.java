@@ -13,11 +13,15 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 
+import java.io.Serializable;
+
 /**
  * Object which holds all {@link RolloutGroup} conditions together which can
  * easily built.
  */
-public class RolloutGroupConditions {
+public class RolloutGroupConditions implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private RolloutGroupSuccessCondition successCondition;
     private String successConditionExp;
     private RolloutGroupSuccessAction successAction;

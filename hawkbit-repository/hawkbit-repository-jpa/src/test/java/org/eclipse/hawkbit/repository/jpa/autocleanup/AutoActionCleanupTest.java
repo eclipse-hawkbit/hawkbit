@@ -97,7 +97,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that canceled and failed actions are cleaned up.")
-    public void canceledAndFailedActionsAreCleanedUp() {
+    public void canceledAndFailedActionsAreCleanedUp() throws Exception{
 
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
@@ -123,6 +123,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
+        Thread.sleep(1000);
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);

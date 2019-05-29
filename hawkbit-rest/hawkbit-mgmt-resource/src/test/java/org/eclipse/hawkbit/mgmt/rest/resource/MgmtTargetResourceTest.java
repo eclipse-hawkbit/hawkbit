@@ -809,7 +809,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PageRequest.of(0, 100));
+        final Slice<? extends Target> findTargetsAll = targetQueryExecutionManagement.findAll(PageRequest.of(0, 100));
         final Target target = findTargetsAll.getContent().get(0);
         assertThat(targetManagement.count()).isEqualTo(1);
         assertThat(target.getControllerId()).isEqualTo(knownControllerId);

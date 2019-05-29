@@ -63,9 +63,7 @@ public interface TargetManagement {
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long tagId);
 
     /**
-     * Counts number of targets with given
-     * {@link Target#getAssignedDistributionSet()}.
-     *
+     * Count targets with a given {@linkplain DistributionSet} assigned
      * @param distId
      *            to search for
      *
@@ -81,26 +79,7 @@ public interface TargetManagement {
     /**
      * Count {@link Target}s for all the given filter parameters.
      *
-     * @param status
-     *            find targets having one of these {@link TargetUpdateStatus}s.
-     *            Set to <code>null</code> in case this is not required.
-     * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
-     *            Set to <code>null</code> in case this is not required.
-     * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
+     * @param filter parameters by which targets should be filtered
      *
      * @return the found number {@link Target}s
      * 
@@ -108,8 +87,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
-            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
+    long countByFilters(FilterParams filter);
 
     /**
      * Counts number of targets with given with given distribution set Id
@@ -124,29 +102,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByInstalledDistributionSet(long distId);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param rsqlParam
-     *            filter definition in RSQL syntax
-     * @return the found number {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsql(@NotEmpty String rsqlParam);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param targetFilterQueryId
-     *            {@link TargetFilterQuery#getId()}
-     * @return the found number {@link Target}s
-     * 
-     * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByTargetFilterQuery(long targetFilterQueryId);
 
     /**
      * Counts all {@link Target}s in the repository.
@@ -233,7 +188,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
+    Page<Target> findByNoActionWithDistributionSetExistsAndQuery(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -251,7 +206,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDS(long distributionSetId, @NotNull String rsqlParam);
+    long countByNotAssignedDistributionSetAndQuery(long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
@@ -266,7 +221,7 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
+    Page<Target> findByQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
 
     /**
@@ -280,7 +235,7 @@ public interface TargetManagement {
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    long countByQueryAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no
@@ -336,7 +291,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetID,
+    Page<Target> findByAssignedDistributionSetAndQuery(@NotNull Pageable pageReq, long distributionSetID,
             @NotNull String rsqlParam);
 
     /**
@@ -416,7 +371,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId,
+    Page<Target> findByInstalledDistributionSetAndQuery(@NotNull Pageable pageReq, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -439,8 +394,8 @@ public interface TargetManagement {
      *            pagination parameter
      * @return the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findAll(@NotNull Pageable pageable);
+//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+//    Slice<Target> findAll(@NotNull Pageable pageable);
 
     /**
      * Retrieves all targets.
@@ -459,39 +414,17 @@ public interface TargetManagement {
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
+//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+//    Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
 
-    /**
-     * Retrieves all target based on {@link TargetFilterQuery}.
-     * 
-     * @param pageable
-     *            pagination parameter
-     * @param targetFilterQueryId
-     *            {@link TargetFilterQuery#getId()}
-     *
-     * @return the found {@link Target}s, never {@code null}
-     *
-     * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} with given ID does not exist.
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
 
     /**
      * method retrieves all {@link Target}s from the repo in the following
      * order:
      * <p>
-     * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
+     * 1) {@link Target}s which have the given {@link DistributionSet} installed
      * <p>
-     * 2) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getAssignedDistributionSet()}
+     * 2) {@link Target}s which have the given {@link DistributionSet} assigned
      * <p>
      * 3) {@link Target}s which have no connection to the given
      * {@link DistributionSet}.

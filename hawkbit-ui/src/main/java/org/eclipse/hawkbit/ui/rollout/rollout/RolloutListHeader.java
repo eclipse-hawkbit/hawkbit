@@ -8,12 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -43,16 +37,14 @@ public class RolloutListHeader extends AbstractGridHeader {
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
-            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
+            final UIEventBus eventBus,
+            final UINotification uiNotification,
+            final UiProperties uiProperties, final VaadinMessageSource i18n,
+            final RolloutServiceContext serviceContext) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
-        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(
+                uiNotification, uiProperties, i18n, eventBus,serviceContext);
     }
 
     @Override

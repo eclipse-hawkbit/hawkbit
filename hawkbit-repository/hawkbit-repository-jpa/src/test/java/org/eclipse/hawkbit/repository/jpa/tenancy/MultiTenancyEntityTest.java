@@ -52,10 +52,10 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(knownControllerId, anotherTenant);
 
         // ensure both tenants see their target
-        final Slice<Target> findTargetsForTenant = findTargetsForTenant(tenant);
+        final Slice<? extends Target> findTargetsForTenant = findTargetsForTenant(tenant);
         assertThat(findTargetsForTenant).hasSize(1);
         assertThat(findTargetsForTenant.getContent().get(0).getTenant().toUpperCase()).isEqualTo(tenant.toUpperCase());
-        final Slice<Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        final Slice<? extends Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(findTargetsForAnotherTenant).hasSize(1);
         assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
@@ -72,12 +72,12 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // find all targets for current tenant "mytenant"
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PAGE);
+        final Slice<? extends Target> findTargetsAll = targetQueryExecutionManagement.findAll(PAGE);
         // no target has been created for "mytenant"
         assertThat(findTargetsAll).hasSize(0);
 
         // find all targets for anotherTenant
-        final Slice<Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
+        final Slice<? extends Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
         // another tenant should have targets
         assertThat(findTargetsForTenant).hasSize(1);
     }
@@ -134,7 +134,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
             // ok
         }
 
-        Slice<Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        Slice<? extends Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(1);
 
         // ensure another tenant can delete the target
@@ -171,9 +171,9 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
                 () -> testdataFactory.createTarget(controllerId));
     }
 
-    private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
+    private Slice<? extends Target> findTargetsForTenant(final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> targetManagement.findAll(PAGE));
+                () -> targetQueryExecutionManagement.findAll(PAGE));
     }
 
     private void deleteTargetsForTenant(final String tenant, final Collection<Long> targetIds) throws Exception {

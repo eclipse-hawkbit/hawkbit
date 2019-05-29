@@ -277,4 +277,16 @@ public interface TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDSWithActionType(long queryId, Long dsId, ActionType actionType);
+
+    /**
+     * Get a {@linkplain TargetFilterQuery} by it's ID
+     *
+     * @param targetFilterQueryId
+     *              the ID of the filter
+     * @return the persistent {@linkplain TargetFilterQuery}
+     *
+     * @throws EntityNotFoundException
+     *              when the filter couldn't be found
+     */
+    TargetFilterQuery getById(Long targetFilterQueryId);
 }

@@ -602,7 +602,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verify that one Action for each assignDistributionSet
         assertThat(actionRepository.findAll(PAGE).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
 
-        final Iterable<Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
+        final Iterable<? extends Target> allFoundTargets = targetQueryExecutionManagement.findAll(PAGE).getContent();
 
         // get final updated version of targets
         savedDeployedTargets = targetManagement.getByControllerID(

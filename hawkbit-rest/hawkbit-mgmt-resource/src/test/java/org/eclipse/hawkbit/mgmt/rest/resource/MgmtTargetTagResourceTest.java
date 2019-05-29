@@ -232,7 +232,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         ResultActions result = toggle(tag, targets);
 
-        List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        List<? extends Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsAll(targets.stream().map(Target::getControllerId).collect(Collectors.toList()));
@@ -242,7 +242,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         result = toggle(tag, targets);
 
-        updated = targetManagement.findAll(PAGE).getContent();
+        updated = targetQueryExecutionManagement.findAll(PAGE).getContent();
 
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0), "unassignedTargets"))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1), "unassignedTargets"));

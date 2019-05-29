@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -384,7 +385,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (sm.getType().getMaxAssignments() < 1) {
             return false;
         }
-        if (targetManagement.countByFilters(null, null, null, ds.getId(), Boolean.FALSE, new String[] {}) > 0) {
+        if (targetManagement.countByFilters(FilterParams.forDistributionSet(ds.getId())) > 0) {
             /* Distribution is already assigned */
             getNotification().displayValidationError(getI18n().getMessage("message.dist.inuse", dsNameAndVersion));
             return false;

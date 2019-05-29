@@ -31,13 +31,16 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -79,7 +82,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -117,6 +119,8 @@ public class TargetTable extends AbstractTable<Target> {
     private static final String MESSAGE_ASSIGN_TARGET_TO_MULTIPLE_DISTRIBUTIONS = "message.confirm.assign.multiple.entities.multiple.distributions";
 
     private final transient TargetManagement targetManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TargetQueryExecutionManagement targetQueryExecutionManagement;
     private final transient DistributionSetManagement distributionSetManagement;
     private final transient TargetTagManagement tagManagement;
     private final transient DeploymentManagement deploymentManagement;
@@ -134,13 +138,17 @@ public class TargetTable extends AbstractTable<Target> {
     private ConfirmationDialog confirmDialog;
 
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
-            final TargetManagement targetManagement, final ManagementUIState managementUIState,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
+            final ManagementUIState managementUIState,
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.distributionSetManagement = distributionSetManagement;
@@ -807,27 +815,14 @@ public class TargetTable extends AbstractTable<Target> {
 
         final long size;
         if (query.isPresent()) {
-            size = targetManagement.countByTargetFilterQuery(query.get());
-        } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
-                filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
-                filterParams.getFilterBySearchText())) {
+            TargetFilterQuery tfq = targetFilterQueryManagement.getById(query.get());
+            size = targetQueryExecutionManagement.countByQuery(tfq.getQuery());
+        } else if (filterParams.isEmpty(pinnedDistId)) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countByFilters(filterParams.getFilterByStatus(), filterParams.getOverdueState(),
-                    filterParams.getFilterBySearchText(), filterParams.getFilterByDistributionId(),
-                    filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames());
+            size = targetManagement.countByFilters(filterParams);
         }
         return size;
-    }
-
-    private static boolean noFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
-            final Boolean noTagClicked, final String[] targetTags, final String searchText) {
-        return CollectionUtils.isEmpty(status) && distributionId == null && StringUtils.isEmpty(searchText)
-                && !isTagSelected(targetTags, noTagClicked);
-    }
-
-    private static Boolean isTagSelected(final String[] targetTags, final Boolean noTagClicked) {
-        return targetTags == null && !noTagClicked;
     }
 
     private long getTotalTargetsCount() {

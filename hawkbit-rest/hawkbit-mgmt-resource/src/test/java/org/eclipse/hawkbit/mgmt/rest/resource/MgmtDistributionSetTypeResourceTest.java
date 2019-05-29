@@ -397,6 +397,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
+        Thread.sleep(1000);
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptLockRevision()).isEqualTo(2);

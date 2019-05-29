@@ -1,6 +1,5 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,29 +15,8 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
-import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.*;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
@@ -140,7 +118,7 @@ import com.google.common.collect.Maps;
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class,
-        SystemManagementCacheKeyGenerator.class })
+                SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
@@ -199,8 +177,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RsqlValidationOracle rsqlValidationOracle() {
-        return new RsqlParserValidationOracle();
+    RsqlValidationOracle rsqlValidationOracle(final TargetQueryExecutionManagement targetQueryExecutionManagement) {
+        return new RsqlParserValidationOracle(targetQueryExecutionManagement);
     }
 
     @Bean
@@ -507,21 +485,29 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
-            final DistributionSetRepository distributionSetRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus, final TenantAware tenantAware,
-            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+            final DistributionSetRepository distributionSetRepository, final TargetTagRepository targetTagRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
+            final BusProperties bus, final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement) {
         return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
-                rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
-                criteriaNoCountDao, eventPublisher, bus, tenantAware, afterCommit, virtualPropertyReplacer,
+                rolloutGroupRepository, distributionSetRepository, targetTagRepository, criteriaNoCountDao,
+                eventPublisher, bus, tenantAware, afterCommit, virtualPropertyReplacer, properties.getDatabase(),
+                targetQueryExecutionManagement);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TargetQueryExecutionManagement targetFilterQueryExecutor(
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final JpaProperties properties) {
+        return new JpaTargetQueryExecutionManagement(targetRepository, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
-     * 
+     *
      * @param targetFilterQueryRepository
      *            holding {@link TargetFilterQuery} entities
      * @param targetRepository
@@ -618,13 +604,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final BusProperties bus, final ApplicationEventPublisher eventPublisher,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
-        return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
+        return new JpaRolloutManagement(targetManagement, targetQueryExecutionManagement, deploymentManagement, rolloutGroupManagement,
                 distributionSetManagement, context, bus, eventPublisher, virtualPropertyReplacer, txManager,
                 tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
     }
@@ -764,7 +751,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoAssignScheduler} bean.
-     * 
+     *
      * Note: does not activate in test profile, otherwise it is hard to test the
      * auto assign functionality.
      *
@@ -794,12 +781,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoActionCleanup} bean.
-     * 
+     *
      * @param deploymentManagement
      *            Deployment management service
      * @param configManagement
      *            Tenant configuration service
-     * 
+     *
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
@@ -810,7 +797,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoCleanupScheduler} bean.
-     * 
+     *
      * @param systemManagement
      *            to find all tenants
      * @param systemSecurityContext
@@ -819,7 +806,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to lock the tenant for auto assignment
      * @param cleanupTasks
      *            a list of cleanup tasks
-     * 
+     *
      * @return a new {@link AutoCleanupScheduler} bean
      */
     @Bean
@@ -834,10 +821,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link RolloutScheduler} bean.
-     * 
+     *
      * Note: does not activate in test profile, otherwise it is hard to test the
      * rollout handling functionality.
-     * 
+     *
      * @param systemManagement
      *            to find all tenants
      * @param rolloutManagement

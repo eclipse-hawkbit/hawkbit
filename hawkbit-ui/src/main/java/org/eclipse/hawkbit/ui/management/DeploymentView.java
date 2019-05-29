@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -124,8 +125,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final DeploymentManagement deploymentManagement, final DistributionTableFilters distFilterParameters,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties,
-            final ManagementViewClientCriterion managementViewClientCriterion,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement, final EntityFactory entityFactory,
+            final UiProperties uiProperties, final ManagementViewClientCriterion managementViewClientCriterion,
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
@@ -149,8 +150,9 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     managementViewClientCriterion, permChecker, eventBus, uiNotification, entityFactory,
                     targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
-                    managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement, deploymentManagement, configManagement, systemSecurityContext, uiProperties);
+                    targetFilterQueryManagement, targetQueryExecutionManagement, managementUIState, permChecker,
+                    managementViewClientCriterion, distributionSetManagement, targetTagManagement, deploymentManagement,
+                   configManagement, systemSecurityContext, uiProperties);
             this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                     targetTable);
 

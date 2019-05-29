@@ -99,7 +99,7 @@ public final class MgmtTargetMapper {
      *            list of targets
      * @return the response
      */
-    public static List<MgmtTarget> toResponse(final Collection<Target> targets) {
+    public static List<MgmtTarget> toResponse(final Collection<? extends Target> targets) {
         if (targets == null) {
             return Collections.emptyList();
         }

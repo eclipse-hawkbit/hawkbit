@@ -1,6 +1,5 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,11 +93,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final String STATUS_ICON_FORCED = "statusIconForced";
     private static final String PROP_TYPE = "actionType";
 
-    private final transient RolloutManagement rolloutManagement;
-
-    private final transient RolloutGroupManagement rolloutGroupManagement;
-
-    private final transient TenantConfigurationManagement tenantConfigManagement;
+    private final transient RolloutServiceContext serviceContext;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
@@ -122,8 +117,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
             RolloutStatus.PAUSED);
 
-    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections
-            .singletonList(RolloutStatus.WAITING_FOR_APPROVAL);
+    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections.singletonList(
+            RolloutStatus.WAITING_FOR_APPROVAL);
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
@@ -157,20 +152,14 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final RolloutManagement rolloutManagement, final UINotification uiNotification,
-            final RolloutUIState rolloutUIState, final SpPermissionChecker permissionChecker,
-            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigManagement) {
+    public RolloutListGrid(VaadinMessageSource i18n, UIEventBus eventBus, UINotification uiNotification,
+            RolloutUIState rolloutUIState, SpPermissionChecker permissionChecker, UiProperties uiProperties,
+            RolloutServiceContext serviceContext) {
         super(i18n, eventBus, permissionChecker);
-        this.rolloutManagement = rolloutManagement;
-        this.rolloutGroupManagement = rolloutGroupManagement;
-        this.tenantConfigManagement = tenantConfigManagement;
-        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
-                uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+        this.serviceContext = serviceContext;
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(
+                uiNotification, uiProperties, i18n, eventBus,
+                serviceContext );
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
         alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);
@@ -224,7 +213,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Optional<Rollout> rollout = rolloutManagement.getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final Optional<Rollout> rollout = serviceContext.rolloutManagement.getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
         if (!rollout.isPresent()) {
             return;
@@ -244,8 +233,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
         item.getItemProperty(PROP_TYPE).setValue(rollout.getActionType());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
-        final Long groupCount = Long
-                .valueOf((Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
+        final Long groupCount = Long.valueOf(
+                (Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
         final int groupsCreated = rollout.getRolloutGroupsCreated();
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
@@ -255,7 +244,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             return;
         }
 
-        final Long size = rolloutGroupManagement.countTargetsOfRolloutsGroup(rollout.getId());
+        final Long size = serviceContext.rolloutGroupManagement.countTargetsOfRolloutsGroup(rollout.getId());
         if (!size.equals(groupCount)) {
             item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(size.intValue());
         }
@@ -347,8 +336,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setColumnHeaderNames() {
         getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
-                .setHeaderCaption(i18n.getMessage("header.distributionset"));
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setHeaderCaption(
+                i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
         getColumn(PROP_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
@@ -357,11 +346,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
         getColumn(SPUILabelDefinitions.VAR_APPROVAL_REMARK).setHeaderCaption(i18n.getMessage("header.approvalRemark"));
-        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY)
-                .setHeaderCaption(i18n.getMessage("header.approvalDecidedBy"));
+        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY).setHeaderCaption(
+                i18n.getMessage("header.approvalDecidedBy"));
         getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
-                .setHeaderCaption(i18n.getMessage("header.detail.status"));
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setHeaderCaption(
+                i18n.getMessage("header.detail.status"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
 
         getColumn(VIRT_PROP_RUN).setHeaderCaption(i18n.getMessage("header.action.run"));
@@ -531,10 +520,12 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private void onClickOfRolloutName(final RendererClickEvent event) {
         rolloutUIState.setRolloutId((long) event.getItemId());
         final String rolloutName = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
+                .getItemProperty(SPUILabelDefinitions.VAR_NAME)
+                .getValue();
         rolloutUIState.setRolloutName(rolloutName);
         final String ds = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).getValue();
+                .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
+                .getValue();
         rolloutUIState.setRolloutDistributionSet(ds);
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
     }
@@ -551,7 +542,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
-        rolloutManagement.pauseRollout(rolloutId);
+        serviceContext.rolloutManagement.pauseRollout(rolloutId);
         uiNotification.displaySuccess(i18n.getMessage("message.rollout.paused", rolloutName));
     }
 
@@ -563,13 +554,13 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
         if (RolloutStatus.READY == rolloutStatus) {
-            rolloutManagement.start(rolloutId);
+            serviceContext.rolloutManagement.start(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.started", rolloutName));
             return;
         }
 
         if (RolloutStatus.PAUSED == rolloutStatus) {
-            rolloutManagement.resumeRollout(rolloutId);
+            serviceContext.rolloutManagement.resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.resumed", rolloutName));
         }
     }
@@ -596,7 +587,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private void deleteRollout(final Long rolloutId) {
-        final Optional<Rollout> rollout = rolloutManagement.getWithDetailedStatus(rolloutId);
+        final Optional<Rollout> rollout = serviceContext.rolloutManagement.getWithDetailedStatus(rolloutId);
 
         if (!rollout.isPresent()) {
             return;
@@ -612,7 +603,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                     }
                     final Item row = getContainerDataSource().getItem(rolloutId);
                     final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-                    rolloutManagement.delete(rolloutId);
+                    serviceContext.rolloutManagement.delete(rolloutId);
                     uiNotification.displaySuccess(i18n.getMessage("message.rollout.deleted", rolloutName));
                 }, UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         UI.getCurrent().addWindow(confirmationDialog.getWindow());
@@ -849,7 +840,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private void hideColumnsDueToInsufficientPermissions() {
 
-        final List<Object> modifiableColumnsList = getColumns().stream().map(Column::getPropertyId)
+        final List<Object> modifiableColumnsList = getColumns().stream()
+                .map(Column::getPropertyId)
                 .collect(Collectors.toList());
 
         if (!permissionChecker.hasRolloutUpdatePermission()) {
@@ -858,8 +850,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
-        if (!permissionChecker.hasRolloutApprovalPermission() || !tenantConfigManagement
-                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
+        if (!permissionChecker.hasRolloutApprovalPermission() || !serviceContext.tenantConfigManagement.getConfigurationValue(
+                TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
             modifiableColumnsList.remove(VIRT_PROP_APPROVE);
         }
         if (!permissionChecker.hasRolloutDeletePermission()) {
