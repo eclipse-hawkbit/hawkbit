@@ -656,7 +656,8 @@ public class JpaTargetManagement implements TargetManagement {
         do {
             Pageable pr = PageRequest.of(currentPageNumber, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_CONTROLLERID);
             Page<? extends Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
-            targetsLeft = targetsFoundByFilter.getTotalPages() > (++currentPageNumber);
+            ++currentPageNumber;
+            targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
             List<String> controllerIds = targetsFoundByFilter.map(Target::getControllerId).getContent();
             targetsFound += targetRepository.count( //
                     hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
