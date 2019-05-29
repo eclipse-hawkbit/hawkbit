@@ -45,7 +45,6 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = 6490445732785388071L;
     private Sort sort = new Sort(Direction.ASC, "id");
-    private transient TargetManagement targetManagement;
     private transient TargetQueryExecutionManagement targetQueryExecutionManagement;
 
     private FilterManagementUIState filterManagementUIState;
@@ -145,12 +144,6 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return (int) size;
     }
 
-    private TargetManagement getTargetManagement() {
-        if (targetManagement == null) {
-            targetManagement = SpringContextHelper.getBean(TargetManagement.class);
-        }
-        return targetManagement;
-    }
     private TargetQueryExecutionManagement getTargetQueryExecutionManagement() {
         if (targetQueryExecutionManagement == null) {
             targetQueryExecutionManagement = SpringContextHelper.getBean(TargetQueryExecutionManagement.class);

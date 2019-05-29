@@ -8,7 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
