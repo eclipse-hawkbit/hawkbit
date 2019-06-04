@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,19 +43,22 @@ public class FilterParams implements Serializable {
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned
      * @param filterByInstalledOrAssignedDistributionSetId
-     *         filter by installed or assigned {@link DistributionSet#getId()}
+     *            filter by installed or assigned
+     *            {@link DistributionSet#getId()}
      * @param filterByStatus
-     *         if set, a filter is added for target states included by the
-     *         collection
+     *            if set, a filter is added for target states included by the
+     *            collection
      * @param overdueState
-     *         if set, a filter is added for overdued devices
+     *            if set, a filter is added for overdued devices
      * @param filterBySearchText
-     *         to find targets having the text anywhere in name or description.
+     *            to find targets having the text anywhere in name or
+     *            description.
      * @param selectTargetWithNoTag
-     *         flag to select targets with no tag assigned, if set, tag-filtering is enabled
+     *            flag to select targets with no tag assigned, if set,
+     *            tag-filtering is enabled
      * @param filterByTagNames
-     *         if tag-filtering is enabled, a filter is added for the given
-     *         tag-names
+     *            if tag-filtering is enabled, a filter is added for the given
+     *            tag-names
      */
     public FilterParams(final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
             final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
@@ -132,7 +136,8 @@ public class FilterParams implements Serializable {
      * Gets the tags that are used to filter for. The activation of this filter
      * is done by {@link #isSelectTargetWithNoTag()}.
      *
-     * @return the tags that are used to filter for or an empty array if non are present
+     * @return the tags that are used to filter for or an empty array if non are
+     *         present
      */
     public String[] getFilterByTagNames() {
         return filterByTagNames;
@@ -150,8 +155,9 @@ public class FilterParams implements Serializable {
     }
 
     /**
-     * Check if a filter by tag should be applied.
-     * Returns also true when tags should be explicitly ignored.
+     * Check if a filter by tag should be applied. Returns also true when tags
+     * should be explicitly ignored.
+     * 
      * @return true when a tag-filter should be applied, false otherwise
      */
     public boolean hasTagsFilterActive() {

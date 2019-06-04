@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +74,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     private final EntityFactory entityFactory;
 
-    MgmtTargetResource(final TargetManagement targetManagement, final TargetQueryExecutionManagement targetQueryExecutionManagement,
+    MgmtTargetResource(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final DeploymentManagement deploymentManagement, final EntityFactory entityFactory) {
         this.targetManagement = targetManagement;
         this.targetQueryExecutionManagement = targetQueryExecutionManagement;

@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,8 +35,8 @@ public class TargetFilterTest extends AbstractJpaIntegrationTest {
     @Description("Tests the UI-filter functions")
     public void shouldOnlyFindTaggedTargets() {
         TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("TEST-TAG"));
-        Target target1 = targetManagement.create(
-                entityFactory.target().create().controllerId("target-1").name("Name1"));
+        Target target1 = targetManagement
+                .create(entityFactory.target().create().controllerId("target-1").name("Name1"));
         targetManagement.create(entityFactory.target().create().controllerId("target-2").name("Name2"));
         targetManagement.assignTag(Arrays.asList(target1.getControllerId()), tag.getId());
 
@@ -46,7 +54,7 @@ public class TargetFilterTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests the UI-filter functions")
     public void shouldApplyWhenTagsHaveBeenSelected() {
-        FilterParams filter = new FilterParams(null,null,null,null,true,null);
+        FilterParams filter = new FilterParams(null, null, null, null, true, null);
         assertThat(filter.hasTagsFilterActive()).as("Has tags should evaluate to true").isTrue();
     }
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +29,7 @@ public interface TargetQueryExecutionManagement {
      * Retrieves all targets.
      *
      * @param pageable
-     *             pagination parameter
+     *            pagination parameter
      * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -38,9 +39,9 @@ public interface TargetQueryExecutionManagement {
      * Query targets
      *
      * @param pageable
-     *             pagination parameter
+     *            pagination parameter
      * @param query
-     *             in RSQL notation
+     *            in RSQL notation
      *
      * @return the found {@linkplain Target}s, never {@code null}
      *
@@ -57,11 +58,12 @@ public interface TargetQueryExecutionManagement {
      * Query targets and limit the result to be in the provided ID-list
      *
      * @param pageable
-     *             pagination parameter
+     *            pagination parameter
      * @param query
-     *             in RSQL notation
+     *            in RSQL notation
      * @param inIdList
-     *             Limit the result to the provided IDs ("... AND controllerId in [id, ...]")
+     *            Limit the result to the provided IDs ("... AND controllerId in
+     *            [id, ...]")
      *
      * @return the found {@linkplain Target}s, never {@code null}
      *
@@ -90,7 +92,8 @@ public interface TargetQueryExecutionManagement {
      * @param query
      *            filter definition in RSQL syntax
      * @param inIdList
-     *             Limit the result to the provided IDs ("... AND controllerId in [id, ...]")
+     *            Limit the result to the provided IDs ("... AND controllerId in
+     *            [id, ...]")
      * @return the found number {@linkplain Target}s
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)

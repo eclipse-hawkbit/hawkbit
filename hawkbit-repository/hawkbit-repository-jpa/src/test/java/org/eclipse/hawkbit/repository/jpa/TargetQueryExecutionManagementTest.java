@@ -1,11 +1,16 @@
+/**
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.repository.jpa;
-
-import static org.junit.Assert.assertThat;
 
 import io.qameta.allure.Description;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
