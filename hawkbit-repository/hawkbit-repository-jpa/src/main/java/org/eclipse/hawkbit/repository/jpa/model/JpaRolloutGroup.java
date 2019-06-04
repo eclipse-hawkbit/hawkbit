@@ -72,7 +72,8 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
             CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
-    // No foreign key to avoid to many nested cascades on delete which some DBs cannot handle
+    // No foreign key to avoid to many nested cascades on delete which some DBs
+    // cannot handle
     @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "parent_id")
     private JpaRolloutGroup parent;

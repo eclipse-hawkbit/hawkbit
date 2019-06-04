@@ -68,19 +68,19 @@ public class RolloutView extends VerticalLayout implements View {
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
-            final TargetQueryExecutionManagement targetQueryExecutionManagement,
-            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigManagement) {
+            final TargetQueryExecutionManagement targetQueryExecutionManagement, final UINotification uiNotification,
+            final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final QuotaManagement quotaManagement,
+            final TenantConfigurationManagement tenantConfigManagement) {
 
-        this.serviceContext = new RolloutServiceContext(
-                rolloutManagement, rolloutGroupManagement, targetManagement, targetQueryExecutionManagement,
-                entityFactory, targetFilterQueryManagement, quotaManagement, tenantConfigManagement);
+        this.serviceContext = new RolloutServiceContext(rolloutManagement, rolloutGroupManagement, targetManagement,
+                targetQueryExecutionManagement, entityFactory, targetFilterQueryManagement, quotaManagement,
+                tenantConfigManagement);
 
         this.permChecker = permissionChecker;
 
-        this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus,
-                uiNotification, uiProperties, i18n, serviceContext );
+        this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, uiNotification,
+                uiProperties, i18n, serviceContext);
 
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);

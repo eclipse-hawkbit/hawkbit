@@ -63,7 +63,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     private final TargetQueryExecutionManagement targetQueryExecutionManagement;
 
-    public RsqlParserValidationOracle( @Autowired final TargetQueryExecutionManagement targetQueryExecutionManagement){
+    public RsqlParserValidationOracle(@Autowired final TargetQueryExecutionManagement targetQueryExecutionManagement) {
         this.targetQueryExecutionManagement = targetQueryExecutionManagement;
     }
 

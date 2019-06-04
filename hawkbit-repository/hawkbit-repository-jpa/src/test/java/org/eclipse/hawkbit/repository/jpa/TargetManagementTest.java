@@ -564,7 +564,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         // "6" has intentionally no DS assigned at all => Should be found!
         Arrays.asList("7", "8", "9").forEach(id -> assignDistributionSet(set2.getId(), id));
 
-        Page<Target> result = targetManagement.findByNoActionWithDistributionSetExistsAndQuery(PAGE, set1.getId(), "id=ge=5");
+        Page<Target> result = targetManagement.findByNoActionWithDistributionSetExistsAndQuery(PAGE, set1.getId(),
+                "id=ge=5");
 
         assertThat(result.getTotalElements())
                 .as("Only targets where distribution set is NOT assigned and RSQL is matching should be returned")
@@ -619,14 +620,14 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted that
-     * the target have additional tags assigned to them which are not contained
-     * within parameter tags.
+     * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted
+     * that the target have additional tags assigned to them which are not
+     * contained within parameter tags.
      *
      * @param strict
-     *            if true, the given targets MUST contain EXACTLY ALL given tags,
-     *            AND NO OTHERS. If false, the given targets MUST contain ALL given
-     *            tags, BUT MAY CONTAIN FURTHER ONE
+     *            if true, the given targets MUST contain EXACTLY ALL given
+     *            tags, AND NO OTHERS. If false, the given targets MUST contain
+     *            ALL given tags, BUT MAY CONTAIN FURTHER ONE
      * @param targets
      *            targets to be verified
      * @param tags

@@ -150,6 +150,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         }
         return targetQueryExecutionManagement;
     }
+
     private FilterManagementUIState getFilterManagementUIState() {
         if (filterManagementUIState == null) {
             filterManagementUIState = SpringContextHelper.getBean(FilterManagementUIState.class);

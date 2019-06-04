@@ -91,8 +91,8 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     protected RolloutGroup createEntity() {
         testdataFactory.createTarget(UUID.randomUUID().toString());
 
-        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet()
-                .create().name("incomplete").version("2").description("incomplete").type("os"));
+        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet().create()
+                .name("incomplete").version("2").description("incomplete").type("os"));
 
         final Rollout entity = rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),

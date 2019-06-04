@@ -216,11 +216,13 @@ public final class TargetSpecifications {
 
     /**
      * Limit the result to all target in the provided controller-id list.
-     * @param controllerIds list of controller-IDs
+     * 
+     * @param controllerIds
+     *            list of controller-IDs
      * @return the {@link Specification}
      */
     public static Specification<JpaTarget> hasControllerId(final Collection<String> controllerIds) {
-        return  (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.controllerId).in(controllerIds);
+        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.controllerId).in(controllerIds);
     }
 
     /**
@@ -273,7 +275,6 @@ public final class TargetSpecifications {
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
     }
-
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are not in the

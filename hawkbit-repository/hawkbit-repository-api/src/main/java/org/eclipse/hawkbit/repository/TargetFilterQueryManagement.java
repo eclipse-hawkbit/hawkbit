@@ -282,11 +282,11 @@ public interface TargetFilterQueryManagement {
      * Get a {@linkplain TargetFilterQuery} by it's ID
      *
      * @param targetFilterQueryId
-     *              the ID of the filter
+     *            the ID of the filter
      * @return the persistent {@linkplain TargetFilterQuery}
      *
      * @throws EntityNotFoundException
-     *              when the filter couldn't be found
+     *             when the filter couldn't be found
      */
     TargetFilterQuery getById(Long targetFilterQueryId);
 }

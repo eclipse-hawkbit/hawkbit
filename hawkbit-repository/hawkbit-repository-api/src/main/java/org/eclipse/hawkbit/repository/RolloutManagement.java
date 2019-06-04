@@ -342,9 +342,9 @@ public interface RolloutManagement {
 
     /**
      * Approves or denies a created rollout being in state
-     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
-     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
-     * {@link RolloutStatus#APPROVAL_DENIED}
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
+     * it switches state to {@link RolloutStatus#READY}, otherwise it switches
+     * to state {@link RolloutStatus#APPROVAL_DENIED}
      *
      * @param rolloutId
      *            the rollout to be approved or denied.
@@ -365,9 +365,9 @@ public interface RolloutManagement {
 
     /**
      * Approves or denies a created rollout being in state
-     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
-     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
-     * {@link RolloutStatus#APPROVAL_DENIED}
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
+     * it switches state to {@link RolloutStatus#READY}, otherwise it switches
+     * to state {@link RolloutStatus#APPROVAL_DENIED}
      * 
      * @param rolloutId
      *            the rollout to be approved or denied.

@@ -37,14 +37,12 @@ public class RolloutListHeader extends AbstractGridHeader {
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus,
-            final UINotification uiNotification,
-            final UiProperties uiProperties, final VaadinMessageSource i18n,
-            final RolloutServiceContext serviceContext) {
+            final UIEventBus eventBus, final UINotification uiNotification, final UiProperties uiProperties,
+            final VaadinMessageSource i18n, final RolloutServiceContext serviceContext) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
-        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(
-                uiNotification, uiProperties, i18n, eventBus,serviceContext);
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(uiNotification, uiProperties, i18n, eventBus,
+                serviceContext);
     }
 
     @Override

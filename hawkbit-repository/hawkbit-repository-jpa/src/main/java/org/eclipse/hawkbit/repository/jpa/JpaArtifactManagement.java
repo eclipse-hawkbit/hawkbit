@@ -102,8 +102,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
-        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(),
-                softwareModule);
+        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());

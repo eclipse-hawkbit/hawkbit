@@ -100,8 +100,7 @@ public interface RolloutGroupManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRolloutAndRsql(@NotNull Pageable pageable, long rolloutId,
-            @NotNull String rsqlParam);
+    Page<RolloutGroup> findByRolloutAndRsql(@NotNull Pageable pageable, long rolloutId, @NotNull String rsqlParam);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given

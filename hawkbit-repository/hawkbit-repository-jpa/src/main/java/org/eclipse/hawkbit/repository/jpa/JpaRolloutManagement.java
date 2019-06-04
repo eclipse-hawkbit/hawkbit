@@ -165,20 +165,15 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     JpaRolloutManagement(final TargetManagement targetManagement,
             final TargetQueryExecutionManagement targetQueryExecutionManagement,
-            final DeploymentManagement deploymentManagement,
-            final RolloutGroupManagement rolloutGroupManagement,
-            final DistributionSetManagement distributionSetManagement,
-            final ApplicationContext context,
-            final BusProperties bus,
-            final ApplicationEventPublisher eventPublisher,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager,
-            final TenantAware tenantAware,
-            final LockRegistry lockRegistry,
-            final Database database,
+            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
+            final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
+            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
-        super(targetManagement, targetQueryExecutionManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+        super(targetManagement, targetQueryExecutionManagement, deploymentManagement, rolloutGroupManagement,
+                distributionSetManagement, context, eventPublisher, virtualPropertyReplacer, txManager, tenantAware,
+                lockRegistry, rolloutApprovalStrategy);
         this.database = database;
         this.bus = bus;
     }
@@ -435,8 +430,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByQueryAndNotInRolloutGroups(pageRequest,
-                    readyGroups, targetFilter);
+            final Page<Target> targets = targetManagement.findByQueryAndNotInRolloutGroups(pageRequest, readyGroups,
+                    targetFilter);
 
             createAssignmentOfTargetsToGroup(targets, group);
 

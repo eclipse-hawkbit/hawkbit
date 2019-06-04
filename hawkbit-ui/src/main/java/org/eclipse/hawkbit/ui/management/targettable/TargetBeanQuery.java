@@ -44,7 +44,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private transient TargetQueryExecutionManagement targetQueryExecutionManagement;
     private transient DeploymentManagement deploymentManagement;
     private transient VaadinMessageSource i18N;
-    
+
     private FilterParams filter;
     private Long pinnedDistId;
     private Long targetFilterQueryId;
@@ -54,13 +54,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
      * Parametric Constructor.
      *
      * @param definition
-     *         as Def
+     *            as Def
      * @param queryConfig
-     *         as Config
+     *            as Config
      * @param sortIds
-     *         as sort
+     *            as sort
      * @param sortStates
-     *         as Sort status
+     *            as Sort status
      */
     public TargetBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortIds, final boolean[] sortStates) {
@@ -74,8 +74,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             }
             filter = new FilterParams(
                     (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS),
-                    (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE),
-                    searchText,
+                    (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE), searchText,
                     (Long) queryConfig.get(SPUIDefinitions.FILTER_BY_DISTRIBUTION),
                     (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG),
                     (String[]) queryConfig.get(SPUIDefinitions.FILTER_BY_TAG));
@@ -114,8 +113,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     targetFilterQuery.getQuery());
         } else if (filter.isEmpty()) {
-            targetBeans = getTargetQueryExecutionManagement().findAll(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = getTargetQueryExecutionManagement()
+                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             targetBeans = getTargetManagement().findByFilters(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),

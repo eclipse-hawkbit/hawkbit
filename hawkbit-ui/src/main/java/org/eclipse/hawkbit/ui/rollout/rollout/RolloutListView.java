@@ -41,9 +41,8 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final UiProperties uiProperties;
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus, final UINotification uiNotification,
-            final UiProperties uiProperties, final VaadinMessageSource i18n,
-            final RolloutServiceContext serviceContext ) {
+            final UIEventBus eventBus, final UINotification uiNotification, final UiProperties uiProperties,
+            final VaadinMessageSource i18n, final RolloutServiceContext serviceContext) {
         super(i18n, eventBus);
         this.serviceContext = serviceContext;
         this.permissionChecker = permissionChecker;
@@ -61,14 +60,14 @@ public class RolloutListView extends AbstractGridComponentLayout {
 
     @Override
     public AbstractOrderedLayout createGridHeader() {
-        return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(),
-                 uiNotification, uiProperties, getI18n(), serviceContext);
+        return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), uiNotification, uiProperties,
+                getI18n(), serviceContext);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
-        return new RolloutListGrid(getI18n(), getEventBus(), uiNotification, rolloutUIState,
-                permissionChecker, uiProperties, serviceContext);
+        return new RolloutListGrid(getI18n(), getEventBus(), uiNotification, rolloutUIState, permissionChecker,
+                uiProperties, serviceContext);
     }
 
 }

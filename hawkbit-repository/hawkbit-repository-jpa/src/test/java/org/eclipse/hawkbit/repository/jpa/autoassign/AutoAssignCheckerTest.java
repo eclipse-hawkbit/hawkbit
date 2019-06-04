@@ -112,7 +112,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(0, 10), targetsCount);
 
         // assign set B to first 5 targets
-        // they have now 2 DS in their action history and should not get updated with dsA
+        // they have now 2 DS in their action history and should not get updated
+        // with dsA
         assignDistributionSet(setB, targets.subList(0, 5));
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
@@ -121,7 +122,9 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByNotAssignedDistributionSetAndQuery(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(90);
+        assertThat(
+                targetManagement.countByNotAssignedDistributionSetAndQuery(setA.getId(), targetFilterQuery.getQuery()))
+                        .isEqualTo(90);
 
         // Run the check
         autoAssignChecker.check();
@@ -198,11 +201,9 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final Slice<? extends Target> targetsAll = targetQueryExecutionManagement.findAll(PAGE);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
-        long countWithAssignedDistSet = targetsAll.stream()
-                .filter(t -> targetIds.contains(t.getId()))
+        long countWithAssignedDistSet = targetsAll.stream().filter(t -> targetIds.contains(t.getId()))
                 .map(t -> deploymentManagement.getAssignedDistributionSet(((Target) t).getControllerId()).get())
-                .filter(ds -> ds.equals(set))
-                .count();
+                .filter(ds -> ds.equals(set)).count();
 
         assertThat(countWithAssignedDistSet).isEqualTo(targets.size());
 

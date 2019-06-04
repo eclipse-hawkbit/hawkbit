@@ -117,7 +117,7 @@ import com.google.common.collect.Maps;
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class,
-                SystemManagementCacheKeyGenerator.class })
+        SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
@@ -497,9 +497,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    TargetQueryExecutionManagement targetFilterQueryExecutor(
-            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+    TargetQueryExecutionManagement targetFilterQueryExecutor(final TargetRepository targetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaTargetQueryExecutionManagement(targetRepository, virtualPropertyReplacer,
                 properties.getDatabase());
     }
@@ -610,9 +609,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
-        return new JpaRolloutManagement(targetManagement, targetQueryExecutionManagement, deploymentManagement, rolloutGroupManagement,
-                distributionSetManagement, context, bus, eventPublisher, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
+        return new JpaRolloutManagement(targetManagement, targetQueryExecutionManagement, deploymentManagement,
+                rolloutGroupManagement, distributionSetManagement, context, bus, eventPublisher,
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
+                rolloutApprovalStrategy);
     }
 
     /**

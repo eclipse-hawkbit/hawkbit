@@ -17,9 +17,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 public interface RolloutApprovalStrategy {
 
     /**
-     * This method handles whether a rollout needs approval. Various factors may be
-     * important according to the implementation, e.g. user roles of the rollout
-     * creator, state of the system, ....
+     * This method handles whether a rollout needs approval. Various factors may
+     * be important according to the implementation, e.g. user roles of the
+     * rollout creator, state of the system, ....
      *
      * @param rollout
      *            rollout to decide for whether approval is needed.
@@ -30,8 +30,8 @@ public interface RolloutApprovalStrategy {
     /**
      * Depending on the implementation, creation of a approval task,
      * notification,... inside or outside of hawkbit may be necessary.
-     * Implementations may also decide to provide an empty implementation for this
-     * method.
+     * Implementations may also decide to provide an empty implementation for
+     * this method.
      *
      * @param rollout
      *            rollout to create approval task for.
@@ -39,9 +39,9 @@ public interface RolloutApprovalStrategy {
     void onApprovalRequired(Rollout rollout);
 
     /**
-     * Returns the user that made a decision to approve or deny the given rollout.
-     * Depending on the implementation this may be different to the current user eg.
-     * when the decision is made in an external system.
+     * Returns the user that made a decision to approve or deny the given
+     * rollout. Depending on the implementation this may be different to the
+     * current user eg. when the decision is made in an external system.
      * 
      * @param rollout
      *            target rollout

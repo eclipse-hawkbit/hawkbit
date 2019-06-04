@@ -140,8 +140,8 @@ public class TargetTable extends AbstractTable<Target> {
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetQueryExecutionManagement targetQueryExecutionManagement,
-            final ManagementUIState managementUIState,
-            final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
+            final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
+            final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties) {

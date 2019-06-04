@@ -270,8 +270,8 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
         } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
             return ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
-            return DistributionBarHelper
-                    .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap(), i18n);
+            return DistributionBarHelper.getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap(),
+                    i18n);
         }
         return null;
     }

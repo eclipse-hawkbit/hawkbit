@@ -367,7 +367,8 @@ public class JpaTargetManagement implements TargetManagement {
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
     }
 
-    // Used by Auto-Assign checker: Identify new targets which have not an specific
+    // Used by Auto-Assign checker: Identify new targets which have not an
+    // specific
     // DS assigned...
     @Override
     public Page<Target> findByNoActionWithDistributionSetExistsAndQuery(final Pageable pageable,
@@ -442,14 +443,14 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
         filterParams.getOverdueState().ifPresent(s -> //
-            specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())) //
+        specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())) //
         );
         filterParams.getFilterByDistributionId().ifPresent(id -> {
             throwEntityNotFoundIfDsDoesNotExist(id);
             specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(id));
         });
         filterParams.getFilterBySearchText().ifPresent(text -> //
-            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)) //
+        specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)) //
         );
 
         if (filterParams.hasTagsFilterActive()) {

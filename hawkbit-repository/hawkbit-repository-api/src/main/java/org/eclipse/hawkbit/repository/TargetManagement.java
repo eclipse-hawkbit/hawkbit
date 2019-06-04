@@ -64,6 +64,7 @@ public interface TargetManagement {
 
     /**
      * Count targets with a given {@linkplain DistributionSet} assigned
+     * 
      * @param distId
      *            to search for
      *
@@ -79,7 +80,8 @@ public interface TargetManagement {
     /**
      * Count {@link Target}s for all the given filter parameters.
      *
-     * @param filter parameters by which targets should be filtered
+     * @param filter
+     *            parameters by which targets should be filtered
      *
      * @return the found number {@link Target}s
      * 
@@ -221,8 +223,8 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    Page<Target> findByQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest, @NotEmpty Collection<Long> groups,
+            @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}

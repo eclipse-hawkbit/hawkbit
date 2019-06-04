@@ -36,8 +36,8 @@ public class TotalTargetCountStatusTest {
             new TotalTargetCountActionStatus(Action.Status.DOWNLOADED, 10L));
 
     @Test
-    @Description("Different Action Statuses should be correctly mapped to the corresponding " +
-            "TotalTargetCountStatus.Status")
+    @Description("Different Action Statuses should be correctly mapped to the corresponding "
+            + "TotalTargetCountStatus.Status")
     public void shouldCorrectlyMapActionStatuses() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.FORCED);
@@ -51,8 +51,8 @@ public class TotalTargetCountStatusTest {
     }
 
     @Test
-    @Description("When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as " +
-            "NOTSTARTED")
+    @Description("When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as "
+            + "NOTSTARTED")
     public void shouldCorrectlyMapActionStatusesToNotStarted() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(Collections.emptyList(), 55L,
                 Action.ActionType.FORCED);

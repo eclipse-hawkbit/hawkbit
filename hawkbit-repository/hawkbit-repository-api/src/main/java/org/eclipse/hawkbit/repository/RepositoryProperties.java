@@ -27,8 +27,8 @@ public class RepositoryProperties {
      * especially useful if the action status feedback channel order from the
      * device cannot be guaranteed.
      *
-     * Note: if this is enforced you have to make sure that the feedback
-     * channel from the devices is in order.
+     * Note: if this is enforced you have to make sure that the feedback channel
+     * from the devices is in order.
      */
     private boolean rejectActionStatusForClosedAction;
 

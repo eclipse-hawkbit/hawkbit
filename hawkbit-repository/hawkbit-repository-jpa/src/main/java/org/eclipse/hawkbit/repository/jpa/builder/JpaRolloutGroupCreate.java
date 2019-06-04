@@ -42,9 +42,9 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
      * Set the Success And Error conditions for the rollout group
      *
      * @param group
-     *          The Rollout group
+     *            The Rollout group
      * @param conditions
-     *          The Rollout Success and Error Conditions
+     *            The Rollout Success and Error Conditions
      */
     public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
             final RolloutGroupConditions conditions) {
@@ -58,23 +58,23 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
      * Set the Success And Error conditions for the rollout group
      *
      * @param group
-     *          The Rollout group
+     *            The Rollout group
      * @param successCondition
-     *          The Rollout group success condition
+     *            The Rollout group success condition
      * @param successConditionExp
-     *          The Rollout group success expression
+     *            The Rollout group success expression
      * @param successAction
-     *          The Rollout group success action
+     *            The Rollout group success action
      * @param successActionExp
-     *          The Rollout group success action expression
+     *            The Rollout group success action expression
      * @param errorCondition
-     *          The Rollout group error condition
+     *            The Rollout group error condition
      * @param errorConditionExp
-     *          The Rollout group error expression
+     *            The Rollout group error expression
      * @param errorAction
-     *          The Rollout group error action
+     *            The Rollout group error action
      * @param errorActionExp
-     *          The Rollout group error action expression
+     *            The Rollout group error action expression
      */
     public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
             final RolloutGroup.RolloutGroupSuccessCondition successCondition, final String successConditionExp,

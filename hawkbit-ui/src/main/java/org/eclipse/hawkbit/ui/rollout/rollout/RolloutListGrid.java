@@ -118,8 +118,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private static final List<RolloutStatus> RUN_BUTTON_ENABLED = Arrays.asList(RolloutStatus.READY,
             RolloutStatus.PAUSED);
 
-    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections.singletonList(
-            RolloutStatus.WAITING_FOR_APPROVAL);
+    private static final List<RolloutStatus> APPROVE_BUTTON_ENABLED = Collections
+            .singletonList(RolloutStatus.WAITING_FOR_APPROVAL);
 
     private static final Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
@@ -158,9 +158,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             RolloutServiceContext serviceContext) {
         super(i18n, eventBus, permissionChecker);
         this.serviceContext = serviceContext;
-        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(
-                uiNotification, uiProperties, i18n, eventBus,
-                serviceContext );
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(uiNotification, uiProperties, i18n, eventBus,
+                serviceContext);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
         alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);
@@ -214,7 +213,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Optional<Rollout> rollout = serviceContext.rolloutManagement.getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final Optional<Rollout> rollout = serviceContext.rolloutManagement
+                .getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
         if (!rollout.isPresent()) {
             return;
@@ -234,8 +234,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
         item.getItemProperty(PROP_TYPE).setValue(rollout.getActionType());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
-        final Long groupCount = Long.valueOf(
-                (Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
+        final Long groupCount = Long
+                .valueOf((Integer) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue());
         final int groupsCreated = rollout.getRolloutGroupsCreated();
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
@@ -337,8 +337,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     @Override
     protected void setColumnHeaderNames() {
         getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.getMessage("header.name"));
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setHeaderCaption(
-                i18n.getMessage("header.distributionset"));
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
+                .setHeaderCaption(i18n.getMessage("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.getMessage("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.getMessage("header.total.targets"));
         getColumn(PROP_TYPE).setHeaderCaption(i18n.getMessage("header.type"));
@@ -347,11 +347,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.getMessage("header.modifiedDate"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.getMessage("header.modifiedBy"));
         getColumn(SPUILabelDefinitions.VAR_APPROVAL_REMARK).setHeaderCaption(i18n.getMessage("header.approvalRemark"));
-        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY).setHeaderCaption(
-                i18n.getMessage("header.approvalDecidedBy"));
+        getColumn(SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY)
+                .setHeaderCaption(i18n.getMessage("header.approvalDecidedBy"));
         getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.getMessage("header.description"));
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setHeaderCaption(
-                i18n.getMessage("header.detail.status"));
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
+                .setHeaderCaption(i18n.getMessage("header.detail.status"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
 
         getColumn(VIRT_PROP_RUN).setHeaderCaption(i18n.getMessage("header.action.run"));
@@ -521,12 +521,10 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private void onClickOfRolloutName(final RendererClickEvent event) {
         rolloutUIState.setRolloutId((long) event.getItemId());
         final String rolloutName = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_NAME)
-                .getValue();
+                .getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         rolloutUIState.setRolloutName(rolloutName);
         final String ds = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION)
-                .getValue();
+                .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).getValue();
         rolloutUIState.setRolloutDistributionSet(ds);
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
     }
@@ -841,8 +839,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private void hideColumnsDueToInsufficientPermissions() {
 
-        final List<Object> modifiableColumnsList = getColumns().stream()
-                .map(Column::getPropertyId)
+        final List<Object> modifiableColumnsList = getColumns().stream().map(Column::getPropertyId)
                 .collect(Collectors.toList());
 
         if (!permissionChecker.hasRolloutUpdatePermission()) {
@@ -851,8 +848,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
-        if (!permissionChecker.hasRolloutApprovalPermission() || !serviceContext.tenantConfigManagement.getConfigurationValue(
-                TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
+        if (!permissionChecker.hasRolloutApprovalPermission() || !serviceContext.tenantConfigManagement
+                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
             modifiableColumnsList.remove(VIRT_PROP_APPROVE);
         }
         if (!permissionChecker.hasRolloutDeletePermission()) {

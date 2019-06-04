@@ -33,8 +33,7 @@ public class RegexCharacterCollection {
     }
 
     private Pattern getPatternFindAnyCharacter() {
-        final String regexCharacters = characters.stream().map(RegexChar::getRegExp)
-                .collect(Collectors.joining());
+        final String regexCharacters = characters.stream().map(RegexChar::getRegExp).collect(Collectors.joining());
         final String regularExpression = String.format(".*[%s]+.*", regexCharacters);
         return Pattern.compile(regularExpression);
     }
@@ -50,7 +49,7 @@ public class RegexCharacterCollection {
         RegexChar(final String character) {
             this(character, null);
         }
-    
+
         RegexChar(final String regExp, final String l18nReferenceDescription) {
             this.regExp = regExp;
             this.l18nReferenceDescription = l18nReferenceDescription;
