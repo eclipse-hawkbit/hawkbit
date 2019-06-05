@@ -76,6 +76,6 @@ public class MgmtRolloutErrorAction {
      * Possible actions
      */
     public enum ErrorAction {
-        PAUSE;
+        PAUSE
     }
 }

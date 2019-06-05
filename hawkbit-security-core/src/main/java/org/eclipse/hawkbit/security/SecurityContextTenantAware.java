@@ -135,7 +135,7 @@ public class SecurityContextTenantAware implements TenantAware {
 
         @Override
         public boolean isAuthenticated() {
-            return (delegate != null) ? delegate.isAuthenticated() : true;
+            return delegate == null || delegate.isAuthenticated();
         }
 
         @Override

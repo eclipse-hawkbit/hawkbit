@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -98,20 +99,35 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Artifact create(final ArtifactUpload artifactUpload) {
         final String filename = artifactUpload.getFilename();
         final long moduleId = artifactUpload.getModuleId();
-        AbstractDbArtifact result = null;
 
         final SoftwareModule softwareModule = getModuleAndThrowExceptionIfThatFails(moduleId);
 
-        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(),
-                softwareModule);
+        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
 
         assertArtifactQuota(moduleId, 1);
         assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
         assertMaxArtifactStorageQuota(filename, artifactUpload.getFilesize());
 
+        return  getOrCreateArtifact(artifactUpload)
+                .map(artifact -> storeArtifactMetadata(softwareModule, filename, artifact, existing))
+                .orElse(null);
+    }
+
+    private Optional<AbstractDbArtifact> getOrCreateArtifact(final ArtifactUpload artifactUpload) {
+        final String providedSha1Sum = artifactUpload.getProvidedSha1Sum();
+        AbstractDbArtifact artifact = null;
+
+        if (!StringUtils.isEmpty(providedSha1Sum)) {
+            artifact = artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum);
+        }
+        artifact = (artifact == null) ? storeArtifact(artifactUpload) : artifact;
+        return Optional.ofNullable(artifact);
+    }
+
+    private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
         try {
-            result = artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(), filename,
-                    artifactUpload.getContentType(),
+            return artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
+                    artifactUpload.getFilename(), artifactUpload.getContentType(),
                     new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum()));
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
@@ -122,11 +138,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 throw new InvalidMD5HashException(e.getMessage(), e);
             }
         }
-        if (result == null) {
-            return null;
-        }
-
-        return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
     private void assertArtifactQuota(final long id, final int requested) {
@@ -166,12 +177,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public boolean clearArtifactBinary(final String sha1Hash, final long moduleId) {
-
-        if (localArtifactRepository.existsWithSha1HashAndSoftwareModuleIdIsNot(sha1Hash, moduleId)) {
+        final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
+                tenantAware.getCurrentTenant());
+        if (count > 1) {
             // there are still other artifacts that need the binary
             return false;
         }
-
         try {
             LOG.debug("deleting artifact from repository {}", sha1Hash);
             artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);

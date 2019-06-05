@@ -22,5 +22,5 @@ public enum ApiType {
     /**
      * Support for Direct Device Integration API.
      */
-    DDI;
+    DDI
 }

@@ -149,7 +149,7 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
      * Rollout start options
      */
     enum AutoStartOption {
-        MANUAL, AUTO_START, SCHEDULED;
+        MANUAL, AUTO_START, SCHEDULED
 
     }
 
