@@ -84,7 +84,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // get deployment base
-        // get deployment base
         mvc.perform(get("/{tenant}/controller/v1/{target}/deploymentBase/" + uaction.getId(),
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -608,7 +607,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
-                .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
+                .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("skip")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].name",
                         contains(ds.findFirstModuleByType(runtimeType).get().getName())))

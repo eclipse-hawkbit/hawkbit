@@ -294,7 +294,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
                     : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
 
-            final HandlingType downloadType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
+            final HandlingType downloadType = calculateDownloadType(action);
             final HandlingType updateType = calculateUpdateType(action, downloadType);
 
             final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
@@ -311,6 +311,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private HandlingType calculateDownloadType(final Action action) {
+        if (action.isDownloadOnly() || action.isForce()) {
+            return HandlingType.FORCED;
+        } else {
+            return HandlingType.ATTEMPT;
+        }
     }
 
     private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
