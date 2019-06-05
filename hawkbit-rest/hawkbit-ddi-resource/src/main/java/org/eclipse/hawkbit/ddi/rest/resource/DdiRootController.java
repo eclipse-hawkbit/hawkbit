@@ -302,7 +302,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
                     new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
 
-            LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", controllerId, base);
+            LOG.debug("Found an active UpdateAction for target {}. returning deployment: {}", controllerId, base);
 
             controllerManagement.registerRetrieved(action.getId(), RepositoryConstants.SERVER_MESSAGE_PREFIX
                     + "Target retrieved update action and should start now the download.");
@@ -322,7 +322,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static HandlingType calculateUpdateType(final Action action, final HandlingType downloadType) {
-        if (action.hasMaintenanceSchedule()) {
+        if (action.isDownloadOnly()) {
+            return HandlingType.SKIP;
+        } else if (action.hasMaintenanceSchedule()) {
             return action.isMaintenanceWindowAvailable() ? downloadType : HandlingType.SKIP;
         }
         return downloadType;

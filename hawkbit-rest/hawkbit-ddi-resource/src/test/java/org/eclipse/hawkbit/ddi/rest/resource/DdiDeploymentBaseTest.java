@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -83,6 +84,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // get deployment base
+        // get deployment base
         mvc.perform(get("/{tenant}/controller/v1/{target}/deploymentBase/" + uaction.getId(),
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -107,7 +109,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that artifacts are not found, when softare module does not exists.")
+    @Description("Ensures that artifacts are not found, when software module does not exists.")
     public void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
         final Long softwareModuleIdNotExist = 1l;
@@ -141,8 +143,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Forced deployment to a controller. Checks if the resource reponse payload for a given deployment is as expected.")
-    public void deplomentForceAction() throws Exception {
+    @Description("Forced deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
+    public void deploymentForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -260,7 +262,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Checks that the deployementBase URL changes when the action is switched from soft to forced in TIMEFORCED case.")
+    @Description("Checks that the deploymentBase URL changes when the action is switched from soft to forced in TIMEFORCED case.")
     public void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget("4712");
@@ -297,8 +299,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Attempt/soft deployment to a controller. Checks if the resource reponse payload  for a given deployment is as expected.")
-    public void deplomentAttemptAction() throws Exception {
+    @Description("Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
+    public void deploymentAttemptAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -306,7 +308,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String visibleMetadataOsValue = "withValue";
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomUtils.nextBytes(artifactSize);
+        final byte[] random = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
         final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
@@ -423,14 +425,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource reponse payload  for a given deployment is as expected.")
-    public void deplomentAutoForceAction() throws Exception {
+    @Description("Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource response payload for a given deployment is as expected.")
+    public void deploymentAutoForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomUtils.nextBytes(artifactSize);
+        final byte[] random = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
         final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
@@ -540,6 +542,133 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
+    @Description("Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
+    public void deploymentDownloadOnlyAction () throws Exception {
+        // Prepare test data
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
+        final String visibleMetadataOsKey = "metaDataVisible";
+        final String visibleMetadataOsValue = "withValue";
+
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomUtils.nextBytes(artifactSize);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
+        final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), getOsModule(ds), "test1.signature", false, artifactSize));
+
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+                .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+                .key("metaDataNotVisible").value("withValue").targetVisible(false));
+
+        final Target savedTarget = testdataFactory.createTarget("4712");
+
+        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
+
+        List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.DOWNLOAD_ONLY,
+                RepositoryModelConstants.NO_FORCE_TIME, Collections.singletonList(savedTarget.getControllerId()))
+                .getAssignedEntity();
+        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
+        saved = assignDistributionSet(ds2, saved).getAssignedEntity();
+        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
+
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+                .getContent().get(0);
+        assertThat(uaction.getDistributionSet()).isEqualTo(ds);
+        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+
+        // Run test
+
+        final long current = System.currentTimeMillis();
+        mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.deploymentBase.href", startsWith("http://localhost/"
+                        + tenantAware.getCurrentTenant() + "/controller/v1/4712/deploymentBase/" + uaction.getId())));
+        assertThat(targetManagement.getByControllerID("4712").get().getLastTargetQuery())
+                .isGreaterThanOrEqualTo(current);
+        assertThat(targetManagement.getByControllerID("4712").get().getLastTargetQuery())
+                .isLessThanOrEqualTo(System.currentTimeMillis());
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+
+        mvc.perform(
+                get("/{tenant}/controller/v1/4712/deploymentBase/" + uaction.getId(), tenantAware.getCurrentTenant())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.id", equalTo(String.valueOf(action.getId()))))
+                .andExpect(jsonPath("$.deployment.download", equalTo("attempt")))
+                .andExpect(jsonPath("$.deployment.update", equalTo("skip")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].name",
+                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].name",
+                        contains(ds.findFirstModuleByType(osType).get().getName())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].key").value(visibleMetadataOsKey))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].value")
+                        .value(visibleMetadataOsValue))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].filename", contains("test1")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.md5",
+                        contains(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
+                        contains(artifact.getSha1Hash())))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + getOsModule(findDistributionSetByAction) + "/artifacts/test1")))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + getOsModule(findDistributionSetByAction) + "/artifacts/test1.MD5SUM")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].size", contains(5 * 1024)))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].filename",
+                        contains("test1.signature")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.md5",
+                        contains(artifactSignature.getMd5Hash())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
+                        contains(artifactSignature.getSha1Hash())))
+                .andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
+                                contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                        + "/controller/v1/4712/softwaremodules/"
+                                        + getOsModule(findDistributionSetByAction) + "/artifacts/test1.signature")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/" + getOsModule(findDistributionSetByAction)
+                                + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].metadata").doesNotExist())
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].name")
+                        .value(ds.findFirstModuleByType(appType).get().getName()));
+
+        // Retrieved is reported
+        final List<ActionStatus> actionStatusMessages = deploymentManagement
+                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+        assertThat(actionStatusMessages).hasSize(2);
+        final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
+        assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
+
+    }
+
+    @Test
     @Description("Test various invalid access attempts to the deployment resource und the expected behaviour of the server.")
     public void badDeploymentAction() throws Exception {
         final Target target = testdataFactory.createTarget("4712");
@@ -563,7 +692,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // wrong media type
-        final List<Target> toAssign = Arrays.asList(target);
+        final List<Target> toAssign = Collections.singletonList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
         final Long actionId = assignDistributionSet(savedSet, toAssign).getActionIds().get(0);
@@ -575,9 +704,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("The server protects itself against to many feedback upload attempts. The test verfies that "
-            + "it is not possible to exceed the configured maximum number of feedback uplods.")
-    public void tooMuchDeplomentActionFeedback() throws Exception {
+    @Description("The server protects itself against to many feedback upload attempts. The test verifies that "
+            + "it is not possible to exceed the configured maximum number of feedback uploads.")
+    public void tooMuchDeploymentActionFeedback() throws Exception {
         final Target target = testdataFactory.createTarget("4712");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -627,7 +756,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Multiple uploads of deployment status feedback to the server.")
-    public void multipleDeplomentActionFeedback() throws Exception {
+    public void multipleDeploymentActionFeedback() throws Exception {
         final Target savedTarget1 = testdataFactory.createTarget("4712");
         testdataFactory.createTarget("4713");
         testdataFactory.createTarget("4714");
@@ -704,8 +833,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that an update action is correctly set to error if the controller provides error feedback.")
-    public void rootRsSingleDeplomentActionWithErrorFeedback() throws Exception {
+    @Description("Verifies that an update action is correctly set to error if the controller provides error feedback.")
+    public void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
         DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -764,13 +893,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that the controller can provided as much feedback entries as necessry as long as it is in the configured limites.")
-    public void rootRsSingleDeplomentActionFeedback() throws Exception {
+    @Description("Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.")
+    public void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final Target savedTarget = testdataFactory.createTarget("4712");
 
-        final List<Target> toAssign = Arrays.asList(savedTarget);
+        final List<Target> toAssign = Collections.singletonList(savedTarget);
 
         Target myT = targetManagement.getByControllerID("4712").get();
         assertThat(myT.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -891,8 +1020,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Various forbidden request appempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.")
-    public void badDeplomentActionFeedback() throws Exception {
+    @Description("Various forbidden request attempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.")
+    public void badDeploymentActionFeedback() throws Exception {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
         final DistributionSet savedSet2 = testdataFactory.createDistributionSet("1");
 

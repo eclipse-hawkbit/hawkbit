@@ -143,6 +143,13 @@ public interface Action extends TenantAwareBaseEntity {
     }
 
     /**
+     * @return true when action is downloadonly, false otherwise
+     */
+    default boolean isDownloadOnly() {
+        return ActionType.DOWNLOAD_ONLY == getActionType();
+    }
+
+    /**
      * Action status as reported by the controller.
      *
      * Be aware that JPA is persisting the ordinal number of the enum by means
