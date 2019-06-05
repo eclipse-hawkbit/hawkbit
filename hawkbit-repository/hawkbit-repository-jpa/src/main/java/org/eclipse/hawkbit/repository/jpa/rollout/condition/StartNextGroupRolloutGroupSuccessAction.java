@@ -65,7 +65,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             // get all next scheduled groups and set them in state running
             rolloutGroupRepository.setStatusForCildren(RolloutGroupStatus.RUNNING, rolloutGroup);
         } else {
-            logger.info("No actions to start for next rolloutgroup of parent {} {}", rolloutGroup.getId(),
+            logger.debug("No actions to start for next rolloutgroup of parent {} {}", rolloutGroup.getId(),
                     rolloutGroup.getName());
             // nothing for next group, just finish the group, this can happen
             // e.g. if targets has been deleted after the group has been

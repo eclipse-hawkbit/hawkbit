@@ -785,7 +785,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                     .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
                     .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
-                LOGGER.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
+                LOGGER.debug("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
             } else {
                 LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
