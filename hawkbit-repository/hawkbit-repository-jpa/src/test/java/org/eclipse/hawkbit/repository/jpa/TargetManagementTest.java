@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -251,7 +252,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .name(RandomStringUtils.randomAlphanumeric(65))))
+                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("target with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -261,7 +262,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .name(RandomStringUtils.randomAlphanumeric(65))))
+                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("target with too long name should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -281,7 +282,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .securityToken(RandomStringUtils.randomAlphanumeric(129))))
+                        .securityToken(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("target with too long token should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -291,7 +292,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .securityToken(RandomStringUtils.randomAlphanumeric(129))))
+                        .securityToken(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("target with too long token should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -341,7 +342,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId(RandomStringUtils.randomAlphanumeric(65))))
+                        .create(entityFactory.target().create().controllerId(RandomStringUtils.randomAlphanumeric(
+                                NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("target with too long controller id should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
