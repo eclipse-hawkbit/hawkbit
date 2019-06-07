@@ -550,7 +550,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String visibleMetadataOsValue = "withValue";
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = RandomUtils.nextBytes(artifactSize);
+        final byte[] random = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "test1", false, artifactSize));
         final Artifact artifactSignature = artifactManagement.create(new ArtifactUpload(
@@ -575,7 +575,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
-        saved = assignDistributionSet(ds2, saved).getAssignedEntity();
+        assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 

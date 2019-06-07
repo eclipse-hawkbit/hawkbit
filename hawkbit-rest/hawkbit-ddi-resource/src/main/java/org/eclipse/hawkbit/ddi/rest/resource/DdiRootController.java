@@ -313,12 +313,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return ResponseEntity.notFound().build();
     }
 
-    private HandlingType calculateDownloadType(final Action action) {
+    private static HandlingType calculateDownloadType(final Action action) {
         if (action.isDownloadOnly() || action.isForce()) {
             return HandlingType.FORCED;
-        } else {
-            return HandlingType.ATTEMPT;
         }
+        return HandlingType.ATTEMPT;
     }
 
     private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
