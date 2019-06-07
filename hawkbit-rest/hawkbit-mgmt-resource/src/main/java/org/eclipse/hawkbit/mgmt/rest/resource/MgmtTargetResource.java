@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
-import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;

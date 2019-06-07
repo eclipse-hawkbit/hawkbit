@@ -86,7 +86,7 @@ public interface TargetManagement {
      * @return the found number {@link Target}s
      * 
      * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
+     *             If no distribution set is found matching the given filter
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByFilters(FilterParams filter);

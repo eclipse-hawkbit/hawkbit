@@ -27,7 +27,7 @@ public class FilterParams implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Collection<TargetUpdateStatus> filterByStatus;
-    private final Boolean overdueState;
+    private final boolean overdueState;
     private final String filterBySearchText;
     private final boolean selectTargetWithNoTag;
     private final String[] filterByTagNames;
@@ -40,11 +40,6 @@ public class FilterParams implements Serializable {
     /**
      * Constructor for creating filter-objects.
      *
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     * @param filterByInstalledOrAssignedDistributionSetId
-     *            filter by installed or assigned
-     *            {@link DistributionSet#getId()}
      * @param filterByStatus
      *            if set, a filter is added for target states included by the
      *            collection
@@ -53,6 +48,9 @@ public class FilterParams implements Serializable {
      * @param filterBySearchText
      *            to find targets having the text anywhere in name or
      *            description.
+     * @param filterByInstalledOrAssignedDistributionSetId
+     *            filter by installed or assigned
+     *            {@link DistributionSet#getId()}
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned, if set,
      *            tag-filtering is enabled
@@ -143,10 +141,20 @@ public class FilterParams implements Serializable {
         return filterByTagNames;
     }
 
+    /**
+     * checks if there is a valid filter specified
+     * 
+     * @return true if there is no valid filter set
+     */
     public boolean isEmpty() {
         return isEmpty(filterByDistributionId);
     }
 
+    /**
+     * @param filterByDistributionId
+     *            {@link DistributionSet#getId()}
+     * @return true if there is no valid filter set
+     */
     public boolean isEmpty(Long filterByDistributionId) {
         return filterByStatus.isEmpty() //
                 || getFilterBySearchText().isPresent() //
