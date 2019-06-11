@@ -442,16 +442,14 @@ public class JpaTargetManagement implements TargetManagement {
         if (!filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
-        filterParams.getOverdueState().ifPresent(s -> //
-        specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())) //
-        );
+        filterParams.getOverdueState().ifPresent(
+                s -> specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())));
         filterParams.getFilterByDistributionId().ifPresent(id -> {
             throwEntityNotFoundIfDsDoesNotExist(id);
             specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(id));
         });
-        filterParams.getFilterBySearchText().ifPresent(text -> //
-        specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)) //
-        );
+        filterParams.getFilterBySearchText()
+                .ifPresent(text -> specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)));
 
         if (filterParams.hasTagsFilterActive()) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),

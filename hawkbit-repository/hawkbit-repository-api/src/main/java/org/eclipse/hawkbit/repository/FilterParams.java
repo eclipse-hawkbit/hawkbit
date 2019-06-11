@@ -151,16 +151,15 @@ public class FilterParams implements Serializable {
     }
 
     /**
-     * Checks if there is a valid filter set. The filter is empty if no filter criteria is set.
+     * Checks if there is a valid filter set. The filter is empty if no filter
+     * criteria is set.
      * 
      * @param filterByDistributionId
      *            {@link DistributionSet#getId()}
      * @return true if there is no valid filter set.
      */
     public boolean isEmpty(Long filterByDistributionId) {
-        return filterByStatus.isEmpty() //
-                || getFilterBySearchText().isPresent() //
-                || filterByDistributionId != null //
+        return filterByStatus.isEmpty() || getFilterBySearchText().isPresent() || filterByDistributionId != null
                 || !hasTagsFilterActive();
     }
 
