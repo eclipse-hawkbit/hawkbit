@@ -130,6 +130,7 @@
       <java.version>1.8</java.version>
       <spring.boot.version>2.1.3.RELEASE</spring.boot.version>
       <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+      <aws-java-sdk.version>1.11.392</aws-java-sdk.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
@@ -829,6 +830,27 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
+         </dependency>
+         <!-- Hawkbit Extensions -->
+         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws-java-sdk.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>${aws-java-sdk.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-kms</artifactId>
+            <version>${aws-java-sdk.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>jmespath-java</artifactId>
+            <version>${aws-java-sdk.version}</version>
          </dependency>
       </dependencies>
    </dependencyManagement>
