@@ -367,9 +367,10 @@ public class JpaTargetManagement implements TargetManagement {
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
     }
 
-    // Used by Auto-Assign checker: Identify new targets which have not an
-    // specific
-    // DS assigned...
+    /*
+     * (non-Javadoc) Used by Auto-Assign checker: Identify new targets which
+     * have not an specific DS assigned.
+     */
     @Override
     public Page<Target> findByNoActionWithDistributionSetExistsAndQuery(final Pageable pageable,
             final long distributionSetId, final String query) {
