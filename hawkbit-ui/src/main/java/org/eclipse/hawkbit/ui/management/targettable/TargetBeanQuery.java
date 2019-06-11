@@ -8,9 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-import org.eclipse.hawkbit.repository.*;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -72,6 +80,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             if (!StringUtils.isEmpty(searchText)) {
                 searchText = String.format("%%%s%%", searchText);
             }
+
             filter = new FilterParams(
                     (Collection<TargetUpdateStatus>) queryConfig.get(SPUIDefinitions.FILTER_BY_STATUS),
                     (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_OVERDUE_STATE), searchText,
