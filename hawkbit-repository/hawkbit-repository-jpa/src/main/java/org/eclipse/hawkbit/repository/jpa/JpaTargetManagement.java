@@ -363,7 +363,7 @@ public class JpaTargetManagement implements TargetManagement {
         // Maybe optimize in order to fetch only the IDs from the database:
         List<String> controllerIds = targetRepository
                 .findByAssignedDistributionSetId(Pageable.unpaged(), distributionSetId).stream()
-                .map(t -> t.getControllerId()).collect(Collectors.toList());
+                .map(Target::getControllerId).collect(Collectors.toList());
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
     }
 
@@ -392,7 +392,7 @@ public class JpaTargetManagement implements TargetManagement {
         // Maybe optimize in order to fetch only the IDs from the database:
         List<String> controllerIdList = targetRepository
                 .findByInstalledDistributionSetId(Pageable.unpaged(), distributionSetId).stream()
-                .map(t -> t.getControllerId()).collect(Collectors.toList());
+                .map(Target::getControllerId).collect(Collectors.toList());
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIdList), pageable);
     }
 
