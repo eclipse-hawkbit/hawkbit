@@ -541,7 +541,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
+    @Description("Test download-only (forced + skip) deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
     public void deploymentDownloadOnlyAction () throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
