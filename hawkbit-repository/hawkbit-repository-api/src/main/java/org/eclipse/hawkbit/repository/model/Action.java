@@ -150,7 +150,7 @@ public interface Action extends TenantAwareBaseEntity {
      * Status enum declaration!
      *
      */
-    public enum Status {
+    enum Status {
         /**
          * Action is finished successfully for this target.
          */
@@ -206,14 +206,14 @@ public interface Action extends TenantAwareBaseEntity {
          * Action has been downloaded by the target and waiting for update to
          * start.
          */
-        DOWNLOADED;
+        DOWNLOADED
     }
 
     /**
      * The action type for this action relation.
      *
      */
-    public enum ActionType {
+    enum ActionType {
         /**
          * Forced action execution. Target is advised to executed immediately.
          */
@@ -234,7 +234,7 @@ public interface Action extends TenantAwareBaseEntity {
         /**
          * Target is only advised to download, but not install
          */
-        DOWNLOAD_ONLY;
+        DOWNLOAD_ONLY
     }
 
     /**

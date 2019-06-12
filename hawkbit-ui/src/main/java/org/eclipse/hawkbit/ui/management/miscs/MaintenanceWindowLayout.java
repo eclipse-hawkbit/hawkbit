@@ -200,11 +200,9 @@ public class MaintenanceWindowLayout extends VerticalLayout {
      * Get list of all time zone offsets supported.
      */
     private static List<String> getAllTimeZones() {
-        final List<String> lst = ZoneId.getAvailableZoneIds().stream()
-                .map(id -> ZonedDateTime.now(ZoneId.of(id)).getOffset().getId().replace("Z", "+00:00")).distinct()
-                .collect(Collectors.toList());
-        lst.sort(null);
-        return lst;
+        return ZoneId.getAvailableZoneIds().stream()
+                .map(id -> ZonedDateTime.now(ZoneId.of(id)).getOffset().getId().replace("Z", "+00:00"))
+                .distinct().sorted().collect(Collectors.toList());
     }
 
     /**

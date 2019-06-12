@@ -106,7 +106,7 @@ public interface Rollout extends NamedEntity {
      * State machine for rollout.
      *
      */
-    public enum RolloutStatus {
+    enum RolloutStatus {
 
         /**
          * Rollouts is being created.
@@ -181,7 +181,7 @@ public interface Rollout extends NamedEntity {
          * @deprecated legacy status is not used anymore
          */
         @Deprecated
-        ERROR_STARTING;
+        ERROR_STARTING
     }
 
     /**

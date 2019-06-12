@@ -106,4 +106,8 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
         FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
     }
 
+    @Override
+    public boolean existsByTenantAndSha1(final String tenant, final String sha1) {
+        return getFile(tenant, sha1).exists();
+    }
 }

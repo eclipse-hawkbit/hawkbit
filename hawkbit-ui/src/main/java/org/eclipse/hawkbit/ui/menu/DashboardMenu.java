@@ -337,14 +337,9 @@ public final class DashboardMenu extends CustomComponent {
      *         with given viewname does not exists
      */
     public DashboardMenuItem getByViewName(final String viewName) {
-        final Optional<DashboardMenuItem> findFirst = dashboardVaadinViews.stream()
-                .filter(view -> view.getViewName().equals(viewName)).findAny();
 
-        if (!findFirst.isPresent()) {
-            return null;
-        }
-
-        return findFirst.get();
+        return dashboardVaadinViews.stream()
+                .filter(view -> view.getViewName().equals(viewName)).findAny().orElse(null);
     }
 
     /**
@@ -355,14 +350,8 @@ public final class DashboardMenu extends CustomComponent {
      * @return <code>true</code> = denied, <code>false</code> = accessible
      */
     public boolean isAccessDenied(final String viewName) {
-        final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
-        boolean accessDeined = Boolean.TRUE.booleanValue();
-        for (final DashboardMenuItem dashboardViewType : accessibleViews) {
-            if (dashboardViewType.getViewName().equals(viewName)) {
-                accessDeined = Boolean.FALSE.booleanValue();
-            }
-        }
-        return accessDeined;
+        return getAccessibleViews().stream()
+                .noneMatch(dashboardMenuItem -> dashboardMenuItem.getViewName().equals(viewName));
     }
 
     private class MenuToggleClickListenerMyClickListener implements ClickListener {

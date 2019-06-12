@@ -77,7 +77,7 @@ public interface ArtifactManagement {
      * @param artifactSha1Hash
      *            no longer needed
      * @param moduleId
-     *            the garbage colelction call is made for
+     *            the garbage collection call is made for
      * 
      * @return <code>true</code> if an binary was actually garbage collected
      */

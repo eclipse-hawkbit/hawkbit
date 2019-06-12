@@ -64,5 +64,5 @@ public enum DmfActionStatus {
     /**
      * Action has been downloaded for this target.
      */
-    DOWNLOADED;
+    DOWNLOADED
 }

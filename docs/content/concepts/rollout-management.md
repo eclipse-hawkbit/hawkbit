@@ -47,3 +47,26 @@ The cascading execution of the deployment groups is based on two thresholds that
 
 ### State Machine on Rollout Deployment Group
 ![](../../images/rolloutgroupstatediagram.png)
+
+## Multi-Assignments (beta)
+
+One of the main paradigms of Eclipse hawkBit is, that a Distribution Set represents the currently installed software of a device. Hence, a device can have only one Distribution Set assigned/installed at a time. With _Multi-Assignments_ enabled, this paradigm shifts. Multi-Assignments allows to assign multiple Distribution Sets to a device simultaneously, without cancelling each other. As a consequence, an operator can trigger multiple campaigns addressing the same devices in parallel. 
+
+### Consequences
+
+While this feature provides more flexibility to the user and enables new use-cases, there are also some consequences one should be aware of:
+
+**Critical**
+
+* This feature is in beta and may change unannounced.
+* For now, this feature is **opt-in only**. Once activated, it cannot be deactivated.
+* Currently, there is no mechanism to hint devices to process the actions in a certain order.
+
+**Minor**
+
+* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the oldest open action. 
+* All information regarding the currently assigned or installed Distribution Set does only respect the last assignment, as well as the last successfully installed Distribution set. This also affects:
+    * Pinning a target or Distribution Set in Deployment View.
+    * Statistics about installed or assigned Distribution Sets.
+* Auto close running actions, when a new Distribution Set is assigned (`repository.actions.autoclose.enabled`) is deactivated.
+* Marking a Distribution Set to be a *Required Migration Step* is deactivated.
