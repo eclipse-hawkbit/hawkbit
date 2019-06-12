@@ -341,9 +341,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with null controller id should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))))
+                .isThrownBy(() -> targetManagement.create(entityFactory.target().create()
+                        .controllerId(RandomStringUtils.randomAlphanumeric(Target.CONTROLLER_ID_MAX_SIZE + 1))))
                 .as("target with too long controller id should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
