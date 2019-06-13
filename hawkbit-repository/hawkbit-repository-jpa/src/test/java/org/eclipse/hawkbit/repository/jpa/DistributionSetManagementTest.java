@@ -254,20 +254,20 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
                         .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))))
-                .as("entity with too long name should not be created");
+                .as("entity with too long version should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
                 () -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a").version("")))
-                .as("entity with too long name should not be created");
+                .as("entity with too short version should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
                         .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))))
-                .as("entity with too long name should not be updated");
+                .as("entity with too long version should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
                 () -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId()).version("")))
-                .as("entity with too short name should not be updated");
+                .as("entity with too short version should not be updated");
 
     }
 
