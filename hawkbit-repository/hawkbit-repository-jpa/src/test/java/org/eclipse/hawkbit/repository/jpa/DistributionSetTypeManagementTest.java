@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
@@ -166,7 +167,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
+                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))))
                 .as("set with too long version should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -185,7 +186,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .version(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))))
+                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))))
                 .as("set with too long version should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
