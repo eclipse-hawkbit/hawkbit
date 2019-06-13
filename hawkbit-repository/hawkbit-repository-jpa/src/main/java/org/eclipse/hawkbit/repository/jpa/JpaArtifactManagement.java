@@ -244,7 +244,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Optional<AbstractDbArtifact> loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), sha1Hash));
+        return Optional.ofNullable(artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(), sha1Hash)
+                ? artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), sha1Hash)
+                : null);
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
