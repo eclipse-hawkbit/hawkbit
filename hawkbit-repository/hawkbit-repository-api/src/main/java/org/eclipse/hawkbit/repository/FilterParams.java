@@ -27,9 +27,9 @@ public class FilterParams implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Collection<TargetUpdateStatus> filterByStatus;
-    private final boolean overdueState;
+    private final Boolean overdueState;
     private final String filterBySearchText;
-    private final boolean selectTargetWithNoTag;
+    private final Boolean selectTargetWithNoTag;
     private final String[] filterByTagNames;
     private final Long filterByDistributionId;
 
