@@ -16,7 +16,7 @@ public interface NamedEntity extends TenantAwareBaseEntity {
     /**
      * Maximum length of name.
      */
-    int NAME_MAX_SIZE = 64;
+    int NAME_MAX_SIZE = 128;
 
     /**
      * Maximum length of description.
