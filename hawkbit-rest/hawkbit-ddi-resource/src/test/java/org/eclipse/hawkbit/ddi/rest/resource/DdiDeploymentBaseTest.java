@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
@@ -1108,8 +1109,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant()).content(missingResultInFeedback).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
-
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     @Test
@@ -1132,7 +1135,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/1080/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant()).content(missingFinishedResultInFeedback)
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     private class ActionStatusCondition extends Condition<ActionStatus> {

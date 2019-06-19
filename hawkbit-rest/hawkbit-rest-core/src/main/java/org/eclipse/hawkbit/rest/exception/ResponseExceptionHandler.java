@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
@@ -129,6 +130,23 @@ public class ResponseExceptionHandler {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /** Method for handling exception of type MethodArgumentNotValidException
+     * which is thrown in case the passed parameters are invalid or missing.
+     * Called by the Spring-Framework for exception handling.
+     *
+     * @param request
+     *            the Http request
+     * @param ex
+     *            the exception which occurred
+     * @return the entity to be responded containing the exception information
+     *         as entity.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionInfo> handleMethodArgumentNotValidException(final HttpServletRequest request,
+            final Exception ex){
+        return handleHttpMessageNotReadableException(request, ex);
     }
 
     /**
