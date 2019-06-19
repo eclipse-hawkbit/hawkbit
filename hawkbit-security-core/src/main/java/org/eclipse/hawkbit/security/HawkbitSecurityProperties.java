@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -90,12 +91,12 @@ public class HawkbitSecurityProperties {
         /**
          * Allowed origins for CORS.
          */
-        private List<String> allowedOrigins;
+        private List<String> allowedOrigins = Collections.singletonList("http://localhost");
 
         /**
          * Allowed headers for CORS.
          */
-        private List<String> allowedHeaders = Arrays.asList("*");
+        private List<String> allowedHeaders = Collections.singletonList("*");
 
         /**
          * Allowed methods for CORS.

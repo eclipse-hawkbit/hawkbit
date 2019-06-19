@@ -502,7 +502,7 @@ public class SecurityManagedConfiguration {
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
 
-            if (securityProperties.getCors().isEnabled() && !CollectionUtils.isEmpty(securityProperties.getCors().getAllowedOrigins())) {
+            if (securityProperties.getCors().isEnabled()) {
                 httpSec = httpSec.cors().and();
             }
 
