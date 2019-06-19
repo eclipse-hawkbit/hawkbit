@@ -115,7 +115,7 @@ public class HawkbitSecurityProperties {
             return allowedOrigins;
         }
 
-        public void setAllowedOrigins(List<String> allowedOrigins) {
+        public void setAllowedOrigins(final List<String> allowedOrigins) {
             this.allowedOrigins = allowedOrigins;
         }
 
@@ -123,7 +123,7 @@ public class HawkbitSecurityProperties {
             return allowedHeaders;
         }
 
-        public void setAllowedHeaders(List<String> allowedHeaders) {
+        public void setAllowedHeaders(final List<String> allowedHeaders) {
             this.allowedHeaders = allowedHeaders;
         }
 
@@ -131,7 +131,7 @@ public class HawkbitSecurityProperties {
             return allowedMethods;
         }
 
-        public void setAllowedMethods(List<String> allowedMethods) {
+        public void setAllowedMethods(final List<String> allowedMethods) {
             this.allowedMethods = allowedMethods;
         }
     }

@@ -541,14 +541,14 @@ public class SecurityManagedConfiguration {
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.cors", name = "enabled", matchIfMissing = false)
         CorsConfigurationSource corsConfigurationSource() {
-            CorsConfiguration restCorsConfiguration = new CorsConfiguration();
+            final CorsConfiguration restCorsConfiguration = new CorsConfiguration();
 
             restCorsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
             restCorsConfiguration.setAllowCredentials(true);
             restCorsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
             restCorsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
 
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
             source.registerCorsConfiguration("/rest/**", restCorsConfiguration);
 
             return source;

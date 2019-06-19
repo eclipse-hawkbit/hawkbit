@@ -32,7 +32,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true", 
+@SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
         "hawkbit.server.security.cors.allowedOrigins=http://test.origin,http://test.second.origin"})
 @Feature("Integration Test - Security")
 @Story("CORS")
@@ -41,7 +41,7 @@ public class CorsTest {
     @Autowired
     private WebApplicationContext context;
 
-    public MockMvc mvc;
+    private MockMvc mvc;
 
     @Before
     public void setup() {
