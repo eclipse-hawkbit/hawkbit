@@ -531,7 +531,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                        RandomStringUtils.random(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST))
+                        RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST))
                 .as("register target with too long controllerId should fail");
     }
 
@@ -561,7 +561,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 1)})
     public void findOrRegisterTargetIfItDoesNotExistDoesNotThrowExceptionBeforeMaxRetries() {
 
-        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
         final Target target = testdataFactory.createTarget();
 
@@ -586,7 +586,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             + "exception is rethrown and no further retries will be attempted")
     public void findOrRegisterTargetIfItDoesNotExistDoesntRetryWhenEntityAlreadyExistsException() {
 
-        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
         when(mockTargetRepository.findOne(any())).thenReturn(Optional.empty());
@@ -595,7 +595,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         try {
             controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST);
             fail("Expected an EntityAlreadyExistsException to be thrown!");
-        } catch (EntityAlreadyExistsException e) {
+        } catch (final EntityAlreadyExistsException e) {
             verify(mockTargetRepository, times(1)).findOne(any());
             verify(mockTargetRepository, times(1)).save(any());
         } finally {
@@ -609,7 +609,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             + "rethrown")
     public void recoverFindOrRegisterTargetIfItDoesNotExistIsNotInvokedForOtherExceptions() {
 
-        TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
         when(mockTargetRepository.findOne(any())).thenThrow(RuntimeException.class);
@@ -617,7 +617,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         try {
             controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST);
             fail("Expected a RuntimeException to be thrown!");
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             verify(mockTargetRepository, times(1)).findOne(any());
         } finally {
             // revert
