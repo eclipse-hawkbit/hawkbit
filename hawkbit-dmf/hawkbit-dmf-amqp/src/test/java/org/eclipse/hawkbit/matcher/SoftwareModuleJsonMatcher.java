@@ -57,50 +57,27 @@ public final class SoftwareModuleJsonMatcher {
             this.expectedModules = expectedModules;
         }
 
-        static boolean containsExactly(final Object actual, final List<DmfSoftwareModule> expected) {
+        boolean containsExactly(final Object actual) {
             if (actual == null) {
-                return expected == null;
+                return expectedModules == null;
             }
 
             @SuppressWarnings("unchecked")
             final Collection<SoftwareModule> modules = (Collection<SoftwareModule>) actual;
 
-            if (modules.size() != expected.size()) {
-                return false;
-            }
+            return expectedModules.stream().allMatch(e -> existsIn(e, modules));
+        }
 
-            for (final SoftwareModule repoSoftwareModule : modules) {
-                boolean containsElement = false;
-
-                for (final DmfSoftwareModule jsonSoftwareModule : expected) {
-                    if (!jsonSoftwareModule.getModuleId().equals(repoSoftwareModule.getId())) {
-                        continue;
-                    }
-                    containsElement = true;
-
-                    if (!jsonSoftwareModule.getModuleType().equals(repoSoftwareModule.getType().getKey())) {
-                        return false;
-                    }
-                    if (!jsonSoftwareModule.getModuleVersion().equals(repoSoftwareModule.getVersion())) {
-                        return false;
-                    }
-                    if (jsonSoftwareModule.getArtifacts().size() != repoSoftwareModule.getArtifacts().size()) {
-                        return false;
-                    }
-                }
-
-                if (!containsElement) {
-                    return false;
-                }
-
-            }
-
-            return true;
+        private static boolean existsIn(final DmfSoftwareModule module, final Collection<SoftwareModule> actual) {
+            return actual.stream()
+                    .anyMatch(e -> module.getModuleType().equals(e.getType().getKey())
+                            && module.getModuleVersion().equals(e.getVersion())
+                            && module.getArtifacts().size() == e.getArtifacts().size());
         }
 
         @Override
         public boolean matches(final Object actualValue) {
-            return containsExactly(actualValue, expectedModules);
+            return containsExactly(actualValue);
         }
 
         @Override

@@ -135,21 +135,21 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("Verify that a distribution assignment multiple times send cancel and assign events with right softwaremodules")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 3) })
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 2) })
     public void assignDistributionSetMultipleTimes() {
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        registerTargetAndAssignDistributionSet(distributionSet2.getId(), TargetUpdateStatus.PENDING,
-                getDistributionSet().getModules(), controllerId);
+        testdataFactory.addSoftwareModuleMetadata(distributionSet2);
+        assignDistributionSet(distributionSet2.getId(), controllerId);
+        assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
         assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);

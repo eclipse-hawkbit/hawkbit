@@ -196,8 +196,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     private boolean hasPendingCancellations(final Target target) {
-        return actionRepository.findByActiveAndTarget(ACTION_PAGE_REQUEST, target.getControllerId(), true).getContent()
-                .stream().anyMatch(action -> action.getStatus() == Status.CANCELING);
+        return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(target.getControllerId(),
+                Status.CANCELING);
     }
 
     /**
