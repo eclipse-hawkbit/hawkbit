@@ -39,7 +39,7 @@ An example configuration is given below.
     hawkbit.server.im.users[1].email=test@tester.com
     hawkbit.server.im.users[1].permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
 
-A permissions value of `ALL` will provide that user will all possible permissions. Passwords need to be specified with the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it is recommended to use a hash function designed for passwords such as *bcrypt*. See this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more information on password encoders in Spring Security.
+A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it is recommended to use a hash function designed for passwords such as *bcrypt*. See this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more information on password encoders in Spring Security.
 
 ### Delivered Permissions
 - READ_/UPDATE_/CREATE_/DELETE_TARGETS for:
@@ -60,7 +60,7 @@ A permissions value of `ALL` will provide that user will all possible permission
   - Permission to read the target security token. The security token is security concerned and should be protected.
 
 - DOWNLOAD_REPOSITORY_ARTIFACT
-  - Permission to download artifacts of an software module (Note: READ_REPOSITORY allows only to read the metadata).
+  - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
 
 - TENANT_CONFIGURATION
   - Permission to administrate the tenant settings.

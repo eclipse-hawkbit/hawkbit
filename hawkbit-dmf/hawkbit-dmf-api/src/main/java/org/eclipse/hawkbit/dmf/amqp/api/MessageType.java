@@ -37,6 +37,6 @@ public enum MessageType {
     /**
      * DMF receiver health check reponse type.
      */
-    PING_RESPONSE;
+    PING_RESPONSE
 
 }

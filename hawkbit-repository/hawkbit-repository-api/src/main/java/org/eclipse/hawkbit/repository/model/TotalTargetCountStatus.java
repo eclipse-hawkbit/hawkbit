@@ -147,7 +147,7 @@ public class TotalTargetCountStatus {
     // Exception squid:MethodCyclomaticComplexity - simple state conversion, not
     // really complex.
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private Status convertStatus(final Action.Status status){
+    private Status convertStatus(final Action.Status status) {
         switch (status) {
         case SCHEDULED:
             return Status.SCHEDULED;
@@ -164,10 +164,9 @@ public class TotalTargetCountStatus {
         case CANCELING:
             return Status.RUNNING;
         case DOWNLOADED:
-            return Action.ActionType.DOWNLOAD_ONLY.equals(rolloutType) ? Status.FINISHED : Status.RUNNING;
+            return Action.ActionType.DOWNLOAD_ONLY == rolloutType ? Status.FINISHED : Status.RUNNING;
         default:
             throw new IllegalArgumentException("State " + status + "is not valid");
         }
     }
-
 }

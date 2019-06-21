@@ -545,7 +545,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
 
-        if (!RolloutStatus.RUNNING.equals(rolloutStatus)) {
+        if (RolloutStatus.RUNNING != rolloutStatus) {
             return;
         }
 
@@ -562,13 +562,13 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 .getValue();
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
-        if (RolloutStatus.READY.equals(rolloutStatus)) {
+        if (RolloutStatus.READY == rolloutStatus) {
             rolloutManagement.start(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.started", rolloutName));
             return;
         }
 
-        if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
+        if (RolloutStatus.PAUSED == rolloutStatus) {
             rolloutManagement.resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.resumed", rolloutName));
         }
@@ -758,22 +758,22 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createTypeLabelAdapter(final ActionType actionType) {
-        if (ActionType.FORCED.equals(actionType)) {
+        if (ActionType.FORCED == actionType) {
             return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        if (ActionType.TIMEFORCED.equals(actionType)) {
+        if (ActionType.TIMEFORCED == actionType) {
             return new StatusFontIcon(FontAwesome.HISTORY, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        if (ActionType.SOFT.equals(actionType)) {
+        if (ActionType.SOFT == actionType) {
             return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        if (ActionType.DOWNLOAD_ONLY.equals(actionType)) {
+        if (ActionType.DOWNLOAD_ONLY == actionType) {
             return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);

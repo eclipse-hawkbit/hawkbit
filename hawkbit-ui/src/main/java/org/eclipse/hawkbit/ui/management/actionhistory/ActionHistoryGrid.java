@@ -261,17 +261,17 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private StatusFontIcon createTypeLabelMetadata(final Action action) {
-        if (ActionType.FORCED.equals(action.getActionType()) || ActionType.TIMEFORCED.equals(action.getActionType())) {
+        if (ActionType.FORCED == action.getActionType() || ActionType.TIMEFORCED == action.getActionType()) {
             return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        if (ActionType.SOFT.equals(action.getActionType())) {
+        if (ActionType.SOFT == action.getActionType()) {
             return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
         }
-        if (ActionType.DOWNLOAD_ONLY.equals(action.getActionType())) {
+        if (ActionType.DOWNLOAD_ONLY == action.getActionType()) {
             return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
                     i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
                     UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
@@ -282,7 +282,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     private StatusFontIcon createTimeForcedLabelMetadata(final Action action) {
         StatusFontIcon result = null;
 
-        if (ActionType.TIMEFORCED.equals(action.getActionType())) {
+        if (ActionType.TIMEFORCED == action.getActionType()) {
             final long currentTimeMillis = System.currentTimeMillis();
             String style;
             String title;
@@ -616,8 +616,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
             setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
             setColumnsSize(100.0, 150.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
             setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED,
-                    VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
+            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
+                    VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
             setColumnsSize(FIXED_PIX_MIN, 500.0, ProxyAction.PXY_ACTION_ROLLOUT_NAME);
         }
     }

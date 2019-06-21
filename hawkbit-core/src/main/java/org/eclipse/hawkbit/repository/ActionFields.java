@@ -39,7 +39,7 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
 
     @Override
     public Object convertValue(final ActionFields e, final String value) {
-        if (STATUS.equals(e)) {
+        if (STATUS == e) {
             return convertStatusValue(value);
         }
         return value;
@@ -58,7 +58,7 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
 
     @Override
     public String[] possibleValues(final ActionFields e) {
-        if (STATUS.equals(e)) {
+        if (STATUS == e) {
             return new String[] { ACTIVE, INACTIVE };
         }
         return new String[0];

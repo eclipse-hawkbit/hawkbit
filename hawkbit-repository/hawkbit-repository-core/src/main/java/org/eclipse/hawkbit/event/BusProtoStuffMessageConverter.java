@@ -122,7 +122,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     private static byte[] writeContent(final Object payload) {
-        final Class<? extends Object> serializeClass = payload.getClass();
+        final Class<?> serializeClass = payload.getClass();
         @SuppressWarnings("unchecked")
         final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
@@ -137,7 +137,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
         }
         @SuppressWarnings("unchecked")
         final Schema<Object> schema = (Schema<Object>) RuntimeSchema
-                .getSchema((Class<? extends Object>) EventType.class);
+                .getSchema((Class<?>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
         return ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
     }

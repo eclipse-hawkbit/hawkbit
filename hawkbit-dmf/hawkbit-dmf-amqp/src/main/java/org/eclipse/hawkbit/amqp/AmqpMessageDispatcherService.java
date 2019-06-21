@@ -254,8 +254,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @return {@link EventTopic} to use for message.
      */
     private static EventTopic getEventTypeForTarget(final ActionProperties action) {
-        return (Action.ActionType.DOWNLOAD_ONLY.equals(action.getActionType())
-                || !action.isMaintenanceWindowAvailable()) ? EventTopic.DOWNLOAD : EventTopic.DOWNLOAD_AND_INSTALL;
+        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
+                ? EventTopic.DOWNLOAD
+                : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
     /**

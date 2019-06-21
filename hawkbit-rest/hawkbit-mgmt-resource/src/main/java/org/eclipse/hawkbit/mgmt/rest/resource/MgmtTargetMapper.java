@@ -190,10 +190,11 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        return actionStatus.stream().map(status -> toResponse(status,
-                deploymentManagement.findMessagesByActionStatusId(
-                        PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
-                        .getContent()))
+        return actionStatus.stream()
+                .map(status -> toResponse(status,
+                        deploymentManagement.findMessagesByActionStatusId(
+                                PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
+                                .getContent()))
                 .collect(Collectors.toList());
     }
 
@@ -202,7 +203,7 @@ public final class MgmtTargetMapper {
 
         result.setActionId(action.getId());
         result.setType(getType(action));
-        if (ActionType.TIMEFORCED.equals(action.getActionType())) {
+        if (ActionType.TIMEFORCED == action.getActionType()) {
             result.setForceTime(action.getForcedTime());
         }
         result.setActionType(MgmtRestModelMapper.convertActionType(action.getActionType()));

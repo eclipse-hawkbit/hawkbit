@@ -95,10 +95,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         }
         final Optional<Target> foundTarget = systemSecurityContext.runAsSystemAsTenant(
                 () -> controllerManagement.get(securityToken.getTargetId()), securityToken.getTenant());
-        if (!foundTarget.isPresent()) {
-            return null;
-        }
-        return foundTarget.get().getControllerId();
+        return foundTarget.map(Target::getControllerId).orElse(null);
     }
 
     @Override
