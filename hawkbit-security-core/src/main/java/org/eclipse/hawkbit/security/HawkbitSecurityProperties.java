@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -19,6 +23,7 @@ public class HawkbitSecurityProperties {
 
     private final Clients clients = new Clients();
     private final Dos dos = new Dos();
+    private final Cors cors = new Cors();
 
     /**
      * Content Security policy Header for Manager UI.
@@ -66,6 +71,69 @@ public class HawkbitSecurityProperties {
 
     public Clients getClients() {
         return clients;
+    }
+
+    public Cors getCors() {
+        return cors;
+    }
+
+    /**
+     * Security configuration related to CORS.
+     *
+     */
+    public static class Cors {
+
+        /**
+         * Flag to enable CORS.
+         */
+        private boolean enabled = false;
+
+        /**
+         * Allowed origins for CORS.
+         */
+        private List<String> allowedOrigins = Collections.singletonList("http://localhost");
+
+        /**
+         * Allowed headers for CORS.
+         */
+        private List<String> allowedHeaders = Collections.singletonList("*");
+
+        /**
+         * Allowed methods for CORS.
+         */
+        private List<String> allowedMethods = Arrays.asList("DELETE", "GET", "POST", "PATCH", "PUT");
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public List<String> getAllowedOrigins() {
+            return allowedOrigins;
+        }
+
+        public void setAllowedOrigins(final List<String> allowedOrigins) {
+            this.allowedOrigins = allowedOrigins;
+        }
+
+        public List<String> getAllowedHeaders() {
+            return allowedHeaders;
+        }
+
+        public void setAllowedHeaders(final List<String> allowedHeaders) {
+            this.allowedHeaders = allowedHeaders;
+        }
+
+        public List<String> getAllowedMethods() {
+            return allowedMethods;
+        }
+
+        public void setAllowedMethods(final List<String> allowedMethods) {
+            this.allowedMethods = allowedMethods;
+        }
     }
 
     /**
