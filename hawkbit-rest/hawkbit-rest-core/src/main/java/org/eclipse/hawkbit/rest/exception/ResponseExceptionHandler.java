@@ -113,9 +113,10 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type HttpMessageNotReadableException
-     * which is thrown in case the request body is not well formed and cannot be
-     * deserialized. Called by the Spring-Framework for exception handling.
+     * Method for handling exception of type HttpMessageNotReadableException and
+     * MethodArgumentNotValidException which are thrown in case the request body is
+     * not well formed (e.g. syntax failures, missing/invalid parameters) and cannot
+     * be deserialized. Called by the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
@@ -124,29 +125,12 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionInfo> handleHttpMessageNotReadableException(final HttpServletRequest request,
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    /** Method for handling exception of type MethodArgumentNotValidException
-     * which is thrown in case the passed parameters are invalid or missing.
-     * Called by the Spring-Framework for exception handling.
-     *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionInfo> handleMethodArgumentNotValidException(final HttpServletRequest request,
-            final Exception ex){
-        return handleHttpMessageNotReadableException(request, ex);
     }
 
     /**
