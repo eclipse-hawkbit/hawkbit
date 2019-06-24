@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.test.util.MsSqlTestDatabase;
+import org.eclipse.hawkbit.repository.test.util.MySqlTestDatabase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,12 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -34,6 +38,8 @@ import io.qameta.allure.Story;
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
         "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + "," + CorsTest.ALLOWED_ORIGIN_SECOND})
+@TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class }, 
+        mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest {
