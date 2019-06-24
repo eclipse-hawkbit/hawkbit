@@ -82,11 +82,6 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.mariadb.jdbc</groupId>
-         <artifactId>mariadb-java-client</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-test</artifactId>
          <version>${project.version}</version>
