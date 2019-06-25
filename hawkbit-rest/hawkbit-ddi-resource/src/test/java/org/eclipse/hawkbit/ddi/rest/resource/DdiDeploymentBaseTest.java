@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
@@ -773,7 +774,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String missingResultInFeedback = JsonBuilder.missingResultInFeedback(action.getId().toString(), "closed",
                 "test");
         postFeedback(MediaType.APPLICATION_JSON, "1080", action.getId(), missingResultInFeedback,
-                status().isBadRequest());
+                status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     @Test
@@ -794,7 +797,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String missingFinishedResultInFeedback = JsonBuilder
                 .missingFinishedResultInFeedback(action.getId().toString(), "closed", "test");
         postFeedback(MediaType.APPLICATION_JSON, "1080", action.getId(), missingFinishedResultInFeedback,
-                status().isBadRequest());
+                status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     private void assertActionStatusCount(final int actionStatusCount, final int minActionStatusCountInPage) {
@@ -829,14 +834,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(content().contentTypeCompatibleWith(mediaType));
     }
 
-    private void postFeedback(final MediaType mediaType, final String controllerId, final Long id, final String content,
+    private ResultActions postFeedback(final MediaType mediaType, final String controllerId, final Long id, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        postFeedback(mediaType, controllerId, id, content.getBytes(), statusMatcher);
+        return postFeedback(mediaType, controllerId, id, content.getBytes(), statusMatcher);
     }
 
-    private void postFeedback(final MediaType mediaType, final String controllerId, final Long id, final byte[] content,
+    private ResultActions postFeedback(final MediaType mediaType, final String controllerId, final Long id, final byte[] content,
             final ResultMatcher statusMatcher) throws Exception {
-        mvc.perform(post(DEPLOYMENT_BASE + id + "/feedback", tenantAware.getCurrentTenant(), controllerId)
+        return mvc.perform(post(DEPLOYMENT_BASE + id + "/feedback", tenantAware.getCurrentTenant(), controllerId)
                 .content(content).contentType(mediaType).accept(mediaType)).andDo(MockMvcResultPrinter.print())
                 .andExpect(statusMatcher);
     }

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
@@ -112,9 +113,10 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type HttpMessageNotReadableException
-     * which is thrown in case the request body is not well formed and cannot be
-     * deserialized. Called by the Spring-Framework for exception handling.
+     * Method for handling exception of type HttpMessageNotReadableException and
+     * MethodArgumentNotValidException which are thrown in case the request body is
+     * not well formed (e.g. syntax failures, missing/invalid parameters) and cannot
+     * be deserialized. Called by the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
@@ -123,8 +125,8 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionInfo> handleHttpMessageNotReadableException(final HttpServletRequest request,
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
