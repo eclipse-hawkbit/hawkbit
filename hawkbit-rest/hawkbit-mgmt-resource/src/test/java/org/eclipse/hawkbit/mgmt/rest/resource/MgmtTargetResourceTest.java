@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -722,7 +723,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
     public void createTargetWithInvalidPropertyBadRequest() throws Exception {
         final Target test1 = entityFactory.target().create().controllerId("id1")
-                .name(RandomStringUtils.randomAlphanumeric(80)).build();
+                .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
 
         final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
                 .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))

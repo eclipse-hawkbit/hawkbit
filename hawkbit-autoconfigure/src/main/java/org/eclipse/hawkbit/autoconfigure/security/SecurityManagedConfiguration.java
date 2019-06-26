@@ -84,7 +84,11 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
@@ -450,6 +454,7 @@ public class SecurityManagedConfiguration {
      * Security configuration for the REST management API.
      */
     @Configuration
+    @EnableWebSecurity
     @Order(350)
     @ConditionalOnClass(MgmtApiConfiguration.class)
     public static class RestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
@@ -496,6 +501,11 @@ public class SecurityManagedConfiguration {
             basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
+
+            if (securityProperties.getCors().isEnabled()) {
+                httpSec = httpSec.cors().and();
+            }
+
             if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
@@ -526,6 +536,22 @@ public class SecurityManagedConfiguration {
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
             httpSec.anonymous().disable();
             httpSec.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.cors", name = "enabled", matchIfMissing = false)
+        CorsConfigurationSource corsConfigurationSource() {
+            final CorsConfiguration restCorsConfiguration = new CorsConfiguration();
+
+            restCorsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
+            restCorsConfiguration.setAllowCredentials(true);
+            restCorsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
+            restCorsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
+
+            final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/rest/**", restCorsConfiguration);
+
+            return source;
         }
     }
 

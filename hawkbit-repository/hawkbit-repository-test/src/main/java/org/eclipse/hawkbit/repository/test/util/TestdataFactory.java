@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -490,6 +491,29 @@ public class TestdataFactory {
         final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));
         return artifactManagement
                 .create(new ArtifactUpload(stubInputStream, moduleId, filename, false, artifactData.length()));
+    }
+
+    /**
+     * Create an {@link Artifact} for given {@link SoftwareModule} with a small
+     * text payload.
+     *
+     * @param artifactData
+     *            the {@link Artifact} Inputstream
+     *
+     * @param moduleId
+     *            the {@link Artifact} belongs to
+     *
+     * @param filename
+     *            that was provided during upload.
+     *
+     * @param fileSize
+     *            the file size
+     *
+     * @return {@link Artifact} entity.
+     */
+    public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename, final int fileSize) {
+        return artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
     }
 
     /**

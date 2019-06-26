@@ -27,11 +27,7 @@ CREATE TABLE sp_action
      maintenance_duration       VARCHAR(40), 
      maintenance_time_zone      VARCHAR(40), 
      PRIMARY KEY (id) 
-  ); 
-
-  ALTER TABLE sp_action ADD column maintenance_cron_schedule VARCHAR(40);
-ALTER TABLE sp_action ADD column maintenance_duration VARCHAR(40);
-ALTER TABLE sp_action ADD column maintenance_time_zone VARCHAR(40);
+  );
 
 CREATE INDEX sp_idx_action_01 
   ON sp_action (tenant, distribution_set); 

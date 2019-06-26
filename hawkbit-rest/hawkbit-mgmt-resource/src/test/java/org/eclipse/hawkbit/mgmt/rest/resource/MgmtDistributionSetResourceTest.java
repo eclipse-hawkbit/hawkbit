@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -989,7 +990,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(status().isBadRequest());
 
         final DistributionSet toLongName = testdataFactory
-                .generateDistributionSet(RandomStringUtils.randomAlphanumeric(80));
+                .generateDistributionSet(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1));
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Arrays.asList(toLongName)))
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

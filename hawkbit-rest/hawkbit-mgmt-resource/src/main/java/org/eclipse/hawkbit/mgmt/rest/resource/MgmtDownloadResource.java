@@ -64,7 +64,9 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             AbstractDbArtifact artifact = null;
 
             if (DownloadType.BY_SHA1 == artifactCache.getDownloadType()) {
-                artifact = artifactRepository.getArtifactBySha1(tenant, artifactCache.getId());
+                artifact = artifactRepository.existsByTenantAndSha1(tenant, artifactCache.getId())
+                        ? artifactRepository.getArtifactBySha1(tenant, artifactCache.getId())
+                        : null;
             } else {
                 LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
             }
