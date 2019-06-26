@@ -210,8 +210,8 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
-        List<SoftwareModuleType> smTypes = distributionSet.getModules().stream().map(SoftwareModule::getType)
-                .collect(Collectors.toList());
+        final List<SoftwareModuleType> smTypes = distributionSet.getModules().stream().map(SoftwareModule::getType)
+                .distinct().collect(Collectors.toList());
         if (smTypes.isEmpty()) {
             return false;
         }

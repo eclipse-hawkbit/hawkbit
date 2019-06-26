@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
@@ -345,4 +347,18 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThat(distributionSetTypeManagement.getByKey("softdeleted").get().isDeleted()).isEqualTo(true);
     }
 
+    @Test
+    @Description("Tests the function checkComplete: when no SoftwareModules are assigned to the Distribution then the test must fail ")
+    public void shouldFailWhenDistributionSetHaveNoSoftwareModulesAssigned() {
+
+        final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("newType").name("new Type"));
+
+        final List<SoftwareModule> softwareModules = new ArrayList<>();
+
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("DistributionOne", "3.1.2",
+                jpaDistributionSetType, softwareModules);
+
+        assertThat(jpaDistributionSetType.checkComplete(distributionSet)).isFalse();
+    }
 }
