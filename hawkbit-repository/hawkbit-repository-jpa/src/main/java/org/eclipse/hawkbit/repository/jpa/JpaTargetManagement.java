@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -431,7 +431,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long countByFilters(final FilterParams filter) {
         List<Specification<JpaTarget>> specifications = buildSpecificationList(filter);
-        if (CollectionUtils.isEmpty(specifications)) {
+        if (specifications.isEmpty()) {
             return targetRepository.count();
         }
         return targetRepository.count(SpecificationsBuilder.combineWithAnd(specifications));

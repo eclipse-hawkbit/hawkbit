@@ -23,6 +23,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Collection;
 
+/**
+ * This interface is the central point which is responsible to execute queries
+ * and return update-targets for Hawkbit.
+ *
+ * By design it should be as minimal as possible in order to make it easy to
+ * plug-in different sources of {@linkplain Target Targets}.
+ * 
+ * For any use-case specific query use the query-/count-methods which limit the
+ * result to a predefined set of IDs.
+ */
 public interface TargetQueryExecutionManagement {
     /**
      * Retrieves all targets.

@@ -27,10 +27,11 @@ public class RolloutServiceContext {
     public final QuotaManagement quotaManagement;
     public final TenantConfigurationManagement tenantConfigManagement;
 
-    public RolloutServiceContext(RolloutManagement rolloutManagement, RolloutGroupManagement rolloutGroupManagement,
-            TargetManagement targetManagement, TargetQueryExecutionManagement targetQueryExecutionManagement,
-            EntityFactory entityFactory, TargetFilterQueryManagement targetFilterQueryManagement,
-            QuotaManagement quotaManagement, TenantConfigurationManagement tenantConfigManagement) {
+    public RolloutServiceContext(final RolloutManagement rolloutManagement,
+            final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement, final EntityFactory entityFactory,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final QuotaManagement quotaManagement,
+            final TenantConfigurationManagement tenantConfigManagement) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.targetManagement = targetManagement;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -153,9 +153,10 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         statusIconMap.put(RolloutStatus.DELETING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_RED));
     }
 
-    public RolloutListGrid(VaadinMessageSource i18n, UIEventBus eventBus, UINotification uiNotification,
-            RolloutUIState rolloutUIState, SpPermissionChecker permissionChecker, UiProperties uiProperties,
-            RolloutServiceContext serviceContext) {
+    public RolloutListGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final UINotification uiNotification, final RolloutUIState rolloutUIState,
+            final SpPermissionChecker permissionChecker, final UiProperties uiProperties,
+            final RolloutServiceContext serviceContext) {
         super(i18n, eventBus, permissionChecker);
         this.serviceContext = serviceContext;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(uiNotification, uiProperties, i18n, eventBus,
@@ -447,8 +448,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Generator class responsible to retrieve a Rollout from the grid data in
-     * order to generate a virtual property.
+     * Generator class responsible to retrieve a Rollout from the grid data in order
+     * to generate a virtual property.
      */
     class GenericPropertyValueGenerator extends PropertyValueGenerator<RolloutStatus> {
         private static final long serialVersionUID = 1L;
@@ -505,8 +506,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
          * Constructor that sets the appropriate adapter.
          *
          * @param adapter
-         *            adapts <code>RolloutStatus</code> to
-         *            <code>StatusFontIcon</code>
+         *            adapts <code>RolloutStatus</code> to <code>StatusFontIcon</code>
          */
         public RolloutGridButtonConverter(final GridButtonAdapter<RolloutStatus> adapter) {
             addAdapter(adapter);
@@ -772,8 +772,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     /**
-     * Converter to convert {@link TotalTargetCountStatus} to formatted string
-     * with status and count details.
+     * Converter to convert {@link TotalTargetCountStatus} to formatted string with
+     * status and count details.
      *
      */
     class TotalTargetCountStatusConverter implements Converter<String, TotalTargetCountStatus> {
