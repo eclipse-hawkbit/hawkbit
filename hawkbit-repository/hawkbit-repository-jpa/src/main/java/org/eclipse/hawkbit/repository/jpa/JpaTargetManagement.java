@@ -364,8 +364,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     /*
-     * (non-Javadoc) Used by Auto-Assign checker: Identify new targets which
-     * have not an specific DS assigned.
+     * (non-Javadoc) Used by Auto-Assign checker: Identify new targets which have
+     * not an specific DS assigned.
      */
     @Override
     public Page<Target> findByNoActionWithDistributionSetExistsAndQuery(final Pageable pageable,
@@ -436,8 +436,9 @@ public class JpaTargetManagement implements TargetManagement {
         if (!filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
-        filterParams.getOverdueState().filter(state -> state == true).ifPresent(
-                s -> specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp())));
+        if (filterParams.getOverdueState()) {
+            specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
+        }
         filterParams.getFilterByDistributionId().ifPresent(id -> {
             throwEntityNotFoundIfDsDoesNotExist(id);
             specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(id));
@@ -639,7 +640,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public long countByQueryAndNotInRolloutGroups(final Collection<Long> groupIds, final String query) {
         // TODO: Refactor assignment of targets to rollout-groups in order to
         // optimize this queries
@@ -702,6 +702,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Target> findByQueryAndTag(final Pageable pageable, final String query, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
         Set<String> targetIds = targetRepository.findControllerIdsByTag(tagId);

@@ -26,7 +26,7 @@ public class FilterParams implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Collection<TargetUpdateStatus> filterByStatus;
-    private final Boolean overdueState;
+    private final boolean overdueState;
     private final String filterBySearchText;
     private final Boolean selectTargetWithNoTag;
     private final String[] filterByTagNames;
@@ -61,10 +61,10 @@ public class FilterParams implements Serializable {
             final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
             final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
         this.filterByStatus = (filterByStatus == null) ? Collections.emptyList() : filterByStatus;
-        this.overdueState = overdueState;
+        this.overdueState = Boolean.TRUE.equals(overdueState);
         this.filterBySearchText = filterBySearchText;
         this.filterByDistributionId = filterByInstalledOrAssignedDistributionSetId;
-        this.selectTargetWithNoTag = (selectTargetWithNoTag == null) ? false : selectTargetWithNoTag;
+        this.selectTargetWithNoTag = Boolean.TRUE.equals(selectTargetWithNoTag);
         this.filterByTagNames = (filterByTagNames == null) ? new String[0] : filterByTagNames;
     }
 
@@ -104,8 +104,8 @@ public class FilterParams implements Serializable {
      *
      * @return flag for overdue filter activation
      */
-    public Optional<Boolean> getOverdueState() {
-        return Optional.ofNullable(overdueState);
+    public boolean getOverdueState() {
+        return overdueState;
     }
 
     /**
