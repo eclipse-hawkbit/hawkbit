@@ -8,18 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -33,13 +27,17 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.Test;
 import org.springframework.data.domain.Slice;
 
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Ints;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Feature("Component Tests - Repository")
 @Story("Target Management Searches")
@@ -672,6 +670,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, assignedSet.getId()))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
                 .as("and that means the following expected amount").hasSize(10);
+
+        assertThat(targetRepository.findControllerIdsByAssignedDistributionSet(assignedSet.getId()))
+                .as("Should find the assinged targets")
+                .containsAll(assignedtargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
 
     }
 

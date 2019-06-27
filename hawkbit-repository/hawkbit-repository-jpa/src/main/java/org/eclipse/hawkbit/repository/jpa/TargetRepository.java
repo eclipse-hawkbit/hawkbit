@@ -8,14 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -30,6 +22,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * {@link Target} repository.
@@ -177,6 +176,14 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByInstalledDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * Select controllerIds which do have a ceratain {@linkplain DistributionSet} installed
+     * @param dsId the id of a {@linkplain DistributionSet}
+     * @return controller-ids which do have the specified {@linkplain DistributionSet} installed.
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget t where t.installedDistributionSet.id = :dsId")
+    Set<String> findControllerIdsByInstalledDistributionSet(Long dsId);
+
+    /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
      * 
      * @param pageable
@@ -187,6 +194,14 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return page of found targets
      */
     Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
+
+    /**
+     * Select controllerIds which do have a ceratain {@linkplain DistributionSet} assigned
+     * @param dsId the id of the {@linkplain DistributionSet}
+     * @return a list of controller-ids which do have the specified {@linkplain DistributionSet} assigned.
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget t where t.assignedDistributionSet.id = :dsId")
+    Set<String> findControllerIdsByAssignedDistributionSet(Long dsId);
 
     /**
      * Finds all target-controller IDs that have a {@link DistributionSet}

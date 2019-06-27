@@ -8,25 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -82,6 +63,24 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications.hasControllerId;
 import static org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications.isNotInRolloutGroups;
@@ -360,10 +359,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByAssignedDistributionSetAndQuery(final Pageable pageable, final long distributionSetId,
             final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
-        // Maybe optimize in order to fetch only the IDs from the database:
-        List<String> controllerIds = targetRepository
-                .findByAssignedDistributionSetId(Pageable.unpaged(), distributionSetId).stream()
-                .map(Target::getControllerId).collect(Collectors.toList());
+        Set<String> controllerIds = targetRepository.findControllerIdsByAssignedDistributionSet(distributionSetId);
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
     }
 
@@ -390,10 +386,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByInstalledDistributionSetAndQuery(final Pageable pageable, final long distributionSetId,
             final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
-        // Maybe optimize in order to fetch only the IDs from the database:
-        List<String> controllerIdList = targetRepository
-                .findByInstalledDistributionSetId(Pageable.unpaged(), distributionSetId).stream()
-                .map(Target::getControllerId).collect(Collectors.toList());
+        Set<String> controllerIdList = targetRepository.findControllerIdsByInstalledDistributionSet(distributionSetId);
         return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIdList), pageable);
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,15 +8,14 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
-import javax.validation.constraints.NotNull;
-
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 
 /**
  * Encapsulates a set of filters that may be specified (optionally). Properties
