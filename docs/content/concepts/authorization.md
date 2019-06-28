@@ -9,7 +9,7 @@ Authorization is handled separately for _Direct Device Integration (DDI) API_ an
 
 However, keep in mind that hawkBit does not offer an off the shelf authentication provider to leverage these permissions and the underlying multi user/tenant capabilities of hawkBit. Check out [Spring security documentation](http://projects.spring.io/spring-security/) for further information. In hawkBit [SecurityAutoConfiguration](https://github.com/eclipse/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java) is a good starting point for integration.
 
-The default implementation is single user/tenant with basic auth and the logged in user is provided with all permissions.
+The default implementation is single user/tenant with basic auth and the logged in user is provided with all permissions. Additionally, the application properties may be configured for multiple static users; see [Multiple Users](#multiple-users) for details.
 
 ## DDI API
 An authenticated target is permitted to:
@@ -20,6 +20,26 @@ An authenticated target is permitted to:
 A target might be permitted to download artifacts without authentication (if enabled, see above). Only the download can be permitted to disable the authentication. This can be used in scenarios where the artifacts itself are e.g. signed and secured.  
 
 ## Management API and UI
+
+### Multiple Users
+hawkBit optionally supports configuring multiple static users through the application properties. In this case, the user and password Spring security properties are ignored.
+An example configuration is given below.
+
+    hawkbit.server.im.users[0].username=admin
+    hawkbit.server.im.users[0].password={noop}admin
+    hawkbit.server.im.users[0].firstname=Test
+    hawkbit.server.im.users[0].lastname=Admin
+    hawkbit.server.im.users[0].email=admin@test.de
+    hawkbit.server.im.users[0].permissions=ALL
+    
+    hawkbit.server.im.users[1].username=test
+    hawkbit.server.im.users[1].password={noop}test
+    hawkbit.server.im.users[1].firstname=Test
+    hawkbit.server.im.users[1].lastname=Tester
+    hawkbit.server.im.users[1].email=test@tester.com
+    hawkbit.server.im.users[1].permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
+
+A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it is recommended to use a hash function designed for passwords such as *bcrypt*. See this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more information on password encoders in Spring Security.
 
 ### Delivered Permissions
 - READ_/UPDATE_/CREATE_/DELETE_TARGETS for:
@@ -40,7 +60,7 @@ A target might be permitted to download artifacts without authentication (if ena
   - Permission to read the target security token. The security token is security concerned and should be protected.
 
 - DOWNLOAD_REPOSITORY_ARTIFACT
-  - Permission to download artifacts of an software module (Note: READ_REPOSITORY allows only to read the metadata).
+  - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
 
 - TENANT_CONFIGURATION
   - Permission to administrate the tenant settings.

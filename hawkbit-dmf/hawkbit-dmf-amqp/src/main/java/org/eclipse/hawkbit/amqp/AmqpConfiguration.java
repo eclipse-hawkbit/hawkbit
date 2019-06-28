@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -240,9 +241,11 @@ public class AmqpConfiguration {
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory);
+                entityFactory, systemSecurityContext, tenantConfigurationManagement);
     }
 
     /**
@@ -319,10 +322,10 @@ public class AmqpConfiguration {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement) {
+            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement,
-                softwareModuleManagement);
+                softwareModuleManagement, deploymentManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

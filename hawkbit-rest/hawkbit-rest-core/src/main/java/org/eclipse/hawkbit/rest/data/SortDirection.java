@@ -35,7 +35,7 @@ public enum SortDirection {
     public static SortDirection getByName(final String name) {
         try {
             return valueOf(name.toUpperCase());
-        } catch (final IllegalArgumentException ex) {// NOSONAR
+        } catch (final IllegalArgumentException ex) {
             throw new SortParameterUnsupportedDirectionException();
         }
     }

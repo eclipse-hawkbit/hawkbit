@@ -227,7 +227,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             if (editRolloutEnabled) {
                 editRollout();
-                if (rollout.getStatus().equals(Rollout.RolloutStatus.WAITING_FOR_APPROVAL)) {
+                if (rollout.getStatus() == Rollout.RolloutStatus.WAITING_FOR_APPROVAL) {
                     rolloutManagement.approveOrDeny(rollout.getId(),
                             (Rollout.ApprovalDecision) approveButtonsGroup.getValue(), approvalRemarkField.getValue());
                     eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
@@ -274,10 +274,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
                     .actionType(getActionType()).forcedTime(getForcedTimeStamp());
 
-            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutUpdate.startAt(System.currentTimeMillis());
             }
-            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED == getAutoStartOption()) {
                 rolloutUpdate.startAt(getScheduledStartTime());
             }
 
@@ -330,10 +330,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
                     .actionType(getActionType()).forcedTime(getForcedTimeStamp());
 
-            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START.equals(getAutoStartOption())) {
+            if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutCreate.startAt(System.currentTimeMillis());
             }
-            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())) {
+            if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED == getAutoStartOption()) {
                 rolloutCreate.startAt(getScheduledStartTime());
             }
 
@@ -348,14 +348,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         }
 
         private long getForcedTimeStamp() {
-            return ActionTypeOption.AUTO_FORCED
-                    .equals(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue())
-                            ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
-                            : RepositoryModelConstants.NO_FORCE_TIME;
+            return ActionTypeOption.AUTO_FORCED == actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue()
+                    ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
+                    : RepositoryModelConstants.NO_FORCE_TIME;
         }
 
         private Long getScheduledStartTime() {
-            return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED.equals(getAutoStartOption())
+            return AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED == getAutoStartOption()
                     ? autoStartOptionGroupLayout.getStartAtDateField().getValue().getTime()
                     : null;
         }
@@ -392,8 +391,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private CommonDialogWindow createWindow() {
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .caption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.rollout"))).content(this)
-                .id(UIComponentIdProvider.ROLLOUT_POPUP_ID)
-                .layout(this).i18n(i18n).helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
+                .id(UIComponentIdProvider.ROLLOUT_POPUP_ID).layout(this).i18n(i18n)
+                .helpLink(uiProperties.getLinks().getDocumentation().getRolloutView())
                 .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
     }
 

@@ -35,7 +35,6 @@ import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.integration.json.JsonPathUtils;
-import org.springframework.test.util.JsonPathExpectationsHelper;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -52,13 +51,13 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
     @Description("Tests that the cancel action resource can be used with CBOR.")
     public void cancelActionCbor() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        final Target savedTarget = testdataFactory.createTarget();
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        testdataFactory.createTarget();
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         // check that we can get the cancel action as CBOR
-        byte[] result = mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
+        final byte[] result = mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                 + cancelAction.getId(), tenantAware.getCurrentTenant()).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR_UTF8))
@@ -81,7 +80,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0);
+        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActionIds().get(0);
 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -134,7 +133,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActions().get(0);
+        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getActionIds().get(0);
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
@@ -250,7 +249,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget(targetid);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
-        final Long actionId = assignDistributionSet(ds, toAssign).getActions().get(0);
+        final Long actionId = assignDistributionSet(ds, toAssign).getActionIds().get(0);
 
         return deploymentManagement.cancelAction(actionId);
     }
@@ -263,7 +262,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
 
         // cancel action manually
@@ -338,11 +337,11 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
-        final Long actionId2 = assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        final Long actionId2 = assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
-        final Long actionId3 = assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        final Long actionId3 = assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
 
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
@@ -452,7 +451,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActions()
+        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID).getActionIds()
                 .get(0);
 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);

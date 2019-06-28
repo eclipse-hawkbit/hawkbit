@@ -62,6 +62,8 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
             private static final long serialVersionUID = 1L;
 
             @Override
+            // Vaadin is returning object, so "==" might not work
+            @SuppressWarnings("squid:S4551")
             public void valueChange(final ValueChangeEvent event) {
                 if (event.getProperty().getValue().equals(AutoStartOption.SCHEDULED)) {
                     startAtDateField.setEnabled(true);
@@ -147,7 +149,7 @@ public class AutoStartOptionGroupLayout extends HorizontalLayout {
      * Rollout start options
      */
     enum AutoStartOption {
-        MANUAL, AUTO_START, SCHEDULED;
+        MANUAL, AUTO_START, SCHEDULED
 
     }
 

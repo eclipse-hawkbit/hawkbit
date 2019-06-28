@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -20,17 +18,19 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
-import org.eclipse.hawkbit.ui.common.entity.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout;
+import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.google.common.collect.Maps;
 import com.vaadin.data.Property;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -59,8 +58,12 @@ public final class TargetAssignmentOperations {
     }
 
     /**
-     * Save all target(s)-distributionSet assignments
+     * Save the given distribution set assignments
      * 
+     * @param targets
+     *            to assign the given distribution sets to
+     * @param distributionSets
+     *            to assign to the given targets
      * @param managementUIState
      *            the management UI state
      * @param actionTypeOptionGroupLayout
@@ -78,79 +81,64 @@ public final class TargetAssignmentOperations {
      * @param eventSource
      *            the source object for sending potential events
      */
-    public static void saveAllAssignments(final ManagementUIState managementUIState,
+    public static void saveAllAssignments(final List<Target> targets, final List<DistributionSet> distributionSets,
+            final ManagementUIState managementUIState,
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
             final UINotification notification, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final Object eventSource) {
-        final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
-        Long distId;
-        List<TargetIdName> targetIdSetList;
-        List<TargetIdName> tempIdList;
-        final ActionType actionType = ((AbstractActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()).getActionType();
-        final long forcedTimeStamp = actionTypeOptionGroupLayout.getActionTypeOptionGroup()
-                .getValue() == AbstractActionTypeOptionGroupLayout.ActionTypeOption.AUTO_FORCED
+
+        final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()).getActionType();
+
+        final long forcedTimeStamp = (((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .getValue()) == ActionTypeOption.AUTO_FORCED)
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : RepositoryModelConstants.NO_FORCE_TIME;
-
-        final Map<Long, List<TargetIdName>> saveAssignedList = Maps.newHashMapWithExpectedSize(itemIds.size());
-
-        for (final TargetIdName itemId : itemIds) {
-            final DistributionSetIdName distitem = managementUIState.getAssignedList().get(itemId);
-            distId = distitem.getId();
-
-            if (saveAssignedList.containsKey(distId)) {
-                targetIdSetList = saveAssignedList.get(distId);
-            } else {
-                targetIdSetList = new ArrayList<>();
-            }
-            targetIdSetList.add(itemId);
-            saveAssignedList.put(distId, targetIdSetList);
-        }
 
         final String maintenanceSchedule = maintenanceWindowLayout.getMaintenanceSchedule();
         final String maintenanceDuration = maintenanceWindowLayout.getMaintenanceDuration();
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
-        for (final Map.Entry<Long, List<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
-            tempIdList = saveAssignedList.get(mapEntry.getKey());
-            final DistributionSetAssignmentResult distributionSetAssignmentResult = deploymentManagement
-                    .assignDistributionSet(mapEntry.getKey(),
-                            tempIdList.stream().map(t -> maintenanceWindowLayout.isEnabled()
-                                    ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
-                                            maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
-                                    : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
-                                    .collect(Collectors.toList()));
-            if (distributionSetAssignmentResult.getAssigned() > 0) {
-                notification.displaySuccess(
-                        i18n.getMessage("message.target.assignment", distributionSetAssignmentResult.getAssigned()));
-            }
-            if (distributionSetAssignmentResult.getAlreadyAssigned() > 0) {
-                notification.displaySuccess(i18n.getMessage("message.target.alreadyAssigned",
-                        distributionSetAssignmentResult.getAlreadyAssigned()));
-            }
+        final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
+        final List<TargetWithActionType> trgActionType = targets.stream()
+                .map(t -> maintenanceWindowLayout.isEnabled()
+                        ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
+                                maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
+                        : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
+                .collect(Collectors.toList());
+
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(dsIds,
+                trgActionType);
+
+        // use the last one for the notification box
+        final DistributionSetAssignmentResult assignmentResult = results.get(results.size() - 1);
+        if (assignmentResult.getAssigned() > 0) {
+            notification.displaySuccess(i18n.getMessage("message.target.assignment", assignmentResult.getAssigned()));
         }
-        refreshPinnedDetails(saveAssignedList, managementUIState, eventBus, eventSource);
-        managementUIState.getAssignedList().clear();
+        if (assignmentResult.getAlreadyAssigned() > 0) {
+            notification.displaySuccess(
+                    i18n.getMessage("message.target.alreadyAssigned", assignmentResult.getAlreadyAssigned()));
+        }
+
+        final Set<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toSet());
+        refreshPinnedDetails(dsIds, targetIds, managementUIState, eventBus, eventSource);
+
         notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
         eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
-    private static void refreshPinnedDetails(final Map<Long, List<TargetIdName>> saveAssignedList,
+    private static void refreshPinnedDetails(final Set<Long> dsIds, final Set<Long> targetIds,
             final ManagementUIState managementUIState, final UIEventBus eventBus, final Object eventSource) {
         final Optional<Long> pinnedDist = managementUIState.getTargetTableFilters().getPinnedDistId();
         final Optional<TargetIdName> pinnedTarget = managementUIState.getDistributionTableFilters().getPinnedTarget();
 
         if (pinnedDist.isPresent()) {
-            if (saveAssignedList.keySet().contains(pinnedDist.get())) {
+            if (dsIds.contains(pinnedDist.get())) {
                 eventBus.publish(eventSource, PinUnpinEvent.PIN_DISTRIBUTION);
             }
-        } else if (pinnedTarget.isPresent()) {
-            final Set<TargetIdName> assignedTargetIds = managementUIState.getAssignedList().keySet();
-            if (assignedTargetIds.contains(pinnedTarget.get())) {
-                eventBus.publish(eventSource, PinUnpinEvent.PIN_TARGET);
-            }
+        } else if (pinnedTarget.isPresent() && targetIds.contains(pinnedTarget.get().getTargetId())) {
+            eventBus.publish(eventSource, PinUnpinEvent.PIN_TARGET);
         }
     }
 
@@ -187,7 +175,8 @@ public final class TargetAssignmentOperations {
      * @param maintenanceWindowLayout
      *            the Maintenance Window Layout
      * @param saveButtonToggle
-     *            The event listener to derimne if save button should be enabled or not
+     *            The event listener to derimne if save button should be enabled
+     *            or not
      * @param i18n
      *            the Vaadin Message Source for multi language
      * @param uiProperties
@@ -261,7 +250,10 @@ public final class TargetAssignmentOperations {
                     private static final long serialVersionUID = 1L;
 
                     @Override
+                    // Vaadin is returning object so "==" might not work
+                    @SuppressWarnings("squid:S4551")
                     public void valueChange(final Property.ValueChangeEvent event) {
+
                         if (event.getProperty().getValue()
                                 .equals(AbstractActionTypeOptionGroupLayout.ActionTypeOption.DOWNLOAD_ONLY)) {
                             enableMaintenanceWindowControl.setValue(false);

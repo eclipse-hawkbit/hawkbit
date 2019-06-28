@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
@@ -50,9 +51,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendAssignmentEvents(final DistributionSet set, final List<JpaTarget> targets,
-            final Set<Long> targetIdsCancellList, final Map<String, JpaAction> targetIdsToActions) {
-
+    void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
         targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
             sendTargetUpdatedEvent(target);
@@ -79,7 +78,8 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void updateTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+            final String currentUser) {
         targetIds.forEach(tIds -> targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
                 TargetUpdateStatus.IN_SYNC, set, System.currentTimeMillis(), currentUser, tIds));
     }
@@ -101,6 +101,16 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         result.setStatus(Status.FINISHED);
         result.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Action reported as offline deployment");
         return result;
+    }
+
+    @Override
+    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
+        // no need to send deployment events in the offline case
+    }
+
+    @Override
+    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
+        // no need to send deployment events in the offline case
     }
 
 }

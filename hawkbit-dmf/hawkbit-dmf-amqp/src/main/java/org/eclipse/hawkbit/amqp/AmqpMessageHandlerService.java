@@ -8,11 +8,16 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,14 +32,17 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +50,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -50,8 +59,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.util.StringUtils;
-
-import com.google.common.collect.Maps;
 
 /**
  *
@@ -70,6 +77,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final EntityFactory entityFactory;
 
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+
+    private final SystemSecurityContext systemSecurityContext;
+
     /**
      * Constructor.
      * 
@@ -84,11 +95,15 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory) {
+            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
+        this.systemSecurityContext = systemSecurityContext;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
@@ -191,11 +206,31 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
-        lookIfUpdateAvailable(target);
+        sendUpdateCommandToTarget(target);
     }
 
-    private void lookIfUpdateAvailable(final Target target) {
+    private void sendUpdateCommandToTarget(final Target target) {
+        if (isMultiAssignmentsEnabled()) {
+            sendCurrentActionsAsMultiActionToTarget(target);
+        } else {
+            sendOldestActionToTarget(target);
+        }
+    }
 
+    private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
+        final List<Action> actions = controllerManagement
+                .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId()).getContent();
+
+        final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
+                .collect(Collectors.toSet());
+        final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet = distributionSets
+                .stream().collect(Collectors.toMap(DistributionSet::getId, this::getSoftwareModulesWithMetadata));
+
+        amqpMessageDispatcherService.sendMultiActionRequestToTarget(target.getTenant(), target, actions,
+                softwareModulesPerDistributionSet);
+    }
+
+    private void sendOldestActionToTarget(final Target target) {
         final Optional<Action> actionOptional = controllerManagement
                 .findOldestActiveActionByTarget(target.getControllerId());
 
@@ -207,20 +242,23 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
                     action.getId(), target.getAddress());
-            return;
+        } else {
+            amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
+                    getSoftwareModulesWithMetadata(action.getDistributionSet()));
         }
+    }
 
-        final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules = Maps
-                .newHashMapWithExpectedSize(action.getDistributionSet().getModules().size());
+    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(
+            final DistributionSet distributionSet) {
+        final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId)
+                .collect(Collectors.toList());
 
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
-                .findTargetVisibleMetaDataBySoftwareModuleId(action.getDistributionSet().getModules().stream()
-                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+                .findTargetVisibleMetaDataBySoftwareModuleId(smIds);
 
-        action.getDistributionSet().getModules().forEach(module -> modules.put(module, metadata.get(module.getId())));
+        return distributionSet.getModules().stream()
+                .collect(Collectors.toMap(sm -> sm, sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));
 
-        amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
-                modules);
     }
 
     /**
@@ -275,12 +313,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
                 .messages(messages);
 
-        final Action addUpdateActionStatus = getUpdateActionStatus(status, actionStatus);
+        final Action updatedAction = (Status.CANCELED == status)
+                ? controllerManagement.addCancelActionStatus(actionStatus)
+                : controllerManagement.addUpdateActionStatus(actionStatus);
 
-        if (!addUpdateActionStatus.isActive() || (addUpdateActionStatus.hasMaintenanceSchedule()
-                && addUpdateActionStatus.isMaintenanceWindowAvailable())) {
-            lookIfUpdateAvailable(action.getTarget());
+        if (shouldTargetProceed(updatedAction)) {
+            sendUpdateCommandToTarget(action.getTarget());
         }
+    }
+
+    private static boolean shouldTargetProceed(final Action action) {
+        return !action.isActive() || (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable());
     }
 
     private static boolean isCorrelationIdNotEmpty(final Message message) {
@@ -337,13 +380,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return null;
     }
 
-    private Action getUpdateActionStatus(final Status status, final ActionStatusCreate actionStatus) {
-        if (Status.CANCELED.equals(status)) {
-            return controllerManagement.addCancelActionStatus(actionStatus);
-        }
-        return controllerManagement.addUpdateActionStatus(actionStatus);
-    }
-
     // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
     // get will not be called
     @SuppressWarnings("squid:S3655")
@@ -371,6 +407,15 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             return UpdateMode.valueOf(mode.name());
         }
         return null;
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
+    }
+
+    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
+        return systemSecurityContext
+                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
 }

@@ -326,7 +326,7 @@ public class RolloutGroupListGrid extends AbstractGrid<LazyQueryContainer> {
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale) {
-            return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap(), i18n);
+            return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
         @Override

@@ -360,14 +360,21 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
+    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
+            return Page.empty();
+        }
+        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
+    }
+
+    @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class,
-            maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
@@ -386,9 +393,11 @@ public class JpaControllerManagement implements ControllerManagement {
             afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
 
             return result;
-        } catch (final EntityAlreadyExistsException e){
-            LOG.warn("Caught an EntityAlreadyExistsException while creating non existing target " +
-                    "[controllerId:{}, address:{}, tenant: {}]", controllerId, address, tenantAware.getCurrentTenant());
+        } catch (final EntityAlreadyExistsException e) {
+            LOG.warn(
+                    "Caught an EntityAlreadyExistsException while creating non existing target "
+                            + "[controllerId:{}, address:{}, tenant: {}]",
+                    controllerId, address, tenantAware.getCurrentTenant());
             throw e;
         }
     }
@@ -483,7 +492,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
         boolean storeEager = isStoreEager(toUpdate, address);
 
-        if (TargetUpdateStatus.UNKNOWN.equals(toUpdate.getUpdateStatus())) {
+        if (TargetUpdateStatus.UNKNOWN == toUpdate.getUpdateStatus()) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             storeEager = true;
         }
@@ -581,15 +590,15 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * ActionStatus updates are allowed mainly if the action is active. If the
-     * action is not active we accept further status updates if permitted so
-     * by repository configuration. In this case, only the values: Status.ERROR
-     * and Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action,
-     * we accept status updates only once.
+     * action is not active we accept further status updates if permitted so by
+     * repository configuration. In this case, only the values: Status.ERROR and
+     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we
+     * accept status updates only once.
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
-        final boolean isIntermediateFeedback = !FINISHED.equals(actionStatus.getStatus())
-                && !Status.ERROR.equals(actionStatus.getStatus());
+        final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
+                && (Status.ERROR != actionStatus.getStatus());
 
         final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
                 && isIntermediateFeedback;
@@ -600,7 +609,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private static boolean isDownloadOnly(final JpaAction action) {
-        return DOWNLOAD_ONLY.equals(action.getActionType());
+        return DOWNLOAD_ONLY == action.getActionType();
     }
 
     /**
@@ -643,11 +652,11 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private String handleDownloadedActionStatus(final JpaAction action) {
-        if(!isDownloadOnly(action)){
+        if (!isDownloadOnly(action)) {
             return null;
         }
 
-        JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
@@ -689,9 +698,11 @@ public class JpaControllerManagement implements ControllerManagement {
         target.setInstalledDistributionSet(ds);
         target.setInstallationDate(System.currentTimeMillis());
 
-        // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
-        // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)
-        if(isDownloadOnly(action)){
+        // Target reported an installation of a DOWNLOAD_ONLY assignment, the
+        // assigned DS has to be adapted
+        // because the currently assigned DS can be unequal to the currently
+        // installed DS (the downloadOnly DS)
+        if (isDownloadOnly(action)) {
             target.setAssignedDistributionSet(action.getDistributionSet());
         }
 
@@ -830,7 +841,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // retrieves after the other we don't want to store to protect to
         // overflood action status in
         // case controller retrieves a action multiple times.
-        if (resultList.isEmpty() || !Status.RETRIEVED.equals(resultList.get(0)[1])) {
+        if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved
             actionStatusRepository
                     .save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));

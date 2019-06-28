@@ -249,10 +249,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected String getDeletedEntityName(final Long entityId) {
         final Optional<SoftwareModule> softwareModule = softwareModuleManagement.get(entityId);
-        if (softwareModule.isPresent()) {
-            return softwareModule.get().getName() + ":" + softwareModule.get().getVersion();
-        }
-        return "";
+        return softwareModule.map(module -> module.getName() + ":" + module.getVersion()).orElse("");
     }
 
 }

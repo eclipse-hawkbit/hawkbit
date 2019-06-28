@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
@@ -17,6 +19,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,11 +27,11 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.User.UserBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
  * Auto-configuration for the in-memory-user-management.
@@ -36,12 +39,19 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
  */
 @Configuration
 @ConditionalOnMissingBean(UserDetailsService.class)
+@EnableConfigurationProperties({ MultiUserProperties.class })
 public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+    private static final String DEFAULT_TENANT = "DEFAULT";
 
     private final SecurityProperties securityProperties;
 
-    InMemoryUserManagementAutoConfiguration(final SecurityProperties securityProperties) {
+    private final MultiUserProperties multiUserProperties;
+
+    InMemoryUserManagementAutoConfiguration(final SecurityProperties securityProperties,
+            final MultiUserProperties multiUserProperties) {
         this.securityProperties = securityProperties;
+        this.multiUserProperties = multiUserProperties;
     }
 
     @Override
@@ -57,17 +67,63 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     @Bean
     @ConditionalOnMissingBean
     UserDetailsService userDetailsService() {
-        final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserPrincipalDetailsManager();
-        inMemoryUserDetailsManager.setAuthenticationManager(null);
-        final SecurityProperties.User user = securityProperties.getUser();
-        final UserBuilder userBuilder = User.builder().username(user.getName()).password(user.getPassword())
-                .authorities(PermissionUtils.createAllAuthorityList());
-        final List<String> roles = user.getRoles();
-        if (!roles.isEmpty()) {
-            userBuilder.roles(roles.toArray(new String[roles.size()]));
+
+        final List<UserPrincipal> userPrincipals = new ArrayList<>();
+        for (final MultiUserProperties.User user : multiUserProperties.getUsers()) {
+            List<GrantedAuthority> authorityList;
+            // Allows ALL as a shorthand for all permissions
+            if (user.getPermissions().size() == 1 && "ALL".equals(user.getPermissions().get(0))) {
+                authorityList = PermissionUtils.createAllAuthorityList();
+            } else {
+                authorityList = new ArrayList<>(user.getPermissions().size());
+                for (final String permission : user.getPermissions()) {
+                    authorityList.add(new SimpleGrantedAuthority(permission));
+                    authorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
+                }
+            }
+
+            final UserPrincipal userPrincipal = new UserPrincipal(user.getUsername(), user.getPassword(),
+                    user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), DEFAULT_TENANT,
+                    authorityList);
+            userPrincipals.add(userPrincipal);
         }
-        inMemoryUserDetailsManager.createUser(userBuilder.build());
-        return inMemoryUserDetailsManager;
+
+        // If no users are configured through the multi user properties, set up
+        // the default user from security properties
+        if (userPrincipals.isEmpty()) {
+            final String name = securityProperties.getUser().getName();
+            final String password = securityProperties.getUser().getPassword();
+            userPrincipals.add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT,
+                    PermissionUtils.createAllAuthorityList()));
+        }
+
+        return new FixedInMemoryUserPrincipalUserDetailsService(userPrincipals);
+    }
+
+    private static class FixedInMemoryUserPrincipalUserDetailsService implements UserDetailsService {
+        private final HashMap<String, UserPrincipal> userPrincipalMap = new HashMap<>();
+
+        public FixedInMemoryUserPrincipalUserDetailsService(final Collection<UserPrincipal> userPrincipals) {
+            for (final UserPrincipal user : userPrincipals) {
+                userPrincipalMap.put(user.getUsername(), user);
+            }
+        }
+
+        private static UserPrincipal clone(final UserPrincipal a) {
+            return new UserPrincipal(a.getUsername(), a.getPassword(), a.getFirstname(), a.getLastname(),
+                    a.getLoginname(), a.getEmail(), a.getTenant(), a.getAuthorities());
+        }
+
+        @Override
+        public UserDetails loadUserByUsername(final String username) {
+            final UserPrincipal userPrincipal = userPrincipalMap.get(username);
+            if (userPrincipal == null) {
+                throw new UsernameNotFoundException("No such user");
+            }
+            // Spring mutates the data, so we must return a copy here
+            return clone(userPrincipal);
+        }
+
     }
 
     /**
@@ -88,21 +144,6 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
                     authentication.getCredentials(), user.getAuthorities());
             result.setDetails(new TenantAwareAuthenticationDetails("DEFAULT", false));
             return result;
-        }
-    }
-
-    private static final class InMemoryUserPrincipalDetailsManager extends InMemoryUserDetailsManager {
-
-        private InMemoryUserPrincipalDetailsManager() {
-            super(new ArrayList<>());
-        }
-
-        @Override
-        public UserDetails loadUserByUsername(final String username) {
-            final UserDetails loadUserByUsername = super.loadUserByUsername(username);
-            return new UserPrincipal(loadUserByUsername.getUsername(), loadUserByUsername.getPassword(),
-                    loadUserByUsername.getUsername(), loadUserByUsername.getUsername(),
-                    loadUserByUsername.getUsername(), null, "DEFAULT", loadUserByUsername.getAuthorities());
         }
     }
 }

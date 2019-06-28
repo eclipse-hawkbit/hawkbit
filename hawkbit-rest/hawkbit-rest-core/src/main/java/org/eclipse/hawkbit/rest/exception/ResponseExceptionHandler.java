@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
@@ -78,6 +79,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_ATTRIBUTES_INVALID, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {
@@ -111,9 +113,10 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type HttpMessageNotReadableException
-     * which is thrown in case the request body is not well formed and cannot be
-     * deserialized. Called by the Spring-Framework for exception handling.
+     * Method for handling exception of type HttpMessageNotReadableException and
+     * MethodArgumentNotValidException which are thrown in case the request body is
+     * not well formed (e.g. syntax failures, missing/invalid parameters) and cannot
+     * be deserialized. Called by the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
@@ -122,8 +125,8 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionInfo> handleHttpMessageNotReadableException(final HttpServletRequest request,
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
         final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());

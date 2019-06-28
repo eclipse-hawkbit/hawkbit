@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -104,8 +106,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
-
-import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 /**
  * JPA implementation of {@link RolloutManagement}.
@@ -336,14 +336,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         int readyGroups = 0;
         int totalTargets = 0;
         for (final RolloutGroup group : rolloutGroups) {
-            if (RolloutGroupStatus.READY.equals(group.getStatus())) {
+            if (RolloutGroupStatus.READY == group.getStatus()) {
                 readyGroups++;
                 totalTargets += group.getTotalTargets();
                 continue;
             }
 
             final RolloutGroup filledGroup = fillRolloutGroupWithTargets(rollout, group);
-            if (RolloutGroupStatus.READY.equals(filledGroup.getStatus())) {
+            if (RolloutGroupStatus.READY == filledGroup.getStatus()) {
                 readyGroups++;
                 totalTargets += filledGroup.getTotalTargets();
             }
@@ -631,7 +631,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (!RolloutStatus.RUNNING.equals(rollout.getStatus())) {
+        if (RolloutStatus.RUNNING != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -650,7 +650,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (!(RolloutStatus.PAUSED.equals(rollout.getStatus()))) {
+        if (RolloutStatus.PAUSED != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -751,7 +751,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY.equals(rollout.getActionType())
+        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY == rollout.getActionType()
                 ? actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
                         DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES)
                 : actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
@@ -785,7 +785,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                     .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
                     .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
-                LOGGER.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
+                LOGGER.debug("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
             } else {
                 LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
@@ -887,7 +887,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }
 
-        if (RolloutStatus.DELETING.equals(jpaRollout.getStatus())) {
+        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
             return;
         }
 
@@ -1028,7 +1028,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private static void checkIfDeleted(final Long rolloutId, final RolloutStatus status) {
-        if (RolloutStatus.DELETING.equals(status) || RolloutStatus.DELETED.equals(status)) {
+        if (RolloutStatus.DELETING == status || RolloutStatus.DELETED == status) {
             throw new EntityReadOnlyException("Rollout " + rolloutId + " is soft deleted and cannot be changed");
         }
     }

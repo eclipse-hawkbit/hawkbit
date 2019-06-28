@@ -8,11 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.ui.management.targettable.TargetMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -63,12 +60,8 @@ public class TargetMetadataDetailsLayout extends AbstractMetadataDetailsLayout {
             return;
         }
         selectedTargetId = target.getId();
-        final List<TargetMetadata> targetMetadataList = targetManagement
-                .findMetaDataByControllerId(PageRequest.of(0, MAX_METADATA_QUERY), target.getControllerId())
-                .getContent();
-        if (targetMetadataList != null && !targetMetadataList.isEmpty()) {
-            targetMetadataList.forEach(this::setMetadataProperties);
-        }
+        targetManagement.findMetaDataByControllerId(PageRequest.of(0, MAX_METADATA_QUERY), target.getControllerId())
+                .getContent().forEach(this::setMetadataProperties);
     }
 
     @Override

@@ -469,7 +469,7 @@ public final class RSQLUtility {
             // values JPA can do it by it's own but not for classes like enums.
             // So we need to transform the given value string into the enum
             // class.
-            final Class<? extends Object> javaType = fieldPath.getJavaType();
+            final Class<?> javaType = fieldPath.getJavaType();
             if (javaType != null && javaType.isEnum()) {
                 return transformEnumValue(node, value, javaType);
             }
@@ -485,7 +485,7 @@ public final class RSQLUtility {
         }
 
         private Object convertBooleanValue(final ComparisonNode node, final String value,
-                final Class<? extends Object> javaType) {
+                final Class<?> javaType) {
             try {
                 return simpleTypeConverter.convertIfNecessary(value, javaType);
             } catch (final TypeMismatchException e) {
@@ -513,7 +513,7 @@ public final class RSQLUtility {
         // https://jira.sonarsource.com/browse/SONARJAVA-1478
         @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
         private static Object transformEnumValue(final ComparisonNode node, final String value,
-                final Class<? extends Object> javaType) {
+                final Class<?> javaType) {
             final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
             try {
                 return Enum.valueOf(tmpEnumType, value.toUpperCase());
@@ -680,13 +680,10 @@ public final class RSQLUtility {
                 final char escapeChar) {
             final String escaped;
 
-            switch (database) {
-            case SQL_SERVER:
+            if (database == Database.SQL_SERVER) {
                 escaped = transformedValue.replace("%", "[%]").replace("_", "[_]");
-                break;
-            default:
+            } else {
                 escaped = transformedValue.replace("%", escapeChar + "%").replace("_", escapeChar + "_");
-                break;
             }
 
             return escaped.replace(LIKE_WILDCARD, '%');

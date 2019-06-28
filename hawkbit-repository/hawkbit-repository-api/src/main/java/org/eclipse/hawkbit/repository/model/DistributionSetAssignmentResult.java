@@ -26,12 +26,16 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
     private final List<String> assignedTargets;
     private final List<Action> actions;
 
+    private final DistributionSet distributionSet;
+
     private final TargetManagement targetManagement;
 
     /**
      *
      * Constructor.
      *
+     * @param distributionSet
+     *            that has been assigned
      * @param assignedTargets
      *            the target objects which have been assigned to the
      *            distribution set
@@ -39,29 +43,46 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      *            count of the assigned targets
      * @param alreadyAssigned
      *            the count of the already assigned targets
-     * @param targetManagement
-     *            to retrieve the assigned targets
      * @param actions
      *            of the assignment
-     *
+     * @param targetManagement
+     *            to retrieve the assigned targets
      */
-    public DistributionSetAssignmentResult(final List<String> assignedTargets, final int assigned,
-            final int alreadyAssigned, final List<Action> actions, final TargetManagement targetManagement) {
+    public DistributionSetAssignmentResult(final DistributionSet distributionSet, final List<String> assignedTargets,
+            final int assigned, final int alreadyAssigned, final List<Action> actions,
+            final TargetManagement targetManagement) {
         super(assigned, alreadyAssigned, 0, Collections.emptyList(), Collections.emptyList());
+        this.distributionSet = distributionSet;
         this.assignedTargets = assignedTargets;
         this.actions = actions;
         this.targetManagement = targetManagement;
     }
 
     /**
+     * @return The distribution set that has been assigned
+     */
+    public DistributionSet getDistributionSet() {
+        return distributionSet;
+    }
+
+    /**
      * @return the actionIds
      */
-    public List<Long> getActions() {
+    public List<Long> getActionIds() {
         if (actions == null) {
             return Collections.emptyList();
         }
-
         return actions.stream().map(Action::getId).collect(Collectors.toList());
+    }
+
+    /**
+     * @return the actions
+     */
+    public List<Action> getActions() {
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+        return actions;
     }
 
     @Override
@@ -69,7 +90,6 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
         if (CollectionUtils.isEmpty(assignedTargets)) {
             return Collections.emptyList();
         }
-
         return targetManagement.getByControllerID(assignedTargets);
     }
 

@@ -209,6 +209,8 @@ public class UiProperties implements Serializable {
              */
             private String rolloutView = "";
 
+            private String provisioningStateMachine = "";
+
             public String getDeploymentView() {
                 return deploymentView;
             }
@@ -249,6 +251,10 @@ public class UiProperties implements Serializable {
                 return maintenanceWindowView;
             }
 
+            public String getProvisioningStateMachine() {
+                return provisioningStateMachine;
+            }
+
             public void setDeploymentView(final String deploymentView) {
                 this.deploymentView = deploymentView;
             }
@@ -287,6 +293,10 @@ public class UiProperties implements Serializable {
 
             public void setMaintenanceWindowView(final String maintenanceWindowView) {
                 this.maintenanceWindowView = maintenanceWindowView;
+            }
+
+            public void setProvisioningStateMachine(final String provisioningStateMachine) {
+                this.provisioningStateMachine = provisioningStateMachine;
             }
 
         }

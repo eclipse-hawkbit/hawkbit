@@ -238,7 +238,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     private static boolean isRolloutStatusReady(final RolloutGroup rolloutGroup) {
-        return rolloutGroup != null && RolloutStatus.READY.equals(rolloutGroup.getRollout().getStatus());
+        return rolloutGroup != null && (RolloutStatus.READY == rolloutGroup.getRollout().getStatus());
     }
 
     @Override

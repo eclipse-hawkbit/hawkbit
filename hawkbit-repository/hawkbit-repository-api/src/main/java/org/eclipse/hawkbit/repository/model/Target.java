@@ -23,7 +23,7 @@ public interface Target extends NamedEntity {
     /**
      * Maximum length of controllerId.
      */
-    int CONTROLLER_ID_MAX_SIZE = 64;
+    int CONTROLLER_ID_MAX_SIZE = 256;
 
     /**
      * Maximum length of securityToken.

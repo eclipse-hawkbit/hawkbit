@@ -16,14 +16,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.net.URL;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -109,7 +105,7 @@ public class AmqpControllerAuthenticationTest {
     private ControllerManagement controllerManagementMock;
 
     @Mock
-    private Target targteMock;
+    private Target targetMock;
 
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_FALSE = TenantConfigurationValue
             .<Boolean> builder().value(Boolean.FALSE).build();
@@ -137,11 +133,11 @@ public class AmqpControllerAuthenticationTest {
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targteMock));
-        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targteMock));
+        when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targetMock));
+        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
 
-        when(targteMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
-        when(targteMock.getControllerId()).thenReturn(CONTROLLER_ID);
+        when(targetMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
+        when(targetMock.getControllerId()).thenReturn(CONTROLLER_ID);
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
@@ -162,11 +158,9 @@ public class AmqpControllerAuthenticationTest {
         when(artifactManagementMock.get(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
-        final AbstractDbArtifact artifact = new ArtifactFilesystem(new File("does not exist"), SHA1,
-                new DbArtifactHash(SHA1, "md5 test"), ARTIFACT_SIZE, null);
-
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
-                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory());
+                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory(),
+                systemSecurityContext, tenantConfigurationManagementMock);
 
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,

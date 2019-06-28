@@ -88,6 +88,8 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                 "the list of action status that should be taken into account for the cleanup.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
                 "the expiry time in milliseconds that needs to elapse before an action may be cleaned up.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED,
+                "if multiple distribution sets can be assigned to the same targets.");
     }
 
     @Autowired

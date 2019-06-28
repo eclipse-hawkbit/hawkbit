@@ -17,25 +17,35 @@ public enum EventTopic {
      * Topic when sending and receiving a update status.
      */
     UPDATE_ACTION_STATUS,
+
     /**
      * Topic when sending and receiving a download and install task.
      */
     DOWNLOAD_AND_INSTALL,
+
     /**
      * Topic when sending and receiving a cancel download task.
      */
     CANCEL_DOWNLOAD,
+
     /**
      * Topic when updating device attributes.
      */
     UPDATE_ATTRIBUTES,
+
     /**
      * Topic when sending a download only task, skipping the install.
      */
     DOWNLOAD,
+
     /**
      * Topic when an update of device attributes is requested.
      */
-    REQUEST_ATTRIBUTES_UPDATE;
+    REQUEST_ATTRIBUTES_UPDATE,
+
+    /**
+     * Topic to send multiple actions to the device.
+     */
+    MULTI_ACTION
 
 }

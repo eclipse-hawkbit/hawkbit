@@ -29,6 +29,6 @@ public enum DmfUpdateMode {
     /**
      * Removal update strategy
      */
-    REMOVE;
+    REMOVE
 
 }

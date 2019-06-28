@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.model;
 import java.io.Serializable;
 
 /**
- * represents a tenant configuration value including some meta data
+ * Represents a tenant configuration value including some meta data
  * 
  * @param <T>
  *            type of the configuration value

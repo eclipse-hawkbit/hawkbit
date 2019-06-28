@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -85,6 +86,10 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Repository")
 @Story("Deployment Management")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
+
+    private static final boolean STATE_ACTIVE = true;
+    private static final boolean STATE_INACTIVE = false;
+
     private EventHandlerStub eventHandlerStub;
 
     private CancelEventHandlerStub cancelEventHandlerStub;
@@ -146,7 +151,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         final Action action = deploymentManagement.findActionWithDetails(actionId).get();
 
         assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
@@ -163,7 +168,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
 
         // act
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
@@ -212,7 +217,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
                 PAGE);
         final ActionStatus expectedActionStatus = ((JpaAction) actions.getContent().get(0)).getActionStatus().get(0);
@@ -231,7 +236,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
         // create action-status entry with one message
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.FINISHED).messages(Arrays.asList("finished message")));
@@ -485,8 +490,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
                 .getAssignedEntity();
         assertThat(actionRepository.count()).isEqualTo(20);
-        assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId()))
-				.as("Offline actions are not active").allMatch(action -> !action.isActive());
+        assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
+                .allMatch(action -> !action.isActive());
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent()).containsAll(targets)
                 .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
@@ -515,26 +520,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
             assignDistributionSet(ds1, targets);
 
-            List<Action> assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(Action::isActive)
-                    .as("Is assigned to DS " + ds1.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is running")
-                    .allMatch(action -> action.getStatus() == Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
 
             // Second assignment
             final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
             assignDistributionSet(ds2, targets);
 
-            final List<Action> assignmentTwo = actionRepository.findByDistributionSetId(PAGE, ds2.getId()).getContent();
-            assignmentOne = actionRepository.findByDistributionSetId(PAGE, ds1.getId()).getContent();
-            assertThat(assignmentTwo).hasSize(10).as("Is active").allMatch(Action::isActive)
-                    .as("Is assigned to DS " + ds2.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds2.getId())).as("Is running")
-                    .allMatch(action -> action.getStatus() == Status.RUNNING);
-            assertThat(assignmentOne).hasSize(10).as("Is active").allMatch(action -> !action.isActive())
-                    .as("Is assigned to DS " + ds1.getId())
-                    .allMatch(action -> action.getDistributionSet().getId().equals(ds1.getId())).as("Is cancelled")
-                    .allMatch(action -> action.getStatus() == Status.CANCELED);
+            assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
+            assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_INACTIVE, Status.CANCELED);
 
             assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds2.getId()).getContent()).hasSize(10)
                     .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
@@ -543,6 +536,44 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             tenantConfigurationManagement
                     .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
         }
+    }
+
+    @Test
+    @Description("If multi-assignment is enabled, verify that the previous Distribution Set assignment is not canceled when a new one is assigned.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = MultiActionEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+    public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
+        enableMultiAssignments();
+        final List<Target> targets = testdataFactory.createTargets(10);
+
+        // First assignment
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
+        assignDistributionSet(ds1, targets);
+
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
+
+        // Second assignment
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
+        assignDistributionSet(ds2, targets);
+
+        assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
+        assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
+    }
+
+    private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
+            final Status status) {
+        final List<Action> assignment = actionRepository.findByDistributionSetId(PAGE, dsId).getContent();
+
+        assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
+                .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
+                .as("State is " + status).allMatch(action -> action.getStatus() == status);
+        final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
+        assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
+                assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
     }
 
     /**
@@ -992,7 +1023,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.SOFT,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActions().get(0);
+        final Long actionId = assignDistributionSet.getActionIds().get(0);
         // verify preparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.SOFT);
@@ -1016,7 +1047,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 ds.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActions().get(0);
+        final Long actionId = assignDistributionSet.getActionIds().get(0);
         // verify perparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
@@ -1087,14 +1118,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(event).isNotNull();
         assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
 
-        List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
+        final List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
                 .collect(Collectors.toList());
 
-        List<Long> targetActiveActionIds = targets.stream()
+        final List<Long> targetActiveActionIds = targets.stream()
                 .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
-                .flatMap(List::stream)
-                .map(Action::getId)
-                .collect(Collectors.toList());
+                .flatMap(List::stream).map(Action::getId).collect(Collectors.toList());
         assertThat(eventActionIds).containsOnlyElementsOf(targetActiveActionIds);
     }
 
@@ -1214,6 +1243,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             events.add(event);
             latch.countDown();
         }
+    }
+
+    private void enableMultiAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
 }

@@ -152,6 +152,19 @@ public interface ControllerManagement {
     Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
 
     /**
+     * Retrieves all active actions which are assigned to the target with the
+     * given controller ID.
+     * 
+     * @param pageable
+     *            pagination parameter
+     * @param controllerId
+     *            of the target
+     * @return the requested {@link Page} with {@link Action}s
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
+    /**
      * Get the {@link Action} entity for given actionId with all lazy
      * attributes.
      *

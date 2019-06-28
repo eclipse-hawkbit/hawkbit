@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -59,7 +60,6 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         assertThat(findTargetsForAnotherTenant).hasSize(1);
         assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
-
     }
 
     @Test
@@ -163,34 +163,32 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         assertThat(findDistributionSetsForAnotherTenant).hasSize(1);
         assertThat(findDistributionSetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
+    }
 
+    private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
+        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
     }
 
     private Target createTargetForTenant(final String controllerId, final String tenant) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> testdataFactory.createTarget(controllerId));
+        return runAsTenant(tenant, () -> testdataFactory.createTarget(controllerId));
     }
 
     private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> targetManagement.findAll(PAGE));
+        return runAsTenant(tenant, () -> targetManagement.findAll(PAGE));
     }
 
     private void deleteTargetsForTenant(final String tenant, final Collection<Long> targetIds) throws Exception {
-        securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), () -> {
+        runAsTenant(tenant, () -> {
             targetManagement.delete(targetIds);
             return null;
         });
     }
 
     private DistributionSet createDistributionSetForTenant(final String tenant) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> testdataFactory.createDistributionSet());
+        return runAsTenant(tenant, () -> testdataFactory.createDistributionSet());
     }
 
     private Page<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> distributionSetManagement.findByCompleted(PAGE, true));
+        return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(PAGE, true));
     }
-
 }

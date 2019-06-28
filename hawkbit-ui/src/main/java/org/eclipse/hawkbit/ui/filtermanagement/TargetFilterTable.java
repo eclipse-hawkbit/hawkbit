@@ -249,7 +249,7 @@ public class TargetFilterTable extends Table {
                     i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION), null, false, null,
                     SPUIButtonStyleNoBorder.class);
         } else {
-            updateIcon = actionType.equals(ActionType.FORCED)
+            updateIcon = actionType == ActionType.FORCED
                     ? SPUIComponentProvider.getButton(buttonId, distSet.getNameVersion(),
                             i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION), null, false,
                             FontAwesome.BOLT, SPUIButtonStyleNoBorderWithIcon.class)

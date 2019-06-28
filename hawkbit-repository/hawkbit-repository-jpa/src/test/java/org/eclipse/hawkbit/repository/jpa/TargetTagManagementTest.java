@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -132,7 +133,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTagManagement
-                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(65))))
+                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(
+                                NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("tag with too long name should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -141,7 +143,8 @@ public class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(65))))
+                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(
+                                NamedEntity.NAME_MAX_SIZE + 1))))
                 .as("tag with too long name should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
