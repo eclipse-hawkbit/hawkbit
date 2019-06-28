@@ -348,8 +348,8 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     }
 
     @Test
-    @Description("Tests the function checkComplete: when no SoftwareModules are assigned to the Distribution then the test must fail ")
-    public void shouldFailWhenDistributionSetHaveNoSoftwareModulesAssigned() {
+    @Description("Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.")
+    public void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
 
         final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("newType").name("new Type"));
