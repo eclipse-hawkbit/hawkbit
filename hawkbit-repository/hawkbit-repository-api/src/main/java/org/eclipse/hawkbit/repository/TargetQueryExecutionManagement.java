@@ -8,19 +8,16 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 /**
@@ -34,6 +31,7 @@ import java.util.Collection;
  * result to a predefined set of IDs.
  */
 public interface TargetQueryExecutionManagement {
+
     /**
      * Retrieves all targets.
      *
@@ -53,12 +51,6 @@ public interface TargetQueryExecutionManagement {
      *            in RSQL notation
      *
      * @return the found {@linkplain Target}s, never {@code null}
-     *
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<? extends Target> findByQuery(@NotNull Pageable pageable, @NotEmpty String query);
@@ -75,12 +67,6 @@ public interface TargetQueryExecutionManagement {
      *            [id, ...]")
      *
      * @return the found {@linkplain Target}s, never {@code null}
-     *
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<? extends Target> findByQuery(@NotNull Pageable pageable, @NotEmpty String query, Collection<String> inIdList);
