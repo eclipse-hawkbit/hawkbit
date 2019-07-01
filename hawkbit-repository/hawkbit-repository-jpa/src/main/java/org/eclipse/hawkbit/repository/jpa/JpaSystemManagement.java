@@ -61,7 +61,7 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaSystemManagement.class);
 
-    private static final int MAX_TENANTS_QUERY = 500;
+    private static final int MAX_TENANTS_QUERY = 1000;
 
     @Autowired
     private EntityManager entityManager;
