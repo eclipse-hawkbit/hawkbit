@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -209,8 +210,12 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().map(SoftwareModule::getType).collect(Collectors.toList())
-                .containsAll(getMandatoryModuleTypes());
+        List<SoftwareModuleType> smTypes = distributionSet.getModules().stream().map(SoftwareModule::getType)
+                .collect(Collectors.toList());
+        if (smTypes.isEmpty()) {
+            return false;
+        }
+        return smTypes.containsAll(getMandatoryModuleTypes());
     }
 
     @Override
