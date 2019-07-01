@@ -8,21 +8,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for {@link SoftwareModuleType}.
@@ -31,15 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface SoftwareModuleTypeRepository
         extends BaseEntityRepository<JpaSoftwareModuleType, Long>, JpaSpecificationExecutor<JpaSoftwareModuleType> {
-
-    /**
-     * @param pageable
-     * @param isDeleted
-     *            to <code>true</code> if only marked as deleted have to be
-     *            count or all undeleted.
-     * @return found {@link SoftwareModuleType}s.
-     */
-    Page<SoftwareModuleType> findByDeleted(Pageable pageable, boolean isDeleted);
 
     /**
      * @param isDeleted

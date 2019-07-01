@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,21 +58,6 @@ public interface ActionStatusRepository
      * @return pages list of {@link ActionStatus} entries
      */
     Page<ActionStatus> findByActionId(Pageable pageReq, Long actionId);
-
-    /**
-     * Finds all status updates for the defined action and target including
-     * {@link ActionStatus#getMessages()}.
-     *
-     * @param pageReq
-     *            for page configuration
-     * @param target
-     *            to look for
-     * @param actionId
-     *            to look for
-     * @return Page with found targets
-     */
-    @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByActionId(Pageable pageReq, Long actionId);
 
     /**
      * Finds a filtered list of status messages for an action.

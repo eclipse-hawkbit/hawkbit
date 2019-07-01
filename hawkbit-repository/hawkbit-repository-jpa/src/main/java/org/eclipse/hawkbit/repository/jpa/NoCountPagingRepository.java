@@ -8,13 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +17,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Workaround as spring data does not provide a {@link Slice} based
@@ -48,9 +47,7 @@ public class NoCountPagingRepository {
      *
      * @return {@link Slice} of data
      *
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(org.springframework
-     *      .data.jpa.domain.Specification,
-     *      org.springframework.data.domain.Pageable)
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Pageable)
      */
     public <T, I extends Serializable> Slice<T> findAll(final Specification<T> spec, final Pageable pageable,
             final Class<T> domainClass) {
@@ -68,9 +65,7 @@ public class NoCountPagingRepository {
      *
      * @return {@link Slice} of data
      *
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(org.springframework
-     *      .data.jpa.domain.Specification,
-     *      org.springframework.data.domain.Pageable)
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Pageable)
      */
     public <T, I extends Serializable> Slice<T> findAll(final Pageable pageable, final Class<T> domainClass) {
         final SimpleJpaNoCountRepository<T, I> noCountDao = new SimpleJpaNoCountRepository<>(domainClass, em);
