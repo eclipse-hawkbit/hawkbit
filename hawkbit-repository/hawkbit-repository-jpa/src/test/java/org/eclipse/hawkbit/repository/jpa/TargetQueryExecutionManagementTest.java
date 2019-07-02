@@ -44,7 +44,7 @@ public class TargetQueryExecutionManagementTest extends AbstractJpaIntegrationTe
         final String rsqlOrControllerIdWithWrongKeyFilter = "id==target2 or metadata.unknown==value1";
         final String rsqlOrControllerIdNotEqualFilter = "id==target1 or metadata.key1!=target1-value1";
 
-        Assertions.assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
+        Assertions.assertThat(targetQueryExecutionManagement.count()).as("Total targets").isEqualTo(2);
         validateFoundTargetsByRsql(rsqlAndControllerIdFilter, controllerId1);
         validateFoundTargetsByRsql(rsqlAndControllerIdWithWrongKeyFilter);
         validateFoundTargetsByRsql(rsqlAndControllerIdNotEqualFilter, controllerId2);

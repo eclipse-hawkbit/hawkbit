@@ -181,7 +181,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     public int size() {
-        final long totSize = getTargetManagement().count();
+        final long totSize = getTargetQueryExecutionManagement().count();
         long size;
         if (null != targetFilterQueryId) {
             TargetFilterQuery targetFilterQuery = getTargetFilterQueryManagement().getById(targetFilterQueryId);

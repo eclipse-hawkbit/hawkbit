@@ -181,7 +181,7 @@ public class RolloutView extends VerticalLayout implements View {
             return true;
         }
 
-        final Optional<Rollout> rollout = serviceContext.rolloutManagement.get(rolloutIdInState.get());
+        final Optional<Rollout> rollout = serviceContext.getRolloutManagement().get(rolloutIdInState.get());
         return !rollout.isPresent() || rollout.get().isDeleted();
     }
 

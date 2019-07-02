@@ -206,7 +206,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!rolloutUIState.isShowRollOuts() || rolloutChangeEvent.getRolloutId() == null) {
             return;
         }
-        final Optional<Rollout> rollout = serviceContext.rolloutManagement
+        final Optional<Rollout> rollout = serviceContext.getRolloutManagement()
                 .getWithDetailedStatus(rolloutChangeEvent.getRolloutId());
 
         if (!rollout.isPresent()) {
@@ -238,7 +238,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             return;
         }
 
-        final Long size = serviceContext.rolloutGroupManagement.countTargetsOfRolloutsGroup(rollout.getId());
+        final Long size = serviceContext.getRolloutGroupManagement().countTargetsOfRolloutsGroup(rollout.getId());
         if (!size.equals(groupCount)) {
             item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(size.intValue());
         }
@@ -533,7 +533,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
-        serviceContext.rolloutManagement.pauseRollout(rolloutId);
+        serviceContext.getRolloutManagement().pauseRollout(rolloutId);
         uiNotification.displaySuccess(i18n.getMessage("message.rollout.paused", rolloutName));
     }
 
@@ -545,13 +545,13 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
         if (RolloutStatus.READY == rolloutStatus) {
-            serviceContext.rolloutManagement.start(rolloutId);
+            serviceContext.getRolloutManagement().start(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.started", rolloutName));
             return;
         }
 
         if (RolloutStatus.PAUSED == rolloutStatus) {
-            serviceContext.rolloutManagement.resumeRollout(rolloutId);
+            serviceContext.getRolloutManagement().resumeRollout(rolloutId);
             uiNotification.displaySuccess(i18n.getMessage("message.rollout.resumed", rolloutName));
         }
     }
@@ -578,7 +578,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     }
 
     private void deleteRollout(final Long rolloutId) {
-        final Optional<Rollout> rollout = serviceContext.rolloutManagement.getWithDetailedStatus(rolloutId);
+        final Optional<Rollout> rollout = serviceContext.getRolloutManagement().getWithDetailedStatus(rolloutId);
 
         if (!rollout.isPresent()) {
             return;
@@ -594,7 +594,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                     }
                     final Item row = getContainerDataSource().getItem(rolloutId);
                     final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-                    serviceContext.rolloutManagement.delete(rolloutId);
+                    serviceContext.getRolloutManagement().delete(rolloutId);
                     uiNotification.displaySuccess(i18n.getMessage("message.rollout.deleted", rolloutName));
                 }, UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         UI.getCurrent().addWindow(confirmationDialog.getWindow());
@@ -840,7 +840,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
-        if (!permissionChecker.hasRolloutApprovalPermission() || !serviceContext.tenantConfigManagement
+        if (!permissionChecker.hasRolloutApprovalPermission() || !serviceContext.getTenantConfigManagement()
                 .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
             modifiableColumnsList.remove(VIRT_PROP_APPROVE);
         }

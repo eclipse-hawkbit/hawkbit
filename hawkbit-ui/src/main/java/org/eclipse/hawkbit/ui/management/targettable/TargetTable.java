@@ -825,7 +825,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private long getTotalTargetsCount() {
-        return targetManagement.count();
+        return targetQueryExecutionManagement.count();
     }
 
     private boolean isFilteredByStatus() {

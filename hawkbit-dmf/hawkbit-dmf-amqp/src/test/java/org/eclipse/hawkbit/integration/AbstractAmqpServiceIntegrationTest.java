@@ -239,7 +239,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void assertAllTargetsCount(final long expectedTargetsCount) {
-        assertThat(targetManagement.count()).isEqualTo(expectedTargetsCount);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(expectedTargetsCount);
     }
 
     protected Message assertReplyMessageHeader(final EventTopic eventTopic, final String controllerId) {

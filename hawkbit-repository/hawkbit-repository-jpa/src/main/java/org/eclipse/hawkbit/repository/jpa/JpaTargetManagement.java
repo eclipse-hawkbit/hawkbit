@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -162,11 +163,6 @@ public class JpaTargetManagement implements TargetManagement {
     public List<Target> getByControllerID(final Collection<String> controllerIDs) {
         return Collections.unmodifiableList(
                 targetRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
-    }
-
-    @Override
-    public long count() {
-        return targetRepository.count();
     }
 
     @Override
@@ -609,51 +605,47 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByQueryAndNotInRolloutGroups(final Pageable pageRequest, final Collection<Long> groupIds,
+    public List<Target> findByQueryAndNotInRolloutGroups(int limit, final Collection<Long> groupIds,
             final String query) {
-        // TODO: Refactor assignment of targets to rollout-groups in order to
-        // optimize this queries
-        int requestedPageSize = pageRequest.getPageSize();
-        List<Target> foundTargets = new LinkedList<>();
-        boolean targetsLeft = true;
-        int currentPageNumber = 0;
+        final List<Target> foundTargets = new LinkedList<>();
+        Page<Target> queryResult = null;
 
-        do {
-            Pageable pr = PageRequest.of(currentPageNumber, 500, ORDERBY_CONTROLLERID);
-            Page<Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
-            currentPageNumber += 1;
-            targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
-            Set<String> controllerIds = new TreeSet<>(targetsFoundByFilter.map(Target::getControllerId).getContent());
-            List<JpaTarget> targets = targetRepository
-                    .findAll(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
-            foundTargets.addAll(targets);
-        } while (targetsLeft && requestedPageSize > foundTargets.size());
-
-        if (foundTargets.size() > requestedPageSize) {
-            foundTargets = foundTargets.subList(0, requestedPageSize);
+        while ((queryResult == null || queryResult.hasNext()) && foundTargets.size() < limit) {
+            queryResult = targetQueryExecutionManagement.findByQuery(nextPageable(queryResult), query);
+            foundTargets.addAll(findTargetsNotInGroup(queryResult, groupIds));
         }
-        long totalCount = countByQueryAndNotInRolloutGroups(groupIds, query);
-        return new PageImpl<>(foundTargets, pageRequest, totalCount);
+        if (foundTargets.size() > limit) {
+            return foundTargets.subList(0, limit);
+        }
+        return foundTargets;
     }
 
     @Override
     public long countByQueryAndNotInRolloutGroups(final Collection<Long> groupIds, final String query) {
-        // TODO: Refactor assignment of targets to rollout-groups in order to
-        // optimize this queries
         long targetsFound = 0L;
-        boolean targetsLeft = true;
-        int currentPageNumber = 0;
+        Page<Target> queryResult = null;
 
-        do {
-            Pageable pr = PageRequest.of(currentPageNumber, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_CONTROLLERID);
-            Page<Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
-            ++currentPageNumber;
-            targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
-            List<String> controllerIds = targetsFoundByFilter.map(Target::getControllerId).getContent();
-            targetsFound += targetRepository.count(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
-        } while (targetsLeft);
-
+        while (queryResult == null || queryResult.hasNext()) {
+            queryResult = targetQueryExecutionManagement.findByQuery(nextPageable(queryResult), query);
+            targetsFound += countTargetsNotInGroup(queryResult, groupIds);
+        }
         return targetsFound;
+    }
+
+    private List<? extends Target> findTargetsNotInGroup(Page<Target> targets, Collection<Long> groupIds) {
+        Set<String> controllerIds = new TreeSet<>(targets.map(Target::getControllerId).getContent());
+        return targetRepository.findAll(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
+    }
+
+    @NotNull
+    private Pageable nextPageable(Page<Target> queryResult) {
+        return (queryResult == null) ? PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_CONTROLLERID)
+                : queryResult.nextPageable();
+    }
+
+    private long countTargetsNotInGroup(Page<Target> targets, Collection<Long> groupIds) {
+        Set<String> controllerIds = new TreeSet<>(targets.map(Target::getControllerId).getContent());
+        return targetRepository.count(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
     }
 
     @Override

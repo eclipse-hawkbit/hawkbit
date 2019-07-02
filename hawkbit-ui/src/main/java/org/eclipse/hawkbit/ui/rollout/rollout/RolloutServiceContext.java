@@ -21,14 +21,14 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
  * Parameter struct used to pass the services, needed by different UI components, through the constructors.
  */
 public class RolloutServiceContext {
-    public final RolloutManagement rolloutManagement;
-    public final RolloutGroupManagement rolloutGroupManagement;
-    public final TargetManagement targetManagement;
-    public final TargetQueryExecutionManagement targetQueryExecutionManagement;
-    public final EntityFactory entityFactory;
-    public final TargetFilterQueryManagement targetFilterQueryManagement;
-    public final QuotaManagement quotaManagement;
-    public final TenantConfigurationManagement tenantConfigManagement;
+    private final RolloutManagement rolloutManagement;
+    private final RolloutGroupManagement rolloutGroupManagement;
+    private final TargetManagement targetManagement;
+    private final TargetQueryExecutionManagement targetQueryExecutionManagement;
+    private final EntityFactory entityFactory;
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final QuotaManagement quotaManagement;
+    private final TenantConfigurationManagement tenantConfigManagement;
 
     public RolloutServiceContext(final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement, final TargetManagement targetManagement,
@@ -45,4 +45,35 @@ public class RolloutServiceContext {
         this.tenantConfigManagement = tenantConfigManagement;
     }
 
+    public RolloutManagement getRolloutManagement() {
+        return rolloutManagement;
+    }
+
+    public RolloutGroupManagement getRolloutGroupManagement() {
+        return rolloutGroupManagement;
+    }
+
+    public TargetManagement getTargetManagement() {
+        return targetManagement;
+    }
+
+    public TargetQueryExecutionManagement getTargetQueryExecutionManagement() {
+        return targetQueryExecutionManagement;
+    }
+
+    public EntityFactory getEntityFactory() {
+        return entityFactory;
+    }
+
+    public TargetFilterQueryManagement getTargetFilterQueryManagement() {
+        return targetFilterQueryManagement;
+    }
+
+    public QuotaManagement getQuotaManagement() {
+        return quotaManagement;
+    }
+
+    public TenantConfigurationManagement getTenantConfigManagement() {
+        return tenantConfigManagement;
+    }
 }

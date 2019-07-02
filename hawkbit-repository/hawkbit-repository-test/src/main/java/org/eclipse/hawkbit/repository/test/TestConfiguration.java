@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.test;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
@@ -39,12 +36,10 @@ import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
-import org.h2.server.web.WebServlet;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
@@ -65,7 +60,9 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Spring context configuration required for Dev.Environment.
@@ -79,12 +76,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @EnableAutoConfiguration
 @PropertySource("classpath:/hawkbit-test-defaults.properties")
 public class TestConfiguration implements AsyncConfigurer {
-    @Bean
-    public ServletRegistrationBean h2servletRegistration() {
-        ServletRegistrationBean registration = new ServletRegistrationBean(new WebServlet());
-        registration.addUrlMappings("/console/*");
-        return registration;
-    }
+
     /**
      * Disables caching during test to avoid concurrency failures during test.
      */

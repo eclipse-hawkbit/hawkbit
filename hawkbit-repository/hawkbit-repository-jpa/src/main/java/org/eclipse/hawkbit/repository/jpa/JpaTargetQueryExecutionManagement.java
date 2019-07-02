@@ -13,8 +13,10 @@ import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Provides a source of
@@ -30,7 +33,7 @@ import java.util.Collection;
  * internal device-management.
  */
 @Transactional(readOnly = true)
-public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionManagement<JpaTarget> {
+public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionManagement {
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
     private final TargetRepository targetRepository;
@@ -43,23 +46,28 @@ public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionMa
     }
 
     @Override
-    public Page<JpaTarget> findAll(@NotNull final Pageable pageable) {
-        return targetRepository.findAll(pageable);
+    public Page<Target> findAll(@NotNull final Pageable pageable) {
+        return convertPage(targetRepository.findAll(pageable));
     }
 
     @Override
-    public Page<JpaTarget> findByQuery(final Pageable pageable, @NotEmpty final String query) {
-        return targetRepository.findAll(toSpec(query), pageable);
+    public Page<Target> findByQuery(final Pageable pageable, @NotEmpty final String query) {
+        return convertPage(targetRepository.findAll(toSpec(query), pageable));
     }
 
     @Override
-    public Page<JpaTarget> findByQuery(@NotNull final Pageable pageable, @NotEmpty final String query,
-            final Collection<String> inIdList) {
+    public Page<Target> findByQuery(@NotNull final Pageable pageable, @NotEmpty final String query,
+            @NotNull final Collection<String> inIdList) {
         if (inIdList.isEmpty()) {
             return Page.empty();
         }
         final Specification<JpaTarget> spec = toSpec(query, inIdList);
-        return targetRepository.findAll(spec, pageable);
+        return convertPage(targetRepository.findAll(spec, pageable));
+    }
+
+    private static Page<Target> convertPage(final Page<? extends Target> result) {
+        return new PageImpl<>(Collections.unmodifiableList(result.getContent()), result.getPageable(),
+                result.getTotalElements());
     }
 
     @Override
@@ -78,6 +86,11 @@ public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionMa
         });
     }
 
+    @Override
+    public long count() {
+        return targetRepository.count();
+    }
+
     private Specification<JpaTarget> toSpec(final String query, final Collection<String> inIdList) {
         return toSpec(query).and(TargetSpecifications.hasControllerId(inIdList));
     }
@@ -85,5 +98,4 @@ public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionMa
     private Specification<JpaTarget> toSpec(final String query) {
         return RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database);
     }
-
 }

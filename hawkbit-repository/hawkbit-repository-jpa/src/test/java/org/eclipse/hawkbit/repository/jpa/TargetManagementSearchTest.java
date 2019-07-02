@@ -561,7 +561,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, null, null, new String[0]))
                 .getContent()).as("Overall we expect that many targets in the repository").hasSize(400)
                         .as("which is also reflected by repository count")
-                        .hasSize(Ints.saturatedCast(targetManagement.count()))
+                        .hasSize(Ints.saturatedCast(targetQueryExecutionManagement.count()))
                         .as("which is also reflected by call without specification")
                         .containsAll(targetQueryExecutionManagement.findAll(PAGE).getContent());
 

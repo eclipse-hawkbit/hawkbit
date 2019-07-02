@@ -8,16 +8,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
@@ -40,6 +30,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Management service for {@link Target}s.
@@ -104,14 +103,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByInstalledDistributionSet(long distId);
-
-    /**
-     * Counts all {@link Target}s in the repository.
-     *
-     * @return number of targets
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long count();
 
     /**
      * creating a new {@link Target}.
@@ -214,8 +205,8 @@ public interface TargetManagement {
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
      * and that are not assigned to one of the {@link RolloutGroup}s
      *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
+     * @param limit
+     *            the maximum amount of results requested (could be less)
      * @param groups
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
@@ -223,7 +214,7 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest, @NotEmpty Collection<Long> groups,
+    List<Target> findByQueryAndNotInRolloutGroups(int limit, @NotEmpty Collection<Long> groups,
             @NotNull String rsqlParam);
 
     /**

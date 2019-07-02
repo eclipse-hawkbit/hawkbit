@@ -413,15 +413,15 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetDeletedEvent.class, count = 12), @Expect(type = TargetUpdatedEvent.class, count = 6) })
     public void deleteAndCreateTargets() {
         Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(1);
         targetManagement.delete(Collections.singletonList(target.getId()));
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(0);
 
         target = createTargetWithAttributes("4711");
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(1);
         assertThat(targetManagement.existsByControllerId("4711")).isTrue();
         targetManagement.delete(Collections.singletonList(target.getId()));
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(0);
         assertThat(targetManagement.existsByControllerId("4711")).isFalse();
 
         final List<Long> targets = new ArrayList<>();
@@ -430,9 +430,9 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             targets.add(target.getId());
             targets.add(createTargetWithAttributes("" + (i * i + 1000)).getId());
         }
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(10);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(10);
         targetManagement.delete(targets);
-        assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).as("target count is wrong").isEqualTo(0);
     }
 
     private Target createTargetWithAttributes(final String controllerId) {
@@ -940,7 +940,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetsListWithNoTag = targetManagement
                 .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.TRUE, tagNames)).getContent();
 
-        assertThat(targetManagement.count()).as("Total targets").isEqualTo(50);
+        assertThat(targetQueryExecutionManagement.count()).as("Total targets").isEqualTo(50);
         assertThat(targetsListWithNoTag.size()).as("Targets with no tag").isEqualTo(25);
 
     }
@@ -975,7 +975,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Page<Target> foundTargets = targetQueryExecutionManagement.findByQuery(PAGE, rsqlFilter);
 
-        assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
+        assertThat(targetQueryExecutionManagement.count()).as("Total targets").isEqualTo(50L);
         assertThat(foundTargets.getTotalElements()).as("Targets in RSQL filter").isEqualTo(27L);
     }
 

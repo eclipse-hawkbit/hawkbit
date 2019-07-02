@@ -8,14 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Validator;
+import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.data.validator.LongRangeValidator;
+import com.vaadin.data.validator.NullValidator;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.themes.ValoTheme;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -64,25 +75,13 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Validator;
-import com.vaadin.data.util.converter.StringToIntegerConverter;
-import com.vaadin.data.validator.IntegerRangeValidator;
-import com.vaadin.data.validator.LongRangeValidator;
-import com.vaadin.data.validator.NullValidator;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.themes.ValoTheme;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Rollout add or update popup layout.
@@ -203,7 +202,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             if (editRolloutEnabled) {
                 editRollout();
                 if (rollout.getStatus() == Rollout.RolloutStatus.WAITING_FOR_APPROVAL) {
-                    serviceContext.rolloutManagement.approveOrDeny(rollout.getId(),
+                    serviceContext.getRolloutManagement().approveOrDeny(rollout.getId(),
                             (Rollout.ApprovalDecision) approveButtonsGroup.getValue(), approvalRemarkField.getValue());
                     eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
                 }
@@ -230,7 +229,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
                 return false;
             }
-            if (serviceContext.rolloutManagement.getByName(getRolloutName()).isPresent()) {
+            if (serviceContext.getRolloutManagement().getByName(getRolloutName()).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", getRolloutName()));
                 return false;
@@ -245,7 +244,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             final Long distributionSetId = (Long) distributionSet.getValue();
 
-            final RolloutUpdate rolloutUpdate = serviceContext.entityFactory.rollout().update(rollout.getId())
+            final RolloutUpdate rolloutUpdate = serviceContext.getEntityFactory().rollout().update(rollout.getId())
                     .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
                     .actionType(getActionType()).forcedTime(getForcedTimeStamp());
 
@@ -258,7 +257,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             Rollout updatedRollout;
             try {
-                updatedRollout = serviceContext.rolloutManagement.update(rolloutUpdate);
+                updatedRollout = serviceContext.getRolloutManagement().update(rolloutUpdate);
             } catch (final EntityNotFoundException | EntityReadOnlyException e) {
                 LOGGER.warn("Rollout was deleted. Redirect to Rollouts overview.", e);
                 uiNotification.displayWarning(
@@ -278,7 +277,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
             final String rolloutNameVal = getRolloutName();
             if (!rollout.getName().equals(rolloutNameVal)
-                    && serviceContext.rolloutManagement.getByName(rolloutNameVal).isPresent()) {
+                    && serviceContext.getRolloutManagement().getByName(rolloutNameVal).isPresent()) {
                 uiNotification
                         .displayValidationError(i18n.getMessage("message.rollout.duplicate.check", rolloutNameVal));
                 return false;
@@ -302,7 +301,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresholdPercent))
                     .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-            final RolloutCreate rolloutCreate = serviceContext.entityFactory.rollout().create()
+            final RolloutCreate rolloutCreate = serviceContext.getEntityFactory().rollout().create()
                     .name(rolloutName.getValue()).description(description.getValue()).set(distributionId)
                     .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType())
                     .forcedTime(getForcedTimeStamp());
@@ -315,10 +314,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             }
 
             if (isNumberOfGroups()) {
-                return serviceContext.rolloutManagement.create(rolloutCreate, amountGroup, conditions);
+                return serviceContext.getRolloutManagement().create(rolloutCreate, amountGroup, conditions);
             } else if (isGroupsDefinition()) {
                 final List<RolloutGroupCreate> groups = defineGroupsLayout.getSavedRolloutGroups();
-                return serviceContext.rolloutManagement.create(rolloutCreate, groups, conditions);
+                return serviceContext.getRolloutManagement().create(rolloutCreate, groups, conditions);
             }
 
             throw new IllegalStateException("Either of the Tabs must be selected");
@@ -762,7 +761,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);
         } else {
-            totalTargetsCount = serviceContext.targetQueryExecutionManagement.countByQuery(filterQueryString);
+            totalTargetsCount = serviceContext.getTargetQueryExecutionManagement().countByQuery(filterQueryString);
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
             defineGroupsLayout.setTargetFilter(filterQueryString);
         }
@@ -780,7 +779,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void populateTargetFilterQuery(final Rollout rollout) {
-        final Page<TargetFilterQuery> filterQueries = serviceContext.targetFilterQueryManagement
+        final Page<TargetFilterQuery> filterQueries = serviceContext.getTargetFilterQueryManagement()
                 .findByQuery(PageRequest.of(0, 1), rollout.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
             final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
@@ -945,7 +944,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null) {
-                final int maxGroups = serviceContext.quotaManagement.getMaxRolloutGroupsPerRollout();
+                final int maxGroups = serviceContext.getQuotaManagement().getMaxRolloutGroupsPerRollout();
                 new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 1, maxGroups), 1,
                         maxGroups).validate(Integer.valueOf(value.toString()));
             }
@@ -958,7 +957,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             if (value != null && totalTargetsCount != null) {
-                final int maxGroupSize = serviceContext.quotaManagement.getMaxTargetsPerRolloutGroup();
+                final int maxGroupSize = serviceContext.getQuotaManagement().getMaxTargetsPerRolloutGroup();
                 if (getGroupSize() > maxGroupSize) {
                     final String msg = i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxGroupSize);
                     throw new InvalidValueException(msg);
@@ -972,7 +971,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             return;
         }
 
-        final Optional<Rollout> rolloutFound = serviceContext.rolloutManagement.get(rolloutId);
+        final Optional<Rollout> rolloutFound = serviceContext.getRolloutManagement().get(rolloutId);
         if (!rolloutFound.isPresent()) {
             return;
         }
@@ -991,7 +990,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
-            totalTargetsCount = serviceContext.targetQueryExecutionManagement
+            totalTargetsCount = serviceContext.getTargetQueryExecutionManagement()
                     .countByQuery(rollout.getTargetFilterQuery());
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
         } else {
@@ -1021,8 +1020,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             window.updateAllComponents(this);
             window.setOrginaleValues();
 
-            updateGroupsChart(serviceContext.rolloutGroupManagement
-                    .findByRollout(PageRequest.of(0, serviceContext.quotaManagement.getMaxRolloutGroupsPerRollout()),
+            updateGroupsChart(serviceContext.getRolloutGroupManagement()
+                    .findByRollout(PageRequest.of(0, serviceContext.getQuotaManagement().getMaxRolloutGroupsPerRollout()),
                             rollout.getId())
                     .getContent(), rollout.getTotalTargets());
 

@@ -226,7 +226,7 @@ public class DefineGroupsLayout extends GridLayout {
         removeAllRows();
 
         final List<RolloutGroup> groups = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, serviceContext.quotaManagement.getMaxRolloutGroupsPerRollout()), rollout.getId())
+                .findByRollout(PageRequest.of(0, serviceContext.getQuotaManagement().getMaxRolloutGroupsPerRollout()), rollout.getId())
                 .getContent();
         for (final RolloutGroup group : groups) {
             final GroupRow groupRow = addGroupRow();
@@ -278,7 +278,8 @@ public class DefineGroupsLayout extends GridLayout {
         }
 
         if (runningValidationsCounter.incrementAndGet() == 1) {
-            final ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups = serviceContext.rolloutManagement
+            final ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups = serviceContext
+                    .getRolloutManagement()
                     .validateTargetsInGroups(savedRolloutGroups, targetFilter, System.currentTimeMillis());
             final UI ui = UI.getCurrent();
             validateTargetsInGroups.addCallback(validation -> ui.access(() -> setGroupsValidation(validation)),
@@ -322,7 +323,7 @@ public class DefineGroupsLayout extends GridLayout {
 
     private void singleGroupsValidation(final GroupRow lastRow) {
         final boolean hasRemainingTargetsError = validationStatus == ValidationStatus.INVALID;
-        final int maxTargets = serviceContext.quotaManagement.getMaxTargetsPerRolloutGroup();
+        final int maxTargets = serviceContext.getQuotaManagement().getMaxTargetsPerRolloutGroup();
 
         for (int i = 0; i < groupRows.size(); ++i) {
             final GroupRow row = groupRows.get(i);
@@ -499,7 +500,7 @@ public class DefineGroupsLayout extends GridLayout {
             if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
                 targetFilterQueryCombo.setValue(null);
             } else {
-                final Page<TargetFilterQuery> filterQueries = serviceContext.targetFilterQueryManagement
+                final Page<TargetFilterQuery> filterQueries = serviceContext.getTargetFilterQueryManagement()
                         .findByQuery(PageRequest.of(0, 1), group.getTargetFilterQuery());
                 if (filterQueries.getTotalElements() > 0) {
                     final TargetFilterQuery filterQuery = filterQueries.getContent().get(0);
@@ -594,7 +595,7 @@ public class DefineGroupsLayout extends GridLayout {
             final String percentageString = targetPercentage.getValue().replace(",", ".");
             final Float percentage = Float.parseFloat(percentageString);
 
-            return serviceContext.entityFactory.rolloutGroup().create().name(groupName.getValue()).description(groupName.getValue())
+            return serviceContext.getEntityFactory().rolloutGroup().create().name(groupName.getValue()).description(groupName.getValue())
                     .targetFilterQuery(getTargetFilterQuery()).targetPercentage(percentage)
                     .conditions(conditionBuilder.build());
         }

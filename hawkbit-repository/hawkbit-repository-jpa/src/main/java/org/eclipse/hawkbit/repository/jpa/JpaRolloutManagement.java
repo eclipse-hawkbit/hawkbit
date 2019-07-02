@@ -8,21 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.persistence.EntityManager;
-import javax.validation.ConstraintDeclarationException;
-import javax.validation.ValidationException;
-
+import com.google.common.collect.Lists;
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -106,7 +92,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
+import javax.persistence.EntityManager;
+import javax.validation.ConstraintDeclarationException;
+import javax.validation.ValidationException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 /**
  * JPA implementation of {@link RolloutManagement}.
@@ -427,19 +425,18 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final long limit) {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
-            final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByQueryAndNotInRolloutGroups(pageRequest, readyGroups,
+            final List<Target> targets = targetManagement.findByQueryAndNotInRolloutGroups(Math.toIntExact(limit), readyGroups,
                     targetFilter);
 
             createAssignmentOfTargetsToGroup(targets, group);
 
-            return Long.valueOf(targets.getNumberOfElements());
+            return Long.valueOf(targets.size());
         });
     }
 
-    private void createAssignmentOfTargetsToGroup(final Page<Target> targets, final RolloutGroup group) {
+    private void createAssignmentOfTargetsToGroup(final List<Target> targets, final RolloutGroup group) {
         targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
 

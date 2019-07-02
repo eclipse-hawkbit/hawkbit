@@ -8,18 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import cz.jirutka.rsql.parser.ParseException;
+import cz.jirutka.rsql.parser.RSQLParserException;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -33,16 +25,21 @@ import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
 import org.eclipse.persistence.exceptions.ConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-import cz.jirutka.rsql.parser.ParseException;
-import cz.jirutka.rsql.parser.RSQLParserException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * An implementation of {@link RsqlValidationOracle} which retrieves the
@@ -63,7 +60,11 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     private final TargetQueryExecutionManagement targetQueryExecutionManagement;
 
-    public RsqlParserValidationOracle(@Autowired final TargetQueryExecutionManagement targetQueryExecutionManagement) {
+    /**
+     * Create a new query-validator.
+     * @param targetQueryExecutionManagement the executor for the query
+     */
+    public RsqlParserValidationOracle(final TargetQueryExecutionManagement targetQueryExecutionManagement) {
         this.targetQueryExecutionManagement = targetQueryExecutionManagement;
     }
 

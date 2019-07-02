@@ -8,19 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.ListJoin;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.SetJoin;
-import javax.persistence.criteria.MapJoin;
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -39,6 +26,18 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.MapJoin;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Specifications class for {@link Target}s. The class provides Spring Data JPQL

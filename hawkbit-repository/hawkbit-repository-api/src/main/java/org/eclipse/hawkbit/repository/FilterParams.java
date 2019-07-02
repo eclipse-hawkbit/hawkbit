@@ -45,14 +45,12 @@ public class FilterParams implements Serializable {
      * @param overdueState
      *            if set, a filter is added for overdued devices
      * @param filterBySearchText
-     *            to find targets having the text anywhere in name or
-     *            description.
+     *            to find targets having the text anywhere in name or description.
      * @param filterByInstalledOrAssignedDistributionSetId
-     *            filter by installed or assigned
-     *            {@link DistributionSet#getId()}
+     *            filter by installed or assigned {@link DistributionSet#getId()}
      * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned, if set,
-     *            tag-filtering is enabled
+     *            flag to select targets with no tag assigned, if set, tag-filtering
+     *            is enabled
      * @param filterByTagNames
      *            if tag-filtering is enabled, a filter is added for the given
      *            tag-names
@@ -68,10 +66,24 @@ public class FilterParams implements Serializable {
         this.filterByTagNames = (filterByTagNames == null) ? new String[0] : filterByTagNames;
     }
 
+    /**
+     * Construct a {@linkplain FilterParams} object for a distribution set
+     * 
+     * @param distributionId
+     *            the ID of the distribution set to be filtered for
+     * @return a new {@linkplain FilterParams} entity
+     */
     public static FilterParams forDistributionSet(Long distributionId) {
         return new FilterParams(distributionId);
     }
 
+    /**
+     * Construct a {@linkplain FilterParams} object for a list of tags
+     * 
+     * @param tagNames
+     *            tag-names to be filtered
+     * @return a new {@linkplain FilterParams} entity
+     */
     public static FilterParams forTags(String... tagNames) {
         return new FilterParams(null, null, null, null, false, tagNames);
     }
@@ -97,20 +109,21 @@ public class FilterParams implements Serializable {
     }
 
     /**
-     * Gets the flag for overdue filter; if set to <code>true</code>, the
-     * overdue filter is activated. Overdued targets a targets that did not
-     * respond during the configured intervals: poll_itvl + overdue_itvl. <br>
+     * Gets the flag for overdue filter; if set to <code>true</code>, the overdue
+     * filter is activated. Overdued targets a targets that did not respond during
+     * the configured intervals: poll_itvl + overdue_itvl. <br>
      * The default is {@code false} - no filtering for overdue targets.
      *
-     * @return {@code true} when overdue filtering should be active, {@code false} otherwise.
+     * @return {@code true} when overdue filtering should be active, {@code false}
+     *         otherwise.
      */
     public boolean isOverdueState() {
         return overdueState;
     }
 
     /**
-     * Gets the search text to filter for. This is used to find targets having
-     * the text anywhere in name or description <br>
+     * Gets the search text to filter for. This is used to find targets having the
+     * text anywhere in name or description <br>
      * If set to <code>null</code> this filter is disabled.
      *
      * @return the search text to filter for
@@ -130,8 +143,8 @@ public class FilterParams implements Serializable {
     }
 
     /**
-     * Gets the tags that are used to filter for. The activation of this filter
-     * is done by {@link #isSelectTargetWithNoTag()}.
+     * Gets the tags that are used to filter for. The activation of this filter is
+     * done by {@link #isSelectTargetWithNoTag()}.
      *
      * @return the tags that are used to filter for or an empty array if non are
      *         present
