@@ -650,8 +650,7 @@ public class JpaTargetManagement implements TargetManagement {
             ++currentPageNumber;
             targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
             List<String> controllerIds = targetsFoundByFilter.map(Target::getControllerId).getContent();
-            targetsFound += targetRepository.count( //
-                    hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
+            targetsFound += targetRepository.count(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
         } while (targetsLeft);
 
         return targetsFound;

@@ -29,6 +29,8 @@ import java.util.Collection;
  * 
  * For any use-case specific query use the query-/count-methods which limit the
  * result to a predefined set of IDs.
+ *
+ * @param <T extends Target> The concrete type of the target implementation
  */
 public interface TargetQueryExecutionManagement<T extends Target> {
 

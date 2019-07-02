@@ -104,9 +104,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<Target> findTargetsAll = (rsqlParam != null) ? //
-                this.targetQueryExecutionManagement.findByQuery(pageable, rsqlParam) : //
-                this.targetQueryExecutionManagement.findAll(pageable);
+        final Page<Target> findTargetsAll = (rsqlParam != null)
+                ? this.targetQueryExecutionManagement.findByQuery(pageable, rsqlParam)
+                : this.targetQueryExecutionManagement.findAll(pageable);
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));

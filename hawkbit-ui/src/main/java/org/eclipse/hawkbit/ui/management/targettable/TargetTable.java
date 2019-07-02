@@ -8,25 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
-import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -90,21 +86,24 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
+import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
 
 /**
  * Concrete implementation of Target table which is displayed on the Deployment

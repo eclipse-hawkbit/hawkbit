@@ -24,6 +24,11 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
+/**
+ * Provides a source of
+ * {@linkplain org.eclipse.hawkbit.repository.model.Target}s based on Hawkbit's
+ * internal device-management.
+ */
 @Transactional(readOnly = true)
 public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionManagement<JpaTarget> {
     private final VirtualPropertyReplacer virtualPropertyReplacer;

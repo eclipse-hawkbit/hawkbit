@@ -17,6 +17,9 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 
+/**
+ * Parameter struct used to pass the services, needed by different UI components, through the constructors.
+ */
 public class RolloutServiceContext {
     public final RolloutManagement rolloutManagement;
     public final RolloutGroupManagement rolloutGroupManagement;
