@@ -110,14 +110,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        Slice<? extends Target> targetBeans;
+        Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findByFilterOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId, getFilter());
         } else if (null != targetFilterQueryId) {
-            TargetFilterQueryManagement targetFilterQueryManagement = getTargetFilterQueryManagement();
-            TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.getById(targetFilterQueryId);
+            TargetFilterQuery targetFilterQuery = getTargetFilterQueryManagement().getById(targetFilterQueryId);
             targetBeans = getTargetQueryExecutionManagement().findByQuery(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     targetFilterQuery.getQuery());
@@ -129,36 +128,36 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     getFilter());
         }
-        for (final Target targ : targetBeans) {
-            final ProxyTarget prxyTarget = new ProxyTarget();
-            prxyTarget.setId(targ.getId());
-            prxyTarget.setName(targ.getName());
-            prxyTarget.setDescription(targ.getDescription());
-            prxyTarget.setControllerId(targ.getControllerId());
-            prxyTarget.setInstallationDate(targ.getInstallationDate());
-            prxyTarget.setAddress(targ.getAddress());
-            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
-            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
-            prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
-            prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
-            prxyTarget.setCreatedAt(targ.getCreatedAt());
-            prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
-            prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
+        for (final Target target : targetBeans) {
+            final ProxyTarget proxyTarget = new ProxyTarget();
+            proxyTarget.setId(target.getId());
+            proxyTarget.setName(target.getName());
+            proxyTarget.setDescription(target.getDescription());
+            proxyTarget.setControllerId(target.getControllerId());
+            proxyTarget.setInstallationDate(target.getInstallationDate());
+            proxyTarget.setAddress(target.getAddress());
+            proxyTarget.setLastTargetQuery(target.getLastTargetQuery());
+            proxyTarget.setUpdateStatus(target.getUpdateStatus());
+            proxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(target.getLastModifiedAt()));
+            proxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(target.getCreatedAt()));
+            proxyTarget.setCreatedAt(target.getCreatedAt());
+            proxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(target));
+            proxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(target));
 
             if (pinnedDistId == null) {
-                prxyTarget.setInstalledDistributionSet(null);
-                prxyTarget.setAssignedDistributionSet(null);
+                proxyTarget.setInstalledDistributionSet(null);
+                proxyTarget.setAssignedDistributionSet(null);
             } else {
-                getDeploymentManagement().getAssignedDistributionSet(targ.getControllerId())
-                        .ifPresent(prxyTarget::setAssignedDistributionSet);
-                getDeploymentManagement().getInstalledDistributionSet(targ.getControllerId())
-                        .ifPresent(prxyTarget::setInstalledDistributionSet);
+                getDeploymentManagement().getAssignedDistributionSet(target.getControllerId())
+                        .ifPresent(proxyTarget::setAssignedDistributionSet);
+                getDeploymentManagement().getInstalledDistributionSet(target.getControllerId())
+                        .ifPresent(proxyTarget::setInstalledDistributionSet);
             }
 
-            prxyTarget.setUpdateStatus(targ.getUpdateStatus());
-            prxyTarget.setLastTargetQuery(targ.getLastTargetQuery());
-            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(targ.getPollStatus(), getI18N()));
-            proxyTargetBeans.add(prxyTarget);
+            proxyTarget.setUpdateStatus(target.getUpdateStatus());
+            proxyTarget.setLastTargetQuery(target.getLastTargetQuery());
+            proxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(target.getPollStatus(), getI18N()));
+            proxyTargetBeans.add(proxyTarget);
         }
         return proxyTargetBeans;
     }

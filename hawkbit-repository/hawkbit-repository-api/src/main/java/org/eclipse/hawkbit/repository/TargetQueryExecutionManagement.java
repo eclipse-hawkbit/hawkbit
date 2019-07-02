@@ -30,7 +30,7 @@ import java.util.Collection;
  * For any use-case specific query use the query-/count-methods which limit the
  * result to a predefined set of IDs.
  */
-public interface TargetQueryExecutionManagement {
+public interface TargetQueryExecutionManagement<T extends Target> {
 
     /**
      * Retrieves all targets.
@@ -40,7 +40,7 @@ public interface TargetQueryExecutionManagement {
      * @return the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<? extends Target> findAll(@NotNull Pageable pageable);
+    Page<T> findAll(@NotNull Pageable pageable);
 
     /**
      * Query targets
@@ -53,7 +53,7 @@ public interface TargetQueryExecutionManagement {
      * @return the found {@linkplain Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<? extends Target> findByQuery(@NotNull Pageable pageable, @NotEmpty String query);
+    Page<T> findByQuery(@NotNull Pageable pageable, @NotEmpty String query);
 
     /**
      * Query targets and limit the result to be in the provided ID-list
@@ -69,7 +69,7 @@ public interface TargetQueryExecutionManagement {
      * @return the found {@linkplain Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<? extends Target> findByQuery(@NotNull Pageable pageable, @NotEmpty String query, Collection<String> inIdList);
+    Page<T> findByQuery(@NotNull Pageable pageable, @NotEmpty String query, Collection<String> inIdList);
 
     /**
      * Count with a {@linkplain TargetFilterQuery#getQuery()}

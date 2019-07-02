@@ -8,13 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -29,10 +26,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test class for {@link AutoAssignChecker}.
@@ -198,7 +197,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        final Slice<? extends Target> targetsAll = targetQueryExecutionManagement.findAll(PAGE);
+        final Slice<Target> targetsAll = targetQueryExecutionManagement.findAll(PAGE);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
 
         long countWithAssignedDistSet = targetsAll.stream().filter(t -> targetIds.contains(t.getId()))

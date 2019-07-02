@@ -8,13 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.ValidationException;
-
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -55,6 +48,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.ValidationException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * REST Resource handling target CRUD operations.
@@ -105,7 +104,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<? extends Target> findTargetsAll = (rsqlParam != null) ? //
+        final Page<Target> findTargetsAll = (rsqlParam != null) ? //
                 this.targetQueryExecutionManagement.findByQuery(pageable, rsqlParam) : //
                 this.targetQueryExecutionManagement.findAll(pageable);
 

@@ -297,10 +297,6 @@ public class JpaTargetManagement implements TargetManagement {
         return targetMetadataRepository.findById(new TargetMetadataCompositeKey(targetId, key)).map(t -> t);
     }
 
-    private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
-        return convertPage(targetRepository.findAll(spec, pageable), pageable);
-    }
-
     @Override
     @Transactional
     @Retryable(include = {
@@ -360,7 +356,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
         Set<String> controllerIds = targetRepository.findControllerIdsByAssignedDistributionSet(distributionSetId);
-        return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
+        return targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds);
     }
 
     /*
@@ -372,7 +368,7 @@ public class JpaTargetManagement implements TargetManagement {
             final long distributionSetId, final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
         Set<String> controllerIds = targetRepository.findByNoActionWithDistributionSetExisits(distributionSetId);
-        return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds), pageable);
+        return targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds);
     }
 
     @Override
@@ -387,7 +383,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
         Set<String> controllerIdList = targetRepository.findControllerIdsByInstalledDistributionSet(distributionSetId);
-        return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, controllerIdList), pageable);
+        return targetQueryExecutionManagement.findByQuery(pageable, query, controllerIdList);
     }
 
     private void throwEntityNotFoundIfDsDoesNotExist(final Long distributionSetID) {
@@ -436,7 +432,7 @@ public class JpaTargetManagement implements TargetManagement {
         if (!filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
-        if (filterParams.getOverdueState()) {
+        if (filterParams.isOverdueState()) {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
         filterParams.getFilterByDistributionId().ifPresent(id -> {
@@ -624,8 +620,9 @@ public class JpaTargetManagement implements TargetManagement {
 
         do {
             Pageable pr = PageRequest.of(currentPageNumber, 500, ORDERBY_CONTROLLERID);
-            Page<? extends Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
-            targetsLeft = targetsFoundByFilter.getTotalPages() > (++currentPageNumber);
+            Page<Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
+            currentPageNumber += 1;
+            targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
             Set<String> controllerIds = new TreeSet<>(targetsFoundByFilter.map(Target::getControllerId).getContent());
             List<JpaTarget> targets = targetRepository
                     .findAll(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
@@ -649,7 +646,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         do {
             Pageable pr = PageRequest.of(currentPageNumber, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_CONTROLLERID);
-            Page<? extends Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
+            Page<Target> targetsFoundByFilter = targetQueryExecutionManagement.findByQuery(pr, query);
             ++currentPageNumber;
             targetsLeft = targetsFoundByFilter.getTotalPages() > (currentPageNumber);
             List<String> controllerIds = targetsFoundByFilter.map(Target::getControllerId).getContent();
@@ -666,8 +663,7 @@ public class JpaTargetManagement implements TargetManagement {
         if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
-        return findTargetsBySpec(
-                (root, cq, cb) -> TargetSpecifications.hasNoActionInRolloutGroup(group).toPredicate(root, cq, cb),
+        return convertPage(targetRepository.findAll(TargetSpecifications.hasNoActionInRolloutGroup(group), pageRequest),
                 pageRequest);
     }
 
@@ -706,7 +702,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByQueryAndTag(final Pageable pageable, final String query, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
         Set<String> targetIds = targetRepository.findControllerIdsByTag(tagId);
-        return convertPage(targetQueryExecutionManagement.findByQuery(pageable, query, targetIds), pageable);
+        return targetQueryExecutionManagement.findByQuery(pageable, query, targetIds);
     }
 
     @Override

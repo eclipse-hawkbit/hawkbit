@@ -8,13 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.tenancy;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -25,9 +21,12 @@ import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Multi-Tenancy tests which testing the CRUD operations of entities that all
@@ -53,10 +52,10 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(knownControllerId, anotherTenant);
 
         // ensure both tenants see their target
-        final Slice<? extends Target> findTargetsForTenant = findTargetsForTenant(tenant);
+        final Slice<Target> findTargetsForTenant = findTargetsForTenant(tenant);
         assertThat(findTargetsForTenant).hasSize(1);
         assertThat(findTargetsForTenant.getContent().get(0).getTenant().toUpperCase()).isEqualTo(tenant.toUpperCase());
-        final Slice<? extends Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        final Slice<Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(findTargetsForAnotherTenant).hasSize(1);
         assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
@@ -72,12 +71,12 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // find all targets for current tenant "mytenant"
-        final Slice<? extends Target> findTargetsAll = targetQueryExecutionManagement.findAll(PAGE);
+        final Slice<Target> findTargetsAll = targetQueryExecutionManagement.findAll(PAGE);
         // no target has been created for "mytenant"
         assertThat(findTargetsAll).hasSize(0);
 
         // find all targets for anotherTenant
-        final Slice<? extends Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
+        final Slice<Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
         // another tenant should have targets
         assertThat(findTargetsForTenant).hasSize(1);
     }
@@ -134,7 +133,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
             // ok
         }
 
-        Slice<? extends Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        Slice<Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(1);
 
         // ensure another tenant can delete the target
@@ -173,7 +172,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         return runAsTenant(tenant, () -> testdataFactory.createTarget(controllerId));
     }
 
-    private Slice<? extends Target> findTargetsForTenant(final String tenant) throws Exception {
+    private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
         return runAsTenant(tenant, () -> targetQueryExecutionManagement.findAll(PAGE));
     }
 

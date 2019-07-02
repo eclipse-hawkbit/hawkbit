@@ -8,16 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
-import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.FILTER_BY_QUERY;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-import static org.springframework.data.domain.Sort.Direction.DESC;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -35,6 +25,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
+import static org.eclipse.hawkbit.ui.utils.SPUIDefinitions.FILTER_BY_QUERY;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 /**
  * Simple implementation of generics bean query which dynamically loads
@@ -88,7 +87,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        Slice<? extends Target> targetBeans;
+        Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!StringUtils.isEmpty(filterQuery)) {
             targetBeans = getTargetQueryExecutionManagement().findByQuery(

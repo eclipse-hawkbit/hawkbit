@@ -100,11 +100,11 @@ public class FilterParams implements Serializable {
      * Gets the flag for overdue filter; if set to <code>true</code>, the
      * overdue filter is activated. Overdued targets a targets that did not
      * respond during the configured intervals: poll_itvl + overdue_itvl. <br>
-     * If set to <code>null</code> this filter is disabled.
+     * The default is {@code false} - no filtering for overdue targets.
      *
-     * @return flag for overdue filter activation
+     * @return {@code true} when overdue filtering should be active, {@code false} otherwise.
      */
-    public boolean getOverdueState() {
+    public boolean isOverdueState() {
         return overdueState;
     }
 
