@@ -23,6 +23,9 @@ public class DdiArtifactHash {
     @JsonProperty
     private String md5;
 
+    @JsonProperty
+    private String sha256;
+
     /**
      * Default constructor.
      */
@@ -36,9 +39,10 @@ public class DdiArtifactHash {
      * @param sha1
      * @param md5
      */
-    public DdiArtifactHash(final String sha1, final String md5) {
+    public DdiArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;
         this.md5 = md5;
+        this.sha256 = sha256;
     }
 
     /**
@@ -55,4 +59,10 @@ public class DdiArtifactHash {
         return md5;
     }
 
+    /**
+     * @return the sh256
+     */
+    public String getSha256() {
+        return sha256;
+    }
 }

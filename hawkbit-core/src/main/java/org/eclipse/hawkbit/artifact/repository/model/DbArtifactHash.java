@@ -18,6 +18,8 @@ public class DbArtifactHash {
 
     private final String md5;
 
+    private final String sha256;
+
     /**
      * Constructor.
      * 
@@ -26,9 +28,10 @@ public class DbArtifactHash {
      * @param md5
      *            the md5 hash
      */
-    public DbArtifactHash(final String sha1, final String md5) {
+    public DbArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;
         this.md5 = md5;
+        this.sha256 = sha256;
     }
 
     public String getSha1() {
@@ -39,4 +42,7 @@ public class DbArtifactHash {
         return md5;
     }
 
+    public String getSha256() {
+        return sha256;
+    }
 }

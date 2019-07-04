@@ -45,24 +45,28 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             final String contentType, final DbArtifactHash hash) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
+        final MessageDigest mdSHA256;
         try {
             mdSHA1 = MessageDigest.getInstance("SHA1");
             mdMD5 = MessageDigest.getInstance("MD5");
+            mdSHA256 = MessageDigest.getInstance("SHA-256");
         } catch (final NoSuchAlgorithmException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
         String tempFile = null;
-        try (final DigestInputStream inputstream = wrapInDigestInputStream(content, mdSHA1, mdMD5)) {
+        try (final DigestInputStream inputstream = wrapInDigestInputStream(content, mdSHA1, mdMD5, mdSHA256)) {
 
             tempFile = storeTempFile(inputstream);
 
             final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
             final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
+            final String sha256Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA256.digest());
 
-            checkHashes(sha1Hash16, md5Hash16, hash);
+            checkHashes(sha1Hash16, md5Hash16, sha256Hash16, hash);
 
-            return store(sanitizeTenant(tenant), sha1Hash16, md5Hash16, contentType, tempFile);
+            return store(sanitizeTenant(tenant), new DbArtifactHash(sha1Hash16, md5Hash16, sha256Hash16), contentType,
+                    tempFile);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
@@ -100,27 +104,32 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         }
     }
 
-    private static void checkHashes(final String sha1Hash16, final String md5Hash16, final DbArtifactHash hash) {
+    private static void checkHashes(final String sha1Hash16, final String md5Hash16, final String sha256Hash16,
+            final DbArtifactHash hash) {
         if (hash == null) {
             return;
         }
         if (hash.getSha1() != null && !sha1Hash16.equals(hash.getSha1())) {
             throw new HashNotMatchException("The given sha1 hash " + hash.getSha1()
-                    + " does not match with the calcualted sha1 hash " + sha1Hash16, HashNotMatchException.SHA1);
+                    + " does not match with the calculated sha1 hash " + sha1Hash16, HashNotMatchException.SHA1);
         }
         if (hash.getMd5() != null && !md5Hash16.equals(hash.getMd5())) {
             throw new HashNotMatchException(
-                    "The given md5 hash " + hash.getMd5() + " does not match with the calcualted md5 hash " + md5Hash16,
+                    "The given md5 hash " + hash.getMd5() + " does not match with the calculated md5 hash " + md5Hash16,
                     HashNotMatchException.MD5);
+        }
+        if (hash.getSha256() != null && !sha256Hash16.equals(hash.getSha256())) {
+            throw new HashNotMatchException("The given sha256 hash " + hash.getSha256()
+                    + " does not match with the calculated sha256 hash " + sha256Hash16, HashNotMatchException.SHA256);
         }
     }
 
-    protected abstract AbstractDbArtifact store(final String tenant, final String sha1Hash16, final String mdMD5Hash16,
+    protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash hashes,
             final String contentType, final String tempFile) throws IOException;
 
     private static DigestInputStream wrapInDigestInputStream(final InputStream input, final MessageDigest mdSHA1,
-            final MessageDigest mdMD5) {
-        return new DigestInputStream(new DigestInputStream(input, mdMD5), mdSHA1);
+            final MessageDigest mdMD5, final MessageDigest mdSHA256) {
+        return new DigestInputStream(new DigestInputStream(new DigestInputStream(input, mdSHA256), mdMD5), mdSHA1);
     }
 
     protected static String sanitizeTenant(final String tenant) {
