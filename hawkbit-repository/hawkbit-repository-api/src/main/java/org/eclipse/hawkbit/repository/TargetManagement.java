@@ -81,35 +81,16 @@ public interface TargetManagement {
     /**
      * Count {@link Target}s for all the given filter parameters.
      *
-     * @param status
-     *            find targets having one of these {@link TargetUpdateStatus}s.
-     *            Set to <code>null</code> in case this is not required.
-     * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
-     *            Set to <code>null</code> in case this is not required.
-     * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
+     * @param filter
+     *            parameters by which targets should be filtered
      *
      * @return the found number {@link Target}s
      * 
      * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
+     *             If no distribution set is found matching the given filter
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
-            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
+    long countByFilters(FilterParams filter);
 
     /**
      * Counts number of targets with given with given distribution set Id

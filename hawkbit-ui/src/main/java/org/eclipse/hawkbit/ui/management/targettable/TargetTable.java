@@ -12,6 +12,7 @@ import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.creat
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +80,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -808,26 +808,12 @@ public class TargetTable extends AbstractTable<Target> {
         final long size;
         if (query.isPresent()) {
             size = targetManagement.countByTargetFilterQuery(query.get());
-        } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
-                filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
-                filterParams.getFilterBySearchText())) {
+        } else if (filterParams.isEmpty(pinnedDistId)) {
             size = totalTargetsCount;
         } else {
-            size = targetManagement.countByFilters(filterParams.getFilterByStatus(), filterParams.getOverdueState(),
-                    filterParams.getFilterBySearchText(), filterParams.getFilterByDistributionId(),
-                    filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames());
+            size = targetManagement.countByFilters(filterParams);
         }
         return size;
-    }
-
-    private static boolean noFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
-            final Boolean noTagClicked, final String[] targetTags, final String searchText) {
-        return CollectionUtils.isEmpty(status) && distributionId == null && StringUtils.isEmpty(searchText)
-                && !isTagSelected(targetTags, noTagClicked);
-    }
-
-    private static Boolean isTagSelected(final String[] targetTags, final Boolean noTagClicked) {
-        return targetTags == null && !noTagClicked;
     }
 
     private long getTotalTargetsCount() {

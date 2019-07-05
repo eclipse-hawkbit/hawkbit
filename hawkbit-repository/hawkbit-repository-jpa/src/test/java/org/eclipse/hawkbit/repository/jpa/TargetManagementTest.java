@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -735,9 +736,6 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         toggleTagAssignment(tagABCTargets, tagB);
         toggleTagAssignment(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "X"))
-                .as("Target count is wrong").isEqualTo(0);
-
         // search for targets with tag tagA
         final List<Target> targetWithTagA = new ArrayList<>();
         final List<Target> targetWithTagB = new ArrayList<>();
@@ -765,12 +763,12 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "A"))
-                .as("Target count is wrong").isEqualTo(targetWithTagA.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "B"))
-                .as("Target count is wrong").isEqualTo(targetWithTagB.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "C"))
-                .as("Target count is wrong").isEqualTo(targetWithTagC.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("A"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagA.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("B"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagB.size());
+        assertThat(targetManagement.countByFilters(FilterParams.forTags("C"))).as("Target count is wrong")
+                .isEqualTo(targetWithTagC.size());
     }
 
     @Test

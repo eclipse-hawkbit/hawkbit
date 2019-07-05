@@ -78,7 +78,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -443,41 +442,35 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(new FilterParams(status, overdueState,
-                searchText, installedOrAssignedDistributionSetId, selectTargetWithNoTag, tagNames));
-        return countByCriteriaAPI(specList);
+    public long countByFilters(final FilterParams filter) {
+        List<Specification<JpaTarget>> specifications = buildSpecificationList(filter);
+        if (specifications.isEmpty()) {
+            return targetRepository.count();
+        }
+        return targetRepository.count(SpecificationsBuilder.combineWithAnd(specifications));
     }
 
     private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = new ArrayList<>();
-        if ((filterParams.getFilterByStatus() != null) && !filterParams.getFilterByStatus().isEmpty()) {
+
+        if (!filterParams.getFilterByStatus().isEmpty()) {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(filterParams.getFilterByStatus()));
         }
-        if (filterParams.getOverdueState() != null) {
+        if (filterParams.isOverdueState()) {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
-        if (filterParams.getFilterByDistributionId() != null) {
-            throwEntityNotFoundIfDsDoesNotExist(filterParams.getFilterByDistributionId());
+        filterParams.getFilterByDistributionId().ifPresent(id -> {
+            throwEntityNotFoundIfDsDoesNotExist(id);
+            specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(id));
+        });
+        filterParams.getFilterBySearchText()
+                .ifPresent(text -> specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(text)));
 
-            specList.add(TargetSpecifications
-                    .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
-        }
-        if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
-            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
-        }
-        if (isHasTagsFilterActive(filterParams)) {
+        if (filterParams.hasTagsFilterActive()) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
-                    filterParams.getSelectTargetWithNoTag()));
+                    filterParams.isSelectTargetWithNoTag()));
         }
         return specList;
-    }
-
-    private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
-        return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
-                || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {

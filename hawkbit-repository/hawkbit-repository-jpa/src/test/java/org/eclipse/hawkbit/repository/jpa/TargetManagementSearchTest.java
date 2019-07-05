@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,8 +185,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(pending, null, null, installedSet.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null,
-                                installedSet.getId(), Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(pending, null,
+                                null, installedSet.getId(), Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -201,8 +202,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(both, null, null, null, Boolean.FALSE, targTagW.getName()))
                 .getContent()).as("has number of elements").hasSize(200)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(both, null, null, null,
-                                Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(both, null, null, null, Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -217,8 +218,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE, targTagW.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(2).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, null,
-                                Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(pending, null, null, null, Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -235,8 +236,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE, targTagW.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(2).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, setA.getId(),
-                                Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(pending, null,
+                                null, setA.getId(), Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -253,8 +254,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(pending, null, "%targ-B%", setA.getId(), Boolean.FALSE, targTagW.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, "%targ-B%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(pending, null,
+                                "%targ-B%", setA.getId(), Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -271,8 +272,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(pending, null, "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(pending, null,
+                                "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -288,8 +289,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -304,8 +305,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(pending, null, null, null, Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -322,8 +323,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(unknown, null, "%targ-B%", null, Boolean.FALSE, targTagW.getName()))
                 .getContent()).as("has number of elements").hasSize(99)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, "%targ-B%", null,
-                                Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(unknown, null, "%targ-B%", null, Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -338,8 +339,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0]))
                 .getContent()).as("has number of elements").hasSize(99)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, "%targ-A%", null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -356,8 +357,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE, new String[0]))))
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
     }
@@ -372,8 +373,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 new FilterParams(unknown, null, null, null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))
                 .getContent()).as("has number of elements").hasSize(198)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, null,
-                                Boolean.FALSE, targTagY.getName(), targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(unknown, null,
+                                null, null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -388,8 +389,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(unknown, null, null, null, Boolean.FALSE, new String[0]))
                 .getContent()).as("has number of elements").hasSize(397)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(unknown, null, null, null, Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -406,8 +407,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE, new String[0]))
                 .getContent()).as("has number of elements").hasSize(198)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, Boolean.TRUE, null, null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -423,8 +424,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -439,8 +440,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(null, null, null, setA.getId(), Boolean.FALSE, new String[0]))
                 .getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(FilterParams.forDistributionSet(setA.getId()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -456,8 +457,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE, targTagX.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-C%",
-                                setA.getId(), Boolean.FALSE, targTagX.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(null, null,
+                                "%targ-C%", setA.getId(), Boolean.FALSE, targTagX.getName()))))
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
 
@@ -472,8 +473,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE, targTagW.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(null, null,
+                                "%targ-A%", setA.getId(), Boolean.FALSE, targTagW.getName()))))
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
 
@@ -489,8 +490,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                         new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE, targTagW.getName()))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-C%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(null, null,
+                                "%targ-C%", setA.getId(), Boolean.FALSE, targTagW.getName()))))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -501,21 +502,21 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     private void verifyThat1TargetHasNameAndId(final String name, final String controllerId) {
         assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, name, null, Boolean.FALSE))
                 .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints
-                                .saturatedCast(targetManagement.countByFilters(null, null, name, null, Boolean.FALSE)));
+                        .hasSize(Ints.saturatedCast(targetManagement
+                                .countByFilters(new FilterParams(null, null, name, null, Boolean.FALSE))));
 
         assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, controllerId, null, Boolean.FALSE))
                 .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, controllerId, null, Boolean.FALSE)));
+                        .hasSize(Ints.saturatedCast(targetManagement
+                                .countByFilters(new FilterParams(null, null, controllerId, null, Boolean.FALSE))));
     }
 
     @Step
     private void verifyThat1TargetHasAttributeValue(final String value, final String controllerId) {
         assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, value, null, Boolean.FALSE))
                 .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, value, null, Boolean.FALSE)));
+                        .hasSize(Ints.saturatedCast(targetManagement
+                                .countByFilters(new FilterParams(null, null, value, null, Boolean.FALSE))));
     }
 
     @Step
@@ -527,8 +528,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 new FilterParams(null, null, "%targ-B%", null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))
                 .getContent()).as("has number of elements").hasSize(100)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-B%", null,
-                                Boolean.FALSE, targTagY.getName(), targTagW.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(new FilterParams(null, null,
+                                "%targ-B%", null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -549,8 +550,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.FALSE, targTagD.getName()))
                 .getContent()).as("Expected number of results is").hasSize(200)
                         .as("and is expected number of results is equal to ")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, null, null,
-                                Boolean.FALSE, targTagD.getName())))
+                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(
+                                new FilterParams(null, null, null, null, Boolean.FALSE, targTagD.getName()))))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
