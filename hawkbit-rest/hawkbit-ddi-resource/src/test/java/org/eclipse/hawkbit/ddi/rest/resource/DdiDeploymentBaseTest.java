@@ -483,8 +483,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                                 contains(artifactSignature.getMd5Hash())))
                         .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
                                 contains(artifactSignature.getSha1Hash())))
-                        .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
-                                contains(artifactSignature.getSha1Hash())))
+                        .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1].hashes.sha256",
+                                contains(artifactSignature.getSha256Hash())))
                         .andExpect(
                                 jsonPath("$.deployment.chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
                                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/"

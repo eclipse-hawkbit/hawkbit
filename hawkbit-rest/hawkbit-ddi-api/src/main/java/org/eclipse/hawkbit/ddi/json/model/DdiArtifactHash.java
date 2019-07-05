@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -24,6 +26,7 @@ public class DdiArtifactHash {
     private String md5;
 
     @JsonProperty
+    @JsonInclude(Include.NON_NULL)
     private String sha256;
 
     /**
@@ -38,6 +41,7 @@ public class DdiArtifactHash {
      *
      * @param sha1
      * @param md5
+     * @param sha256
      */
     public DdiArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;
@@ -60,7 +64,7 @@ public class DdiArtifactHash {
     }
 
     /**
-     * @return the sh256
+     * @return the sha256
      */
     public String getSha256() {
         return sha256;
