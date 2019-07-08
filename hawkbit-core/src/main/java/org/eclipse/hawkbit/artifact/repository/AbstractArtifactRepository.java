@@ -127,7 +127,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         return providedHashValue != null && !hashValue.equals(providedHashValue);
     }
 
-    protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash hashes,
+    protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes,
             final String contentType, final String tempFile) throws IOException;
 
     private static DigestInputStream wrapInDigestInputStream(final InputStream input, final MessageDigest mdSHA1,
