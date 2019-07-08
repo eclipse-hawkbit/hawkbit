@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -43,16 +43,16 @@ public class RolloutListHeader extends AbstractGridHeader {
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     RolloutListHeader(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
-            final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
+            final UIEventBus eventBus, final RolloutManagement rolloutManagement, final UINotification uiNotification,
             final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
-        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
+        this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+                targetQueryExecutionManagement, rolloutGroupManagement, quotaManagement);
     }
 
     @Override

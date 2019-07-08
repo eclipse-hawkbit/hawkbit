@@ -674,7 +674,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.count()).isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -693,7 +693,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.count()).isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -710,7 +710,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.count()).isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -729,7 +729,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .content(JsonBuilder.targets(Arrays.asList(test1), true)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
-        assertThat(targetManagement.count()).isEqualTo(0);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(0);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -810,9 +810,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PageRequest.of(0, 100));
+        final Slice<Target> findTargetsAll = targetQueryExecutionManagement.findAll(PageRequest.of(0, 100));
         final Target target = findTargetsAll.getContent().get(0);
-        assertThat(targetManagement.count()).isEqualTo(1);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(1);
         assertThat(target.getControllerId()).isEqualTo(knownControllerId);
         assertThat(target.getName()).isEqualTo(knownName);
         assertThat(target.getDescription()).isEqualTo(knownDescription);
@@ -838,7 +838,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(status().is(HttpStatus.CONFLICT.value())).andReturn();
 
         // verify only one entry
-        assertThat(targetManagement.count()).isEqualTo(1);
+        assertThat(targetQueryExecutionManagement.count()).isEqualTo(1);
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility

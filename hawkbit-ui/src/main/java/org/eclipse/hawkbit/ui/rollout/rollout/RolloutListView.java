@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -35,11 +35,11 @@ public class RolloutListView extends AbstractGridComponentLayout {
 
     private final transient RolloutManagement rolloutManagement;
     private final transient RolloutGroupManagement rolloutGroupManagement;
-    private final transient TargetManagement targetManagement;
     private final transient EntityFactory entityFactory;
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
     private final transient QuotaManagement quotaManagement;
     private final transient TenantConfigurationManagement tenantConfigManagement;
+    private final transient TargetQueryExecutionManagement targetQueryExecutionManagement;
 
     private final SpPermissionChecker permissionChecker;
     private final RolloutUIState rolloutUIState;
@@ -48,9 +48,10 @@ public class RolloutListView extends AbstractGridComponentLayout {
 
     public RolloutListView(final SpPermissionChecker permissionChecker, final RolloutUIState rolloutUIState,
             final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final TargetManagement targetManagement, final UINotification uiNotification,
+            final UINotification uiNotification,
             final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement) {
         super(i18n, eventBus);
@@ -59,11 +60,11 @@ public class RolloutListView extends AbstractGridComponentLayout {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.quotaManagement = quotaManagement;
-        this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
         this.entityFactory = entityFactory;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
         this.tenantConfigManagement = tenantConfigManagement;
 
         init();
@@ -77,15 +78,15 @@ public class RolloutListView extends AbstractGridComponentLayout {
     @Override
     public AbstractOrderedLayout createGridHeader() {
         return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), rolloutManagement,
-                targetManagement, uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+                uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
+                targetQueryExecutionManagement, rolloutGroupManagement, quotaManagement);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
         return new RolloutListGrid(getI18n(), getEventBus(), rolloutManagement, uiNotification, rolloutUIState,
-                permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
+                permissionChecker, entityFactory, uiProperties, targetFilterQueryManagement,
+                targetQueryExecutionManagement, rolloutGroupManagement, quotaManagement, tenantConfigManagement);
     }
 
 }

@@ -602,7 +602,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verify that one Action for each assignDistributionSet
         assertThat(actionRepository.findAll(PAGE).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
 
-        final Iterable<Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
+        final Iterable<Target> allFoundTargets = targetQueryExecutionManagement.findAll(PAGE).getContent();
 
         // get final updated version of targets
         savedDeployedTargets = targetManagement.getByControllerID(
@@ -920,13 +920,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     Collections.singletonList("blabla alles gut"));
         }
 
-        assertThat(targetManagement.count()).as("size of targets is wrong").isNotZero();
+        assertThat(targetQueryExecutionManagement.count()).as("size of targets is wrong").isNotZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isNotZero();
 
         targetManagement.delete(deploymentResult.getUndeployedTargetIDs());
         targetManagement.delete(deploymentResult.getDeployedTargetIDs());
 
-        assertThat(targetManagement.count()).as("size of targets should be zero").isZero();
+        assertThat(targetQueryExecutionManagement.count()).as("size of targets should be zero").isZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isZero();
     }
 

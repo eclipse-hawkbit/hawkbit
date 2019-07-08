@@ -242,7 +242,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         result = toggle(tag, targets);
 
-        updated = targetManagement.findAll(PAGE).getContent();
+        updated = targetQueryExecutionManagement.findAll(PAGE).getContent();
 
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0), "unassignedTargets"))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1), "unassignedTargets"));

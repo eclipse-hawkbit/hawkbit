@@ -14,11 +14,11 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
-import javax.persistence.criteria.MapJoin;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -215,6 +215,17 @@ public final class TargetSpecifications {
     }
 
     /**
+     * Limit the result to all target in the provided controller-id list.
+     *
+     * @param controllerIds
+     *            list of controller-IDs
+     * @return the {@link Specification}
+     */
+    public static Specification<JpaTarget> hasControllerId(final Collection<String> controllerIds) {
+        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.controllerId).in(controllerIds);
+    }
+
+    /**
      * {@link Specification} for retrieving {@link Target}s by "has no tag
      * names"or "has at least on of the given tag names".
      *
@@ -245,20 +256,6 @@ public final class TargetSpecifications {
         } else {
             return exp.in(tagNames);
         }
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
-     *
-     * @param distributionSetId
-     *            the ID of the distribution set which must be assigned
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
-        return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
-                distributionSetId);
     }
 
     /**

@@ -124,7 +124,9 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(90);
+        assertThat(
+                targetManagement.countByNotAssignedDistributionSetAndQuery(setA.getId(), targetFilterQuery.getQuery()))
+                        .isEqualTo(90);
 
         // Run the check
         autoAssignChecker.check();
@@ -198,8 +200,14 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
-        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
+        final Slice<Target> targetsAll = targetQueryExecutionManagement.findAll(PAGE);
         assertThat(targetsAll).as("Count of targets").hasSize(count);
+
+        final long countWithAssignedDistSet = targetsAll.stream().filter(t -> targetIds.contains(t.getId()))
+                .map(t -> deploymentManagement.getAssignedDistributionSet(((Target) t).getControllerId()).get())
+                .filter(ds -> ds.equals(set)).count();
+
+        assertThat(countWithAssignedDistSet).isEqualTo(targets.size());
 
         for (final Target target : targetsAll) {
             if (targetIds.contains(target.getId())) {

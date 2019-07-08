@@ -170,8 +170,8 @@ public class AutoAssignChecker {
      */
     private List<TargetWithActionType> getTargetsWithActionType(final String targetFilterQuery, final Long dsId,
             final ActionType type, final int count) {
-        final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId,
-                targetFilterQuery);
+        final Page<Target> targets = targetManagement
+                .findByNoActionWithDistributionSetExistsAndQuery(PageRequest.of(0, count), dsId, targetFilterQuery);
         // the action type is set to FORCED per default (when not explicitly
         // specified)
         final ActionType autoAssignActionType = type == null ? ActionType.FORCED : type;

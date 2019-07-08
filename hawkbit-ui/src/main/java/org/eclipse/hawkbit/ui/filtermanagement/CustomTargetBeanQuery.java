@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
@@ -44,7 +44,8 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = 6490445732785388071L;
     private Sort sort = new Sort(Direction.ASC, "id");
-    private transient TargetManagement targetManagement;
+    private transient TargetQueryExecutionManagement targetQueryExecutionManagement;
+
     private FilterManagementUIState filterManagementUIState;
     private transient VaadinMessageSource i18N;
     private String filterQuery;
@@ -86,14 +87,14 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        Slice<Target> targetBeans;
+        final Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!StringUtils.isEmpty(filterQuery)) {
-            targetBeans = targetManagement.findByRsql(
+            targetBeans = getTargetQueryExecutionManagement().findByQuery(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
                     filterQuery);
         } else {
-            targetBeans = targetManagement
+            targetBeans = getTargetQueryExecutionManagement()
                     .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         }
 
@@ -130,7 +131,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     public int size() {
         long size = 0;
         if (!StringUtils.isEmpty(filterQuery)) {
-            size = getTargetManagement().countByRsql(filterQuery);
+            size = getTargetQueryExecutionManagement().countByQuery(filterQuery);
         }
         getFilterManagementUIState().setTargetsCountAll(size);
         if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
@@ -142,11 +143,11 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return (int) size;
     }
 
-    private TargetManagement getTargetManagement() {
-        if (targetManagement == null) {
-            targetManagement = SpringContextHelper.getBean(TargetManagement.class);
+    private TargetQueryExecutionManagement getTargetQueryExecutionManagement() {
+        if (targetQueryExecutionManagement == null) {
+            targetQueryExecutionManagement = SpringContextHelper.getBean(TargetQueryExecutionManagement.class);
         }
-        return targetManagement;
+        return targetQueryExecutionManagement;
     }
 
     private FilterManagementUIState getFilterManagementUIState() {

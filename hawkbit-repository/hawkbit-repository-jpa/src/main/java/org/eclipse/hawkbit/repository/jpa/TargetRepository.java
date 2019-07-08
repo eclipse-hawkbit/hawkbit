@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -128,6 +129,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<JpaTarget> findByTag(Pageable page, @Param("tag") Long tagId);
 
     /**
+     * Finds {@link Target} IDs by assigned {@link Tag}.
+     *
+     * @param tagId
+     *            to be found
+     * @return all controller IDs of found targets
+     */
+    @Query(value = "SELECT t.controllerId FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
+    Set<String> findControllerIdsByTag(@Param("tag") Long tagId);
+
+    /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
      * list and assigned {@link Tag#getName()}.
      *
@@ -166,6 +177,14 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByInstalledDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * Select controllerIds which do have a ceratain {@linkplain DistributionSet} installed
+     * @param dsId the id of a {@linkplain DistributionSet}
+     * @return controller-ids which do have the specified {@linkplain DistributionSet} installed.
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget t where t.installedDistributionSet.id = :dsId")
+    Set<String> findControllerIdsByInstalledDistributionSet(Long dsId);
+
+    /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
      * 
      * @param pageable
@@ -178,10 +197,31 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
 
     /**
+     * Select controllerIds which do have a ceratain {@linkplain DistributionSet} assigned
+     * @param dsId the id of the {@linkplain DistributionSet}
+     * @return a list of controller-ids which do have the specified {@linkplain DistributionSet} assigned.
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget t where t.assignedDistributionSet.id = :dsId")
+    Set<String> findControllerIdsByAssignedDistributionSet(Long dsId);
+
+    /**
+     * Finds all target-controller IDs that have a {@link DistributionSet}
+     * <em>not</em> assigned in either action
+     *
+     * @param setId
+     *            is the ID of the {@linkplain DistributionSet} to filter for.
+     *
+     * @return a list of target controller-IDs
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget  t where t.controllerId not in ("
+            + "SELECT t.controllerId FROM JpaTarget t JOIN t.actions a where a.distributionSet.id = :setId)")
+    Set<String> findByNoActionWithDistributionSetExisits(Long setId);
+
+    /**
      * retrieves {@link Target}s where
      * {@link JpaTarget#isRequestControllerAttributes()}.
      * 
-     * @param pageReq
+     * @param pageable
      *            page parameter
      *
      * @return the found {@link Target}s

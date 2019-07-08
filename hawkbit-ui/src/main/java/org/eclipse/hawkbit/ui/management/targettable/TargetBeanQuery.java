@@ -16,8 +16,11 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
@@ -52,6 +55,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private String searchText;
     private Boolean noTagClicked;
     private transient TargetManagement targetManagement;
+    private transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private transient TargetQueryExecutionManagement targetQueryExecutionManagement;
     private transient DeploymentManagement deploymentManagement;
     private transient VaadinMessageSource i18N;
     private Long pinnedDistId;
@@ -106,18 +111,19 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        Slice<Target> targetBeans;
+        final Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findByFilterOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
                     new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         } else if (null != targetFilterQueryId) {
-            targetBeans = getTargetManagement().findByTargetFilterQuery(
+            final TargetFilterQuery targetFilterQuery = getTargetFilterQueryManagement().getById(targetFilterQueryId);
+            targetBeans = getTargetQueryExecutionManagement().findByQuery(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    targetFilterQueryId);
+                    targetFilterQuery.getQuery());
         } else if (!isAnyFilterSelected()) {
-            targetBeans = getTargetManagement()
+            targetBeans = getTargetQueryExecutionManagement()
                     .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             targetBeans = getTargetManagement().findByFilters(
@@ -169,6 +175,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         return Boolean.TRUE.equals(overdueState);
     }
 
+    private TargetFilterQueryManagement getTargetFilterQueryManagement() {
+        if (targetFilterQueryManagement == null) {
+            targetFilterQueryManagement = SpringContextHelper.getBean(TargetFilterQueryManagement.class);
+        }
+        return targetFilterQueryManagement;
+    }
+
     @Override
     protected void saveBeans(final List<ProxyTarget> addedTargets, final List<ProxyTarget> modifiedTargets,
             final List<ProxyTarget> removedTargets) {
@@ -177,10 +190,11 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     @Override
     public int size() {
-        final long totSize = getTargetManagement().count();
+        final long totSize = getTargetQueryExecutionManagement().count();
         long size;
         if (null != targetFilterQueryId) {
-            size = getTargetManagement().countByTargetFilterQuery(targetFilterQueryId);
+            final TargetFilterQuery targetFilterQuery = getTargetFilterQueryManagement().getById(targetFilterQueryId);
+            size = getTargetQueryExecutionManagement().countByQuery(targetFilterQuery.getQuery());
         } else if (!isAnyFilterSelected()) {
             size = totSize;
         } else {
@@ -211,6 +225,13 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             targetManagement = SpringContextHelper.getBean(TargetManagement.class);
         }
         return targetManagement;
+    }
+
+    private TargetQueryExecutionManagement getTargetQueryExecutionManagement() {
+        if (targetQueryExecutionManagement == null) {
+            targetQueryExecutionManagement = SpringContextHelper.getBean(TargetQueryExecutionManagement.class);
+        }
+        return targetQueryExecutionManagement;
     }
 
     private DeploymentManagement getDeploymentManagement() {

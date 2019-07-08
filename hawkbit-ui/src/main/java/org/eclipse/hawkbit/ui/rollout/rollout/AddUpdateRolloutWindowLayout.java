@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -122,9 +122,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final transient QuotaManagement quotaManagement;
 
-    private final transient TargetManagement targetManagement;
-
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+
+    private final transient TargetQueryExecutionManagement targetQueryExecutionManagement;
 
     private final UINotification uiNotification;
 
@@ -185,23 +185,24 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private final NullValidator nullValidator = new NullValidator(null, false);
 
     @SuppressWarnings("squid:S00107")
-    AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
+    AddUpdateRolloutWindowLayout(final RolloutManagement rolloutManagement,
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.quotaManagement = quotaManagement;
-        this.targetManagement = targetManagement;
         this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
         this.entityFactory = entityFactory;
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
 
         defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement);
@@ -785,7 +786,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsLegendLayout.populateTotalTargets(null);
             defineGroupsLayout.setTargetFilter(null);
         } else {
-            totalTargetsCount = targetManagement.countByRsql(filterQueryString);
+            totalTargetsCount = targetQueryExecutionManagement.countByQuery(filterQueryString);
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
             defineGroupsLayout.setTargetFilter(filterQueryString);
         }
@@ -1014,7 +1015,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setSelectedTab(1);
 
             window.clearOriginalValues();
-            totalTargetsCount = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+            totalTargetsCount = targetQueryExecutionManagement.countByQuery(rollout.getTargetFilterQuery());
             groupsLegendLayout.populateTotalTargets(totalTargetsCount);
         } else {
             editRolloutEnabled = true;

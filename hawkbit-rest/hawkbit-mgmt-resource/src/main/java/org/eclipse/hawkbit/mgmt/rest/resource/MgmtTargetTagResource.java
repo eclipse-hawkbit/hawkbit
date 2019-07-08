@@ -155,7 +155,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = targetManagement.findByTag(pageable, targetTagId);
 
         } else {
-            findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
+            findTargetsAll = targetManagement.findByQueryAndTag(pageable, rsqlParam, targetTagId);
         }
 
         final Long countTargetsAll = findTargetsAll.getTotalElements();

@@ -57,13 +57,18 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
     protected final RolloutApprovalStrategy rolloutApprovalStrategy;
 
+    protected final TargetQueryExecutionManagement targetQueryExecutionManagement;
+
+
     protected AbstractRolloutManagement(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
         this.targetManagement = targetManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.distributionSetManagement = distributionSetManagement;
@@ -81,7 +86,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         final Map<String, Long> targetFilterCounts = groups.stream()
                 .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
-                .collect(Collectors.toMap(Function.identity(), targetManagement::countByRsql));
+                .collect(Collectors.toMap(Function.identity(), targetQueryExecutionManagement::countByQuery));
 
         long unusedTargetsCount = 0;
 
@@ -127,7 +132,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
             return targetFilterCounts.get(overlappingTargetsFilter);
         } else {
-            final long overlappingTargets = targetManagement.countByRsql(overlappingTargetsFilter);
+            final long overlappingTargets = targetQueryExecutionManagement.countByQuery(overlappingTargetsFilter);
             targetFilterCounts.put(overlappingTargetsFilter, overlappingTargets);
             return overlappingTargets;
         }
@@ -136,7 +141,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     protected long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
             final Long createdAt) {
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
+        final long totalTargets = targetQueryExecutionManagement.countByQuery(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
@@ -152,7 +157,7 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
+        final long totalTargets = targetQueryExecutionManagement.countByQuery(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }

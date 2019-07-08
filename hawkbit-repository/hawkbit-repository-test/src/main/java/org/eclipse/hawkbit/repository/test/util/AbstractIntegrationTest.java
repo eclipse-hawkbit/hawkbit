@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -147,6 +148,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TargetTagManagement targetTagManagement;
+
+    @Autowired
+    protected TargetQueryExecutionManagement targetQueryExecutionManagement;
 
     @Autowired
     protected DistributionSetTagManagement distributionSetTagManagement;

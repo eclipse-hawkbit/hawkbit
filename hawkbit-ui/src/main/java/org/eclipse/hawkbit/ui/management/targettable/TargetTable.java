@@ -31,13 +31,16 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -122,6 +125,8 @@ public class TargetTable extends AbstractTable<Target> {
     private final transient DeploymentManagement deploymentManagement;
     private final transient TenantConfigurationManagement configManagement;
     private final transient SystemSecurityContext systemSecurityContext;
+    private final transient TargetQueryExecutionManagement targetQueryExecutionManagement;
+    private final transient TargetFilterQueryManagement targetFilterQueryManagement;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
     private final ManagementUIState managementUIState;
@@ -134,13 +139,17 @@ public class TargetTable extends AbstractTable<Target> {
     private ConfirmationDialog confirmDialog;
 
     public TargetTable(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
-            final TargetManagement targetManagement, final ManagementUIState managementUIState,
-            final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
+            final ManagementUIState managementUIState, final SpPermissionChecker permChecker,
+            final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
+        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.managementUIState = managementUIState;
         this.distributionSetManagement = distributionSetManagement;
@@ -807,7 +816,8 @@ public class TargetTable extends AbstractTable<Target> {
 
         final long size;
         if (query.isPresent()) {
-            size = targetManagement.countByTargetFilterQuery(query.get());
+            final TargetFilterQuery tfq = targetFilterQueryManagement.getById(query.get());
+            size = targetQueryExecutionManagement.countByQuery(tfq.getQuery());
         } else if (noFilterSelected(filterParams.getFilterByStatus(), pinnedDistId,
                 filterParams.getSelectTargetWithNoTag(), filterParams.getFilterByTagNames(),
                 filterParams.getFilterBySearchText())) {
@@ -831,7 +841,7 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private long getTotalTargetsCount() {
-        return targetManagement.count();
+        return targetQueryExecutionManagement.count();
     }
 
     private boolean isFilteredByStatus() {

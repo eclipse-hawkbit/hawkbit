@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
@@ -76,12 +77,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
@@ -199,8 +194,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RsqlValidationOracle rsqlValidationOracle() {
-        return new RsqlParserValidationOracle();
+    RsqlValidationOracle rsqlValidationOracle(final TargetQueryExecutionManagement targetQueryExecutionManagement) {
+        return new RsqlParserValidationOracle(targetQueryExecutionManagement);
     }
 
     @Bean
@@ -507,15 +502,22 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
-            final DistributionSetRepository distributionSetRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus, final TenantAware tenantAware,
-            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+            final DistributionSetRepository distributionSetRepository, final TargetTagRepository targetTagRepository,
+            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
+            final BusProperties bus, final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement) {
         return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
-                rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
-                criteriaNoCountDao, eventPublisher, bus, tenantAware, afterCommit, virtualPropertyReplacer,
+                rolloutGroupRepository, distributionSetRepository, targetTagRepository, criteriaNoCountDao,
+                eventPublisher, bus, tenantAware, afterCommit, virtualPropertyReplacer, properties.getDatabase(),
+                targetQueryExecutionManagement);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TargetQueryExecutionManagement targetFilterQueryExecutor(final TargetRepository targetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
+        return new JpaTargetQueryExecutionManagement(targetRepository, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
@@ -618,15 +620,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final BusProperties bus, final ApplicationEventPublisher eventPublisher,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
-        return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
-                distributionSetManagement, context, bus, eventPublisher, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
+        return new JpaRolloutManagement(targetManagement, targetQueryExecutionManagement, deploymentManagement,
+                rolloutGroupManagement, distributionSetManagement, context, bus, eventPublisher,
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
+                rolloutApprovalStrategy);
     }
 
     /**

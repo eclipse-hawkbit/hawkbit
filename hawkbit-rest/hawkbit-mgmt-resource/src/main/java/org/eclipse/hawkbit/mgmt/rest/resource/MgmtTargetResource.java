@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetQueryExecutionManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -66,13 +67,17 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     private final TargetManagement targetManagement;
 
+    private final TargetQueryExecutionManagement targetQueryExecutionManagement;
+
     private final DeploymentManagement deploymentManagement;
 
     private final EntityFactory entityFactory;
 
-    MgmtTargetResource(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final EntityFactory entityFactory) {
+    MgmtTargetResource(final TargetManagement targetManagement,
+            final TargetQueryExecutionManagement targetQueryExecutionManagement,
+            final DeploymentManagement deploymentManagement, final EntityFactory entityFactory) {
         this.targetManagement = targetManagement;
+        this.targetQueryExecutionManagement = targetQueryExecutionManagement;
         this.deploymentManagement = deploymentManagement;
         this.entityFactory = entityFactory;
     }
@@ -100,19 +105,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Slice<Target> findTargetsAll;
-        final long countTargetsAll;
-        if (rsqlParam != null) {
-            final Page<Target> findTargetPage = this.targetManagement.findByRsql(pageable, rsqlParam);
-            countTargetsAll = findTargetPage.getTotalElements();
-            findTargetsAll = findTargetPage;
-        } else {
-            findTargetsAll = this.targetManagement.findAll(pageable);
-            countTargetsAll = this.targetManagement.count();
-        }
+        final Page<Target> findTargetsAll = (rsqlParam != null)
+                ? this.targetQueryExecutionManagement.findByQuery(pageable, rsqlParam)
+                : this.targetQueryExecutionManagement.findAll(pageable);
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
     }
 
     @Override

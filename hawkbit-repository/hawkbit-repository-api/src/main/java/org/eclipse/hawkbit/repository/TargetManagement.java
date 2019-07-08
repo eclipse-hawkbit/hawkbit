@@ -63,8 +63,7 @@ public interface TargetManagement {
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long tagId);
 
     /**
-     * Counts number of targets with given
-     * {@link Target#getAssignedDistributionSet()}.
+     * Count targets with a given {@linkplain DistributionSet} assigned
      *
      * @param distId
      *            to search for
@@ -124,37 +123,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByInstalledDistributionSet(long distId);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param rsqlParam
-     *            filter definition in RSQL syntax
-     * @return the found number {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsql(@NotEmpty String rsqlParam);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param targetFilterQueryId
-     *            {@link TargetFilterQuery#getId()}
-     * @return the found number {@link Target}s
-     * 
-     * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByTargetFilterQuery(long targetFilterQueryId);
-
-    /**
-     * Counts all {@link Target}s in the repository.
-     *
-     * @return number of targets
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long count();
 
     /**
      * creating a new {@link Target}.
@@ -233,7 +201,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
+    Page<Target> findByNoActionWithDistributionSetExistsAndQuery(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -251,14 +219,14 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDS(long distributionSetId, @NotNull String rsqlParam);
+    long countByNotAssignedDistributionSetAndQuery(long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
      * and that are not assigned to one of the {@link RolloutGroup}s
      *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
+     * @param limit
+     *            the maximum amount of results requested (could be less)
      * @param groups
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
@@ -266,8 +234,8 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    List<Target> findByQueryAndNotInRolloutGroups(int limit, @NotEmpty Collection<Long> groups,
+            @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -280,7 +248,7 @@ public interface TargetManagement {
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    long countByQueryAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no
@@ -336,7 +304,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetID,
+    Page<Target> findByAssignedDistributionSetAndQuery(@NotNull Pageable pageReq, long distributionSetID,
             @NotNull String rsqlParam);
 
     /**
@@ -416,7 +384,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId,
+    Page<Target> findByInstalledDistributionSetAndQuery(@NotNull Pageable pageReq, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -433,65 +401,12 @@ public interface TargetManagement {
     Page<Target> findByUpdateStatus(@NotNull Pageable pageable, @NotNull TargetUpdateStatus status);
 
     /**
-     * Retrieves all targets.
-     *
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findAll(@NotNull Pageable pageable);
-
-    /**
-     * Retrieves all targets.
-     * 
-     * @param pageable
-     *            pagination parameter
-     * @param rsqlParam
-     *            in RSQL notation
-     *
-     * @return the found {@link Target}s, never {@code null}
-     * 
-     * 
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
-
-    /**
-     * Retrieves all target based on {@link TargetFilterQuery}.
-     * 
-     * @param pageable
-     *            pagination parameter
-     * @param targetFilterQueryId
-     *            {@link TargetFilterQuery#getId()}
-     *
-     * @return the found {@link Target}s, never {@code null}
-     *
-     * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} with given ID does not exist.
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
-
-    /**
      * method retrieves all {@link Target}s from the repo in the following
      * order:
      * <p>
-     * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
+     * 1) {@link Target}s which have the given {@link DistributionSet} installed
      * <p>
-     * 2) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getAssignedDistributionSet()}
+     * 2) {@link Target}s which have the given {@link DistributionSet} assigned
      * <p>
      * 3) {@link Target}s which have no connection to the given
      * {@link DistributionSet}.
@@ -549,7 +464,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
+    Page<Target> findByQueryAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means

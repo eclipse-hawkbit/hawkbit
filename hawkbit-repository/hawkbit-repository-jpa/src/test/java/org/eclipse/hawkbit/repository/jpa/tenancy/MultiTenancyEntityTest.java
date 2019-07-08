@@ -72,7 +72,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // find all targets for current tenant "mytenant"
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PAGE);
+        final Slice<Target> findTargetsAll = targetQueryExecutionManagement.findAll(PAGE);
         // no target has been created for "mytenant"
         assertThat(findTargetsAll).hasSize(0);
 
@@ -174,7 +174,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     }
 
     private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
-        return runAsTenant(tenant, () -> targetManagement.findAll(PAGE));
+        return runAsTenant(tenant, () -> targetQueryExecutionManagement.findAll(PAGE));
     }
 
     private void deleteTargetsForTenant(final String tenant, final Collection<Long> targetIds) throws Exception {
