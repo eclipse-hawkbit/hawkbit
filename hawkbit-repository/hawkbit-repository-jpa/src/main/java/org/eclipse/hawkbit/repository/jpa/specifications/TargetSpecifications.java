@@ -14,11 +14,11 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
-import javax.persistence.criteria.MapJoin;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -237,7 +237,7 @@ public final class TargetSpecifications {
         final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
         final Path<String> exp = tags.get(JpaTargetTag_.name);
         if (selectTargetWithNoTag) {
-            if (tagNames != null) {
+            if (tagNames != null && tagNames.length > 0) {
                 return cb.or(exp.isNull(), exp.in(tagNames));
             } else {
                 return exp.isNull();
