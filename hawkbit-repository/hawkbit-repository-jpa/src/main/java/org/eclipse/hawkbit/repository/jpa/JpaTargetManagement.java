@@ -97,6 +97,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TargetRepository targetRepository;
 
+    private final ActionRepository actionRepository;
+
     private final TargetMetadataRepository targetMetadataRepository;
 
     private final RolloutGroupRepository rolloutGroupRepository;
@@ -122,7 +124,8 @@ public class JpaTargetManagement implements TargetManagement {
     private final Database database;
 
     JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
+            final TargetRepository targetRepository, final ActionRepository actionRepository,
+            final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -133,6 +136,7 @@ public class JpaTargetManagement implements TargetManagement {
         this.entityManager = entityManager;
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
+        this.actionRepository = actionRepository;
         this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -295,7 +299,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
         return targetMetadataRepository.findById(new TargetMetadataCompositeKey(targetId, key))
-                .map(t -> (TargetMetadata) t);
+                .map(t -> t);
     }
 
     @Override
@@ -518,17 +522,16 @@ public class JpaTargetManagement implements TargetManagement {
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
             alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
-            return new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(), Collections.emptyList(),
+            return new TargetTagAssignmentResult(Collections.emptyList(), Collections.emptyList(),
                     Collections.unmodifiableList(alreadyAssignedTargets), tag);
         }
 
         allTargets.removeAll(alreadyAssignedTargets);
         // some or none are assigned -> assign
-        allTargets.forEach(target -> target.addTag(tag));
-        final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                allTargets.size(), 0,
-                Collections
-                        .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
+        allTargets.forEach(t -> t.addTag(tag));
+        targetRepository.saveAll(allTargets);
+        final TargetTagAssignmentResult result = new TargetTagAssignmentResult(
+                Collections.unmodifiableList(alreadyAssignedTargets), Collections.unmodifiableList(allTargets),
                 Collections.emptyList(), tag);
 
         // no reason to persist the tag
@@ -774,7 +777,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Optional<Target> get(final long id) {
-        return targetRepository.findById(id).map(t -> (Target) t);
+        return targetRepository.findById(id).map(t -> t);
     }
 
     @Override

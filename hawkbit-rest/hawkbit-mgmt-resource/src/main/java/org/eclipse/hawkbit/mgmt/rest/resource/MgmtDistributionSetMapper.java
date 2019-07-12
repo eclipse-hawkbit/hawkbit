@@ -139,7 +139,6 @@ public final class MgmtDistributionSetMapper {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         result.setAssigned(dsAssignmentResult.getAssigned());
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
-        result.setTotal(dsAssignmentResult.getTotal());
         return result;
     }
 

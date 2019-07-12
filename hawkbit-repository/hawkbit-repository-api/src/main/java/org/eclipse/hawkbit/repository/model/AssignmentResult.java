@@ -20,33 +20,22 @@ import java.util.List;
  */
 public class AssignmentResult<T extends BaseEntity> {
 
-    private final int total;
-    private final int assigned;
-    private final int alreadyAssigned;
-    private final int unassigned;
-    private final List<T> assignedEntity;
-    private final List<T> unassignedEntity;
+    private final List<? extends T> alreadyAssignedEntity;
+    private final List<? extends T> assignedEntity;
+    private final List<? extends T> unassignedEntity;
 
     /**
      * Constructor.
-     *
-     * @param assigned
-     *            is the number of newly assigned elements.
-     * @param alreadyAssigned
-     *            number of already assigned/ignored elements
-     * @param unassigned
-     *            number of newly assigned elements
+     * @param alreadyAssignedEntity
+     *      {@link List} of already assigned entities
      * @param assignedEntity
      *            {@link List} of assigned entity.
      * @param unassignedEntity
      *            {@link List} of unassigned entity.
      */
-    public AssignmentResult(final int assigned, final int alreadyAssigned, final int unassigned,
-            final List<T> assignedEntity, final List<T> unassignedEntity) {
-        this.assigned = assigned;
-        this.alreadyAssigned = alreadyAssigned;
-        total = assigned + alreadyAssigned;
-        this.unassigned = unassigned;
+    public AssignmentResult(final List<? extends T> alreadyAssignedEntity, final List<? extends T> assignedEntity,
+            final List<? extends T> unassignedEntity) {
+        this.alreadyAssignedEntity = alreadyAssignedEntity;
         this.assignedEntity = assignedEntity;
         this.unassignedEntity = unassignedEntity;
     }
@@ -55,28 +44,37 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return number of newly assigned elements.
      */
     public int getAssigned() {
-        return assigned;
+        return getAssignedEntity().size();
     }
 
     /**
      * @return total number (assigned and already assigned).
      */
     public int getTotal() {
-        return total;
+        return getAssignedEntity().size() + getAlreadyAssignedEntity().size();
     }
 
     /**
      * @return number of already assigned/ignored elements.
      */
     public int getAlreadyAssigned() {
-        return alreadyAssigned;
+        return getAlreadyAssignedEntity().size();
+    }
+
+    /**
+     * @return already assigned/ignored elements.
+     */
+    public List<T> getAlreadyAssignedEntity() {
+        return alreadyAssignedEntity == null
+                ? Collections.emptyList()
+                : Collections.unmodifiableList(alreadyAssignedEntity);
     }
 
     /**
      * @return number of unsassigned elements
      */
     public int getUnassigned() {
-        return unassigned;
+        return getUnassignedEntity().size();
     }
 
     /**

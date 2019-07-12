@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Response Body of Target for assignment operations.
@@ -22,10 +25,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentResponseBody {
 
+    private List<MgmtActionId> assignedActions;
+    private List<MgmtActionId> alreadyAssignedActions;
     private int assigned;
     private int alreadyAssigned;
-    private int total;
-
     /**
      * @return the assigned
      */
@@ -59,15 +62,38 @@ public class MgmtTargetAssignmentResponseBody {
     /**
      * @return the total
      */
+    @JsonProperty("total")
     public int getTotal() {
-        return total;
+        return assigned + alreadyAssigned;
     }
 
     /**
-     * @param total
-     *            the total to set
+     * @return the assignedActions
      */
-    public void setTotal(final int total) {
-        this.total = total;
+    public List<MgmtActionId> getAssignedActions() {
+        return assignedActions;
+    }
+
+    /**
+     * @param assignedActions
+     *            the assigned actions to set
+     */
+    public void setAssignedActions(final List<MgmtActionId> assignedActions) {
+        this.assignedActions = assignedActions;
+    }
+
+    /**
+     * @return the alreadyAssignedActions
+     */
+    public List<MgmtActionId> getAlreadyAssignedActions() {
+        return alreadyAssignedActions;
+    }
+
+    /**
+     * @param alreadyAssignedActions
+     *            the alreadyAssignedActions to set
+     */
+    public void setAlreadyAssignedActions(final List<MgmtActionId> alreadyAssignedActions) {
+        this.alreadyAssignedActions = alreadyAssignedActions;
     }
 }

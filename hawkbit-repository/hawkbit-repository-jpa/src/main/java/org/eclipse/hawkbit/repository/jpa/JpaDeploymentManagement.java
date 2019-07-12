@@ -273,8 +273,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             // detaching as it is not necessary to persist the set itself
             entityManager.detach(distributionSetEntity);
             // return with nothing as all targets had the DS already assigned
-            return new DistributionSetAssignmentResult(distributionSetEntity, Collections.emptyList(), 0,
-                    targetsWithActionType.size(), Collections.emptyList(), targetManagement);
+            return new DistributionSetAssignmentResult(distributionSetEntity,
+                    targetManagement.getByControllerID(controllerIDs), Collections.emptyList(), Collections.emptyList(),
+                    Collections.emptyList(),
+                    actionRepository.findAllByActiveAndTargetControllerIdIn(true, controllerIDs));
         }
 
         // split tIDs length into max entries in-statement because many database
@@ -303,11 +305,26 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
+        final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final List<String> alreadyAssignedIds = controllerIDs.stream().filter(id -> !targetEntitiesIds.contains(id))
+                .collect(Collectors.toList());
+        List<Action> assignedActions = controllerIdsToActions.values().stream()
+                .filter(action -> targetEntitiesIds.contains(action.getTarget().getControllerId()))
+                .collect(Collectors.toList());
+        List<Action> alreadyAssignedActions = controllerIdsToActions.values().stream()
+                .filter(action -> !targetEntitiesIds.contains(action.getTarget().getControllerId()))
+                .collect(Collectors.toList());
+        final List<Target> byControllerID = alreadyAssignedIds.isEmpty()
+                ? Collections.emptyList()
+                : targetManagement.getByControllerID(alreadyAssignedIds);
+        return new DistributionSetAssignmentResult(distributionSetEntity, byControllerID,
+                targetManagement.getByControllerID(targetEntitiesIds), Collections.emptyList(), assignedActions,
+                alreadyAssignedActions);
+    }
 
-        return new DistributionSetAssignmentResult(distributionSetEntity,
-                targetEntities.stream().map(Target::getControllerId).collect(Collectors.toList()),
-                targetEntities.size(), controllerIDs.size() - targetEntities.size(),
-                Lists.newArrayList(controllerIdsToActions.values()), targetManagement);
+    private static boolean notInList(final String id, final List<JpaTarget> targetEntities) {
+        return targetEntities.stream().map(Target::getControllerId).noneMatch(targetId -> targetId.equals(id));
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {
@@ -384,12 +401,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
-            final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
+            final List<? extends Target> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set) {
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
                 .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
-        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
+        return targets.stream()
+                .map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, (JpaTarget) trg, set))
                 .filter(Objects::nonNull).map(actionRepository::save)
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
     }

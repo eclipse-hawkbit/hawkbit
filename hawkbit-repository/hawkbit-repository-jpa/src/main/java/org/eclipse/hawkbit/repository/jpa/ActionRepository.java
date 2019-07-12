@@ -504,4 +504,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
     void deleteByIdIn(Collection<Long> actionIDs);
 
+    /**
+     * Retrieves all IDs for {@link Action}s referring to the given target ControllerIds and active flag
+     *
+     * @param controllerIds
+     *            the controllerIds of targets for the actions
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @return the found list of {@link Action} IDs
+     */
+    List<Action> findAllByActiveAndTargetControllerIdIn(@Param("active") boolean active,
+            @Param("controllerIds") List<String> controllerIds);
 }

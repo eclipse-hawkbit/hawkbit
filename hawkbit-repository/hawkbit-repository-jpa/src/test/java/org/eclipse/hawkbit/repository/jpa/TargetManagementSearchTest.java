@@ -96,7 +96,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String assignedB = targBs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedB);
         final String installedC = targCs.iterator().next().getControllerId();
-        final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getActionIds().get(0);
+        final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getAssignedActions().get(0).getId();
 
         // add attributes to match against only attribute value or attribute
         // value and name
@@ -599,6 +599,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         expected.addAll(notAssigned);
 
         assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
+        ///
 
     }
 
@@ -652,6 +653,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .collect(Collectors.toList()));
 
         assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
+        ///
 
     }
 
@@ -701,8 +703,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getActionIds().forEach(actionId -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
+        assignDistributionSet(installedSet, installedtargets).getAssignedActions().forEach(action -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED)));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets

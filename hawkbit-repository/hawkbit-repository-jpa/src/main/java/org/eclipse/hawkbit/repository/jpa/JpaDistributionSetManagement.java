@@ -178,37 +178,40 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
         }
 
-        final DistributionSetTag myTag = distributionSetTagManagement.getByName(tagName)
+        final DistributionSetTag tag = distributionSetTagManagement.getByName(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
         DistributionSetTagAssignmentResult result;
 
-        final List<JpaDistributionSet> toBeChangedDSs = sets.stream().filter(set -> set.addTag(myTag))
+        final List<JpaDistributionSet> toBeChangedDSs = sets.stream().filter(set -> set.addTag(tag))
                 .collect(Collectors.toList());
 
         // un-assignment case
         if (toBeChangedDSs.isEmpty()) {
             for (final JpaDistributionSet set : sets) {
-                if (set.removeTag(myTag)) {
+                if (set.removeTag(tag)) {
                     toBeChangedDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
-                    toBeChangedDSs.size(), Collections.emptyList(),
-                    Collections.unmodifiableList(
-                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                    myTag);
+            final List<DistributionSet> alreadyAssigned = getAlreadyAssigned(dsIds, toBeChangedDSs);
+            final List<DistributionSet> unassigned = Collections.unmodifiableList(
+                    toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+            result = new DistributionSetTagAssignmentResult(alreadyAssigned, Collections.emptyList(), unassigned, tag);
         } else {
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0,
-                    Collections.unmodifiableList(
-                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                    Collections.emptyList(), myTag);
+            final List<DistributionSet> alreadyAssigned = getAlreadyAssigned(dsIds, toBeChangedDSs);
+            final List<DistributionSet> assignedDs = Collections.unmodifiableList(
+                    toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
+            result = new DistributionSetTagAssignmentResult(alreadyAssigned, assignedDs, Collections.emptyList(), tag);
         }
 
         // no reason to persist the tag
-        entityManager.detach(myTag);
+        entityManager.detach(tag);
         return result;
+    }
+
+    private List<DistributionSet> getAlreadyAssigned(final Collection<Long> dsIds, final List<JpaDistributionSet> toBeChangedDSs) {
+        dsIds.removeIf(id -> toBeChangedDSs.stream().anyMatch(ds -> ds.getId().equals(id)));
+        return new ArrayList<>(distributionSetRepository.findAllById(dsIds));
     }
 
     private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {
@@ -391,7 +394,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList = Arrays.asList(DistributionSetSpecification.isDeleted(false),
                     DistributionSetSpecification.isCompleted(complete));
         } else {
-            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false));
+            specList = Collections.singletonList(DistributionSetSpecification.isDeleted(false));
         }
 
         return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
@@ -759,7 +762,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void delete(final long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
-        delete(Arrays.asList(setId));
+        delete(Collections.singletonList(setId));
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {
@@ -816,7 +819,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> get(final long id) {
-        return distributionSetRepository.findById(id).map(d -> (DistributionSet) d);
+        return distributionSetRepository.findById(id).map(d -> d);
     }
 
     @Override

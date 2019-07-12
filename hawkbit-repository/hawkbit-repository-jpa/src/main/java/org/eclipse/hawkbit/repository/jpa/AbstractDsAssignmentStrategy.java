@@ -79,7 +79,7 @@ public abstract class AbstractDsAssignmentStrategy {
     abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
 
     /**
-     * 
+     *
      * @param set
      * @param targets
      */

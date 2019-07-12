@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -395,9 +396,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void switchActionToForced() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getActionIds().get(0);
+        final Long actionId = deploymentManagement.assignDistributionSet(set.getId(), ActionType.SOFT, 0,
+                Collections.singletonList(target.getControllerId())).getAssignedActions().get(0).getId();
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();
