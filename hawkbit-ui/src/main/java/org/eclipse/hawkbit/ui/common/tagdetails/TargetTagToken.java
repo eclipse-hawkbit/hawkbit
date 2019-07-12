@@ -96,18 +96,19 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     @Override
     protected void displayAlreadyAssignedTags() {
-        removePreviouslyAddedTokens();
+        // removePreviouslyAddedTokens();
         if (selectedEntity != null) {
             for (final TargetTag tag : tagManagement.findByTarget(PageRequest.of(0, MAX_TAGS),
                     selectedEntity.getControllerId())) {
-                addNewToken(tag.getId());
+                addNewToken(tag.getId(), tag.getName(), tag.getColour());
             }
         }
     }
 
     @Override
     protected void populateContainer() {
-        container.removeAllItems();
+        tokenField.removeAllTokens();
+        // container.removeAllItems();
         tagDetails.clear();
         for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
@@ -117,7 +118,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     public void processTargetTagAssigmentResult(final TargetTagAssignmentResult assignmentResult) {
         final TargetTag targetTag = assignmentResult.getTargetTag();
         if (isAssign(assignmentResult)) {
-            addNewToken(targetTag.getId());
+            addNewToken(targetTag.getId(), targetTag.getName(), targetTag.getColour());
         } else if (isUnassign(assignmentResult)) {
             removeTokenItem(targetTag.getId(), targetTag.getName());
         }

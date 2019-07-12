@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.tagdetails.TokenField;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -39,7 +40,6 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.tokenfield.TokenField;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
@@ -286,7 +286,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     public void resetComponents() {
         dsNamecomboBox.clear();
         descTextArea.clear();
-        targetBulkTokenTags.getTokenField().clear();
+        targetBulkTokenTags.getTokenField().removeAllTokens();
         targetBulkTokenTags.populateContainer();
         progressBar.setValue(0F);
         progressBar.setVisible(false);

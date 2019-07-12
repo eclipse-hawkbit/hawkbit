@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -312,7 +313,9 @@ public class BulkUploadHandler extends CustomComponent
         }
 
         private String tagAssignment() {
-            final Map<Long, TagData> tokensSelected = targetBulkTokenTags.getTokensAdded();
+            // final Map<Long, TagData> tokensSelected =
+            // targetBulkTokenTags.getTokensAdded();
+            final Map<Long, TagData> tokensSelected = new HashMap<>();
             final List<String> deletedTags = new ArrayList<>();
             for (final TagData tagData : tokensSelected.values()) {
                 if (!tagManagement.get(tagData.getId()).isPresent()) {
@@ -333,7 +336,8 @@ public class BulkUploadHandler extends CustomComponent
         }
 
         private boolean ifTagsSelected() {
-            return targetBulkTokenTags.getTokenField().getValue() != null;
+            return false;
+            // return targetBulkTokenTags.getTokenField().getValue() != null;
         }
 
         private boolean ifDsSelected() {

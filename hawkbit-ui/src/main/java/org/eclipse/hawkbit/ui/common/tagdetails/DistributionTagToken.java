@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetTagUpdatedEventContainer;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -35,7 +34,6 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Sets;
-import com.vaadin.data.Item;
 
 /**
  * Implementation of target/ds tag token layout.
@@ -106,16 +104,17 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @Override
     public void displayAlreadyAssignedTags() {
-        removePreviouslyAddedTokens();
+        // removePreviouslyAddedTokens();
         if (selectedEntity != null) {
             distributionSetTagManagement.findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
-                    .getContent().stream().forEach(tag -> addNewToken(tag.getId()));
+                    .getContent().stream().forEach(tag -> addNewToken(tag.getId(), tag.getName(), tag.getColour()));
         }
     }
 
     @Override
     protected void populateContainer() {
-        container.removeAllItems();
+        // container.removeAllItems();
+        tokenField.removeAllTokens();
         tagDetails.clear();
         distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
                 .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
@@ -134,27 +133,30 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
                         distributionSetTag.getName(), distributionSetTag.getColour()));
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
-                .forEach(this::removeTagFromCombo);
-    }
+    // @EventBusListenerMethod(scope = EventScope.UI)
+    // void onDistributionSetTagDeletedEvent(final
+    // DistributionSetTagDeletedEventContainer eventContainer) {
+    // eventContainer.getEvents().stream().map(event ->
+    // getTagIdByTagName(event.getEntityId()))
+    // .forEach(this::removeTagFromCombo);
+    // }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
         eventContainer.getEvents().stream().filter(Objects::nonNull).map(DistributionSetTagUpdatedEvent::getEntity)
                 .forEach(entity -> {
-                    final Item item = container.getItem(entity.getId());
-                    if (item != null) {
-                        updateItem(entity.getName(), entity.getColour(), item);
-                    }
+                    tokenField.updateToken(entity.getName(), entity.getColour());
+                    // final Item item = container.getItem(entity.getId());
+                    // if (item != null) {
+                    // updateItem(entity.getName(), entity.getColour(), item);
+                    // }
                 });
     }
 
     private void processTargetTagAssigmentResult(final DistributionSetTagAssignmentResult assignmentResult) {
         final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
         if (isAssign(assignmentResult)) {
-            addNewToken(tag.getId());
+            addNewToken(tag.getId(), tag.getName(), tag.getColour());
         } else if (isUnassign(assignmentResult)) {
             removeTokenItem(tag.getId(), tag.getName());
         }

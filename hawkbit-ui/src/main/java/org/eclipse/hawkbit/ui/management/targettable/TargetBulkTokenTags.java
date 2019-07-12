@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -63,19 +63,25 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     @Override
     public void displayAlreadyAssignedTags() {
-        removePreviouslyAddedTokens();
+        // removePreviouslyAddedTokens();
         addAlreadySelectedTags();
     }
 
     protected void addAlreadySelectedTags() {
         for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+            // tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+            final Optional<TargetTag> byName = tagManagement.getByName(tagName);
+            if (byName.isPresent()) {
+                final TargetTag targetTag = byName.get();
+                addNewToken(targetTag.getId(), targetTag.getName(), targetTag.getColour());
+            }
         }
     }
 
     @Override
     protected void populateContainer() {
-        container.removeAllItems();
+        // container.removeAllItems();
+        tokenField.removeAllTokens();
         tagDetails.clear();
         for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
@@ -83,7 +89,7 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
 
     }
 
-    public Map<Long, TagData> getTokensAdded() {
-        return tokensAdded;
-    }
+    // public Map<Long, TagData> getTokensAdded() {
+    // return tokensAdded;
+    // }
 }
