@@ -31,7 +31,10 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -45,12 +48,25 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Auto-configuration for OpenID Connect user management.
+ *
+ */
 @Configuration
 @Conditional(value = ClientsConfiguredCondition.class)
 public class OidcUserManagementAutoConfiguration {
 
+    /**
+     * @return the oauth2 user details service to load a user from oidc user
+     *         manager
+     */
     @Bean
     @ConditionalOnMissingBean
     public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserDetailsService() {
@@ -61,12 +77,18 @@ public class OidcUserManagementAutoConfiguration {
         return new JwtAuthoritiesOidcUserService(authorityMapper);
     }
 
+    /**
+     * @return the OpenID Connect authentication success handler
+     */
     @Bean
     @ConditionalOnMissingBean
     public AuthenticationSuccessHandler oidcAuthenticationSuccessHandler() {
         return new OidcAuthenticationSuccessHandler();
     }
 
+    /**
+     * @return the OpenID Connect logout handler
+     */
     @Bean
     @ConditionalOnMissingBean
     public LogoutHandler oidcLogoutHandler() {
@@ -79,18 +101,18 @@ public class OidcUserManagementAutoConfiguration {
  */
 class JwtAuthoritiesOidcUserService extends OidcUserService {
 
-    private final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+    private static final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 
     private final GrantedAuthoritiesMapper authoritiesMapper;
 
-    public JwtAuthoritiesOidcUserService(GrantedAuthoritiesMapper authoritiesMapper) {
+    JwtAuthoritiesOidcUserService(GrantedAuthoritiesMapper authoritiesMapper) {
         super();
 
         this.authoritiesMapper = authoritiesMapper;
     }
 
     @Override
-    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+    public OidcUser loadUser(OidcUserRequest userRequest) {
         OidcUser user = super.loadUser(userRequest);
 
         Set<GrantedAuthority> authorities = new LinkedHashSet<>(extractAuthorities(userRequest));
