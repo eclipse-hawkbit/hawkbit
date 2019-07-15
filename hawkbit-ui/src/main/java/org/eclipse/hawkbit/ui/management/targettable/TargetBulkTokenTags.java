@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -35,15 +37,24 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
         super(checker, i18n, uinotification, eventBus, managementUIState, tagManagement);
     }
 
-    @Override
-    protected void assignTag(final String tagNameSelected) {
-        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagNameSelected);
+    // @Override
+    // protected void assignTag(final String tagNameSelected) {
+    // managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagNameSelected);
+    // }
+    //
+    // @Override
+    // protected void unassignTag(final String tagName) {
+    // managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagName);
+    // }
 
+    @Override
+    protected void assignTag(final TagData tagData) {
+        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagData.getName());
     }
 
     @Override
-    protected void unassignTag(final String tagName) {
-        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagName);
+    protected void unassignTag(final TagData tagData) {
+        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagData.getName());
     }
 
     @Override
@@ -61,32 +72,62 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
         return checker.hasCreateTargetPermission();
     }
 
-    @Override
-    public void displayAlreadyAssignedTags() {
-        // removePreviouslyAddedTokens();
-        addAlreadySelectedTags();
+    // @Override
+    // public void displayAlreadyAssignedTags() {
+    // // removePreviouslyAddedTokens();
+    // addAlreadySelectedTags();
+    // }
+    //
+    // protected void addAlreadySelectedTags() {
+    // for (final String tagName :
+    // managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames())
+    // {
+    // //
+    // tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+    // final Optional<TargetTag> byName = tagManagement.getByName(tagName);
+    // if (byName.isPresent()) {
+    // final TargetTag targetTag = byName.get();
+    // addNewToken(targetTag.getId(), targetTag.getName(),
+    // targetTag.getColour());
+    // }
+    // }
+    // }
+
+    // @Override
+    // protected void populateContainer() {
+    // // container.removeAllItems();
+    // tagPanel.removeAllTokens();
+    // tagDetailsById.clear();
+    // for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0,
+    // MAX_TAGS))) {
+    // setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
+    // }
+    // }
+
+    public void initializeTags() {
+        repopulateToken();
     }
 
-    protected void addAlreadySelectedTags() {
-        for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            // tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
+    @Override
+    protected List<TagData> getAllAssignableTags() {
+        final List<TagData> allTags = new ArrayList<>();
+        tagManagement.findAll(PageRequest.of(0, MAX_TAGS))
+                .forEach(tag -> allTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
+        return allTags;
+    }
+
+    @Override
+    protected List<TagData> getAssignedTags() {
+        final List<TagData> assignedTags = new ArrayList<>();
+        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().forEach(tagName -> {
             final Optional<TargetTag> byName = tagManagement.getByName(tagName);
             if (byName.isPresent()) {
                 final TargetTag targetTag = byName.get();
-                addNewToken(targetTag.getId(), targetTag.getName(), targetTag.getColour());
+                assignedTags.add(new TagData(targetTag.getId(), targetTag.getName(), targetTag.getColour()));
             }
-        }
-    }
+        });
 
-    @Override
-    protected void populateContainer() {
-        // container.removeAllItems();
-        tokenField.removeAllTokens();
-        tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
-            setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
-        }
-
+        return assignedTags;
     }
 
     // public Map<Long, TagData> getTokensAdded() {

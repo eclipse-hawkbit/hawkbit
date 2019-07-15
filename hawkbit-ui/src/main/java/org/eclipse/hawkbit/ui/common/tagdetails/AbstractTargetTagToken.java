@@ -12,12 +12,14 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
+import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -46,21 +48,19 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEventTargetTagCreated(final TargetTagCreatedEventContainer container) {
         container.getEvents().stream().filter(Objects::nonNull).map(TargetTagCreatedEvent::getEntity)
-                .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour()));
+                .forEach(tag -> tagCreated(new TagData(tag.getId(), tag.getName(), tag.getColour())));
     }
 
-    // @EventBusListenerMethod(scope = EventScope.UI)
-    // void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer
-    // container) {
-    // container.getEvents().stream().map(event ->
-    // getTagIdByTagName(event.getEntityId()))
-    // .forEach(this::removeTagFromCombo);
-    // }
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onTargetTagDeletedEvent(final TargetTagDeletedEventContainer container) {
+        container.getEvents().stream().filter(Objects::nonNull).map(TargetTagDeletedEvent::getEntityId)
+                .forEach(this::tagDeleted);
+    }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagUpdateEvent(final List<TargetTagUpdatedEvent> events) {
         events.stream().map(TargetTagUpdatedEvent::getEntity)
-                .forEach(entity -> tokenField.updateToken(entity.getName(), entity.getColour()));
+                .forEach(tag -> tagUpdated(new TagData(tag.getId(), tag.getName(), tag.getColour())));
 
     }
 }

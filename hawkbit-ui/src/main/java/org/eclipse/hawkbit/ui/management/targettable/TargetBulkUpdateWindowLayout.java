@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.common.tagdetails.TokenField;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -220,7 +220,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private VerticalLayout getTokenFieldLayout() {
-        final TokenField tokenField = targetBulkTokenTags.getTokenField();
+        final TagPanel tokenField = targetBulkTokenTags.getTokenField();
         final VerticalLayout tokenLayout = SPUIComponentProvider.getDetailTabLayout();
         tokenLayout.addStyleName("bulk-target-tags-layout");
         tokenLayout.addComponent(tokenField);
@@ -286,8 +286,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     public void resetComponents() {
         dsNamecomboBox.clear();
         descTextArea.clear();
-        targetBulkTokenTags.getTokenField().removeAllTokens();
-        targetBulkTokenTags.populateContainer();
+        // targetBulkTokenTags.getTokenField().removeAllTokens();
+        targetBulkTokenTags.initializeTags();
         progressBar.setValue(0F);
         progressBar.setVisible(false);
         managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(0F);
@@ -308,12 +308,13 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Restore the target bulk upload layout field values.
      */
     public void restoreComponentsValue() {
-        targetBulkTokenTags.populateContainer();
+        // targetBulkTokenTags.populateContainer();
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
         progressBar.setValue(targetBulkUpload.getProgressBarCurrentValue());
         dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
         descTextArea.setValue(targetBulkUpload.getDescription());
-        targetBulkTokenTags.addAlreadySelectedTags();
+        targetBulkTokenTags.initializeTags();
+        // targetBulkTokenTags.addAlreadySelectedTags();
 
         if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
             targetsCountLabel.setVisible(true);
