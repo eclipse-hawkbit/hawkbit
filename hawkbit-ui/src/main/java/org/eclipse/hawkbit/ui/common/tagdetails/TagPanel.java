@@ -63,10 +63,6 @@ public class TagPanel extends VerticalLayout {
         assignedTagField.removeTag(tagData.getName());
     }
 
-    public void tagUpdated(final TagData tagData) {
-        assignedTagField.updateTag(tagData.getName(), tagData.getColor());
-    }
-
     public interface TagAssignmentListener {
 
         public void assignTag(String tagName);

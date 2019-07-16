@@ -15,9 +15,9 @@ import java.util.Objects;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.management.event.DistributionSetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -121,7 +121,11 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdatedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().filter(Objects::nonNull).map(DistributionSetTagUpdatedEvent::getEntity)
-                .forEach(tag -> tagUpdated(new TagData(tag.getId(), tag.getName(), tag.getColour())));
+        repopulateToken();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagTableEvent event) {
+        repopulateToken();
     }
 }

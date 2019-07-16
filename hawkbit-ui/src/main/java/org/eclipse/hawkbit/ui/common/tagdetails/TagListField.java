@@ -43,28 +43,25 @@ public class TagListField extends CssLayout {
 
     public void addTag(final String tagName, final String tagColor) {
         if (!tagButtons.containsKey(tagName)) {
-            final Button tagButton = SPUIComponentProvider.getButton(
-                    UIComponentIdProvider.ASSIGNED_TAG_ID_PREFIX + tagName, tagName,
-                    i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_REMOVE), null, false, null,
-                    SPUITagButtonStyle.class);
-            tagButtons.put(tagName, tagButton);
-            tagButton.setData(tagName);
-            tagButton.addClickListener(e -> removeTagAssignment((String) e.getButton().getData()));
-            tagButton.addStyleName(SPUIStyleDefinitions.TAG_BUTTON_WITH_BACKGROUND);
-            tagButton.setEnabled(!readOnlyMode);
+            final Button tagButton = createButton(tagName, tagColor);
             addComponent(tagButton, getComponentCount());
-            updateTag(tagName, tagColor);
+            tagButtons.put(tagName, tagButton);
         }
     }
 
-    public void updateTag(final String tagName, final String tagColor) {
-        final Button button = tagButtons.get(tagName);
-        if (button != null) {
-            button.addStyleName(SPUIDefinitions.TEXT_STYLE + " " + SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
-            button.setCaption("<span style=\" color:" + tagColor + " !important;\">" + FontAwesome.CIRCLE.getHtml()
-                    + "</span>" + " " + tagName.concat("  ×"));
-            button.setCaptionAsHtml(true);
-        }
+    private Button createButton(final String tagName, final String tagColor) {
+        final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ASSIGNED_TAG_ID_PREFIX + tagName,
+                tagName, i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_REMOVE), null, false, null,
+                SPUITagButtonStyle.class);
+        button.setData(tagName);
+        button.addClickListener(e -> removeTagAssignment((String) e.getButton().getData()));
+        button.addStyleName(SPUIStyleDefinitions.TAG_BUTTON_WITH_BACKGROUND);
+        button.addStyleName(SPUIDefinitions.TEXT_STYLE + " " + SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
+        button.setEnabled(!readOnlyMode);
+        button.setCaption("<span style=\" color:" + tagColor + " !important;\">" + FontAwesome.CIRCLE.getHtml()
+                + "</span>" + " " + tagName.concat("  ×"));
+        button.setCaptionAsHtml(true);
+        return button;
     }
 
     private void removeTagAssignment(final String tagName) {

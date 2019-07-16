@@ -118,18 +118,18 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     public void tagCreated(final TagData tagData) {
         tagDetailsByName.put(tagData.getName(), tagData);
         tagDetailsById.put(tagData.getId(), tagData);
+
+        tagPanel.tagCreated(tagData);
     }
 
     public void tagDeleted(final Long id) {
         final TagData tagData = tagDetailsById.get(id);
         if (tagData != null) {
+            tagPanel.tagDeleted(tagData);
+
             tagDetailsByName.remove(tagData.getName());
             tagDetailsById.remove(id);
         }
-    }
-
-    public void tagUpdated(final TagData tagData) {
-        tagPanel.tagUpdated(tagData);
     }
 
     @Override

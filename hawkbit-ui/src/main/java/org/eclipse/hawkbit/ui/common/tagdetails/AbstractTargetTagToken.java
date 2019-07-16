@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.push.TargetTagCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.TargetTagDeletedEventContainer;
@@ -59,8 +60,13 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagUpdateEvent(final List<TargetTagUpdatedEvent> events) {
-        events.stream().map(TargetTagUpdatedEvent::getEntity)
-                .forEach(tag -> tagUpdated(new TagData(tag.getId(), tag.getName(), tag.getColour())));
+        repopulateToken();
 
     }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onTargetTagUpdateEvent(final TargetTagTableEvent event) {
+        repopulateToken();
+    }
+
 }
