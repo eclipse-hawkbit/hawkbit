@@ -286,7 +286,6 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     public void resetComponents() {
         dsNamecomboBox.clear();
         descTextArea.clear();
-        // targetBulkTokenTags.getTokenField().removeAllTokens();
         targetBulkTokenTags.initializeTags();
         progressBar.setValue(0F);
         progressBar.setVisible(false);
@@ -308,13 +307,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Restore the target bulk upload layout field values.
      */
     public void restoreComponentsValue() {
-        // targetBulkTokenTags.populateContainer();
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
         progressBar.setValue(targetBulkUpload.getProgressBarCurrentValue());
         dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
         descTextArea.setValue(targetBulkUpload.getDescription());
         targetBulkTokenTags.initializeTags();
-        // targetBulkTokenTags.addAlreadySelectedTags();
 
         if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
             targetsCountLabel.setVisible(true);

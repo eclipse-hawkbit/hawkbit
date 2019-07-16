@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;

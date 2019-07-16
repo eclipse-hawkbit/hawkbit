@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 //import org.vaadin.tokenfield.TokenField.InsertPosition;
 
 import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
@@ -44,15 +44,8 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected TagPanel tagPanel;
 
-    // protected IndexedContainer container;
-
     protected final transient Map<Long, TagData> tagDetailsById = new ConcurrentHashMap<>();
     protected final transient Map<String, TagData> tagDetailsByName = new ConcurrentHashMap<>();
-
-    // protected final transient Map<Long, TagData> tokensAdded = new
-    // HashMap<>();
-
-    // protected CssLayout tokenLayout = new CssLayout();
 
     protected SpPermissionChecker checker;
 
@@ -76,7 +69,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         this.uinotification = uinotification;
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
-        createTokenField();
+        createTagPanel();
         checkIfTagAssignedIsAllowed();
         if (doSubscribeToEventBus()) {
             eventBus.subscribe(this);
@@ -105,20 +98,10 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         });
     }
 
-    private void createTokenField() {
-
-        // final Container tokenContainer = createContainer();
-        tagPanel = new TagPanel();
+    private void createTagPanel() {
+        tagPanel = new TagPanel(i18n);
         tagPanel.addTagAssignmentListener(this);
-        // tagPanel.setContainerDataSource(tokenContainer);
-        // tagPanel.setNewTokensAllowed(false);
-        // tagPanel.setFilteringMode(FilteringMode.CONTAINS);
-        // tagPanel.setInputPrompt(getTokenInputPrompt());
-        // tagPanel.setTokenInsertPosition(InsertPosition.AFTER);
-        tagPanel.setImmediate(true);
-        tagPanel.addStyleName(ValoTheme.COMBOBOX_TINY);
         tagPanel.setSizeFull();
-        // tagPanel.setTokenCaptionPropertyId(NAME_PROPERTY);
     }
 
     protected void repopulateToken() {
@@ -131,31 +114,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             tagDetailsById.put(tagData.getId(), tagData);
         });
         tagPanel.initializeTags(allAssignableTags, getAssignedTags());
-        // populateContainer();
-        // displayAlreadyAssignedTags();
     }
-
-    // protected void addNewToken(final Long tagId, final String tagName, final
-    // String tagColor) {
-    // tagPanel.addToken(new TagData(tagId, tagName, tagColor));
-    // removeTagAssignedFromCombo(tagId);
-    // }
-    //
-    // private void removeTagAssignedFromCombo(final Long tagId) {
-    // // tokensAdded.put(tagId, new TagData(tagId, getTagName(item),
-    // // getColor(item)));
-    // tagPanel.removeToken(tagId.toString());
-    // }
-    //
-    // protected void setContainerPropertValues(final Long tagId, final String
-    // tagName, final String tagColor) {
-    // final TagData newTagData = new TagData(tagId, tagName, tagColor);
-    // final TagData existingTagData = tagDetailsById.putIfAbsent(tagId,
-    // newTagData);
-    // if (existingTagData == null) {
-    // tagPanel.addToken(newTagData);
-    // }
-    // }
 
     public void tagCreated(final TagData tagData) {
         tagDetailsByName.put(tagData.getName(), tagData);
@@ -200,89 +159,9 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected abstract void unassignTag(TagData tagData);
 
-    // class CustomTokenField extends TokenField {
-    // private static final long serialVersionUID = 694216966472937436L;
-    //
-    // Container tokenContainer;
-    //
-    // CustomTokenField(final CssLayout cssLayout, final Container
-    // tokenContainer) {
-    // super(cssLayout);
-    // this.tokenContainer = tokenContainer;
-    // }
-    //
-    // @Override
-    // protected void configureTokenButton(final Object tokenId, final Button
-    // button) {
-    // super.configureTokenButton(tokenId, button);
-    // updateTokenStyle(tokenId, button);
-    // button.addStyleName(SPUIDefinitions.TEXT_STYLE + " " +
-    // SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
-    // }
-    //
-    // @Override
-    // protected void onTokenInput(final Object tokenId) {
-    // super.addToken(tokenId);
-    // onTokenSearch(tokenId);
-    // }
-    //
-    // @Override
-    // protected void onTokenClick(final Object tokenId) {
-    // if (isToggleTagAssignmentAllowed()) {
-    // super.onTokenClick(tokenId);
-    // tokenClick(tokenId);
-    // }
-    // }
-    //
-    // private void updateTokenStyle(final Object tokenId, final Button button)
-    // {
-    // final Item item = tagPanel.getContainerDataSource().getItem(tokenId);
-    // if (item == null) {
-    // return;
-    // }
-    //
-    // final String color = getColor(item);
-    // button.setCaption("<span style=\"color:" + color + " !important;\">" +
-    // FontAwesome.CIRCLE.getHtml()
-    // + "</span>" + " " +
-    // getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
-    // button.setCaptionAsHtml(true);
-    // }
-    //
-    // private void onTokenSearch(final Object tokenId) {
-    // assignTag(getItemNameProperty(tokenId).getValue().toString());
-    // removeTagAssignedFromCombo((Long) tokenId);
-    // }
-    //
-    // private void tokenClick(final Object tokenId) {
-    // final Item item = tagPanel.getContainerDataSource().addItem(tokenId);
-    // item.getItemProperty(NAME_PROPERTY).setValue(tagDetailsById.get(tokenId).getName());
-    // item.getItemProperty(COLOR_PROPERTY).setValue(tagDetailsById.get(tokenId).getColor());
-    // unassignTag(tagDetailsById.get(tokenId).getName());
-    // }
-    // }
-
-    // private static String getColor(final Item item) {
-    // if (item.getItemProperty(COLOR_PROPERTY).getValue() != null) {
-    // return (String) item.getItemProperty(COLOR_PROPERTY).getValue();
-    // } else {
-    // return SPUIDefinitions.DEFAULT_COLOR;
-    // }
-    // }
-
-    // private static String getTagName(final Item item) {
-    // return (String) item.getItemProperty(NAME_PROPERTY).getValue();
-    // }
-
-    // protected void removePreviouslyAddedTokens() {
-    // tokensAdded.keySet().forEach(previouslyAddedToken ->
-    // tagPanel.removeToken(previouslyAddedToken));
-    // }
-
     protected Long getTagIdByTagName(final Long tagId) {
         return tagDetailsById.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findAny()
-                .map(entry -> entry.getKey()).orElse(null);
-
+                .map(Entry::getKey).orElse(null);
     }
 
     protected boolean checkAssignmentResult(final List<? extends NamedEntity> assignedEntities,
@@ -303,28 +182,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
                 && unAssignedDistributionSet.getId().equals(expectedUnAssignedEntityId);
     }
 
-    // protected void removeTokenItem(final Long tokenId, final String name) {
-    // tagPanel.removeToken(name);
-    // tagDetailsById.remove(tokenId);
-    // // setContainerPropertValues(tokenId, name,
-    // // tokensAdded.get(tokenId).getColor());
-    // }
-
-    // protected void removeTagFromCombo(final Long deletedTagId) {
-    // if (deletedTagId != null) {
-    // container.removeItem(deletedTagId);
-    // }
-    // }
-
-    protected abstract String getTagStyleName();
-
-    protected abstract String getTokenInputPrompt();
-
     protected abstract Boolean isToggleTagAssignmentAllowed();
-
-    // protected abstract void displayAlreadyAssignedTags();
-    //
-    // protected abstract void populateContainer();
 
     protected abstract List<TagData> getAllAssignableTags();
 
@@ -332,79 +190,5 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     public TagPanel getTokenField() {
         return tagPanel;
-    }
-
-    /**
-     * Tag details.
-     *
-     */
-    public static class TagData implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        private String name;
-
-        private Long id;
-
-        private String color;
-
-        /**
-         * Tag data constructor.
-         *
-         * @param id
-         * @param name
-         * @param color
-         */
-        public TagData(final Long id, final String name, final String color) {
-            this.color = color;
-            this.id = id;
-            this.name = name;
-        }
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @param name
-         *            the name to set
-         */
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the id
-         */
-        public Long getId() {
-            return id;
-        }
-
-        /**
-         * @param id
-         *            the id to set
-         */
-        public void setId(final Long id) {
-            this.id = id;
-        }
-
-        /**
-         * @return the color
-         */
-        public String getColor() {
-            return color;
-        }
-
-        /**
-         * @param color
-         *            the color to set
-         */
-        public void setColor(final String color) {
-            this.color = color;
-        }
-
     }
 }

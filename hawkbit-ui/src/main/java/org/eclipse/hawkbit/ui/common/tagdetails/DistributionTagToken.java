@@ -45,9 +45,6 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private final transient DistributionSetManagement distributionSetManagement;
 
-    // To Be Done : have to set this value based on view???
-    // private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
-
     public DistributionTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
             final DistributionSetTagManagement distributionSetTagManagement,
@@ -56,51 +53,6 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.distributionSetManagement = distributionSetManagement;
     }
-
-    @Override
-    protected String getTagStyleName() {
-        return "distribution-tag-";
-    }
-
-    @Override
-    protected String getTokenInputPrompt() {
-        return i18n.getMessage("combo.type.tag.name");
-    }
-
-    // @Override
-    // public void assignTag(final String tagName) {
-    // if (tagName != null) {
-    // final DistributionSetTagAssignmentResult result =
-    // toggleAssignment(tagName);
-    // if (result.getAssigned() >= 1 && NOTAGS_SELECTED) {
-    // eventBus.publish(this, ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG);
-    // }
-    // } else {
-    // uinotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
-    // }
-    // }
-
-    //
-    // @Override
-    // public void unassignTag(final String tagName) {
-    // final DistributionSetTagAssignmentResult result =
-    // toggleAssignment(tagName);
-    // if (result.getUnassigned() >= 1) {
-    // eventBus.publish(this, ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG);
-    // }
-    // }
-    //
-    // private DistributionSetTagAssignmentResult toggleAssignment(final String
-    // tagNameSelected) {
-    // final DistributionSetTagAssignmentResult result =
-    // distributionSetManagement
-    // .toggleTagAssignment(Sets.newHashSet(selectedEntity.getId()),
-    // tagNameSelected);
-    // processTargetTagAssigmentResult(result);
-    // uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected,
-    // result, i18n));
-    // return result;
-    // }
 
     @Override
     protected void assignTag(final TagData tagData) {
@@ -130,28 +82,6 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     protected Boolean isToggleTagAssignmentAllowed() {
         return checker.hasUpdateRepositoryPermission();
     }
-
-    // @Override
-    // public void displayAlreadyAssignedTags() {
-    // // removePreviouslyAddedTokens();
-    // if (selectedEntity != null) {
-    // distributionSetTagManagement.findByDistributionSet(PageRequest.of(0,
-    // MAX_TAG_QUERY), selectedEntity.getId())
-    // .getContent().stream().forEach(tag -> addNewToken(tag.getId(),
-    // tag.getName(), tag.getColour()));
-    // }
-    // }
-
-    // @Override
-    // protected void populateContainer() {
-    // // container.removeAllItems();
-    // tagPanel.removeAllTokens();
-    // tagDetailsById.clear();
-    // distributionSetTagManagement.findAll(PageRequest.of(0,
-    // MAX_TAG_QUERY)).getContent().stream()
-    // .forEach(tag -> setContainerPropertValues(tag.getId(), tag.getName(),
-    // tag.getColour()));
-    // }
 
     @Override
     protected List<TagData> getAllAssignableTags() {
@@ -194,45 +124,4 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
         eventContainer.getEvents().stream().filter(Objects::nonNull).map(DistributionSetTagUpdatedEvent::getEntity)
                 .forEach(tag -> tagUpdated(new TagData(tag.getId(), tag.getName(), tag.getColour())));
     }
-
-    // private void processTargetTagAssigmentResult(final
-    // DistributionSetTagAssignmentResult assignmentResult) {
-    // final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
-    // if (isAssign(assignmentResult)) {
-    // addNewToken(tag.getId(), tag.getName(), tag.getColour());
-    // } else if (isUnassign(assignmentResult)) {
-    // removeTokenItem(tag.getId(), tag.getName());
-    // }
-    // }
-
-    // protected boolean isAssign(final DistributionSetTagAssignmentResult
-    // assignmentResult) {
-    // if (assignmentResult.getAssigned() > 0 &&
-    // managementUIState.getLastSelectedDsIdName() != null) {
-    // final List<Long> assignedDsNames =
-    // assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
-    // .collect(Collectors.toList());
-    // if
-    // (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName())) {
-    // return true;
-    // }
-    // }
-    // return false;
-    // }
-
-    // protected boolean isUnassign(final DistributionSetTagAssignmentResult
-    // assignmentResult) {
-    // if (assignmentResult.getUnassigned() > 0 &&
-    // managementUIState.getLastSelectedDsIdName() != null) {
-    // final List<Long> assignedDsNames =
-    // assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
-    // .collect(Collectors.toList());
-    // if
-    // (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName())) {
-    // return true;
-    // }
-    // }
-    // return false;
-    // }
-
 }

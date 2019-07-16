@@ -10,100 +10,74 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.google.common.collect.Lists;
-import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.VerticalLayout;
 
 public class TagPanel extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String NAME_PROPERTY = "name";
-    private static final String COLOR_PROPERTY = "color";
+    private final TagListField assignedTagField;
+    private final TagAssignementComboBox assignableTagsComboBox;
 
-    private final IndexedContainer allAssignableTags;
-    private final transient List<TagAssignmentListener> listeners = Lists.newCopyOnWriteArrayList();
-
-    private final ComboBox assignableTagsComboBox;
-    private final TokenField assignedTagField;
-
-    public TagPanel() {
-        allAssignableTags = new IndexedContainer();
-        allAssignableTags.addContainerProperty(NAME_PROPERTY, String.class, "");
-        allAssignableTags.addContainerProperty(COLOR_PROPERTY, String.class, "");
-
-        assignableTagsComboBox = new ComboBox();
+    public TagPanel(final VaadinMessageSource i18n) {
+        assignableTagsComboBox = new TagAssignementComboBox(i18n);
         addComponent(assignableTagsComboBox);
-        assignableTagsComboBox.setContainerDataSource(allAssignableTags);
 
-        assignedTagField = new TokenField();
+        assignedTagField = new TagListField(i18n);
         addComponent(assignedTagField);
     }
 
     public void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
-        allAssignableTags.removeAllItems();
-        assignedTagField.removeAllTokens();
+        assignableTagsComboBox.removeAllTags();
+        assignedTagField.removeAllTags();
 
-        allTags.forEach(this::addAssignableTag);
+        allTags.forEach(assignableTagsComboBox::addAssignableTag);
         assignedTags.forEach(this::setAssignedTag);
-    }
-
-    private void addAssignableTag(final TagData tagData) {
-        final Item item = allAssignableTags.addItem(tagData.getName());
-        if (item == null) {
-            return;
-        }
-        item.getItemProperty(NAME_PROPERTY).setValue(tagData.getName());
-        item.getItemProperty(COLOR_PROPERTY).setValue(tagData.getColor());
     }
 
     public void setAssignedTag(final TagData tagData) {
         // the assigned tag is no longer assignable
-        allAssignableTags.removeItem(tagData.getName());
+        assignableTagsComboBox.removeAssignableTag(tagData);
         // show it as an assigned tag
-        assignedTagField.addToken(tagData.getName(), tagData.getColor());
+        assignedTagField.addTag(tagData.getName(), tagData.getColor());
     }
 
     public void removeAssignedTag(final TagData tagData) {
         // the un-assigned tag is now assignable
-        addAssignableTag(tagData);
+        assignableTagsComboBox.addAssignableTag(tagData);
         // remove ot from the assigned tags
-        assignedTagField.removeToken(tagData.getName());
+        assignedTagField.removeTag(tagData.getName());
     }
 
     public void tagCreated(final TagData tagData) {
-        addAssignableTag(tagData);
+        assignableTagsComboBox.addAssignableTag(tagData);
     }
 
     public void tagDeleted(final TagData tagData) {
-        // TODO implement
+        assignableTagsComboBox.removeAssignableTag(tagData);
+        assignedTagField.removeTag(tagData.getName());
     }
 
     public void tagUpdated(final TagData tagData) {
-        // TODO implement
+        assignedTagField.updateTag(tagData.getName(), tagData.getColor());
     }
 
     public interface TagAssignmentListener {
+
         public void assignTag(String tagName);
 
         public void unassignTag(String tagName);
     }
 
     public void addTagAssignmentListener(final TagAssignmentListener listener) {
-        listeners.add(listener);
+        assignableTagsComboBox.addTagAssignmentListener(listener);
         assignedTagField.addTagAssignmentListener(listener);
     }
 
     public void removeTagAssignmentListener(final TagAssignmentListener listener) {
-        listeners.remove(listener);
+        assignableTagsComboBox.removeTagAssignmentListener(listener);
         assignedTagField.removeTagAssignmentListener(listener);
-    }
-
-    private void notifyListenersTagAssigned(final String tagName) {
-        listeners.forEach(listener -> listener.assignTag(tagName));
     }
 }
