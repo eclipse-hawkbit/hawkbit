@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
@@ -57,6 +58,7 @@ import com.google.common.collect.Lists;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Documentation generation for Management API for {@link Target}.
@@ -490,8 +492,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
-        testdataFactory.createTarget(targetId);
+        // create target and ds, and assign ds and finish update
+        testdataFactory.createTarget(targetId + "-old");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assignDistributionSet(set.getId(), targetId + "-old");
+
+        testdataFactory.createTarget(targetId);
 
         final long forceTime = System.currentTimeMillis();
         final String body = new JSONObject().put("id", set.getId()).put("type", "timeforced")
@@ -500,9 +506,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone()))
                 .toString();
 
-        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+        final MvcResult mvcResult = mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -524,8 +530,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+                                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+                                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                                fieldWithPath("alreadyAssignedActions").type(JsonFieldType.ARRAY)
+                                        .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_ACTIONS),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
+                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS)))).andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
     }
 
     @Test

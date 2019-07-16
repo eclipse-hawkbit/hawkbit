@@ -283,7 +283,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") final String targetId, @RequestBody final MgmtDistributionSetAssignment dsId,
             @RequestParam(value = "offline", required = false) final boolean offline) {
-        //TODO 
+
         if (offline) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(deploymentManagement
                     .offlineAssignedDistributionSet(dsId.getId(), Collections.singletonList(targetId))));

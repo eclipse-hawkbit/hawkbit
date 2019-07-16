@@ -51,7 +51,7 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return total number (assigned and already assigned).
      */
     public int getTotal() {
-        return getAssignedEntity().size() + getAlreadyAssignedEntity().size();
+        return getAssigned() + getAlreadyAssigned();
     }
 
     /**

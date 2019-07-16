@@ -469,7 +469,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive());
-        ///
+
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent()).containsAll(targets)
                 .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
@@ -699,7 +699,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // test the content of different lists
         assertThat(allFoundTargets).as("content of founded target is wrong").containsAll(deployedTargetsFromDB)
                 .containsAll(undeployedTargetsFromDB);
-        ///
+
         assertThat(deployedTargetsFromDB).as("content of deployed target is wrong").containsAll(savedDeployedTargets)
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
         assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
@@ -778,7 +778,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // get final updated version of targets
         final List<Target> deployResWithDsBTargets = targetManagement.getByControllerID(deployResWithDsB
                 .getDeployedTargets().stream().map(Target::getControllerId).collect(Collectors.toList()));
-///
+
         assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);
         assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsBTargets);
 

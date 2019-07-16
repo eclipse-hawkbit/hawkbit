@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
@@ -139,6 +140,10 @@ public final class MgmtDistributionSetMapper {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         result.setAssigned(dsAssignmentResult.getAssigned());
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
+        result.setAssignedActions(dsAssignmentResult.getAssignedActions().stream()
+                .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));
+        result.setAlreadyAssignedActions(dsAssignmentResult.getAlreadyAssignedActions().stream()
+                .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));
         return result;
     }
 

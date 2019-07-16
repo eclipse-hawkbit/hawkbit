@@ -270,15 +270,37 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
-            // detaching as it is not necessary to persist the set itself
-            entityManager.detach(distributionSetEntity);
-            // return with nothing as all targets had the DS already assigned
-            return new DistributionSetAssignmentResult(distributionSetEntity,
-                    targetManagement.getByControllerID(controllerIDs), Collections.emptyList(), Collections.emptyList(),
-                    Collections.emptyList(),
-                    actionRepository.findAllByActiveAndTargetControllerIdIn(true, controllerIDs));
+            return allTargetsAlreadyAssignedResult(distributionSetEntity, controllerIDs);
         }
 
+        closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
+                targetEntities);
+
+        final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
+                assignmentStrategy, distributionSetEntity);
+        // create initial action status when action is created so we remember
+        // the initial running status because we will change the status
+        // of the action itself and with this action status we have a nicer
+        // action history.
+        createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
+
+        detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
+        return buildAssignmentResult(distributionSetEntity, controllerIDs, targetEntities, controllerIdsToActions);
+    }
+
+    private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
+            final JpaDistributionSet distributionSetEntity, final List<String> controllerIDs) {
+        // detaching as it is not necessary to persist the set itself
+        entityManager.detach(distributionSetEntity);
+        // return with nothing as all targets had the DS already assigned
+        return new DistributionSetAssignmentResult(distributionSetEntity,
+                targetManagement.getByControllerID(controllerIDs), Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList(), actionRepository.findAllByActiveAndTargetControllerIdIn(true, controllerIDs));
+    }
+
+    private void closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(
+            final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
+            final List<JpaTarget> targetEntities) {
         // split tIDs length into max entries in-statement because many database
         // have constraint of max entries in in-statements e.g. Oracle with
         // maximum 1000 elements, so we need to split the entries here and
@@ -295,36 +317,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
                 targetEntitiesIdsChunks);
-
-        final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
-                assignmentStrategy, distributionSetEntity);
-        // create initial action status when action is created so we remember
-        // the initial running status because we will change the status
-        // of the action itself and with this action status we have a nicer
-        // action history.
-        createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
-
-        detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
-        final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
-                .collect(Collectors.toList());
-        final List<String> alreadyAssignedIds = controllerIDs.stream().filter(id -> !targetEntitiesIds.contains(id))
-                .collect(Collectors.toList());
-        List<Action> assignedActions = controllerIdsToActions.values().stream()
-                .filter(action -> targetEntitiesIds.contains(action.getTarget().getControllerId()))
-                .collect(Collectors.toList());
-        List<Action> alreadyAssignedActions = controllerIdsToActions.values().stream()
-                .filter(action -> !targetEntitiesIds.contains(action.getTarget().getControllerId()))
-                .collect(Collectors.toList());
-        final List<Target> byControllerID = alreadyAssignedIds.isEmpty()
-                ? Collections.emptyList()
-                : targetManagement.getByControllerID(alreadyAssignedIds);
-        return new DistributionSetAssignmentResult(distributionSetEntity, byControllerID,
-                targetManagement.getByControllerID(targetEntitiesIds), Collections.emptyList(), assignedActions,
-                alreadyAssignedActions);
     }
 
-    private static boolean notInList(final String id, final List<JpaTarget> targetEntities) {
-        return targetEntities.stream().map(Target::getControllerId).noneMatch(targetId -> targetId.equals(id));
+    private DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
+            final List<String> controllerIDs, final List<JpaTarget> targetEntities,
+            final Map<String, JpaAction> controllerIdsToActions) {
+
+        final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final List<Action> alreadyAssignedActions = actionRepository
+                .findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(distributionSet.getId(), true,
+                        targetEntitiesIds);
+        final List<Target> alreadyAssignedTargets = alreadyAssignedActions.stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+
+        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargets, 
+                targetManagement.getByControllerID(targetEntitiesIds), Collections.emptyList(),
+                new ArrayList<>(controllerIdsToActions.values()), alreadyAssignedActions);
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {

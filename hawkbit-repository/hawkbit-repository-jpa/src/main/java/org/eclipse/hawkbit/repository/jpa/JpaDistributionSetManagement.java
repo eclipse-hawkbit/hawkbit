@@ -209,9 +209,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return result;
     }
 
-    private List<DistributionSet> getAlreadyAssigned(final Collection<Long> dsIds, final List<JpaDistributionSet> toBeChangedDSs) {
-        dsIds.removeIf(id -> toBeChangedDSs.stream().anyMatch(ds -> ds.getId().equals(id)));
-        return new ArrayList<>(distributionSetRepository.findAllById(dsIds));
+    private List<DistributionSet> getAlreadyAssigned(final Collection<Long> dsIds,
+            final List<JpaDistributionSet> toBeChangedDSs) {
+        List<Long> ids = new ArrayList<>(dsIds);
+        ids.removeIf(id -> toBeChangedDSs.stream().anyMatch(ds -> ds.getId().equals(id)));
+        return new ArrayList<>(distributionSetRepository.findAllById(ids));
     }
 
     private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {

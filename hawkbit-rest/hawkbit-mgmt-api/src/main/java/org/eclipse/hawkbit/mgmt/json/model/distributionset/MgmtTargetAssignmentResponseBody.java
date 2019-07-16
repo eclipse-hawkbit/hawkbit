@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.hateoas.ResourceSupport;
 
 /**
  * Response Body of Target for assignment operations.
@@ -23,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtTargetAssignmentResponseBody {
+public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
 
     private List<MgmtActionId> assignedActions;
     private List<MgmtActionId> alreadyAssignedActions;

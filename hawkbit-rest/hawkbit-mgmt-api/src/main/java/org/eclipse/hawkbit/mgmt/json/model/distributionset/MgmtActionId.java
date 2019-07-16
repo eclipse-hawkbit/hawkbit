@@ -8,10 +8,18 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionId extends ResourceSupport {
 
     private long actionId;
@@ -23,9 +31,11 @@ public class MgmtActionId extends ResourceSupport {
      * Constructor
      * @param actionId
      *              the actionId
+     * @param targetId
      */
-    public MgmtActionId(final long actionId) {
+    public MgmtActionId(final String targetId, final long actionId) {
         this.actionId = actionId;
+        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, actionId)).withSelfRel());
     }
 
     @JsonProperty("id")

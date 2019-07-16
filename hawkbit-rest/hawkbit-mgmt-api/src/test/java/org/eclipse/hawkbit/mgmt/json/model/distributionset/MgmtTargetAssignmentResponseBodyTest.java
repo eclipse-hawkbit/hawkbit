@@ -60,9 +60,11 @@ public class MgmtTargetAssignmentResponseBodyTest {
 
     private MgmtTargetAssignmentResponseBody generateResponseBody() {
         MgmtTargetAssignmentResponseBody response = new MgmtTargetAssignmentResponseBody();
-        response.setAlreadyAssignedActions(
-                Arrays.asList(new MgmtActionId(1L), new MgmtActionId(2L), new MgmtActionId(3L)));
-        response.setAssignedActions(Arrays.asList(new MgmtActionId(4L), new MgmtActionId(5L), new MgmtActionId(6L)));
+        final String targetId = "target";
+        response.setAlreadyAssignedActions(Arrays.asList(new MgmtActionId(targetId, 1L), new MgmtActionId(targetId, 2L),
+                new MgmtActionId(targetId, 3L)));
+        response.setAssignedActions(Arrays.asList(new MgmtActionId(targetId, 4L), new MgmtActionId(targetId, 5L),
+                new MgmtActionId(targetId, 6L)));
         response.setAssigned(3);
         response.setAlreadyAssigned(3);
         return response;

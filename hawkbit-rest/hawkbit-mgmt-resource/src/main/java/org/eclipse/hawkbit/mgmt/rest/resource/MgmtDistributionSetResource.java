@@ -256,7 +256,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments
                             .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
         }
-//TODO
+
         final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament
                 .assignDistributionSet(distributionSetId, assignments.stream().map(t -> {
                     final MgmtMaintenanceWindowRequestBody maintenanceWindow = t.getMaintenanceWindow();

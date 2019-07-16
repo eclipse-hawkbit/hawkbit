@@ -505,7 +505,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     void deleteByIdIn(Collection<Long> actionIDs);
 
     /**
-     * Retrieves all IDs for {@link Action}s referring to the given target ControllerIds and active flag
+     * Retrieves all {@link Action}s referring to the given target ControllerIds and active flag
      *
      * @param controllerIds
      *            the controllerIds of targets for the actions
@@ -515,4 +515,17 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     List<Action> findAllByActiveAndTargetControllerIdIn(@Param("active") boolean active,
             @Param("controllerIds") List<String> controllerIds);
+    
+    /**
+     * Retrieves all {@link Action}s referring to the given distributionSet id and not having targetId from the 
+     * given ControllerIds and active flag
+     *
+     * @param controllerIds
+     *            the controllerIds of targets for the actions
+     * @param active
+     *            flag to indicate active/inactive actions
+     * @return the found list of {@link Action} IDs
+     */
+    List<Action> findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(@Param("distributionSetId") Long dsId,
+            @Param("active") boolean active, @Param("controllerIds") List<String> controllerIds);
 }

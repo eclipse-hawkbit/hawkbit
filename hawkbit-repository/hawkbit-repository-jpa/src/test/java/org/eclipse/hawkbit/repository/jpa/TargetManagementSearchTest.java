@@ -599,7 +599,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         expected.addAll(notAssigned);
 
         assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
-        ///
+
 
     }
 
@@ -653,7 +653,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .collect(Collectors.toList()));
 
         assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
-        ///
+
 
     }
 

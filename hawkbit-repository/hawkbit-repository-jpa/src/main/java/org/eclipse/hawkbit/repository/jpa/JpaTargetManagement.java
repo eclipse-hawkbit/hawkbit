@@ -97,8 +97,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TargetRepository targetRepository;
 
-    private final ActionRepository actionRepository;
-
     private final TargetMetadataRepository targetMetadataRepository;
 
     private final RolloutGroupRepository rolloutGroupRepository;
@@ -124,8 +122,7 @@ public class JpaTargetManagement implements TargetManagement {
     private final Database database;
 
     JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository, final ActionRepository actionRepository,
-            final TargetMetadataRepository targetMetadataRepository,
+            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -136,7 +133,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.entityManager = entityManager;
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
-        this.actionRepository = actionRepository;
         this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -472,14 +468,14 @@ public class JpaTargetManagement implements TargetManagement {
         if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
             specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
         }
-        if (isHasTagsFilterActive(filterParams)) {
+        if (hasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
                     filterParams.getSelectTargetWithNoTag()));
         }
         return specList;
     }
 
-    private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
+    private static boolean hasTagsFilterActive(final FilterParams filterParams) {
         return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
                 || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
