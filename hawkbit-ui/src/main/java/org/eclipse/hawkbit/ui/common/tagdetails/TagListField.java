@@ -32,11 +32,12 @@ public class TagListField extends CssLayout {
 
     private final transient Map<String, Button> tagButtons = new ConcurrentHashMap<>();
     private final transient List<TagAssignmentListener> listeners = Lists.newCopyOnWriteArrayList();
-
     private final VaadinMessageSource i18n;
+    private final boolean readOnlyMode;
 
-    public TagListField(final VaadinMessageSource i18n) {
+    public TagListField(final VaadinMessageSource i18n, final boolean readOnlyMode) {
         this.i18n = i18n;
+        this.readOnlyMode = readOnlyMode;
         setSizeFull();
     }
 
@@ -50,6 +51,7 @@ public class TagListField extends CssLayout {
             tagButton.setData(tagName);
             tagButton.addClickListener(e -> removeTagAssignment((String) e.getButton().getData()));
             tagButton.addStyleName(SPUIStyleDefinitions.TAG_BUTTON_WITH_BACKGROUND);
+            tagButton.setEnabled(!readOnlyMode);
             addComponent(tagButton, getComponentCount());
             updateTag(tagName, tagColor);
         }

@@ -20,12 +20,15 @@ public class TagPanel extends VerticalLayout {
 
     private final TagListField assignedTagField;
     private final TagAssignementComboBox assignableTagsComboBox;
+    private final boolean readOnlyMode;
 
-    public TagPanel(final VaadinMessageSource i18n) {
-        assignableTagsComboBox = new TagAssignementComboBox(i18n);
+    public TagPanel(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+        this.readOnlyMode = readOnlyMode;
+
+        assignableTagsComboBox = new TagAssignementComboBox(i18n, readOnlyMode);
         addComponent(assignableTagsComboBox);
 
-        assignedTagField = new TagListField(i18n);
+        assignedTagField = new TagListField(i18n, readOnlyMode);
         addComponent(assignedTagField);
     }
 

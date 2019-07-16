@@ -70,7 +70,6 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
         createTagPanel();
-        checkIfTagAssignedIsAllowed();
         if (doSubscribeToEventBus()) {
             eventBus.subscribe(this);
         }
@@ -99,7 +98,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     private void createTagPanel() {
-        tagPanel = new TagPanel(i18n);
+        tagPanel = new TagPanel(i18n, !isToggleTagAssignmentAllowed());
         tagPanel.addTagAssignmentListener(this);
         tagPanel.setSizeFull();
     }
@@ -131,12 +130,6 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     public void tagUpdated(final TagData tagData) {
         tagPanel.tagUpdated(tagData);
-    }
-
-    protected void checkIfTagAssignedIsAllowed() {
-        if (!isToggleTagAssignmentAllowed()) {
-            tagPanel.addStyleName("hideTokenFieldcombo");
-        }
     }
 
     @Override

@@ -41,7 +41,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
     private final ComboBox assignableTagsComboBox;
     private final Button assignButton;
 
-    public TagAssignementComboBox(final VaadinMessageSource i18n) {
+    public TagAssignementComboBox(final VaadinMessageSource i18n, final boolean readOnlyMode) {
         allAssignableTags = new IndexedContainer();
         allAssignableTags.addContainerProperty(NAME_PROPERTY, String.class, "");
         allAssignableTags.addContainerProperty(COLOR_PROPERTY, String.class, "");
@@ -55,6 +55,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
         assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
         assignableTagsComboBox.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         assignableTagsComboBox.addStyleName(ValoTheme.COMBOBOX_TINY);
+        assignableTagsComboBox.setEnabled(!readOnlyMode);
 
         assignButton = SPUIComponentProvider.getButton(UIComponentIdProvider.ASSIGN_TAG, "",
                 i18n.getMessage(UIMessageIdProvider.TOOLTIP_ASSIGN_TAG), null, false, FontAwesome.LINK,
