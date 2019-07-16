@@ -37,7 +37,7 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * Maximum length of external reference.
      */
-    int EXTERNAL_REF_MAX_LENGTH = 256;
+    int EXTERNAL_REF_MAX_LENGTH = 512;
     
     /**
      * @return the distributionSet
