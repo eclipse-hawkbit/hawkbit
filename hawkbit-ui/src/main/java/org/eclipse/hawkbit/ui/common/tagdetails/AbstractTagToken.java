@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
-import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel.TagAssignmentListener;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -42,7 +42,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     private static final long serialVersionUID = 6599386705285184783L;
 
-    protected TagPanel tagPanel;
+    protected TagPanelLayout tagPanelLayout;
 
     protected final transient Map<Long, TagData> tagDetailsById = new ConcurrentHashMap<>();
     protected final transient Map<String, TagData> tagDetailsByName = new ConcurrentHashMap<>();
@@ -98,9 +98,9 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
     }
 
     private void createTagPanel() {
-        tagPanel = new TagPanel(i18n, !isToggleTagAssignmentAllowed());
-        tagPanel.addTagAssignmentListener(this);
-        tagPanel.setSizeFull();
+        tagPanelLayout = new TagPanelLayout(i18n, !isToggleTagAssignmentAllowed());
+        tagPanelLayout.addTagAssignmentListener(this);
+        tagPanelLayout.setSizeFull();
     }
 
     protected void repopulateToken() {
@@ -112,20 +112,20 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             tagDetailsByName.put(tagData.getName(), tagData);
             tagDetailsById.put(tagData.getId(), tagData);
         });
-        tagPanel.initializeTags(allAssignableTags, getAssignedTags());
+        tagPanelLayout.initializeTags(allAssignableTags, getAssignedTags());
     }
 
     public void tagCreated(final TagData tagData) {
         tagDetailsByName.put(tagData.getName(), tagData);
         tagDetailsById.put(tagData.getId(), tagData);
 
-        tagPanel.tagCreated(tagData);
+        tagPanelLayout.tagCreated(tagData);
     }
 
     public void tagDeleted(final Long id) {
         final TagData tagData = tagDetailsById.get(id);
         if (tagData != null) {
-            tagPanel.tagDeleted(tagData);
+            tagPanelLayout.tagDeleted(tagData);
 
             tagDetailsByName.remove(tagData.getName());
             tagDetailsById.remove(id);
@@ -181,7 +181,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected abstract List<TagData> getAssignedTags();
 
-    public TagPanel getTokenField() {
-        return tagPanel;
+    public TagPanelLayout getTagPanel() {
+        return tagPanelLayout;
     }
 }

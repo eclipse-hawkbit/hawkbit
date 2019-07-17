@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
-import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -220,10 +220,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private VerticalLayout getTokenFieldLayout() {
-        final TagPanel tokenField = targetBulkTokenTags.getTokenField();
+        final TagPanelLayout tagPanelLayout = targetBulkTokenTags.getTagPanel();
+        tagPanelLayout.setMargin(false);
         final VerticalLayout tokenLayout = SPUIComponentProvider.getDetailTabLayout();
         tokenLayout.addStyleName("bulk-target-tags-layout");
-        tokenLayout.addComponent(tokenField);
+        tokenLayout.addComponent(tagPanelLayout);
         tokenLayout.setSpacing(false);
         tokenLayout.setMargin(false);
         tokenLayout.setSizeFull();

@@ -54,7 +54,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
             uinotification.displaySuccess(
                     i18n.getMessage("message.target.assigned.one", selectedEntity.getName(), tagData.getName()));
             eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
-            tagPanel.setAssignedTag(tagData);
+            tagPanelLayout.setAssignedTag(tagData);
         }
     }
 
@@ -65,7 +65,7 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
             uinotification.displaySuccess(
                     i18n.getMessage("message.target.unassigned.one", selectedEntity.getName(), tagData.getName()));
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
-            tagPanel.removeAssignedTag(tagData);
+            tagPanelLayout.removeAssignedTag(tagData);
         }
     }
 

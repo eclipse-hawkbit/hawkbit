@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel.TagAssignmentListener;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -92,5 +92,9 @@ public class TagListField extends CssLayout {
 
     private void notifyListenersTagAssignmentRemoved(final String tagName) {
         listeners.forEach(listener -> listener.unassignTag(tagName));
+    }
+
+    public List<String> getTags() {
+        return Lists.newArrayList(tagButtons.keySet());
     }
 }

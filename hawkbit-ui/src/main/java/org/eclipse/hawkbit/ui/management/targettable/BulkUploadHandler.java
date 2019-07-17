@@ -22,9 +22,7 @@ import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -288,7 +286,7 @@ public class BulkUploadHandler extends CustomComponent
             String dsAssignmentFailedMsg = null;
             String tagAssignmentFailedMsg = null;
             if (ifTargetsCreatedSuccessfully()) {
-                if (ifTagsSelected()) {
+                if (targetBulkTokenTags.isTagSelectedForAssignment()) {
                     tagAssignmentFailedMsg = tagAssignment();
                 }
                 if (ifDsSelected()) {
@@ -313,11 +311,8 @@ public class BulkUploadHandler extends CustomComponent
         }
 
         private String tagAssignment() {
-            // final Map<Long, TagData> tokensSelected =
-            // targetBulkTokenTags.getTokensAdded();
-            final Map<Long, TagData> tokensSelected = new HashMap<>();
             final List<String> deletedTags = new ArrayList<>();
-            for (final TagData tagData : tokensSelected.values()) {
+            for (final TagData tagData : targetBulkTokenTags.getSelectedTagsForAssignment()) {
                 if (!tagManagement.get(tagData.getId()).isPresent()) {
                     deletedTags.add(tagData.getName());
                 } else {
@@ -333,11 +328,6 @@ public class BulkUploadHandler extends CustomComponent
                 return i18n.getMessage("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
             }
             return i18n.getMessage("message.bulk.upload.tag.assignments.failed");
-        }
-
-        private boolean ifTagsSelected() {
-            return false;
-            // return targetBulkTokenTags.getTokenField().getValue() != null;
         }
 
         private boolean ifDsSelected() {

@@ -14,22 +14,22 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.VerticalLayout;
 
-public class TagPanel extends VerticalLayout {
+public class TagPanelLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
     private final TagListField assignedTagField;
     private final TagAssignementComboBox assignableTagsComboBox;
-    private final boolean readOnlyMode;
 
-    public TagPanel(final VaadinMessageSource i18n, final boolean readOnlyMode) {
-        this.readOnlyMode = readOnlyMode;
+    public TagPanelLayout(final VaadinMessageSource i18n, final boolean readOnlyMode) {
 
         assignableTagsComboBox = new TagAssignementComboBox(i18n, readOnlyMode);
         addComponent(assignableTagsComboBox);
 
         assignedTagField = new TagListField(i18n, readOnlyMode);
         addComponent(assignedTagField);
+        setExpandRatio(assignedTagField, 1f);
+        setExpandRatio(assignableTagsComboBox, 0f);
     }
 
     public void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
@@ -78,5 +78,9 @@ public class TagPanel extends VerticalLayout {
     public void removeTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.removeTagAssignmentListener(listener);
         assignedTagField.removeTagAssignmentListener(listener);
+    }
+
+    public List<String> getAssignedTags() {
+        return assignedTagField.getTags();
     }
 }

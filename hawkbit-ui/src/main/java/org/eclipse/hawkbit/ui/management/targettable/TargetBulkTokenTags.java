@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -42,11 +43,13 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
     @Override
     protected void assignTag(final TagData tagData) {
         managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagData.getName());
+        tagPanelLayout.setAssignedTag(tagData);
     }
 
     @Override
     protected void unassignTag(final TagData tagData) {
         managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagData.getName());
+        tagPanelLayout.removeAssignedTag(tagData);
     }
 
     @Override
@@ -56,6 +59,10 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
 
     public void initializeTags() {
         repopulateToken();
+    }
+
+    public boolean isTagSelectedForAssignment() {
+        return !tagPanelLayout.getAssignedTags().isEmpty();
     }
 
     @Override
@@ -78,5 +85,9 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
         });
 
         return assignedTags;
+    }
+
+    public List<TagData> getSelectedTagsForAssignment() {
+        return tagPanelLayout.getAssignedTags().stream().map(tagDetailsByName::get).collect(Collectors.toList());
     }
 }

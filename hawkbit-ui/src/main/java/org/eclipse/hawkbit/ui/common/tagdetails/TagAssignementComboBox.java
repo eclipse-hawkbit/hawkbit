@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.List;
 
 import org.eclipse.hawkbit.ui.common.builder.ComboBoxBuilder;
-import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel.TagAssignmentListener;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
