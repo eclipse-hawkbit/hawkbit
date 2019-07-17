@@ -17,12 +17,12 @@ public enum SpServerError {
     /**
     *
     */
-    SP_REPO_GENERIC_ERROR("hawkbit.server.error.repo.genericError", "unknown error occured"),
+    SP_REPO_GENERIC_ERROR("hawkbit.server.error.repo.genericError", "unknown error occurred"),
 
     /**
     *
     */
-    SP_REPO_ENTITY_ALRREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists",
+    SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entityAlreadyExists",
             "The given entity already exists in database"),
 
     /**
@@ -40,7 +40,7 @@ public enum SpServerError {
     /**
      *
      */
-    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entitiyNotFound",
+    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entityNotFound",
             "The given entity does not exist in the repository"),
 
     /**
@@ -59,13 +59,13 @@ public enum SpServerError {
      *
      */
     SP_REST_SORT_PARAM_SYNTAX("hawkbit.server.error.rest.param.sortParamSyntax",
-            "The given sort paramter is not well formed"),
+            "The given sort parameter is not well formed"),
 
     /**
      *
      */
     SP_REST_RSQL_SEARCH_PARAM_SYNTAX("hawkbit.server.error.rest.param.rsqlParamSyntax",
-            "The given search paramter is not well formed"),
+            "The given search parameter is not well formed"),
 
     /**
      *
@@ -142,7 +142,7 @@ public enum SpServerError {
      * the action is inactive.
      */
     SP_ACTION_NOT_CANCELABLE("hawkbit.server.error.action.notcancelable",
-            "Only active actions which are in status pending are canceable."),
+            "Only active actions which are in status pending are cancelable."),
 
     /**
      * error message, which describes that the action can not be force quit
@@ -178,7 +178,7 @@ public enum SpServerError {
     /**
      *
      */
-    SP_ENTITY_LOCKED("hawkbit.server.error.entitiylocked", "The given entity is locked by the server."),
+    SP_ENTITY_LOCKED("hawkbit.server.error.entitylocked", "The given entity is locked by the server."),
 
     /**
      *

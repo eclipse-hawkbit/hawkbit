@@ -47,7 +47,7 @@ public class ResponseExceptionHandler {
 
     static {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_NOT_EXISTS, HttpStatus.NOT_FOUND);
-        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_ALRREADY_EXISTS, HttpStatus.CONFLICT);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_READ_ONLY, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_FIELD, HttpStatus.BAD_REQUEST);
