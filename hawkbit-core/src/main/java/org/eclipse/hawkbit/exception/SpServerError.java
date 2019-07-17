@@ -22,7 +22,7 @@ public enum SpServerError {
     /**
     *
     */
-    SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entityAlreadyExists",
+    SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists",
             "The given entity already exists in database"),
 
     /**
@@ -40,7 +40,7 @@ public enum SpServerError {
     /**
      *
      */
-    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entityNotFound",
+    SP_REPO_ENTITY_NOT_EXISTS("hawkbit.server.error.repo.entitiyNotFound",
             "The given entity does not exist in the repository"),
 
     /**
@@ -178,7 +178,7 @@ public enum SpServerError {
     /**
      *
      */
-    SP_ENTITY_LOCKED("hawkbit.server.error.entitylocked", "The given entity is locked by the server."),
+    SP_ENTITY_LOCKED("hawkbit.server.error.entitiylocked", "The given entity is locked by the server."),
 
     /**
      *
