@@ -35,7 +35,7 @@ public class DistributionTableFilters implements Serializable {
 
     private TargetIdName pinnedTarget;
 
-    private final List<String> distSetTags = new ArrayList<>();
+    private final List<String> clickedDistSetTags = new ArrayList<>();
 
     private Boolean noTagSelected = Boolean.FALSE;
 
@@ -47,8 +47,8 @@ public class DistributionTableFilters implements Serializable {
         return noTagSelected;
     }
 
-    public List<String> getDistSetTags() {
-        return distSetTags;
+    public List<String> getClickedDistSetTags() {
+        return clickedDistSetTags;
     }
 
     public Optional<Long> getDistId() {
@@ -74,5 +74,4 @@ public class DistributionTableFilters implements Serializable {
     public void setSearchText(final String searchText) {
         this.searchText = searchText;
     }
-
 }

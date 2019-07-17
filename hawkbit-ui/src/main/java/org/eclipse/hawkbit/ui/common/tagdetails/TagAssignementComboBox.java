@@ -12,8 +12,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.ui.common.builder.ComboBoxBuilder;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagPanel.TagAssignmentListener;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -22,8 +20,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import com.google.common.collect.Lists;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -39,9 +35,15 @@ public class TagAssignementComboBox extends HorizontalLayout {
     private final transient List<TagAssignmentListener> listeners = Lists.newCopyOnWriteArrayList();
 
     private final ComboBox assignableTagsComboBox;
-    private final Button assignButton;
+
+    private final boolean readOnlyMode;
 
     public TagAssignementComboBox(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+
+        this.readOnlyMode = readOnlyMode;
+
+        setWidth("100%");
+
         allAssignableTags = new IndexedContainer();
         allAssignableTags.addContainerProperty(NAME_PROPERTY, String.class, "");
         allAssignableTags.addContainerProperty(COLOR_PROPERTY, String.class, "");
@@ -56,29 +58,26 @@ public class TagAssignementComboBox extends HorizontalLayout {
         assignableTagsComboBox.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         assignableTagsComboBox.addStyleName(ValoTheme.COMBOBOX_TINY);
         assignableTagsComboBox.setEnabled(!readOnlyMode);
-
-        assignButton = SPUIComponentProvider.getButton(UIComponentIdProvider.ASSIGN_TAG, "",
-                i18n.getMessage(UIMessageIdProvider.TOOLTIP_ASSIGN_TAG), null, false, FontAwesome.LINK,
-                SPUIButtonStyleNoBorder.class);
-        addComponent(assignButton);
-        assignButton.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
-        assignButton.addStyleName(SPUIStyleDefinitions.ASSIGN_TAG_BUTTON);
-        assignButton.addClickListener(e -> assignSelectedTag());
-        assignButton.setEnabled(false);
-    }
-
-    private void assignSelectedTag() {
-        final String tagName = (String) assignableTagsComboBox.getValue();
-        if (tagName != null) {
-            allAssignableTags.removeItem(tagName);
-            notifyListenersTagAssigned(tagName);
-        }
-        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
+        assignableTagsComboBox.setWidth("100%");
     }
 
     private void onSelectionChanged() {
-        final Object value = assignableTagsComboBox.getValue();
-        assignButton.setEnabled(value != null && value != assignableTagsComboBox.getNullSelectionItemId());
+        final Object selectedValue = assignableTagsComboBox.getValue();
+        if (!isValidTagSelection(selectedValue) || readOnlyMode) {
+            return;
+        }
+        assignTag((String) assignableTagsComboBox.getValue());
+    }
+
+    private void assignTag(final String tagName) {
+        allAssignableTags.removeItem(tagName);
+        notifyListenersTagAssigned(tagName);
+        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
+    }
+
+    private boolean isValidTagSelection(final Object selectedValue) {
+        return selectedValue != null && selectedValue != assignableTagsComboBox.getNullSelectionItemId()
+                && selectedValue instanceof String;
     }
 
     public void removeAllTags() {

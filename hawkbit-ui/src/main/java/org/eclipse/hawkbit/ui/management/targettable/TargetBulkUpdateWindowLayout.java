@@ -249,7 +249,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
 
         queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG,
-                managementUIState.getDistributionTableFilters().getDistSetTags());
+                managementUIState.getDistributionTableFilters().getClickedDistSetTags());
 
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
