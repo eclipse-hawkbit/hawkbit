@@ -285,7 +285,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
-        return buildAssignmentResult(distributionSetEntity, controllerIDs, targetEntities, controllerIdsToActions);
+        return buildAssignmentResult(distributionSetEntity, targetEntities, controllerIdsToActions);
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
@@ -320,8 +320,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
-            final List<String> controllerIDs, final List<JpaTarget> targetEntities,
-            final Map<String, JpaAction> controllerIdsToActions) {
+            final List<JpaTarget> targetEntities, final Map<String, JpaAction> controllerIdsToActions) {
 
         final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
                 .collect(Collectors.toList());

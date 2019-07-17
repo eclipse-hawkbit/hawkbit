@@ -213,4 +213,6 @@ public final class MgmtApiModelProperties {
 
     public static final String DS_NEW_ASSIGNED_ACTIONS = "The newly created actions as a result of this assignment";
     public static final String DS_ALREADY_ASSIGNED_ACTIONS = "The already created actions as a result of this assignment";
+    public static final String DS_ASSIGNED_ACTION_ID = "The assigned Action Id";
+    public static final String DS_ASSIGNED_ACTION_SEFL_HREF = "The assigned Action self link";
 }

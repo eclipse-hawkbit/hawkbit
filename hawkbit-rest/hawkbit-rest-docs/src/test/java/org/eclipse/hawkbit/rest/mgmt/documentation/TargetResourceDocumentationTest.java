@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
@@ -58,7 +56,6 @@ import com.google.common.collect.Lists;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Documentation generation for Management API for {@link Target}.
@@ -506,7 +503,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone()))
                 .toString();
 
-        final MvcResult mvcResult = mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -532,12 +529,18 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
                                 fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
                                         .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_ID),
+                                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
                                 fieldWithPath("alreadyAssignedActions").type(JsonFieldType.ARRAY)
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_ACTIONS),
+                                fieldWithPath("alreadyAssignedActions.[].id").type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_ID),
+                                fieldWithPath("alreadyAssignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS)))).andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
     }
 
     @Test
@@ -642,7 +645,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String knownValue = "knownValue";
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -664,7 +667,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -691,7 +694,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{key}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
