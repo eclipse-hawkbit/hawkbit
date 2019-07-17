@@ -100,11 +100,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Arrays.asList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Arrays.asList(new TargetWithActionType(target.getControllerId())), "xxx"), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId())), "xxx"), "DistributionSet");
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
-                System.currentTimeMillis(), Arrays.asList(target.getControllerId())), "DistributionSet");
+                System.currentTimeMillis(), Collections.singletonList(target.getControllerId())), "DistributionSet");
 
         verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
         verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
@@ -216,7 +216,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = assignDistributionSet(testDs, testTarget).getAssignedActions().get(0).getId();
         // create action-status entry with one message
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.FINISHED).messages(Arrays.asList("finished message")));
+                .status(Action.Status.FINISHED).messages(Collections.singletonList("finished message")));
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(PAGE, actionId);
 
         // find newly created action-status entry with message
@@ -631,7 +631,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
         final DistributionSet incomplete = distributionSetManagement.create(entityFactory.distributionSet().create()
-                .name("incomplete").version("v1").type(standardDsType).modules(Arrays.asList(ah.getId())));
+                .name("incomplete").version("v1").type(standardDsType).modules(Collections.singletonList(ah.getId())));
 
         try {
             assignDistributionSet(incomplete, targets);
@@ -894,7 +894,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("a");
         final DistributionSet dsB = testdataFactory.createDistributionSet("b");
-        List<Target> targs = Arrays.asList(testdataFactory.createTarget("target-id-A"));
+        List<Target> targs = Collections.singletonList(testdataFactory.createTarget("target-id-A"));
 
         // doing the assignment
         targs = assignDistributionSet(dsA, targs).getAssignedEntity();
@@ -964,7 +964,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
 
-        assignDistributionSet(dsA, Arrays.asList(targ));
+        assignDistributionSet(dsA, Collections.singletonList(targ));
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
@@ -980,7 +980,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.SOFT,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Arrays.asList(target.getControllerId()));
+                Collections.singletonList(target.getControllerId()));
         final Long actionId = assignDistributionSet.getAssignedActions().get(0).getId();
         // verify preparation
         Action findAction = deploymentManagement.findAction(actionId).get();
@@ -1004,7 +1004,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Arrays.asList(target.getControllerId()));
+                Collections.singletonList(target.getControllerId()));
         final Long actionId = assignDistributionSet.getAssignedActions().get(0).getId();
         // verify perparation
         Action findAction = deploymentManagement.findAction(actionId).get();
@@ -1017,6 +1017,37 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(forceTargetAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
         findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
+    }
+    
+    @Test
+    @Description("Tests the computation of already assigned entities returned as a result of an assignment")
+    public void testAlreadyAssignedAndAlreadyAssignedActionsInAssignmentResult(){
+        // create target1, distributionSet, assign ds to target1 and finish update (close all actions)
+        final Action action = prepareFinishedUpdate("target1", "ds", false);
+        final Target target2 = testdataFactory.createTarget("target2"); 
+        final Target target3 = testdataFactory.createTarget("target3");
+
+        // assign ds to target2, but don't finish update (actions should be still open)
+        assignDistributionSet(action.getDistributionSet().getId(), target2.getControllerId());
+
+        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                action.getDistributionSet().getId(),
+                Collections.singleton(new TargetWithActionType(target3.getControllerId())));
+        
+        assertThat(assignmentResult).isNotNull();
+        assertEquals(2, assignmentResult.getTotal());
+        assertEquals(1, assignmentResult.getAssigned());
+        assertEquals(1, assignmentResult.getAlreadyAssigned());
+        assertThat(assignmentResult.getAssignedActions()).isNotEmpty();
+        assertThat(assignmentResult.getAssignedActions().stream().allMatch(
+                a -> a.getTarget().equals(target3) && a.getDistributionSet().equals(action.getDistributionSet())))
+                        .isTrue();
+        assertThat(assignmentResult.getAlreadyAssignedActions()).isNotEmpty();
+        final List<Action> alreadyAssignedActions = assignmentResult.getAlreadyAssignedActions();
+        assertThat(alreadyAssignedActions.stream().allMatch(
+                a -> a.getTarget().getControllerId().equals(target2.getControllerId())
+                        && a.getDistributionSet().equals(action.getDistributionSet())))
+                        .isTrue();
     }
 
     /**
