@@ -526,6 +526,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            flag to indicate active/inactive actions
      * @return the found list of {@link Action} IDs
      */
-    List<Action> findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(@Param("distributionSetId") Long dsId,
-            @Param("active") boolean active, @Param("controllerIds") List<String> controllerIds);
+    List<Action> findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(final Pageable pageable,
+            @Param("distributionSetId") Long dsId, @Param("active") boolean active,
+            @Param("controllerIds") List<String> controllerIds);
 }

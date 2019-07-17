@@ -1042,12 +1042,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignmentResult.getAssignedActions().stream().allMatch(
                 a -> a.getTarget().equals(target3) && a.getDistributionSet().equals(action.getDistributionSet())))
                         .isTrue();
-        assertThat(assignmentResult.getAlreadyAssignedActions()).isNotEmpty();
-        final List<Action> alreadyAssignedActions = assignmentResult.getAlreadyAssignedActions();
-        assertThat(alreadyAssignedActions.stream().allMatch(
-                a -> a.getTarget().getControllerId().equals(target2.getControllerId())
-                        && a.getDistributionSet().equals(action.getDistributionSet())))
-                        .isTrue();
+        assertThat(assignmentResult.getAssignedActions().stream()
+                .noneMatch(a -> a.getTarget().getControllerId().equals("target1"))).isTrue();
     }
 
     /**

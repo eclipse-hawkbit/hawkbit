@@ -540,7 +540,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("alreadyAssignedActions.[]._links.self").type(JsonFieldType.OBJECT)
                                         .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS)))).andReturn();
+                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }
 
     @Test

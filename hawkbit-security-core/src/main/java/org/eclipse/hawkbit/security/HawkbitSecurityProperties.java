@@ -271,6 +271,11 @@ public class HawkbitSecurityProperties {
          */
         private long maxArtifactStorage = 21_474_836_480L;
 
+        /**
+         * Maximum number of alreadyAssignedActions to be returned in the assignment result
+         */
+        private int maxAlreadyAssignedActionsInAssignmentResult = 1000;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -409,6 +414,14 @@ public class HawkbitSecurityProperties {
 
         public void setMaxArtifactStorage(final long maxArtifactStorage) {
             this.maxArtifactStorage = maxArtifactStorage;
+        }
+
+        public int getMaxAlreadyAssignedActionsInAssignmentResult() {
+            return maxAlreadyAssignedActionsInAssignmentResult;
+        }
+
+        public void setMaxAlreadyAssignedActionsInAssignmentResult(final int maxAlreadyAssignedActions) {
+            this.maxAlreadyAssignedActionsInAssignmentResult = maxAlreadyAssignedActions;
         }
 
         /**
