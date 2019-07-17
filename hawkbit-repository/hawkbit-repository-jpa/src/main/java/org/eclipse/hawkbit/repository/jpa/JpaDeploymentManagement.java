@@ -324,9 +324,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
-        Pageable limit = PageRequest.of(0, quotaManagement.getMaxAlreadyAssignedActionsInAssignmentResult());
         final List<Action> alreadyAssignedActions = actionRepository
-                .findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(limit, distributionSet.getId(), true,
+                .findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(distributionSet.getId(), true,
                         targetEntitiesIds);
         final List<Target> alreadyAssignedTargets = alreadyAssignedActions.stream().map(Action::getTarget)
                 .collect(Collectors.toList());

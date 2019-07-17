@@ -35,10 +35,12 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -65,15 +67,15 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetResource.class);
 
     private final TargetManagement targetManagement;
-
     private final DeploymentManagement deploymentManagement;
-
+    private final QuotaManagement quotaManagement;
     private final EntityFactory entityFactory;
 
     MgmtTargetResource(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final EntityFactory entityFactory) {
+            final QuotaManagement quotaManagement, final EntityFactory entityFactory) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
+        this.quotaManagement = quotaManagement;
         this.entityFactory = entityFactory;
     }
 
@@ -285,17 +287,20 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(deploymentManagement
-                    .offlineAssignedDistributionSet(dsId.getId(), Collections.singletonList(targetId))));
+            return ResponseEntity
+                    .ok(MgmtDistributionSetMapper.toResponse(deploymentManagement.offlineAssignedDistributionSet(
+                            dsId.getId(), Collections.singletonList(targetId)), quotaManagement));
         }
 
         findTargetWithExceptionIfNotFound(targetId);
         final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsId.getMaintenanceWindow();
 
         if (maintenanceWindow == null) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
-                    .assignDistributionSet(dsId.getId(), Collections.singletonList(new TargetWithActionType(targetId,
-                            MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
+            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
+                    this.deploymentManagement.assignDistributionSet(dsId.getId(),
+                            Collections.singletonList(new TargetWithActionType(targetId,
+                                    MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime()))),
+                    quotaManagement));
         }
 
         final String cronSchedule = maintenanceWindow.getSchedule();
@@ -303,12 +308,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final String timezone = maintenanceWindow.getTimezone();
 
         MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
-
-        return ResponseEntity
-                .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
+        final DistributionSetAssignmentResult assignmentResult = this.deploymentManagement
+                .assignDistributionSet(dsId.getId(),
                         Collections.singletonList(new TargetWithActionType(targetId,
                                 MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
-                                cronSchedule, duration, timezone)))));
+                                cronSchedule, duration, timezone)));
+
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResult, quotaManagement));
     }
 
     @Override

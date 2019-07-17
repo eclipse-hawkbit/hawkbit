@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -81,11 +82,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private final SystemSecurityContext systemSecurityContext;
 
+    private final QuotaManagement quotaManagement;
+
     MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deployManagament, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final QuotaManagement quotaManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
@@ -94,6 +97,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.entityFactory = entityFactory;
         this.distributionSetManagement = distributionSetManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.quotaManagement = quotaManagement;
     }
 
     @Override
@@ -252,9 +256,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = "offline", required = false) final boolean offline) {
 
         if (offline) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper
-                    .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments
-                            .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
+            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
+                    this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments.stream()
+                            .map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList())),
+                    quotaManagement));
         }
 
         final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament
@@ -276,7 +281,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                             t.getForcetime(), cronSchedule, duration, timezone);
                 }).collect(Collectors.toList()));
 
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet));
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignDistributionSet, quotaManagement));
 
     }
 
