@@ -27,6 +27,8 @@ public class DbArtifactHash {
      *            the sha1 hash
      * @param md5
      *            the md5 hash
+     * @param sha256
+     *            the sha256 hash
      */
     public DbArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;

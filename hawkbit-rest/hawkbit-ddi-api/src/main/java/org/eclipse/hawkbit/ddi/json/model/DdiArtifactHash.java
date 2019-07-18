@@ -40,8 +40,11 @@ public class DdiArtifactHash {
      * Public constructor.
      *
      * @param sha1
+     *            sha1 hash of the artifact
      * @param md5
+     *            md5 hash of the artifact
      * @param sha256
+     *            sha256 hash of the artifact
      */
     public DdiArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;
