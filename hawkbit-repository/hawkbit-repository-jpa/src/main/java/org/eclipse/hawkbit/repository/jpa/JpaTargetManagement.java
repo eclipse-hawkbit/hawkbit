@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -525,9 +526,10 @@ public class JpaTargetManagement implements TargetManagement {
         allTargets.removeAll(alreadyAssignedTargets);
         // some or none are assigned -> assign
         allTargets.forEach(t -> t.addTag(tag));
-        targetRepository.saveAll(allTargets);
+
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(
-                Collections.unmodifiableList(alreadyAssignedTargets), Collections.unmodifiableList(allTargets),
+                Collections.unmodifiableList(alreadyAssignedTargets), StreamSupport
+                        .stream(targetRepository.saveAll(allTargets).spliterator(), false).collect(Collectors.toList()),
                 Collections.emptyList(), tag);
 
         // no reason to persist the tag

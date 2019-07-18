@@ -489,7 +489,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
-        // create target and ds, and assign ds and finish update
+        // create target and ds, and assign ds
         testdataFactory.createTarget(targetId + "-old");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assignDistributionSet(set.getId(), targetId + "-old");

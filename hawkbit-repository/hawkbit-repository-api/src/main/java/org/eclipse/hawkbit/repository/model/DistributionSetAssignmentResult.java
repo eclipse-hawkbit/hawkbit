@@ -58,14 +58,14 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
     }
 
     /**
-     * @return the assigned actionIds
+     * @return the assigned actions
      */
     public List<Action> getAssignedActions() {
         return Collections.unmodifiableList(assignedActions);
     }
 
     /**
-     * @return the already assigned actionIds
+     * @return the already assigned actions
      */
     public List<Action> getAlreadyAssignedActions() {
         return Collections.unmodifiableList(alreadyAssignedActions);

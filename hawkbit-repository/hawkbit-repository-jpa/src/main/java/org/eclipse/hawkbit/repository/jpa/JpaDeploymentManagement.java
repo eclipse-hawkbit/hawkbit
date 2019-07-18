@@ -330,7 +330,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<Target> alreadyAssignedTargets = alreadyAssignedActions.stream().map(Action::getTarget)
                 .collect(Collectors.toList());
 
-        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargets, 
+        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargets,
                 targetManagement.getByControllerID(targetEntitiesIds), Collections.emptyList(),
                 new ArrayList<>(controllerIdsToActions.values()), alreadyAssignedActions);
     }
@@ -409,13 +409,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
-            final List<? extends Target> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
+            final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set) {
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
                 .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
-        return targets.stream()
-                .map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, (JpaTarget) trg, set))
+        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
                 .filter(Objects::nonNull).map(actionRepository::save)
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
     }
