@@ -83,4 +83,11 @@ public class DmfSoftwareModule {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "DmfSoftwareModule [moduleId=%d, moduleType='%s', moduleVersion='%s', artifacts=%s, metadata=%s]",
+                moduleId, moduleType, moduleVersion, artifacts, metadata);
+    }
+
 }

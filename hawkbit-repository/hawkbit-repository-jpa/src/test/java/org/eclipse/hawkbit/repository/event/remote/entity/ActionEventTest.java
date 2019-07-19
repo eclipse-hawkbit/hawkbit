@@ -74,12 +74,12 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         assertThat(event.getEntity()).isSameAs(baseEntity);
         assertThat(event.getRolloutId()).isEqualTo(1L);
 
-        AbstractActionEvent underTestCreatedEvent = (AbstractActionEvent) createProtoStuffEvent(event);
+        AbstractActionEvent underTestCreatedEvent = createProtoStuffEvent(event);
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
 
-        underTestCreatedEvent = (AbstractActionEvent) createJacksonEvent(event);
+        underTestCreatedEvent = createJacksonEvent(event);
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
