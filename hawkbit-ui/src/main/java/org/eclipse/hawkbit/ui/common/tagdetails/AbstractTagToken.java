@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-//import org.vaadin.tokenfield.TokenField.InsertPosition;
 
 import com.vaadin.ui.UI;
 
@@ -115,14 +114,14 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tagPanelLayout.initializeTags(allAssignableTags, getAssignedTags());
     }
 
-    public void tagCreated(final TagData tagData) {
+    protected void tagCreated(final TagData tagData) {
         tagDetailsByName.put(tagData.getName(), tagData);
         tagDetailsById.put(tagData.getId(), tagData);
 
         tagPanelLayout.tagCreated(tagData);
     }
 
-    public void tagDeleted(final Long id) {
+    protected void tagDeleted(final Long id) {
         final TagData tagData = tagDetailsById.get(id);
         if (tagData != null) {
             tagPanelLayout.tagDeleted(tagData);

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
@@ -26,6 +28,10 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 
+/**
+ * A panel that shows the assigned tags. A click on a tag unsassigns the tag
+ * from the {@link Target} or {@link DistributionSet}.
+ */
 public class TagListField extends CssLayout {
 
     private static final long serialVersionUID = 1L;
@@ -35,13 +41,26 @@ public class TagListField extends CssLayout {
     private final VaadinMessageSource i18n;
     private final boolean readOnlyMode;
 
-    public TagListField(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+    /**
+     * Constructor.
+     * 
+     * @param i18n
+     * @param readOnlyMode
+     *            if <code>true</code> no unassignment can be done
+     */
+    TagListField(final VaadinMessageSource i18n, final boolean readOnlyMode) {
         this.i18n = i18n;
         this.readOnlyMode = readOnlyMode;
         setSizeFull();
     }
 
-    public void addTag(final String tagName, final String tagColor) {
+    /**
+     * Adds a tag
+     * 
+     * @param tagName
+     * @param tagColor
+     */
+    void addTag(final String tagName, final String tagColor) {
         if (!tagButtons.containsKey(tagName)) {
             final Button tagButton = createButton(tagName, tagColor);
             addComponent(tagButton, getComponentCount());
@@ -69,7 +88,12 @@ public class TagListField extends CssLayout {
         notifyListenersTagAssignmentRemoved(tagName);
     }
 
-    public void removeTag(final String tagName) {
+    /**
+     * Removes a tag from the field.
+     * 
+     * @param tagName
+     */
+    void removeTag(final String tagName) {
         final Button button = tagButtons.get(tagName);
         if (button != null) {
             tagButtons.remove(tagName);
@@ -77,16 +101,31 @@ public class TagListField extends CssLayout {
         }
     }
 
-    public void removeAllTags() {
+    /**
+     * Removes all tags from the field.
+     */
+    void removeAllTags() {
         removeAllComponents();
         tagButtons.clear();
     }
 
-    public void addTagAssignmentListener(final TagAssignmentListener listener) {
+    /**
+     * Registers a {@link TagAssignmentListener}.
+     * 
+     * @param listener
+     *            the listener to register
+     */
+    void addTagAssignmentListener(final TagAssignmentListener listener) {
         listeners.add(listener);
     }
 
-    public void removeTagAssignmentListener(final TagAssignmentListener listener) {
+    /**
+     * Removes a {@link TagAssignmentListener}.
+     * 
+     * @param listener
+     *            the listener to remove
+     */
+    void removeTagAssignmentListener(final TagAssignmentListener listener) {
         listeners.remove(listener);
     }
 
@@ -94,7 +133,12 @@ public class TagListField extends CssLayout {
         listeners.forEach(listener -> listener.unassignTag(tagName));
     }
 
-    public List<String> getTags() {
+    /**
+     * Returns all assigned tags shown in the field.
+     * 
+     * @return a {@link List} with tags
+     */
+    List<String> getTags() {
         return Lists.newArrayList(tagButtons.keySet());
     }
 }

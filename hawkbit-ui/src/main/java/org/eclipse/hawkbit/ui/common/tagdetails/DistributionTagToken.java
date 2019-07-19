@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -31,6 +31,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -85,21 +86,19 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @Override
     protected List<TagData> getAllAssignableTags() {
-        final List<TagData> allTags = new ArrayList<>();
-        distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
-                .forEach(tag -> allTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
-        return allTags;
+        return distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
+                .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override
     protected List<TagData> getAssignedTags() {
-        final List<TagData> assignedTags = new ArrayList<>();
         if (selectedEntity != null) {
             distributionSetTagManagement.findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
-                    .getContent().stream()
-                    .forEach(tag -> assignedTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
+                    .getContent().stream().map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour()))
+                    .collect(Collectors.toList());
         }
-        return assignedTags;
+
+        return Lists.newArrayList();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.builder.ComboBoxBuilder;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -24,6 +26,10 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * Combobox that lists all available Tags that can be assigned to a
+ * {@link Target} or {@link DistributionSet}.
+ */
 public class TagAssignementComboBox extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
@@ -38,7 +44,16 @@ public class TagAssignementComboBox extends HorizontalLayout {
 
     private final boolean readOnlyMode;
 
-    public TagAssignementComboBox(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+    /**
+     * Constructor.
+     * 
+     * @param i18n
+     *            the i18n
+     * @param readOnlyMode
+     *            if true the combobox will be disabled so no assignment can be
+     *            done.
+     */
+    TagAssignementComboBox(final VaadinMessageSource i18n, final boolean readOnlyMode) {
 
         this.readOnlyMode = readOnlyMode;
 
@@ -80,12 +95,21 @@ public class TagAssignementComboBox extends HorizontalLayout {
                 && selectedValue instanceof String;
     }
 
-    public void removeAllTags() {
+    /**
+     * Removes all Tags from Combobox.
+     */
+    void removeAllTags() {
         allAssignableTags.removeAllItems();
         assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
     }
 
-    public void addAssignableTag(final TagData tagData) {
+    /**
+     * Adds an assignable Tag to the combobox.
+     * 
+     * @param tagData
+     *            the data of the Tag
+     */
+    void addAssignableTag(final TagData tagData) {
         final Item item = allAssignableTags.addItem(tagData.getName());
         if (item == null) {
             return;
@@ -94,15 +118,33 @@ public class TagAssignementComboBox extends HorizontalLayout {
         item.getItemProperty(COLOR_PROPERTY).setValue(tagData.getColor());
     }
 
-    public void removeAssignableTag(final TagData tagData) {
+    /**
+     * Removes an assignable tag from the combobox.
+     * 
+     * @param tagData
+     *            the {@link TagData} of the Tag that should be removed.
+     */
+    void removeAssignableTag(final TagData tagData) {
         allAssignableTags.removeItem(tagData.getName());
     }
 
-    public void addTagAssignmentListener(final TagAssignmentListener listener) {
+    /**
+     * Registers an {@link TagAssignmentListener} on the combobox.
+     * 
+     * @param listener
+     *            the listener to register
+     */
+    void addTagAssignmentListener(final TagAssignmentListener listener) {
         listeners.add(listener);
     }
 
-    public void removeTagAssignmentListener(final TagAssignmentListener listener) {
+    /**
+     * Removes a {@link TagAssignmentListener} from the combobox,
+     * 
+     * @param listener
+     *            the listener that should be removed.
+     */
+    void removeTagAssignmentListener(final TagAssignmentListener listener) {
         listeners.remove(listener);
     }
 

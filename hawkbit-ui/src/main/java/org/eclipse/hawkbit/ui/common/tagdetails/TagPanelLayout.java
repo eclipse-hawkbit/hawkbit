@@ -10,10 +10,17 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * A layout that shows a combobox with available tags that can be assigned to a
+ * {@link Target} or {@link DistributionSet}. The layout also shows all already
+ * assigned tags. This tags can also be removed.
+ */
 public class TagPanelLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
@@ -21,7 +28,13 @@ public class TagPanelLayout extends VerticalLayout {
     private final TagListField assignedTagField;
     private final TagAssignementComboBox assignableTagsComboBox;
 
-    public TagPanelLayout(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+    /**
+     * Constructor.
+     * 
+     * @param i18n
+     * @param readOnlyMode
+     */
+    TagPanelLayout(final VaadinMessageSource i18n, final boolean readOnlyMode) {
 
         assignableTagsComboBox = new TagAssignementComboBox(i18n, readOnlyMode);
         addComponent(assignableTagsComboBox);
@@ -32,7 +45,13 @@ public class TagPanelLayout extends VerticalLayout {
         setExpandRatio(assignableTagsComboBox, 0f);
     }
 
-    public void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
+    /**
+     * Initializes the panel with all available tags and all assigned tags.
+     * 
+     * @param allTags
+     * @param assignedTags
+     */
+    void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
         assignableTagsComboBox.removeAllTags();
         assignedTagField.removeAllTags();
 
@@ -40,6 +59,11 @@ public class TagPanelLayout extends VerticalLayout {
         assignedTags.forEach(this::setAssignedTag);
     }
 
+    /**
+     * Sets a tag that is assigned.
+     * 
+     * @param tagData
+     */
     public void setAssignedTag(final TagData tagData) {
         // the assigned tag is no longer assignable
         assignableTagsComboBox.removeAssignableTag(tagData);
@@ -47,6 +71,11 @@ public class TagPanelLayout extends VerticalLayout {
         assignedTagField.addTag(tagData.getName(), tagData.getColor());
     }
 
+    /**
+     * Removes an assigned tag.
+     * 
+     * @param tagData
+     */
     public void removeAssignedTag(final TagData tagData) {
         // the un-assigned tag is now assignable
         assignableTagsComboBox.addAssignableTag(tagData);
@@ -54,32 +83,74 @@ public class TagPanelLayout extends VerticalLayout {
         assignedTagField.removeTag(tagData.getName());
     }
 
-    public void tagCreated(final TagData tagData) {
+    /**
+     * Informs the panel that a new tag was created.
+     * 
+     * @param tagData
+     */
+    void tagCreated(final TagData tagData) {
         assignableTagsComboBox.addAssignableTag(tagData);
     }
 
+    /**
+     * Informs the panel that a tag was deleted.
+     * 
+     * @param tagData
+     */
     public void tagDeleted(final TagData tagData) {
         assignableTagsComboBox.removeAssignableTag(tagData);
         assignedTagField.removeTag(tagData.getName());
     }
 
+    /**
+     * Callback interface if user triggers a tag assignment or tag unassignment
+     * via UI controls.
+     *
+     */
     public interface TagAssignmentListener {
 
+        /**
+         * User triggers a tag assignment.
+         * 
+         * @param tagName
+         *            the name of the tag that should be assigned.
+         */
         public void assignTag(String tagName);
 
+        /**
+         * User triggers a tag unassignment.
+         * 
+         * @param tagName
+         *            the name of the tag that should be unassigned.
+         */
         public void unassignTag(String tagName);
     }
 
+    /**
+     * Registers a {@link TagAssignmentListener}.
+     * 
+     * @param listener
+     */
     public void addTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.addTagAssignmentListener(listener);
         assignedTagField.addTagAssignmentListener(listener);
     }
 
+    /**
+     * Removes a {@link TagAssignmentListener}.
+     * 
+     * @param listener
+     */
     public void removeTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.removeTagAssignmentListener(listener);
         assignedTagField.removeTagAssignmentListener(listener);
     }
 
+    /**
+     * Returns all assigned tags.
+     * 
+     * @return {@link List} with tags.
+     */
     public List<String> getAssignedTags() {
         return assignedTagField.getTags();
     }

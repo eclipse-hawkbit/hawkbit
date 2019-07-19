@@ -67,10 +67,8 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
 
     @Override
     protected List<TagData> getAllAssignableTags() {
-        final List<TagData> allTags = new ArrayList<>();
-        tagManagement.findAll(PageRequest.of(0, MAX_TAGS))
-                .forEach(tag -> allTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
-        return allTags;
+        return tagManagement.findAll(PageRequest.of(0, MAX_TAGS)).stream()
+                .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override

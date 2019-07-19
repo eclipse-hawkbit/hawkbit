@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -25,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
+
+import com.google.common.collect.Lists;
 
 /**
  * Implementation of Target tag token.
@@ -76,20 +78,17 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     @Override
     protected List<TagData> getAllAssignableTags() {
-        final List<TagData> allTags = new ArrayList<>();
-        tagManagement.findAll(PageRequest.of(0, MAX_TAGS))
-                .forEach(tag -> allTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
-        return allTags;
+        return tagManagement.findAll(PageRequest.of(0, MAX_TAGS)).stream()
+                .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override
     protected List<TagData> getAssignedTags() {
-        final List<TagData> assignedTags = new ArrayList<>();
         if (selectedEntity != null) {
-            tagManagement.findByTarget(PageRequest.of(0, MAX_TAGS), selectedEntity.getControllerId())
-                    .forEach(tag -> assignedTags.add(new TagData(tag.getId(), tag.getName(), tag.getColour())));
+            return tagManagement.findByTarget(PageRequest.of(0, MAX_TAGS), selectedEntity.getControllerId()).stream()
+                    .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
         }
-        return assignedTags;
+        return Lists.newArrayList();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
