@@ -32,7 +32,10 @@ public class TagPanelLayout extends VerticalLayout {
      * Constructor.
      * 
      * @param i18n
+     *            i18n
      * @param readOnlyMode
+     *            if <code>true</code> no assignments and unassignements can be
+     *            done.
      */
     TagPanelLayout(final VaadinMessageSource i18n, final boolean readOnlyMode) {
 
@@ -41,15 +44,17 @@ public class TagPanelLayout extends VerticalLayout {
 
         assignedTagField = new TagListField(i18n, readOnlyMode);
         addComponent(assignedTagField);
-        setExpandRatio(assignedTagField, 1f);
-        setExpandRatio(assignableTagsComboBox, 0f);
+        setExpandRatio(assignedTagField, 1.0F);
+        setExpandRatio(assignableTagsComboBox, 0.0F);
     }
 
     /**
      * Initializes the panel with all available tags and all assigned tags.
      * 
      * @param allTags
+     *            all tags
      * @param assignedTags
+     *            assigned tags
      */
     void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
         assignableTagsComboBox.removeAllTags();
@@ -63,6 +68,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Sets a tag that is assigned.
      * 
      * @param tagData
+     *            the {@link TagData}
      */
     public void setAssignedTag(final TagData tagData) {
         // the assigned tag is no longer assignable
@@ -75,6 +81,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Removes an assigned tag.
      * 
      * @param tagData
+     *            the {@link TagData}
      */
     public void removeAssignedTag(final TagData tagData) {
         // the un-assigned tag is now assignable
@@ -87,6 +94,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Informs the panel that a new tag was created.
      * 
      * @param tagData
+     *            the {@link TagData}
      */
     void tagCreated(final TagData tagData) {
         assignableTagsComboBox.addAssignableTag(tagData);
@@ -96,6 +104,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Informs the panel that a tag was deleted.
      * 
      * @param tagData
+     *            the {@link TagData}
      */
     public void tagDeleted(final TagData tagData) {
         assignableTagsComboBox.removeAssignableTag(tagData);
@@ -130,6 +139,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Registers a {@link TagAssignmentListener}.
      * 
      * @param listener
+     *            the listener
      */
     public void addTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.addTagAssignmentListener(listener);
@@ -140,6 +150,7 @@ public class TagPanelLayout extends VerticalLayout {
      * Removes a {@link TagAssignmentListener}.
      * 
      * @param listener
+     *            the listener
      */
     public void removeTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.removeTagAssignmentListener(listener);
