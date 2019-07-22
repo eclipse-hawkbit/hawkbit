@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 public class EntityAlreadyExistsException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
-    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_ALRREADY_EXISTS;
+    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS;
 
     /**
      * Default constructor.

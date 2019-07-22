@@ -17,10 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,6 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
@@ -48,7 +46,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -60,11 +57,7 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -89,22 +82,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private static final boolean STATE_ACTIVE = true;
     private static final boolean STATE_INACTIVE = false;
-
-    private EventHandlerStub eventHandlerStub;
-
-    private CancelEventHandlerStub cancelEventHandlerStub;
-
-    @Autowired
-    private ConfigurableApplicationContext applicationContext;
-
-    @Before
-    public void addHandler() {
-        eventHandlerStub = new EventHandlerStub();
-        applicationContext.addApplicationListener(eventHandlerStub);
-
-        cancelEventHandlerStub = new CancelEventHandlerStub();
-        applicationContext.addApplicationListener(cancelEventHandlerStub);
-    }
 
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
@@ -276,7 +253,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = TargetUpdatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
             @Expect(type = CancelTargetAssignmentEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
             @Expect(type = ActionUpdatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
@@ -581,12 +558,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
      * and checking the active action and the action history of the targets.
      *
-     * @throws InterruptedException
      */
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
-    public void assignDistributionSet2Targets() throws InterruptedException {
-        eventHandlerStub.setExpectedNumberOfEvents(1);
+    @ExpectEvents({@Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 30), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = TargetUpdatedEvent.class, count = 20),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3)})
+    public void assignDistributionSet2Targets() {
 
         final String myCtrlIDPref = "myCtrlID";
         final Iterable<Target> savedNakedTargets = testdataFactory.createTargets(10, myCtrlIDPref, "first description");
@@ -631,17 +611,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 assertThat(ua.getDistributionSet()).as("action has wrong ds").isEqualTo(ds);
             }
         }
-
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(10, TimeUnit.SECONDS);
-
-        assertTargetAssignDistributionSetEvents(savedDeployedTargets, ds, events);
     }
 
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
-    public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
-        eventHandlerStub.setExpectedNumberOfEvents(0);
+    @ExpectEvents({@Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 10), @Expect(type = ActionCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 10),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1)
 
+    })
+    public void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
         final List<Target> targets = testdataFactory.createTargets(10);
 
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
@@ -656,50 +638,31 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         } catch (final IncompleteDistributionSetException ex) {
         }
 
-        // give some chance to receive events asynchronously
-        Thread.sleep(1L);
-        final List<TargetAssignDistributionSetEvent> events = eventHandlerStub.getEvents(5, TimeUnit.SECONDS);
-        assertThat(events).as("events should be empty").isEmpty();
-
         final DistributionSet nowComplete = distributionSetManagement.assignSoftwareModules(incomplete.getId(),
                 Sets.newHashSet(os.getId()));
 
-        eventHandlerStub.setExpectedNumberOfEvents(1);
-
         assertThat(assignDistributionSet(nowComplete, targets).getAssigned()).as("assign ds doesn't work")
                 .isEqualTo(10);
-
-        assertTargetAssignDistributionSetEvents(targets, nowComplete, eventHandlerStub.getEvents(15, TimeUnit.SECONDS));
     }
 
     @Test
     @Description("Multiple deployments or distribution set to target assignment test. Expected behaviour is that a new deployment "
             + "overides unfinished old one which are canceled as part of the operation.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5 + 4),
+    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 5 + 4),
             @Expect(type = TargetUpdatedEvent.class, count = 3 * 4),
             @Expect(type = ActionCreatedEvent.class, count = 3 * 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4 * 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 4 * 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2)})
     public void mutipleDeployments() throws InterruptedException {
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 5;
 
         final String deployedTargetPrefix = "dep-T";
         final int noOfDeployedTargets = 4;
-
         final int noOfDistributionSets = 3;
-
-        // One assigment per DS
-        final int expectedNumberOfEventsForAssignment = 1;
-        eventHandlerStub.setExpectedNumberOfEvents(expectedNumberOfEventsForAssignment);
-
-        // Each of the four targets get two more assignment the which are
-        // cancelled (4 * 2 = 8)
-        final int expectedNumberOfEventsForCancel = 8;
-        cancelEventHandlerStub.setExpectedNumberOfEvents(expectedNumberOfEventsForCancel);
 
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
@@ -739,13 +702,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
         assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
-
-        // For each of the 4 targets 1 distribution sets gets assigned
-        eventHandlerStub.getEvents(10, TimeUnit.SECONDS);
-
-        // For each of the 4 targets 2 distribution sets gets cancelled
-        cancelEventHandlerStub.getEvents(10, TimeUnit.SECONDS);
-
     }
 
     @Test
@@ -1111,22 +1067,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    private void assertTargetAssignDistributionSetEvents(final List<Target> targets, final DistributionSet ds,
-            final List<TargetAssignDistributionSetEvent> events) {
-        assertThat(events).hasSize(1);
-        final TargetAssignDistributionSetEvent event = events.get(0);
-        assertThat(event).isNotNull();
-        assertThat(event.getDistributionSetId()).isEqualTo(ds.getId());
-
-        final List<Long> eventActionIds = event.getActions().values().stream().map(ActionProperties::getId)
-                .collect(Collectors.toList());
-
-        final List<Long> targetActiveActionIds = targets.stream()
-                .map(t -> deploymentManagement.findActiveActionsByTarget(PAGE, t.getControllerId()).getContent())
-                .flatMap(List::stream).map(Action::getId).collect(Collectors.toList());
-        assertThat(eventActionIds).containsOnlyElementsOf(targetActiveActionIds);
-    }
-
     private class DeploymentResult {
         final List<Long> deployedTargetIDs = new ArrayList<>();
         final List<Long> undeployedTargetIDs = new ArrayList<>();
@@ -1176,73 +1116,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             return undeployedTargetIDs;
         }
 
-    }
-
-    protected static class EventHandlerStub implements ApplicationListener<TargetAssignDistributionSetEvent> {
-        private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
-        private CountDownLatch latch;
-        private int expectedNumberOfEvents;
-
-        /**
-         * @param expectedNumberOfEvents
-         *            the expectedNumberOfEvents to set
-         */
-        public void setExpectedNumberOfEvents(final int expectedNumberOfEvents) {
-            events.clear();
-            this.expectedNumberOfEvents = expectedNumberOfEvents;
-            this.latch = new CountDownLatch(expectedNumberOfEvents);
-        }
-
-        public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
-                throws InterruptedException {
-            latch.await(timeout, unit);
-            final List<TargetAssignDistributionSetEvent> handledEvents = Collections
-                    .unmodifiableList(new LinkedList<>(events));
-            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
-            return handledEvents;
-
-        }
-
-        @Override
-        public void onApplicationEvent(final TargetAssignDistributionSetEvent event) {
-            if (latch == null) {
-                return;
-            }
-            events.add(event);
-            latch.countDown();
-
-        }
-    }
-
-    private static class CancelEventHandlerStub implements ApplicationListener<CancelTargetAssignmentEvent> {
-        private final List<CancelTargetAssignmentEvent> events = Collections.synchronizedList(new LinkedList<>());
-        private CountDownLatch latch;
-        private int expectedNumberOfEvents;
-
-        public void setExpectedNumberOfEvents(final int expectedNumberOfEvents) {
-            events.clear();
-            this.expectedNumberOfEvents = expectedNumberOfEvents;
-            this.latch = new CountDownLatch(expectedNumberOfEvents);
-        }
-
-        public List<CancelTargetAssignmentEvent> getEvents(final long timeout, final TimeUnit unit)
-                throws InterruptedException {
-            latch.await(timeout, unit);
-            final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<>(events);
-            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
-            return handledEvents;
-        }
-
-        @Override
-        public void onApplicationEvent(final CancelTargetAssignmentEvent event) {
-            if (latch == null) {
-                return;
-            }
-            events.add(event);
-            latch.countDown();
-        }
     }
 
     private void enableMultiAssignments() {

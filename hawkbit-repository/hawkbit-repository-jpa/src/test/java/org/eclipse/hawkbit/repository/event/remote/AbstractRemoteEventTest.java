@@ -79,13 +79,15 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
         return busProtoStuffMessageConverter.toMessage(event, new MessageHeaders(headers));
     }
 
-    protected TenantAwareEvent createJacksonEvent(final TenantAwareEvent event) {
-        final Message<?> message = createJsonMessage(event);
-        return (TenantAwareEvent) jacksonMessageConverter.fromMessage(message, event.getClass());
+    @SuppressWarnings("unchecked")
+    protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
+        final Message<String> message = createJsonMessage(event);
+        return (T) jacksonMessageConverter.fromMessage(message, event.getClass());
     }
 
-    protected TenantAwareEvent createProtoStuffEvent(final TenantAwareEvent event) {
+    @SuppressWarnings("unchecked")
+    protected <T extends TenantAwareEvent> T createProtoStuffEvent(final T event) {
         final Message<?> message = createProtoStuffMessage(event);
-        return (TenantAwareEvent) busProtoStuffMessageConverter.fromMessage(message, event.getClass());
+        return (T) busProtoStuffMessageConverter.fromMessage(message, event.getClass());
     }
 }

@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,8 +37,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
@@ -50,8 +46,6 @@ import com.google.common.collect.Lists;
  *
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
-
-    private static final Pageable ACTION_PAGE_REQUEST = PageRequest.of(0, MAX_ACTION_COUNT);
 
     private final Supplier<Boolean> multiAssignmentsConfig;
 
@@ -196,8 +190,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     private boolean hasPendingCancellations(final Target target) {
-        return actionRepository.findByActiveAndTarget(ACTION_PAGE_REQUEST, target.getControllerId(), true).getContent()
-                .stream().anyMatch(action -> action.getStatus() == Status.CANCELING);
+        return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(target.getControllerId(),
+                Status.CANCELING);
     }
 
     /**

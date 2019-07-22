@@ -128,6 +128,20 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     boolean activeActionExistsForControllerId(@Param("controllerId") String controllerId);
 
     /**
+     * Check if any active actions with given action status and given controller
+     * ID exist.
+     *
+     * @param controllerId
+     *            of the target to check for actions
+     * @param currentStatus
+     *            of the active action to look for
+     *
+     * @return <code>true</code> if one or more active actions for the given
+     *         controllerId and action status are found
+     */
+    boolean existsByTargetControllerIdAndStatusAndActiveIsTrue(String controllerId, Action.Status currentStatus);
+
+    /**
      * Retrieves latest {@link Action} for given target and
      * {@link SoftwareModule}.
      *

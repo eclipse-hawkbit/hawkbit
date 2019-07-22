@@ -94,10 +94,10 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
     protected void assertEntity(final RemoteIdEvent event) {
         assertThat(event.getEntityId()).isSameAs(ENTITY_ID);
 
-        final RemoteIdEvent protoStuffEvent = (RemoteIdEvent) createProtoStuffEvent(event);
+        final RemoteIdEvent protoStuffEvent = createProtoStuffEvent(event);
         assertDeserializeEvent(protoStuffEvent, event);
 
-        final RemoteIdEvent jacksonEvent = (RemoteIdEvent) createJacksonEvent(event);
+        final RemoteIdEvent jacksonEvent = createJacksonEvent(event);
         assertDeserializeEvent(jacksonEvent, event);
     }
 

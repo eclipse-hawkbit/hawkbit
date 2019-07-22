@@ -844,8 +844,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final ExceptionInfo exceptionInfo = ResourceUtility
                 .convertException(mvcResult.getResponse().getContentAsString());
         assertThat(exceptionInfo.getExceptionClass()).isEqualTo(EntityAlreadyExistsException.class.getName());
-        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_ENTITY_ALRREADY_EXISTS.getKey());
-        assertThat(exceptionInfo.getMessage()).isEqualTo(SpServerError.SP_REPO_ENTITY_ALRREADY_EXISTS.getMessage());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS.getKey());
+        assertThat(exceptionInfo.getMessage()).isEqualTo(SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS.getMessage());
     }
 
     @Test

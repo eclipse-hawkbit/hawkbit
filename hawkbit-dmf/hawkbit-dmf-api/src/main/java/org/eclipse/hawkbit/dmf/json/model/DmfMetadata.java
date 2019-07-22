@@ -79,4 +79,8 @@ public class DmfMetadata {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return String.format("DmfMetadata [key='%s', value='%s']", key, value);
+    }
 }
