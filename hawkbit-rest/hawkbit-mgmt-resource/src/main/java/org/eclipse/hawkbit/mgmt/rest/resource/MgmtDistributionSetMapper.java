@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -137,16 +136,11 @@ public final class MgmtDistributionSetMapper {
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
     }
 
-    static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult,
-            final QuotaManagement quotaManagement) {
+    static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
-
         result.setAssigned(dsAssignmentResult.getAssigned());
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
         result.setAssignedActions(dsAssignmentResult.getAssignedActions().stream()
-                .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));
-        result.setAlreadyAssignedActions(dsAssignmentResult.getAlreadyAssignedActions().stream()
-                .limit(quotaManagement.getMaxAlreadyAssignedActionsInAssignmentResult())
                 .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));
         return result;
     }

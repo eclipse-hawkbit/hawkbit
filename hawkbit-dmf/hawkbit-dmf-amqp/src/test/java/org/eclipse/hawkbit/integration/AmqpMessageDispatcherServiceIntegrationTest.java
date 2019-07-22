@@ -150,12 +150,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
-        assertCancelActionMessage(assignmentResult.getAssignedActions().get(0), controllerId);
+        assertCancelActionMessage(assignmentResult.getAssignedActions().get(0).getId(), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(assignmentResult.getAssignedActions().get(0).getId(), controllerId);
-
     }
 
     @Test

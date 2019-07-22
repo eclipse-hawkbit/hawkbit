@@ -541,15 +541,13 @@ public class TargetTable extends AbstractTable<Target> {
         final List<Target> targets = targetManagement.get(targetIds);
         if (targets.isEmpty()) {
             getNotification().displayWarning(getI18n().getMessage("targets.not.exists"));
-            return new TargetTagAssignmentResult(Collections.emptyList(), Collections.emptyList(),
-                    Collections.emptyList(), null);
+            return new TargetTagAssignmentResult(0, Collections.emptyList(), Collections.emptyList(), null);
         }
 
         final Optional<TargetTag> tag = tagManagement.getByName(targTagName);
         if (!tag.isPresent()) {
             getNotification().displayWarning(getI18n().getMessage("targettag.not.exists", targTagName));
-            return new TargetTagAssignmentResult(Collections.emptyList(), Collections.emptyList(),
-                    Collections.emptyList(), null);
+            return new TargetTagAssignmentResult(0, Collections.emptyList(), Collections.emptyList(), null);
         }
 
         final List<String> controllerIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());

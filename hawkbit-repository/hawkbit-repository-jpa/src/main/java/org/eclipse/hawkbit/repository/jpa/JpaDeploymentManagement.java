@@ -270,7 +270,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
-            return allTargetsAlreadyAssignedResult(distributionSetEntity, controllerIDs);
+            return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
         closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
@@ -285,17 +285,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
-        return buildAssignmentResult(distributionSetEntity, targetEntities, controllerIdsToActions);
+        return buildAssignmentResult(distributionSetEntity, controllerIdsToActions);
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
-            final JpaDistributionSet distributionSetEntity, final List<String> controllerIDs) {
+            final JpaDistributionSet distributionSetEntity, final int alreadyAssignedCount) {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(distributionSetEntity);
         // return with nothing as all targets had the DS already assigned
-        return new DistributionSetAssignmentResult(distributionSetEntity,
-                targetManagement.getByControllerID(controllerIDs), Collections.emptyList(), Collections.emptyList(),
-                Collections.emptyList(), actionRepository.findAllByActiveAndTargetControllerIdIn(true, controllerIDs));
+        return new DistributionSetAssignmentResult(distributionSetEntity, alreadyAssignedCount, Collections.emptyList(),
+                Collections.emptyList(), Collections.emptyList());
     }
 
     private void closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(
@@ -320,19 +319,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
-            final List<JpaTarget> targetEntities, final Map<String, JpaAction> controllerIdsToActions) {
+            final Map<String, JpaAction> controllerIdsToActions) {
+        int alreadyAssignedTargetsCount = actionRepository.countByDistributionSetIdAndActiveAndTargetControllerIdNotIn(
+                distributionSet.getId(), true, controllerIdsToActions.keySet());
 
-        final List<String> targetEntitiesIds = targetEntities.stream().map(Target::getControllerId)
-                .collect(Collectors.toList());
-        final List<Action> alreadyAssignedActions = actionRepository
-                .findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(distributionSet.getId(), true,
-                        targetEntitiesIds);
-        final List<Target> alreadyAssignedTargets = alreadyAssignedActions.stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-
-        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargets,
-                targetManagement.getByControllerID(targetEntitiesIds), Collections.emptyList(),
-                new ArrayList<>(controllerIdsToActions.values()), alreadyAssignedActions);
+        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount,
+                targetManagement.getByControllerID(controllerIdsToActions.keySet()), Collections.emptyList(),
+                new ArrayList<>(controllerIdsToActions.values()));
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {

@@ -178,42 +178,36 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
         }
 
-        final DistributionSetTag tag = distributionSetTagManagement.getByName(tagName)
+        final DistributionSetTag myTag = distributionSetTagManagement.getByName(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
         DistributionSetTagAssignmentResult result;
 
-        final List<JpaDistributionSet> toBeChangedDSs = sets.stream().filter(set -> set.addTag(tag))
+        final List<JpaDistributionSet> toBeChangedDSs = sets.stream().filter(set -> set.addTag(myTag))
                 .collect(Collectors.toList());
 
         // un-assignment case
         if (toBeChangedDSs.isEmpty()) {
             for (final JpaDistributionSet set : sets) {
-                if (set.removeTag(tag)) {
+                if (set.removeTag(myTag)) {
                     toBeChangedDSs.add(set);
                 }
             }
-            final List<DistributionSet> alreadyAssigned = getAlreadyAssigned(dsIds, toBeChangedDSs);
-            final List<DistributionSet> unassigned = Collections.unmodifiableList(
-                    toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
-            result = new DistributionSetTagAssignmentResult(alreadyAssigned, Collections.emptyList(), unassigned, tag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
+                    Collections.emptyList(),
+                    Collections.unmodifiableList(
+                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                    myTag);
         } else {
-            final List<DistributionSet> alreadyAssigned = getAlreadyAssigned(dsIds, toBeChangedDSs);
-            final List<DistributionSet> assignedDs = Collections.unmodifiableList(
-                    toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList()));
-            result = new DistributionSetTagAssignmentResult(alreadyAssigned, assignedDs, Collections.emptyList(), tag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
+                    Collections.unmodifiableList(
+                            toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                    Collections.emptyList(), myTag);
         }
 
         // no reason to persist the tag
-        entityManager.detach(tag);
+        entityManager.detach(myTag);
         return result;
-    }
-
-    private List<DistributionSet> getAlreadyAssigned(final Collection<Long> dsIds,
-            final List<JpaDistributionSet> toBeChangedDSs) {
-        List<Long> ids = new ArrayList<>(dsIds);
-        ids.removeIf(id -> toBeChangedDSs.stream().anyMatch(ds -> ds.getId().equals(id)));
-        return new ArrayList<>(distributionSetRepository.findAllById(ids));
     }
 
     private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {

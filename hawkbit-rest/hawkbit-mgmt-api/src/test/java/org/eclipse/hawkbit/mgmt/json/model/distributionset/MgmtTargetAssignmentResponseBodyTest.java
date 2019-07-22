@@ -47,22 +47,11 @@ public class MgmtTargetAssignmentResponseBodyTest {
         assertTrue(jsonNode.get("assignedActions").get(0).has("id"));
         assertTrue(jsonNode.get("assignedActions").get(0).get("id").isNumber());
         assertTrue(Arrays.asList(4L, 5L, 6L).contains(jsonNode.get("assignedActions").get(0).get("id").asLong()));
-
-        assertTrue(jsonNode.has("alreadyAssignedActions"));
-        assertTrue(jsonNode.get("alreadyAssignedActions").isArray());
-        assertEquals(3, jsonNode.get("alreadyAssignedActions").size());
-        assertTrue(jsonNode.get("alreadyAssignedActions").get(0).isObject());
-        assertTrue(jsonNode.get("alreadyAssignedActions").get(0).has("id"));
-        assertTrue(jsonNode.get("alreadyAssignedActions").get(0).get("id").isNumber());
-        assertTrue(
-                Arrays.asList(1L, 2L, 3L).contains(jsonNode.get("alreadyAssignedActions").get(0).get("id").asLong()));
     }
 
     private MgmtTargetAssignmentResponseBody generateResponseBody() {
         MgmtTargetAssignmentResponseBody response = new MgmtTargetAssignmentResponseBody();
         final String targetId = "target";
-        response.setAlreadyAssignedActions(Arrays.asList(new MgmtActionId(targetId, 1L), new MgmtActionId(targetId, 2L),
-                new MgmtActionId(targetId, 3L)));
         response.setAssignedActions(Arrays.asList(new MgmtActionId(targetId, 4L), new MgmtActionId(targetId, 5L),
                 new MgmtActionId(targetId, 6L)));
         response.setAssigned(3);

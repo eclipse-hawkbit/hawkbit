@@ -22,7 +22,7 @@ public class TargetTagAssignmentResult extends AssignmentResult<Target> {
      * Constructor.
      *
      * @param alreadyAssigned
-     *            {@link List} of already assigned/ignored elements
+     *            count of already assigned (ignored) elements
      * @param assigned
      *            {@link List} of assigned {@link Target}s.
      * @param unassigned
@@ -30,7 +30,7 @@ public class TargetTagAssignmentResult extends AssignmentResult<Target> {
      * @param targetTag
      *            the assigned or unassigned tag
      */
-    public TargetTagAssignmentResult(final List<? extends Target> alreadyAssigned, final List<? extends Target> assigned,
+    public TargetTagAssignmentResult(final int alreadyAssigned, final List<? extends Target> assigned,
             final List<? extends Target> unassigned, final TargetTag targetTag) {
         super(alreadyAssigned, assigned, unassigned);
         this.targetTag = targetTag;

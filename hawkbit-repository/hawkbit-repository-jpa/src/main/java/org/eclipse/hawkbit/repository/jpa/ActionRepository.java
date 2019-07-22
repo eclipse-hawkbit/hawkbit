@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -505,27 +506,17 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     void deleteByIdIn(Collection<Long> actionIDs);
 
     /**
-     * Retrieves all {@link Action}s referring to the given target ControllerIds and active flag
-     *
-     * @param controllerIds
-     *            the controllerIds of targets for the actions
-     * @param active
-     *            flag to indicate active/inactive actions
-     * @return the found list of {@link Action} IDs
-     */
-    List<Action> findAllByActiveAndTargetControllerIdIn(@Param("active") boolean active,
-            @Param("controllerIds") List<String> controllerIds);
-    
-    /**
-     * Retrieves all {@link Action}s referring to the given distributionSet id and not having targetId from the 
+     * Retrieves all {@link Action}s referring to the given distributionSet id and not having targetId from the
      * given ControllerIds and active flag
      *
-     * @param controllerIds
-     *            the controllerIds of targets for the actions
+     * @param dsId
+     *            the distributionSet Id
      * @param active
      *            flag to indicate active/inactive actions
+     * @param controllerIds
+     *            the controllerIds of targets for the actions
      * @return the found list of {@link Action} IDs
      */
-    List<Action> findAllByDistributionSetIdAndActiveAndTargetControllerIdNotIn(@Param("distributionSetId") Long dsId,
-            @Param("active") boolean active, @Param("controllerIds") List<String> controllerIds);
+    int countByDistributionSetIdAndActiveAndTargetControllerIdNotIn(@Param("distributionSetId") Long dsId,
+            @Param("active") boolean active, @Param("controllerIds") Set<String> controllerIds);
 }

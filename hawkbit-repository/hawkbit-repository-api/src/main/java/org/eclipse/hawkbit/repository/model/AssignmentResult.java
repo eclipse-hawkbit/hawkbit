@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class AssignmentResult<T extends BaseEntity> {
 
-    private final List<? extends T> alreadyAssignedEntity;
+    private final int alreadyAssigned;
     private final List<? extends T> assignedEntity;
     private final List<? extends T> unassignedEntity;
 
@@ -33,9 +33,9 @@ public class AssignmentResult<T extends BaseEntity> {
      * @param unassignedEntity
      *            {@link List} of unassigned entity.
      */
-    public AssignmentResult(final List<? extends T> alreadyAssignedEntity, final List<? extends T> assignedEntity,
+    public AssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
             final List<? extends T> unassignedEntity) {
-        this.alreadyAssignedEntity = alreadyAssignedEntity;
+        this.alreadyAssigned = alreadyAssigned;
         this.assignedEntity = assignedEntity;
         this.unassignedEntity = unassignedEntity;
     }
@@ -51,23 +51,14 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return total number (assigned and already assigned).
      */
     public int getTotal() {
-        return getAssigned() + getAlreadyAssigned();
+        return getAssigned() + alreadyAssigned;
     }
 
     /**
      * @return number of already assigned/ignored elements.
      */
     public int getAlreadyAssigned() {
-        return getAlreadyAssignedEntity().size();
-    }
-
-    /**
-     * @return already assigned/ignored elements.
-     */
-    public List<T> getAlreadyAssignedEntity() {
-        return alreadyAssignedEntity == null
-                ? Collections.emptyList()
-                : Collections.unmodifiableList(alreadyAssignedEntity);
+        return alreadyAssigned;
     }
 
     /**

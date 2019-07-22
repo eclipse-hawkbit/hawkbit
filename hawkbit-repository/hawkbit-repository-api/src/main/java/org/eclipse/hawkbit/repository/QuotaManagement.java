@@ -106,8 +106,4 @@ public interface QuotaManagement {
      */
     long getMaxArtifactStorage();
 
-    /**
-     * @return the maximum count of alreadyAssignedActions to be returned in the AssignmentResult
-     */
-    int getMaxAlreadyAssignedActionsInAssignmentResult();
 }

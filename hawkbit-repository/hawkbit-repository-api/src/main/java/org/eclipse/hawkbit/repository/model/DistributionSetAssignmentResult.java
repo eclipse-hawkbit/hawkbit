@@ -20,34 +20,27 @@ import java.util.List;
 public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
 
     private final List<? extends Action> assignedActions;
-    private final List<? extends Action> alreadyAssignedActions;
     private final DistributionSet distributionSet;
 
     /**
      *
      * Constructor.
-     *
-     * @param distributionSet
+     *  @param distributionSet
      *            that has been assigned
      * @param alreadyAssigned
-     *            the the already assigned targets
+     *            the the count of already assigned targets
      * @param assigned
-     *            the assigned targets
+ *            the assigned targets
      * @param unassigned
-     *            the unassigned targets
+*            the unassigned targets
      * @param assignedActions
-     *            the assigned actions
-     * @param alreadyAssignedActions
-     *            the alreadyAssigned actions
      */
-    public DistributionSetAssignmentResult(final DistributionSet distributionSet,
-            final List<? extends Target> alreadyAssigned, final List<? extends Target> assigned,
-            final List<? extends Target> unassigned, final List<? extends Action> assignedActions,
-            final List<? extends Action> alreadyAssignedActions) {
+    public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
+            final List<? extends Target> assigned, final List<? extends Target> unassigned,
+            final List<? extends Action> assignedActions) {
         super(alreadyAssigned, assigned, unassigned);
         this.distributionSet = distributionSet;
         this.assignedActions = assignedActions;
-        this.alreadyAssignedActions = alreadyAssignedActions;
     }
 
     /**
@@ -62,13 +55,6 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      */
     public List<Action> getAssignedActions() {
         return Collections.unmodifiableList(assignedActions);
-    }
-
-    /**
-     * @return the already assigned actions
-     */
-    public List<Action> getAlreadyAssignedActions() {
-        return Collections.unmodifiableList(alreadyAssignedActions);
     }
 
 }

@@ -24,13 +24,13 @@ public class DistributionSetTagAssignmentResult extends AssignmentResult<Distrib
      * @param alreadyAssigned
      *            number of already assigned/ignored elements
      * @param assigned
-     *            number of newly assigned elements
+     *            newly assigned elements
      * @param unassigned
-     *            number of newly assigned elements
+     *            unassigned elements
      * @param distributionSetTag
      *            the assigned or unassigned tag
      */
-    public DistributionSetTagAssignmentResult(final List<DistributionSet> alreadyAssigned,
+    public DistributionSetTagAssignmentResult(final int alreadyAssigned,
             final List<DistributionSet> assigned, final List<DistributionSet> unassigned,
             final DistributionSetTag distributionSetTag) {
         super(alreadyAssigned, assigned, unassigned);

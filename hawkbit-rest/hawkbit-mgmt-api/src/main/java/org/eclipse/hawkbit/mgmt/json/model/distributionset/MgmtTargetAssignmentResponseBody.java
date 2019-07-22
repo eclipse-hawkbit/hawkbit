@@ -26,10 +26,9 @@ import org.springframework.hateoas.ResourceSupport;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
 
-    private List<MgmtActionId> assignedActions;
-    private List<MgmtActionId> alreadyAssignedActions;
     private int assigned;
     private int alreadyAssigned;
+    private List<MgmtActionId> assignedActions;
     /**
      * @return the assigned
      */
@@ -81,20 +80,5 @@ public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
      */
     public void setAssignedActions(final List<MgmtActionId> assignedActions) {
         this.assignedActions = assignedActions;
-    }
-
-    /**
-     * @return the alreadyAssignedActions
-     */
-    public List<MgmtActionId> getAlreadyAssignedActions() {
-        return alreadyAssignedActions;
-    }
-
-    /**
-     * @param alreadyAssignedActions
-     *            the alreadyAssignedActions to set
-     */
-    public void setAlreadyAssignedActions(final List<MgmtActionId> alreadyAssignedActions) {
-        this.alreadyAssignedActions = alreadyAssignedActions;
     }
 }

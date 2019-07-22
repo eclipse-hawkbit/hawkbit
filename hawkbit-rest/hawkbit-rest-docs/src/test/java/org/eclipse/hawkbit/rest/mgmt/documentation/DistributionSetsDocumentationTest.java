@@ -402,12 +402,6 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                         .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_ID),
                                 fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
                                         .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
-                                fieldWithPath("alreadyAssignedActions").type(JsonFieldType.ARRAY)
-                                        .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_ACTIONS),
-                                fieldWithPath("alreadyAssignedActions.[].id").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_ID),
-                                fieldWithPath("alreadyAssignedActions.[]._links.self").type(JsonFieldType.OBJECT)
-                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }
