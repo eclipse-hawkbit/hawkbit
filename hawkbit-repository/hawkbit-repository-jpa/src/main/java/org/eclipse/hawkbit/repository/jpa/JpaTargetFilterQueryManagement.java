@@ -197,7 +197,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public TargetFilterQuery getById(final Long targetFilterQueryId) {
+    public TargetFilterQuery getById(final long targetFilterQueryId) {
         return get(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
     }

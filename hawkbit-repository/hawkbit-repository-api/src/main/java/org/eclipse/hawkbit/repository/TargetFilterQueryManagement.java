@@ -288,5 +288,5 @@ public interface TargetFilterQueryManagement {
      * @throws EntityNotFoundException
      *             when the filter couldn't be found
      */
-    TargetFilterQuery getById(Long targetFilterQueryId);
+    TargetFilterQuery getById(long targetFilterQueryId);
 }

@@ -182,7 +182,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return controller-ids which do have the specified {@linkplain DistributionSet} installed.
      */
     @Query("SELECT t.controllerId FROM JpaTarget t where t.installedDistributionSet.id = :dsId")
-    Set<String> findControllerIdsByInstalledDistributionSet(Long dsId);
+    Set<String> findControllerIdsByInstalledDistributionSet(@Param("dsId") Long dsId);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
@@ -202,7 +202,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return a list of controller-ids which do have the specified {@linkplain DistributionSet} assigned.
      */
     @Query("SELECT t.controllerId FROM JpaTarget t where t.assignedDistributionSet.id = :dsId")
-    Set<String> findControllerIdsByAssignedDistributionSet(Long dsId);
+    Set<String> findControllerIdsByAssignedDistributionSet(@Param("dsId") Long dsId);
 
     /**
      * Finds all target-controller IDs that have a {@link DistributionSet}
@@ -214,8 +214,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      * @return a list of target controller-IDs
      */
     @Query("SELECT t.controllerId FROM JpaTarget  t where t.controllerId not in ("
-            + "SELECT t.controllerId FROM JpaTarget t JOIN t.actions a where a.distributionSet.id = :setId)")
-    Set<String> findByNoActionWithDistributionSetExisits(Long setId);
+            + "SELECT t.controllerId FROM JpaTarget t JOIN t.actions a where a.distributionSet.id = :dsId)")
+    Set<String> findByNoActionWithDistributionSetExisits(@Param("dsId") Long dsId);
 
     /**
      * retrieves {@link Target}s where

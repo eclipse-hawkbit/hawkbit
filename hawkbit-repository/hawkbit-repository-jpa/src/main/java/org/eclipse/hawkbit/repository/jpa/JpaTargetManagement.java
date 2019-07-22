@@ -94,7 +94,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaTargetManagement implements TargetManagement {
 
-    public static final Sort ORDERBY_CONTROLLERID = Sort.by(Sort.Order.asc("controllerId"));
+    private static final Sort ORDERBY_ID = Sort.by(Sort.Order.asc("id"));
 
     private final EntityManager entityManager;
 
@@ -352,14 +352,11 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByAssignedDistributionSetAndQuery(final Pageable pageable, final long distributionSetId,
             final String query) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
-        final Set<String> controllerIds = targetRepository.findControllerIdsByAssignedDistributionSet(distributionSetId);
+        final Set<String> controllerIds = targetRepository
+                .findControllerIdsByAssignedDistributionSet(distributionSetId);
         return targetQueryExecutionManagement.findByQuery(pageable, query, controllerIds);
     }
 
-    /*
-     * (non-Javadoc) Used by Auto-Assign checker: Identify new targets which have
-     * not an specific DS assigned.
-     */
     @Override
     public Page<Target> findByNoActionWithDistributionSetExistsAndQuery(final Pageable pageable,
             final long distributionSetId, final String query) {
@@ -438,7 +435,8 @@ public class JpaTargetManagement implements TargetManagement {
                     .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
         if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
-            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
+            specList.add(TargetSpecifications
+                    .likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
         }
         if (isHasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
@@ -648,22 +646,21 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private List<? extends Target> findTargetsNotInGroup(Page<Target> targets, Collection<Long> groupIds) {
-        Set<String> controllerIds = new TreeSet<>(targets.map(Target::getControllerId).getContent());
+        final List<String> controllerIds = targets.map(Target::getControllerId).getContent();
         return targetRepository.findAll(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
     }
 
-    private Pageable nextPageable(Page<Target> queryResult) {
-        return (queryResult == null) ? PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_CONTROLLERID)
+    private static Pageable nextPageable(final Page<Target> queryResult) {
+        return (queryResult == null) ? PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT, ORDERBY_ID)
                 : queryResult.nextPageable();
     }
 
     private long countTargetsNotInGroup(Page<Target> targets, Collection<Long> groupIds) {
-        Set<String> controllerIds = new TreeSet<>(targets.map(Target::getControllerId).getContent());
+        final Set<String> controllerIds = new TreeSet<>(targets.map(Target::getControllerId).getContent());
         return targetRepository.count(hasControllerId(controllerIds).and(isNotInRolloutGroups(groupIds)));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
         if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
@@ -703,7 +700,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<Target> findByQueryAndTag(final Pageable pageable, final String query, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
         Set<String> targetIds = targetRepository.findControllerIdsByTag(tagId);

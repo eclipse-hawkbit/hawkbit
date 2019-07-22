@@ -25,13 +25,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * This interface is the central point which is responsible to execute queries
  * and return update-targets for Hawkbit.
  *
- * By design it should be as minimal as possible in order to make it easy to
- * plug-in different sources of {@linkplain Target Targets}.
- *
- * For any use-case specific query use the query-/count-methods which limit the
- * result to a predefined set of IDs.
- *
- * @param <T> The concrete type of the target implementation
+ * By design it only contains generic filter methods so given query parameters
+ * can be used in a more universal, model independent manner. Thus domain
+ * specific querying e.g. {@code findByFilterAndDistributionSet(...)} should
+ * rather be expressed within the query syntax, or by providing a pre-select
+ * with the {@code inIdList} parameter, than by introducing (new) named methods.
  */
 public interface TargetQueryExecutionManagement {
 

@@ -27,18 +27,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Provides a source of
  * {@linkplain org.eclipse.hawkbit.repository.model.Target}s based on Hawkbit's
  * internal device-management.
  */
+@Validated
 @Transactional(readOnly = true)
 public class JpaTargetQueryExecutionManagement implements TargetQueryExecutionManagement {
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
     private final TargetRepository targetRepository;
 
+    /**
+     * Creates a {@linkplain JpaTargetQueryExecutionManagement}
+     * @param targetRepository the target repo
+     * @param virtualPropertyReplacer the virtual property replacer
+     * @param database the database
+     */
     public JpaTargetQueryExecutionManagement(final TargetRepository targetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.virtualPropertyReplacer = virtualPropertyReplacer;
