@@ -126,7 +126,7 @@ public class SystemSecurityContext {
      * {@link SecurityContext} and back after the callable is called.
      * 
      * @param tenant
-     *            to act as system code
+     *            under which the {@link Callable#call()} must be executed.
      * @param callable
      *            to call within the security context
      * @return the return value of the {@link Callable#call()} method.
@@ -138,7 +138,6 @@ public class SystemSecurityContext {
         List<SimpleGrantedAuthority> authorities = Collections
                 .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
         try {
-            LOG.debug("entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
                 try {
                     setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
@@ -151,7 +150,6 @@ public class SystemSecurityContext {
 
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            LOG.debug("leaving system code execution");
         }
     }
 
@@ -163,7 +161,7 @@ public class SystemSecurityContext {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 
-    protected void setCustomSecurityContext(final String tenantId, final Object principal,
+    private void setCustomSecurityContext(final String tenantId, final Object principal,
             final Collection<? extends GrantedAuthority> authorities) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
                 UUID.randomUUID().toString(), principal, authorities);
