@@ -93,8 +93,9 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     @Override
     protected List<TagData> getAssignedTags() {
         if (selectedEntity != null) {
-            distributionSetTagManagement.findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId())
-                    .getContent().stream().map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour()))
+            return distributionSetTagManagement
+                    .findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getId()).getContent()
+                    .stream().map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour()))
                     .collect(Collectors.toList());
         }
 

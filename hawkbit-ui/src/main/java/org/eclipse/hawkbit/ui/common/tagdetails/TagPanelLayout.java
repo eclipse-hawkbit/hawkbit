@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
+import com.google.common.collect.Lists;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -60,8 +61,12 @@ public class TagPanelLayout extends VerticalLayout {
         assignableTagsComboBox.removeAllTags();
         assignedTagField.removeAllTags();
 
-        allTags.forEach(assignableTagsComboBox::addAssignableTag);
-        assignedTags.forEach(this::setAssignedTag);
+        final List<TagData> assignableTags = Lists.newArrayList(allTags);
+        assignableTags.removeAll(assignedTags);
+
+        assignableTagsComboBox.initializeAssignableTags(assignableTags);
+        assignedTagField.initializeAssignedTags(assignedTags);
+
     }
 
     /**

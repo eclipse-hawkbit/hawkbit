@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
@@ -55,6 +56,23 @@ public class TagListField extends CssLayout {
     }
 
     /**
+     * Initializes the Tag panel with all assigned tags.
+     * 
+     * @param assignedTags
+     *            assigned tags
+     */
+    void initializeAssignedTags(final List<TagData> assignedTags) {
+        removeAllComponents();
+
+        assignedTags.forEach(tag -> {
+            final Button tagButton = createButton(tag.getName(), tag.getColor());
+            tagButtons.put(tag.getName(), tagButton);
+        });
+
+        addTagButtonsAsComponents();
+    }
+
+    /**
      * Adds a tag
      * 
      * @param tagName
@@ -62,10 +80,23 @@ public class TagListField extends CssLayout {
      */
     void addTag(final String tagName, final String tagColor) {
         if (!tagButtons.containsKey(tagName)) {
+            removeAllComponents();
+
             final Button tagButton = createButton(tagName, tagColor);
-            addComponent(tagButton, getComponentCount());
             tagButtons.put(tagName, tagButton);
+
+            addTagButtonsAsComponents();
         }
+    }
+
+    private void addTagButtonsAsComponents() {
+        sortTagNames(tagButtons.keySet()).forEach(sortedTagName -> addComponent(tagButtons.get(sortedTagName)));
+    }
+
+    private static List<String> sortTagNames(final Iterable<String> tagNames) {
+        final List<String> sortedTagNames = Lists.newArrayList(tagNames);
+        sortedTagNames.sort(Ordering.natural());
+        return sortedTagNames;
     }
 
     private Button createButton(final String tagName, final String tagColor) {

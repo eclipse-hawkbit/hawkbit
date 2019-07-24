@@ -76,6 +76,16 @@ public class TagAssignementComboBox extends HorizontalLayout {
         assignableTagsComboBox.setWidth("100%");
     }
 
+    /**
+     * Initializes the Combobox with all assignable tags.
+     * 
+     * @param assignableTags
+     *            assignable tags
+     */
+    void initializeAssignableTags(final List<TagData> assignableTags) {
+        assignableTags.forEach(this::addAssignableTag);
+    }
+
     private void onSelectionChanged() {
         final Object selectedValue = assignableTagsComboBox.getValue();
         if (!isValidTagSelection(selectedValue) || readOnlyMode) {
