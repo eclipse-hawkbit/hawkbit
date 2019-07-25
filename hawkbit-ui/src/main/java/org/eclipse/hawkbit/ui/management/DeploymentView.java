@@ -407,11 +407,15 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
     protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
         final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(10);
 
-        supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
-        supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());
+        if (targetTableLayout != null) {
+            supportedEvents.put(TargetCreatedEventContainer.class, targetTableLayout.getTable());
+            supportedEvents.put(TargetDeletedEventContainer.class, targetTableLayout.getTable());
+        }
 
-        supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
-        supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());
+        if (distributionTableLayout != null) {
+            supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
+            supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());
+        }
 
         supportedEvents.put(TargetTagCreatedEventContainer.class, targetTagFilterLayout);
         supportedEvents.put(TargetTagDeletedEventContainer.class, targetTagFilterLayout);
