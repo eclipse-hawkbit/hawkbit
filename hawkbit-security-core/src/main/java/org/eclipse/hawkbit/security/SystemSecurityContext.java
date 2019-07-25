@@ -11,12 +11,18 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -112,11 +118,57 @@ public class SystemSecurityContext {
     }
 
     /**
+     * Runs a given {@link Callable} within a system security context, which has
+     * the provided {@link GrantedAuthority}s to successfully run the
+     * {@link Callable}.
+     * 
+     * The security context will be switched to the a new
+     * {@link SecurityContext} and back after the callable is called.
+     * 
+     * @param tenant
+     *            under which the {@link Callable#call()} must be executed.
+     * @param callable
+     *            to call within the security context
+     * @return the return value of the {@link Callable#call()} method.
+     */
+    // The callable API throws a Exception and not a specific one
+    @SuppressWarnings({ "squid:S2221", "squid:S00112" })
+    public <T> T runAsControllerAsTenant(@NotEmpty final String tenant, @NotNull final Callable<T> callable) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        List<SimpleGrantedAuthority> authorities = Collections
+                .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
+        try {
+            return tenantAware.runAsTenant(tenant, () -> {
+                try {
+                    setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
+                    return callable.call();
+
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+
+    /**
      * @return {@code true} if the current running code is running as system
      *         code block.
      */
     public boolean isCurrentThreadSystemCode() {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
+    }
+
+    private void setCustomSecurityContext(final String tenantId, final Object principal,
+            final Collection<? extends GrantedAuthority> authorities) {
+        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
+                UUID.randomUUID().toString(), principal, authorities);
+        authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
+        final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
+        securityContextImpl.setAuthentication(authenticationToken);
+        SecurityContextHolder.setContext(securityContextImpl);
     }
 
     private static void setSystemContext(final SecurityContext oldContext) {

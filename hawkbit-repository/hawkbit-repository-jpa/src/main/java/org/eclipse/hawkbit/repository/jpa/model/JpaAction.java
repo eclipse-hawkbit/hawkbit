@@ -126,6 +126,9 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
+    
+    @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
+    private String externalRef;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -331,5 +334,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
                 return false;
             }
         }
+    }
+
+    @Override
+    public void setExternalRef(String externalRef) {
+        this.externalRef = externalRef;
+    }
+
+    @Override
+    public String getExternalRef() {
+        return externalRef;
     }
 }
