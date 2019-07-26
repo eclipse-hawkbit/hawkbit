@@ -288,8 +288,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
-                cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
+        final Target target = cancelEvent.getEntity();
+        if (target != null) {
+            sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
+                    target.getAddress());
+        } else {
+            LOG.debug(
+                    "Cannot process the received CancelTargetAssignmentEvent with action ID {} because the referenced target with ID {} does no longer exist.",
+                    cancelEvent.getActionId(), cancelEvent.getEntityId());
+        }
     }
 
     /**
@@ -366,7 +373,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return targetAddress != null && IpUtil.isAmqpUri(URI.create(targetAddress));
     }
 
-    private boolean isNotFromSelf(final RemoteApplicationEvent event) {
+    protected boolean isNotFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
     }
 
