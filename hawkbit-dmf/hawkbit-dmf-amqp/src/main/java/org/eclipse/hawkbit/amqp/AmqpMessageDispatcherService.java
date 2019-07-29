@@ -169,7 +169,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         sendMultiActionRequestMessages(e.getTenant(), e.getControllerIds());
     }
 
-    protected void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
+    private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
 
         final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModuleMetadata = new HashMap<>();
         targetManagement.getByControllerID(controllerIds).stream()
@@ -359,7 +359,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
     }
 
-    protected void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
+    private void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
 
         if (!hasValidAddress(targetAddress)) {
             return;
@@ -393,7 +393,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     }
 
-    protected void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
+    private void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
             final String targetAddress) {
         if (!hasValidAddress(targetAddress)) {
             return;
