@@ -96,9 +96,9 @@
 | org.springframework.security         | spring-security-config         | 5.1.1.RELEASE  | [CQ18351](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18351) |
 | org.springframework.security         | spring-security-core           | 5.1.1.RELEASE  | [CQ18352](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18352) |
 | org.springframework.security         | spring-security-crypto         | 5.1.1.RELEASE  | [CQ18353](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18353) |
-| org.springframework.security         | spring-security-oauth2-client  | 5.1.5.RELEASE  | []() |
-| org.springframework.security         | spring-security-oauth2-core    | 5.1.5.RELEASE  | []() |
-| org.springframework.security         | spring-security-oauth2-jose    | 5.1.5.RELEASE  | []() |
+| org.springframework.security         | spring-security-oauth2-client  | 5.1.5.RELEASE  | [CQ20474](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=20474) |
+| org.springframework.security         | spring-security-oauth2-core    | 5.1.5.RELEASE  | [CQ20475](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=20475) |
+| org.springframework.security         | spring-security-oauth2-jose    | 5.1.5.RELEASE  | [CQ20476](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=20476) |
 | org.springframework.security         | spring-security-web            | 5.1.1.RELEASE  | [CQ18354](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18354) |
 | org.springframework                  | spring-aop                     | 5.1.2.RELEASE  | [CQ18355](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18355) |
 | org.springframework                  | spring-aspects                 | 5.1.2.RELEASE  | [CQ18356](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18356) |
