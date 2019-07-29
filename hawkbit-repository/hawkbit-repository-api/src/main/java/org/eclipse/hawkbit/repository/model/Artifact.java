@@ -39,6 +39,11 @@ public interface Artifact extends TenantAwareBaseEntity {
     String getSha1Hash();
 
     /**
+     * @return SHA-256 hash of the artifact.
+     */
+    String getSha256Hash();
+
+    /**
      * @return size of the artifact in bytes.
      */
     long getSize();

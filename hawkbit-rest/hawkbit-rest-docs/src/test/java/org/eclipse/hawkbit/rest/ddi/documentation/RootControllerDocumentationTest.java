@@ -321,6 +321,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(DdiApiModelProperties.ARTIFACT_HASHES_SHA1),
                                 fieldWithPath("deployment.chunks[].artifacts[].hashes.md5")
                                         .description(DdiApiModelProperties.ARTIFACT_HASHES_MD5),
+                                fieldWithPath("deployment.chunks[].artifacts[].hashes.sha256")
+                                        .description(DdiApiModelProperties.ARTIFACT_HASHES_SHA256),
                                 fieldWithPath("deployment.chunks[].artifacts[].size")
                                         .description(DdiApiModelProperties.ARTIFACT_SIZE),
                                 fieldWithPath("deployment.chunks[].artifacts[]._links.download")
@@ -451,6 +453,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("[]hashes").description(DdiApiModelProperties.ARTIFACTS),
                                 fieldWithPath("[]hashes.sha1").description(DdiApiModelProperties.ARTIFACT_HASHES_SHA1),
                                 fieldWithPath("[]hashes.md5").description(DdiApiModelProperties.ARTIFACT_HASHES_MD5),
+                                fieldWithPath("[]hashes.sha256")
+                                        .description(DdiApiModelProperties.ARTIFACT_HASHES_SHA256),
                                 fieldWithPath("[]size").description(DdiApiModelProperties.ARTIFACT_SIZE),
                                 fieldWithPath("[]_links.download")
                                         .description(DdiApiModelProperties.ARTIFACT_HTTPS_DOWNLOAD_LINK_BY_CONTROLLER),

@@ -128,7 +128,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try {
             return artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
                     artifactUpload.getFilename(), artifactUpload.getContentType(),
-                    new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum()));
+                    new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum(), artifactUpload.getProvidedSha256Sum()));
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
@@ -256,6 +256,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             artifact = new JpaArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
         }
         artifact.setMd5Hash(result.getHashes().getMd5());
+        artifact.setSha256Hash(result.getHashes().getSha256());
         artifact.setSha1Hash(result.getHashes().getSha1());
         artifact.setSize(result.getSize());
 

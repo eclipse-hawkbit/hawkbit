@@ -57,6 +57,9 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @Column(name = "md5_hash", length = 32, updatable = false, nullable = true)
     private String md5Hash;
 
+    @Column(name = "sha256_hash", length = 64, updatable = false, nullable = true)
+    private String sha256Hash;
+
     @Column(name = "file_size", updatable = false)
     private long size;
 
@@ -94,6 +97,11 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
         return sha1Hash;
     }
 
+    @Override
+    public String getSha256Hash() {
+        return sha256Hash;
+    }
+
     public void setMd5Hash(final String md5Hash) {
         this.md5Hash = md5Hash;
     }
@@ -101,6 +109,11 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     public void setSha1Hash(final String sha1Hash) {
         this.sha1Hash = sha1Hash;
     }
+
+    public void setSha256Hash(final String sha256Hash) {
+        this.sha256Hash = sha256Hash;
+    }
+
 
     @Override
     public long getSize() {
