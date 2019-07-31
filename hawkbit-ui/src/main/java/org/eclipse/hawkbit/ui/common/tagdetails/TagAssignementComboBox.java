@@ -39,7 +39,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
     private static final String COLOR_PROPERTY = "color";
 
     private final IndexedContainer allAssignableTags;
-    private final transient Set<TagAssignmentListener> listeners = Sets.newCopyOnWriteArraySet();
+    private final transient Set<TagAssignmentListener> listeners = Sets.newConcurrentHashSet();
 
     private final ComboBox assignableTagsComboBox;
 

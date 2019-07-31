@@ -40,7 +40,7 @@ public class TagListField extends CssLayout {
     private static final long serialVersionUID = 1L;
 
     private final transient Map<String, Button> tagButtons = new ConcurrentHashMap<>();
-    private final transient Set<TagAssignmentListener> listeners = Sets.newCopyOnWriteArraySet();
+    private final transient Set<TagAssignmentListener> listeners = Sets.newConcurrentHashSet();
     private final VaadinMessageSource i18n;
     private final boolean readOnlyMode;
 
