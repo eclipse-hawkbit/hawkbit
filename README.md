@@ -9,7 +9,7 @@ Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=shield)](
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eclipse.hawkbit/hawkbit-parent)
 [![Lines of code](https://img.shields.io/badge/dynamic/xml.svg?label=Lines%20of%20code&url=https%3A%2F%2Fwww.openhub.net%2Fprojects%2Fhawkbit.xml%3Fapi_key%3D30bc3f3fad087c2c5a6a67a8071665ba0fbe3b6236ffbf71b7d20849f4a5e35a&query=%2Fresponse%2Fresult%2Fproject%2Fanalysis%2Ftotal_code_lines&colorB=lightgrey)](https://www.openhub.net/p/hawkbit)
 
-Docker images: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.3.0M3.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:0.3.0M3-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
+Docker: [![Docker](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server) [![Docker MYSQL](https://images.microbadger.com/badges/version/hawkbit/hawkbit-update-server:latest-mysql.svg)](https://hub.docker.com/r/hawkbit/hawkbit-update-server)
 
 # Documentation
 
