@@ -57,8 +57,11 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
         return checker.hasCreateTargetPermission();
     }
 
+    /**
+     * Initializes the Tags
+     */
     public void initializeTags() {
-        repopulateToken();
+        repopulateTags();
     }
 
     public boolean isTagSelectedForAssignment() {

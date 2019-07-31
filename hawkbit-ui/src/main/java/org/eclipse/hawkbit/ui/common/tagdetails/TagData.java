@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,9 +9,14 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.io.Serializable;
+import java.util.Objects;
+
+import org.eclipse.hawkbit.repository.model.Tag;
+
+import com.google.common.base.MoreObjects;
 
 /**
- * Tag details.
+ * Tag details. Represents the ui data for {@link Tag} entity.
  */
 public class TagData implements Serializable {
 
@@ -27,8 +32,11 @@ public class TagData implements Serializable {
      * Tag data constructor.
      *
      * @param id
+     *            the id of the {@link Tag}
      * @param name
+     *            the name of the {@link Tag}
      * @param color
+     *            the color of the {@link Tag}
      */
     public TagData(final Long id, final String name, final String color) {
         this.color = color;
@@ -59,37 +67,24 @@ public class TagData implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         final TagData other = (TagData) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
+        return Objects.equals(this.id, other.id) && Objects.equals(this.name, other.name)
+                && Objects.equals(this.color, other.color);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
+        return Objects.hash(id, name, color);
     }
 
     @Override
     public String toString() {
-        return "TagData [name=" + name + ", id=" + id + ", color=" + color + "]";
+        return MoreObjects.toStringHelper(this).add("id", id).add("name", name).add("color", color).toString();
     }
 }

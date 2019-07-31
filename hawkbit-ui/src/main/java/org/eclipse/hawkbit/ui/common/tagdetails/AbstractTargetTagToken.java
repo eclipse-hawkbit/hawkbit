@@ -60,13 +60,13 @@ public abstract class AbstractTargetTagToken<T extends BaseEntity> extends Abstr
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagUpdateEvent(final List<TargetTagUpdatedEvent> events) {
-        repopulateToken();
+        repopulateTags();
 
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onTargetTagUpdateEvent(final TargetTagTableEvent event) {
-        repopulateToken();
+        repopulateTags();
     }
 
 }

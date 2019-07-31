@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -111,7 +111,7 @@ public class TagPanelLayout extends VerticalLayout {
      * @param tagData
      *            the {@link TagData}
      */
-    public void tagDeleted(final TagData tagData) {
+    void tagDeleted(final TagData tagData) {
         assignableTagsComboBox.removeAssignableTag(tagData);
         assignedTagField.removeTag(tagData.getName());
     }
@@ -121,7 +121,7 @@ public class TagPanelLayout extends VerticalLayout {
      * via UI controls.
      *
      */
-    public interface TagAssignmentListener {
+    interface TagAssignmentListener {
 
         /**
          * User triggers a tag assignment.
@@ -129,7 +129,7 @@ public class TagPanelLayout extends VerticalLayout {
          * @param tagName
          *            the name of the tag that should be assigned.
          */
-        public void assignTag(String tagName);
+        void assignTag(String tagName);
 
         /**
          * User triggers a tag unassignment.
@@ -137,7 +137,7 @@ public class TagPanelLayout extends VerticalLayout {
          * @param tagName
          *            the name of the tag that should be unassigned.
          */
-        public void unassignTag(String tagName);
+        void unassignTag(String tagName);
     }
 
     /**
@@ -146,7 +146,7 @@ public class TagPanelLayout extends VerticalLayout {
      * @param listener
      *            the listener
      */
-    public void addTagAssignmentListener(final TagAssignmentListener listener) {
+    void addTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.addTagAssignmentListener(listener);
         assignedTagField.addTagAssignmentListener(listener);
     }
@@ -157,7 +157,7 @@ public class TagPanelLayout extends VerticalLayout {
      * @param listener
      *            the listener
      */
-    public void removeTagAssignmentListener(final TagAssignmentListener listener) {
+    void removeTagAssignmentListener(final TagAssignmentListener listener) {
         assignableTagsComboBox.removeTagAssignmentListener(listener);
         assignedTagField.removeTagAssignmentListener(listener);
     }

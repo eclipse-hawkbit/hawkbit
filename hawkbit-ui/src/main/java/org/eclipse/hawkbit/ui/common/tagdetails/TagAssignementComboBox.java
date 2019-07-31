@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -19,7 +20,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.ComboBox;
@@ -38,7 +39,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
     private static final String COLOR_PROPERTY = "color";
 
     private final IndexedContainer allAssignableTags;
-    private final transient List<TagAssignmentListener> listeners = Lists.newCopyOnWriteArrayList();
+    private final transient Set<TagAssignmentListener> listeners = Sets.newCopyOnWriteArraySet();
 
     private final ComboBox assignableTagsComboBox;
 

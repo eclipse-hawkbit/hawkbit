@@ -91,7 +91,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
             final T entity = baseEntityEvent.getEntity();
             if (entity != null) {
                 selectedEntity = entity;
-                repopulateToken();
+                repopulateTags();
             }
         });
     }
@@ -102,7 +102,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tagPanelLayout.setSizeFull();
     }
 
-    protected void repopulateToken() {
+    protected void repopulateTags() {
         tagDetailsById.clear();
         tagDetailsByName.clear();
 
