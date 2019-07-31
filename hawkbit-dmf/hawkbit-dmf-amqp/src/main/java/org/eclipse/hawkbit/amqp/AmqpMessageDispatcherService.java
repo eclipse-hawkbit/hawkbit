@@ -293,7 +293,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
                     target.getAddress());
         } else {
-            LOG.debug(
+            LOG.warn(
                     "Cannot process the received CancelTargetAssignmentEvent with action ID {} because the referenced target with ID {} does no longer exist.",
                     cancelEvent.getActionId(), cancelEvent.getEntityId());
         }
