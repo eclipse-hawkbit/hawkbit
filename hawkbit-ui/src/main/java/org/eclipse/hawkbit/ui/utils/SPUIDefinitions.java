@@ -346,7 +346,6 @@ public final class SPUIDefinitions {
     /**
      * Sort order of column - created at in target table.
      */
-    public static final Direction TARGET_TABLE_CREATE_AT_SORT_ORDER = Direction.ASC;
     public static final Direction TARGET_TABLE_LASTMODIFIED_AT_SORT_ORDER = Direction.DESC;
 
     /**
