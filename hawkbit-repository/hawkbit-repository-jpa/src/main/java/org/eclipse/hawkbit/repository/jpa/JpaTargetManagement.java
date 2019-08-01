@@ -121,7 +121,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final Database database;
 
-    JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
+    public JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
