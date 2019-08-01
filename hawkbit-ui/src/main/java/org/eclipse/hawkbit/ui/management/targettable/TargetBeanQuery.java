@@ -44,7 +44,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
     private static final long serialVersionUID = -5645680058303167558L;
 
-    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "id");
+    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_LASTMODIFIED_AT_SORT_ORDER, "lastModifiedAt");
     private transient Collection<TargetUpdateStatus> status;
     private transient Boolean overdueState;
     private String[] targetTags;
