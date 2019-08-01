@@ -136,7 +136,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
-        if (isNotFromSelf(assignedEvent)) {
+        if (!shouldBeProcessed(assignedEvent)) {
             return;
         }
 
@@ -161,15 +161,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            the Multi-Action event to be processed
      */
     @EventListener(classes = MultiActionEvent.class)
-    protected void onMultiAction(final MultiActionEvent e) {
-        if (isNotFromSelf(e)) {
+    protected void onMultiAction(final MultiActionEvent multiActionEvent) {
+        if (!shouldBeProcessed(multiActionEvent)) {
             return;
         }
-        LOG.debug("MultiActionEvent received for {}", e.getControllerIds());
-        sendMultiActionRequestMessages(e.getTenant(), e.getControllerIds());
+        LOG.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
+        sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
     }
 
-    protected void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
+    private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
 
         final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModuleMetadata = new HashMap<>();
         targetManagement.getByControllerID(controllerIds).stream()
@@ -284,12 +284,19 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (isNotFromSelf(cancelEvent)) {
+        if (!shouldBeProcessed(cancelEvent)) {
             return;
         }
 
-        sendCancelMessageToTarget(cancelEvent.getTenant(), cancelEvent.getEntity().getControllerId(),
-                cancelEvent.getActionId(), cancelEvent.getEntity().getAddress());
+        final Target target = cancelEvent.getEntity();
+        if (target != null) {
+            sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
+                    target.getAddress());
+        } else {
+            LOG.warn(
+                    "Cannot process the received CancelTargetAssignmentEvent with action ID {} because the referenced target with ID {} does no longer exist.",
+                    cancelEvent.getActionId(), cancelEvent.getEntityId());
+        }
     }
 
     /**
@@ -302,7 +309,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetDeletedEvent.class)
     protected void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (isNotFromSelf(deleteEvent)) {
+        if (!shouldBeProcessed(deleteEvent)) {
             return;
         }
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
@@ -352,7 +359,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
     }
 
-    protected void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
+    private void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
 
         if (!hasValidAddress(targetAddress)) {
             return;
@@ -366,8 +373,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return targetAddress != null && IpUtil.isAmqpUri(URI.create(targetAddress));
     }
 
-    private boolean isNotFromSelf(final RemoteApplicationEvent event) {
-        return serviceMatcher != null && !serviceMatcher.isFromSelf(event);
+    protected boolean shouldBeProcessed(final RemoteApplicationEvent event) {
+        return isFromSelf(event);
+    }
+
+    private boolean isFromSelf(final RemoteApplicationEvent event) {
+        return serviceMatcher == null || serviceMatcher.isFromSelf(event);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
@@ -386,7 +397,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     }
 
-    protected void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
+    private void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
             final String targetAddress) {
         if (!hasValidAddress(targetAddress)) {
             return;
