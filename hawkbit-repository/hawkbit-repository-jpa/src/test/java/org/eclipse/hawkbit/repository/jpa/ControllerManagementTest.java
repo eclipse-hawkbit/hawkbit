@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -1312,6 +1314,44 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
             fail("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates");
         } catch (final QuotaExceededException e) {
+        }
+    }
+
+    @Test
+    @Description("Verify that the attaching externalRef to an action is propery stored")
+    public void updatedExternalRefOnActionIsReallyUpdated() {
+        final List<String> allExternalRef = new ArrayList<>();
+        final List<Long> allActionId = new ArrayList<>();
+        final int numberOfActions = 3;
+        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
+        for (int i = 0; i < numberOfActions; i++) {
+            final String knownControllerId = "controllerId" + i;
+            final String knownExternalref = "externalRefId" + i;
+
+            testdataFactory.createTarget(knownControllerId);
+            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                    knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final Long actionId = assignmentResult.getActionIds().get(0);
+            controllerManagement.updateActionExternalRef(actionId, knownExternalref);
+
+            allExternalRef.add(knownExternalref);
+            allActionId.add(actionId);
+        }
+
+        final List<Action> foundAction = controllerManagement.getActiveActionsByExternalRef(allExternalRef);
+        assertThat(foundAction).isNotNull();
+        for (int i = 0; i < numberOfActions; i++) {
+            assertThat(foundAction.get(i).getId()).isEqualTo(allActionId.get(i));
+        }
+    }
+
+    @Test
+    @Description("Verify that a null externalRef cannot be assigned to an action")
+    public void externalRefCannotBeNull() {
+        try {
+            controllerManagement.updateActionExternalRef(1L, null);
+            fail("No ConstraintViolationException thrown when a null externalRef was set on an action");
+        } catch (final ConstraintViolationException e) {
         }
     }
 

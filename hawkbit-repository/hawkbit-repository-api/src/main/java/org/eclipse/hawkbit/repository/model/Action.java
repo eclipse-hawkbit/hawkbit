@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * Update operations to be executed by the target.
  */
@@ -32,6 +34,11 @@ public interface Action extends TenantAwareBaseEntity {
      */
     int MAINTENANCE_WINDOW_TIMEZONE_LENGTH = 8;
 
+    /**
+     * Maximum length of external reference.
+     */
+    int EXTERNAL_REF_MAX_LENGTH = 512;
+    
     /**
      * @return the distributionSet
      */
@@ -97,6 +104,16 @@ public interface Action extends TenantAwareBaseEntity {
      * @return maintenance window time zone related to this {@link Action}.
      */
     String getMaintenanceWindowTimeZone();
+
+    /**
+     * @param externalRef associated with this action
+     */
+    void setExternalRef(@NotEmpty String externalRef);
+    
+    /**
+     * @return externalRef of the action
+     */
+    String getExternalRef();
 
     /**
      * checks if the {@link #getForcedTime()} is hit by the given

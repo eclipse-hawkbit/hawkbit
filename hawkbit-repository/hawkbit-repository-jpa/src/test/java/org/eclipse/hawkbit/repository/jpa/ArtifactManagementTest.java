@@ -139,6 +139,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                     .isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
             assertThat(artifactManagement.getByFilename("file1").get().getMd5Hash())
                     .isEqualTo(HashGeneratorUtils.generateMD5(randomBytes));
+            assertThat(artifactManagement.getByFilename("file1").get().getSha256Hash())
+                    .isEqualTo(HashGeneratorUtils.generateSHA256(randomBytes));
 
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);

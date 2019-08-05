@@ -36,6 +36,8 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -370,6 +372,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
+    }
+
+    @Override
+    public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
+        return actionRepository.findByExternalRefInAndActive(externalRefs, true);
     }
 
     @Override
@@ -1040,6 +1047,11 @@ public class JpaControllerManagement implements ControllerManagement {
             throw new CancelActionNotAllowedException(
                     "Action [id: " + action.getId() + "] is not active and cannot be canceled");
         }
+    }
+
+    @Override
+    public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
+        actionRepository.updateExternalRef(actionId, externalRef);
     }
 
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {

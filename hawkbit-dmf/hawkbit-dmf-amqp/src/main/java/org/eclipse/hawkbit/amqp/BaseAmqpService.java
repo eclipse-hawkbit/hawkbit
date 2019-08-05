@@ -90,7 +90,7 @@ public class BaseAmqpService {
     }
 
     protected static final void logAndThrowMessageError(final Message message, final String error) {
-        LOGGER.warn("Warning! \"{}\" reported by message: {}", error, message);
+        LOGGER.debug("Warning! \"{}\" reported by message: {}", error, message);
         throw new AmqpRejectAndDontRequeueException(error);
     }
 

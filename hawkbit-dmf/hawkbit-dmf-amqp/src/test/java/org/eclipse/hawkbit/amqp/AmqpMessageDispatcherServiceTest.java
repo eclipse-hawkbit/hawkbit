@@ -168,14 +168,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that download and install event with software moduls and artifacts works")
+    @Description("Verifies that download and install event with software modules and artifacts works")
     public void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
         final List<AbstractDbArtifact> receivedList = new ArrayList<>();
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
             receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
-                    new DbArtifactHash(artifact.getSha1Hash(), null), artifact.getSize(), null));
+                    new DbArtifactHash(artifact.getSha1Hash(), null, null), artifact.getSize(), null));
         }
         module = softwareModuleManagement.get(module.getId()).get();
         dsA = distributionSetManagement.get(dsA.getId()).get();

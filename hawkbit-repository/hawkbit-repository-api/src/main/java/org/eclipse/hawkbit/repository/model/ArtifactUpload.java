@@ -35,6 +35,8 @@ public class ArtifactUpload {
 
     private final String providedSha1Sum;
 
+    private final String providedSha256Sum;
+
     private final boolean overrideExisting;
 
     private final String contentType;
@@ -90,6 +92,7 @@ public class ArtifactUpload {
         this.filename = filename;
         this.providedMd5Sum = providedMd5Sum;
         this.providedSha1Sum = providedSha1Sum;
+        this.providedSha256Sum = null;
         this.overrideExisting = overrideExisting;
         this.contentType = contentType;
         this.filesize = filesize;
@@ -113,6 +116,10 @@ public class ArtifactUpload {
 
     public String getProvidedSha1Sum() {
         return providedSha1Sum;
+    }
+
+    public String getProvidedSha256Sum() {
+        return providedSha256Sum;
     }
 
     public boolean overrideExisting() {

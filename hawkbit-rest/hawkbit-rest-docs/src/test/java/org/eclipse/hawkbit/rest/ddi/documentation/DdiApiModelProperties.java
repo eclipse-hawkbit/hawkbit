@@ -112,6 +112,8 @@ final class DdiApiModelProperties {
 
     static final String ARTIFACT_HASHES_SHA1 = "SHA1 hash of the artifact in Base 16 format";
     static final String ARTIFACT_HASHES_MD5 = "MD5 hash of the artifact";
+    static final String ARTIFACT_HASHES_SHA256 = "SHA-256 hash of the artifact in Base 16 format";
+
     static final String ARTIFACT_SIZE = "size of the artifact";
 
     static final String ACTION_HISTORY = "Optional GET parameter to retrieve a given number of messages which are previously provided by the device. "

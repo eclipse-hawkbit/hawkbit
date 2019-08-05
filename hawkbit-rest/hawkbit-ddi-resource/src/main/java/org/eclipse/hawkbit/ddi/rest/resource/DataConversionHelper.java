@@ -92,7 +92,7 @@ public final class DataConversionHelper {
     private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
             final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
         final DdiArtifact file = new DdiArtifact();
-        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
+        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
         file.setFilename(artifact.getFilename());
         file.setSize(artifact.getSize());
 
