@@ -1331,7 +1331,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long actionId = assignmentResult.getActionIds().get(0);
+            final Long actionId = assignmentResult.getAssignedActions().get(0).getId();
             controllerManagement.updateActionExternalRef(actionId, knownExternalref);
 
             allExternalRef.add(knownExternalref);
