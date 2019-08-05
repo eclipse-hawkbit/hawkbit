@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,6 +30,7 @@ public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
     private int assigned;
     private int alreadyAssigned;
     private List<MgmtActionId> assignedActions;
+
     /**
      * @return the assigned
      */
@@ -80,5 +82,17 @@ public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
      */
     public void setAssignedActions(final List<MgmtActionId> assignedActions) {
         this.assignedActions = assignedActions;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj) && ((MgmtTargetAssignmentResponseBody) obj).getAlreadyAssigned() == alreadyAssigned
+                && ((MgmtTargetAssignmentResponseBody) obj).getAssigned() == assigned
+                && Objects.equals(((MgmtTargetAssignmentResponseBody) obj).getAssignedActions(), assignedActions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), assigned, alreadyAssigned, assignedActions);
     }
 }

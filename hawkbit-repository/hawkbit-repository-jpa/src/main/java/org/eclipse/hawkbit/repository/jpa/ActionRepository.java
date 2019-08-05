@@ -531,7 +531,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     void updateExternalRef(@Param("actionId") Long actionId, @Param("externalRef") String externalRef);
 
     /**
-     * Retrieves all {@link Action}s referring to the given distributionSet id and not having targetId from the
+     * Counts all {@link Action}s referring to the given distributionSet id and not having targetId from the
      * given ControllerIds and active flag
      *
      * @param dsId

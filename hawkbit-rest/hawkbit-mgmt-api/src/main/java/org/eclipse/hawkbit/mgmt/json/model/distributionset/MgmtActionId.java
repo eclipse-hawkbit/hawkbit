@@ -18,6 +18,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
+/**
+ * Representation of an Action Id as a Json Object with link to the Action resource
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionId extends ResourceSupport {
@@ -32,6 +37,7 @@ public class MgmtActionId extends ResourceSupport {
      * @param actionId
      *              the actionId
      * @param targetId
+     *              the controller Id
      */
     public MgmtActionId(final String targetId, final long actionId) {
         this.actionId = actionId;
@@ -45,5 +51,15 @@ public class MgmtActionId extends ResourceSupport {
 
     public void setActionId(final long actionId) {
         this.actionId = actionId;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj) && actionId == ((MgmtActionId) obj).getActionId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), actionId);
     }
 }

@@ -34,6 +34,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      * @param unassigned
 *            the unassigned targets
      * @param assignedActions
+     *       the created Actions as a result of this assignment
      */
     public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
             final List<? extends Target> assigned, final List<? extends Target> unassigned,

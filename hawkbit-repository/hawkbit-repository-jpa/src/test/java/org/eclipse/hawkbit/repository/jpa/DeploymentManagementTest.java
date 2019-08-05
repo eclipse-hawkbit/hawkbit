@@ -1035,9 +1035,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 Collections.singleton(new TargetWithActionType(target3.getControllerId())));
         
         assertThat(assignmentResult).isNotNull();
-        assertEquals(2, assignmentResult.getTotal());
-        assertEquals(1, assignmentResult.getAssigned());
-        assertEquals(1, assignmentResult.getAlreadyAssigned());
+        assertThat(assignmentResult.getTotal()).as("Total count of assigned and already assigned targets").isEqualTo(2);
+        assertThat(assignmentResult.getAssigned()).as("Total count of assigned targets").isEqualTo(1);
+        assertThat(assignmentResult.getAlreadyAssigned()).as("Total count of already assigned targets").isEqualTo(1);
         assertThat(assignmentResult.getAssignedActions()).isNotEmpty();
         assertThat(assignmentResult.getAssignedActions().stream().allMatch(
                 a -> a.getTarget().equals(target3) && a.getDistributionSet().equals(action.getDistributionSet())))

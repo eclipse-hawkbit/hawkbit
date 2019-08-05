@@ -26,8 +26,8 @@ public class AssignmentResult<T extends BaseEntity> {
 
     /**
      * Constructor.
-     * @param alreadyAssignedEntity
-     *      {@link List} of already assigned entities
+     * @param alreadyAssigned
+     *      count of already assigned entities
      * @param assignedEntity
      *            {@link List} of assigned entity.
      * @param unassignedEntity
