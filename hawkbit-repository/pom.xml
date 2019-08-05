@@ -29,6 +29,7 @@
       <module>hawkbit-repository-api</module>
       <module>hawkbit-repository-test</module>
       <module>hawkbit-repository-core</module>
+      <module>hawkbit-repository-hono</module>
    </modules>
 
 
