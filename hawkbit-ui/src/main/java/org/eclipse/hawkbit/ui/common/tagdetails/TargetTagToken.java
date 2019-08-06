@@ -37,8 +37,6 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;
 
-    private static final int MAX_TAGS = 500;
-
     private final transient TargetManagement targetManagement;
 
     public TargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
@@ -77,16 +75,17 @@ public class TargetTagToken extends AbstractTargetTagToken<Target> {
     }
 
     @Override
-    protected List<TagData> getAllAssignableTags() {
-        return tagManagement.findAll(PageRequest.of(0, MAX_TAGS)).stream()
+    protected List<TagData> getAllTags() {
+        return tagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).stream()
                 .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override
     protected List<TagData> getAssignedTags() {
         if (selectedEntity != null) {
-            return tagManagement.findByTarget(PageRequest.of(0, MAX_TAGS), selectedEntity.getControllerId()).stream()
-                    .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
+            return tagManagement.findByTarget(PageRequest.of(0, MAX_TAG_QUERY), selectedEntity.getControllerId())
+                    .stream().map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour()))
+                    .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }

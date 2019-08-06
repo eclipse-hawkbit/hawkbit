@@ -369,6 +369,7 @@ public class BulkUploadHandler extends CustomComponent
 
             } catch (final EntityAlreadyExistsException ex) {
                 // Targets that exist already are simply ignored
+                LOG.info("Entity {} - {} already exists and will be ignored", newControllerId, name);
             }
         }
     }

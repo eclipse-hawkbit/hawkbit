@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,7 +32,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -85,7 +85,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
     }
 
     @Override
-    protected List<TagData> getAllAssignableTags() {
+    protected List<TagData> getAllTags() {
         return distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
                 .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
@@ -99,7 +99,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
                     .collect(Collectors.toList());
         }
 
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -115,8 +115,7 @@ public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEventContainer eventContainer) {
-        eventContainer.getEvents().stream().map(event -> getTagIdByTagName(event.getEntityId()))
-                .forEach(this::tagDeleted);
+        eventContainer.getEvents().forEach(event -> tagDeleted(event.getEntityId()));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

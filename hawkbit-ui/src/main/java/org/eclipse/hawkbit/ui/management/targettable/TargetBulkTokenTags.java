@@ -8,14 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagData;
@@ -31,8 +29,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
     private static final long serialVersionUID = 4159616629565523717L;
-
-    private static final int MAX_TAGS = 500;
 
     TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
@@ -69,23 +65,17 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
     }
 
     @Override
-    protected List<TagData> getAllAssignableTags() {
-        return tagManagement.findAll(PageRequest.of(0, MAX_TAGS)).stream()
+    protected List<TagData> getAllTags() {
+        return tagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).stream()
                 .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override
     protected List<TagData> getAssignedTags() {
-        final List<TagData> assignedTags = new ArrayList<>();
-        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().forEach(tagName -> {
-            final Optional<TargetTag> byName = tagManagement.getByName(tagName);
-            if (byName.isPresent()) {
-                final TargetTag targetTag = byName.get();
-                assignedTags.add(new TagData(targetTag.getId(), targetTag.getName(), targetTag.getColour()));
-            }
-        });
-
-        return assignedTags;
+        // this view doesn't belong to a specific target, so the current
+        // selected target in the target table is ignored and therefore there
+        // are no assigned tags
+        return Collections.emptyList();
     }
 
     public List<TagData> getSelectedTagsForAssignment() {

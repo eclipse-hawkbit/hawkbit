@@ -11,12 +11,10 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
@@ -24,6 +22,8 @@ import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentList
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.hateoas.Identifiable;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -37,7 +37,7 @@ import com.vaadin.ui.UI;
  */
 public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable, TagAssignmentListener {
 
-    protected static final int MAX_TAG_QUERY = 500;
+    protected static final int MAX_TAG_QUERY = 1000;
 
     private static final long serialVersionUID = 6599386705285184783L;
 
@@ -106,7 +106,7 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         tagDetailsById.clear();
         tagDetailsByName.clear();
 
-        final List<TagData> allAssignableTags = getAllAssignableTags();
+        final List<TagData> allAssignableTags = getAllTags();
         allAssignableTags.forEach(tagData -> {
             tagDetailsByName.put(tagData.getName(), tagData);
             tagDetailsById.put(tagData.getId(), tagData);
@@ -151,15 +151,10 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
 
     protected abstract void unassignTag(TagData tagData);
 
-    protected Long getTagIdByTagName(final Long tagId) {
-        return tagDetailsById.entrySet().stream().filter(entry -> entry.getValue().getId().equals(tagId)).findAny()
-                .map(Entry::getKey).orElse(null);
-    }
-
-    protected boolean checkAssignmentResult(final List<? extends NamedEntity> assignedEntities,
+    protected boolean checkAssignmentResult(final List<? extends Identifiable<Long>> assignedEntities,
             final Long expectedAssignedEntityId) {
-        if (assignedEntities != null && !assignedEntities.isEmpty() && expectedAssignedEntityId != null) {
-            final List<Long> assignedDsIds = assignedEntities.stream().map(NamedEntity::getId)
+        if (!CollectionUtils.isEmpty(assignedEntities) && expectedAssignedEntityId != null) {
+            final List<Long> assignedDsIds = assignedEntities.stream().map(Identifiable::getId)
                     .collect(Collectors.toList());
             if (assignedDsIds.contains(expectedAssignedEntityId)) {
                 return true;
@@ -168,15 +163,15 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
         return false;
     }
 
-    protected boolean checkUnassignmentResult(final NamedEntity unAssignedDistributionSet,
+    protected boolean checkUnassignmentResult(final Identifiable<Long> unAssignedEntity,
             final Long expectedUnAssignedEntityId) {
-        return unAssignedDistributionSet != null && expectedUnAssignedEntityId != null
-                && unAssignedDistributionSet.getId().equals(expectedUnAssignedEntityId);
+        return unAssignedEntity != null && expectedUnAssignedEntityId != null
+                && unAssignedEntity.getId().equals(expectedUnAssignedEntityId);
     }
 
     protected abstract Boolean isToggleTagAssignmentAllowed();
 
-    protected abstract List<TagData> getAllAssignableTags();
+    protected abstract List<TagData> getAllTags();
 
     protected abstract List<TagData> getAssignedTags();
 

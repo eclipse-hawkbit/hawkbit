@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -25,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.vaadin.server.FontAwesome;
@@ -39,7 +39,7 @@ public class TagListField extends CssLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient Map<String, Button> tagButtons = new ConcurrentHashMap<>();
+    private final transient Map<String, Button> tagButtons = Maps.newTreeMap(Ordering.natural());
     private final transient Set<TagAssignmentListener> listeners = Sets.newConcurrentHashSet();
     private final VaadinMessageSource i18n;
     private final boolean readOnlyMode;
@@ -92,21 +92,14 @@ public class TagListField extends CssLayout {
     }
 
     private void addTagButtonsAsComponents() {
-        sortTagNames(tagButtons.keySet()).forEach(sortedTagName -> addComponent(tagButtons.get(sortedTagName)));
-    }
-
-    private static List<String> sortTagNames(final Iterable<String> tagNames) {
-        final List<String> sortedTagNames = Lists.newArrayList(tagNames);
-        sortedTagNames.sort(Ordering.natural());
-        return sortedTagNames;
+        tagButtons.keySet().forEach(sortedTagName -> addComponent(tagButtons.get(sortedTagName)));
     }
 
     private Button createButton(final String tagName, final String tagColor) {
         final Button button = SPUIComponentProvider.getButton(UIComponentIdProvider.ASSIGNED_TAG_ID_PREFIX + tagName,
                 tagName, i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_REMOVE), null, false, null,
                 SPUITagButtonStyle.class);
-        button.setData(tagName);
-        button.addClickListener(e -> removeTagAssignment((String) e.getButton().getData()));
+        button.addClickListener(e -> removeTagAssignment(tagName));
         button.addStyleName(SPUIStyleDefinitions.TAG_BUTTON_WITH_BACKGROUND);
         button.addStyleName(SPUIDefinitions.TEXT_STYLE + " " + SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         button.setEnabled(!readOnlyMode);

@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -66,15 +67,15 @@ public class TagAssignementComboBox extends HorizontalLayout {
 
         assignableTagsComboBox = new ComboBoxBuilder().setId(UIComponentIdProvider.TAG_SELECTION_ID)
                 .setPrompt(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SELECT_TAG))
-                .setValueChangeListener(e -> onSelectionChanged()).buildCombBox();
+                .setValueChangeListener(this::onSelectionChanged).buildCombBox();
         addComponent(assignableTagsComboBox);
         assignableTagsComboBox.setContainerDataSource(allAssignableTags);
         assignableTagsComboBox.setNullSelectionAllowed(true);
-        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
         assignableTagsComboBox.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         assignableTagsComboBox.addStyleName(ValoTheme.COMBOBOX_TINY);
         assignableTagsComboBox.setEnabled(!readOnlyMode);
         assignableTagsComboBox.setWidth("100%");
+        clearComboBoxSelection();
     }
 
     /**
@@ -87,18 +88,18 @@ public class TagAssignementComboBox extends HorizontalLayout {
         assignableTags.forEach(this::addAssignableTag);
     }
 
-    private void onSelectionChanged() {
-        final Object selectedValue = assignableTagsComboBox.getValue();
+    private void onSelectionChanged(final ValueChangeEvent event) {
+        final Object selectedValue = event.getProperty().getValue();
         if (!isValidTagSelection(selectedValue) || readOnlyMode) {
             return;
         }
-        assignTag((String) assignableTagsComboBox.getValue());
+        assignTag((String) selectedValue);
     }
 
     private void assignTag(final String tagName) {
         allAssignableTags.removeItem(tagName);
         notifyListenersTagAssigned(tagName);
-        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
+        clearComboBoxSelection();
     }
 
     private boolean isValidTagSelection(final Object selectedValue) {
@@ -111,7 +112,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
      */
     void removeAllTags() {
         allAssignableTags.removeAllItems();
-        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
+        clearComboBoxSelection();
     }
 
     /**
@@ -161,5 +162,9 @@ public class TagAssignementComboBox extends HorizontalLayout {
 
     private void notifyListenersTagAssigned(final String tagName) {
         listeners.forEach(listener -> listener.assignTag(tagName));
+    }
+
+    private void clearComboBoxSelection() {
+        assignableTagsComboBox.select(assignableTagsComboBox.getNullSelectionItemId());
     }
 }
