@@ -9,8 +9,8 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -188,13 +188,19 @@
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
-      <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
-      <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
-      <jacoco.version>0.8.2</jacoco.version>
-      <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
-      <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
-      <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
-      <sonar.jacoco.reportPaths>${jacoco.reportPath},${jacoco.itReportPath}</sonar.jacoco.reportPaths>
+      <sonar.exclusions>
+         **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+      </sonar.exclusions>
+      <sonar.coverage.exclusions>
+         **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
+      </sonar.coverage.exclusions>
+      <jacoco.version>0.8.4</jacoco.version>
+      <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
+      <sonar.coverage.jacoco.xmlReportPaths>
+         ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
+         ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
+      </sonar.coverage.jacoco.xmlReportPaths>
+
       <!-- Sonar - END -->
 
       <!-- ************************ -->
@@ -261,6 +267,7 @@
          <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
             <executions>
                <execution>
                   <id>prepare-ut-agent</id>
@@ -269,21 +276,17 @@
                      <goal>prepare-agent</goal>
                   </goals>
                   <configuration>
-                     <destFile>${jacoco.reportPath}</destFile>
                      <propertyName>jacoco.agent.ut.arg</propertyName>
-                     <append>true</append>
                   </configuration>
                </execution>
                <execution>
                   <id>prepare-it-agent</id>
                   <phase>pre-integration-test</phase>
                   <goals>
-                     <goal>prepare-agent</goal>
+                     <goal>prepare-agent-integration</goal>
                   </goals>
                   <configuration>
-                     <destFile>${jacoco.itReportPath}</destFile>
                      <propertyName>jacoco.agent.it.arg</propertyName>
-                     <append>true</append>
                   </configuration>
                </execution>
             </executions>
@@ -385,7 +388,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore />
+                              <ignore/>
                            </action>
                         </pluginExecution>
                      </pluginExecutions>
@@ -418,34 +421,33 @@
                   <includes>
                      <include>**/*Tests.java</include>
                      <include>**/*Test.java</include>
-                     <include>**/*IT.java</include>
                   </includes>
                   <excludes>
                      <exclude>**/Abstract*.java</exclude>
+                     <exclude>**/*IntegrationTest.java</exclude>
                   </excludes>
-               </configuration>
-            </plugin>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-failsafe-plugin</artifactId>
-               <configuration>
-                  <reuseForks>false</reuseForks>
-                  <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
-                  <properties>
-                     <property>
-                        <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
-                     </property>
-                  </properties>
                </configuration>
                <executions>
                   <execution>
                      <id>integration-test</id>
-                     <phase>integration-test</phase>
                      <goals>
-                        <goal>integration-test</goal>
+                        <goal>test</goal>
                      </goals>
+                     <phase>integration-test</phase>
+                     <configuration>
+                        <reuseForks>true</reuseForks>
+                        <forkCount>${surefire.forkcount}</forkCount>
+                        <argLine>
+                           ${jacoco.agent.it.arg}
+                        </argLine>
+                        <excludes>
+                           <exclude>none</exclude>
+                        </excludes>
+                        <includes>
+                           <include>**/*IntegrationTest.java</include>
+                           <include>**/*IT.java</include>
+                        </includes>
+                     </configuration>
                   </execution>
                </executions>
             </plugin>
