@@ -396,7 +396,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
         final Long actionId = deploymentManagement.assignDistributionSet(set.getId(), ActionType.SOFT, 0,
-                Collections.singletonList(target.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(target.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();

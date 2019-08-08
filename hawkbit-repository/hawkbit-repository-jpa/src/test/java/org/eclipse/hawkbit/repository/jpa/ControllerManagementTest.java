@@ -493,8 +493,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
                         .isFalse();
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().stream()
+                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
+                .getTarget();
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
                         .isTrue();
@@ -1056,7 +1057,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
         final List<Target> testTarget = testdataFactory.createTargets(1);
 
-        final Long actionId = assignDistributionSet(testDs, testTarget).getAssignedActions().get(0).getId();
+        final Long actionId = assignDistributionSet(testDs, testTarget).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 1")));
@@ -1085,7 +1087,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // test for informational status
         final Long actionId1 = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
-                testdataFactory.createTargets(1, "t1")).getAssignedActions().get(0).getId();
+                testdataFactory.createTargets(1, "t1")).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         assertThat(actionId1).isNotNull();
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
@@ -1096,7 +1099,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // test for update status (and mixed case)
         final Long actionId2 = assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
-                testdataFactory.createTargets(1, "t2")).getAssignedActions().get(0).getId();
+                testdataFactory.createTargets(1, "t2")).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         assertThat(actionId2).isNotEqualTo(actionId1);
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
@@ -1119,7 +1123,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
         final Long actionId = assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
-                testdataFactory.createTargets(1)).getAssignedActions().get(0).getId();
+                testdataFactory.createTargets(1)).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         assertThat(actionId).isNotNull();
 
         final List<String> messages = Lists.newArrayList();
@@ -1331,7 +1336,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long actionId = assignmentResult.getAssignedActions().get(0).getId();
+            final Long actionId = assignmentResult.getAssignedEntity().stream().findFirst()
+                    .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
             controllerManagement.updateActionExternalRef(actionId, knownExternalref);
 
             allExternalRef.add(knownExternalref);
@@ -1432,7 +1438,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long forcedDistributionSetId = testdataFactory.createDistributionSet("forcedDs1").getId();
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(forcedDistributionSetId,
                 DEFAULT_CONTROLLER_ID, Action.ActionType.SOFT);
-        addUpdateActionStatus(assignmentResult.getAssignedActions().get(0).getId(), DEFAULT_CONTROLLER_ID, Status.FINISHED);
+        addUpdateActionStatus(assignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId(),
+                DEFAULT_CONTROLLER_ID, Status.FINISHED);
         assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
         assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
         assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);

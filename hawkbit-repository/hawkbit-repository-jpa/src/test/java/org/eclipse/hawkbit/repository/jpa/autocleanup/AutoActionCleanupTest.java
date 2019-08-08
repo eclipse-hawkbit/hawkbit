@@ -81,7 +81,8 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
         final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg1.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg1.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
                 Collections.singletonList(trg2.getControllerId()));
 
@@ -110,11 +111,14 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
         final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg1.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg1.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action2 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg2.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg2.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action3 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg3.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg3.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
@@ -145,11 +149,14 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
         final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg1.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg1.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action2 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg2.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg2.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action3 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg3.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg3.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
@@ -182,11 +189,14 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
         final Long action1 = deploymentManagement.assignDistributionSet(ds1.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg1.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg1.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action2 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg2.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg2.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Long action3 = deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
-                Collections.singletonList(trg3.getControllerId())).getAssignedActions().get(0).getId();
+                Collections.singletonList(trg3.getControllerId())).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         assertThat(actionRepository.count()).isEqualTo(3);
 

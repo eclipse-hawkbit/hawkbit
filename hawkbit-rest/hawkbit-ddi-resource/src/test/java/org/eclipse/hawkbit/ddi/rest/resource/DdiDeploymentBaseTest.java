@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Condition;
@@ -156,7 +157,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> targetsAssignedToDs = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
                         Collections.singletonList(savedTarget.getControllerId()))
-                .getAssignedEntity();
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());;
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -209,7 +210,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Long actionId = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
                 System.currentTimeMillis() + 2_000, Collections.singletonList(target.getControllerId()))
-                .getAssignedActions().get(0).getId();
+                .getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         MvcResult mvcResult = performGet("/{tenant}/controller/v1/" + DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON,
                 status().isOk(), tenantAware.getCurrentTenant()).andReturn();
@@ -258,7 +260,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.SOFT,
                 RepositoryModelConstants.NO_FORCE_TIME, Collections.singletonList(savedTarget.getControllerId()))
-                .getAssignedEntity();
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -318,7 +320,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
                 System.currentTimeMillis(), Collections.singletonList(savedTarget.getControllerId()))
-                .getAssignedEntity();
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -386,7 +388,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.DOWNLOAD_ONLY,
                 RepositoryModelConstants.NO_FORCE_TIME, Collections.singletonList(savedTarget.getControllerId()))
-                .getAssignedEntity();
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -528,7 +530,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Collections.singletonList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
-        final Long actionId = assignDistributionSet(savedSet, toAssign).getAssignedActions().get(0).getId();
+        final Long actionId = assignDistributionSet(savedSet, toAssign).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE + actionId, tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
@@ -591,11 +594,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
         final DistributionSet ds3 = testdataFactory.createDistributionSet("3", true);
 
-        final Long actionId1 = assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID).getAssignedActions().get(0)
+        final Long actionId1 = assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
+                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
                 .getId();
-        final Long actionId2 = assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID).getAssignedActions().get(0)
+        final Long actionId2 = assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
+                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
                 .getId();
-        final Long actionId3 = assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID).getAssignedActions().get(0)
+        final Long actionId3 = assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
+                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
                 .getId();
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 3, Optional.empty());
@@ -667,8 +673,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     public void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Action action = assignDistributionSet(ds,
-                Collections.singletonList(testdataFactory.createTarget(DEFAULT_CONTROLLER_ID))).getAssignedActions()
-                .get(0);
+                Collections.singletonList(testdataFactory.createTarget(DEFAULT_CONTROLLER_ID))).getAssignedEntity()
+                        .stream().findFirst()
+                        .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.PENDING, 1, Optional.empty());
 
         // Now valid Feedback

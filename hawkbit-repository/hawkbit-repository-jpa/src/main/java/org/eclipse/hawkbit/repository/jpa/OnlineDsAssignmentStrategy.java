@@ -79,7 +79,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
         if (isMultiAssignmentsEnabled()) {
-            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedActions().stream())
+            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedEntity().stream())
                     .collect(Collectors.toList()));
         } else {
             assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
@@ -172,7 +172,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
-        final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedActions())
+        final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity())
                 .filter(action -> !hasPendingCancellations(action.getTarget())).collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);

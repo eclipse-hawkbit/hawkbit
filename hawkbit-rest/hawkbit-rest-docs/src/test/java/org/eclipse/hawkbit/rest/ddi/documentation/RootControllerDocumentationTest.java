@@ -138,8 +138,9 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedActions()
-                .get(0).getId();
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(
@@ -171,8 +172,9 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedActions()
-                .get(0).getId();
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(post(
@@ -265,7 +267,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedActions().get(0).getId();
+                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         controllerManagement.addInformationalActionStatus(
                 entityFactory.actionStatus().create(actionId).message("Started download").status(Status.DOWNLOAD));
@@ -349,7 +352,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedActions().get(0).getId();
+                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         mockMvc.perform(get(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
@@ -390,8 +394,9 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedActions()
-                .get(0).getId();
+                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
 
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),

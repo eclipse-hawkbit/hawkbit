@@ -1210,14 +1210,16 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         // Update
         if (schedule == null) {
-            final List<Target> updatedTargets = assignDistributionSet(one, Arrays.asList(target)).getAssignedEntity();
+            final List<Target> updatedTargets = assignDistributionSet(one, Arrays.asList(target)).getAssignedEntity()
+                    .stream().map(Action::getTarget).collect(Collectors.toList());
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Thread.sleep(10);
             assignDistributionSet(two, updatedTargets);
         } else {
             final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
-                    target.getControllerId(), schedule, duration, timezone).getAssignedEntity();
+                    target.getControllerId(), schedule, duration, timezone).getAssignedEntity().stream()
+                            .map(Action::getTarget).collect(Collectors.toList());
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Thread.sleep(10);
@@ -1240,7 +1242,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final DistributionSet set = testdataFactory.createDistributionSet();
         final Long actionId = deploymentManagement
                 .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getAssignedActions().get(0).getId();
+                .getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();

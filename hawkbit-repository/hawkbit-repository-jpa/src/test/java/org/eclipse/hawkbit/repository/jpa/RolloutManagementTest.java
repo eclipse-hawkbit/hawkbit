@@ -104,7 +104,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(knownControllerId);
         final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                 knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-        final Long manuallyAssignedActionId = assignmentResult.getAssignedActions().get(0).getId();
+        final Long manuallyAssignedActionId = assignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!")).getId();
 
         // create rollout with the same distribution set already assigned
         // start rollout
@@ -144,7 +145,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long manuallyAssignedActionId = assignmentResult.getAssignedActions().get(0).getId();
+            final Long manuallyAssignedActionId = assignmentResult.getAssignedEntity().stream().findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!")).getId();
 
             // create rollout with the same distribution set already assigned
             // start rollout

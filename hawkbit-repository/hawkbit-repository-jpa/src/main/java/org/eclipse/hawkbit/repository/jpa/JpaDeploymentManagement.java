@@ -264,28 +264,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> controllerIDs = getControllerIdsForAssignmentAndCheckQuota(targetsWithActionType,
-                distributionSetEntity);
-        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(controllerIDs,
+        checkQuotaForAssignment(targetsWithActionType, distributionSetEntity);
+        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(
+                targetsWithActionType.stream().map(TargetWithActionType::getControllerId).collect(Collectors.toList()),
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
-                targetEntities);
-
-        final Map<String, JpaAction> controllerIdsToActions = createActions(targetsWithActionType, targetEntities,
-                assignmentStrategy, distributionSetEntity);
-        // create initial action status when action is created so we remember
-        // the initial running status because we will change the status
-        // of the action itself and with this action status we have a nicer
-        // action history.
-        createActionsStatus(controllerIdsToActions.values(), assignmentStrategy, actionMessage);
-
-        detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
-        return buildAssignmentResult(distributionSetEntity, controllerIdsToActions);
+        return doAssignDistributionSetToTargets(targetsWithActionType, actionMessage, assignmentStrategy,
+                distributionSetEntity, targetEntities);
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
@@ -293,39 +282,48 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(distributionSetEntity);
         // return with nothing as all targets had the DS already assigned
-        return new DistributionSetAssignmentResult(distributionSetEntity, alreadyAssignedCount, Collections.emptyList(),
-                Collections.emptyList(), Collections.emptyList());
+        return new DistributionSetAssignmentResult(distributionSetEntity, alreadyAssignedCount,
+                Collections.emptyList());
     }
 
-    private void closeOrCancelActiveActionsAndSetAssignedDSAndTargetUpdateStatus(
+    private DistributionSetAssignmentResult doAssignDistributionSetToTargets(
+            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
-        // split tIDs length into max entries in-statement because many database
-        // have constraint of max entries in in-statements e.g. Oracle with
-        // maximum 1000 elements, so we need to split the entries here and
-        // execute multiple statements
-        final List<List<Long>> targetEntitiesIdsChunks = Lists.partition(
-                targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
-                Constants.MAX_ENTRIES_IN_STATEMENT);
-
+        final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
         closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
+        final Map<String, JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities,
+                assignmentStrategy, distributionSetEntity);
+        // create initial action status when action is created so we remember
+        // the initial running status because we will change the status
+        // of the action itself and with this action status we have a nicer
+        // action history.
+        createActionsStatus(assignedActions.values(), assignmentStrategy, actionMessage);
 
-        setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
-                targetEntitiesIdsChunks);
+        detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
+        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType);
+    }
+
+    private List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
+        // split tIDs length into max entries in-statement because many database
+        // have constraint of max entries in in-statements e.g. Oracle with
+        // maximum 1000 elements, so we need to split the entries here and
+        // execute multiple statements
+        return Lists.partition(
+                targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+                Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 
     private DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
-            final Map<String, JpaAction> controllerIdsToActions) {
-        int alreadyAssignedTargetsCount = actionRepository.countByDistributionSetIdAndActiveAndTargetControllerIdNotIn(
-                distributionSet.getId(), true, controllerIdsToActions.keySet());
+            final Map<String, JpaAction> assignedActions, final Collection<TargetWithActionType> controllerIds) {
+        int alreadyAssignedTargetsCount = controllerIds.size() - assignedActions.size();
 
         return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount,
-                targetManagement.getByControllerID(controllerIdsToActions.keySet()), Collections.emptyList(),
-                new ArrayList<>(controllerIdsToActions.values()));
+                new ArrayList<>(assignedActions.values()));
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {
@@ -340,17 +338,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return distributionSet;
     }
 
-    private List<String> getControllerIdsForAssignmentAndCheckQuota(
-            final Collection<TargetWithActionType> targetsWithActionType, final JpaDistributionSet distributionSet) {
-        final List<String> controllerIDs = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
-                .collect(Collectors.toList());
-
+    private void checkQuotaForAssignment(final Collection<TargetWithActionType> targetsWithActionType,
+            final JpaDistributionSet distributionSet) {
         // enforce the 'max targets per manual assignment' quota
-        if (!controllerIDs.isEmpty()) {
-            assertMaxTargetsPerManualAssignmentQuota(distributionSet.getId(), controllerIDs.size());
+        if (!targetsWithActionType.isEmpty()) {
+            assertMaxTargetsPerManualAssignmentQuota(distributionSet.getId(), targetsWithActionType.size());
         }
-
-        return controllerIDs;
     }
 
     /**
@@ -386,7 +379,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
         if (!isMultiAssignmentsEnabled()) {
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
@@ -431,7 +424,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
@@ -462,7 +455,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceQuitAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -684,7 +677,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceTargetAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));

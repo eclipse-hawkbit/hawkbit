@@ -124,8 +124,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Action createAction(final DistributionSet testDs) {
-        return deploymentManagement.findAction(assignDistributionSet(testDs, testTarget).getAssignedActions().get(0)
-                .getId()).get();
+        return assignDistributionSet(testDs, testTarget).getAssignedEntity().stream().findFirst().orElseThrow(
+                () -> new IllegalStateException("Expected at least one Action to be created, found none!"));
     }
 
     @Test

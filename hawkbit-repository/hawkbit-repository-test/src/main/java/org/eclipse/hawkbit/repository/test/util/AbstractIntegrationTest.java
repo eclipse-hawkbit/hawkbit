@@ -323,7 +323,8 @@ public abstract class AbstractIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
         savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
-                .getAssignedEntity().iterator().next();
+                .getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!")).getTarget();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 

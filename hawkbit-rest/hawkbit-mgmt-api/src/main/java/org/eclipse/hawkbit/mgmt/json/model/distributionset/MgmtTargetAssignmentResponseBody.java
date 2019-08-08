@@ -86,7 +86,8 @@ public class MgmtTargetAssignmentResponseBody extends ResourceSupport {
 
     @Override
     public boolean equals(final Object obj) {
-        return super.equals(obj) && ((MgmtTargetAssignmentResponseBody) obj).getAlreadyAssigned() == alreadyAssigned
+        return super.equals(obj) && this.getClass().isInstance(obj)
+                && ((MgmtTargetAssignmentResponseBody) obj).getAlreadyAssigned() == alreadyAssigned
                 && ((MgmtTargetAssignmentResponseBody) obj).getAssigned() == assigned
                 && Objects.equals(((MgmtTargetAssignmentResponseBody) obj).getAssignedActions(), assignedActions);
     }

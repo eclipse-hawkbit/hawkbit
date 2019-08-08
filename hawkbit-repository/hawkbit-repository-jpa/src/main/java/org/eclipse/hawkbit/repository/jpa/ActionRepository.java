@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -529,19 +528,4 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     @Transactional
     @Query("UPDATE JpaAction a SET a.externalRef = :externalRef WHERE a.id = :actionId")
     void updateExternalRef(@Param("actionId") Long actionId, @Param("externalRef") String externalRef);
-
-    /**
-     * Counts all {@link Action}s referring to the given distributionSet id and not having targetId from the
-     * given ControllerIds and active flag
-     *
-     * @param dsId
-     *            the distributionSet Id
-     * @param active
-     *            flag to indicate active/inactive actions
-     * @param controllerIds
-     *            the controllerIds of targets for the actions
-     * @return the found list of {@link Action} IDs
-     */
-    int countByDistributionSetIdAndActiveAndTargetControllerIdNotIn(@Param("distributionSetId") Long dsId,
-            @Param("active") boolean active, @Param("controllerIds") Set<String> controllerIds);
 }

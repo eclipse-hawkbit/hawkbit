@@ -17,9 +17,8 @@ import java.util.List;
  * how much of the assignments had already been existed.
  *
  */
-public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
+public class DistributionSetAssignmentResult extends AssignmentResult<Action> {
 
-    private final List<? extends Action> assignedActions;
     private final DistributionSet distributionSet;
 
     /**
@@ -30,18 +29,12 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      * @param alreadyAssigned
      *            the the count of already assigned targets
      * @param assigned
- *            the assigned targets
-     * @param unassigned
-*            the unassigned targets
-     * @param assignedActions
-     *       the created Actions as a result of this assignment
+     *            the assigned targets
      */
     public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
-            final List<? extends Target> assigned, final List<? extends Target> unassigned,
-            final List<? extends Action> assignedActions) {
-        super(alreadyAssigned, assigned, unassigned);
+            final List<? extends Action> assigned) {
+        super(alreadyAssigned, assigned, Collections.emptyList());
         this.distributionSet = distributionSet;
-        this.assignedActions = assignedActions;
     }
 
     /**
@@ -49,13 +42,6 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      */
     public DistributionSet getDistributionSet() {
         return distributionSet;
-    }
-
-    /**
-     * @return the assigned actions
-     */
-    public List<Action> getAssignedActions() {
-        return Collections.unmodifiableList(assignedActions);
     }
 
 }
