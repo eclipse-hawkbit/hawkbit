@@ -40,8 +40,10 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
+import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedHonoFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
+import org.eclipse.hawkbit.security.PreAuthHonoAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -49,6 +51,7 @@ import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -84,7 +87,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -157,6 +159,9 @@ public class SecurityManagedConfiguration {
         private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
 
+        @Value("${hawkbit.server.repository.hono-sync.credentials-endpoint:}")
+        private String honoCredentialsEndpoint;
+
         @Autowired
         ControllerSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
                 final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
@@ -205,6 +210,17 @@ public class SecurityManagedConfiguration {
             securityHeaderFilter.setCheckForPrincipalChanges(true);
             securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
+
+            HttpControllerPreAuthenticatedHonoFilter honoFilter = null;
+            if (!honoCredentialsEndpoint.isEmpty()) {
+                honoFilter = new HttpControllerPreAuthenticatedHonoFilter(
+                        tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext,
+                        honoCredentialsEndpoint);
+                honoFilter.setAuthenticationManager(authenticationManager());
+                honoFilter.setCheckForPrincipalChanges(true);
+                honoFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+            }
+
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
             securityTokenFilter.setAuthenticationManager(authenticationManager());
@@ -236,7 +252,11 @@ public class SecurityManagedConfiguration {
                         .authenticationFilter(anoymousFilter);
             } else {
 
-                httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
+                httpSec.addFilter(securityHeaderFilter);
+                if (honoFilter != null) {
+                    httpSec.addFilter(honoFilter);
+                }
+                httpSec.addFilter(securityTokenFilter)
                         .addFilter(gatewaySecurityTokenFilter).requestMatchers().antMatchers(DDI_ANT_MATCHERS).and()
                         .anonymous().disable().authorizeRequests().anyRequest().authenticated().and()
                         .exceptionHandling()
@@ -249,6 +269,8 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 
+            auth.authenticationProvider(new PreAuthHonoAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
             auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
                     ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
@@ -272,6 +294,9 @@ public class SecurityManagedConfiguration {
         private final DdiSecurityProperties ddiSecurityConfiguration;
         private final HawkbitSecurityProperties securityProperties;
         private final SystemSecurityContext systemSecurityContext;
+
+        @Value("${hawkbit.server.repository.hono-sync.credentials-endpoint:}")
+        private String honoCredentialsEndpoint;
 
         @Autowired
         ControllerDownloadSecurityConfigurationAdapter(final ControllerManagement controllerManagement,
@@ -321,6 +346,16 @@ public class SecurityManagedConfiguration {
             securityHeaderFilter.setCheckForPrincipalChanges(true);
             securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
+            HttpControllerPreAuthenticatedHonoFilter honoFilter = null;
+            if (!honoCredentialsEndpoint.isEmpty()) {
+                honoFilter = new HttpControllerPreAuthenticatedHonoFilter(
+                        tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext,
+                        honoCredentialsEndpoint);
+                honoFilter.setAuthenticationManager(authenticationManager());
+                honoFilter.setCheckForPrincipalChanges(true);
+                honoFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+            }
+
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
                     tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
             securityTokenFilter.setAuthenticationManager(authenticationManager());
@@ -358,7 +393,11 @@ public class SecurityManagedConfiguration {
                         .authenticationFilter(anoymousFilter);
             } else {
 
-                httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
+                httpSec.addFilter(securityHeaderFilter);
+                if (honoFilter != null) {
+                    httpSec.addFilter(honoFilter);
+                }
+                httpSec.addFilter(securityTokenFilter)
                         .addFilter(gatewaySecurityTokenFilter).addFilter(controllerAnonymousDownloadFilter)
                         .requestMatchers().antMatchers(DDI_DL_ANT_MATCHER).and().anonymous().disable()
                         .authorizeRequests().anyRequest().authenticated().and().exceptionHandling()
@@ -371,6 +410,8 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 
+            auth.authenticationProvider(new PreAuthHonoAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
             auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
                     ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
@@ -445,6 +486,8 @@ public class SecurityManagedConfiguration {
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+            auth.authenticationProvider(new PreAuthHonoAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
             auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
                     ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
