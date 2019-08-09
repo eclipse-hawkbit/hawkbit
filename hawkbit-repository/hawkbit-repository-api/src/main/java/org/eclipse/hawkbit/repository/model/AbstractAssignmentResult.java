@@ -18,7 +18,7 @@ import java.util.List;
  *            type of the assigned and unassigned {@link BaseEntity}s.
  *
  */
-public abstract class AssignmentResult<T extends BaseEntity> {
+public abstract class AbstractAssignmentResult<T extends BaseEntity> {
 
     private final int alreadyAssigned;
     private final List<? extends T> assignedEntity;
@@ -33,7 +33,7 @@ public abstract class AssignmentResult<T extends BaseEntity> {
      * @param unassignedEntity
      *            {@link List} of unassigned entity.
      */
-    public AssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
+    public AbstractAssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
             final List<? extends T> unassignedEntity) {
         this.alreadyAssigned = alreadyAssigned;
         this.assignedEntity = assignedEntity;

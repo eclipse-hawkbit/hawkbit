@@ -17,7 +17,7 @@ import java.util.List;
  * how much of the assignments had already been existed.
  *
  */
-public class DistributionSetAssignmentResult extends AssignmentResult<Action> {
+public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Action> {
 
     private final DistributionSet distributionSet;
 

@@ -13,8 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,13 +47,13 @@ import com.google.common.collect.Lists;
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
-    private final Supplier<Boolean> multiAssignmentsConfig;
+    private final BooleanSupplier multiAssignmentsConfig;
 
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
             final BusProperties bus, final ActionRepository actionRepository,
             final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
-            final Supplier<Boolean> multiAssignmentsConfig) {
+            final BooleanSupplier multiAssignmentsConfig) {
         super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
                 quotaManagement);
         this.multiAssignmentsConfig = multiAssignmentsConfig;
@@ -209,7 +209,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.get();
+        return multiAssignmentsConfig.getAsBoolean();
     }
 
     private static Stream<Action> filterCancellations(final List<Action> actions) {

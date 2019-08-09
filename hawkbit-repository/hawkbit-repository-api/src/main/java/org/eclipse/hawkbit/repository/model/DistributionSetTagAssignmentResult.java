@@ -14,7 +14,7 @@ import java.util.List;
  * Result object for {@link DistributionSetTag} assignments.
  *
  */
-public class DistributionSetTagAssignmentResult extends AssignmentResult<DistributionSet> {
+public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
     private final DistributionSetTag distributionSetTag;
 

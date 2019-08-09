@@ -14,7 +14,7 @@ import java.util.List;
  * Result object for {@link TargetTag} assignments.
  *
  */
-public class TargetTagAssignmentResult extends AssignmentResult<Target> {
+public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetTag targetTag;
 

@@ -315,12 +315,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      * 1000 elements, so we need to split the entries here and execute multiple
      * statements
      */
-    private List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
+    private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
         return Lists.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 
-    private DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
+    private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
             final Map<String, JpaAction> assignedActions, final Collection<TargetWithActionType> controllerIds) {
         int alreadyAssignedTargetsCount = controllerIds.size() - assignedActions.size();
 
