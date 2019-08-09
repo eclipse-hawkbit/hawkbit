@@ -180,6 +180,11 @@
          <artifactId>hawkbit-dmf-rabbitmq-test</artifactId>
          <version>${project.version}</version>
       </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-update-server</artifactId>
+         <version>${project.version}</version>
+      </dependency>
    </dependencies>
 
    <build>
