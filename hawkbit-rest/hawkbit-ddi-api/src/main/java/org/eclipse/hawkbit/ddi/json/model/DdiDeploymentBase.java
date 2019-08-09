@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * Update action resource.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "id", "deployment", "actionHistory" })
 public class DdiDeploymentBase extends ResourceSupport {
 

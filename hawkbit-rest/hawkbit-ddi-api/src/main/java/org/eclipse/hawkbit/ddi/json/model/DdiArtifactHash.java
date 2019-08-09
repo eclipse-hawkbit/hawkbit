@@ -8,15 +8,15 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Hashes for given Artifact.
- *
- *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiArtifactHash {
 
     @JsonProperty
@@ -40,11 +40,11 @@ public class DdiArtifactHash {
      * Public constructor.
      *
      * @param sha1
-     *            sha1 hash of the artifact
+     *         sha1 hash of the artifact
      * @param md5
-     *            md5 hash of the artifact
+     *         md5 hash of the artifact
      * @param sha256
-     *            sha256 hash of the artifact
+     *         sha256 hash of the artifact
      */
     public DdiArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;

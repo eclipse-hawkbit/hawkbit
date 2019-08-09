@@ -10,9 +10,12 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * The action that has to be stopped by the target.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiCancelActionToStop {
 
     @NotNull

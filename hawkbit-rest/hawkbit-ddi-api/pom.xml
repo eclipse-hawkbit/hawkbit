@@ -10,15 +10,15 @@
 -->
 
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-     <groupId>org.eclipse.hawkbit</groupId>
-     <artifactId>hawkbit-rest-parent</artifactId>
-     <version>0.3.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>hawkbit-ddi-api</artifactId>
-  <name>hawkBit :: REST :: DDI API</name>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <artifactId>hawkbit-rest-parent</artifactId>
+      <version>0.3.0-SNAPSHOT</version>
+   </parent>
+   <artifactId>hawkbit-ddi-api</artifactId>
+   <name>hawkBit :: REST :: DDI API</name>
 
    <dependencies>
       <dependency>
@@ -36,6 +36,28 @@
       <dependency>
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
+      </dependency>
+
+      <!-- TEST -->
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>io.qameta.allure</groupId>
+         <artifactId>allure-junit4</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.assertj</groupId>
+         <artifactId>assertj-core</artifactId>
+         <scope>test</scope>
       </dependency>
    </dependencies>
 </project>
