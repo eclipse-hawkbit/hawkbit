@@ -36,12 +36,12 @@ public class MgmtActionId extends ResourceSupport {
      * Constructor
      * @param actionId
      *              the actionId
-     * @param targetId
+     * @param controllerId
      *              the controller Id
      */
-    public MgmtActionId(final String targetId, final long actionId) {
+    public MgmtActionId(final String controllerId, final long actionId) {
         this.actionId = actionId;
-        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, actionId)).withSelfRel());
+        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, actionId)).withSelfRel());
     }
 
     @JsonProperty("id")
@@ -55,7 +55,7 @@ public class MgmtActionId extends ResourceSupport {
 
     @Override
     public boolean equals(final Object obj) {
-        return super.equals(obj) && actionId == ((MgmtActionId) obj).getActionId();
+        return super.equals(obj) && this.getClass().isInstance(obj) && actionId == ((MgmtActionId) obj).getActionId();
     }
 
     @Override

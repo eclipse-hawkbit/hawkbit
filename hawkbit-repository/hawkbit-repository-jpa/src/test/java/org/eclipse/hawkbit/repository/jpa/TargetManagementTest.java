@@ -477,11 +477,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSetAssignmentResult result = assignDistributionSet(set.getId(), "4711");
 
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus()
-                .create(result.getAssignedEntity().stream().findFirst()
-                        .orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!"))
-                        .getId())
-                .status(Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(getAssignedActionId(result)).status(Status.FINISHED));
         assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.getByControllerID("4711").get();

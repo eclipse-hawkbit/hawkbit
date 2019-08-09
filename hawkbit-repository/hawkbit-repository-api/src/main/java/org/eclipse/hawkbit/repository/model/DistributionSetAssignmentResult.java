@@ -29,7 +29,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Action> {
      * @param alreadyAssigned
      *            the the count of already assigned targets
      * @param assigned
-     *            the assigned targets
+     *            the assigned actions
      */
     public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
             final List<? extends Action> assigned) {

@@ -52,9 +52,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
     public void cancelActionCbor() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         testdataFactory.createTarget();
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(
+                assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         // check that we can get the cancel action as CBOR
@@ -81,9 +80,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity()
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -136,9 +133,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity()
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/{controller}", tenantAware.getCurrentTenant(),
@@ -254,8 +249,7 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget(targetid);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
-        final Long actionId = assignDistributionSet(ds, toAssign).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(ds, toAssign));
 
         return deploymentManagement.cancelAction(actionId);
     }
@@ -268,9 +262,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(
+                assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
 
         // cancel action manually
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
@@ -344,15 +337,12 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = testdataFactory.createTarget();
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
-        final Long actionId2 = assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
-        final Long actionId3 = assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(
+                assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
+        final Long actionId2 = getAssignedActionId(
+                assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
+        final Long actionId3 = getAssignedActionId(
+                assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
 
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
 
@@ -461,9 +451,8 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        final Long actionId = assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(
+                assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 

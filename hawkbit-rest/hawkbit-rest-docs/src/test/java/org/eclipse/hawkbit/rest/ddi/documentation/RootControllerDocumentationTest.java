@@ -137,10 +137,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         });
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                Arrays.asList(target.getTargetWithActionType())));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(
@@ -171,10 +169,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                Arrays.asList(target.getTargetWithActionType()))); 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(post(
@@ -266,9 +262,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         .key("aMetadataKey").value("Metadata value as defined in software module").targetVisible(true));
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
+                target.getControllerId(), getTestSchedule(-5), getTestDuration(10), getTestTimeZone()));
 
         controllerManagement.addInformationalActionStatus(
                 entityFactory.actionStatus().create(actionId).message("Started download").status(Status.DOWNLOAD));
@@ -351,9 +346,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = assignDistributionSetWithMaintenanceWindow(set.getId(), target.getControllerId(),
-                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
+                target.getControllerId(), getTestSchedule(2), getTestDuration(1), getTestTimeZone()));
 
         mockMvc.perform(get(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
@@ -393,10 +387,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType())).getAssignedEntity()
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                Arrays.asList(target.getTargetWithActionType())));
 
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),

@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -123,7 +122,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
-    private final TargetManagement targetManagement;
     private final AuditorAware<String> auditorProvider;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
@@ -137,10 +135,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
-            final ActionStatusRepository actionStatusRepository, final TargetManagement targetManagement,
-            final AuditorAware<String> auditorProvider, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
+            final ApplicationEventPublisher eventPublisher, final BusProperties bus,
+            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
         this.entityManager = entityManager;
@@ -148,7 +146,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.distributionSetRepository = distributionSetRepository;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
-        this.targetManagement = targetManagement;
         this.auditorProvider = auditorProvider;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
@@ -265,6 +262,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
         checkQuotaForAssignment(targetsWithActionType, distributionSetEntity);
+
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(
                 targetsWithActionType.stream().map(TargetWithActionType::getControllerId).collect(Collectors.toList()),
                 distributionSetEntity.getId());
@@ -273,8 +271,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        return doAssignDistributionSetToTargets(targetsWithActionType, actionMessage, assignmentStrategy,
-                distributionSetEntity, targetEntities);
+        final Map<String, JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
+                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType);
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
@@ -286,7 +285,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 Collections.emptyList());
     }
 
-    private DistributionSetAssignmentResult doAssignDistributionSetToTargets(
+    private Map<String, JpaAction> doAssignDistributionSetToTargets(
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
@@ -296,6 +295,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // not active before and the manual assignment which has been done
         // cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
+        setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
+                targetEntitiesIdsChunks);
         final Map<String, JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities,
                 assignmentStrategy, distributionSetEntity);
         // create initial action status when action is created so we remember
@@ -305,16 +306,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         createActionsStatus(assignedActions.values(), assignmentStrategy, actionMessage);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType);
+        return assignedActions;
     }
 
+    /**
+     * split tIDs length into max entries in-statement because many database
+     * have constraint of max entries in in-statements e.g. Oracle with maximum
+     * 1000 elements, so we need to split the entries here and execute multiple
+     * statements
+     */
     private List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
-        // split tIDs length into max entries in-statement because many database
-        // have constraint of max entries in in-statements e.g. Oracle with
-        // maximum 1000 elements, so we need to split the entries here and
-        // execute multiple statements
-        return Lists.partition(
-                targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+        return Lists.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 
@@ -379,7 +381,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
         if (!isMultiAssignmentsEnabled()) {
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
@@ -424,7 +426,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
@@ -455,7 +457,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceQuitAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -677,7 +679,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Transactional
     @Retryable(include = {
-            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceTargetAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));

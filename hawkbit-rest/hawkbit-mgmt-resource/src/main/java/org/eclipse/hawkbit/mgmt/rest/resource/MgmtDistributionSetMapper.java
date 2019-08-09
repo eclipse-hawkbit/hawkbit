@@ -138,7 +138,6 @@ public final class MgmtDistributionSetMapper {
 
     static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
-        result.setAssigned(dsAssignmentResult.getAssigned());
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
         result.setAssignedActions(dsAssignmentResult.getAssignedEntity().stream()
                 .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));

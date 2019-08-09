@@ -59,8 +59,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long manuallyAssignedActionId = assignmentResult.getAssignedEntity().stream().findFirst()
-                    .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+            final Long manuallyAssignedActionId = getAssignedActionId(assignmentResult);
 
             // target filter query that matches all targets
             final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement

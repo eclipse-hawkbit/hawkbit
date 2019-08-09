@@ -235,9 +235,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected Long registerTargetAndCancelActionId(final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Action action = assignmentResult.getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!"));
-        return cancelAction(action.getId(), controllerId);
+        return cancelAction(getAssignedActionId(assignmentResult), controllerId);
     }
 
     protected void assertAllTargetsCount(final long expectedTargetsCount) {

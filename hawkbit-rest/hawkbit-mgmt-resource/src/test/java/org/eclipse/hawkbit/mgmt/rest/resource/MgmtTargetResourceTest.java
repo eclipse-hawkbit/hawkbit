@@ -1240,10 +1240,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     public void updateAction() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                ActionType.SOFT, 0, Collections.singletonList(target.getControllerId())));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();

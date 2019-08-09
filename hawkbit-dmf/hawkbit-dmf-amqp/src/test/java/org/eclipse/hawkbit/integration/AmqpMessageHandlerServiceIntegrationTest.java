@@ -579,15 +579,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
-        final Long actionId = distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!")).getId();
-        deploymentManagement.cancelAction(actionId);
+        deploymentManagement.cancelAction(getAssignedActionId(distributionSetAssignmentResult));
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(actionId, controllerId);
+        assertCancelActionMessage(getAssignedActionId(distributionSetAssignmentResult), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -914,8 +912,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = assignmentResult.getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!")).getId();
+        final Long actionId = getAssignedActionId(assignmentResult);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }

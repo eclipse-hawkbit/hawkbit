@@ -208,10 +208,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
-        final Long actionId = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis() + 2_000, Collections.singletonList(target.getControllerId()))
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(
+                deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
+                        System.currentTimeMillis() + 2_000, Collections.singletonList(target.getControllerId())));
 
         MvcResult mvcResult = performGet("/{tenant}/controller/v1/" + DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON,
                 status().isOk(), tenantAware.getCurrentTenant()).andReturn();
@@ -530,8 +529,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Collections.singletonList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
-        final Long actionId = assignDistributionSet(savedSet, toAssign).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(savedSet, toAssign));
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE + actionId, tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
@@ -594,15 +592,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
         final DistributionSet ds3 = testdataFactory.createDistributionSet("3", true);
 
-        final Long actionId1 = assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
-                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
-                .getId();
-        final Long actionId2 = assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
-                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
-                .getId();
-        final Long actionId3 = assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID).getAssignedEntity().stream()
-                .findFirst().orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"))
-                .getId();
+        final Long actionId1 = getAssignedActionId(assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID));
+        final Long actionId2 = getAssignedActionId(assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID));
+        final Long actionId3 = getAssignedActionId(assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID));
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 3, Optional.empty());
         assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
@@ -672,41 +664,39 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.")
     public void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        final Action action = assignDistributionSet(ds,
-                Collections.singletonList(testdataFactory.createTarget(DEFAULT_CONTROLLER_ID))).getAssignedEntity()
-                        .stream().findFirst()
-                        .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
+        final Long actionId = getAssignedActionId(assignDistributionSet(ds,
+                Collections.singletonList(testdataFactory.createTarget(DEFAULT_CONTROLLER_ID))));
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.PENDING, 1, Optional.empty());
 
         // Now valid Feedback
         for (int i = 0; i < 4; i++) {
-            postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                    JsonBuilder.deploymentActionFeedback(action.getId().toString(), "proceeding"), status().isOk());
+            postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                    JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding"), status().isOk());
             assertActionStatusCount(i + 2, i);
 
         }
 
-        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "scheduled"), status().isOk());
+        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                JsonBuilder.deploymentActionFeedback(actionId.toString(), "scheduled"), status().isOk());
         assertActionStatusCount(6, 5);
 
-        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "resumed"), status().isOk());
+        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                JsonBuilder.deploymentActionFeedback(actionId.toString(), "resumed"), status().isOk());
         assertActionStatusCount(7, 6);
 
-        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "canceled"), status().isOk());
+        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                JsonBuilder.deploymentActionFeedback(actionId.toString(), "canceled"), status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.PENDING, 1);
         assertActionStatusCount(8, 7, 0, 0, 1);
         assertTargetCountByStatus(1, 0, 0);
 
-        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "rejected"), status().isOk());
+        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                JsonBuilder.deploymentActionFeedback(actionId.toString(), "rejected"), status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.PENDING, 1);
         assertActionStatusCount(9, 6, 1, 0, 1);
 
-        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed"), status().isOk());
+        postFeedback(MediaType.APPLICATION_JSON, DEFAULT_CONTROLLER_ID, actionId,
+                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed"), status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.IN_SYNC, 0);
         assertActionStatusCount(10, 7, 1, 1, 1);
         assertTargetCountByStatus(0, 0, 1);

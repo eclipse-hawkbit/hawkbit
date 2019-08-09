@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import io.qameta.allure.Story;
 import org.junit.Test;
@@ -24,6 +26,10 @@ import org.springframework.context.annotation.Description;
 @Description("Tests for the MgmtTargetAssignmentResponseBody")
 public class MgmtTargetAssignmentResponseBodyTest {
 
+    private static final List<Long> ASSIGNED_ACTIONS = Arrays.asList(4L, 5L, 6L);
+    private static final int ALREADY_ASSIGNED_COUNT = 3;
+    private static final String CONTROLLER_ID = "target";
+
     @Test
     @Description("Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody")
     public void testActionIdsSerialization() throws IOException {
@@ -34,15 +40,18 @@ public class MgmtTargetAssignmentResponseBodyTest {
 
         assertThat(jsonNode.has("assigned")).as("the assigned targets count").isTrue();
         assertThat(jsonNode.get("assigned").isNumber()).as("the assigned targets count").isTrue();
-        assertThat(jsonNode.get("assigned").asLong()).as("the assigned targets count").isEqualTo(3);
+        assertThat(jsonNode.get("assigned").asLong()).as("the assigned targets count")
+                .isEqualTo(ASSIGNED_ACTIONS.size());
 
         assertThat(jsonNode.has("alreadyAssigned")).as("the already assigned targets count").isTrue();
         assertThat(jsonNode.get("alreadyAssigned").isNumber()).as("the already assigned targets count").isTrue();
-        assertThat(jsonNode.get("alreadyAssigned").asLong()).as("the already assigned targets count").isEqualTo(3);
+        assertThat(jsonNode.get("alreadyAssigned").asLong()).as("the already assigned targets count")
+                .isEqualTo(ALREADY_ASSIGNED_COUNT);
 
         assertThat(jsonNode.has("total")).as("the total targets count").isTrue();
         assertThat(jsonNode.get("total").isNumber()).as("the total targets count").isTrue();
-        assertThat(jsonNode.get("total").asLong()).as("the total targets count").isEqualTo(6);
+        assertThat(jsonNode.get("total").asLong()).as("the total targets count")
+                .isEqualTo(ALREADY_ASSIGNED_COUNT + ASSIGNED_ACTIONS.size());
 
         assertThat(jsonNode.has("assignedActions")).as("The created actions in result of this assignment").isTrue();
         assertThat(jsonNode.get("assignedActions").isArray()).as("The created actions in result of this assignment")
@@ -56,17 +65,15 @@ public class MgmtTargetAssignmentResponseBodyTest {
                 .isTrue();
         assertThat(jsonNode.get("assignedActions").get(0).get("id").isNumber())
                 .as("A created action in result of this assignment").isTrue();
-        assertThat(Arrays.asList(4L, 5L, 6L)).as("The expected action ids")
+        assertThat(ASSIGNED_ACTIONS).as("The expected action ids")
                 .contains(jsonNode.get("assignedActions").get(0).get("id").asLong());
     }
 
     private static MgmtTargetAssignmentResponseBody generateResponseBody() {
         MgmtTargetAssignmentResponseBody response = new MgmtTargetAssignmentResponseBody();
-        final String targetId = "target";
-        response.setAssignedActions(Arrays.asList(new MgmtActionId(targetId, 4L), new MgmtActionId(targetId, 5L),
-                new MgmtActionId(targetId, 6L)));
-        response.setAssigned(3);
-        response.setAlreadyAssigned(3);
+        response.setAssignedActions(
+                ASSIGNED_ACTIONS.stream().map(id -> new MgmtActionId(CONTROLLER_ID, id)).collect(Collectors.toList()));
+        response.setAlreadyAssigned(ALREADY_ASSIGNED_COUNT);
         return response;
     }
 }

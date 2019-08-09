@@ -395,9 +395,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void switchActionToForced() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = deploymentManagement.assignDistributionSet(set.getId(), ActionType.SOFT, 0,
-                Collections.singletonList(target.getControllerId())).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none")).getId();
+        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                ActionType.SOFT, 0, Collections.singletonList(target.getControllerId())));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();
@@ -531,9 +530,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
                                         .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
                                 fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_ID),
+                                        .description(MgmtApiModelProperties.ACTION_ID),
                                 fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
-                                        .description(MgmtApiModelProperties.DS_ASSIGNED_ACTION_SEFL_HREF),
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }

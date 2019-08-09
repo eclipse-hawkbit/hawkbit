@@ -96,9 +96,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String assignedB = targBs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedB);
         final String installedC = targCs.iterator().next().getControllerId();
-        final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getAssignedEntity().stream()
-                .findFirst().orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!"))
-                .getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
 
         // add attributes to match against only attribute value or attribute
         // value and name
@@ -602,8 +600,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         expected.addAll(targAssigned);
         expected.addAll(notAssigned);
 
-        assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
-
+        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
+                .containsExactly(expected.toArray(new Target[0]));
 
     }
 
@@ -658,8 +656,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
                 .collect(Collectors.toList()));
 
-        assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
-
+        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
+                .containsExactly(expected.toArray(new Target[0]));
 
     }
 

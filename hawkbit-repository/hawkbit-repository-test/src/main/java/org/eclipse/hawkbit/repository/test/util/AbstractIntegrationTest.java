@@ -17,6 +17,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -322,9 +323,8 @@ public abstract class AbstractIntegrationTest {
             final boolean isRequiredMigrationStep) {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
-                .getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one assigned Action, found none!")).getTarget();
+        savedTarget = getTargetFromAssignment(
+                assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -435,5 +435,23 @@ public abstract class AbstractIntegrationTest {
         }
 
         return randomStringBuilder.toString();
+    }
+
+
+    protected static Action getAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
+    }
+
+    protected static Long getAssignedActionId(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return getAssignedAction(distributionSetAssignmentResult).getId();
+    }
+
+    protected static Target getTargetFromAssignment(final DistributionSetAssignmentResult assignment) {
+        return getAssignedAction(assignment).getTarget();
+    }
+
+    protected static Comparator<Target> controllerIdComparator() {
+        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
     }
 }

@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
@@ -156,7 +156,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
     private Long prepareDeploymentBase() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test");
         final Target target = testdataFactory.createTarget("4711");
-        final List<Target> toAssign = Arrays.asList(target);
+        final List<Target> toAssign = Collections.singletonList(target);
 
         assignDistributionSet(ds, toAssign);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);

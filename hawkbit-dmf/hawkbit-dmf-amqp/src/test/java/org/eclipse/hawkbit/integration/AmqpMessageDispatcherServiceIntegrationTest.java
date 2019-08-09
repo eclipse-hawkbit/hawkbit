@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -151,13 +150,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
-        final Action action = assignmentResult.getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected at least one Action to be created, found non!"));
-        assertCancelActionMessage(action.getId(), controllerId);
+        assertCancelActionMessage(getAssignedActionId(assignmentResult), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertCancelActionMessage(action.getId(), controllerId);
+        assertCancelActionMessage(getAssignedActionId(assignmentResult), controllerId);
     }
 
     @Test
@@ -260,17 +257,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final Action action = assignDistributionSet(ds.getId(), controllerId).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!"));
+        final Long actionId1 = getAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        final Action action2 = assignDistributionSet(ds.getId(), controllerId).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!"));
+        final Long actionId2 = getAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
-        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(action.getId(),
-                EventTopic.DOWNLOAD_AND_INSTALL);
-        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(action2.getId(),
-                EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
+        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
 
@@ -281,8 +274,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Long assignNewDsToTarget(final String controllerId) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Long actionId = assignDistributionSet(ds.getId(), controllerId).getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Expected one Action to be created, found none!")).getId();
+        final Long actionId = getAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         return actionId;
     }
