@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -27,7 +28,8 @@ public class DdiMetadata {
     @NotNull
     private final String value;
 
-    public DdiMetadata(final String key, final String value) {
+    @JsonCreator
+    public DdiMetadata(@JsonProperty("key") final String key, @JsonProperty("value")final String value) {
         this.key = key;
         this.value = value;
     }

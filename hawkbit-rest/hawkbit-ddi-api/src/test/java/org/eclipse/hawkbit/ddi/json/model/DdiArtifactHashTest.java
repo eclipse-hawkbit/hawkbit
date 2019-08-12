@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +21,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 /**
- * Test serializability of DDI api model 'DdiArtifact'
+ * Test serializability of DDI api model 'DdiArtifactHash'
  */
 @Feature("Model Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
@@ -45,11 +54,11 @@ public class DdiArtifactHashTest {
         String serializedDdiArtifact = "{\"sha1\": \"123\", \"md5\": \"456\",  \"sha256\": \"789\", \"unknownProperty\": \"test\"}";
 
         // Test
-        DdiArtifactHash DdiArtifact = mapper.readValue(serializedDdiArtifact, DdiArtifactHash.class);
+        DdiArtifactHash ddiArtifact = mapper.readValue(serializedDdiArtifact, DdiArtifactHash.class);
 
-        assertThat(DdiArtifact.getSha1()).isEqualTo("123");
-        assertThat(DdiArtifact.getMd5()).isEqualTo("456");
-        assertThat(DdiArtifact.getSha256()).isEqualTo("789");
+        assertThat(ddiArtifact.getSha1()).isEqualTo("123");
+        assertThat(ddiArtifact.getMd5()).isEqualTo("456");
+        assertThat(ddiArtifact.getSha256()).isEqualTo("789");
     }
 
     @Test(expected = com.fasterxml.jackson.databind.exc.MismatchedInputException.class)
