@@ -111,7 +111,7 @@ import com.google.common.collect.Sets;
 @Transactional(readOnly = true)
 @Validated
 public class JpaControllerManagement implements ControllerManagement {
-    private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
@@ -391,22 +391,14 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private Target createTarget(final String controllerId, final URI address) {
-        try {
-            final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                    .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
-                    .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
+        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
 
-            return result;
-        } catch (final EntityAlreadyExistsException e) {
-            LOG.warn(
-                    "Caught an EntityAlreadyExistsException while creating non existing target "
-                            + "[controllerId:{}, address:{}, tenant: {}]",
-                    controllerId, address, tenantAware.getCurrentTenant());
-            throw e;
-        }
+        return result;
     }
 
     /**

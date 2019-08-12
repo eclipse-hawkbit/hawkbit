@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
@@ -73,7 +74,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
-    private final ControllerManagement controllerManagement;
+    private ControllerManagement controllerManagement;
 
     private final EntityFactory entityFactory;
 
@@ -164,7 +165,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
-        } catch (final IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException | EntityAlreadyExistsException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
         } finally {
             SecurityContextHolder.setContext(oldContext);
@@ -418,4 +419,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
+    // for testing
+    public void setControllerManagement(final ControllerManagement controllerManagement) {
+        this.controllerManagement = controllerManagement;
+    }
 }
