@@ -61,7 +61,7 @@ public class DdiChunkTest {
 
         assertThat(ddiChunk.getPart()).isEqualTo("1234");
         assertThat(ddiChunk.getVersion()).isEqualTo("1.0");
-        assertThat(ddiChunk.getName()).isEqualTo("Artifact");
+        assertThat(ddiChunk.getName()).isEqualTo("Dummy-Artifact");
         assertThat(ddiChunk.getArtifacts().size()).isEqualTo(0);
     }
 
