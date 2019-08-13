@@ -93,6 +93,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            for target repo access
      * @param entityFactory
      *            to create entities
+     * @param systemSecurityContext
+     *            the system Security Context
+     * @param tenantConfigurationManagement
+     *            the tenant configuration Management
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
@@ -165,7 +169,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
-        } catch (final IllegalArgumentException | EntityAlreadyExistsException ex) {
+        } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
         } finally {
             SecurityContextHolder.setContext(oldContext);
@@ -204,10 +208,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
-        LOG.debug("Target {} reported online state.", thingId);
-
-        sendUpdateCommandToTarget(target);
+        try {
+            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            LOG.debug("Target {} reported online state.", thingId);
+            sendUpdateCommandToTarget(target);
+        } catch (EntityAlreadyExistsException e) {
+            throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
+        }
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
@@ -372,7 +379,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status handleCancelRejectedState(final Message message, final Action action) {
+    private static Status handleCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
         }
@@ -420,7 +427,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     // for testing
-    public void setControllerManagement(final ControllerManagement controllerManagement) {
+    void setControllerManagement(final ControllerManagement controllerManagement) {
         this.controllerManagement = controllerManagement;
     }
 }

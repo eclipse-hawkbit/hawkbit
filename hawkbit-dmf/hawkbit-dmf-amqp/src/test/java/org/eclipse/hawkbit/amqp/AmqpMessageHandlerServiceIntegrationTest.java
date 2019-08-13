@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.integration;
+package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
-import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -34,6 +33,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
+import org.eclipse.hawkbit.integration.AbstractAmqpServiceIntegrationTest;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -894,17 +894,23 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Test
     @Description("Messages that result into certain exceptions being raised should not be requeued. This message should forwarded to the deadletter queue")
     @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 0)})
-    public void ignoredExceptionTypesShouldNotBeRequeued() {
-
+    public void ignoredExceptionTypesShouldNotBeRequeued() throws IllegalAccessException, InstantiationException {
         final ControllerManagement mockedControllerManagement = Mockito.mock(ControllerManagement.class);
-        doThrow(new EntityAlreadyExistsException("Oops!")).when(mockedControllerManagement)
-                .findOrRegisterTargetIfItDoesNotExist(eq("dummy_target"), any());
+
+        final List<Class<? extends RuntimeException>> exceptionsThatShouldNotBeRequeued = Arrays
+                .asList(IllegalArgumentException.class, EntityAlreadyExistsException.class);
+        final String controllerId = "dummy_target";
 
         try {
-            amqpMessageHandlerService.setControllerManagement(mockedControllerManagement);
-            createAndSendThingCreated("dummy_target", TENANT_EXIST);
-            verifyOneDeadLetterMessage();
-            assertAllTargetsCount(0);
+            for (Class<? extends RuntimeException> exceptionClass : exceptionsThatShouldNotBeRequeued) {
+                doThrow(exceptionClass.newInstance()).when(mockedControllerManagement)
+                        .findOrRegisterTargetIfItDoesNotExist(eq(controllerId), any());
+
+                amqpMessageHandlerService.setControllerManagement(mockedControllerManagement);
+                createAndSendThingCreated(controllerId, TENANT_EXIST);
+                verifyOneDeadLetterMessage();
+                assertThat(targetManagement.getByControllerID(controllerId)).isEmpty();
+            }
         } finally {
             amqpMessageHandlerService.setControllerManagement(controllerManagement);
         }
@@ -1019,6 +1025,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         assertEmptyReceiverQueueCount();
         createConditionFactory().untilAsserted(() -> Mockito
                 .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
+        Mockito.reset(getDeadletterListener());
     }
 
     private static String getJsonFieldFromBody(final byte[] body, final String fieldName) throws IOException {
