@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -39,7 +40,6 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.tokenfield.TokenField;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
@@ -220,10 +220,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private VerticalLayout getTokenFieldLayout() {
-        final TokenField tokenField = targetBulkTokenTags.getTokenField();
+        final TagPanelLayout tagPanelLayout = targetBulkTokenTags.getTagPanel();
+        tagPanelLayout.setMargin(false);
         final VerticalLayout tokenLayout = SPUIComponentProvider.getDetailTabLayout();
         tokenLayout.addStyleName("bulk-target-tags-layout");
-        tokenLayout.addComponent(tokenField);
+        tokenLayout.addComponent(tagPanelLayout);
         tokenLayout.setSpacing(false);
         tokenLayout.setMargin(false);
         tokenLayout.setSizeFull();
@@ -249,7 +250,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
 
         queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG,
-                managementUIState.getDistributionTableFilters().getDistSetTags());
+                managementUIState.getDistributionTableFilters().getClickedDistSetTags());
 
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
@@ -286,8 +287,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     public void resetComponents() {
         dsNamecomboBox.clear();
         descTextArea.clear();
-        targetBulkTokenTags.getTokenField().clear();
-        targetBulkTokenTags.populateContainer();
+        targetBulkTokenTags.initializeTags();
         progressBar.setValue(0F);
         progressBar.setVisible(false);
         managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(0F);
@@ -308,12 +308,11 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Restore the target bulk upload layout field values.
      */
     public void restoreComponentsValue() {
-        targetBulkTokenTags.populateContainer();
         final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
         progressBar.setValue(targetBulkUpload.getProgressBarCurrentValue());
         dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
         descTextArea.setValue(targetBulkUpload.getDescription());
-        targetBulkTokenTags.addAlreadySelectedTags();
+        targetBulkTokenTags.initializeTags();
 
         if (targetBulkUpload.getProgressBarCurrentValue() >= 1) {
             targetsCountLabel.setVisible(true);
