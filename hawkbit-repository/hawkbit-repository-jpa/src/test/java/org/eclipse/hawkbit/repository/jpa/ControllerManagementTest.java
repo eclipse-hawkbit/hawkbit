@@ -493,7 +493,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
                         .isFalse();
-        savedTarget = getTargetFromAssignment(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
                         .isTrue();
@@ -1055,7 +1055,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
         final List<Target> testTarget = testdataFactory.createTargets(1);
 
-        final Long actionId = getAssignedActionId(assignDistributionSet(testDs, testTarget));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 1")));
@@ -1083,7 +1083,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
 
         // test for informational status
-        final Long actionId1 = getAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
+        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
                 testdataFactory.createTargets(1, "t1")));
         assertThat(actionId1).isNotNull();
         for (int i = 0; i < maxStatusEntries; ++i) {
@@ -1094,7 +1094,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
 
         // test for update status (and mixed case)
-        final Long actionId2 = getAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
+        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
                 testdataFactory.createTargets(1, "t2")));
         assertThat(actionId2).isNotEqualTo(actionId1);
         for (int i = 0; i < maxStatusEntries; ++i) {
@@ -1117,7 +1117,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
-        final Long actionId = getAssignedActionId(
+        final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1)));
         assertThat(actionId).isNotNull();
 
@@ -1330,7 +1330,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long actionId = getAssignedActionId(assignmentResult);
+            final Long actionId = getFirstAssignedActionId(assignmentResult);
             controllerManagement.updateActionExternalRef(actionId, knownExternalref);
 
             allExternalRef.add(knownExternalref);
@@ -1431,7 +1431,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long forcedDistributionSetId = testdataFactory.createDistributionSet("forcedDs1").getId();
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(forcedDistributionSetId,
                 DEFAULT_CONTROLLER_ID, Action.ActionType.SOFT);
-        addUpdateActionStatus(getAssignedActionId(assignmentResult), DEFAULT_CONTROLLER_ID, Status.FINISHED);
+        addUpdateActionStatus(getFirstAssignedActionId(assignmentResult), DEFAULT_CONTROLLER_ID, Status.FINISHED);
         assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
         assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, forcedDistributionSetId);
         assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);

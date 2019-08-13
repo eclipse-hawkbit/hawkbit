@@ -80,7 +80,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
-        final Long action1 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
+        final Long action1 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg1.getControllerId())));
         deploymentManagement.assignDistributionSet(ds2.getId(), ActionType.FORCED, 0,
                 Collections.singletonList(trg2.getControllerId()));
@@ -109,11 +109,11 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
-        final Long action1 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
+        final Long action1 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg1.getControllerId())));
-        final Long action2 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action2 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg2.getControllerId())));
-        final Long action3 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action3 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg3.getControllerId())));
 
         assertThat(actionRepository.count()).isEqualTo(3);
@@ -144,11 +144,11 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
-        final Long action1 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
+        final Long action1 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg1.getControllerId())));
-        final Long action2 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action2 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg2.getControllerId())));
-        final Long action3 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action3 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg3.getControllerId())));
 
         assertThat(actionRepository.count()).isEqualTo(3);
@@ -181,11 +181,11 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
 
-        final Long action1 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
+        final Long action1 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds1.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg1.getControllerId())));
-        final Long action2 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action2 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg2.getControllerId())));
-        final Long action3 = getAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
+        final Long action3 = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(ds2.getId(),
                 ActionType.FORCED, 0, Collections.singletonList(trg3.getControllerId())));
 
         assertThat(actionRepository.count()).isEqualTo(3);

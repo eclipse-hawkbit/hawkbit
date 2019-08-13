@@ -395,7 +395,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void switchActionToForced() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
                 ActionType.SOFT, 0, Collections.singletonList(target.getControllerId())));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 

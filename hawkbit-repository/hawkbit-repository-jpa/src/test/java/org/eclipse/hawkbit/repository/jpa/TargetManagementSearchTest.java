@@ -96,7 +96,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String assignedB = targBs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedB);
         final String installedC = targCs.iterator().next().getControllerId();
-        final Long actionId = getAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
 
         // add attributes to match against only attribute value or attribute
         // value and name

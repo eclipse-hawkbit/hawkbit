@@ -104,7 +104,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(knownControllerId);
         final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                 knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-        final Long manuallyAssignedActionId = getAssignedActionId(assignmentResult);
+        final Long manuallyAssignedActionId = getFirstAssignedActionId(assignmentResult);
 
         // create rollout with the same distribution set already assigned
         // start rollout
@@ -144,7 +144,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createTarget(knownControllerId);
             final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
                     firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
-            final Long manuallyAssignedActionId = getAssignedActionId(assignmentResult);
+            final Long manuallyAssignedActionId = getFirstAssignedActionId(assignmentResult);
 
             // create rollout with the same distribution set already assigned
             // start rollout

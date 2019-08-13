@@ -235,7 +235,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected Long registerTargetAndCancelActionId(final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        return cancelAction(getAssignedActionId(assignmentResult), controllerId);
+        return cancelAction(getFirstAssignedActionId(assignmentResult), controllerId);
     }
 
     protected void assertAllTargetsCount(final long expectedTargetsCount) {

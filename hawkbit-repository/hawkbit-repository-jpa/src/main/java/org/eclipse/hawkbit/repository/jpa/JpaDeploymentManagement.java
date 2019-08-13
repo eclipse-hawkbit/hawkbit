@@ -271,9 +271,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        final Map<String, JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
                 actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType);
+        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType.size());
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
@@ -285,7 +285,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 Collections.emptyList());
     }
 
-    private Map<String, JpaAction> doAssignDistributionSetToTargets(
+    private List<JpaAction> doAssignDistributionSetToTargets(
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
@@ -297,13 +297,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
                 targetEntitiesIdsChunks);
-        final Map<String, JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities,
-                assignmentStrategy, distributionSetEntity);
+        final List<JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities, assignmentStrategy,
+                distributionSetEntity);
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
         // action history.
-        createActionsStatus(assignedActions.values(), assignmentStrategy, actionMessage);
+        createActionsStatus(assignedActions, assignmentStrategy, actionMessage);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
         return assignedActions;
@@ -321,11 +321,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
-            final Map<String, JpaAction> assignedActions, final Collection<TargetWithActionType> controllerIds) {
-        int alreadyAssignedTargetsCount = controllerIds.size() - assignedActions.size();
+            final List<JpaAction> assignedActions, final int totalTargetsForAssignment) {
+        int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
 
-        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount,
-                new ArrayList<>(assignedActions.values()));
+        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
     }
 
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {
@@ -396,15 +395,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
     }
 
-    private Map<String, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
+    private List<JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
             final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set) {
         final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
                 .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
         return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
-                .filter(Objects::nonNull).map(actionRepository::save)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), Function.identity()));
+                .filter(Objects::nonNull).map(actionRepository::save).collect(Collectors.toList());
     }
 
     private void createActionsStatus(final Collection<JpaAction> actions,
@@ -604,7 +602,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     public Optional<Action> findAction(final long actionId) {
-        return actionRepository.findById(actionId).map(a -> (Action) a);
+        return actionRepository.findById(actionId).map(a -> a);
     }
 
     @Override
@@ -717,8 +715,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
         selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
 
-        final List<String> result = entityManager.createQuery(selMsgQuery).setFirstResult((int) pageable.getOffset())
-                .setMaxResults(pageable.getPageSize()).getResultList().stream().collect(Collectors.toList());
+        final List<String> result = new ArrayList<>(entityManager.createQuery(selMsgQuery)
+                .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());
 
         return new PageImpl<>(result, pageable, totalCount);
     }
@@ -811,7 +809,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionRepository;
     }
 
-    protected boolean isActionsAutocloseEnabled() {
+    private boolean isActionsAutocloseEnabled() {
         return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
     }
 

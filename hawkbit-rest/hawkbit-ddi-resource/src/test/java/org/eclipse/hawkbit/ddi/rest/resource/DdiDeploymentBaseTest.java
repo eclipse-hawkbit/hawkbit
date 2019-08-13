@@ -208,7 +208,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
-        final Long actionId = getAssignedActionId(
+        final Long actionId = getFirstAssignedActionId(
                 deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
                         System.currentTimeMillis() + 2_000, Collections.singletonList(target.getControllerId())));
 
@@ -529,7 +529,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Collections.singletonList(target);
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
-        final Long actionId = getAssignedActionId(assignDistributionSet(savedSet, toAssign));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE + actionId, tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
@@ -592,9 +592,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
         final DistributionSet ds3 = testdataFactory.createDistributionSet("3", true);
 
-        final Long actionId1 = getAssignedActionId(assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID));
-        final Long actionId2 = getAssignedActionId(assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID));
-        final Long actionId3 = getAssignedActionId(assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID));
+        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(ds1.getId(), DEFAULT_CONTROLLER_ID));
+        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(ds2.getId(), DEFAULT_CONTROLLER_ID));
+        final Long actionId3 = getFirstAssignedActionId(assignDistributionSet(ds3.getId(), DEFAULT_CONTROLLER_ID));
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 3, Optional.empty());
         assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
@@ -664,7 +664,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.")
     public void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        final Long actionId = getAssignedActionId(assignDistributionSet(ds,
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds,
                 Collections.singletonList(testdataFactory.createTarget(DEFAULT_CONTROLLER_ID))));
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.PENDING, 1, Optional.empty());
 

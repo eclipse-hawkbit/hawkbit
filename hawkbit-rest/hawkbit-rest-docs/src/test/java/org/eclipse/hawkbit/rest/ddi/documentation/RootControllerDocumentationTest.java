@@ -137,7 +137,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         });
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
                 Arrays.asList(target.getTargetWithActionType())));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -169,7 +169,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
                 Arrays.asList(target.getTargetWithActionType()))); 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -262,7 +262,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         .key("aMetadataKey").value("Metadata value as defined in software module").targetVisible(true));
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
+        final Long actionId = getFirstAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
                 target.getControllerId(), getTestSchedule(-5), getTestDuration(10), getTestTimeZone()));
 
         controllerManagement.addInformationalActionStatus(
@@ -346,7 +346,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
+        final Long actionId = getFirstAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
                 target.getControllerId(), getTestSchedule(2), getTestDuration(1), getTestTimeZone()));
 
         mockMvc.perform(get(
@@ -387,7 +387,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
                 Arrays.asList(target.getTargetWithActionType())));
 
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
