@@ -79,9 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -158,21 +156,20 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
 
-    private final BusProperties bus;
+    private final EventPublisherHolder eventPublisherHolder;
 
     private final Database database;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
-            final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+        this.eventPublisherHolder = eventPublisherHolder;
         this.database = database;
-        this.bus = bus;
     }
 
     @Override
@@ -322,8 +319,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new RolloutGroupCreatedEvent(group, rollout.getId(), context.getId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
+                new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {
@@ -942,9 +939,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
                 .collect(Collectors.toList());
 
-        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
+        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), bus.getId()))));
+                        JpaRolloutGroup.class.getName(), eventPublisherHolder.getApplicationId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
@@ -961,8 +958,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false).map(Action::getId)
                         .collect(Collectors.toList());
                 actionRepository.deleteByIdIn(actionIds);
-                afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                        new RolloutUpdatedEvent(rollout, EventPublisherHolder.getInstance().getApplicationId())));
+                afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                        .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
             } catch (final RuntimeException e) {
                 LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
