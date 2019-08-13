@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterButton
 import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
 import org.eclipse.hawkbit.ui.push.DistributionSetDeletedEventContainer;
@@ -95,8 +96,8 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     @Autowired
     DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final ManageDistUIState manageDistUIState,
-            final SoftwareModuleManagement softwareModuleManagement,
+            final UINotification uiNotification, final ManagementUIState managementUIState,
+            final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
@@ -117,10 +118,10 @@ public class DistributionsView extends AbstractNotificationView implements Brows
         this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
                 entityFactory, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
                 dsTypeFilterButtons);
-        this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, manageDistUIState,
-                softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement, targetManagement,
-                entityFactory, uiNotification, distributionSetTagManagement, distributionsViewClientCriterion,
-                systemManagement, configManagement, systemSecurityContext);
+        this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, managementUIState,
+                manageDistUIState, softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement,
+                targetManagement, entityFactory, uiNotification, distributionSetTagManagement,
+                distributionsViewClientCriterion, systemManagement, configManagement, systemSecurityContext);
         this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus,
                 softwareModuleManagement, softwareModuleTypeManagement, entityFactory, manageDistUIState, permChecker,
                 distributionsViewClientCriterion, artifactUploadState, artifactManagement);

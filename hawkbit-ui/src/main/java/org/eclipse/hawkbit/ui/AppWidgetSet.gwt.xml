@@ -18,7 +18,7 @@
 
    <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
 
-   <inherits name="org.vaadin.tokenfield.TokenfieldWidgetset" />
+   
 
    <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
 

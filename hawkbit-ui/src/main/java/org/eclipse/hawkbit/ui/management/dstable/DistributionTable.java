@@ -227,11 +227,27 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         });
     }
 
+    private boolean isFilteredByTags() {
+        return !managementUIState.getDistributionTableFilters().getClickedDistSetTags().isEmpty();
+    }
+
+    private boolean isFilteredByNoTag() {
+        return managementUIState.getDistributionTableFilters().isNoTagSelected();
+    }
+
+    private boolean tableIsFilteredByTagsAndTagWasUnassignedFromDistSet(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG && isFilteredByTags();
+    }
+
+    private boolean tableIsFilteredByNoTagAndTagWasAssignedToDistSet(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG && isFilteredByNoTag();
+    }
+
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
         UI.getCurrent().access(() -> {
-            if (managementUIEvent == ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG
-                    || managementUIEvent == ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG) {
+            if (tableIsFilteredByTagsAndTagWasUnassignedFromDistSet(managementUIEvent)
+                    || tableIsFilteredByNoTagAndTagWasAssignedToDistSet(managementUIEvent)) {
                 refreshFilter();
             }
         });
@@ -263,8 +279,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         final List<String> list = new ArrayList<>();
         queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG,
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
-        if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
-            list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
+        if (!managementUIState.getDistributionTableFilters().getClickedDistSetTags().isEmpty()) {
+            list.addAll(managementUIState.getDistributionTableFilters().getClickedDistSetTags());
         }
         queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list);
         return queryConfig;

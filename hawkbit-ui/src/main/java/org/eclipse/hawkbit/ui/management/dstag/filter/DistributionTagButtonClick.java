@@ -39,7 +39,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {
             managementUIState.getDistributionTableFilters().setNoTagSelected(false);
         } else {
-            managementUIState.getDistributionTableFilters().getDistSetTags().remove(clickedButton.getId());
+            managementUIState.getDistributionTableFilters().getClickedDistSetTags().remove(clickedButton.getId());
         }
         eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
@@ -49,7 +49,7 @@ public class DistributionTagButtonClick extends AbstractFilterMultiButtonClick {
         if (clickedButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID)) {
             managementUIState.getDistributionTableFilters().setNoTagSelected(true);
         } else {
-            managementUIState.getDistributionTableFilters().getDistSetTags().add(clickedButton.getId());
+            managementUIState.getDistributionTableFilters().getClickedDistSetTags().add(clickedButton.getId());
         }
         eventBus.publish(this, new RefreshDistributionTableByFilterEvent());
     }
