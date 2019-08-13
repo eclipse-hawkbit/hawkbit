@@ -15,9 +15,8 @@ import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * A singleton bean which holds the event publisher and service origin Id in
- * order to publish remote application events. It can be used in the cache
- * manager and beans not instantiated by spring e.g. JPA entities or
- * CacheFieldEntityListener which cannot be auto-wired.
+ * order to publish remote application events. It can be used in beans not
+ * instantiated by spring e.g. JPA entities which cannot be auto-wired.
  */
 public final class EventPublisherHolder {
 
