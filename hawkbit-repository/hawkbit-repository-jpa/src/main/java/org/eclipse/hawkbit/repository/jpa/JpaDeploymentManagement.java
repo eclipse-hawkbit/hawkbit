@@ -807,7 +807,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return actionRepository;
     }
 
-    private boolean isActionsAutocloseEnabled() {
+    protected boolean isActionsAutocloseEnabled() {
         return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
     }
 
@@ -821,4 +821,3 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
 }
-
