@@ -32,10 +32,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -48,20 +47,18 @@ public abstract class AbstractDsAssignmentStrategy {
 
     protected final TargetRepository targetRepository;
     protected final AfterTransactionCommitExecutor afterCommit;
-    protected final ApplicationEventPublisher eventPublisher;
-    protected final BusProperties bus;
+    protected final EventPublisherHolder eventPublisherHolder;
     protected final ActionRepository actionRepository;
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
-        this.eventPublisher = eventPublisher;
-        this.bus = bus;
+        this.eventPublisherHolder = eventPublisherHolder;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
@@ -126,7 +123,8 @@ public abstract class AbstractDsAssignmentStrategy {
     abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults);
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId())));
     }
 
     /**
@@ -197,8 +195,8 @@ public abstract class AbstractDsAssignmentStrategy {
      *            the action id of the assignment
      */
     void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
+                new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
     }
 
     JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
