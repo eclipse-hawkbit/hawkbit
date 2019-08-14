@@ -207,8 +207,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
         }
 
-        final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
         try {
+            final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
             final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
