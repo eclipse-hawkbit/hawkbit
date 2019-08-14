@@ -427,7 +427,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     // for testing
-    void setControllerManagement(final ControllerManagement controllerManagement) {
+    public void setControllerManagement(final ControllerManagement controllerManagement) {
         this.controllerManagement = controllerManagement;
     }
 }
