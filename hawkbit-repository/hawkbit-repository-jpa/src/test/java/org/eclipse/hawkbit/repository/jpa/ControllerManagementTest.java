@@ -1083,8 +1083,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
 
         // test for informational status
-        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds1"),
-                testdataFactory.createTargets(1, "t1")));
+        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(
+                testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
         assertThat(actionId1).isNotNull();
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
@@ -1094,8 +1094,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
 
         // test for update status (and mixed case)
-        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(testdataFactory.createDistributionSet("ds2"),
-                testdataFactory.createTargets(1, "t2")));
+        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
+                testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
         assertThat(actionId2).isNotEqualTo(actionId1);
         for (int i = 0; i < maxStatusEntries; ++i) {
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)

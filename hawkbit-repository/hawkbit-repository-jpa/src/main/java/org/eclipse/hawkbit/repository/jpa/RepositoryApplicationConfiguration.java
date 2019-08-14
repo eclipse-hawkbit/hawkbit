@@ -666,8 +666,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
             final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
             final TargetRepository targetRepository, final ActionStatusRepository actionStatusRepository,
-            final AuditorAware<String> auditorProvider, final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final AuditorAware<String> auditorProvider, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final JpaProperties properties) {

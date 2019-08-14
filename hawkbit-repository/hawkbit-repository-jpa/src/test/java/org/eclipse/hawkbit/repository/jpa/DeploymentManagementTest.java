@@ -98,13 +98,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
+        final String dsName = "DistributionSet";
 
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Collections.singletonList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId()))), dsName);
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Collections.singletonList(new TargetWithActionType(target.getControllerId())), "xxx"), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId())), "xxx"), dsName);
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
-                System.currentTimeMillis(), Collections.singletonList(target.getControllerId())), "DistributionSet");
+                System.currentTimeMillis(), Collections.singletonList(target.getControllerId())), dsName);
 
         verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
         verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
@@ -470,9 +471,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .allMatch(action -> !action.isActive());
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent())
-                .usingElementComparator(controllerIdComparator())
-                .containsAll(targets)
-                .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
+                .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
+                .containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
                 .as("TargetUpdateStatus IN_SYNC")
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
@@ -702,8 +702,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .containsAll(undeployedTargetsFromDB);
 
         assertThat(deployedTargetsFromDB).as("content of deployed target is wrong")
-                .usingElementComparator(controllerIdComparator())
-                .containsAll(savedDeployedTargets)
+                .usingElementComparator(controllerIdComparator()).containsAll(savedDeployedTargets)
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
         assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
