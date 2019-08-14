@@ -35,8 +35,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
@@ -50,11 +49,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     private final BooleanSupplier multiAssignmentsConfig;
 
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
-            final BooleanSupplier multiAssignmentsConfig) {
-        super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+        super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
                 quotaManagement);
         this.multiAssignmentsConfig = multiAssignmentsConfig;
     }
@@ -185,8 +183,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions,
+                        eventPublisherHolder.getApplicationId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     private boolean hasPendingCancellations(final Target target) {
@@ -204,8 +203,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      *            of the targets the event refers to
      */
     private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new MultiActionEvent(tenant, bus.getId(), controllerIds)));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new MultiActionEvent(tenant, eventPublisherHolder.getApplicationId(), controllerIds)));
     }
 
     private boolean isMultiAssignmentsEnabled() {

@@ -107,8 +107,8 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected boolean isClickedByDefault(final String tagName) {
-        return null != managementUIState.getDistributionTableFilters().getDistSetTags()
-                && managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName);
+        return null != managementUIState.getDistributionTableFilters().getClickedDistSetTags()
+                && managementUIState.getDistributionTableFilters().getClickedDistSetTags().contains(tagName);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     protected void deleteEntity(final String entityToDelete) {
         final Optional<DistributionSetTag> tagToDelete = distributionSetTagManagement.getByName(entityToDelete);
         tagToDelete.ifPresent(tag -> {
-            if (managementUIState.getDistributionTableFilters().getDistSetTags().contains(entityToDelete)) {
+            if (managementUIState.getDistributionTableFilters().getClickedDistSetTags().contains(entityToDelete)) {
                 uiNotification.displayValidationError(getI18n().getMessage("message.tag.delete", entityToDelete));
                 removeUpdateAndDeleteColumn();
             } else {

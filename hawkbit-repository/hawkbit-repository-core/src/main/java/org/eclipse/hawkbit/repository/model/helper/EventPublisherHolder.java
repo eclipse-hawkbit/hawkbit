@@ -10,26 +10,28 @@ package org.eclipse.hawkbit.repository.model.helper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * A singleton bean which holds the event publisher to have to the cache manager
- * in beans not instantiated by spring e.g. JPA entities or
- * CacheFieldEntityListener which cannot be autowired.
+ * A singleton bean which holds the event publisher and service origin Id in
+ * order to publish remote application events. It can be used in beans not
+ * instantiated by spring e.g. JPA entities which cannot be auto-wired.
  */
-public final class EventPublisherHolder implements ApplicationContextAware {
+public final class EventPublisherHolder {
 
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    private String applicationId;
+    @Autowired(required = false)
+    private ServiceMatcher serviceMatcher;
+
+    @Autowired
+    private BusProperties bus;
 
     private EventPublisherHolder() {
-
     }
 
     /**
@@ -46,12 +48,11 @@ public final class EventPublisherHolder implements ApplicationContextAware {
         return eventPublisher;
     }
 
+    /**
+     * @return the service origin Id coming either from {@link ServiceMatcher}
+     *         when available or {@link BusProperties} otherwise.
+     */
     public String getApplicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public void setApplicationContext(final ApplicationContext applicationContext) {
-        applicationId = applicationContext.getBean(BusProperties.class).getId();
+        return serviceMatcher != null ? serviceMatcher.getServiceId() : bus.getId();
     }
 }

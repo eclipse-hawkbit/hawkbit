@@ -62,10 +62,9 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -109,9 +108,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final NoCountPagingRepository criteriaNoCountDao;
 
-    private final ApplicationEventPublisher eventPublisher;
-
-    private final BusProperties bus;
+    private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
 
@@ -127,7 +124,7 @@ public class JpaTargetManagement implements TargetManagement {
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus, final TenantAware tenantAware,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
         this.entityManager = entityManager;
@@ -139,8 +136,7 @@ public class JpaTargetManagement implements TargetManagement {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
-        this.eventPublisher = eventPublisher;
-        this.bus = bus;
+        this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -190,7 +186,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         // TargetUpdatedEvent is not sent within the touch() method due to the
         // "lastModifiedAt" field being ignored in JpaTarget
-        eventPublisher.publishEvent(new TargetUpdatedEvent(updatedTarget, bus.getId()));
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(updatedTarget, eventPublisherHolder.getApplicationId()));
 
         return createdMetadata;
     }
@@ -239,7 +236,8 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetMetadata matadata = targetMetadataRepository.save(updatedMetadata);
         // target update event is set to ignore "lastModifiedAt" field so it is
         // not send automatically within the touch() method
-        eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId()));
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
         return matadata;
     }
 
@@ -255,7 +253,8 @@ public class JpaTargetManagement implements TargetManagement {
         targetMetadataRepository.deleteById(metadata.getId());
         // target update event is set to ignore "lastModifiedAt" field so it is
         // not send automatically within the touch() method
-        eventPublisher.publishEvent(new TargetUpdatedEvent(target, bus.getId()));
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
     }
 
     @Override
@@ -354,10 +353,12 @@ public class JpaTargetManagement implements TargetManagement {
 
         targetRepository.deleteByIdIn(targetIDs);
 
-        afterCommit.afterCommit(() -> targets.forEach(target -> eventPublisher.publishEvent(
-                new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
-                        Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
-                        JpaTarget.class.getName(), bus.getId()))));
+        afterCommit
+                .afterCommit(() -> targets.forEach(target -> eventPublisherHolder.getEventPublisher()
+                        .publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                                target.getControllerId(),
+                                Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
+                                JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()))));
     }
 
     @Override
@@ -466,7 +467,8 @@ public class JpaTargetManagement implements TargetManagement {
                     .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
         }
         if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
-            specList.add(TargetSpecifications.likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
+            specList.add(TargetSpecifications
+                    .likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
         }
         if (hasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
@@ -794,9 +796,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         target.setRequestControllerAttributes(true);
 
-        eventPublisher.publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                JpaTarget.class.getName(), bus.getId()));
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                        target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
+                        JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()));
     }
 
     @Override

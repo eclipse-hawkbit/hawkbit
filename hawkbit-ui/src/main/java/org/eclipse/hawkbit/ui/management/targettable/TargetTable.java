@@ -220,11 +220,19 @@ public class TargetTable extends AbstractTable<Target> {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
         UI.getCurrent().access(() -> {
-            if (managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG
-                    || managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG) {
+            if (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent)
+                    || tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent)) {
                 refreshFilter();
             }
         });
+    }
+
+    private boolean tableIsFilteredByTagsAndTagWasUnassignedFromTarget(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG && isFilteredByTags();
+    }
+
+    private boolean tableIsFilteredByNoTagAndTagWasAssignedToTarget(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG && isFilteredByNoTag();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -837,6 +845,10 @@ public class TargetTable extends AbstractTable<Target> {
 
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
+    }
+
+    private boolean isFilteredByNoTag() {
+        return managementUIState.getTargetTableFilters().isNoTagSelected();
     }
 
     private void assignDsToTarget(final DragAndDropEvent event) {

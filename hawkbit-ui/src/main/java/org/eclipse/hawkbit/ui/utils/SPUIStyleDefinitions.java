@@ -120,6 +120,14 @@ public final class SPUIStyleDefinitions {
     public static final String SIMPLE_FILTER_HEADER = "simple-tag-filter-header";
 
     /**
+     * Simple tag filter header layout.
+     */
+    public static final String TAG_BUTTON_WITH_BACKGROUND = "button-tag-with-background";
+    /**
+     * Simple tag filter header layout.
+     */
+    public static final String ASSIGN_TAG_BUTTON = "button-assign-tag";
+    /**
      * Style to disable top border.
      */
     public static final String NO_TOP_BORDER = "no-border-top";

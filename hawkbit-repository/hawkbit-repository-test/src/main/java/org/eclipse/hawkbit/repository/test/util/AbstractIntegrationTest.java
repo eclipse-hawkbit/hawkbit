@@ -201,7 +201,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    protected ApplicationEventPublisher eventPublisher;
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
@@ -231,9 +231,8 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType) {
-        return deploymentManagement.assignDistributionSet(dsID,
-                Collections.singletonList(new TargetWithActionType(controllerId, actionType,
-                        RepositoryModelConstants.NO_FORCE_TIME)));
+        return deploymentManagement.assignDistributionSet(dsID, Collections.singletonList(
+                new TargetWithActionType(controllerId, actionType, RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
     /**

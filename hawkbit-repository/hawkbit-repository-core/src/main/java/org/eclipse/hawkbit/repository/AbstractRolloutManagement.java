@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -45,8 +44,6 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
     protected final ApplicationContext context;
 
-    protected final ApplicationEventPublisher eventPublisher;
-
     protected final VirtualPropertyReplacer virtualPropertyReplacer;
 
     protected final PlatformTransactionManager txManager;
@@ -60,15 +57,14 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     protected AbstractRolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final ApplicationEventPublisher eventPublisher, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry,
             final RolloutApprovalStrategy rolloutApprovalStrategy) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.context = context;
-        this.eventPublisher = eventPublisher;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         this.tenantAware = tenantAware;
