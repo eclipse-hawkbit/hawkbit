@@ -895,7 +895,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Test
     @Description("Messages that result into certain exceptions being raised should not be requeued. This message should forwarded to the deadletter queue")
     @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 0)})
-    public void ignoredExceptionTypesShouldNotBeRequeued() throws IllegalAccessException, InstantiationException {
+    public void ignoredExceptionTypesShouldNotBeRequeued() {
         final ControllerManagement mockedControllerManagement = Mockito.mock(ControllerManagement.class);
 
         final List<Class<? extends RuntimeException>> exceptionsThatShouldNotBeRequeued = Arrays
@@ -904,7 +904,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         try {
             for (Class<? extends RuntimeException> exceptionClass : exceptionsThatShouldNotBeRequeued) {
-                doThrow(exceptionClass.newInstance()).when(mockedControllerManagement)
+                doThrow(exceptionClass).when(mockedControllerManagement)
                         .findOrRegisterTargetIfItDoesNotExist(eq(controllerId), any());
 
                 amqpMessageHandlerService.setControllerManagement(mockedControllerManagement);

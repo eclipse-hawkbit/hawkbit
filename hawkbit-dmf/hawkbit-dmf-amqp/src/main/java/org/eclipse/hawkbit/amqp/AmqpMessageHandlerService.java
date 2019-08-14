@@ -341,7 +341,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
     // mapping
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
+    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
             final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
