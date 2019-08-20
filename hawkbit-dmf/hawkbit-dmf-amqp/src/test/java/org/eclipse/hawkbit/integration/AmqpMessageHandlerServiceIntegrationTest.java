@@ -589,13 +589,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
-        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActionIds().get(0));
+        deploymentManagement.cancelAction(getFirstAssignedActionId(distributionSetAssignmentResult));
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(distributionSetAssignmentResult.getActionIds().get(0), controllerId);
+        assertCancelActionMessage(getFirstAssignedActionId(distributionSetAssignmentResult), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -947,7 +947,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = assignmentResult.getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }

@@ -20,6 +20,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
@@ -167,20 +168,23 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     private List<Target> assignWithoutMaintenanceWindow(final DistributionSet distributionSet, final Target savedTarget,
             final boolean timeforced) {
-        return timeforced ? assignDistributionSetTimeForced(distributionSet, savedTarget).getAssignedEntity()
+        final List<Action> actions = timeforced
+                ? assignDistributionSetTimeForced(distributionSet, savedTarget).getAssignedEntity()
                 : assignDistributionSet(distributionSet, savedTarget).getAssignedEntity();
+        return actions.stream().map(Action::getTarget).collect(Collectors.toList());
     }
 
     private List<Target> assignWithMaintenanceWindow(final DistributionSet distributionSet, final Target savedTarget,
             final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
-        return timeforced
+        final List<Action> actions = timeforced
                 ? assignDistributionSetWithMaintenanceWindowTimeForced(distributionSet.getId(),
                         savedTarget.getControllerId(), maintenanceWindowSchedule, maintenanceWindowDuration,
                         maintenanceWindowTimeZone).getAssignedEntity()
                 : assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), savedTarget.getControllerId(),
                         maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
                                 .getAssignedEntity();
+        return actions.stream().map(Action::getTarget).collect(Collectors.toList());
     }
 
     protected DistributionSet createDistributionSet() {

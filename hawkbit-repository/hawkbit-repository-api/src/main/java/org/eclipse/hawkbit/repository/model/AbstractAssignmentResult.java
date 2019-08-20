@@ -18,35 +18,24 @@ import java.util.List;
  *            type of the assigned and unassigned {@link BaseEntity}s.
  *
  */
-public class AssignmentResult<T extends BaseEntity> {
+public abstract class AbstractAssignmentResult<T extends BaseEntity> {
 
-    private final int total;
-    private final int assigned;
     private final int alreadyAssigned;
-    private final int unassigned;
-    private final List<T> assignedEntity;
-    private final List<T> unassignedEntity;
+    private final List<? extends T> assignedEntity;
+    private final List<? extends T> unassignedEntity;
 
     /**
      * Constructor.
-     *
-     * @param assigned
-     *            is the number of newly assigned elements.
      * @param alreadyAssigned
-     *            number of already assigned/ignored elements
-     * @param unassigned
-     *            number of newly assigned elements
+     *      count of already assigned entities
      * @param assignedEntity
      *            {@link List} of assigned entity.
      * @param unassignedEntity
      *            {@link List} of unassigned entity.
      */
-    public AssignmentResult(final int assigned, final int alreadyAssigned, final int unassigned,
-            final List<T> assignedEntity, final List<T> unassignedEntity) {
-        this.assigned = assigned;
+    public AbstractAssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
+            final List<? extends T> unassignedEntity) {
         this.alreadyAssigned = alreadyAssigned;
-        total = assigned + alreadyAssigned;
-        this.unassigned = unassigned;
         this.assignedEntity = assignedEntity;
         this.unassignedEntity = unassignedEntity;
     }
@@ -55,14 +44,14 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return number of newly assigned elements.
      */
     public int getAssigned() {
-        return assigned;
+        return getAssignedEntity().size();
     }
 
     /**
      * @return total number (assigned and already assigned).
      */
     public int getTotal() {
-        return total;
+        return getAssigned() + alreadyAssigned;
     }
 
     /**
@@ -76,7 +65,7 @@ public class AssignmentResult<T extends BaseEntity> {
      * @return number of unsassigned elements
      */
     public int getUnassigned() {
-        return unassigned;
+        return getUnassignedEntity().size();
     }
 
     /**

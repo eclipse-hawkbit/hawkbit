@@ -369,8 +369,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
         sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null).andDo(MockMvcResultPrinter.print())
@@ -413,7 +412,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Step
     private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds)
             throws Exception {
-        target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
+        target = getFirstAssignedTarget(assignDistributionSet(ds.getId(), target.getControllerId()));
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
         sendDeploymentActionFeedback(target, action, "closed", "failure").andExpect(status().isOk());
@@ -423,7 +422,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Step
     private void assertAttributesUpdateRequestedAfterSuccessfulDeployment(Target target, final DistributionSet ds)
             throws Exception {
-        target = assignDistributionSet(ds.getId(), target.getControllerId()).getAssignedEntity().iterator().next();
+        target = getFirstAssignedTarget(assignDistributionSet(ds.getId(), target.getControllerId()));
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
                 .getContent().get(0);
         sendDeploymentActionFeedback(target, action, "closed", null).andExpect(status().isOk());
@@ -474,8 +473,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void testActionHistoryCount() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -510,8 +508,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void testActionHistoryZeroInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -542,8 +539,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void testActionHistoryNegativeInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId()).getAssignedEntity().iterator()
-                .next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -620,8 +616,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
-                getTestSchedule(2), getTestDuration(1), getTestTimeZone()).getAssignedEntity().iterator().next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
+                savedTarget.getControllerId(), getTestSchedule(2), getTestDuration(1), getTestTimeZone()));
 
         mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
 
@@ -640,8 +636,8 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        savedTarget = assignDistributionSetWithMaintenanceWindow(ds.getId(), savedTarget.getControllerId(),
-                getTestSchedule(-5), getTestDuration(10), getTestTimeZone()).getAssignedEntity().iterator().next();
+        savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
+                savedTarget.getControllerId(), getTestSchedule(-5), getTestDuration(10), getTestTimeZone()));
 
         mvc.perform(get("/default-tenant/controller/v1/1911/")).andExpect(status().isOk());
 
@@ -662,12 +658,12 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Action action1 = assignDistributionSet(ds1, target).getActions().get(0);
-        final Action action2 = assignDistributionSet(ds2, target).getActions().get(0);
+        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1, target));
+        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2, target));
 
         assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
         sendDeploymentActionFeedback(target, action1, "closed", "success");
-        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action2.getId());
+        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action2Id);
 
     }
 

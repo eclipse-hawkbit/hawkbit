@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -286,7 +286,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         if (offline) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(), Arrays.asList(targetId))));
+                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(),
+                            Collections.singletonList(targetId))));
         }
 
         findTargetWithExceptionIfNotFound(targetId);
@@ -294,7 +295,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         if (maintenanceWindow == null) {
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
-                    .assignDistributionSet(dsId.getId(), Arrays.asList(new TargetWithActionType(targetId,
+                    .assignDistributionSet(dsId.getId(), Collections.singletonList(new TargetWithActionType(targetId,
                             MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
         }
 
@@ -306,7 +307,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         return ResponseEntity
                 .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
-                        Arrays.asList(new TargetWithActionType(targetId,
+                        Collections.singletonList(new TargetWithActionType(targetId,
                                 MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
                                 cronSchedule, duration, timezone)))));
 

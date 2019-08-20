@@ -188,14 +188,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     toBeChangedDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
-                    toBeChangedDSs.size(), Collections.emptyList(),
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
+                    Collections.emptyList(),
                     Collections.unmodifiableList(
                             toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
                     myTag);
         } else {
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0,
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
                     Collections.unmodifiableList(
                             toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
                     Collections.emptyList(), myTag);
@@ -386,7 +385,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList = Arrays.asList(DistributionSetSpecification.isDeleted(false),
                     DistributionSetSpecification.isCompleted(complete));
         } else {
-            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false));
+            specList = Collections.singletonList(DistributionSetSpecification.isDeleted(false));
         }
 
         return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
@@ -754,7 +753,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void delete(final long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
-        delete(Arrays.asList(setId));
+        delete(Collections.singletonList(setId));
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {
@@ -811,7 +810,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> get(final long id) {
-        return distributionSetRepository.findById(id).map(d -> (DistributionSet) d);
+        return distributionSetRepository.findById(id).map(d -> d);
     }
 
     @Override

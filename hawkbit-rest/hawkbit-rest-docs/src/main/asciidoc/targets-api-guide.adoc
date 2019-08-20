@@ -577,6 +577,9 @@ include::{snippets}/targets/post-assign-distribution-set-to-target/http-request.
 
 === Response (Status 200)
 
+==== Response fields
+include::{snippets}/targets/post-assign-distribution-set-to-target/response-fields.adoc[]
+
 ==== Response example 
 
 include::{snippets}/targets/post-assign-distribution-set-to-target/http-response.adoc[]

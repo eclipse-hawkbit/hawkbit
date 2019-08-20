@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.eclipse.hawkbit.repository.model.AssignmentResult;
+import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -294,7 +294,7 @@ public final class HawkbitCommonUtil {
      * @return message
      */
     public static String createAssignmentMessage(final String tagName,
-            final AssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
+            final AbstractAssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();

@@ -150,12 +150,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
-        assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
+        assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
-        assertCancelActionMessage(assignmentResult.getActionIds().get(0), controllerId);
-
+        assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
     }
 
     @Test
@@ -258,9 +257,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         registerAndAssertTargetWithExistingTenant(controllerId);
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final Long actionId1 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        final Long actionId2 = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
@@ -275,7 +274,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Long assignNewDsToTarget(final String controllerId) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Long actionId = assignDistributionSet(ds.getId(), controllerId).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         return actionId;
     }

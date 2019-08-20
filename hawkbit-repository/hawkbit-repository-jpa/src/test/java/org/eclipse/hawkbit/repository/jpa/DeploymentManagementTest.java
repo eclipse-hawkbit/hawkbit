@@ -98,13 +98,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
+        final String dsName = "DistributionSet";
 
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Arrays.asList(new TargetWithActionType(target.getControllerId()))), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId()))), dsName);
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Arrays.asList(new TargetWithActionType(target.getControllerId())), "xxx"), "DistributionSet");
+                Collections.singletonList(new TargetWithActionType(target.getControllerId())), "xxx"), dsName);
         verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
-                System.currentTimeMillis(), Arrays.asList(target.getControllerId())), "DistributionSet");
+                System.currentTimeMillis(), Collections.singletonList(target.getControllerId())), dsName);
 
         verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
         verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
@@ -128,7 +129,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
         final Action action = deploymentManagement.findActionWithDetails(actionId).get();
 
         assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
@@ -145,7 +146,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
         // act
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
@@ -190,11 +191,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test verifies that action-states of an action are found by using id-based search.")
     public void findActionStatusByActionId() {
-        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
-                new ArrayList<DistributionSetTag>());
+        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0", Collections.emptyList());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
         final Slice<Action> actions = deploymentManagement.findActionsByTarget(testTarget.get(0).getControllerId(),
                 PAGE);
         final ActionStatus expectedActionStatus = ((JpaAction) actions.getContent().get(0)).getActionStatus().get(0);
@@ -213,10 +213,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
-        final Long actionId = assignDistributionSet(testDs, testTarget).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
         // create action-status entry with one message
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.FINISHED).messages(Arrays.asList("finished message")));
+                .status(Action.Status.FINISHED).messages(Collections.singletonList("finished message")));
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(PAGE, actionId);
 
         // find newly created action-status entry with message
@@ -465,12 +465,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final long current = System.currentTimeMillis();
         final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
-                .getAssignedEntity();
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());;
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive());
-        assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent()).containsAll(targets)
-                .hasSize(10).containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
+
+        assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent())
+                .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
+                .containsAll(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()))
                 .as("InstallationDate set").allMatch(target -> target.getInstallationDate() >= current)
                 .as("TargetUpdateStatus IN_SYNC")
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
@@ -630,7 +632,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
         final DistributionSet incomplete = distributionSetManagement.create(entityFactory.distributionSet().create()
-                .name("incomplete").version("v1").type(standardDsType).modules(Arrays.asList(ah.getId())));
+                .name("incomplete").version("v1").type(standardDsType).modules(Collections.singletonList(ah.getId())));
 
         try {
             assignDistributionSet(incomplete, targets);
@@ -698,7 +700,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // test the content of different lists
         assertThat(allFoundTargets).as("content of founded target is wrong").containsAll(deployedTargetsFromDB)
                 .containsAll(undeployedTargetsFromDB);
-        assertThat(deployedTargetsFromDB).as("content of deployed target is wrong").containsAll(savedDeployedTargets)
+
+        assertThat(deployedTargetsFromDB).as("content of deployed target is wrong")
+                .usingElementComparator(controllerIdComparator()).containsAll(savedDeployedTargets)
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
         assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
@@ -769,15 +773,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // remove updActB from
         // activeActions, add a corresponding cancelAction and another
         // UpdateAction for dsA
-        final Iterable<Target> deployed2DS = assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets())
-                .getAssignedEntity();
+        final List<Target> deployed2DS = assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets())
+                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         actionRepository.findByDistributionSetId(pageRequest, dsA.getId()).getContent().get(1);
 
         // get final updated version of targets
         final List<Target> deployResWithDsBTargets = targetManagement.getByControllerID(deployResWithDsB
                 .getDeployedTargets().stream().map(Target::getControllerId).collect(Collectors.toList()));
 
-        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);
+        assertThat(deployed2DS).as("deployed ds is wrong").usingElementComparator(controllerIdComparator())
+                .containsAll(deployResWithDsBTargets);
         assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsBTargets);
 
         for (final Target t_ : deployed2DS) {
@@ -892,10 +897,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("a");
         final DistributionSet dsB = testdataFactory.createDistributionSet("b");
-        List<Target> targs = Arrays.asList(testdataFactory.createTarget("target-id-A"));
+        List<Target> targs = Collections.singletonList(testdataFactory.createTarget("target-id-A"));
 
         // doing the assignment
-        targs = assignDistributionSet(dsA, targs).getAssignedEntity();
+        targs = assignDistributionSet(dsA, targs).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
         Target targ = targetManagement.getByControllerID(targs.iterator().next().getControllerId()).get();
 
         // checking the revisions of the created entities
@@ -934,7 +940,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertEquals("wrong installed ds", dsA,
                 deploymentManagement.getInstalledDistributionSet(targ.getControllerId()).get());
 
-        targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity();
+        targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
 
         targ = targs.iterator().next();
 
@@ -962,7 +969,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
 
-        assignDistributionSet(dsA, Arrays.asList(targ));
+        assignDistributionSet(dsA, Collections.singletonList(targ));
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
@@ -978,8 +985,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.SOFT,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActionIds().get(0);
+                Collections.singletonList(target.getControllerId()));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet);
         // verify preparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.SOFT);
@@ -1002,8 +1009,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.FORCED,
                 org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Arrays.asList(target.getControllerId()));
-        final Long actionId = assignDistributionSet.getActionIds().get(0);
+                Collections.singletonList(target.getControllerId()));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet);
         // verify perparation
         Action findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
@@ -1015,6 +1022,50 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(forceTargetAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
         findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
+    }
+    
+    @Test
+    @Description("Tests the computation of already assigned entities returned as a result of an assignment")
+    public void testAlreadyAssignedAndAssignedActionsInAssignmentResult(){
+        // create target1, distributionSet, assign ds to target1 and finish update (close all actions)
+        final Action action = prepareFinishedUpdate("target1", "ds", false);
+        final Target target2 = testdataFactory.createTarget("target2"); 
+        final Target target3 = testdataFactory.createTarget("target3");
+
+        // assign ds to target2, but don't finish update (actions should be still open)
+        assignDistributionSet(action.getDistributionSet().getId(), target2.getControllerId());
+
+        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+                action.getDistributionSet().getId(),
+                Arrays.asList(new TargetWithActionType(action.getTarget().getControllerId()),
+                        new TargetWithActionType(target3.getControllerId())));
+        
+        assertThat(assignmentResult).isNotNull();
+        assertThat(assignmentResult.getTotal()).as("Total count of assigned and already assigned targets").isEqualTo(2);
+        assertThat(assignmentResult.getAssigned()).as("Total count of assigned targets").isEqualTo(1);
+        assertThat(assignmentResult.getAlreadyAssigned()).as("Total count of already assigned targets").isEqualTo(1);
+        assertThat(assignmentResult.getAssignedEntity()).isNotEmpty();
+        assertThat(assignmentResult.getAssignedEntity()).allMatch(
+                a -> a.getTarget().equals(target3) && a.getDistributionSet().equals(action.getDistributionSet()));
+        assertThat(assignmentResult.getAssignedEntity())
+                .noneMatch(a -> a.getTarget().getControllerId().equals("target1"));
+    }
+
+    @Test
+    @Description("Verify that the DistributionSetAssignmentResult not contains already assigned targets.")
+    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
+        final DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+
+        // create assigned DS
+        final Target savedTarget = testdataFactory.createTarget();
+        DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
+                savedTarget.getControllerId());
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
+
+        assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
+        assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
+
+        assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
     /**
@@ -1059,7 +1110,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // assigning all DistributionSet to the Target in the list
         // deployedTargets
         for (final DistributionSet ds : dsList) {
-            deployedTargets = assignDistributionSet(ds, deployedTargets).getAssignedEntity();
+            deployedTargets = assignDistributionSet(ds, deployedTargets).getAssignedEntity().stream()
+                    .map(Action::getTarget).collect(Collectors.toList());
         }
 
         return new DeploymentResult(deployedTargets, nakedTargets, dsList, deployedTargetPrefix, undeployedTargetPrefix,

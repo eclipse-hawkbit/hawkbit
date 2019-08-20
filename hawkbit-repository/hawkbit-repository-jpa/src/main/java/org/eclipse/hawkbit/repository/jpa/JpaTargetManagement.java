@@ -294,7 +294,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
         return targetMetadataRepository.findById(new TargetMetadataCompositeKey(targetId, key))
-                .map(t -> (TargetMetadata) t);
+                .map(t -> t);
     }
 
     @Override
@@ -470,14 +470,14 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications
                     .likeIdOrNameOrDescriptionOrAttributeValue(filterParams.getFilterBySearchText()));
         }
-        if (isHasTagsFilterActive(filterParams)) {
+        if (hasTagsFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
                     filterParams.getSelectTargetWithNoTag()));
         }
         return specList;
     }
 
-    private static boolean isHasTagsFilterActive(final FilterParams filterParams) {
+    private static boolean hasTagsFilterActive(final FilterParams filterParams) {
         return ((filterParams.getSelectTargetWithNoTag() != null) && filterParams.getSelectTargetWithNoTag())
                 || ((filterParams.getFilterByTagNames() != null) && (filterParams.getFilterByTagNames().length > 0));
     }
@@ -520,7 +520,7 @@ public class JpaTargetManagement implements TargetManagement {
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
             alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
-            return new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(), Collections.emptyList(),
+            return new TargetTagAssignmentResult(0, Collections.emptyList(),
                     Collections.unmodifiableList(alreadyAssignedTargets), tag);
         }
 
@@ -528,7 +528,6 @@ public class JpaTargetManagement implements TargetManagement {
         // some or none are assigned -> assign
         allTargets.forEach(target -> target.addTag(tag));
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                allTargets.size(), 0,
                 Collections
                         .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
                 Collections.emptyList(), tag);
@@ -776,7 +775,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Optional<Target> get(final long id) {
-        return targetRepository.findById(id).map(t -> (Target) t);
+        return targetRepository.findById(id).map(t -> t);
     }
 
     @Override

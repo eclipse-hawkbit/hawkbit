@@ -124,7 +124,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Action createAction(final DistributionSet testDs) {
-        return deploymentManagement.findAction(assignDistributionSet(testDs, testTarget).getActionIds().get(0)).get();
+        return getFirstAssignedAction(assignDistributionSet(testDs, testTarget));
     }
 
     @Test
