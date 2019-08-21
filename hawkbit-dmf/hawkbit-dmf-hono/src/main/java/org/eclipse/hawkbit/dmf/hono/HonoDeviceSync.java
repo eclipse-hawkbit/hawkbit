@@ -1,5 +1,6 @@
 package org.eclipse.hawkbit.dmf.hono;
 
+import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,22 +9,24 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
-import javax.annotation.PostConstruct;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 @EnableBinding(HonoInputSink.class)
 public class HonoDeviceSync {
@@ -42,9 +45,12 @@ public class HonoDeviceSync {
     @Autowired
     private TargetManagement targetManagement;
 
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    private String oidcAccessToken;
+    private Semaphore mutex = new Semaphore(1);
+    private boolean syncedInitially = false;
+
+    private String oidcAccessToken = null;
     private Instant oidcAccessTokenExpirationDate;
 
     private String honoTenantListUri;
@@ -65,26 +71,35 @@ public class HonoDeviceSync {
         this.username = username;
         this.password = password;
 
-        objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        oidcAccessToken = null;
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
+    private void initialSync() {
+        // Since ApplicationReadyEvent is emitted multiple times make sure it is synced at most once during startup.
+        if (!syncedInitially) {
+            synchronize();
+            syncedInitially = true;
+        }
+    }
+
     public void synchronize() {
         try {
+            mutex.acquire();
+
             List<IdentifiableHonoTenant> tenants = getAllHonoTenants();
             for (IdentifiableHonoTenant honoTenant : tenants) {
                 String tenant = honoTenant.getId();
-                Map<String, HonoDevice> honoDevices = getAllHonoDevices(tenant);
-                List<Target> targets = getAllHawkbitTargets(tenant);
+                Map<String, IdentifiableHonoDevice> honoDevices = getAllHonoDevices(tenant);
+                Slice<Target> targets = systemSecurityContext.runAsSystemAsTenant(
+                        () -> targetManagement.findAll(Pageable.unpaged()), tenant);
 
                 for (Target target : targets) {
                     String controllerId = target.getControllerId();
                     if (honoDevices.containsKey(controllerId)) {
-                        HonoDevice honoDevice = honoDevices.remove(controllerId);
+                        IdentifiableHonoDevice honoDevice = honoDevices.remove(controllerId);
                         honoDevice.setTenant(tenant);
-                        updateTarget(honoDevice);
+                        systemSecurityContext.runAsSystemAsTenant(() -> updateTarget(honoDevice), tenant);
                     }
                     else {
                         systemSecurityContext.runAsSystemAsTenant(() -> {
@@ -95,28 +110,17 @@ public class HonoDeviceSync {
                 }
 
                 // At this point honoTargets only contains objects which were not found in hawkBit's target repository
-                for (Map.Entry<String, HonoDevice> entry : honoDevices.entrySet()) {
-                    HonoDevice device = entry.getValue();
-                    device.setTenant(tenant);
-                    systemSecurityContext.runAsSystemAsTenant(() -> createTarget(device), tenant);
+                for (Map.Entry<String, IdentifiableHonoDevice> entry : honoDevices.entrySet()) {
+                    systemSecurityContext.runAsSystemAsTenant(() -> createTarget(entry.getValue()), tenant);
                 }
             }
+
+            mutex.release();
         } catch (IOException e) {
-            LOG.error("Could not parse hono api response", e);
+            LOG.error("Could not parse hono api response.", e);
+        } catch (InterruptedException e) {
+            LOG.error("Synchronizing hawkbit with Hono has been interrupted.", e);
         }
-    }
-    
-    private List<Target> getAllHawkbitTargets(String tenant) {
-        List<Target> targets = new ArrayList<>();
-
-        return systemSecurityContext.runAsSystemAsTenant(() -> {
-            long count = targetManagement.count();
-            for (int i = 0; count > 0; count -= Integer.MAX_VALUE, ++i) {
-                targets.addAll(targetManagement.findAll(PageRequest.of(i, Integer.MAX_VALUE)).getContent());
-            }
-
-            return targets;
-        }, tenant);
     }
 
     private List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {
@@ -137,8 +141,8 @@ public class HonoDeviceSync {
         return tenants;
     }
 
-    private Map<String, HonoDevice> getAllHonoDevices(String tenant) throws IOException {
-        Map<String, HonoDevice> devices = new HashMap<>();
+    private Map<String, IdentifiableHonoDevice> getAllHonoDevices(String tenant) throws IOException {
+        Map<String, IdentifiableHonoDevice> devices = new HashMap<>();
         long offset = 0;
         long total = Long.MAX_VALUE;
         while (devices.size() < total) {
@@ -147,10 +151,13 @@ public class HonoDeviceSync {
             addAuthorizationHeader(connection);
 
             HonoDeviceListPage page = objectMapper.readValue(connection.getInputStream(), HonoDeviceListPage.class);
-            for (IdentifiableHonoDevice identifiableDevice : page.getItems()) {
-                devices.put(identifiableDevice.getId(), identifiableDevice.getDevice());
+            if (page.getItems() != null) {
+                for (IdentifiableHonoDevice identifiableDevice : page.getItems()) {
+                    identifiableDevice.setTenant(tenant);
+                    devices.put(identifiableDevice.getId(), identifiableDevice);
+                }
+                offset += page.getItems().size();
             }
-            offset += page.getItems().size();
             total = page.getTotal();
         }
 
@@ -194,7 +201,7 @@ public class HonoDeviceSync {
     }
 
     @StreamListener(HonoInputSink.DEVICE_CREATED)
-    public void onDeviceCreated(HonoDevice honoDevice) {
+    public void onDeviceCreated(IdentifiableHonoDevice honoDevice) {
         final String tenant = honoDevice.getTenant();
         if (tenant == null) {
             throw new RuntimeException("The delivered hono device does not contain information about the tenant");
@@ -204,7 +211,7 @@ public class HonoDeviceSync {
     }
 
     @StreamListener(HonoInputSink.DEVICE_UPDATED)
-    public void onDeviceUpdated(HonoDevice honoDevice) {
+    public void onDeviceUpdated(IdentifiableHonoDevice honoDevice) {
         final String tenant = honoDevice.getTenant();
         if (tenant == null) {
             throw new RuntimeException("The delivered hono device does not contain information about the tenant");
@@ -221,7 +228,7 @@ public class HonoDeviceSync {
     }
 
     @StreamListener(HonoInputSink.DEVICE_DELETED)
-    public void onDeviceDeleted(HonoDevice honoDevice) {
+    public void onDeviceDeleted(IdentifiableHonoDevice honoDevice) {
         final String tenant = honoDevice.getTenant();
         if (tenant == null) {
             throw new RuntimeException("The delivered hono device does not contain information about the tenant");
@@ -238,20 +245,15 @@ public class HonoDeviceSync {
         }, tenant);
     }
 
-    private Target createTarget(HonoDevice honoDevice) {
-        // Create tenant if necessary
-        if (SystemManagementHolder.getInstance().getSystemManagement() == null) {
-            SystemManagementHolder.getInstance().setSystemManagement(systemManagement); // Make sure it's set.
-        }
+    private Target createTarget(IdentifiableHonoDevice honoDevice) {
         systemManagement.getTenantMetadata(honoDevice.getTenant());
         return targetManagement.create(entityFactory.target().create()
-                .controllerId(honoDevice.getId()).description(honoDevice.getExt().toString()));
+                .controllerId(honoDevice.getId()).description(honoDevice.getDevice().getExt().toString()));
     }
 
-    private Target updateTarget(HonoDevice honoDevice) {
+    private Target updateTarget(IdentifiableHonoDevice honoDevice) {
         return targetManagement.update(entityFactory.target()
                 .update(honoDevice.getId())
-                .description(honoDevice.getExt().toString()));
+                .description(honoDevice.getDevice().getExt().toString()));
     }
-
 }
