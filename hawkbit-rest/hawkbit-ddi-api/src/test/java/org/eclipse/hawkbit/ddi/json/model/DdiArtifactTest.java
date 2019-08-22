@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
+import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
@@ -31,6 +32,7 @@ public class DdiArtifactTest {
     private ObjectMapper mapper = new ObjectMapper();
 
     @Test
+    @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         String filename = "testfile.txt";
@@ -55,6 +57,7 @@ public class DdiArtifactTest {
     }
 
     @Test
+    @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
@@ -70,6 +73,7 @@ public class DdiArtifactTest {
     }
 
     @Test(expected = MismatchedInputException.class)
+    @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
