@@ -19,17 +19,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 
+import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 /**
  * Check DDI api model classes for '@JsonIgnoreProperties' annotation
  */
-@Feature("Model Tests - Direct Device Integration API")
+@Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
 public class JsonIgnorePropertiesAnnotationTest {
 
     @Test
+    @Description(
+            "This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
     public void shouldCheckAnnotationsForAllModelClasses() throws IOException {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         String packageName = this.getClass().getPackage().getName();

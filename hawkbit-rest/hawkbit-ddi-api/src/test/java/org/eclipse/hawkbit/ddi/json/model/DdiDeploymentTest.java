@@ -20,6 +20,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -27,7 +28,7 @@ import io.qameta.allure.Story;
 /**
  * Test serializability of DDI api model 'DdiDeployment'
  */
-@Feature("Model Tests - Direct Device Integration API")
+@Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
 public class DdiDeploymentTest {
 
@@ -64,7 +65,7 @@ public class DdiDeploymentTest {
         assertThat(ddiDeployment.getMaintenanceWindow().getStatus()).isEqualTo(AVAILABLE.getStatus());
     }
 
-    @Test(expected = com.fasterxml.jackson.databind.exc.MismatchedInputException.class)
+    @Test(expected = MismatchedInputException.class)
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiDeployment = "{\"download\":[\"forced\"],\"update\":\"attempt\", "

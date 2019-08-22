@@ -17,6 +17,7 @@ import org.assertj.core.util.Lists;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -24,7 +25,7 @@ import io.qameta.allure.Story;
 /**
  * Test serializability of DDI api model 'DdiActionFeedback'
  */
-@Feature("Model Tests - Direct Device Integration API")
+@Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
 public class DdiActionFeedbackTest {
 
@@ -61,7 +62,7 @@ public class DdiActionFeedbackTest {
         assertThat(ddiActionFeedback.getTime()).matches("20190809T121314");
     }
 
-    @Test(expected = com.fasterxml.jackson.databind.exc.MismatchedInputException.class)
+    @Test(expected = MismatchedInputException.class)
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiActionFeedback = "{\"id\": [1],\"time\":\"20190809T121314\",\"status\":{\"execution\":\"closed\",\"result\":null,\"details\":[]}}";

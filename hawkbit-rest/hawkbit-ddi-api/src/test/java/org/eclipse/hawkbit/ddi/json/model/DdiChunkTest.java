@@ -18,6 +18,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -25,7 +26,7 @@ import io.qameta.allure.Story;
 /**
  * Test serializability of DDI api model 'DdiChunk'
  */
-@Feature("Model Tests - Direct Device Integration API")
+@Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
 public class DdiChunkTest {
 
@@ -65,7 +66,7 @@ public class DdiChunkTest {
         assertThat(ddiChunk.getArtifacts().size()).isEqualTo(0);
     }
 
-    @Test(expected = com.fasterxml.jackson.databind.exc.MismatchedInputException.class)
+    @Test(expected = MismatchedInputException.class)
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiChunk = "{\"part\":[\"1234\"],\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[]}";
