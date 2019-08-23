@@ -179,42 +179,6 @@ public interface DeploymentManagement {
      * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
      * </ol>
      * 
-     * @param dsID
-     *            the ID of the distribution set that was assigned
-     * @param controllerIDs
-     *            a list of IDs of the targets that where assigned
-     * @return the assignment result
-     * 
-     * @throws IncompleteDistributionSetException
-     *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             defined by the {@link DistributionSetType}.
-     *
-     * @throws EntityNotFoundException
-     *             if either provided {@link DistributionSet} or {@link Target}s
-     *             do not exist
-     * 
-     * @throws QuotaExceededException
-     *             if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult offlineAssignedDistributionSet(Long dsID, Collection<String> controllerIDs);
-
-    /**
-     * Registers an "offline" assignment, i.e. adds a completed action for the
-     * given {@link DistributionSet} to the given {@link Target}s.
-     * 
-     * The handling differs to hawkBit-managed updates by means that:<br/>
-     * 
-     * <ol type="A">
-     * <li>it ignores targets completely that are in
-     * {@link TargetUpdateStatus#PENDING}.</li>
-     * <li>it creates completed actions.</li>
-     * <li>sets both installed and assigned DS on the target and switches the
-     * status to {@link TargetUpdateStatus#IN_SYNC}.</li>
-     * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
-     * </ol>
-     * 
      * @param dsIDs
      *            the IDs of the distribution sets that were assigned
      * @param controllerIDs

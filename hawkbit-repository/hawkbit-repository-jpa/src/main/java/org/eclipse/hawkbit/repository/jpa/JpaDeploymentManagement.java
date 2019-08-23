@@ -167,19 +167,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
-            final Collection<String> controllerIDs) {
-        final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
-                .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
-                .collect(Collectors.toList());
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID,
-                targetWithActionTypes, null, offlineDsAssignmentStrategy);
-        offlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Long> dsIDs,
             final Collection<String> controllerIDs) {
         final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
@@ -357,7 +344,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
             final List<JpaAction> assignedActions, final int totalTargetsForAssignment) {
-        int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
+        final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
 
         return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
     }

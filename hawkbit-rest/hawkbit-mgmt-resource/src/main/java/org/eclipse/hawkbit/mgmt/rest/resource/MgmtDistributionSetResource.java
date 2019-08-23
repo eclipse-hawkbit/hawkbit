@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -253,7 +254,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         if (offline) {
             return ResponseEntity.ok(MgmtDistributionSetMapper
-                    .toResponse(this.deployManagament.offlineAssignedDistributionSet(distributionSetId, assignments
+                    .toResponse(this.deployManagament.offlineAssignedDistributionSets(
+                            Collections.singletonList(distributionSetId), assignments
                             .stream().map(MgmtTargetAssignmentRequestBody::getId).collect(Collectors.toList()))));
         }
 

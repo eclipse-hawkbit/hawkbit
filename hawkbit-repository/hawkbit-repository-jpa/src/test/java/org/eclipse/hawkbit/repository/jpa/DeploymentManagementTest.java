@@ -464,8 +464,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(testdataFactory.createDistributionSet("2"), onlineAssignedTargets);
 
         final long current = System.currentTimeMillis();
-        final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());;
+
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .offlineAssignedDistributionSets(Collections.singleton(ds.getId()), controllerIds);
+        assertThat(assignmentResults).hasSize(1);
+        final List<Target> targets = assignmentResults.get(0).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive());
@@ -479,6 +484,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("InstallationDate equal to LastModifiedAt")
                 .allMatch(target -> target.getLastModifiedAt() == target.getInstallationDate());
     }
+
+    // TODO test multiassign offline assigment
 
     @Test
     @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned set get closed and set to CANCELED.")
