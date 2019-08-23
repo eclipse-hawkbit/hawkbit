@@ -7,11 +7,15 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
  *
  */
 public class MgmtDistributionSetAssignment extends MgmtId {
+
     private long forcetime;
     private MgmtActionType type;
 
@@ -20,6 +24,11 @@ public class MgmtDistributionSetAssignment extends MgmtId {
      * duration and timezone.
      */
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
+
+    @JsonCreator
+    public MgmtDistributionSetAssignment(@JsonProperty(required = true, value = "id") final Long id) {
+        super(id);
+    }
 
     public MgmtActionType getType() {
         return type;

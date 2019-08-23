@@ -144,6 +144,21 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
+    static MgmtTargetAssignmentResponseBody toResponse(
+            final List<DistributionSetAssignmentResult> dsAssignmentResults) {
+        // TODO test if this does the job right
+        final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
+        final int alreadyAssigned = dsAssignmentResults.stream()
+                .mapToInt(DistributionSetAssignmentResult::getAlreadyAssigned).sum();
+        final List<MgmtActionId> assignedActions = dsAssignmentResults.stream()
+                .flatMap(assignmentResult -> assignmentResult.getAssignedEntity().stream())
+                .map(action -> new MgmtActionId(action.getTarget().getControllerId(), action.getId()))
+                .collect(Collectors.toList());
+        result.setAlreadyAssigned(alreadyAssigned);
+        result.setAssignedActions(assignedActions);
+        return result;
+    }
+
     static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();

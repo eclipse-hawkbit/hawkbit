@@ -12,7 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
@@ -26,6 +29,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -39,6 +43,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
@@ -279,38 +284,40 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(distributionSetRest);
     }
 
-    @Override
-    public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("targetId") final String targetId, @RequestBody final MgmtDistributionSetAssignment dsId,
-            @RequestParam(value = "offline", required = false) final boolean offline) {
-
-        if (offline) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(),
-                            Collections.singletonList(targetId))));
-        }
-
-        findTargetWithExceptionIfNotFound(targetId);
-        final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsId.getMaintenanceWindow();
-
+    private TargetWithActionType createTargetWithActionType(final MgmtDistributionSetAssignment dsAssignment,
+            final String targetId) {
+        final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsAssignment.getMaintenanceWindow();
         if (maintenanceWindow == null) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
-                    .assignDistributionSet(dsId.getId(), Collections.singletonList(new TargetWithActionType(targetId,
-                            MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
+            return new TargetWithActionType(targetId, MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
+                    dsAssignment.getForcetime());
         }
-
         final String cronSchedule = maintenanceWindow.getSchedule();
         final String duration = maintenanceWindow.getDuration();
         final String timezone = maintenanceWindow.getTimezone();
-
         MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
+        return new TargetWithActionType(targetId, MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
+                dsAssignment.getForcetime(), cronSchedule, duration, timezone);
+    }
 
-        return ResponseEntity
-                .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
-                        Collections.singletonList(new TargetWithActionType(targetId,
-                                MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
-                                cronSchedule, duration, timezone)))));
+    @Override
+    public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
+            @PathVariable("targetId") final String targetId,
+            @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
+            @RequestParam(value = "offline", required = false) final boolean offline) {
+        final Set<Long> dsIds = dsAssignments.stream().map(MgmtDistributionSetAssignment::getId)
+                .collect(Collectors.toSet());
 
+        if (offline) {
+            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
+                    deploymentManagement.offlineAssignedDistributionSets(dsIds, Collections.singletonList(targetId))));
+        }
+        findTargetWithExceptionIfNotFound(targetId);
+        final List<TargetWithActionType> targetWithActionTypes = dsAssignments.stream()
+                .map(dsAssignment -> createTargetWithActionType(dsAssignment, targetId)).collect(Collectors.toList());
+
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .assignDistributionSets(dsIds, targetWithActionTypes);
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
     @Override

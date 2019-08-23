@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -275,7 +275,7 @@ public interface MgmtTargetRestApi {
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("targetId") String targetId, MgmtDistributionSetAssignment dsId,
+            @PathVariable("targetId") String targetId, MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) boolean offline);
 
     /**

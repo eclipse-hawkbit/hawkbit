@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -81,8 +82,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.retry.RetryCallback;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,6 +136,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final Database database;
+    private final RetryTemplate retryTemplate;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
@@ -156,74 +162,105 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;
+        retryTemplate = createRetryTemplate();
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
             final Collection<String> controllerIDs) {
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
-                controllerIDs.stream()
-                        .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
-                        .collect(Collectors.toList()),
-                null, offlineDsAssignmentStrategy);
+        final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
+                .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
+                .collect(Collectors.toList());
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID,
+                targetWithActionTypes, null, offlineDsAssignmentStrategy);
         offlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final long dsID, final ActionType actionType,
-            final long forcedTimestamp, final Collection<String> controllerIDs) {
-
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
-                controllerIDs.stream()
-                        .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
-                        .collect(Collectors.toList()),
-                null, onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
-            final Collection<TargetWithActionType> targets) {
-
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, null,
-                onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final Set<Long> dsIDs,
-            final Collection<TargetWithActionType> targets) {
-
-        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
-                .map(dsID -> assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy))
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Long> dsIDs,
+            final Collection<String> controllerIDs) {
+        final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
+                .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                 .collect(Collectors.toList());
-        onlineDsAssignmentStrategy.sendDeploymentEvents(results);
+        if (isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
+            throw new MultiassignmentIsNotEnabledException();
+        }
+        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
+                .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targetWithActionTypes, null,
+                        offlineDsAssignmentStrategy))
+                .collect(Collectors.toList());
+        offlineDsAssignmentStrategy.sendDeploymentEvents(results);
         return results;
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetAssignmentResult assignDistributionSet(final long dsID, final ActionType actionType,
+            final long forcedTimestamp, final Collection<String> controllerIDs) {
+        final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
+                .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
+                .collect(Collectors.toList());
+        return onlineAssigneDistributionSet(dsID, targetWithActionTypes, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
+            final Collection<TargetWithActionType> targets) {
+        return onlineAssigneDistributionSet(dsID, targets, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
+        return onlineAssigneDistributionSet(dsID, targets, actionMessage);
+    }
 
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, actionMessage,
-                onlineDsAssignmentStrategy);
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> assignDistributionSets(final Collection<Long> dsIDs,
+            final Collection<TargetWithActionType> targets) {
+        return onlineAssigneDistributionSets(dsIDs, targets, null);
+    }
+
+    private DistributionSetAssignmentResult onlineAssigneDistributionSet(final long dsID, final Collection<TargetWithActionType> targets,
+            final String actionMessage) {
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID, targets,
+                actionMessage, onlineDsAssignmentStrategy);
         onlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
+    }
+
+    private List<DistributionSetAssignmentResult> onlineAssigneDistributionSets(final Collection<Long> dsIDs,
+            final Collection<TargetWithActionType> targets, final String actionMessage) {
+        if (isCausingMultiassignment(dsIDs, targets)) {
+            throw new MultiassignmentIsNotEnabledException();
+        }
+        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
+                .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targets, actionMessage,
+                        onlineDsAssignmentStrategy))
+                .collect(Collectors.toList());
+        onlineDsAssignmentStrategy.sendDeploymentEvents(results);
+        return results;
+    }
+
+    private boolean isCausingMultiassignment(final Collection<Long> dsIDs,
+            final Collection<TargetWithActionType> targetWithActionTypes) {
+        final boolean isAssigningSameTargetMultipleTimes = targetWithActionTypes.stream().map(TargetWithActionType::getControllerId)
+                .distinct().count() < targetWithActionTypes.size();
+        return dsIDs.size() > 1 || isAssigningSameTargetMultipleTimes;
+    }
+
+    private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final Long dsID,
+            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final AbstractDsAssignmentStrategy assignmentStrategy) {
+        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback = retryContext -> assignDistributionSetToTargets(
+                dsID, targetsWithActionType, actionMessage, assignmentStrategy);
+        return retryTemplate.execute(retryCallback);
     }
 
     /**
@@ -820,4 +857,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
+    private static RetryTemplate createRetryTemplate() {
+        final RetryTemplate template = new RetryTemplate();
+
+        final FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+        backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
+        template.setBackOffPolicy(backOffPolicy);
+
+        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+        retryPolicy.setMaxAttempts(Constants.TX_RT_MAX);
+        template.setRetryPolicy(retryPolicy);
+
+        return template;
+    }
 }

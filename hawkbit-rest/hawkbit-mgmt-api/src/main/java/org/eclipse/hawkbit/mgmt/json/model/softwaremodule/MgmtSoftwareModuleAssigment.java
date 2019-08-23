@@ -19,4 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleAssigment extends MgmtId {
 
+    public MgmtSoftwareModuleAssigment(final Long id) {
+        super(id);
+    }
+
 }

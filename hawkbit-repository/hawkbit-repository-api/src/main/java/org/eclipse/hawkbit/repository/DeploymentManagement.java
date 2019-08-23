@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -126,9 +127,13 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
+     * @throws MultiassignmentIsNotEnabledException
+     *             if the request results in multiple assignments to the same
+     *             target and multiassignment is disabled
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Set<Long> dsIDs,
+    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Collection<Long> dsIDs,
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**
@@ -194,6 +199,47 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult offlineAssignedDistributionSet(Long dsID, Collection<String> controllerIDs);
+
+    /**
+     * Registers an "offline" assignment, i.e. adds a completed action for the
+     * given {@link DistributionSet} to the given {@link Target}s.
+     * 
+     * The handling differs to hawkBit-managed updates by means that:<br/>
+     * 
+     * <ol type="A">
+     * <li>it ignores targets completely that are in
+     * {@link TargetUpdateStatus#PENDING}.</li>
+     * <li>it creates completed actions.</li>
+     * <li>sets both installed and assigned DS on the target and switches the
+     * status to {@link TargetUpdateStatus#IN_SYNC}.</li>
+     * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
+     * </ol>
+     * 
+     * @param dsIDs
+     *            the IDs of the distribution sets that were assigned
+     * @param controllerIDs
+     *            a list of IDs of the targets that where assigned
+     * @return the assignment results
+     * 
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             defined by the {@link DistributionSetType}.
+     *
+     * @throws EntityNotFoundException
+     *             if either provided {@link DistributionSet} or {@link Target}s
+     *             do not exist
+     * 
+     * @throws QuotaExceededException
+     *             if the maximum number of targets the distribution set can be
+     *             assigned to at once is exceeded
+     * 
+     * @throws MultiassignmentIsNotEnabledException
+     *             if the request results in multiple assignments to the same
+     *             target and multiassignment is disabled
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Long> dsIDs,
+            Collection<String> controllerIDs);
 
     /**
      * Cancels the {@link Action} with the given ID. The method will immediately
