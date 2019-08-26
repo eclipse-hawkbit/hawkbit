@@ -55,6 +55,11 @@ public abstract class AbstractDistributionSetTableHeader extends AbstractTableHe
     }
 
     @Override
+    protected String getSyncIconId() {
+        return null;
+    }
+
+    @Override
     protected boolean isDropHintRequired() {
         return true;
     }

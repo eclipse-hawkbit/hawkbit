@@ -1,6 +1,5 @@
 package org.eclipse.hawkbit.dmf.hono;
 
-import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +46,7 @@ public class HonoDeviceSync {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private Semaphore mutex = new Semaphore(1);
+    private Map<String, Semaphore> mutexes = new HashMap<>();
     private boolean syncedInitially = false;
 
     private String oidcAccessToken = null;
@@ -78,49 +77,64 @@ public class HonoDeviceSync {
     private void initialSync() {
         // Since ApplicationReadyEvent is emitted multiple times make sure it is synced at most once during startup.
         if (!syncedInitially) {
-            synchronize();
+            synchronize(false);
             syncedInitially = true;
         }
     }
 
-    public void synchronize() {
+    public void synchronize(boolean syncOnlyCurrentTenant) {
         try {
-            mutex.acquire();
+            String currentTenant = null;
+            if (syncOnlyCurrentTenant) {
+                currentTenant = systemManagement.currentTenant();
+            }
 
             List<IdentifiableHonoTenant> tenants = getAllHonoTenants();
             for (IdentifiableHonoTenant honoTenant : tenants) {
                 String tenant = honoTenant.getId();
-                Map<String, IdentifiableHonoDevice> honoDevices = getAllHonoDevices(tenant);
-                Slice<Target> targets = systemSecurityContext.runAsSystemAsTenant(
-                        () -> targetManagement.findAll(Pageable.unpaged()), tenant);
 
-                for (Target target : targets) {
-                    String controllerId = target.getControllerId();
-                    if (honoDevices.containsKey(controllerId)) {
-                        IdentifiableHonoDevice honoDevice = honoDevices.remove(controllerId);
-                        honoDevice.setTenant(tenant);
-                        systemSecurityContext.runAsSystemAsTenant(() -> updateTarget(honoDevice), tenant);
-                    }
-                    else {
-                        systemSecurityContext.runAsSystemAsTenant(() -> {
-                            targetManagement.deleteByControllerID(target.getControllerId());
-                            return true;
-                        }, tenant);
-                    }
+                if (syncOnlyCurrentTenant && !tenant.equals(currentTenant)) {
+                    continue;
                 }
 
-                // At this point honoTargets only contains objects which were not found in hawkBit's target repository
-                for (Map.Entry<String, IdentifiableHonoDevice> entry : honoDevices.entrySet()) {
-                    systemSecurityContext.runAsSystemAsTenant(() -> createTarget(entry.getValue()), tenant);
-                }
+                synchronizeTenant(tenant);
             }
-
-            mutex.release();
         } catch (IOException e) {
             LOG.error("Could not parse hono api response.", e);
         } catch (InterruptedException e) {
             LOG.error("Synchronizing hawkbit with Hono has been interrupted.", e);
         }
+    }
+
+    private void synchronizeTenant(String tenant) throws IOException, InterruptedException {
+        Semaphore semaphore = mutexes.computeIfAbsent(tenant, t -> new Semaphore(1));
+        semaphore.acquire();
+
+        Map<String, IdentifiableHonoDevice> honoDevices = getAllHonoDevices(tenant);
+        Slice<Target> targets = systemSecurityContext.runAsSystemAsTenant(
+                () -> targetManagement.findAll(Pageable.unpaged()), tenant);
+
+        for (Target target : targets) {
+            String controllerId = target.getControllerId();
+            if (honoDevices.containsKey(controllerId)) {
+                IdentifiableHonoDevice honoDevice = honoDevices.remove(controllerId);
+                honoDevice.setTenant(tenant);
+                systemSecurityContext.runAsSystemAsTenant(() -> updateTarget(honoDevice), tenant);
+            }
+            else {
+                systemSecurityContext.runAsSystemAsTenant(() -> {
+                    targetManagement.deleteByControllerID(target.getControllerId());
+                    return true;
+                }, tenant);
+            }
+        }
+
+        // At this point honoTargets only contains objects which were not found in hawkBit's target repository
+        for (Map.Entry<String, IdentifiableHonoDevice> entry : honoDevices.entrySet()) {
+            systemSecurityContext.runAsSystemAsTenant(() -> createTarget(entry.getValue()), tenant);
+        }
+
+        semaphore.release();
     }
 
     private List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {

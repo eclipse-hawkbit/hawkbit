@@ -62,6 +62,11 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
     }
 
     @Override
+    protected String getSyncIconId() {
+        return null;
+    }
+
+    @Override
     protected String getShowFilterButtonLayoutId() {
         return "show.type.icon";
     }
@@ -77,11 +82,21 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
     }
 
     @Override
+    protected Boolean isHonoSyncAllowed() {
+        return Boolean.FALSE;
+    }
+
+    @Override
     protected void addNewItem(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
         addSoftwareModule.setCaption(i18n.getMessage("caption.create.new", i18n.getMessage("caption.software.module")));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
+    }
+
+    @Override
+    protected void syncHono(final ClickEvent event) {
+        // do nothing
     }
 
     @Override

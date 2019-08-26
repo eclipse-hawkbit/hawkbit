@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.dmf.hono.HonoDeviceSync;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -131,7 +132,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
             final NotificationUnreadButton notificationUnreadButton,
-            final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor) {
+            final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor,
+            final HonoDeviceSync honoDeviceSync) {
         super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -156,7 +158,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
             this.targetTableLayout = new TargetTableLayout(eventBus, targetTable, targetManagement, entityFactory, i18n,
                     uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor);
+                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor, honoDeviceSync);
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout

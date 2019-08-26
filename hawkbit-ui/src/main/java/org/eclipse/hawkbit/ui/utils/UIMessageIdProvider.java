@@ -111,6 +111,8 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_ADD = "tooltip.add";
 
+    public static final String TOOLTIP_SYNC_HONO = "tooltip.sync.hono";
+
     public static final String TOOLTIP_SHOW_TAGS = "tooltip.showTags";
 
     public static final String TOOLTIP_BULK_UPLOAD = "tooltip.bulkUpload";
