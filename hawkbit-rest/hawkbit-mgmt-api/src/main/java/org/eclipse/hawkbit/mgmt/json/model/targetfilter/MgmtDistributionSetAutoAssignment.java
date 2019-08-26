@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
-    public MgmtDistributionSetAutoAssignment(final Long id) {
+    public MgmtDistributionSetAutoAssignment(@JsonProperty(value = "id") final Long id) {
         super(id);
     }
 

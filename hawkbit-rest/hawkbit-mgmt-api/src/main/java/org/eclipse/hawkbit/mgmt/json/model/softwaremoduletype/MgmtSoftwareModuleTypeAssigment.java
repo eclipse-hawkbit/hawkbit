@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of SoftwareModuleType for assignment operations (ID only).
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleTypeAssigment extends MgmtId {
 
-    public MgmtSoftwareModuleTypeAssigment(final Long id) {
+    public MgmtSoftwareModuleTypeAssigment(@JsonProperty(value = "id") final Long id) {
         super(id);
     }
 
