@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Result information of the action progress which can by an intermediate or
  * final update.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiResult {
 
     @NotNull
