@@ -172,6 +172,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
                 .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                 .collect(Collectors.toList());
+        checkQuotaForAssignment(dsIDs, targetWithActionTypes);
         if (isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
             throw new MultiassignmentIsNotEnabledException();
         }
@@ -216,6 +217,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private DistributionSetAssignmentResult onlineAssigneDistributionSet(final long dsID, final Collection<TargetWithActionType> targets,
             final String actionMessage) {
+        checkQuotaForAssignment(Collections.singleton(dsID), targets);
         final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID, targets,
                 actionMessage, onlineDsAssignmentStrategy);
         onlineDsAssignmentStrategy.sendDeploymentEvents(result);
@@ -224,6 +226,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private List<DistributionSetAssignmentResult> onlineAssigneDistributionSets(final Collection<Long> dsIDs,
             final Collection<TargetWithActionType> targets, final String actionMessage) {
+        checkQuotaForAssignment(dsIDs, targets);
         if (isCausingMultiassignment(dsIDs, targets)) {
             throw new MultiassignmentIsNotEnabledException();
         }
@@ -283,7 +286,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        checkQuotaForAssignment(targetsWithActionType, distributionSetEntity);
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(
                 targetsWithActionType.stream().map(TargetWithActionType::getControllerId).collect(Collectors.toList()),
@@ -361,27 +363,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return distributionSet;
     }
 
-    private void checkQuotaForAssignment(final Collection<TargetWithActionType> targetsWithActionType,
-            final JpaDistributionSet distributionSet) {
-        // enforce the 'max targets per manual assignment' quota
-        if (!targetsWithActionType.isEmpty()) {
-            assertMaxTargetsPerManualAssignmentQuota(distributionSet.getId(), targetsWithActionType.size());
+    private void checkQuotaForAssignment(final Collection<Long> dsIds,
+            final Collection<TargetWithActionType> targetWithActionTypes) {
+        if (!dsIds.isEmpty() && !targetWithActionTypes.isEmpty()) {
+            final int requestedActions = dsIds.size() * targetWithActionTypes.size();
+            QuotaHelper.assertAssignmentQuota(requestedActions,
+                quotaManagement.getMaxResultingActionsPerManualAssignment(), Target.class, DistributionSet.class);
         }
-    }
-
-    /**
-     * Enforces the quota defining the maximum number of {@link Target}s per
-     * manual {@link DistributionSet} assignment.
-     * 
-     * @param id
-     *            of the distribution set
-     * @param requested
-     *            number of targets to check
-     */
-    private void assertMaxTargetsPerManualAssignmentQuota(final Long distributionSetId,
-            final int requestedTargetsCount) {
-        QuotaHelper.assertAssignmentQuota(distributionSetId, requestedTargetsCount,
-                quotaManagement.getMaxTargetsPerManualAssignment(), Target.class, DistributionSet.class, null);
     }
 
     private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
@@ -851,8 +839,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
         template.setBackOffPolicy(backOffPolicy);
 
-        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(Constants.TX_RT_MAX);
+        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(Constants.TX_RT_MAX,
+                Collections.singletonMap(ConcurrencyFailureException.class, true));
         template.setRetryPolicy(retryPolicy);
 
         return template;

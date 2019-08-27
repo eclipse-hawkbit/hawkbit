@@ -301,9 +301,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
     public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
+        // TODO add multiasssignment test
 
-        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
-        final List<Target> targets = testdataFactory.createTargets(maxTargets + 1);
+        final int maxActions = quotaManagement.getMaxResultingActionsPerManualAssignment();
+        final List<Target> targets = testdataFactory.createTargets(maxActions + 1);
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
         final JSONArray payload = new JSONArray();

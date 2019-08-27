@@ -180,12 +180,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Assigns the same distribution set to many targets until the 'max targets per manual assignment' quota is exceeded.")
     public void assignDistributionSetUntilQuotaIsExceeded() {
 
-        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final int maxActions = quotaManagement.getMaxResultingActionsPerManualAssignment();
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
-        assignDistributionSet(ds, testdataFactory.createTargets(maxTargets, "ok"));
+        final List<Target> targets = testdataFactory.createTargets(maxActions, "assignmentTest1");
+        assignDistributionSet(ds1, targets);
+
+        targets.add(testdataFactory.createTarget("assignmentTest2"));
         assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds, testdataFactory.createTargets(maxTargets + 1, "fail")));
+                .isThrownBy(() -> assignDistributionSet(ds2, targets));
     }
 
     @Test

@@ -80,10 +80,10 @@ public interface QuotaManagement {
     int getMaxTargetsPerRolloutGroup();
 
     /**
-     * @return the maximum number of targets which for a manual distribution set
-     *         assignment
+     * @return the maximum number of actions resulting from a manual assignment
+     *         of distribution sets and targets
      */
-    int getMaxTargetsPerManualAssignment();
+    int getMaxResultingActionsPerManualAssignment();
 
     /**
      * @return the maximum number of targets for an automatic distribution set
