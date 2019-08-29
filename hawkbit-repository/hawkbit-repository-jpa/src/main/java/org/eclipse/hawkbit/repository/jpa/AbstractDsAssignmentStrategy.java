@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -199,14 +198,14 @@ public abstract class AbstractDsAssignmentStrategy {
                 new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
     }
 
-    JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
+    JpaAction createTargetAction(final TargetWithActionType targetWithActionType, final List<JpaTarget> targets,
             final JpaDistributionSet set) {
-
-        // enforce the 'max actions per target' quota
-        assertActionsPerTargetQuota(target, 1);
+        final Optional<JpaTarget> optTarget = targets.stream()
+                .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
         // create the action
-        return getTargetWithActionType(targetsWithActionMap, target.getControllerId()).map(targetWithActionType -> {
+        return optTarget.map(target -> {
+            assertActionsPerTargetQuota(target, 1);
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
@@ -218,7 +217,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
             return actionForTarget;
         }).orElseGet(() -> {
-            LOG.warn("Cannot find targetWithActionType for target '{}'.", target.getControllerId());
+            LOG.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
             return null;
         });
     }
@@ -240,15 +239,4 @@ public abstract class AbstractDsAssignmentStrategy {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
-
-    private static Optional<TargetWithActionType> getTargetWithActionType(
-            final Map<String, TargetWithActionType> targetsWithActionMap, final String controllerId) {
-        if (targetsWithActionMap.containsKey(controllerId)) {
-            return Optional.of(targetsWithActionMap.get(controllerId));
-        } else {
-            return targetsWithActionMap.values().stream()
-                    .filter(t -> controllerId.equalsIgnoreCase(t.getControllerId())).findFirst();
-        }
-    }
-
 }

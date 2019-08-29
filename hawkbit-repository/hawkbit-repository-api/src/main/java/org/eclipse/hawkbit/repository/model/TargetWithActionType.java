@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  *
  */
 public class TargetWithActionType {
-
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
@@ -120,6 +119,55 @@ public class TargetWithActionType {
                 + getForceTime() + ", maintenanceSchedule=" + getMaintenanceSchedule() + ", maintenanceWindowDuration="
                 + getMaintenanceWindowDuration() + ", maintenanceWindowTimeZone=" + getMaintenanceWindowTimeZone()
                 + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((actionType == null) ? 0 : actionType.hashCode());
+        result = prime * result + ((controllerId == null) ? 0 : controllerId.hashCode());
+        result = prime * result + (int) (forceTime ^ (forceTime >>> 32));
+        result = prime * result + ((maintenanceSchedule == null) ? 0 : maintenanceSchedule.hashCode());
+        result = prime * result + ((maintenanceWindowDuration == null) ? 0 : maintenanceWindowDuration.hashCode());
+        result = prime * result + ((maintenanceWindowTimeZone == null) ? 0 : maintenanceWindowTimeZone.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final TargetWithActionType other = (TargetWithActionType) obj;
+        if (actionType != other.actionType)
+            return false;
+        if (controllerId == null) {
+            if (other.controllerId != null)
+                return false;
+        } else if (!controllerId.equals(other.controllerId))
+            return false;
+        if (forceTime != other.forceTime)
+            return false;
+        if (maintenanceSchedule == null) {
+            if (other.maintenanceSchedule != null)
+                return false;
+        } else if (!maintenanceSchedule.equals(other.maintenanceSchedule))
+            return false;
+        if (maintenanceWindowDuration == null) {
+            if (other.maintenanceWindowDuration != null)
+                return false;
+        } else if (!maintenanceWindowDuration.equals(other.maintenanceWindowDuration))
+            return false;
+        if (maintenanceWindowTimeZone == null) {
+            if (other.maintenanceWindowTimeZone != null)
+                return false;
+        } else if (!maintenanceWindowTimeZone.equals(other.maintenanceWindowTimeZone))
+            return false;
+        return true;
     }
 
 }

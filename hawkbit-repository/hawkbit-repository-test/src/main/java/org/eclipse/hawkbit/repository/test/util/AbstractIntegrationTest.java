@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -276,6 +277,13 @@ public abstract class AbstractIntegrationTest {
         return deploymentManagement.assignDistributionSet(dsID,
                 Arrays.asList(new TargetWithActionType(controllerId, ActionType.TIMEFORCED, System.currentTimeMillis(),
                         maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
+    }
+
+    protected List<DistributionSetAssignmentResult> assignDistributionSets(
+            final Collection<DistributionSet> distributionSets, final Collection<Target> targets) {
+        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        final List<TargetWithActionType> targetWithActionTypes = targets.stream().map(Target::getTargetWithActionType).collect(Collectors.toList());
+        return deploymentManagement.assignDistributionSets(dsIds, targetWithActionTypes);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,

@@ -167,21 +167,32 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Long> dsIDs,
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Long> requestedDsIDs,
             final Collection<String> controllerIDs) {
+        final List<Long> dsIDs = new ArrayList<>(requestedDsIDs);
         final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream()
                 .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
                 .collect(Collectors.toList());
-        checkQuotaForAssignment(dsIDs, targetWithActionTypes);
-        if (isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
-            throw new MultiassignmentIsNotEnabledException();
+        if (!isMultiAssignmentsEnabled()) {
+            removeDuplicatesFromCollection(dsIDs);
+            removeDuplicatesFromCollection(targetWithActionTypes);
+            if (isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
+                throw new MultiassignmentIsNotEnabledException();
+            }
         }
+        checkQuotaForAssignment(dsIDs, targetWithActionTypes);
         final List<DistributionSetAssignmentResult> results = dsIDs.stream()
                 .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targetWithActionTypes, null,
                         offlineDsAssignmentStrategy))
                 .collect(Collectors.toList());
         offlineDsAssignmentStrategy.sendDeploymentEvents(results);
         return results;
+    }
+
+    private static <T> void removeDuplicatesFromCollection(final Collection<T> collection) {
+        final List<T> duplicatesRemoved = collection.stream().distinct().collect(Collectors.toList());
+        collection.clear();
+        collection.addAll(duplicatesRemoved);
     }
 
     @Override
@@ -215,23 +226,37 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return onlineAssigneDistributionSets(dsIDs, targets, null);
     }
 
-    private DistributionSetAssignmentResult onlineAssigneDistributionSet(final long dsID, final Collection<TargetWithActionType> targets,
+    private DistributionSetAssignmentResult onlineAssigneDistributionSet(final long dsID,
+            final Collection<TargetWithActionType> requestedTargetWithActionTypes,
             final String actionMessage) {
-        checkQuotaForAssignment(Collections.singleton(dsID), targets);
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID, targets,
-                actionMessage, onlineDsAssignmentStrategy);
+        final List<TargetWithActionType> targetWithActionTypes = new ArrayList<>(requestedTargetWithActionTypes);
+        if (!isMultiAssignmentsEnabled()) {
+            removeDuplicatesFromCollection(targetWithActionTypes);
+            if (isCausingMultiassignment(Collections.singleton(dsID), targetWithActionTypes)) {
+                throw new MultiassignmentIsNotEnabledException();
+            }
+        }
+        checkQuotaForAssignment(Collections.singleton(dsID), targetWithActionTypes);
+        final DistributionSetAssignmentResult result = assignDistributionSetToTargetsWithRetry(dsID,
+                targetWithActionTypes, actionMessage, onlineDsAssignmentStrategy);
         onlineDsAssignmentStrategy.sendDeploymentEvents(result);
         return result;
     }
 
-    private List<DistributionSetAssignmentResult> onlineAssigneDistributionSets(final Collection<Long> dsIDs,
-            final Collection<TargetWithActionType> targets, final String actionMessage) {
-        checkQuotaForAssignment(dsIDs, targets);
-        if (isCausingMultiassignment(dsIDs, targets)) {
-            throw new MultiassignmentIsNotEnabledException();
+    private List<DistributionSetAssignmentResult> onlineAssigneDistributionSets(final Collection<Long> requestedDsIDs,
+            final Collection<TargetWithActionType> requestedTargetWithActionTypes, final String actionMessage) {
+        final List<TargetWithActionType> targetWithActionTypes = new ArrayList<>(requestedTargetWithActionTypes);
+        final List<Long> dsIDs = new ArrayList<>(requestedDsIDs);
+        if (!isMultiAssignmentsEnabled()) {
+            removeDuplicatesFromCollection(targetWithActionTypes);
+            removeDuplicatesFromCollection(dsIDs);
+            if (isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
+                throw new MultiassignmentIsNotEnabledException();
+            }
         }
+        checkQuotaForAssignment(dsIDs, targetWithActionTypes);
         final List<DistributionSetAssignmentResult> results = dsIDs.stream()
-                .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targets, actionMessage,
+                .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targetWithActionTypes, actionMessage,
                         onlineDsAssignmentStrategy))
                 .collect(Collectors.toList());
         onlineDsAssignmentStrategy.sendDeploymentEvents(results);
@@ -286,9 +311,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
+        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct()
+                .collect(Collectors.toList());
 
-        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(
-                targetsWithActionType.stream().map(TargetWithActionType::getControllerId).collect(Collectors.toList()),
+        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
@@ -366,10 +392,32 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private void checkQuotaForAssignment(final Collection<Long> dsIds,
             final Collection<TargetWithActionType> targetWithActionTypes) {
         if (!dsIds.isEmpty() && !targetWithActionTypes.isEmpty()) {
-            final int requestedActions = dsIds.size() * targetWithActionTypes.size();
-            QuotaHelper.assertAssignmentQuota(requestedActions,
-                quotaManagement.getMaxResultingActionsPerManualAssignment(), Target.class, DistributionSet.class);
+            enforceMaxActionsPerReqest(dsIds, targetWithActionTypes);
+            enforceMaxActionsPerTarget(dsIds, targetWithActionTypes);
         }
+    }
+
+    private void enforceMaxActionsPerReqest(final Collection<Long> dsIds,
+            final Collection<TargetWithActionType> targetWithActionTypes) {
+        final int requestedActions = dsIds.size() * targetWithActionTypes.size();
+        QuotaHelper.assertAssignmentQuota(requestedActions, quotaManagement.getMaxResultingActionsPerManualAssignment(),
+                Target.class, DistributionSet.class);
+    }
+
+    private void enforceMaxActionsPerTarget(final Collection<Long> dsIds,
+            final Collection<TargetWithActionType> targetWithActionTypes) {
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+
+        final Map<String, Long> countOfTargtInRequest = targetWithActionTypes.stream()
+                .map(TargetWithActionType::getControllerId)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        countOfTargtInRequest.forEach((controllerId, count) -> {
+            final Long requestedActions = count * dsIds.size();
+            QuotaHelper.assertAssignmentQuota(controllerId,
+                    requestedActions, quota, Action.class, Target.class,
+                    actionRepository::countByTargetControllerId);
+            });
     }
 
     private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
@@ -408,10 +456,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private List<JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
             final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set) {
-        final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
-                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
-        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
+        return targetsWithActionType.stream().map(twt -> assignmentStrategy.createTargetAction(twt, targets, set))
                 .filter(Objects::nonNull).map(actionRepository::save).collect(Collectors.toList());
     }
 

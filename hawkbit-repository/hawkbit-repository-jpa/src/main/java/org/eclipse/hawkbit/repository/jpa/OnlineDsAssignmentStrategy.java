@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -130,9 +129,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
+    JpaAction createTargetAction(final TargetWithActionType targetWithActionType, final List<JpaTarget> targets,
             final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
         if (result != null) {
             result.setStatus(Status.RUNNING);
         }

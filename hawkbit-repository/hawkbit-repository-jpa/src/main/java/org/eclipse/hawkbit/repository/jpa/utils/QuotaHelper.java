@@ -76,8 +76,8 @@ public final class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
-            @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<Long, Long> countFct) {
+    public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
+            @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<T, Long> countFct) {
         assertAssignmentQuota(parentId, requested, limit, type.getSimpleName(), parentType.getSimpleName(), countFct);
     }
 
@@ -104,8 +104,8 @@ public final class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
-            @NotNull final String type, @NotNull final String parentType, final Function<Long, Long> countFct) {
+    public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
+            @NotNull final String type, @NotNull final String parentType, final Function<T, Long> countFct) {
 
         // check if the quota is unlimited
         if (limit <= 0) {

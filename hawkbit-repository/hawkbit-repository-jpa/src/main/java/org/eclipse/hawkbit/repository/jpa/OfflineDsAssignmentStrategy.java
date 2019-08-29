@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -84,9 +83,9 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    protected JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
+    protected JpaAction createTargetAction(final TargetWithActionType targetWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
         if (result != null) {
             result.setStatus(Status.FINISHED);
             result.setActive(Boolean.FALSE);
