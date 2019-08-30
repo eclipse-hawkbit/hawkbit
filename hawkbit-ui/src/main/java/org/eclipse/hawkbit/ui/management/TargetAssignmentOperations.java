@@ -131,6 +131,7 @@ public final class TargetAssignmentOperations {
             eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
         } catch (final MultiassignmentIsNotEnabledException e) {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
+            LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
         }
     }
 
