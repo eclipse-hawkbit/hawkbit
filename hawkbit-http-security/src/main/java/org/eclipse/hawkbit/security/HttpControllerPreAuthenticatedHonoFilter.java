@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import org.eclipse.hawkbit.dmf.hono.HonoDeviceSync;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -28,7 +29,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 public class HttpControllerPreAuthenticatedHonoFilter extends AbstractHttpControllerAuthenticationFilter {
 
     private final ControllerManagement controllerManagement;
-    private final String honoCredentialsEndpoint;
+    private final HonoDeviceSync honoDeviceSync;
 
     /**
      * Constructor.
@@ -48,16 +49,16 @@ public class HttpControllerPreAuthenticatedHonoFilter extends AbstractHttpContro
     public HttpControllerPreAuthenticatedHonoFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
             final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
-            final String honoCredentialsEndpoint) {
+            final HonoDeviceSync honoDeviceSync) {
         super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.controllerManagement = controllerManagement;
-        this.honoCredentialsEndpoint = honoCredentialsEndpoint;
+        this.honoDeviceSync = honoDeviceSync;
     }
 
     @Override
     protected PreAuthenticationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedHonoFilter(tenantConfigurationManagement, controllerManagement,
-                tenantAware, systemSecurityContext, honoCredentialsEndpoint);
+                tenantAware, systemSecurityContext, honoDeviceSync);
     }
 
 }

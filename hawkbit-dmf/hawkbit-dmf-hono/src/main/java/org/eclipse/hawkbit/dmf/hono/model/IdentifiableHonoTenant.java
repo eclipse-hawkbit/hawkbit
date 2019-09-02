@@ -1,6 +1,6 @@
-package org.eclipse.hawkbit.dmf.hono;
+package org.eclipse.hawkbit.dmf.hono.model;
 
-class IdentifiableHonoTenant {
+public class IdentifiableHonoTenant {
     private String id;
     private HonoTenant tenant;
 

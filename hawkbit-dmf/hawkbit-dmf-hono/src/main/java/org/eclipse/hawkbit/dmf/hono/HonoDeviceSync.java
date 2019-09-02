@@ -1,8 +1,11 @@
 package org.eclipse.hawkbit.dmf.hono;
 
+import com.esotericsoftware.minlog.Log;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.hawkbit.dmf.hono.model.*;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -44,9 +47,9 @@ public class HonoDeviceSync {
     @Autowired
     private TargetManagement targetManagement;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private Map<String, Semaphore> mutexes = new HashMap<>();
+    private final Map<String, Semaphore> mutexes = new HashMap<>();
     private boolean syncedInitially = false;
 
     private String oidcAccessToken = null;
@@ -54,16 +57,19 @@ public class HonoDeviceSync {
 
     private String honoTenantListUri;
     private String honoDeviceListUri;
+    private String honoCredentialsListUri;
     private String authorizationMethod;
     private String oidcTokenUri;
     private String oidcClientId;
     private String username;
     private String password;
 
-    HonoDeviceSync(String honoTenantListUri, String honoDevicesEndpoint, String authorizationMethod,
-                   String oidcTokenUri, String oidcClientId, String username, String password) {
+    HonoDeviceSync(String honoTenantListUri, String honoDevicesEndpoint, String honoCredentialsListUri,
+                   String authorizationMethod, String oidcTokenUri, String oidcClientId, String username,
+                   String password) {
         this.honoTenantListUri = honoTenantListUri;
         this.honoDeviceListUri = honoDevicesEndpoint;
+        this.honoCredentialsListUri = honoCredentialsListUri;
         this.authorizationMethod = authorizationMethod;
         this.oidcTokenUri = oidcTokenUri;
         this.oidcClientId = oidcClientId;
@@ -137,14 +143,24 @@ public class HonoDeviceSync {
         semaphore.release();
     }
 
-    private List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {
+    public void checkDeviceIfAbsentSync(String tenant, String deviceID) {
+        Optional<Target> target = systemSecurityContext.runAsSystemAsTenant(
+                () -> targetManagement.getByControllerID(deviceID), tenant);
+        if (!target.isPresent()) {
+            try {
+                synchronizeTenant(tenant);
+            } catch (IOException | InterruptedException e) {
+                Log.error("Could not synchronize with hono for tenant {}.", tenant, e);
+            }
+        }
+    }
+
+    public List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {
         List<IdentifiableHonoTenant> tenants = new ArrayList<>();
         long offset = 0;
         long total = Long.MAX_VALUE;
         while (tenants.size() < total) {
-            URL url = new URL(honoTenantListUri + "?offset=" + offset);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            addAuthorizationHeader(connection);
+            HttpURLConnection connection = getHonoData(honoTenantListUri + "?offset=" + offset);
 
             HonoTenantListPage page = objectMapper.readValue(connection.getInputStream(), HonoTenantListPage.class);
             tenants.addAll(page.getItems());
@@ -155,14 +171,12 @@ public class HonoDeviceSync {
         return tenants;
     }
 
-    private Map<String, IdentifiableHonoDevice> getAllHonoDevices(String tenant) throws IOException {
+    public Map<String, IdentifiableHonoDevice> getAllHonoDevices(String tenant) throws IOException {
         Map<String, IdentifiableHonoDevice> devices = new HashMap<>();
         long offset = 0;
         long total = Long.MAX_VALUE;
         while (devices.size() < total) {
-            URL url = new URL(honoDeviceListUri.replace("$tenantId", tenant) + "?offset=" + offset);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            addAuthorizationHeader(connection);
+            HttpURLConnection connection = getHonoData(honoDeviceListUri.replace("$tenantId", tenant) + "?offset=" + offset);
 
             HonoDeviceListPage page = objectMapper.readValue(connection.getInputStream(), HonoDeviceListPage.class);
             if (page.getItems() != null) {
@@ -178,7 +192,21 @@ public class HonoDeviceSync {
         return devices;
     }
 
-    private void addAuthorizationHeader(HttpURLConnection connection) throws IOException {
+    public Collection<HonoCredentials> getAllHonoCredentials(String tenant, String deviceId) {
+        try {
+            HttpURLConnection connection = getHonoData(honoCredentialsListUri.replace("$tenantId", tenant)
+                    .replace("$deviceId", deviceId));
+            return objectMapper.readValue(connection.getInputStream(), new TypeReference<Collection<HonoCredentials>>() {});
+        }
+        catch (IOException e) {
+            return null;
+        }
+    }
+
+    private HttpURLConnection getHonoData(String uri) throws IOException {
+        URL url = new URL(uri);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
         switch (authorizationMethod) {
             case "basic":
                 connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
@@ -188,8 +216,8 @@ public class HonoDeviceSync {
                 if (oidcAccessToken == null ||
                         (oidcAccessTokenExpirationDate != null && oidcAccessTokenExpirationDate.isBefore(Instant.now()))) {
 
-                    URL url = new URL(oidcTokenUri);
-                    HttpURLConnection jwtConnection = (HttpURLConnection) url.openConnection();
+                    URL oidcTokenUrl = new URL(oidcTokenUri);
+                    HttpURLConnection jwtConnection = (HttpURLConnection) oidcTokenUrl.openConnection();
                     jwtConnection.setDoOutput(true);
                     DataOutputStream outputStream = new DataOutputStream(jwtConnection.getOutputStream());
                     outputStream.writeBytes("grant_type=password&client_id=" + oidcClientId + "&username=" + username + "&password=" + password);
@@ -206,12 +234,14 @@ public class HonoDeviceSync {
                         }
                     }
                     else {
-                        throw new IOException("Server returned HTTP response code: " + statusCode + " for URL: " + url.toString());
+                        throw new IOException("Server returned HTTP response code: " + statusCode + " for URL: " + oidcTokenUrl.toString());
                     }
                 }
                 connection.setRequestProperty("Authorization", "Bearer " + oidcAccessToken);
                 break;
         }
+
+        return connection;
     }
 
     @StreamListener(HonoInputSink.DEVICE_CREATED)

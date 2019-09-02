@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.security;
 
+import org.eclipse.hawkbit.dmf.hono.HonoDeviceSync;
+import org.eclipse.hawkbit.dmf.hono.model.HonoCredentials;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -19,16 +21,21 @@ import java.util.List;
 
 public class PreAuthHonoAuthenticationProvider extends PreAuthTokenSourceTrustAuthenticationProvider {
 
-    public PreAuthHonoAuthenticationProvider() {
+    private HonoDeviceSync honoDeviceSync;
+
+    public PreAuthHonoAuthenticationProvider(HonoDeviceSync honoDeviceSync) {
         super();
+        this.honoDeviceSync = honoDeviceSync;
     }
 
-    public PreAuthHonoAuthenticationProvider(final List<String> authorizedSourceIps) {
+    public PreAuthHonoAuthenticationProvider(HonoDeviceSync honoDeviceSync, final List<String> authorizedSourceIps) {
         super(authorizedSourceIps);
+        this.honoDeviceSync = honoDeviceSync;
     }
 
-    public PreAuthHonoAuthenticationProvider(final String... authorizedSourceIps) {
+    public PreAuthHonoAuthenticationProvider(HonoDeviceSync honoDeviceSync, final String... authorizedSourceIps) {
         super(authorizedSourceIps);
+        this.honoDeviceSync = honoDeviceSync;
     }
 
     @Override
@@ -51,13 +58,15 @@ public class PreAuthHonoAuthenticationProvider extends PreAuthTokenSourceTrustAu
         for (Object object : (Collection) credentials) {
             if (object instanceof HonoCredentials) {
                 if (((HonoCredentials) object).matches(((HeaderAuthentication) principal).getHeaderAuth())) {
-                    successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);;
+                    successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
                     break;
                 }
             }
         }
 
         if (successAuthentication) {
+            honoDeviceSync.checkDeviceIfAbsentSync("", "");
+
             final PreAuthenticatedAuthenticationToken successToken = new PreAuthenticatedAuthenticationToken(principal,
                     credentials, authorities);
             successToken.setDetails(tokenDetails);

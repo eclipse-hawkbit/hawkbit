@@ -8,17 +8,11 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
+import org.eclipse.hawkbit.dmf.hono.HonoDeviceSync;
+import org.eclipse.hawkbit.dmf.hono.model.HonoCredentials;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -41,7 +35,7 @@ public class ControllerPreAuthenticatedHonoFilter extends AbstractControllerAuth
     private static final int OFFSET_TARGET_TOKEN = TARGET_SECURITY_TOKEN_AUTH_SCHEME.length();
 
     private final ControllerManagement controllerManagement;
-    private final String honoCredentialsEndpoint;
+    private final HonoDeviceSync honoDeviceSync;
 
     /**
      * Constructor.
@@ -58,14 +52,16 @@ public class ControllerPreAuthenticatedHonoFilter extends AbstractControllerAuth
      * @param systemSecurityContext
      *            the system security context to get access to tenant
      *            configuration
+     * @param honoDeviceSync
+     *            the hono device sync interface
      */
     public ControllerPreAuthenticatedHonoFilter(
             final TenantConfigurationManagement tenantConfigurationManagement,
             final ControllerManagement controllerManagement, final TenantAware tenantAware,
-            final SystemSecurityContext systemSecurityContext, final String honoCredentialsEndpoint) {
+            final SystemSecurityContext systemSecurityContext, final HonoDeviceSync honoDeviceSync) {
         super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.controllerManagement = controllerManagement;
-        this.honoCredentialsEndpoint = honoCredentialsEndpoint;
+        this.honoDeviceSync = honoDeviceSync;
     }
 
     @Override
@@ -85,82 +81,7 @@ public class ControllerPreAuthenticatedHonoFilter extends AbstractControllerAuth
 
     @Override
     public Collection<HonoCredentials> getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
-        Object response;
-        try {
-            URL url = new URL(honoCredentialsEndpoint
-                    .replace("$tenantId", securityToken.getTenant())
-                    .replace("$deviceId", resolveControllerId(securityToken)));
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-
-            int statusCode = connection.getResponseCode();
-            if (statusCode < 200 || statusCode >= 300) {
-                return null;
-            }
-            JSONParser parser = new JSONParser();
-            response = parser.parse(connection.getInputStream());
-        }
-        catch (IOException | ParseException e) {
-            return null;
-        }
-
-        ArrayList<HonoCredentials> honoCredentials = new ArrayList<>();
-
-        if (response instanceof JSONArray) {
-            JSONArray credentialsArray = (JSONArray) response;
-            for (Object object : credentialsArray) {
-                JSONObject credentials = (JSONObject) object;
-
-                String deviceId = credentials.getAsString("device-id");
-                String type = credentials.getAsString("type");
-                String authId = credentials.getAsString("auth-id");
-                Boolean enabled = (Boolean) credentials.getOrDefault("enabled", true);
-                JSONArray secrets = (JSONArray) credentials.get("secrets");
-
-                ArrayList<HonoSecret> honoSecrets = new ArrayList<>();
-                switch (type) {
-                    case "hashed-password":
-                        for (Object secretObject : secrets) {
-                            JSONObject secret = (JSONObject) secretObject;
-                            String notAfter = secret.getAsString("not-after");
-                            String notBefore = secret.getAsString("not-before");
-                            String pwdHash = secret.getAsString("pwd-hash");
-                            String salt = secret.getAsString("salt");
-                            String hashFunction = (String) secret.getOrDefault("hash-function", "sha-256");
-
-                            honoSecrets.add(new HonoPasswordSecret(notBefore, notAfter, hashFunction, salt, pwdHash));
-                        }
-                        break;
-
-                    case "psk":
-                        for (Object secretObject : secrets) {
-                            JSONObject secret = (JSONObject) secretObject;
-                            String notAfter = secret.getAsString("not-after");
-                            String notBefore = secret.getAsString("not-before");
-                            String key = secret.getAsString("key");
-
-                            honoSecrets.add(new HonoPreSharedKey(notBefore, notAfter, key));
-                        }
-                        break;
-
-                    case "x509-cert":
-                        for (Object secretObject : secrets) {
-                            JSONObject secret = (JSONObject) secretObject;
-                            String notAfter = secret.getAsString("not-after");
-                            String notBefore = secret.getAsString("not-before");
-
-                            honoSecrets.add(new HonoX509Certificate(notBefore, notAfter));
-                        }
-
-                    default:
-                        // skip this credentials entry as it is not supported
-                        continue;
-                }
-                honoCredentials.add(new HonoCredentials(deviceId, type, authId, enabled, honoSecrets));
-            }
-        }
-
-        return honoCredentials;
+        return honoDeviceSync.getAllHonoCredentials(securityToken.getTenant(), resolveControllerId(securityToken));
     }
 
     private String resolveControllerId(final DmfTenantSecurityToken securityToken) {

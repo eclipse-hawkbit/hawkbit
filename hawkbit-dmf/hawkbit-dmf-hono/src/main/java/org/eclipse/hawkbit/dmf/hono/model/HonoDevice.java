@@ -1,24 +1,24 @@
-package org.eclipse.hawkbit.dmf.hono;
+package org.eclipse.hawkbit.dmf.hono.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-class HonoDevice {
+public class HonoDevice {
     private boolean enabled;
     private JsonNode ext;
 
-    boolean isEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    Object getExt() {
+    public Object getExt() {
         return ext;
     }
 
-    void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
-    void setExt(JsonNode ext) {
+    public void setExt(JsonNode ext) {
         this.ext = ext;
     }
 }

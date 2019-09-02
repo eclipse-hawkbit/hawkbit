@@ -15,6 +15,9 @@ public class DmfHonoConfiguration {
     @Value("${hawkbit.server.repository.hono-sync.device-list-uri}")
     private String honoDeviceListUri;
 
+    @Value("${hawkbit.server.repository.hono-sync.credentials-list-uri}")
+    private String honoCredentialsListUri;
+
     @Value("${hawkbit.server.repository.hono-sync.authorization-method:none}")
     private String authorizationMethod;
 
@@ -32,7 +35,7 @@ public class DmfHonoConfiguration {
 
     @Bean
     public HonoDeviceSync honoDeviceSync() {
-        return new HonoDeviceSync(honoTenantListUri, honoDeviceListUri, authorizationMethod, oidcTokenUri, oidcClientId,
-                username, password);
+        return new HonoDeviceSync(honoTenantListUri, honoDeviceListUri, honoCredentialsListUri, authorizationMethod,
+                oidcTokenUri, oidcClientId, username, password);
     }
 }

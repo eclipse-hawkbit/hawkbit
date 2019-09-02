@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.dmf.hono;
+package org.eclipse.hawkbit.dmf.hono.model;
 
 public class IdentifiableHonoDevice {
     private String id;
@@ -9,7 +9,7 @@ public class IdentifiableHonoDevice {
         return id;
     }
 
-    String getTenant() {
+    public String getTenant() {
         return tenant;
     }
 
@@ -21,7 +21,7 @@ public class IdentifiableHonoDevice {
         this.id = id;
     }
 
-    void setTenant(String tenant) {
+    public void setTenant(String tenant) {
         this.tenant = tenant;
     }
 

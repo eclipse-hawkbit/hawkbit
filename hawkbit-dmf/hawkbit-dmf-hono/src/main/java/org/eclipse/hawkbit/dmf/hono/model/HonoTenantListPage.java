@@ -1,16 +1,16 @@
-package org.eclipse.hawkbit.dmf.hono;
+package org.eclipse.hawkbit.dmf.hono.model;
 
 import java.util.List;
 
-public class HonoDeviceListPage {
+public class HonoTenantListPage {
     private long total;
-    private List<IdentifiableHonoDevice> items;
+    private List<IdentifiableHonoTenant> items;
 
     public long getTotal() {
         return total;
     }
 
-    public List<IdentifiableHonoDevice> getItems() {
+    public List<IdentifiableHonoTenant> getItems() {
         return items;
     }
 
@@ -18,7 +18,7 @@ public class HonoDeviceListPage {
         this.total = total;
     }
 
-    public void setItems(List<IdentifiableHonoDevice> items) {
+    public void setItems(List<IdentifiableHonoTenant> items) {
         this.items = items;
     }
 }

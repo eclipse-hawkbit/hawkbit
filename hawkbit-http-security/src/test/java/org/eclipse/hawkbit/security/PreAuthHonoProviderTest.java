@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.security;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.dmf.hono.HonoDeviceSync;
+import org.eclipse.hawkbit.dmf.hono.model.HonoPasswordCredentials;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,16 +26,25 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 @Feature("Unit Tests - Security")
 @Story("PreAuth Hono Provider Test")
 @RunWith(MockitoJUnitRunner.class)
 public class PreAuthHonoProviderTest {
 
-    private final PreAuthHonoAuthenticationProvider testProvider = new PreAuthHonoAuthenticationProvider();
+    private PreAuthHonoAuthenticationProvider testProvider;
 
     @Mock
     private TenantAwareWebAuthenticationDetails webAuthenticationDetailsMock;
+
+    @Mock
+    private HonoDeviceSync honoDeviceSyncMock;
+
+    @Before
+    public void beforeTest() {
+         this.testProvider = new PreAuthHonoAuthenticationProvider(honoDeviceSyncMock);
+    }
 
     @Test
     @Description("Testing that the provided credentials are incorrect.")
@@ -40,8 +52,15 @@ public class PreAuthHonoProviderTest {
 
         HeaderAuthentication principal = new HeaderAuthentication("deviceId", "wrongPassword");
 
-        HonoPasswordSecret secret = new HonoPasswordSecret(null, null, "sha-256", "salt", "hash");
-        HonoCredentials credentials = new HonoCredentials("deviceId", "hashed-password", "authId", true, Collections.singletonList(secret));
+        HonoPasswordCredentials.Secret secret = new HonoPasswordCredentials.Secret();
+        secret.setHashFunction("sha-256");
+        secret.setSalt("salt");
+        secret.setPwdHash("hash");
+
+        HonoPasswordCredentials credentials = new HonoPasswordCredentials();
+        credentials.setAuthId("authId");
+        credentials.setType("hashed-password");
+        credentials.setSecrets(Collections.singletonList(secret));
 
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
                 Collections.singletonList(credentials));
@@ -52,6 +71,7 @@ public class PreAuthHonoProviderTest {
             testProvider.authenticate(token);
             fail("Should not work with wrong credentials");
         } catch (final BadCredentialsException e) {
+            verifyNoMoreInteractions(honoDeviceSyncMock);
         }
     }
 
@@ -59,10 +79,20 @@ public class PreAuthHonoProviderTest {
     @Description("Testing that the provided credentials are correct.")
     public void credentialsAreCorrect() {
 
-        HeaderAuthentication principal = new HeaderAuthentication("deviceId", "password");
+        String tenant = "tenant";
+        String deviceID = "deviceId";
 
-        HonoPasswordSecret secret = new HonoPasswordSecret(null, null, "sha-256", "salt", "7a37b85c8918eac19a9089c0fa5a2ab4dce3f90528dcdeec108b23ddf3607b99");
-        HonoCredentials credentials = new HonoCredentials("deviceId", "hashed-password", "authId", true, Collections.singletonList(secret));
+        HeaderAuthentication principal = new HeaderAuthentication(deviceID, "password");
+
+        HonoPasswordCredentials.Secret secret = new HonoPasswordCredentials.Secret();
+        secret.setHashFunction("sha-256");
+        secret.setSalt("salt");
+        secret.setPwdHash("7a37b85c8918eac19a9089c0fa5a2ab4dce3f90528dcdeec108b23ddf3607b99");
+
+        HonoPasswordCredentials credentials = new HonoPasswordCredentials();
+        credentials.setAuthId("authId");
+        credentials.setType("hashed-password");
+        credentials.setSecrets(Collections.singletonList(secret));
 
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
                 Collections.singletonList(credentials));
@@ -71,5 +101,8 @@ public class PreAuthHonoProviderTest {
         // test, should throw authentication exception
         final Authentication authenticate = testProvider.authenticate(token);
         assertThat(authenticate.isAuthenticated()).isTrue();
+
+        verify(honoDeviceSyncMock, times(1)).checkDeviceIfAbsentSync(tenant, deviceID);
+        verifyNoMoreInteractions(honoDeviceSyncMock);
     }
 }

@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.dmf.hono;
+package org.eclipse.hawkbit.dmf.hono.model;
 
 public class HonoTenant {
     private boolean enabled;
