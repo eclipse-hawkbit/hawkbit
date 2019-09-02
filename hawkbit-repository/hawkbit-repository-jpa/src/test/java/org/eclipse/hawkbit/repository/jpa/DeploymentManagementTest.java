@@ -176,7 +176,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Assigns the same distribution set to many targets until the 'max targets per manual assignment' quota is exceeded.")
+    @Description("Assigns distribution set to many targets until the 'maxResultingActionsPerManualAssignment' quota is exceeded.")
     public void assignDistributionSetUntilQuotaIsExceeded() {
 
         final int maxActions = quotaManagement.getMaxResultingActionsPerManualAssignment();
@@ -489,7 +489,29 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .allMatch(target -> target.getLastModifiedAt() == target.getInstallationDate());
     }
 
-    // TODO test multiassign offline assigment
+    @Test
+    @Description("Offline assign multiple DSs to multiple Targets in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+    public void multiOfflineAssignment() {
+        final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream()
+                .map(DistributionSet::getId).collect(Collectors.toList());
+
+        enableMultiAssignments();
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .offlineAssignedDistributionSets(dsIds, targetIds);
+
+        assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
+        targetIds.forEach(controllerId -> {
+            final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, controllerId).stream()
+                    .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+            assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
+        });
+    }
 
     @Test
     @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned set get closed and set to CANCELED.")
@@ -564,6 +586,31 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
         assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
                 assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
+    }
+
+    @Test
+    @Description("Assign multiple DSs to multiple Targets in one request in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = MultiActionEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+    public void multiassignmentInOneRequest() {
+        final List<Target> targets = testdataFactory.createTargets(2);
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+
+        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
+
+        enableMultiAssignments();
+        final List<DistributionSetAssignmentResult> results = assignDistributionSets(distributionSets, targets);
+        assertThat(getResultingActionCount(results)).isEqualTo(4);
+        targets.forEach(target -> {
+            final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, target.getControllerId())
+                    .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+            assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
+        });
+
     }
 
     @Test
@@ -1248,10 +1295,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             return undeployedTargetIDs;
         }
 
-    }
-
-    private void enableMultiAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
 }

@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 public class MgmtDistributionSetAssignmentsDeserializer extends StdDeserializer<MgmtDistributionSetAssignments> {
+    private static final long serialVersionUID = 1L;
+
     public MgmtDistributionSetAssignmentsDeserializer() {
         this(null);
     }

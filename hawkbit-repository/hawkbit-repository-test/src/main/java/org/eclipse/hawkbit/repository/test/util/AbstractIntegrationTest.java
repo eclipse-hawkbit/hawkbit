@@ -61,6 +61,7 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -300,6 +301,10 @@ public abstract class AbstractIntegrationTest {
             final Target target) {
         return deploymentManagement.assignDistributionSet(pset.getId(), Arrays.asList(
                 new TargetWithActionType(target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis())));
+    }
+
+    protected void enableMultiAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {

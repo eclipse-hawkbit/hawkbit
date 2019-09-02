@@ -263,7 +263,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return results;
     }
 
-    private boolean isCausingMultiassignment(final Collection<Long> dsIDs,
+    private static boolean isCausingMultiassignment(final Collection<Long> dsIDs,
             final Collection<TargetWithActionType> targetWithActionTypes) {
         final boolean isAssigningSameTargetMultipleTimes = targetWithActionTypes.stream().map(TargetWithActionType::getControllerId)
                 .distinct().count() < targetWithActionTypes.size();

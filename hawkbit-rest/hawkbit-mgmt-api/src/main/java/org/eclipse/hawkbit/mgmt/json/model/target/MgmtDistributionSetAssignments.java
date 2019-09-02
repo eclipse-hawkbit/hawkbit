@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MgmtDistributionSetAssignmentsDeserializer.class)
 public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
+    private static final long serialVersionUID = 1L;
+
     public MgmtDistributionSetAssignments() {
         super();
     }
