@@ -478,7 +478,7 @@ public final class HawkbitCommonUtil {
         default:
             break;
         }
-        return String.format("%.1f", tmpFinishedPercentage);
+        return String.format(getCurrentLocale(), "%.1f", tmpFinishedPercentage);
     }
 
     /**
@@ -574,14 +574,14 @@ public final class HawkbitCommonUtil {
      */
     public static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties,
             final Locale desiredLocale) {
-        final List<String> availableLocals = localizationProperties.getAvailableLocals();
+        final List<Locale> availableLocals = localizationProperties.getAvailableLocals();
         // ckeck if language code of UI locale matches an available local.
         // Country, region and variant are ignored. "availableLocals" must only
         // contain language codes without country or other extensions.
-        if (availableLocals.contains(desiredLocale.getLanguage())) {
+        if (availableLocals.contains(desiredLocale)) {
             return desiredLocale;
         }
-        return new Locale(localizationProperties.getDefaultLocal());
+        return localizationProperties.getDefaultLocal();
     }
 
     /**

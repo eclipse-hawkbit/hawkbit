@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -53,7 +54,6 @@ public class UiProperties implements Serializable {
         this.fixedTimeZone = fixedTimeZone;
     }
 
-
     /**
      * Localization information
      */
@@ -63,26 +63,26 @@ public class UiProperties implements Serializable {
         /**
          * Default localization
          */
-        private String defaultLocal = "en";
+        private Locale defaultLocal = Locale.ENGLISH;
 
         /**
          * List of available localizations
          */
-        private List<String> availableLocals = Collections.singletonList("en");
+        private List<Locale> availableLocals = Collections.singletonList(Locale.ENGLISH);
 
-        public String getDefaultLocal() {
+        public Locale getDefaultLocal() {
             return defaultLocal;
         }
 
-        public List<String> getAvailableLocals() {
+        public List<Locale> getAvailableLocals() {
             return availableLocals;
         }
 
-        public void setDefaultLocal(final String defaultLocal) {
+        public void setDefaultLocal(final Locale defaultLocal) {
             this.defaultLocal = defaultLocal;
         }
 
-        public void setAvailableLocals(final List<String> availableLocals) {
+        public void setAvailableLocals(final List<Locale> availableLocals) {
             this.availableLocals = availableLocals;
         }
     }
