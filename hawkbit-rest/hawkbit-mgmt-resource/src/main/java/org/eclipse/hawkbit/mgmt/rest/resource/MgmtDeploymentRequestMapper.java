@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 /**
  * A mapper for assignment requests
  */
-public final class MgmtAssignmentRequestMapper {
-    private MgmtAssignmentRequestMapper() {
+public final class MgmtDeploymentRequestMapper {
+    private MgmtDeploymentRequestMapper() {
         // Utility class
     }
 

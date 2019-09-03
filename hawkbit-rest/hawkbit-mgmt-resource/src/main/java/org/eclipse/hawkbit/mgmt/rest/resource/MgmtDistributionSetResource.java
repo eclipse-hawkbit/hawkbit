@@ -259,7 +259,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         }
         
         final List<DeploymentRequest> deploymentRequests = assignments.stream()
-                .map(assignment -> MgmtAssignmentRequestMapper.createAssignmentRequest(assignment, distributionSetId))
+                .map(assignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(assignment, distributionSetId))
                 .collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deployManagament

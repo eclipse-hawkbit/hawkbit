@@ -297,7 +297,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         findTargetWithExceptionIfNotFound(targetId);
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream()
-                .map(dsAssignment -> MgmtAssignmentRequestMapper.createAssignmentRequest(dsAssignment, targetId))
+                .map(dsAssignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(dsAssignment, targetId))
                 .collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement

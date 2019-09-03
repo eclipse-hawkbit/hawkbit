@@ -1897,6 +1897,19 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Identical assignments in a single request are removed when multiassignment in disabled.")
+    public void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = getAssignmentBody(Arrays.asList(dsId, dsId));
+
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1)));
+    }
+
+    @Test
     @Description("Assign multiple DSs to a target in one request with multiassignments enabled.")
     public void multiAssignment() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();

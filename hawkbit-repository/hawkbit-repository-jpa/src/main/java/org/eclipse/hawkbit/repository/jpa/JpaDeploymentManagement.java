@@ -249,7 +249,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private static boolean isCausingMultiassignment(final Collection<DeploymentRequest> deploymentRequests) {
         final long distinctTargetsInRequest = deploymentRequests.stream()
-                .map(DeploymentRequest::getTargetWithActionType).distinct().count();
+                .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         return distinctTargetsInRequest < deploymentRequests.size();
     }
 
