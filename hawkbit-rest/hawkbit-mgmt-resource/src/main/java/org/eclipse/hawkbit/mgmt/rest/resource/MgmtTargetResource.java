@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -37,13 +36,12 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.AssignmentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -284,23 +282,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(distributionSetRest);
     }
 
-    private static AssignmentRequest createAssignmentRequest(final MgmtDistributionSetAssignment dsAssignment,
-            final String targetId) {
-        final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsAssignment.getMaintenanceWindow();
-        if (maintenanceWindow == null) {
-            return new AssignmentRequest(targetId, dsAssignment.getId(),
-                    MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
-                    dsAssignment.getForcetime());
-        }
-        final String cronSchedule = maintenanceWindow.getSchedule();
-        final String duration = maintenanceWindow.getDuration();
-        final String timezone = maintenanceWindow.getTimezone();
-        MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
-        return new AssignmentRequest(targetId, dsAssignment.getId(),
-                MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
-                dsAssignment.getForcetime(), cronSchedule, duration, timezone);
-    }
-
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") final String targetId,
@@ -315,11 +296,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
         findTargetWithExceptionIfNotFound(targetId);
 
-        final List<AssignmentRequest> assignmentRequests = dsAssignments.stream()
-                .map(dsAssignment -> createAssignmentRequest(dsAssignment, targetId)).collect(Collectors.toList());
+        final List<DeploymentRequest> deploymentRequests = dsAssignments.stream()
+                .map(dsAssignment -> MgmtAssignmentRequestMapper.createAssignmentRequest(dsAssignment, targetId))
+                .collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .assignDistributionSets(assignmentRequests);
+                .assignDistributionSets(deploymentRequests);
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 

@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -944,8 +943,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
-        deploymentManagement.assignDistributionSet(set.getId(),
-                Arrays.asList(new TargetWithActionType(testdataFactory.createTarget().getControllerId())));
+        assignDistributionSet(set.getId(), testdataFactory.createTarget().getControllerId());
 
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 

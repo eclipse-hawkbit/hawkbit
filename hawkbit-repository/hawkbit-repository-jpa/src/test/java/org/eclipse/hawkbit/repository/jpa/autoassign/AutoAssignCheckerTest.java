@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,8 +56,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final DistributionSet firstDistributionSet = testdataFactory.createDistributionSet();
             final DistributionSet secondDistributionSet = testdataFactory.createDistributionSet("second");
             testdataFactory.createTarget(knownControllerId);
-            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
-                    firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(firstDistributionSet.getId(),
+                    knownControllerId);
             final Long manuallyAssignedActionId = getFirstAssignedActionId(assignmentResult);
 
             // target filter query that matches all targets
@@ -218,11 +217,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final String targetDsBIdPref = "B";
         final String targetDsCIdPref = "C";
 
-        List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet,
+        final List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet,
                 ActionType.FORCED);
-        List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSet,
+        final List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSet,
                 ActionType.SOFT);
-        List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSet,
+        final List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSet,
                 ActionType.DOWNLOAD_ONLY);
 
         final int targetsCount = targetsA.size() + targetsB.size() + targetsC.size();

@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  * A custom view on assigning a {@link DistributionSet} to a {@link Target}.
  *
  */
-public class AssignmentRequest {
+public class DeploymentRequest {
     private final Long distributionSetId;
     private final TargetWithActionType targetWithActionType;
 
@@ -28,7 +28,7 @@ public class AssignmentRequest {
      *            of the distribution set that that should be assigned to the
      *            controller.
      */
-    public AssignmentRequest(final String controllerId, final Long distributionSetId) {
+    public DeploymentRequest(final String controllerId, final Long distributionSetId) {
         this.targetWithActionType = new TargetWithActionType(controllerId);
         this.distributionSetId = distributionSetId;
     }
@@ -46,7 +46,7 @@ public class AssignmentRequest {
      * @param forceTime
      *            at what time the type soft turns into forced.
      */
-    public AssignmentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
+    public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
             final long forceTime) {
         this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime);
         this.distributionSetId = distributionSetId;
@@ -81,7 +81,7 @@ public class AssignmentRequest {
      * @throws InvalidMaintenanceScheduleException
      *             if the parameters do not define a valid maintenance schedule.
      */
-    public AssignmentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
+    public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
             final long forceTime, final String maintenanceSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
         this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime, maintenanceSchedule,
@@ -107,7 +107,7 @@ public class AssignmentRequest {
     @Override
     public String toString() {
         return String.format(
-                "AssignmentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s]",
+                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s]",
                 targetWithActionType.getControllerId(), getDistributionSetId(), targetWithActionType.getActionType(),
                 targetWithActionType.getForceTime(), targetWithActionType.getMaintenanceSchedule(),
                 targetWithActionType.getMaintenanceWindowDuration(),
@@ -131,7 +131,7 @@ public class AssignmentRequest {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final AssignmentRequest other = (AssignmentRequest) obj;
+        final DeploymentRequest other = (DeploymentRequest) obj;
         if (distributionSetId == null) {
             if (other.distributionSetId != null)
                 return false;

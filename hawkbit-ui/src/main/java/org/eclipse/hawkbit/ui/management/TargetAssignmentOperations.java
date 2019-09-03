@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.AssignmentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -104,15 +104,15 @@ public final class TargetAssignmentOperations {
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
-        final List<AssignmentRequest> assignmentRequests = new ArrayList<>();
-        dsIds.forEach(dsId -> targets.forEach(t -> assignmentRequests.add(maintenanceWindowLayout.isEnabled()
-                ? new AssignmentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp,
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        dsIds.forEach(dsId -> targets.forEach(t -> deploymentRequests.add(maintenanceWindowLayout.isEnabled()
+                ? new DeploymentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp,
                         maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
-                : new AssignmentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp))));
+                : new DeploymentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp))));
 
         try {
             final List<DistributionSetAssignmentResult> results = deploymentManagement
-                    .assignDistributionSets(assignmentRequests);
+                    .assignDistributionSets(deploymentRequests);
             // use the last one for the notification box
             final DistributionSetAssignmentResult assignmentResult = results.get(results.size() - 1);
             if (assignmentResult.getAssigned() > 0) {
