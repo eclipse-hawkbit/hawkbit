@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,11 +20,11 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.AssignmentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
@@ -103,16 +104,15 @@ public final class TargetAssignmentOperations {
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
-        final List<TargetWithActionType> trgActionType = targets.stream()
-                .map(t -> maintenanceWindowLayout.isEnabled()
-                        ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
-                                maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
-                        : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
-                .collect(Collectors.toList());
+        final List<AssignmentRequest> assignmentRequests = new ArrayList<>();
+        dsIds.forEach(dsId -> targets.forEach(t -> assignmentRequests.add(maintenanceWindowLayout.isEnabled()
+                ? new AssignmentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp,
+                        maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
+                : new AssignmentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp))));
 
         try {
-            final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(dsIds,
-                    trgActionType);
+            final List<DistributionSetAssignmentResult> results = deploymentManagement
+                    .assignDistributionSets(assignmentRequests);
             // use the last one for the notification box
             final DistributionSetAssignmentResult assignmentResult = results.get(results.size() - 1);
             if (assignmentResult.getAssigned() > 0) {

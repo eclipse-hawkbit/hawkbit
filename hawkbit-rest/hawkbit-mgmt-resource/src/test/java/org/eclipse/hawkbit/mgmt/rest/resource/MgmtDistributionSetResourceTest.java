@@ -299,7 +299,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
+    @Description("Ensures that multi target assignment is protected by our getMaxResultingActionsPerManualAssignment quota.")
     public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
         // TODO add multiasssignment test
 

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.AssignmentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -280,11 +282,13 @@ public abstract class AbstractIntegrationTest {
                         maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
     }
 
-    protected List<DistributionSetAssignmentResult> assignDistributionSets(
-            final Collection<DistributionSet> distributionSets, final Collection<Target> targets) {
-        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
-        final List<TargetWithActionType> targetWithActionTypes = targets.stream().map(Target::getTargetWithActionType).collect(Collectors.toList());
-        return deploymentManagement.assignDistributionSets(dsIds, targetWithActionTypes);
+    protected List<AssignmentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
+            final Collection<Target> targets) {
+        final List<AssignmentRequest> assignmentRequests = new ArrayList<>();
+        distributionSets.forEach(ds -> targets.forEach(
+                target -> assignmentRequests.add(new AssignmentRequest(target.getControllerId(), ds.getId())))
+        );
+        return assignmentRequests;
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,

@@ -43,10 +43,10 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.AssignmentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -284,18 +284,20 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(distributionSetRest);
     }
 
-    private TargetWithActionType createTargetWithActionType(final MgmtDistributionSetAssignment dsAssignment,
+    private static AssignmentRequest createAssignmentRequest(final MgmtDistributionSetAssignment dsAssignment,
             final String targetId) {
         final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsAssignment.getMaintenanceWindow();
         if (maintenanceWindow == null) {
-            return new TargetWithActionType(targetId, MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
+            return new AssignmentRequest(targetId, dsAssignment.getId(),
+                    MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
                     dsAssignment.getForcetime());
         }
         final String cronSchedule = maintenanceWindow.getSchedule();
         final String duration = maintenanceWindow.getDuration();
         final String timezone = maintenanceWindow.getTimezone();
         MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
-        return new TargetWithActionType(targetId, MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
+        return new AssignmentRequest(targetId, dsAssignment.getId(),
+                MgmtRestModelMapper.convertActionType(dsAssignment.getType()),
                 dsAssignment.getForcetime(), cronSchedule, duration, timezone);
     }
 
@@ -312,11 +314,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                     deploymentManagement.offlineAssignedDistributionSets(dsIds, Collections.singletonList(targetId))));
         }
         findTargetWithExceptionIfNotFound(targetId);
-        final List<TargetWithActionType> targetWithActionTypes = dsAssignments.stream()
-                .map(dsAssignment -> createTargetWithActionType(dsAssignment, targetId)).collect(Collectors.toList());
+
+        final List<AssignmentRequest> assignmentRequests = dsAssignments.stream()
+                .map(dsAssignment -> createAssignmentRequest(dsAssignment, targetId)).collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .assignDistributionSets(dsIds, targetWithActionTypes);
+                .assignDistributionSets(assignmentRequests);
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 

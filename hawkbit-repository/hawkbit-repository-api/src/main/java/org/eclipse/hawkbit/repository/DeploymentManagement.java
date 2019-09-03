@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.AssignmentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -106,14 +107,12 @@ public interface DeploymentManagement {
             @NotEmpty Collection<TargetWithActionType> targets);
 
     /**
-     * Assigns the given set of {@link DistributionSet} entities to the given
-     * {@link Target}s using the specified {@link ActionType} and
-     * {@code forcetime}.
+     * Assigns {@link DistributionSet}s to {@link Target}s according to the
+     * {@link AssignmentRequest}.
      *
-     * @param dsIDs
+     * @param assignmentRequests
      *            the set of IDs of the distribution sets to assign
-     * @param targets
-     *            a list of all targets and their action type
+     * 
      * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
@@ -133,8 +132,8 @@ public interface DeploymentManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Collection<Long> dsIDs,
-            @NotEmpty Collection<TargetWithActionType> targets);
+    List<DistributionSetAssignmentResult> assignDistributionSets(
+            @NotEmpty Collection<AssignmentRequest> assignmentRequests);
 
     /**
      * Assigns the addressed {@link DistributionSet} to all {@link Target}s by

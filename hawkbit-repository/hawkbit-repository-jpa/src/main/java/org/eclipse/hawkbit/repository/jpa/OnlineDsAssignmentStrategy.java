@@ -45,15 +45,12 @@ import com.google.common.collect.Lists;
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
-    private final BooleanSupplier multiAssignmentsConfig;
-
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement);
-        this.multiAssignmentsConfig = multiAssignmentsConfig;
+                quotaManagement, multiAssignmentsConfig);
     }
 
     @Override
@@ -204,10 +201,6 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new MultiActionEvent(tenant, eventPublisherHolder.getApplicationId(), controllerIds)));
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.getAsBoolean();
     }
 
     private static Stream<Action> filterCancellations(final List<Action> actions) {

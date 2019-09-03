@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.AssignmentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -167,10 +168,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
 
         enableMultiAssignments();
-        final List<String> targets = Collections.nCopies(maxActions, testTarget.getControllerId());
-        deploymentManagement.offlineAssignedDistributionSets(Collections.singletonList(ds1.getId()), targets);
+        for (int i = 0; i < maxActions; i++) {
+            deploymentManagement.offlineAssignedDistributionSets(Collections.singletonList(ds1.getId()),
+                    Collections.singletonList(testTarget.getControllerId()));
+        }
 
-        // change the distribution set one last time to trigger a quota hit
         assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> assignDistributionSet(ds1, Collections.singletonList(testTarget)));
     }
@@ -599,12 +601,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void multiassignmentInOneRequest() {
         final List<Target> targets = testdataFactory.createTargets(2);
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
-
-        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        final List<AssignmentRequest> assignmentRequests = createAssignmentRequests(distributionSets, targets);
 
         enableMultiAssignments();
-        final List<DistributionSetAssignmentResult> results = assignDistributionSets(distributionSets, targets);
-        assertThat(getResultingActionCount(results)).isEqualTo(4);
+        final List<DistributionSetAssignmentResult> results = deploymentManagement
+                .assignDistributionSets(assignmentRequests);
+
+        assertThat(getResultingActionCount(results)).isEqualTo(assignmentRequests.size());
+        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
         targets.forEach(target -> {
             final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, target.getControllerId())
                     .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
@@ -617,25 +621,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("A Request resulting in multiple assignments to a single target is only allowed when multiassignment is enabled.")
     public void multipleAssignmentsToTargetOnlyAllowedInMultiAssignMode() {
         final Target target = testdataFactory.createTarget();
-        final TargetWithActionType twa1 = new TargetWithActionType(target.getControllerId(), ActionType.FORCED, 0);
-        final TargetWithActionType twa2 = new TargetWithActionType(target.getControllerId(), ActionType.SOFT, 0);
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
 
-        final List<Long> singleDS = Collections.singletonList(distributionSets.get(0).getId());
-        final List<Long> differentDSs = distributionSets.stream().map(DistributionSet::getId)
-                .collect(Collectors.toList());
-        final List<TargetWithActionType> sameTargetTwice = Arrays.asList(twa1, twa2);
-        final List<TargetWithActionType> singleTarget = Collections.singletonList(twa1);
+        final AssignmentRequest targetToDS0 = new AssignmentRequest(target.getControllerId(),
+                distributionSets.get(0).getId());
+        final AssignmentRequest targetToDS1 = new AssignmentRequest(target.getControllerId(),
+                distributionSets.get(1).getId());
 
         Assertions.assertThatExceptionOfType(MultiassignmentIsNotEnabledException.class)
-                .isThrownBy(() -> deploymentManagement.assignDistributionSets(singleDS, sameTargetTwice));
-        Assertions.assertThatExceptionOfType(MultiassignmentIsNotEnabledException.class)
-                .isThrownBy(() -> deploymentManagement.assignDistributionSets(differentDSs, singleTarget));
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)));
 
         enableMultiAssignments();
-        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(singleDS, sameTargetTwice)))
-                .isEqualTo(2);
-        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(differentDSs, singleTarget)))
+        assertThat(getResultingActionCount(
+                deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1))))
                 .isEqualTo(2);
     }
 
@@ -644,18 +642,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void duplicateAssignmentsInRequestAreOnlyRemovedIfMultiassignmentDisabled() {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final List<Target> sameTargetTwice = Arrays.asList(target, target);
-        final List<DistributionSet> sameDsTwice = Arrays.asList(ds, ds);
-
-        assertThat(getResultingActionCount(assignDistributionSets(Collections.singletonList(ds), sameTargetTwice)))
-                .isEqualTo(1);
-        assertThat(getResultingActionCount(assignDistributionSets(sameDsTwice, Collections.singletonList(target))))
+        final List<AssignmentRequest> twoEqualAssignments = Collections.nCopies(2,
+                new AssignmentRequest(target.getControllerId(), ds.getId()));
+        
+        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
                 .isEqualTo(1);
 
         enableMultiAssignments();
-        assertThat(getResultingActionCount(assignDistributionSets(Collections.singletonList(ds), sameTargetTwice)))
-                .isEqualTo(2);
-        assertThat(getResultingActionCount(assignDistributionSets(sameDsTwice, Collections.singletonList(target))))
+        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
                 .isEqualTo(2);
     }
 
@@ -671,15 +665,16 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
     public void maxActionsPerTargetIsCheckedBeforeAssignmentExecution() {
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
-        final Target target = testdataFactory.createTarget();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final List<Target> targets = Collections.nCopies(maxActions / 2, target);
+        final List<AssignmentRequest> assignmentRequests = Collections.nCopies(maxActions + 1,
+                new AssignmentRequest(controllerId, dsId));
 
         enableMultiAssignments();
         Assertions.assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSets(Arrays.asList(ds, ds, ds), targets));
-        assertThat(actionRepository.countByTargetControllerId(target.getControllerId())).isEqualTo(0);
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(assignmentRequests));
+        assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(0);
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -50,17 +51,19 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final ActionRepository actionRepository;
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
+    private final BooleanSupplier multiAssignmentsConfig;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement) {
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisherHolder = eventPublisherHolder;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
+        this.multiAssignmentsConfig = multiAssignmentsConfig;
     }
 
     /**
@@ -238,5 +241,9 @@ public abstract class AbstractDsAssignmentStrategy {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
+    }
+
+    protected boolean isMultiAssignmentsEnabled() {
+        return multiAssignmentsConfig.getAsBoolean();
     }
 }
