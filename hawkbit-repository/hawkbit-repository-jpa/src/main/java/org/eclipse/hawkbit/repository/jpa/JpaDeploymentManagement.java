@@ -173,6 +173,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<String> controllerIDs) {
         final List<String> distinctControllerIds = controllerIDs.stream().distinct().collect(Collectors.toList());
         final List<Long> distinctDsIds = requestedDsIDs.stream().distinct().collect(Collectors.toList());
+        enforceMaxActionsPerReqest(distinctControllerIds.size() * distinctControllerIds.size());
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         distinctDsIds.forEach(dsId ->
             distinctControllerIds.forEach(controllerId -> deploymentRequests
@@ -364,13 +365,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {
         if (!deploymentRequests.isEmpty()) {
-            enforceMaxActionsPerReqest(deploymentRequests);
+            enforceMaxActionsPerReqest(deploymentRequests.size());
             enforceMaxActionsPerTarget(deploymentRequests);
         }
     }
 
-    private void enforceMaxActionsPerReqest(final Collection<DeploymentRequest> deploymentRequests) {
-        final int requestedActions = deploymentRequests.size();
+    private void enforceMaxActionsPerReqest(final int requestedActions) {
         QuotaHelper.assertAssignmentQuota(requestedActions, quotaManagement.getMaxResultingActionsPerManualAssignment(),
                 Target.class, DistributionSet.class);
     }

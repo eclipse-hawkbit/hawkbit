@@ -146,7 +146,6 @@ public final class MgmtDistributionSetMapper {
 
     static MgmtTargetAssignmentResponseBody toResponse(
             final List<DistributionSetAssignmentResult> dsAssignmentResults) {
-        // TODO test if this does the job right
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         final int alreadyAssigned = dsAssignmentResults.stream()
                 .mapToInt(DistributionSetAssignmentResult::getAlreadyAssigned).sum();
