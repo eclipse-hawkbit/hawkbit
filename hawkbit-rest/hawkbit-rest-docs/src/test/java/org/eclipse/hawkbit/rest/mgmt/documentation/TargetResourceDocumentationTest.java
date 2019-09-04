@@ -48,6 +48,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -485,7 +486,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
-
+    
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
@@ -511,30 +512,80 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
-                        requestFields(requestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
+                        requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPath("maintenanceWindow")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW).optional(),
-                                requestFieldWithPath("maintenanceWindow.schedule")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE).optional(),
-                                requestFieldWithPath("maintenanceWindow.duration")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION).optional(),
-                                requestFieldWithPath("maintenanceWindow.timezone")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE).optional(),
-                                requestFieldWithPath("type").description(MgmtApiModelProperties.FORCETIME_TYPE)
+                                optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
                                         .attributes(key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
-                        responseFields(
-                                fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
-                                fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
-                                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
-                                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
-                                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.ACTION_ID),
-                                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
-                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
-                                fieldWithPath("total").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
+                        responseFields(getDsAssignmentResponseFieldDescriptors())));
+    }
+
+    @Test
+    @Description("Handles the POST request for assigning distribution sets to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
+    public void postAssignDistributionSetsToTarget() throws Exception {
+        // create target and ds, and assign ds
+        final List<DistributionSet> sets = testdataFactory.createDistributionSets(2);
+        testdataFactory.createTarget(targetId);
+
+        final long forceTime = System.currentTimeMillis();
+        final JSONArray body = new JSONArray();
+        body.put(new JSONObject().put("id", sets.get(1).getId()).put("type", "timeforced")
+                .put("forcetime", forceTime)
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())))
+                .toString();
+        body.put(new JSONObject().put("id", sets.get(0).getId()).put("type", "forced"));
+
+        enableMultiAssignments();
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        requestParameters(parameterWithName("offline")
+                                .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
+                        requestFields(
+                                requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                optionalRequestFieldWithPath("[].forcetime")
+                                        .description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("[].maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("[].type")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
+                                        .attributes(key("[].value")
+                                                .value("['soft', 'forced','timeforced', 'downloadonly']"))),
+                        responseFields(getDsAssignmentResponseFieldDescriptors())));
+    }
+
+    private static FieldDescriptor[] getDsAssignmentResponseFieldDescriptors() {
+        final FieldDescriptor[] descriptors = {
+                fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
+            fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
+            .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+    fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+            .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+    fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+            .description(MgmtApiModelProperties.ACTION_ID),
+    fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+            .description(MgmtApiModelProperties.LINK_TO_ACTION),
+    fieldWithPath("total").type(JsonFieldType.NUMBER)
+                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS) };
+        return descriptors;
     }
 
     @Test
