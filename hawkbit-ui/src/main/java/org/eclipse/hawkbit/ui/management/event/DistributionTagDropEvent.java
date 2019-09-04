@@ -139,7 +139,7 @@ public class DistributionTagDropEvent implements DropHandler {
         final String distTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
-        final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
+        final List<String> tagsClickedList = distFilterParameters.getClickedDistSetTags();
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distSelected,
                 distTagName);
 

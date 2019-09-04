@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTargetTagToken;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagData;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -24,10 +27,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Target tag layout in bulk upload popup.
  *
  */
-public class TargetBulkTokenTags extends AbstractTargetTagToken {
+public class TargetBulkTokenTags extends AbstractTargetTagToken<Target> {
     private static final long serialVersionUID = 4159616629565523717L;
-
-    private static final int MAX_TAGS = 500;
 
     TargetBulkTokenTags(final SpPermissionChecker checker, final VaadinMessageSource i18n,
             final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState,
@@ -36,24 +37,15 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
     }
 
     @Override
-    protected void assignTag(final String tagNameSelected) {
-        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagNameSelected);
-
+    protected void assignTag(final TagData tagData) {
+        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().add(tagData.getName());
+        tagPanelLayout.setAssignedTag(tagData);
     }
 
     @Override
-    protected void unassignTag(final String tagName) {
-        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagName);
-    }
-
-    @Override
-    protected String getTagStyleName() {
-        return "target-tag-";
-    }
-
-    @Override
-    protected String getTokenInputPrompt() {
-        return i18n.getMessage("combo.type.tag.name");
+    protected void unassignTag(final TagData tagData) {
+        managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames().remove(tagData.getName());
+        tagPanelLayout.removeAssignedTag(tagData);
     }
 
     @Override
@@ -61,29 +53,32 @@ public class TargetBulkTokenTags extends AbstractTargetTagToken {
         return checker.hasCreateTargetPermission();
     }
 
+    /**
+     * Initializes the Tags
+     */
+    public void initializeTags() {
+        repopulateTags();
+    }
+
+    public boolean isTagSelectedForAssignment() {
+        return !tagPanelLayout.getAssignedTags().isEmpty();
+    }
+
     @Override
-    public void displayAlreadyAssignedTags() {
-        removePreviouslyAddedTokens();
-        addAlreadySelectedTags();
-    }
-
-    protected void addAlreadySelectedTags() {
-        for (final String tagName : managementUIState.getTargetTableFilters().getBulkUpload().getAssignedTagNames()) {
-            tagManagement.getByName(tagName).map(TargetTag::getId).ifPresent(this::addNewToken);
-        }
+    protected List<TagData> getAllTags() {
+        return tagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).stream()
+                .map(tag -> new TagData(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 
     @Override
-    protected void populateContainer() {
-        container.removeAllItems();
-        tagDetails.clear();
-        for (final TargetTag tag : tagManagement.findAll(PageRequest.of(0, MAX_TAGS))) {
-            setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
-        }
-
+    protected List<TagData> getAssignedTags() {
+        // this view doesn't belong to a specific target, so the current
+        // selected target in the target table is ignored and therefore there
+        // are no assigned tags
+        return Collections.emptyList();
     }
 
-    public Map<Long, TagData> getTokensAdded() {
-        return tokensAdded;
+    public List<TagData> getSelectedTagsForAssignment() {
+        return tagPanelLayout.getAssignedTags().stream().map(tagDetailsByName::get).collect(Collectors.toList());
     }
 }

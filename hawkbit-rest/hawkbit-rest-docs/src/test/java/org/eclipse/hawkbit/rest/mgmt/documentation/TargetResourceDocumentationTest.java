@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -395,9 +395,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void switchActionToForced() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
+                ActionType.SOFT, 0, Collections.singletonList(target.getControllerId())));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();
@@ -490,8 +489,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
-        testdataFactory.createTarget(targetId);
+        // create target and ds, and assign ds
+        testdataFactory.createTarget(targetId + "-old");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assignDistributionSet(set.getId(), targetId + "-old");
+
+        testdataFactory.createTarget(targetId);
 
         final long forceTime = System.currentTimeMillis();
         final String body = new JSONObject().put("id", set.getId()).put("type", "timeforced")
@@ -502,7 +505,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -524,6 +527,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+                                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+                                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }
@@ -630,7 +639,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String knownValue = "knownValue";
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -652,7 +661,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -679,7 +688,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{key}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())

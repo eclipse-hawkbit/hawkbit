@@ -10,10 +10,6 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.eclipse.hawkbit.repository.TargetManagement;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A bean which holds a complex result of an service operation to combine the
@@ -21,41 +17,24 @@ import org.springframework.util.CollectionUtils;
  * how much of the assignments had already been existed.
  *
  */
-public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
-
-    private final List<String> assignedTargets;
-    private final List<Action> actions;
+public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Action> {
 
     private final DistributionSet distributionSet;
-
-    private final TargetManagement targetManagement;
 
     /**
      *
      * Constructor.
-     *
-     * @param distributionSet
+     *  @param distributionSet
      *            that has been assigned
-     * @param assignedTargets
-     *            the target objects which have been assigned to the
-     *            distribution set
-     * @param assigned
-     *            count of the assigned targets
      * @param alreadyAssigned
-     *            the count of the already assigned targets
-     * @param actions
-     *            of the assignment
-     * @param targetManagement
-     *            to retrieve the assigned targets
+     *            the the count of already assigned targets
+     * @param assigned
+     *            the assigned actions
      */
-    public DistributionSetAssignmentResult(final DistributionSet distributionSet, final List<String> assignedTargets,
-            final int assigned, final int alreadyAssigned, final List<Action> actions,
-            final TargetManagement targetManagement) {
-        super(assigned, alreadyAssigned, 0, Collections.emptyList(), Collections.emptyList());
+    public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
+            final List<? extends Action> assigned) {
+        super(alreadyAssigned, assigned, Collections.emptyList());
         this.distributionSet = distributionSet;
-        this.assignedTargets = assignedTargets;
-        this.actions = actions;
-        this.targetManagement = targetManagement;
     }
 
     /**
@@ -63,34 +42,6 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
      */
     public DistributionSet getDistributionSet() {
         return distributionSet;
-    }
-
-    /**
-     * @return the actionIds
-     */
-    public List<Long> getActionIds() {
-        if (actions == null) {
-            return Collections.emptyList();
-        }
-        return actions.stream().map(Action::getId).collect(Collectors.toList());
-    }
-
-    /**
-     * @return the actions
-     */
-    public List<Action> getActions() {
-        if (actions == null) {
-            return Collections.emptyList();
-        }
-        return actions;
-    }
-
-    @Override
-    public List<Target> getAssignedEntity() {
-        if (CollectionUtils.isEmpty(assignedTargets)) {
-            return Collections.emptyList();
-        }
-        return targetManagement.getByControllerID(assignedTargets);
     }
 
 }

@@ -17,6 +17,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -200,7 +201,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    protected ApplicationEventPublisher eventPublisher;
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
@@ -230,9 +231,8 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType) {
-        return deploymentManagement.assignDistributionSet(dsID,
-                Collections.singletonList(new TargetWithActionType(controllerId, actionType,
-                        RepositoryModelConstants.NO_FORCE_TIME)));
+        return deploymentManagement.assignDistributionSet(dsID, Collections.singletonList(
+                new TargetWithActionType(controllerId, actionType, RepositoryModelConstants.NO_FORCE_TIME)));
     }
 
     /**
@@ -322,8 +322,8 @@ public abstract class AbstractIntegrationTest {
             final boolean isRequiredMigrationStep) {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
-                .getAssignedEntity().iterator().next();
+        savedTarget = getFirstAssignedTarget(
+                assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -434,5 +434,22 @@ public abstract class AbstractIntegrationTest {
         }
 
         return randomStringBuilder.toString();
+    }
+
+    protected static Action getFirstAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
+    }
+
+    protected static Long getFirstAssignedActionId(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return getFirstAssignedAction(distributionSetAssignmentResult).getId();
+    }
+
+    protected static Target getFirstAssignedTarget(final DistributionSetAssignmentResult assignment) {
+        return getFirstAssignedAction(assignment).getTarget();
+    }
+
+    protected static Comparator<Target> controllerIdComparator() {
+        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
     }
 }

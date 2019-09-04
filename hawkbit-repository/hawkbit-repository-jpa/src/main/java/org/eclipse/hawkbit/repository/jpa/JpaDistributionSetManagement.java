@@ -55,10 +55,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -103,9 +102,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final NoCountPagingRepository criteriaNoCountDao;
 
-    private final ApplicationEventPublisher eventPublisher;
-
-    private final BusProperties bus;
+    private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
 
@@ -125,9 +122,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final TenantAware tenantAware,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final NoCountPagingRepository criteriaNoCountDao, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final Database database) {
@@ -141,8 +137,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
         this.criteriaNoCountDao = criteriaNoCountDao;
-        this.eventPublisher = eventPublisher;
-        this.bus = bus;
+        this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -193,14 +188,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     toBeChangedDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
-                    toBeChangedDSs.size(), Collections.emptyList(),
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
+                    Collections.emptyList(),
                     Collections.unmodifiableList(
                             toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
                     myTag);
         } else {
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0,
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(),
                     Collections.unmodifiableList(
                             toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
                     Collections.emptyList(), myTag);
@@ -283,9 +277,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
 
-        afterCommit.afterCommit(() -> distributionSetIDs.forEach(
-                dsId -> eventPublisher.publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(),
-                        dsId, JpaDistributionSet.class.getName(), bus.getId()))));
+        afterCommit.afterCommit(() -> distributionSetIDs.forEach(dsId -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId,
+                        JpaDistributionSet.class.getName(), eventPublisherHolder.getApplicationId()))));
     }
 
     @Override
@@ -391,7 +385,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList = Arrays.asList(DistributionSetSpecification.isDeleted(false),
                     DistributionSetSpecification.isCompleted(complete));
         } else {
-            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false));
+            specList = Collections.singletonList(DistributionSetSpecification.isDeleted(false));
         }
 
         return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
@@ -759,7 +753,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void delete(final long setId) {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
-        delete(Arrays.asList(setId));
+        delete(Collections.singletonList(setId));
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long setId) {
@@ -816,7 +810,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> get(final long id) {
-        return distributionSetRepository.findById(id).map(d -> (DistributionSet) d);
+        return distributionSetRepository.findById(id).map(d -> d);
     }
 
     @Override

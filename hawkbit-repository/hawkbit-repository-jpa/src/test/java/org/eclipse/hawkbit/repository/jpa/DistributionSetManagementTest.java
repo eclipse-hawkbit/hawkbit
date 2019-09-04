@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -991,23 +990,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
         assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(2);
-    }
-
-    @Test
-    @Description("Verify that the DistributionSetAssignmentResult not contains already assigned targets.")
-    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
-        final DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
-
-        // create assigned DS
-        final Target savedTarget = testdataFactory.createTarget();
-        DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
-                savedTarget.getControllerId());
-        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
-
-        assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
-        assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
-
-        assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
     @Test

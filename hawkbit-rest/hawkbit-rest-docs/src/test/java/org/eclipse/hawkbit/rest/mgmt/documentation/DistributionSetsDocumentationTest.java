@@ -23,9 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -306,7 +308,8 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         final List<Target> targets = assignDistributionSet(set,
-                testdataFactory.createTargets(5, "targetMisc", "Test targets for query")).getAssignedEntity();
+                testdataFactory.createTargets(5, "targetMisc", "Test targets for query")).getAssignedEntity().stream()
+                        .map(Action::getTarget).collect(Collectors.toList());
         testdataFactory.sendUpdateActionStatusToTargets(targets, Status.FINISHED, "some message");
 
         mockMvc.perform(
@@ -396,6 +399,12 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+                                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+                                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }

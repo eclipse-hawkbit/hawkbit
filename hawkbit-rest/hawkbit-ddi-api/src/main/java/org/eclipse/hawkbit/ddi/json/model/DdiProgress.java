@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.ddi.json.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Action fulfillment progress by means of gives the achieved amount of maximal
  * of possible levels.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiProgress {
 
     @NotNull

@@ -82,6 +82,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
@@ -100,9 +101,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
-import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -443,15 +442,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final TenantAware tenantAware,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final NoCountPagingRepository criteriaNoCountDao, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
-                targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisher, bus, tenantAware,
+                targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisherHolder, tenantAware,
                 virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
                 properties.getDatabase());
 
@@ -510,12 +508,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus, final TenantAware tenantAware,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties) {
         return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
                 rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
-                criteriaNoCountDao, eventPublisher, bus, tenantAware, afterCommit, virtualPropertyReplacer,
+                criteriaNoCountDao, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
@@ -620,12 +618,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
-            final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy) {
         return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
-                distributionSetManagement, context, bus, eventPublisher, virtualPropertyReplacer, txManager,
+                distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
                 tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
     }
 
@@ -669,17 +666,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
             final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
             final TargetRepository targetRepository, final ActionStatusRepository actionStatusRepository,
-            final TargetManagement targetManagement, final AuditorAware<String> auditorProvider,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus,
+            final AuditorAware<String> auditorProvider, final EventPublisherHolder eventPublisherHolder,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final JpaProperties properties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
-                actionStatusRepository, targetManagement, auditorProvider, eventPublisher, bus, afterCommit,
-                virtualPropertyReplacer, txManager, tenantConfigurationManagement, quotaManagement,
-                systemSecurityContext, tenantAware, properties.getDatabase());
+                actionStatusRepository, auditorProvider, eventPublisherHolder, afterCommit, virtualPropertyReplacer,
+                txManager, tenantConfigurationManagement, quotaManagement, systemSecurityContext, tenantAware,
+                properties.getDatabase());
     }
 
     /**

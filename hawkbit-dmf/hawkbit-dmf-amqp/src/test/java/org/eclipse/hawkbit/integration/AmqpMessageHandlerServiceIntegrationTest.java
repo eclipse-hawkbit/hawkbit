@@ -10,9 +10,13 @@ package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -30,6 +35,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
+import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -42,6 +48,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -75,6 +82,9 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     @Autowired
     private AmqpProperties amqpProperties;
+    
+    @Autowired
+    private AmqpMessageHandlerService amqpMessageHandlerService;
 
     @Test
     @Description("Tests DMF PING request and expected reponse.")
@@ -579,13 +589,13 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSetAssignmentResult distributionSetAssignmentResult = assignDistributionSet(
                 distributionSet.getId(), controllerId);
-        deploymentManagement.cancelAction(distributionSetAssignmentResult.getActionIds().get(0));
+        deploymentManagement.cancelAction(getFirstAssignedActionId(distributionSetAssignmentResult));
 
         // test
         registerSameTargetAndAssertBasedOnVersion(controllerId, 1, TargetUpdateStatus.PENDING);
 
         // verify
-        assertCancelActionMessage(distributionSetAssignmentResult.getActionIds().get(0), controllerId);
+        assertCancelActionMessage(getFirstAssignedActionId(distributionSetAssignmentResult), controllerId);
         Mockito.verifyZeroInteractions(getDeadletterListener());
     }
 
@@ -882,6 +892,31 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), distributionSet.getId());
     }
 
+    @Test
+    @Description("Messages that result into certain exceptions being raised should not be requeued. This message should forwarded to the deadletter queue")
+    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 0)})
+    public void ignoredExceptionTypesShouldNotBeRequeued() {
+        final ControllerManagement mockedControllerManagement = Mockito.mock(ControllerManagement.class);
+
+        final List<Class<? extends RuntimeException>> exceptionsThatShouldNotBeRequeued = Arrays
+                .asList(IllegalArgumentException.class, EntityAlreadyExistsException.class);
+        final String controllerId = "dummy_target";
+
+        try {
+            for (Class<? extends RuntimeException> exceptionClass : exceptionsThatShouldNotBeRequeued) {
+                doThrow(exceptionClass).when(mockedControllerManagement)
+                        .findOrRegisterTargetIfItDoesNotExist(eq(controllerId), any());
+
+                amqpMessageHandlerService.setControllerManagement(mockedControllerManagement);
+                createAndSendThingCreated(controllerId, TENANT_EXIST);
+                verifyOneDeadLetterMessage();
+                assertThat(targetManagement.getByControllerID(controllerId)).isEmpty();
+            }
+        } finally {
+            amqpMessageHandlerService.setControllerManagement(controllerManagement);
+        }
+    }
+
     @Step
     private void verifyAssignedDsAndInstalledDs(final String controllerId, final Long assignedDsId,
             final Long installedDsId) {
@@ -912,7 +947,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = assignmentResult.getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
         sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
@@ -991,6 +1026,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         assertEmptyReceiverQueueCount();
         createConditionFactory().untilAsserted(() -> Mockito
                 .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
+        Mockito.reset(getDeadletterListener());
     }
 
     private static String getJsonFieldFromBody(final byte[] body, final String fieldName) throws IOException {

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -182,6 +183,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy, Applicati
             if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
                 return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
                         .equalsIgnoreCase(event.getTenant());
+            }
+            final Object userPrincipalDetails = userContext.getAuthentication().getPrincipal();
+            if (userPrincipalDetails instanceof UserPrincipal) {
+                return ((UserPrincipal) userPrincipalDetails).getTenant().equalsIgnoreCase(event.getTenant());
             }
             return false;
         }

@@ -96,7 +96,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String assignedB = targBs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedB);
         final String installedC = targCs.iterator().next().getControllerId();
-        final Long actionId = assignDistributionSet(installedSet.getId(), assignedC).getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
 
         // add attributes to match against only attribute value or attribute
         // value and name
@@ -578,8 +578,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
-        targAssigned = Lists.newLinkedList(assignDistributionSet(ds, targAssigned).getAssignedEntity());
-        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
+        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
         targInstalled = testdataFactory
                 .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
                 .stream().map(Action::getTarget).collect(Collectors.toList());
@@ -598,7 +600,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         expected.addAll(targAssigned);
         expected.addAll(notAssigned);
 
-        assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
+        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
+                .containsExactly(expected.toArray(new Target[0]));
 
     }
 
@@ -628,8 +631,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
-        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity();
-        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity();
+        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
         targInstalled = testdataFactory
                 .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
                 .stream().map(Action::getTarget).collect(Collectors.toList());
@@ -651,7 +656,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
                 .collect(Collectors.toList()));
 
-        assertThat(result.getContent()).containsExactly(expected.toArray(new Target[0]));
+        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
+                .containsExactly(expected.toArray(new Target[0]));
 
     }
 
@@ -701,8 +707,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getActionIds().forEach(actionId -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
+        assignDistributionSet(installedSet, installedtargets).getAssignedEntity().forEach(action -> controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED)));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets

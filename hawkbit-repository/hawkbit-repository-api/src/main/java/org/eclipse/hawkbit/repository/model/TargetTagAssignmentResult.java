@@ -14,7 +14,7 @@ import java.util.List;
  * Result object for {@link TargetTag} assignments.
  *
  */
-public class TargetTagAssignmentResult extends AssignmentResult<Target> {
+public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetTag targetTag;
 
@@ -22,21 +22,17 @@ public class TargetTagAssignmentResult extends AssignmentResult<Target> {
      * Constructor.
      *
      * @param alreadyAssigned
-     *            number of already assigned/ignored elements
+     *            count of already assigned (ignored) elements
      * @param assigned
-     *            number of newly assigned elements
-     * @param unassigned
-     *            number of newly assigned elements
-     * @param assignedTargets
      *            {@link List} of assigned {@link Target}s.
-     * @param unassignedTargets
+     * @param unassigned
      *            {@link List} of unassigned {@link Target}s.
      * @param targetTag
      *            the assigned or unassigned tag
      */
-    public TargetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
-            final List<Target> assignedTargets, final List<Target> unassignedTargets, final TargetTag targetTag) {
-        super(assigned, alreadyAssigned, unassigned, assignedTargets, unassignedTargets);
+    public TargetTagAssignmentResult(final int alreadyAssigned, final List<? extends Target> assigned,
+            final List<? extends Target> unassigned, final TargetTag targetTag) {
+        super(alreadyAssigned, assigned, unassigned);
         this.targetTag = targetTag;
     }
 

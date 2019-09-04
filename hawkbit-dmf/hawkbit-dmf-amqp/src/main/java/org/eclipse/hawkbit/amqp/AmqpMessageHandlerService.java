@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
@@ -73,7 +74,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
-    private final ControllerManagement controllerManagement;
+    private ControllerManagement controllerManagement;
 
     private final EntityFactory entityFactory;
 
@@ -92,6 +93,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            for target repo access
      * @param entityFactory
      *            to create entities
+     * @param systemSecurityContext
+     *            the system Security Context
+     * @param tenantConfigurationManagement
+     *            the tenant configuration Management
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
@@ -202,11 +207,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
         }
 
-        final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
-        LOG.debug("Target {} reported online state.", thingId);
-
-        sendUpdateCommandToTarget(target);
+        try {
+            final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
+            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            LOG.debug("Target {} reported online state.", thingId);
+            sendUpdateCommandToTarget(target);
+        } catch (EntityAlreadyExistsException e) {
+            throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
+        }
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
@@ -333,7 +341,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
     // mapping
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
+    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
             final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
@@ -371,7 +379,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return status;
     }
 
-    private Status handleCancelRejectedState(final Message message, final Action action) {
+    private static Status handleCancelRejectedState(final Message message, final Action action) {
         if (action.isCancelingOrCanceled()) {
             return Status.CANCEL_REJECTED;
         }
@@ -418,4 +426,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
+    // for testing
+    public void setControllerManagement(final ControllerManagement controllerManagement) {
+        this.controllerManagement = controllerManagement;
+    }
 }
