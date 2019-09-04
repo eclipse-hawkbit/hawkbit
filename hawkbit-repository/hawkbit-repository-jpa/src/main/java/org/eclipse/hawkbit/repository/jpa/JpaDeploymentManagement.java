@@ -171,21 +171,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Long> requestedDsIDs,
             final Collection<String> controllerIDs) {
+        final List<String> distinctControllerIds = controllerIDs.stream().distinct().collect(Collectors.toList());
+        final List<Long> distinctDsIds = requestedDsIDs.stream().distinct().collect(Collectors.toList());
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        distinctDsIds.forEach(dsId ->
+            distinctControllerIds.forEach(controllerId -> deploymentRequests
+                .add(new DeploymentRequest(controllerId, dsId, ActionType.FORCED, -1))));
 
-        final List<Long> dsIDs = requestedDsIDs.stream().distinct().collect(Collectors.toList());
-        final List<TargetWithActionType> targetWithActionTypes = controllerIDs.stream().distinct()
-                .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
-                .collect(Collectors.toList());
-        if (!isMultiAssignmentsEnabled() && isCausingMultiassignment(dsIDs, targetWithActionTypes)) {
-            throw new MultiassignmentIsNotEnabledException();
-        }
-        checkQuotaForAssignment(dsIDs, targetWithActionTypes);
-        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
-                .map(dsID -> assignDistributionSetToTargetsWithRetry(dsID, targetWithActionTypes, null,
-                        offlineDsAssignmentStrategy))
-                .collect(Collectors.toList());
-        offlineDsAssignmentStrategy.sendDeploymentEvents(results);
-        return results;
+        return assignDistributionSets(deploymentRequests, null, offlineDsAssignmentStrategy);
     }
 
     private static <T> void removeDuplicatesFromCollection(final Collection<T> collection) {
@@ -205,19 +198,20 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final Collection<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        return onlineAssigneDistributionSets(deploymentRequests, actionMessage);
+        return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
-    private List<DistributionSetAssignmentResult> onlineAssigneDistributionSets(
-            final Collection<DeploymentRequest> deploymentRequests, final String actionMessage) {
+    private List<DistributionSetAssignmentResult> assignDistributionSets(
+            final Collection<DeploymentRequest> deploymentRequests, final String actionMessage,
+            final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateRequestForAssignments(deploymentRequests);
         final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
 
         final List<DistributionSetAssignmentResult> results = assignmentsByDsIds.entrySet().stream()
                 .map(entry -> assignDistributionSetToTargetsWithRetry(entry.getKey(), entry.getValue(), actionMessage,
-                        onlineDsAssignmentStrategy))
+                        strategy))
                 .collect(Collectors.toList());
-        onlineDsAssignmentStrategy.sendDeploymentEvents(results);
+        strategy.sendDeploymentEvents(results);
         return results;
     }
 
@@ -232,13 +226,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
         checkQuotaForAssignment(modifiableListOfRequests);
         return modifiableListOfRequests;
-    }
-
-    private static boolean isCausingMultiassignment(final Collection<Long> dsIDs,
-            final Collection<TargetWithActionType> targetWithActionTypes) {
-        final boolean isAssigningSameTargetMultipleTimes = targetWithActionTypes.stream()
-                .map(TargetWithActionType::getControllerId).distinct().count() < targetWithActionTypes.size();
-        return dsIDs.size() > 1 || isAssigningSameTargetMultipleTimes;
     }
 
     private static Map<Long, List<TargetWithActionType>> convertRequest(
@@ -323,7 +310,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
-        closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
+
+        if (!isMultiAssignmentsEnabled()) {
+            closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
+        }
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels them
@@ -372,14 +362,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return distributionSet;
     }
 
-    private void checkQuotaForAssignment(final Collection<Long> dsIds,
-            final Collection<TargetWithActionType> targetWithActionTypes) {
-        if (!dsIds.isEmpty() && !targetWithActionTypes.isEmpty()) {
-            enforceMaxActionsPerReqest(dsIds, targetWithActionTypes);
-            enforceMaxActionsPerTarget(dsIds, targetWithActionTypes);
-        }
-    }
-
     private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {
         if (!deploymentRequests.isEmpty()) {
             enforceMaxActionsPerReqest(deploymentRequests);
@@ -389,13 +371,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void enforceMaxActionsPerReqest(final Collection<DeploymentRequest> deploymentRequests) {
         final int requestedActions = deploymentRequests.size();
-        QuotaHelper.assertAssignmentQuota(requestedActions, quotaManagement.getMaxResultingActionsPerManualAssignment(),
-                Target.class, DistributionSet.class);
-    }
-
-    private void enforceMaxActionsPerReqest(final Collection<Long> dsIds,
-            final Collection<TargetWithActionType> targetWithActionTypes) {
-        final int requestedActions = dsIds.size() * targetWithActionTypes.size();
         QuotaHelper.assertAssignmentQuota(requestedActions, quotaManagement.getMaxResultingActionsPerManualAssignment(),
                 Target.class, DistributionSet.class);
     }
@@ -411,30 +386,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
     }
 
-    private void enforceMaxActionsPerTarget(final Collection<Long> dsIds,
-            final Collection<TargetWithActionType> targetWithActionTypes) {
-        final int quota = quotaManagement.getMaxActionsPerTarget();
-
-        final Map<String, Long> countOfTargtInRequest = targetWithActionTypes.stream()
-                .map(TargetWithActionType::getControllerId)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-        countOfTargtInRequest.forEach((controllerId, count) -> {
-            final Long requestedActions = count * dsIds.size();
-            QuotaHelper.assertAssignmentQuota(controllerId,
-                    requestedActions, quota, Action.class, Target.class,
-                    actionRepository::countByTargetControllerId);
-            });
-    }
-
     private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
             final List<List<Long>> targetIdsChunks) {
-
-        if (isMultiAssignmentsEnabled()) {
-            LOG.debug("Multi Assignments feature is enabled: No need to close /cancel active actions.");
-            return;
-        }
-
         if (isActionsAutocloseEnabled()) {
             assignmentStrategy.closeActiveActions(targetIdsChunks);
         } else {
