@@ -19,66 +19,6 @@
    <artifactId>hawkbit-test-report</artifactId>
    <name>hawkBit :: Test Report</name>
 
-   <profiles>
-      <profile>
-         <id>generateTestReport</id>
-         <build>
-            <plugins>
-               <plugin>
-                  <artifactId>maven-resources-plugin</artifactId>
-                  <executions>
-                     <execution>
-                        <id>copy-resources</id>
-                        <phase>verify</phase>
-                        <goals>
-                           <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                           <outputDirectory>${basedir}/target/allure-results</outputDirectory>
-                           <resources>
-                              <resource>
-                                 <directory>${basedir}/..</directory>
-                                 <filtering>false</filtering>
-                                 <includes>
-                                    <include>**/target/allure-results/*.json</include>
-                                 </includes>
-                              </resource>
-                              <resource>
-                                 <directory>${basedir}</directory>
-                                 <filtering>false</filtering>
-                                 <includes>
-                                    <include>placeholder.txt</include>
-                                 </includes>
-                              </resource>
-                           </resources>
-                        </configuration>
-                     </execution>
-                  </executions>
-               </plugin>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-assembly-plugin</artifactId>
-                  <configuration>
-                     <descriptors>
-                        <descriptor>src/main/resources/assemblies/test-report.xml</descriptor>
-                     </descriptors>
-                     <appendAssemblyId>true</appendAssemblyId>
-                  </configuration>
-                  <executions>
-                     <execution>
-                        <id>create-report-zip-assembly</id>
-                        <phase>verify</phase>
-                        <goals>
-                           <goal>single</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-   </profiles>
-
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
@@ -209,5 +149,65 @@
 
       </plugins>
    </build>
+
+   <profiles>
+      <profile>
+         <id>generateTestReport</id>
+         <build>
+            <plugins>
+               <plugin>
+                  <artifactId>maven-resources-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <id>copy-resources</id>
+                        <phase>verify</phase>
+                        <goals>
+                           <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                           <outputDirectory>${basedir}/target/allure-results</outputDirectory>
+                           <resources>
+                              <resource>
+                                 <directory>${basedir}/..</directory>
+                                 <filtering>false</filtering>
+                                 <includes>
+                                    <include>**/target/allure-results/*.json</include>
+                                 </includes>
+                              </resource>
+                              <resource>
+                                 <directory>${basedir}</directory>
+                                 <filtering>false</filtering>
+                                 <includes>
+                                    <include>placeholder.txt</include>
+                                 </includes>
+                              </resource>
+                           </resources>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-assembly-plugin</artifactId>
+                  <configuration>
+                     <descriptors>
+                        <descriptor>src/main/resources/assemblies/test-report.xml</descriptor>
+                     </descriptors>
+                     <appendAssemblyId>true</appendAssemblyId>
+                  </configuration>
+                  <executions>
+                     <execution>
+                        <id>create-report-zip-assembly</id>
+                        <phase>verify</phase>
+                        <goals>
+                           <goal>single</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
 
 </project>
