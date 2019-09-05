@@ -96,7 +96,9 @@ public class PreAuthHonoProviderTest {
 
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
                 Collections.singletonList(credentials));
-        token.setDetails(webAuthenticationDetailsMock);
+
+        final TenantAwareWebAuthenticationDetails details = new TenantAwareWebAuthenticationDetails(tenant, "remoteAddress", true);
+        token.setDetails(details);
 
         // test, should throw authentication exception
         final Authentication authenticate = testProvider.authenticate(token);

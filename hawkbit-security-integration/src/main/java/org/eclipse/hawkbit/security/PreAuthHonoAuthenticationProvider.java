@@ -65,7 +65,10 @@ public class PreAuthHonoAuthenticationProvider extends PreAuthTokenSourceTrustAu
         }
 
         if (successAuthentication) {
-            honoDeviceSync.checkDeviceIfAbsentSync("", "");
+            if (tokenDetails instanceof TenantAwareWebAuthenticationDetails) {
+                TenantAwareWebAuthenticationDetails tenantAwareTokenDetails = (TenantAwareWebAuthenticationDetails) tokenDetails;
+                honoDeviceSync.checkDeviceIfAbsentSync(tenantAwareTokenDetails.getTenant(), ((HeaderAuthentication) principal).getControllerId());
+            }
 
             final PreAuthenticatedAuthenticationToken successToken = new PreAuthenticatedAuthenticationToken(principal,
                     credentials, authorities);

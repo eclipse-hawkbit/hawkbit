@@ -1,6 +1,5 @@
 package org.eclipse.hawkbit.dmf.hono;
 
-import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +25,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -108,7 +108,7 @@ public class HonoDeviceSync {
         } catch (IOException e) {
             LOG.error("Could not parse hono api response.", e);
         } catch (InterruptedException e) {
-            LOG.error("Synchronizing hawkbit with Hono has been interrupted.", e);
+            LOG.warn("Synchronizing hawkbit with Hono has been interrupted.", e);
         }
     }
 
@@ -150,7 +150,7 @@ public class HonoDeviceSync {
             try {
                 synchronizeTenant(tenant);
             } catch (IOException | InterruptedException e) {
-                Log.error("Could not synchronize with hono for tenant {}.", tenant, e);
+                LOG.error("Could not synchronize with hono for tenant {}.", tenant, e);
             }
         }
     }
@@ -220,7 +220,8 @@ public class HonoDeviceSync {
                     HttpURLConnection jwtConnection = (HttpURLConnection) oidcTokenUrl.openConnection();
                     jwtConnection.setDoOutput(true);
                     DataOutputStream outputStream = new DataOutputStream(jwtConnection.getOutputStream());
-                    outputStream.writeBytes("grant_type=password&client_id=" + oidcClientId + "&username=" + username + "&password=" + password);
+                    outputStream.writeBytes("grant_type=password&client_id=" + URLEncoder.encode(oidcClientId)
+                            + "&username=" + URLEncoder.encode(username) + "&password=" + URLEncoder.encode(password));
                     outputStream.flush();
                     outputStream.close();
 
