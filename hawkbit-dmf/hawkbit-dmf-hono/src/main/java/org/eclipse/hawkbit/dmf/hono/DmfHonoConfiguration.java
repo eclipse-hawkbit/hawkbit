@@ -1,5 +1,6 @@
 package org.eclipse.hawkbit.dmf.hono;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -7,12 +8,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "hawkbit.dmf.hono")
+@ConditionalOnProperty(prefix = "hawkbit.dmf.hono", name = "enabled")
 @ComponentScan
 public class DmfHonoConfiguration {
     private String tenantListUri;
     private String deviceListUri;
     private String credentialsListUri;
-    private String authorizationMethod = "none";
+    private String authenticationMethod = "none";
     private String oidcTokenUri = "";
     private String oidcClientId = "";
     private String username = "";
@@ -20,7 +22,7 @@ public class DmfHonoConfiguration {
 
     @Bean
     public HonoDeviceSync honoDeviceSync() {
-        return new HonoDeviceSync(tenantListUri, deviceListUri, credentialsListUri, authorizationMethod,
+        return new HonoDeviceSync(tenantListUri, deviceListUri, credentialsListUri, authenticationMethod,
                 oidcTokenUri, oidcClientId, username, password);
     }
 
@@ -48,12 +50,12 @@ public class DmfHonoConfiguration {
         this.credentialsListUri = credentialsListUri;
     }
 
-    public String getAuthorizationMethod() {
-        return authorizationMethod;
+    public String getAuthenticationMethod() {
+        return authenticationMethod;
     }
 
-    public void setAuthorizationMethod(String authorizationMethod) {
-        this.authorizationMethod = authorizationMethod;
+    public void setAuthenticationMethod(String authenticationMethod) {
+        this.authenticationMethod = authenticationMethod;
     }
 
     public String getOidcTokenUri() {

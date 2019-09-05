@@ -58,19 +58,19 @@ public class HonoDeviceSync {
     private String honoTenantListUri;
     private String honoDeviceListUri;
     private String honoCredentialsListUri;
-    private String authorizationMethod;
+    private String authenticationMethod;
     private String oidcTokenUri;
     private String oidcClientId;
     private String username;
     private String password;
 
     HonoDeviceSync(String honoTenantListUri, String honoDevicesEndpoint, String honoCredentialsListUri,
-                   String authorizationMethod, String oidcTokenUri, String oidcClientId, String username,
+                   String authenticationMethod, String oidcTokenUri, String oidcClientId, String username,
                    String password) {
         this.honoTenantListUri = honoTenantListUri;
         this.honoDeviceListUri = honoDevicesEndpoint;
         this.honoCredentialsListUri = honoCredentialsListUri;
-        this.authorizationMethod = authorizationMethod;
+        this.authenticationMethod = authenticationMethod;
         this.oidcTokenUri = oidcTokenUri;
         this.oidcClientId = oidcClientId;
         this.username = username;
@@ -207,7 +207,7 @@ public class HonoDeviceSync {
         URL url = new URL(uri);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        switch (authorizationMethod) {
+        switch (authenticationMethod) {
             case "basic":
                 connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
                 break;

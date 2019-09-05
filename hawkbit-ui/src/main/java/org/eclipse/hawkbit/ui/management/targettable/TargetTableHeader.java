@@ -88,7 +88,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final EntityFactory entityFactory, final UINotification uiNotification,
             final TargetTagManagement tagManagement, final DistributionSetManagement distributionSetManagement,
             final Executor uiExecutor, final TargetTable targetTable, final HonoDeviceSync honoDeviceSync) {
-        super(i18n, permChecker, eventBus, managementUIState, null, null);
+        super(i18n, permChecker, eventBus, managementUIState, null, null, honoDeviceSync != null);
         this.notification = notification;
         this.managementViewClientCriterion = managementViewClientCriterion;
         this.targetAddUpdateWindow = new TargetAddUpdateWindowLayout(i18n, targetManagement, eventBus, uiNotification,

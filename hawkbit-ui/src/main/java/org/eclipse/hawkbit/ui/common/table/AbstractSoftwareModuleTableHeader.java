@@ -37,7 +37,7 @@ public abstract class AbstractSoftwareModuleTableHeader extends AbstractTableHea
             final UIEventBus eventbus, final ManagementUIState managementUIState,
             final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState,
             final SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow) {
-        super(i18n, permChecker, eventbus, managementUIState, manageDistUIstate, artifactUploadState);
+        super(i18n, permChecker, eventbus, managementUIState, manageDistUIstate, artifactUploadState, false);
         this.softwareModuleAddUpdateWindow = softwareModuleAddUpdateWindow;
     }
 

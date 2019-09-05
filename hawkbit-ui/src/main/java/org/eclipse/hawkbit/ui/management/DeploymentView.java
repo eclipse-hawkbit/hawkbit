@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -133,7 +134,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
             final NotificationUnreadButton notificationUnreadButton,
             final DeploymentViewMenuItem deploymentViewMenuItem, @Qualifier("uiExecutor") final Executor uiExecutor,
-            final HonoDeviceSync honoDeviceSync) {
+            final Optional<HonoDeviceSync> honoDeviceSync) {
         super(eventBus, notificationUnreadButton);
         this.permChecker = permChecker;
         this.i18n = i18n;
@@ -158,7 +159,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
             this.targetTableLayout = new TargetTableLayout(eventBus, targetTable, targetManagement, entityFactory, i18n,
                     uiNotification, managementUIState, managementViewClientCriterion, deploymentManagement,
-                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor, honoDeviceSync);
+                    uiProperties, permChecker, targetTagManagement, distributionSetManagement, uiExecutor, honoDeviceSync.orElse(null));
 
             actionHistoryLayout.registerDetails(((ActionStatusGrid) actionStatusLayout.getGrid()).getDetailsSupport());
             actionStatusLayout

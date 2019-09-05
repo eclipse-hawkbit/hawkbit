@@ -73,15 +73,19 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
+    private final boolean honoSyncEnabled;
+
     protected AbstractTableHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final ManagementUIState managementUIState,
-            final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState) {
+            final ManageDistUIState manageDistUIstate, final ArtifactUploadState artifactUploadState,
+            final boolean honoSyncEnabled) {
         this.i18n = i18n;
         this.permChecker = permChecker;
         this.eventBus = eventBus;
         this.managementUIState = managementUIState;
         this.manageDistUIstate = manageDistUIstate;
         this.artifactUploadState = artifactUploadState;
+        this.honoSyncEnabled = honoSyncEnabled;
         createComponents();
         buildLayout();
         restoreState();
@@ -157,22 +161,14 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     private void hideAddAndUploadIcon() {
-        if (syncHono == null) {
-            addIcon.setVisible(false);
-        }
-        else {
-            syncHono.setVisible(false);
-        }
+        addIcon.setVisible(false);
+        syncHono.setVisible(false);
         bulkUploadIcon.setVisible(false);
     }
 
     private void showAddAndUploadIcon() {
-        if (syncHono == null) {
-            addIcon.setVisible(true);
-        }
-        else {
-            syncHono.setVisible(true);
-        }
+        addIcon.setVisible(true);
+        syncHono.setVisible(true);
         bulkUploadIcon.setVisible(true);
     }
 
@@ -184,7 +180,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         titleFilterIconsLayout.setComponentAlignment(searchField, Alignment.TOP_RIGHT);
         titleFilterIconsLayout.setComponentAlignment(searchResetIcon, Alignment.TOP_RIGHT);
         titleFilterIconsLayout.setComponentAlignment(showFilterButtonLayout, Alignment.TOP_RIGHT);
-        if (syncHono != null && isHonoSyncAllowed()) {
+        if (honoSyncEnabled && isHonoSyncAllowed()) {
             titleFilterIconsLayout.addComponent(syncHono);
             titleFilterIconsLayout.setComponentAlignment(syncHono, Alignment.TOP_RIGHT);
         }
