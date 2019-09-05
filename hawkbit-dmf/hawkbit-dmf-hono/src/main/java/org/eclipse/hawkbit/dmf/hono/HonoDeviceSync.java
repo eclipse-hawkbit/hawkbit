@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.dmf.hono.model.*;
+import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -55,6 +56,9 @@ public class HonoDeviceSync {
     @Autowired
     private TargetManagement targetManagement;
 
+    @Autowired
+    PermissionService permissionService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<String, Semaphore> mutexes = new HashMap<>();
@@ -88,7 +92,9 @@ public class HonoDeviceSync {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    private void initialSync() {
+    private void init() {
+        permissionService.setHonoSyncEnabled(true);
+
         // Since ApplicationReadyEvent is emitted multiple times make sure it is synced at most once during startup.
         if (!syncedInitially) {
             synchronize(false);

@@ -153,7 +153,8 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement, deploymentManagement, configManagement, systemSecurityContext, uiProperties);
+                    targetTagManagement, deploymentManagement, configManagement, systemSecurityContext, uiProperties,
+                    honoDeviceSync.isPresent());
             this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                     targetTable);
 

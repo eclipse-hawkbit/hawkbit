@@ -50,7 +50,7 @@ public class TargetTableLayout extends AbstractTableLayout<TargetTable> {
         this.eventBus = eventBus;
         TargetDetails targetDetails = new TargetDetails(i18n, eventBus, permissionChecker, managementUIState, uiNotification,
                 tagManagement, targetManagement, targetMetadataPopupLayout, deploymentManagement, entityFactory,
-                targetTable);
+                targetTable, honoDeviceSync != null);
         TargetTableHeader targetTableHeader = new TargetTableHeader(i18n, permissionChecker, eventBus, uiNotification,
                 managementUIState, managementViewClientCriterion, targetManagement, deploymentManagement, uiProperties,
                 entityFactory, uiNotification, tagManagement, distributionSetManagement, uiExecutor, targetTable, honoDeviceSync);
