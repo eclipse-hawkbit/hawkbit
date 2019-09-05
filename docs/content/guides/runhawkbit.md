@@ -89,7 +89,7 @@ hawkbit.dmf.hono.username=USERNAME
 hawkbit.dmf.hono.password=PASSWORD
 
 // Only for authentication-method = oidc
-hawkbit.dmf.hono.oidc-token-uri=http://OIDC_HOST/auth/realms/kiwigrid/protocol/openid-connect/token
+hawkbit.dmf.hono.oidc-token-uri=http://OIDC_HOST/auth/realms/REALM/protocol/openid-connect/token
 hawkbit.dmf.hono.oidc-client-id=OIDC_CLIENT_ID
 ```
 
