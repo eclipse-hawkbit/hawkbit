@@ -18,3 +18,7 @@
 
 ### Renamed maven modules
 - Module hawkbit-mgmt-api-client have changed to hawkbit-example-mgmt-simulator
+
+## Milestone 0.3.0M6
+### Configuration Property changes
+- hawkbit.server.security.dos.maxTargetsPerManualAssignment has changed to hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment

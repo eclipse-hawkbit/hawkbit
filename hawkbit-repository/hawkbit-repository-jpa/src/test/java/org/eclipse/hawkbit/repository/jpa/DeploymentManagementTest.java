@@ -172,9 +172,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("An assignment request that would lead to more actions than allowed by 'maxResultingActionsPerManualAssignment' quota throws an exception.")
+    @Description("An assignment request with more assignments than allowed by 'maxTargetDistributionSetAssignmentsPerManualAssignment' quota throws an exception.")
     public void assignmentRequestThatIsTooLarge() {
-        final int maxActions = quotaManagement.getMaxResultingActionsPerManualAssignment();
+        final int maxActions = quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment();
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 

@@ -364,7 +364,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void enforceMaxAssignmentsPerRequest(final int requestedActions) {
         QuotaHelper.assertAssignmentRequestSizeQuota(requestedActions,
-                quotaManagement.getMaxResultingActionsPerManualAssignment());
+                quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment());
     }
 
     private void enforceMaxActionsPerTarget(final Collection<DeploymentRequest> deploymentRequests) {

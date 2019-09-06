@@ -253,7 +253,7 @@ public class HawkbitSecurityProperties {
          * Maximum number of actions resulting from a manual assignment of
          * distribution sets and targets. Must be greater than 1000.
          */
-        private int maxResultingActionsPerManualAssignment = 5000;
+        private int maxTargetDistributionSetAssignmentsPerManualAssignment = 5000;
 
         /**
          * Maximum number of targets for an automatic distribution set
@@ -379,12 +379,13 @@ public class HawkbitSecurityProperties {
             this.maxActionsPerTarget = maxActionsPerTarget;
         }
 
-        public int getMaxResultingActionsPerManualAssignment() {
-            return maxResultingActionsPerManualAssignment;
+        public int getMaxTargetDistributionSetAssignmentsPerManualAssignment() {
+            return maxTargetDistributionSetAssignmentsPerManualAssignment;
         }
         
-        public void setMaxResultingActionsPerManualAssignment(final int maxResultingActionsPerManualAssignment) {
-            this.maxResultingActionsPerManualAssignment = maxResultingActionsPerManualAssignment;
+        public void setMaxTargetDistributionSetAssignmentsPerManualAssignment(
+                final int maxTargetDistributionSetAssignmentsPerManualAssignment) {
+            this.maxTargetDistributionSetAssignmentsPerManualAssignment = maxTargetDistributionSetAssignmentsPerManualAssignment;
         }
         
         public int getMaxTargetsPerAutoAssignment() {
