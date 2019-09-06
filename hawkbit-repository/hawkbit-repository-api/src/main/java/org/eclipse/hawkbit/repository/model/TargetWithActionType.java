@@ -23,10 +23,27 @@ public class TargetWithActionType {
     private String maintenanceWindowDuration;
     private String maintenanceWindowTimeZone;
 
+    /**
+     * Constructor that uses {@link ActionType#FORCED}
+     * 
+     * @param controllerId
+     *            ID if the controller
+     */
     public TargetWithActionType(final String controllerId) {
         this(controllerId, ActionType.FORCED, 0);
     }
 
+    /**
+     * Constructor that leaves the maintenance info empty
+     *
+     * @param controllerId
+     *            for which the action is created.
+     * @param actionType
+     *            specified for the action.
+     * @param forceTime
+     *            after that point in time the action is exposed as forcen in
+     *            case the type is {@link ActionType#TIMEFORCED}
+     */
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
         this.controllerId = controllerId;
         this.actionType = actionType != null ? actionType : ActionType.FORCED;
@@ -41,6 +58,9 @@ public class TargetWithActionType {
      *            for which the action is created.
      * @param actionType
      *            specified for the action.
+     * @param forceTime
+     *            after that point in time the action is exposed as forcen in
+     *            case the type is {@link ActionType#TIMEFORCED}
      * @param maintenanceSchedule
      *            is the cron expression to be used for scheduling maintenance
      *            windows. Expression has 6 mandatory fields and 1 last optional
@@ -136,37 +156,50 @@ public class TargetWithActionType {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         final TargetWithActionType other = (TargetWithActionType) obj;
-        if (actionType != other.actionType)
+        if (actionType != other.actionType) {
             return false;
+        }
         if (controllerId == null) {
-            if (other.controllerId != null)
+            if (other.controllerId != null) {
                 return false;
-        } else if (!controllerId.equals(other.controllerId))
+            }
+        } else if (!controllerId.equals(other.controllerId)) {
             return false;
-        if (forceTime != other.forceTime)
+        }
+        if (forceTime != other.forceTime) {
             return false;
+        }
         if (maintenanceSchedule == null) {
-            if (other.maintenanceSchedule != null)
+            if (other.maintenanceSchedule != null) {
                 return false;
-        } else if (!maintenanceSchedule.equals(other.maintenanceSchedule))
+            }
+        } else if (!maintenanceSchedule.equals(other.maintenanceSchedule)) {
             return false;
+        }
         if (maintenanceWindowDuration == null) {
-            if (other.maintenanceWindowDuration != null)
+            if (other.maintenanceWindowDuration != null) {
                 return false;
-        } else if (!maintenanceWindowDuration.equals(other.maintenanceWindowDuration))
+            }
+        } else if (!maintenanceWindowDuration.equals(other.maintenanceWindowDuration)) {
             return false;
+        }
         if (maintenanceWindowTimeZone == null) {
-            if (other.maintenanceWindowTimeZone != null)
+            if (other.maintenanceWindowTimeZone != null) {
                 return false;
-        } else if (!maintenanceWindowTimeZone.equals(other.maintenanceWindowTimeZone))
+            }
+        } else if (!maintenanceWindowTimeZone.equals(other.maintenanceWindowTimeZone)) {
             return false;
+        }
         return true;
     }
 

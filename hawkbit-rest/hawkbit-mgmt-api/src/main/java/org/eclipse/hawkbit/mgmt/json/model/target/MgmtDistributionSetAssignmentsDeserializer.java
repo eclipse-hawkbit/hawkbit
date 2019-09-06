@@ -17,9 +17,16 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+/**
+ * Deserializes a single object or a List of
+ * {@link MgmtDistributionSetAssignment}s
+ */
 public class MgmtDistributionSetAssignmentsDeserializer extends StdDeserializer<MgmtDistributionSetAssignments> {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Mandatory constructor
+     */
     public MgmtDistributionSetAssignmentsDeserializer() {
         this(null);
     }

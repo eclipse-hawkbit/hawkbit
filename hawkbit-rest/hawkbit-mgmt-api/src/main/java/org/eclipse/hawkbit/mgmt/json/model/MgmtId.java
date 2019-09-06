@@ -19,16 +19,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtId {
+    private Long id;
+    
+    /**
+     * Constructor
+     */
+    public MgmtId() {
+    }
 
+    /**
+     * Constructor
+     * 
+     * @param id
+     *            ID of object
+     */
     @JsonCreator
     public MgmtId(final Long id) {
         this.id = id;
     }
 
-    private Long id;
 
     /**
-     * @return the id
+     * @return the ID
      */
     public Long getId() {
         return id;
@@ -36,7 +48,7 @@ public class MgmtId {
 
     /**
      * @param id
-     *            the id to set
+     *            the ID to set
      */
     public void setId(final Long id) {
         this.id = id;

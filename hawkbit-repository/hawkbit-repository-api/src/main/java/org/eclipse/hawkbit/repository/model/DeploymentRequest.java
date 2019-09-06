@@ -125,23 +125,30 @@ public class DeploymentRequest {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         final DeploymentRequest other = (DeploymentRequest) obj;
         if (distributionSetId == null) {
-            if (other.distributionSetId != null)
+            if (other.distributionSetId != null) {
                 return false;
-        } else if (!distributionSetId.equals(other.distributionSetId))
+            }
+        } else if (!distributionSetId.equals(other.distributionSetId)) {
             return false;
+        }
         if (targetWithActionType == null) {
-            if (other.targetWithActionType != null)
+            if (other.targetWithActionType != null) {
                 return false;
-        } else if (!targetWithActionType.equals(other.targetWithActionType))
+            }
+        } else if (!targetWithActionType.equals(other.targetWithActionType)) {
             return false;
+        }
         return true;
     }
 }

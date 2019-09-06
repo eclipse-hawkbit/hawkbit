@@ -553,7 +553,7 @@ include::../errors/429.adoc[]
 
 Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET
 
-=== Asssin distribution set to target
+=== Assign distribution set to target
 
 ==== Curl
 
@@ -607,7 +607,7 @@ include::../errors/429.adoc[]
 
 Handles the POST request for assigning multiple distribution sets to a specific target (only allowed id 'multi assignments' is enabled). Required Permission: READ_REPOSITORY and UPDATE_TARGET
 
-=== Asssin distribution sets to target
+=== Assign distribution sets to target
 
 ==== Curl
 

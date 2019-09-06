@@ -173,7 +173,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final Collection<String> controllerIDs) {
         final List<String> distinctControllerIds = controllerIDs.stream().distinct().collect(Collectors.toList());
         final List<Long> distinctDsIds = requestedDsIDs.stream().distinct().collect(Collectors.toList());
-        enforceMaxActionsPerReqest(distinctControllerIds.size() * distinctControllerIds.size());
+        enforceMaxAssignmentsPerRequest(distinctControllerIds.size() * distinctControllerIds.size());
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         distinctDsIds.forEach(dsId ->
             distinctControllerIds.forEach(controllerId -> deploymentRequests
@@ -182,28 +182,22 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return assignDistributionSets(deploymentRequests, null, offlineDsAssignmentStrategy);
     }
 
-    private static <T> void removeDuplicatesFromCollection(final Collection<T> collection) {
-        final List<T> duplicatesRemoved = collection.stream().distinct().collect(Collectors.toList());
-        collection.clear();
-        collection.addAll(duplicatesRemoved);
-    }
-
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
-            final Collection<DeploymentRequest> deploymentRequests) {
+            final List<DeploymentRequest> deploymentRequests) {
         return assignDistributionSets(deploymentRequests, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
-            final Collection<DeploymentRequest> deploymentRequests, final String actionMessage) {
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
     private List<DistributionSetAssignmentResult> assignDistributionSets(
-            final Collection<DeploymentRequest> deploymentRequests, final String actionMessage,
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage,
             final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateRequestForAssignments(deploymentRequests);
         final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
@@ -216,17 +210,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return results;
     }
 
-    private List<DeploymentRequest> validateRequestForAssignments(
-            final Collection<DeploymentRequest> deploymentRequests) {
-        final List<DeploymentRequest> modifiableListOfRequests = new ArrayList<>(deploymentRequests);
+    private List<DeploymentRequest> validateRequestForAssignments(List<DeploymentRequest> deploymentRequests) {
         if (!isMultiAssignmentsEnabled()) {
-            removeDuplicatesFromCollection(modifiableListOfRequests);
-            if (isCausingMultiassignment(modifiableListOfRequests)) {
-                throw new MultiassignmentIsNotEnabledException();
-            }
+            deploymentRequests = deploymentRequests.stream().distinct().collect(Collectors.toList());
+            checkIfCausesMultiassignment(deploymentRequests);
         }
-        checkQuotaForAssignment(modifiableListOfRequests);
-        return modifiableListOfRequests;
+        checkQuotaForAssignment(deploymentRequests);
+        return deploymentRequests;
     }
 
     private static Map<Long, List<TargetWithActionType>> convertRequest(
@@ -235,10 +225,12 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 Collectors.mapping(DeploymentRequest::getTargetWithActionType, Collectors.toList())));
     }
 
-    private static boolean isCausingMultiassignment(final Collection<DeploymentRequest> deploymentRequests) {
+    private static void checkIfCausesMultiassignment(final Collection<DeploymentRequest> deploymentRequests) {
         final long distinctTargetsInRequest = deploymentRequests.stream()
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
-        return distinctTargetsInRequest < deploymentRequests.size();
+        if (distinctTargetsInRequest < deploymentRequests.size()) {
+            throw new MultiassignmentIsNotEnabledException();
+        }
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final Long dsID,
@@ -365,14 +357,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {
         if (!deploymentRequests.isEmpty()) {
-            enforceMaxActionsPerReqest(deploymentRequests.size());
+            enforceMaxAssignmentsPerRequest(deploymentRequests.size());
             enforceMaxActionsPerTarget(deploymentRequests);
         }
     }
 
-    private void enforceMaxActionsPerReqest(final int requestedActions) {
-        QuotaHelper.assertAssignmentQuota(requestedActions, quotaManagement.getMaxResultingActionsPerManualAssignment(),
-                Target.class, DistributionSet.class);
+    private void enforceMaxAssignmentsPerRequest(final int requestedActions) {
+        QuotaHelper.assertAssignmentRequestSizeQuota(requestedActions,
+                quotaManagement.getMaxResultingActionsPerManualAssignment());
     }
 
     private void enforceMaxActionsPerTarget(final Collection<DeploymentRequest> deploymentRequests) {

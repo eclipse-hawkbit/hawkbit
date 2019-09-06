@@ -18,13 +18,14 @@ public class MgmtDistributionSetAssignment extends MgmtId {
 
     private long forcetime;
     private MgmtActionType type;
-
-    /**
-     * {@link MgmtMaintenanceWindowRequestBody} object defining a schedule,
-     * duration and timezone.
-     */
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
+    /**
+     * Constructor
+     * 
+     * @param id
+     *            ID of object
+     */
     @JsonCreator
     public MgmtDistributionSetAssignment(@JsonProperty(required = true, value = "id") final Long id) {
         super(id);
