@@ -386,9 +386,45 @@ public class JpaControllerManagement implements ControllerManagement {
                 .orElseGet(() -> createTarget(controllerId, address));
     }
 
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    // TODO Ammar @Param name = name for the target to be created
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, String name) {
+        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
+                .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
+
+        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
+                .orElseGet(() -> createNewTarget(controllerId, address, name));
+    }
+
+    // TODO created by Ammar
+    private Target createNewTarget(final String controllerId, final URI address, final String name) {
+        // In case of a true expression, the targetId will be set as name
+        if (name == null || name.length() == 0) {
+            return createTarget(controllerId, address);
+        }
+        return createTarget(controllerId, address, name);
+    }
+
     private Target createTarget(final String controllerId, final URI address) {
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
+
+        return result;
+    }
+
+    // TODO created by Ammar to create Target in case optional name -> so we
+    // have an overloaded method "createTarget()"
+    private Target createTarget(final String controllerId, final URI address, final String name) {
+
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
@@ -519,7 +555,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
@@ -532,20 +568,20 @@ public class JpaControllerManagement implements ControllerManagement {
         final JpaActionStatus actionStatus = create.build();
 
         switch (actionStatus.getStatus()) {
-        case CANCELED:
-        case FINISHED:
-            handleFinishedCancelation(actionStatus, action);
-            break;
-        case ERROR:
-        case CANCEL_REJECTED:
-            // Cancellation rejected. Back to running.
-            action.setStatus(Status.RUNNING);
-            break;
-        default:
-            // information status entry - check for a potential DOS attack
-            assertActionStatusQuota(action);
-            assertActionStatusMessageQuota(actionStatus);
-            break;
+            case CANCELED :
+            case FINISHED :
+                handleFinishedCancelation(actionStatus, action);
+                break;
+            case ERROR :
+            case CANCEL_REJECTED :
+                // Cancellation rejected. Back to running.
+                action.setStatus(Status.RUNNING);
+                break;
+            default :
+                // information status entry - check for a potential DOS attack
+                assertActionStatusQuota(action);
+                assertActionStatusMessageQuota(actionStatus);
+                break;
         }
 
         actionStatus.setAction(actionRepository.save(action));
@@ -570,7 +606,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
@@ -622,19 +658,19 @@ public class JpaControllerManagement implements ControllerManagement {
         assertActionStatusMessageQuota(actionStatus);
 
         switch (actionStatus.getStatus()) {
-        case ERROR:
-            final JpaTarget target = (JpaTarget) action.getTarget();
-            target.setUpdateStatus(TargetUpdateStatus.ERROR);
-            handleErrorOnAction(action, target);
-            break;
-        case FINISHED:
-            controllerId = handleFinishedAndStoreInTargetStatus(action);
-            break;
-        case DOWNLOADED:
-            controllerId = handleDownloadedActionStatus(action);
-            break;
-        default:
-            break;
+            case ERROR :
+                final JpaTarget target = (JpaTarget) action.getTarget();
+                target.setUpdateStatus(TargetUpdateStatus.ERROR);
+                handleErrorOnAction(action, target);
+                break;
+            case FINISHED :
+                controllerId = handleFinishedAndStoreInTargetStatus(action);
+                break;
+            case DOWNLOADED :
+                controllerId = handleDownloadedActionStatus(action);
+                break;
+            default :
+                break;
         }
 
         actionStatus.setAction(action);
@@ -720,7 +756,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
             final UpdateMode mode) {
 
@@ -737,27 +773,29 @@ public class JpaControllerManagement implements ControllerManagement {
 
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
-
+        // TODO Ammar so here it REALLY check and handles the "mode" from body,
+        // but what happens if no mode in Body? Looking in the next line, if no
+        // mode found the default "UpdateMode.MERGE" will be assigned
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
         switch (updateMode) {
-        case REMOVE:
-            // remove the addressed attributes
-            data.keySet().forEach(controllerAttributes::remove);
-            break;
-        case REPLACE:
-            // clear the attributes before adding the new attributes
-            controllerAttributes.clear();
-            copy(data, controllerAttributes);
-            target.setRequestControllerAttributes(false);
-            break;
-        case MERGE:
-            // just merge the attributes in
-            copy(data, controllerAttributes);
-            target.setRequestControllerAttributes(false);
-            break;
-        default:
-            // unknown update mode
-            throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
+            case REMOVE :
+                // remove the addressed attributes
+                data.keySet().forEach(controllerAttributes::remove);
+                break;
+            case REPLACE :
+                // clear the attributes before adding the new attributes
+                controllerAttributes.clear();
+                copy(data, controllerAttributes);
+                target.setRequestControllerAttributes(false);
+                break;
+            case MERGE :
+                // just merge the attributes in
+                copy(data, controllerAttributes);
+                target.setRequestControllerAttributes(false);
+                break;
+            default :
+                // unknown update mode
+                throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
         }
         assertTargetAttributesQuota(target);
 
@@ -798,7 +836,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action registerRetrieved(final long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
     }
@@ -859,7 +897,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional
     @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());

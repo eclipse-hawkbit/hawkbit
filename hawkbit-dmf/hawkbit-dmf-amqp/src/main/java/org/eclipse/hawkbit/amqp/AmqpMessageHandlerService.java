@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfTargetProperties;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -126,6 +127,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
     public Message onMessage(final Message message,
             @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
+            // TODO Ammar check whether i have to just add a new line but not
+            // @Header but @ RequestBody to get the whole payload and then check
+            // whether a name is specified to display it if specified = true, or
+            // is the RequestBody and so the payload in the "message" parameter?
             @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
@@ -152,22 +157,43 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         try {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
-            case THING_CREATED:
-                setTenantSecurityContext(tenant);
-                registerTarget(message, virtualHost);
-                break;
-            case EVENT:
-                checkContentTypeJson(message);
-                setTenantSecurityContext(tenant);
-                handleIncomingEvent(message);
-                break;
-            case PING:
-                if (isCorrelationIdNotEmpty(message)) {
-                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
-                }
-                break;
-            default:
-                logAndThrowMessageError(message, "No handle method was found for the given message type.");
+                // TODO Ammar here the thing created message is received
+                case THING_CREATED :
+                    // If never reassigned (so still null) then targetId will be
+                    // the default targetName
+                    String name = null;
+                    // Check whether there is a message body, if so extract name
+                    // TODO Ammar check what happens if there is a body BUT no
+                    // name!?
+                   // if (message.getBody() != null || message.getBody().length != 0) {
+                   // if(message.getBody().toString().contains("name")){
+                   //     if (message.toString().contains("name")){
+                   // if( message.getBodyContentAsString().contains("name"))
+                    if (message.toString().contains("name")){
+                        checkContentTypeJson(message);
+                        // Check whether name property set
+                        final DmfTargetProperties targetProperties = convertMessage(message, DmfTargetProperties.class);
+                        // if if-condition is false, then name will be null, and
+                        // so later replaced with the targetId
+                        if (targetProperties.getName() != null || targetProperties.getName().length() != 0) {
+                            name = targetProperties.getName();
+                        } ;
+                    }
+                    setTenantSecurityContext(tenant);
+                    registerTarget(message, virtualHost, name);
+                    break;
+                case EVENT :
+                    checkContentTypeJson(message);
+                    setTenantSecurityContext(tenant);
+                    handleIncomingEvent(message);
+                    break;
+                case PING :
+                    if (isCorrelationIdNotEmpty(message)) {
+                        amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
+                    }
+                    break;
+                default :
+                    logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
@@ -199,7 +225,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param ip
      *            the ip of the target/thing
      */
-    private void registerTarget(final Message message, final String virtualHost) {
+    // TODO Ammar write that param name can be null without problems to use per
+    // default the tgargetId as name
+    private void registerTarget(final Message message, final String virtualHost, final String name) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
         final String replyTo = message.getMessageProperties().getReplyTo();
 
@@ -209,7 +237,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         try {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            // TODO Ammar here is where the target is created
+            // TODO Ammar overload the method
+            // "findOrRegisterTargetIfItDoesNotExist" by adding a additional one
+            // but with the name option
+            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (EntityAlreadyExistsException e) {
@@ -279,20 +311,36 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      */
     private void handleIncomingEvent(final Message message) {
         switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
-        case UPDATE_ACTION_STATUS:
-            updateActionStatus(message);
-            break;
-        case UPDATE_ATTRIBUTES:
-            updateAttributes(message);
-            break;
-        default:
-            logAndThrowMessageError(message, "Got event without appropriate topic.");
-            break;
+            case UPDATE_ACTION_STATUS :
+                updateActionStatus(message);
+                break;
+            case UPDATE_ATTRIBUTES :
+                updateAttributes(message);
+                break;
+            default :
+                logAndThrowMessageError(message, "Got event without appropriate topic.");
+                break;
         }
 
     }
 
+    // TODO Ammar IN THIS METHOD "getUpdateMode()" IS CALLED AND THIS HANDELS
+    // THE OPTIONAL FIELD "mode" IN THE BODY, SO JUST USE THIS BEHAVIOR AND TRY
+    // WHETHER IT WORKS
     private void updateAttributes(final Message message) {
+        // TODO Ammar create class for "name" similar to this DmfAttributeUpdate
+        // and use similar logic
+        final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+
+        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
+                getUpdateMode(attributeUpdate));
+    }
+
+    // TODO created by Ammar
+    private void updateAttributesWithName(final Message message) {
+        // TODO Ammar create class for "name" similar to this DmfAttributeUpdate
+        // and use similar logic
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
 
@@ -345,35 +393,35 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
-        case DOWNLOAD:
-            status = Status.DOWNLOAD;
-            break;
-        case RETRIEVED:
-            status = Status.RETRIEVED;
-            break;
-        case RUNNING:
-            status = Status.RUNNING;
-            break;
-        case CANCELED:
-            status = Status.CANCELED;
-            break;
-        case FINISHED:
-            status = Status.FINISHED;
-            break;
-        case ERROR:
-            status = Status.ERROR;
-            break;
-        case WARNING:
-            status = Status.WARNING;
-            break;
-        case DOWNLOADED:
-            status = Status.DOWNLOADED;
-            break;
-        case CANCEL_REJECTED:
-            status = handleCancelRejectedState(message, action);
-            break;
-        default:
-            logAndThrowMessageError(message, "Status for action does not exisit.");
+            case DOWNLOAD :
+                status = Status.DOWNLOAD;
+                break;
+            case RETRIEVED :
+                status = Status.RETRIEVED;
+                break;
+            case RUNNING :
+                status = Status.RUNNING;
+                break;
+            case CANCELED :
+                status = Status.CANCELED;
+                break;
+            case FINISHED :
+                status = Status.FINISHED;
+                break;
+            case ERROR :
+                status = Status.ERROR;
+                break;
+            case WARNING :
+                status = Status.WARNING;
+                break;
+            case DOWNLOADED :
+                status = Status.DOWNLOADED;
+                break;
+            case CANCEL_REJECTED :
+                status = handleCancelRejectedState(message, action);
+                break;
+            default :
+                logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
         return status;
