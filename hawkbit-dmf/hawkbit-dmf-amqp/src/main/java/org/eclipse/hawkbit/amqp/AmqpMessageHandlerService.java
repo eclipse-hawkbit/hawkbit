@@ -127,10 +127,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
     public Message onMessage(final Message message,
             @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
-            // TODO Ammar check whether i have to just add a new line but not
-            // @Header but @ RequestBody to get the whole payload and then check
-            // whether a name is specified to display it if specified = true, or
-            // is the RequestBody and so the payload in the "message" parameter?
             @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
@@ -156,31 +152,29 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             final MessageType messageType = MessageType.valueOf(type);
+            // If name never reassigned, so still null, then per default:
+            // targetName = targetId
+            String name = null;
             switch (messageType) {
-                // TODO Ammar here the thing created message is received
                 case THING_CREATED :
-                    // If never reassigned (so still null) then targetId will be
-                    // the default targetName
-                    String name = null;
-                    // Check whether there is a message body, if so extract name
-                    // TODO Ammar check what happens if there is a body BUT no
-                    // name!?
-                   // if (message.getBody() != null || message.getBody().length != 0) {
-                   // if(message.getBody().toString().contains("name")){
-                   //     if (message.toString().contains("name")){
-                   // if( message.getBodyContentAsString().contains("name"))
-                    if (message.toString().contains("name")){
+                    if (message.toString().contains("name")) {
                         checkContentTypeJson(message);
                         // Check whether name property set
                         final DmfTargetProperties targetProperties = convertMessage(message, DmfTargetProperties.class);
-                        // if if-condition is false, then name will be null, and
-                        // so later replaced with the targetId
-                        if (targetProperties.getName() != null || targetProperties.getName().length() != 0) {
+                        // Will be true if "name" properly in body and not just
+                        // contained in some attributes
+                        if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
                             name = targetProperties.getName();
-                        } ;
+                            setTenantSecurityContext(tenant);
+                            registerTarget(message, virtualHost, name);
+                        } else {
+                            setTenantSecurityContext(tenant);
+                            registerTarget(message, virtualHost);
+                        }
+                    } else {
+                        setTenantSecurityContext(tenant);
+                        registerTarget(message, virtualHost);
                     }
-                    setTenantSecurityContext(tenant);
-                    registerTarget(message, virtualHost, name);
                     break;
                 case EVENT :
                     checkContentTypeJson(message);
@@ -218,15 +212,41 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     /**
-     * Method to create a new target or to find the target if it already exists.
+     * Method to register a new target.
      *
-     * @param targetID
-     *            the ID of the target/thing
-     * @param ip
-     *            the ip of the target/thing
+     * @param message
+     *            the message that contains the target/thing
+     * @param virtualHost
      */
-    // TODO Ammar write that param name can be null without problems to use per
-    // default the tgargetId as name
+    private void registerTarget(final Message message, final String virtualHost) {
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String replyTo = message.getMessageProperties().getReplyTo();
+
+        if (StringUtils.isEmpty(replyTo)) {
+            logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
+        }
+
+        try {
+            final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
+            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            LOG.debug("Target {} reported online state.", thingId);
+            sendUpdateCommandToTarget(target);
+        } catch (EntityAlreadyExistsException e) {
+            throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
+        }
+    }
+
+    /**
+     * Method to register a new target.
+     *
+     * @param message
+     *            the message that contains the target/thing
+     * @param virtualHost
+     *            the virtualHost of the target/thing
+     * @param name
+     *            the name of the target/thing, can be null and would then be
+     *            replaced by targetId
+     */
     private void registerTarget(final Message message, final String virtualHost, final String name) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
         final String replyTo = message.getMessageProperties().getReplyTo();
@@ -237,10 +257,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         try {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-            // TODO Ammar here is where the target is created
-            // TODO Ammar overload the method
-            // "findOrRegisterTargetIfItDoesNotExist" by adding a additional one
-            // but with the name option
             final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
@@ -324,23 +340,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     }
 
-    // TODO Ammar IN THIS METHOD "getUpdateMode()" IS CALLED AND THIS HANDELS
-    // THE OPTIONAL FIELD "mode" IN THE BODY, SO JUST USE THIS BEHAVIOR AND TRY
-    // WHETHER IT WORKS
     private void updateAttributes(final Message message) {
-        // TODO Ammar create class for "name" similar to this DmfAttributeUpdate
-        // and use similar logic
-        final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
-
-        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
-                getUpdateMode(attributeUpdate));
-    }
-
-    // TODO created by Ammar
-    private void updateAttributesWithName(final Message message) {
-        // TODO Ammar create class for "name" similar to this DmfAttributeUpdate
-        // and use similar logic
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
 

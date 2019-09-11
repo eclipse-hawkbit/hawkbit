@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
+import org.eclipse.hawkbit.dmf.json.model.DmfTargetProperties;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -135,8 +136,11 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
+    @Captor
+    private ArgumentCaptor<String> targetNameCaptor;
+
     @Before
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
@@ -191,6 +195,62 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
 
+    }
+
+    @Test
+    @Description("Tests the creation of a target/thing with specified name by calling the same method that incoming RabbitMQ messages would access.")
+    public void createThingWithName() {
+        final String knownThingId = "2";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        final DmfTargetProperties targetProperties = new DmfTargetProperties();
+        targetProperties.setName("NonDefaultTargetName");
+
+        final Message message = messageConverter.toMessage(targetProperties, messageProperties);
+
+        final Target targetMock = mock(Target.class);
+
+        final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
+        final ArgumentCaptor<String> targetNameCaptor = ArgumentCaptor.forClass(String.class);
+
+        when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
+                uriCaptor.capture(), targetNameCaptor.capture())).thenReturn(targetMock);
+        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
+
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
+        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
+        assertThat(targetNameCaptor.getValue()).as("Attributes is not right").isEqualTo(targetProperties.getName());
+    }
+
+    @Test
+    @Description("Tests the creation of a target/thing without name but with body by calling the same method that incoming RabbitMQ messages would access.")
+    public void createThingWithBodyWithoutName() {
+        final String knownThingId = "3";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
+        // put "fake" name in the attributes to also test this behaviour, name
+        // should still be default (=targetId)
+        attributeUpdate.getAttributes().put("name", "testValue1");
+
+        final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
+                messageProperties);
+
+        final Target targetMock = mock(Target.class);
+
+        final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
+        when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
+                uriCaptor.capture())).thenReturn(targetMock);
+        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
+
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
+        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
     }
 
     @Test

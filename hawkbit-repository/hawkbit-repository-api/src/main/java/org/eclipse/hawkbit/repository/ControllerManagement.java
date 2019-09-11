@@ -207,7 +207,6 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address);
 
-    //TODO created by Ammar - adapt comment section
     /**
      * Register new target in the repository (plug-and-play) and in case it
      * already exists updates {@link Target#getAddress()} and
@@ -219,6 +218,8 @@ public interface ControllerManagement {
      *            reference
      * @param address
      *            the client IP address of the target, might be {@code null}
+     * @param name
+     *            the name of the target
      * @return target reference
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)

@@ -389,7 +389,6 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    // TODO Ammar @Param name = name for the target to be created
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, String name) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
@@ -398,7 +397,6 @@ public class JpaControllerManagement implements ControllerManagement {
                 .orElseGet(() -> createNewTarget(controllerId, address, name));
     }
 
-    // TODO created by Ammar
     private Target createNewTarget(final String controllerId, final URI address, final String name) {
         // In case of a true expression, the targetId will be set as name
         if (name == null || name.length() == 0) {
@@ -419,8 +417,6 @@ public class JpaControllerManagement implements ControllerManagement {
         return result;
     }
 
-    // TODO created by Ammar to create Target in case optional name -> so we
-    // have an overloaded method "createTarget()"
     private Target createTarget(final String controllerId, final URI address, final String name) {
 
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
@@ -773,9 +769,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
-        // TODO Ammar so here it REALLY check and handles the "mode" from body,
-        // but what happens if no mode in Body? Looking in the next line, if no
-        // mode found the default "UpdateMode.MERGE" will be assigned
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
         switch (updateMode) {
             case REMOVE :

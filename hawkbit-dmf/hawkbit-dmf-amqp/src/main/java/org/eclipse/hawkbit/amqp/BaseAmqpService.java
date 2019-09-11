@@ -60,19 +60,10 @@ public class BaseAmqpService {
     @SuppressWarnings("unchecked")
     public <T> T convertMessage(@NotNull final Message message, final Class<T> clazz) {
         checkMessageBody(message);
-        //TODO ??? how did they implement here, that "mode" is only optional??
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
-
-    //TODO created by Ammar
-/*    public void isMessageBodyEmptyRename(@NotNull final Message message) {
-        checkMessageBody(message);
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                clazz.getName());
-        return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
-    }*/
 
     protected MessageConverter getMessageConverter() {
         return rabbitTemplate.getMessageConverter();
