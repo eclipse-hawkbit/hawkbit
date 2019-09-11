@@ -12,8 +12,10 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 
 /**
  * A mapper for assignment requests
@@ -57,18 +59,16 @@ public final class MgmtDeploymentRequestMapper {
 
     private static DeploymentRequest createAssignmentRequest(final String targetId, final Long dsId,
             final MgmtActionType type, final long forcetime, final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
-        if (maintenanceWindow == null) {
-            return new DeploymentRequest(targetId, dsId, MgmtRestModelMapper.convertActionType(type), forcetime);
+        final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setActionType(MgmtRestModelMapper.convertActionType(type)).setForceTime(forcetime);
+        if (maintenanceWindow != null) {
+            final String cronSchedule = maintenanceWindow.getSchedule();
+            final String duration = maintenanceWindow.getDuration();
+            final String timezone = maintenanceWindow.getTimezone();
+            MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
+            request.setMaintenance(cronSchedule, duration, timezone);
         }
-
-        final String cronSchedule = maintenanceWindow.getSchedule();
-        final String duration = maintenanceWindow.getDuration();
-        final String timezone = maintenanceWindow.getTimezone();
-
-        MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
-
-        return new DeploymentRequest(targetId, dsId, MgmtRestModelMapper.convertActionType(type), forcetime,
-                cronSchedule, duration, timezone);
+        return request.build();
     }
 
 }

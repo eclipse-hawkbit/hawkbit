@@ -261,8 +261,8 @@ public interface MgmtTargetRestApi {
      *
      * @param targetId
      *            of the target to change
-     * @param dsId
-     *            of the distributionset that is to be assigned
+     * @param dsAssignments
+     *            the requested Assignments that shall be made
      * @param offline
      *            to <code>true</code> if update was executed offline, i.e. not
      *            managed by hawkBit.

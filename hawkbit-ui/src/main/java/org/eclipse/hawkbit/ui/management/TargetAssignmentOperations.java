@@ -18,9 +18,10 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
-import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -82,7 +83,7 @@ public final class TargetAssignmentOperations {
      *            the Vaadin Message Source for multi language
      * @param eventSource
      *            the source object for sending potential events
-     * @throws MultiassignmentIsNotEnabledException
+     * @throws MultiAssignmentIsNotEnabledException
      */
     public static void saveAllAssignments(final List<Target> targets, final List<DistributionSet> distributionSets,
             final ManagementUIState managementUIState,
@@ -105,10 +106,14 @@ public final class TargetAssignmentOperations {
 
         final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        dsIds.forEach(dsId -> targets.forEach(t -> deploymentRequests.add(maintenanceWindowLayout.isEnabled()
-                ? new DeploymentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp,
-                        maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
-                : new DeploymentRequest(t.getControllerId(), dsId, actionType, forcedTimeStamp))));
+        dsIds.forEach(dsId -> targets.forEach(t -> {
+            final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
+                    .setActionType(actionType).setForceTime(forcedTimeStamp);
+            if (maintenanceWindowLayout.isEnabled()) {
+                request.setMaintenance(maintenanceSchedule, maintenanceDuration, maintenanceTimeZone);
+            }
+            deploymentRequests.add(request.build());
+        }));
 
         try {
             final List<DistributionSetAssignmentResult> results = deploymentManagement
@@ -129,7 +134,7 @@ public final class TargetAssignmentOperations {
 
             notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
             eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
-        } catch (final MultiassignmentIsNotEnabledException e) {
+        } catch (final MultiAssignmentIsNotEnabledException e) {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
             LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
         }

@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -52,7 +53,7 @@ public interface DeploymentManagement {
      * {@link DeploymentRequest}.
      *
      * @param deploymentRequests
-     *            the set of IDs of the distribution sets to assign
+     *            information about all target-ds-assignments that shall be made
      * 
      * @return the list of assignment results
      *
@@ -67,7 +68,7 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
-     * @throws MultiassignmentIsNotEnabledException
+     * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
      * 
@@ -81,7 +82,7 @@ public interface DeploymentManagement {
      * {@link DeploymentRequest}.
      *
      * @param deploymentRequests
-     *            the set of IDs of the distribution sets to assign
+     *            information about all target-ds-assignments that shall be made
      * @param actionMessage
      *            an optional message for the action status
      * 
@@ -98,7 +99,7 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
-     * @throws MultiassignmentIsNotEnabledException
+     * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
      * 
@@ -106,6 +107,20 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
             @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
+
+    /**
+     * build a {@link DeploymentRequest} for a target distribution set
+     * assignment
+     * 
+     * @param controllerId
+     *            ID of target
+     * @param distributionSetId
+     *            ID of distribution set
+     * @return the builder
+     */
+    static DeploymentRequestBuilder deploymentRequest(final String controllerId, final long distributionSetId) {
+        return new DeploymentRequestBuilder(controllerId, distributionSetId);
+    }
 
     /**
      * Registers an "offline" assignment, i.e. adds a completed action for the
@@ -140,7 +155,7 @@ public interface DeploymentManagement {
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * 
-     * @throws MultiassignmentIsNotEnabledException
+     * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
      */

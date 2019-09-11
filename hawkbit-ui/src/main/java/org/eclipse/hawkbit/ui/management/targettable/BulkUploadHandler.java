@@ -308,8 +308,9 @@ public class BulkUploadHandler extends CustomComponent
                 return i18n.getMessage("message.bulk.upload.assignment.failed");
             }
             final List<DeploymentRequest> deploymentRequests = targetIds.stream()
-                    .map(targetId -> new DeploymentRequest(targetId, targetBulkUpload.getDsNameAndVersion(), actionType,
-                            forcedTimeStamp))
+                    .map(targetId -> DeploymentManagement
+                            .deploymentRequest(targetId, targetBulkUpload.getDsNameAndVersion())
+                            .setActionType(actionType).setForceTime(forcedTimeStamp).build())
                     .collect(Collectors.toList());
             deploymentManagement.assignDistributionSets(deploymentRequests);
             return null;

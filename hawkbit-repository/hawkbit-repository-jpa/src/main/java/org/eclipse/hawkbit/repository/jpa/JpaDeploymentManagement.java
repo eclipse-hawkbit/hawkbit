@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -177,7 +177,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         distinctDsIds.forEach(dsId ->
             distinctControllerIds.forEach(controllerId -> deploymentRequests
-                .add(new DeploymentRequest(controllerId, dsId, ActionType.FORCED, -1))));
+                .add(DeploymentManagement.deploymentRequest(controllerId, dsId).build())));
 
         return assignDistributionSets(deploymentRequests, null, offlineDsAssignmentStrategy);
     }
@@ -229,7 +229,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final long distinctTargetsInRequest = deploymentRequests.stream()
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         if (distinctTargetsInRequest < deploymentRequests.size()) {
-            throw new MultiassignmentIsNotEnabledException();
+            throw new MultiAssignmentIsNotEnabledException();
         }
     }
 

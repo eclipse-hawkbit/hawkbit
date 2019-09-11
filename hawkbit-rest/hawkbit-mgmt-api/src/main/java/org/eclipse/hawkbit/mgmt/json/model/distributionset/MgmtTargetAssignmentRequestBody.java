@@ -26,6 +26,12 @@ public class MgmtTargetAssignmentRequestBody {
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
+    /**
+     * JsonCreator Constructor
+     * 
+     * @param id
+     *            Mandatory ID of the target that should be assigned
+     */
     @JsonCreator
     public MgmtTargetAssignmentRequestBody(@JsonProperty(required = true, value = "id") final String id) {
         this.id = id;

@@ -20,39 +20,6 @@ public class DeploymentRequest {
     private final TargetWithActionType targetWithActionType;
 
     /**
-     * Constructor with actionType {@link ActionType#FORCED}
-     * 
-     * @param controllerId
-     *            for which the action is created.
-     * @param distributionSetId
-     *            of the distribution set that that should be assigned to the
-     *            controller.
-     */
-    public DeploymentRequest(final String controllerId, final Long distributionSetId) {
-        this.targetWithActionType = new TargetWithActionType(controllerId);
-        this.distributionSetId = distributionSetId;
-    }
-
-    /**
-     * Constructor without maintenanceWindow.
-     *
-     * @param controllerId
-     *            for which the action is created.
-     * @param distributionSetId
-     *            of the distribution set that that should be assigned to the
-     *            controller.
-     * @param actionType
-     *            specified for the action.
-     * @param forceTime
-     *            at what time the type soft turns into forced.
-     */
-    public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
-            final long forceTime) {
-        this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime);
-        this.distributionSetId = distributionSetId;
-    }
-
-    /**
      * Constructor that also accepts maintenance schedule parameters and checks
      * for validity of the specified maintenance schedule.
      *
@@ -88,7 +55,6 @@ public class DeploymentRequest {
                 maintenanceWindowDuration,
                 maintenanceWindowTimeZone);
         this.distributionSetId = distributionSetId;
-
     }
 
     public Long getDistributionSetId() {

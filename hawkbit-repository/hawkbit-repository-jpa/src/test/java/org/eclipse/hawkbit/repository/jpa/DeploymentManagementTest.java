@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -35,7 +36,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiassignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -615,12 +616,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
 
-        final DeploymentRequest targetToDS0 = new DeploymentRequest(target.getControllerId(),
-                distributionSets.get(0).getId());
-        final DeploymentRequest targetToDS1 = new DeploymentRequest(target.getControllerId(),
-                distributionSets.get(1).getId());
+        final DeploymentRequest targetToDS0 = DeploymentManagement
+                .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).build();
+        final DeploymentRequest targetToDS1 = DeploymentManagement
+                .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).build();
 
-        Assertions.assertThatExceptionOfType(MultiassignmentIsNotEnabledException.class)
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)));
 
         enableMultiAssignments();
@@ -634,7 +635,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final List<DeploymentRequest> twoEqualAssignments = Collections.nCopies(2,
-                new DeploymentRequest(target.getControllerId(), ds.getId()));
+                DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build());
 
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
                 .isEqualTo(1);
@@ -660,7 +661,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final List<DeploymentRequest> deploymentRequests = Collections.nCopies(maxActions + 1,
-                new DeploymentRequest(controllerId, dsId));
+                DeploymentManagement.deploymentRequest(controllerId, dsId).build());
 
         enableMultiAssignments();
         Assertions.assertThatExceptionOfType(QuotaExceededException.class)

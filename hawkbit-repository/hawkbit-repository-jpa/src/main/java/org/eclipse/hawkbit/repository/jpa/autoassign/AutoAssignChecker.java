@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.slf4j.Logger;
@@ -176,8 +175,10 @@ public class AutoAssignChecker {
         // specified)
         final ActionType autoAssignActionType = type == null ? ActionType.FORCED : type;
 
-        return targets.getContent().stream().map(t -> new DeploymentRequest(t.getControllerId(), dsId,
-                autoAssignActionType, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());
+        return targets.getContent().stream()
+                .map(t -> DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
+                        .setActionType(autoAssignActionType).build())
+                .collect(Collectors.toList());
     }
 
 }

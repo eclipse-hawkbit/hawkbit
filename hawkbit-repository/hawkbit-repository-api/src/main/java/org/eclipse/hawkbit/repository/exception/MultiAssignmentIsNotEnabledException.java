@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * feature is not enabled.
  * 
  */
-public class MultiassignmentIsNotEnabledException extends AbstractServerRtException {
+public class MultiAssignmentIsNotEnabledException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED;
@@ -24,7 +24,7 @@ public class MultiassignmentIsNotEnabledException extends AbstractServerRtExcept
     /**
      * Default constructor.
      */
-    public MultiassignmentIsNotEnabledException() {
+    public MultiAssignmentIsNotEnabledException() {
         super(THIS_ERROR);
     }
 
@@ -34,7 +34,7 @@ public class MultiassignmentIsNotEnabledException extends AbstractServerRtExcept
      * @param cause
      *            of the exception
      */
-    public MultiassignmentIsNotEnabledException(final Throwable cause) {
+    public MultiAssignmentIsNotEnabledException(final Throwable cause) {
         super(THIS_ERROR, cause);
     }
 
@@ -46,7 +46,7 @@ public class MultiassignmentIsNotEnabledException extends AbstractServerRtExcept
      * @param cause
      *            of the exception
      */
-    public MultiassignmentIsNotEnabledException(final String message, final Throwable cause) {
+    public MultiAssignmentIsNotEnabledException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
     }
 
@@ -56,7 +56,7 @@ public class MultiassignmentIsNotEnabledException extends AbstractServerRtExcept
      * @param message
      *            of the exception
      */
-    public MultiassignmentIsNotEnabledException(final String message) {
+    public MultiAssignmentIsNotEnabledException(final String message) {
         super(message, THIS_ERROR);
     }
 }
