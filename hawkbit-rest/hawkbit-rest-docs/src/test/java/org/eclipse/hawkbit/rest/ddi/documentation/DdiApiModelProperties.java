@@ -108,7 +108,7 @@ final class DdiApiModelProperties {
 
     static final String FILENAME = "file name of artifact";
 
-    static final String TARGET_CONFIG_DATA = "configuration data as key/value list";
+    static final String TARGET_CONFIG_DATA = "Configuration data as key/value list. Only showed for initial configuration, after UI request or a successful update";
 
     static final String ARTIFACT_HASHES_SHA1 = "SHA1 hash of the artifact in Base 16 format";
     static final String ARTIFACT_HASHES_MD5 = "MD5 hash of the artifact";
