@@ -222,7 +222,7 @@ public class AmqpMessageHandlerServiceTest {
 
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
-        assertThat(targetNameCaptor.getValue()).as("Attributes is not right").isEqualTo(targetProperties.getName());
+        assertThat(targetNameCaptor.getValue()).as("Thing name is not right").isEqualTo(targetProperties.getName());
     }
 
     @Test
@@ -276,6 +276,38 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(attributesCaptor.getValue()).as("Attributes is not right")
                 .isEqualTo(attributeUpdate.getAttributes());
+
+    }
+
+    @Test
+    @Description("Tests the target attribute update with name update by calling the same method that incoming RabbitMQ messages would access.")
+    public void updateAttributesWithName() {
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
+        attributeUpdate.getAttributes().put("testKey1", "testValue1");
+        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+        attributeUpdate.setName("UpdatedTargetName");
+
+        final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
+                messageProperties);
+
+        final ArgumentCaptor<String> targetNameCaptor = ArgumentCaptor.forClass(String.class);
+
+        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
+                modeCaptor.capture())).thenReturn(null);
+        when(controllerManagementMock.updateControllerName(targetIdCaptor.capture(), targetNameCaptor.capture()))
+                .thenReturn(null);
+
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+
+        // verify
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
+        assertThat(attributesCaptor.getValue()).as("Attributes is not right")
+                .isEqualTo(attributeUpdate.getAttributes());
+        assertThat(targetNameCaptor.getValue()).as("Thing name is wrong").isEqualTo(attributeUpdate.getName());
 
     }
 

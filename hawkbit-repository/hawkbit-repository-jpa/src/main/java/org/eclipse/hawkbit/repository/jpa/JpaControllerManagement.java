@@ -795,6 +795,22 @@ public class JpaControllerManagement implements ControllerManagement {
         return targetRepository.save(target);
     }
 
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class}, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target updateControllerName(final String controllerId, final String controllerName) {
+
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        target.setName(controllerName);
+
+        assertTargetAttributesQuota(target);
+
+        return targetRepository.save(target);
+    }
+
     private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {
         return isAttributeKeyValid(e.getKey()) && isAttributeValueValid(e.getValue());
     }

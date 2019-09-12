@@ -375,6 +375,24 @@ public interface ControllerManagement {
             UpdateMode mode);
 
     /**
+     * Updates name of the controller according to the given name
+     *
+     * @param controllerId
+     *            to update
+     * @param controllerName
+     *            the update mode or <code>null</code>
+     *
+     * @return updated {@link Target}
+     *
+     * @throws EntityNotFoundException
+     *             if target that has to be updated could not be found
+     * @throws QuotaExceededException
+     *             if maximum number of attributes per target is exceeded
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Target updateControllerName(final String controllerId, final String controllerName);
+
+    /**
      * Finds {@link Target} based on given controller ID returns found Target
      * without details, i.e. NO {@link Target#getTags()} and
      * {@link Target#getActions()} possible.
