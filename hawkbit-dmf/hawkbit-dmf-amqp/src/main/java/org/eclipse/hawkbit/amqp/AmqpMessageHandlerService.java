@@ -152,29 +152,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             final MessageType messageType = MessageType.valueOf(type);
-            // If name never reassigned, so still null, then per default:
-            // targetName = targetId
-            String name = null;
             switch (messageType) {
                 case THING_CREATED :
-                    if (message.toString().contains("name")) {
-                        checkContentTypeJson(message);
-                        // Check whether name property set
-                        final DmfTargetProperties targetProperties = convertMessage(message, DmfTargetProperties.class);
-                        // Will be true if "name" properly in body and not just
-                        // contained in some attributes
-                        if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
-                            name = targetProperties.getName();
-                            setTenantSecurityContext(tenant);
-                            registerTarget(message, virtualHost, name);
-                        } else {
-                            setTenantSecurityContext(tenant);
-                            registerTarget(message, virtualHost);
-                        }
-                    } else {
-                        setTenantSecurityContext(tenant);
-                        registerTarget(message, virtualHost);
-                    }
+                    handleThingCreatedRequest(message, tenant, virtualHost);
                     break;
                 case EVENT :
                     checkContentTypeJson(message);
@@ -472,6 +452,39 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
         return systemSecurityContext
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+    }
+
+    private void handleThingCreatedRequest(Message message, String tenant, String virtualHost) {
+        if (message.toString().contains("name")) {
+            handleNameContainedRequest(message, tenant, virtualHost);
+        } else {
+            handleNoNameContainedRequest(message, tenant, virtualHost);
+        }
+    }
+
+    private void handleNameContainedRequest(Message message, String tenant, String virtualHost) {
+        // If name never reassigned, so still null, then per default:
+        // targetName = targetId
+        String name = null;
+
+        checkContentTypeJson(message);
+        // Check whether name property set
+        final DmfTargetProperties targetProperties = convertMessage(message, DmfTargetProperties.class);
+        // Will be true if "name" properly in body and not just
+        // contained in some attributes
+        if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
+            name = targetProperties.getName();
+            setTenantSecurityContext(tenant);
+            registerTarget(message, virtualHost, name);
+        } else {
+            setTenantSecurityContext(tenant);
+            registerTarget(message, virtualHost);
+        }
+    }
+
+    private void handleNoNameContainedRequest(Message message, String tenant, String virtualHost) {
+        setTenantSecurityContext(tenant);
+        registerTarget(message, virtualHost);
     }
 
     // for testing
