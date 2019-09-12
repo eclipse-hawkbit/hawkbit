@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
@@ -287,12 +286,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @PathVariable("targetId") final String targetId,
             @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
-        final Set<Long> dsIds = dsAssignments.stream().map(MgmtDistributionSetAssignment::getId)
-                .collect(Collectors.toSet());
-
         if (offline) {
+            final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
+                    .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSets(dsIds, Collections.singletonList(targetId))));
+                    deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
         findTargetWithExceptionIfNotFound(targetId);
 

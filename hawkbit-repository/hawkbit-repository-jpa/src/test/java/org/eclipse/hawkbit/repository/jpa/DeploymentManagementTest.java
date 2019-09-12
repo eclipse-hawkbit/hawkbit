@@ -13,11 +13,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
@@ -164,8 +166,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         enableMultiAssignments();
         for (int i = 0; i < maxActions; i++) {
-            deploymentManagement.offlineAssignedDistributionSets(Collections.singletonList(ds1.getId()),
-                    Collections.singletonList(testTarget.getControllerId()));
+            deploymentManagement.offlineAssignedDistributionSets(Collections
+                    .singletonList(new SimpleEntry<String, Long>(testTarget.getControllerId(), ds1.getId())));
         }
 
         assertThatExceptionOfType(QuotaExceededException.class)
@@ -464,8 +466,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final long current = System.currentTimeMillis();
 
+        final List<Entry<String, Long>> offlineAssignments = controllerIds.stream()
+                .map(targetId -> new SimpleEntry<String, Long>(targetId, ds.getId())).collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .offlineAssignedDistributionSets(Collections.singleton(ds.getId()), controllerIds);
+                .offlineAssignedDistributionSets(offlineAssignments);
         assertThat(assignmentResults).hasSize(1);
         final List<Target> targets = assignmentResults.get(0).getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
@@ -497,8 +501,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .collect(Collectors.toList());
 
         enableMultiAssignments();
+        final List<Entry<String, Long>> offlineAssignments = new ArrayList<>();
+        targetIds.forEach(targetId -> dsIds
+                .forEach(dsId -> offlineAssignments.add(new SimpleEntry<String, Long>(targetId, dsId))));
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .offlineAssignedDistributionSets(dsIds, targetIds);
+                .offlineAssignedDistributionSets(offlineAssignments);
 
         assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
         targetIds.forEach(controllerId -> {

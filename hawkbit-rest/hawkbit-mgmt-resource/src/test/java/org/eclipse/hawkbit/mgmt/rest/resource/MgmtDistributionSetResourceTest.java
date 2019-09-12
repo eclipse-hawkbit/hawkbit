@@ -1288,7 +1288,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Identical assignments in a single request are removed when multiassignment in disabled.")
+    @Description("Identical assignments in a single request are removed when multiassignment is disabled.")
     public void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();

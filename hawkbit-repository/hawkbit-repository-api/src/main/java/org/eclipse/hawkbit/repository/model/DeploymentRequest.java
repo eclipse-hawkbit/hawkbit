@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Objects;
+
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
@@ -82,11 +84,7 @@ public class DeploymentRequest {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((distributionSetId == null) ? 0 : distributionSetId.hashCode());
-        result = prime * result + ((targetWithActionType == null) ? 0 : targetWithActionType.hashCode());
-        return result;
+        return Objects.hash(distributionSetId, targetWithActionType);
     }
 
     @Override
@@ -101,20 +99,7 @@ public class DeploymentRequest {
             return false;
         }
         final DeploymentRequest other = (DeploymentRequest) obj;
-        if (distributionSetId == null) {
-            if (other.distributionSetId != null) {
-                return false;
-            }
-        } else if (!distributionSetId.equals(other.distributionSetId)) {
-            return false;
-        }
-        if (targetWithActionType == null) {
-            if (other.targetWithActionType != null) {
-                return false;
-            }
-        } else if (!targetWithActionType.equals(other.targetWithActionType)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(distributionSetId, other.distributionSetId)
+                && Objects.equals(targetWithActionType, other.targetWithActionType);
     }
 }

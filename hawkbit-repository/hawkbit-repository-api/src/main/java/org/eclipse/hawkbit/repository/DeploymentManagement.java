@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -123,8 +124,8 @@ public interface DeploymentManagement {
     }
 
     /**
-     * Registers an "offline" assignment, i.e. adds a completed action for the
-     * given {@link DistributionSet} to the given {@link Target}s.
+     * Registers "offline" assignments. "offline" assignment means adding a
+     * completed action for a {@link DistributionSet} to a {@link Target}.
      * 
      * The handling differs to hawkBit-managed updates by means that:<br/>
      * 
@@ -137,10 +138,9 @@ public interface DeploymentManagement {
      * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
      * </ol>
      * 
-     * @param dsIDs
-     *            the IDs of the distribution sets that were assigned
-     * @param controllerIDs
-     *            a list of IDs of the targets that where assigned
+     * @param assignments
+     *            target IDs with the respective distribution set ID which they
+     *            are supposed to be assigned to
      * @return the assignment results
      * 
      * @throws IncompleteDistributionSetException
@@ -160,8 +160,7 @@ public interface DeploymentManagement {
      *             target and multiassignment is disabled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Long> dsIDs,
-            Collection<String> controllerIDs);
+    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments);
 
     /**
      * Cancels the {@link Action} with the given ID. The method will immediately

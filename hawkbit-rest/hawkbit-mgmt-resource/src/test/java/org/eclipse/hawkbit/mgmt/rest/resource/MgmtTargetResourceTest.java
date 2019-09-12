@@ -1870,7 +1870,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
-    @Description("A request for assigning multiple DS to a rarget results in a Bad Request when multiassignment in disabled.")
+    @Description("A request for assigning multiple DS to a target results in a Bad Request when multiassignment in disabled.")
     public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
