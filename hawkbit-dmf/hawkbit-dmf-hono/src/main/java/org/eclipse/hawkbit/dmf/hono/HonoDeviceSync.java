@@ -177,8 +177,10 @@ public class HonoDeviceSync {
             HttpURLConnection connection = getHonoData(honoTenantListUri + "?offset=" + offset);
 
             HonoTenantListPage page = objectMapper.readValue(connection.getInputStream(), HonoTenantListPage.class);
-            tenants.addAll(page.getItems());
-            offset += page.getItems().size();
+            if (page.getItems() != null) {
+                tenants.addAll(page.getItems());
+                offset += page.getItems().size();
+            }
             total = page.getTotal();
         }
 
