@@ -52,11 +52,21 @@ Message Properties | Description                                                
 content_type       | The content type of the payload                                                                      | String | true
 reply_to           | Exchange to reply to. The default is sp.direct.exchange which is bound to the sp_direct_queue | String | false
 
-Example headers
+Example headers and payload:
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
 type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lwm2m | content\_type=application/json <br /> reply_to (optional) =sp.connector.replyTo
+
+Payload Template (optional):
+
+```json
+{
+    "name": "String"
+}
+```
+
+The "name" property specifies the name of the thing, which per default is the thing ID. This property is optional.
 
 ### UPDATE_ATTRIBUTES
 
@@ -88,10 +98,12 @@ Payload Template:
         "exampleKey1" : "exampleValue1",
         "exampleKey2" : "exampleValue2"
     },
+    "name": "String",
     "mode": "String"
 }
 ```
 
+The "name" property specifies the name of the thing. This property is optional. <br />
 The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
 
 Value           | Description
