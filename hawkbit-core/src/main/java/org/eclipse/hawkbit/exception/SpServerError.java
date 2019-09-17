@@ -240,7 +240,13 @@ public enum SpServerError {
      * change is not allowed.
      */
     SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED("hawkbit.server.error.repo.tenantConfigurationValueChangeNotAllowed",
-            "The requested tenant configuration value modification is not allowed.");
+            "The requested tenant configuration value modification is not allowed."),
+
+    /**
+    *
+    */
+    SP_MULTIASSIGNMENT_NOT_ENABLED("hawkbit.server.error.multiassignmentNotEnabled",
+            "The requested operation requires Multiassignments to be enabled.");
 
     private final String key;
     private final String message;

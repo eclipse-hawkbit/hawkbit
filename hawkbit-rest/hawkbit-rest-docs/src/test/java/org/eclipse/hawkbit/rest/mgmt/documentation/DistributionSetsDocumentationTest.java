@@ -383,17 +383,20 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
-                        requestFields(requestFieldWithPath("[]forcetime").description(MgmtApiModelProperties.FORCETIME),
-                                requestFieldWithPath("[]id").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPath("[]maintenanceWindow")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.schedule")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.duration")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.timezone")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE).optional(),
-                                requestFieldWithPath("[]type").description(MgmtApiModelProperties.FORCETIME_TYPE)
+                        requestFields(
+                                requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                optionalRequestFieldWithPath("[].forcetime")
+                                        .description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("[].maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("[].type")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
                                         .attributes(key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
                         responseFields(
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),

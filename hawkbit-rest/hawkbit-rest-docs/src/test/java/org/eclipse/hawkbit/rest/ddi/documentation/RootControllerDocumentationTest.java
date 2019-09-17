@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +72,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        deploymentManagement.assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType()));
+        assignDistributionSet(set.getId(), target.getControllerId());
 
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
@@ -101,8 +100,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet setTwo = testdataFactory.createDistributionSet("two");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        deploymentManagement.assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType()));
-        deploymentManagement.assignDistributionSet(setTwo.getId(), Arrays.asList(target.getTargetWithActionType()));
+        assignDistributionSet(set.getId(), target.getControllerId());
+        assignDistributionSet(setTwo.getId(), target.getControllerId());
 
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
                 tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
@@ -137,8 +136,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         });
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
-                Arrays.asList(target.getTargetWithActionType())));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(
@@ -169,8 +167,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
-                Arrays.asList(target.getTargetWithActionType()))); 
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         mockMvc.perform(post(
@@ -387,8 +384,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
-                Arrays.asList(target.getTargetWithActionType())));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
 
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
@@ -434,7 +430,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binaryFile", false, 0));
 
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        deploymentManagement.assignDistributionSet(set.getId(), Arrays.asList(target.getTargetWithActionType()));
+        assignDistributionSet(set.getId(), target.getControllerId());
 
         mockMvc.perform(
                 get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{moduleId}/artifacts",

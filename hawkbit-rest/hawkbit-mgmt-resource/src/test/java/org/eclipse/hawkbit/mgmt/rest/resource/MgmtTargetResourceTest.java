@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +61,7 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -1240,8 +1242,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     public void updateAction() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = getFirstAssignedActionId(deploymentManagement.assignDistributionSet(set.getId(),
-                ActionType.SOFT, 0, Collections.singletonList(target.getControllerId())));
+        final Long actionId = getFirstAssignedActionId(
+                assignDistributionSet(set.getId(), target.getControllerId(), ActionType.SOFT));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();
@@ -1293,7 +1295,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Description("Verfies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
     public void assignDownloadOnlyDistributionSetToTarget() throws Exception {
 
-        Target target = testdataFactory.createTarget();
+        final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
@@ -1303,7 +1305,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("total", equalTo(1)));
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
-        Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
+        final Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
         assertThat(actions.getSize()).isGreaterThan(0);
         actions.stream().filter(a -> a.getDistributionSet().equals(set))
                 .forEach(a -> ActionType.DOWNLOAD_ONLY.equals(a.getActionType()));
@@ -1865,5 +1867,70 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
                 .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
+    }
+
+    @Test
+    @Description("A request for assigning multiple DS to a target results in a Bad Request when multiassignment in disabled.")
+    public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
+                .collect(Collectors.toList());
+
+        final JSONArray body = getAssignmentBody(dsIds);
+
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Passing an array in assignment request is allowed if multiassignment is disabled and array size in 1.")
+    public void multiassignmentRequestAllowedIfDisabledButHasSizeOne() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = getAssignmentBody(Collections.singletonList(dsId));
+            
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Identical assignments in a single request are removed when multiassignment in disabled.")
+    public void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = getAssignmentBody(Arrays.asList(dsId, dsId));
+
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1)));
+    }
+
+    @Test
+    @Description("Assign multiple DSs to a target in one request with multiassignments enabled.")
+    public void multiAssignment() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
+                .collect(Collectors.toList());
+
+        final JSONArray body = getAssignmentBody(dsIds);
+
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)));
+    }
+
+    public static JSONArray getAssignmentBody(final Collection<Long> dsIds) throws JSONException {
+        final JSONArray body = new JSONArray();
+        for (final Long id : dsIds) {
+            final JSONObject obj = new JSONObject();
+            obj.put("id", id);
+            body.put(obj);
+        }
+        return body;
     }
 }

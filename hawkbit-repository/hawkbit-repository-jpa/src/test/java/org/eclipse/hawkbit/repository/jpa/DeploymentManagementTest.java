@@ -13,15 +13,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -35,6 +38,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -47,13 +51,13 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -100,12 +104,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final String dsName = "DistributionSet";
 
-        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Collections.singletonList(new TargetWithActionType(target.getControllerId()))), dsName);
-        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL,
-                Collections.singletonList(new TargetWithActionType(target.getControllerId())), "xxx"), dsName);
-        verifyThrownExceptionBy(() -> deploymentManagement.assignDistributionSet(NOT_EXIST_IDL, ActionType.FORCED,
-                System.currentTimeMillis(), Collections.singletonList(target.getControllerId())), dsName);
+        verifyThrownExceptionBy(() -> assignDistributionSet(NOT_EXIST_IDL, target.getControllerId()), dsName);
 
         verifyThrownExceptionBy(() -> deploymentManagement.cancelAction(NOT_EXIST_IDL), "Action");
         verifyThrownExceptionBy(() -> deploymentManagement.countActionsByTarget(NOT_EXIST_ID), "Target");
@@ -158,34 +157,35 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test verifies that the 'max actions per target' quota is enforced if the assigned distribution set is changed permanently.")
-    public void changeDistributionSetAssignmentUntilMaxActionsPerTargetQuotaIsExceeded() {
+    @Description("Test verifies that the 'max actions per target' quota is enforced.")
+    public void assertMaxActionsPerTargetQuotaIsEnforced() {
 
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
-        final List<Target> testTargets = testdataFactory.createTargets(1);
+        final Target testTarget = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
-        final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
 
-        IntStream.range(0, maxActions).forEach(i -> {
-            assignDistributionSet(i % 2 == 0 ? ds1 : ds2, testTargets);
-        });
+        enableMultiAssignments();
+        for (int i = 0; i < maxActions; i++) {
+            deploymentManagement.offlineAssignedDistributionSets(Collections
+                    .singletonList(new SimpleEntry<String, Long>(testTarget.getControllerId(), ds1.getId())));
+        }
 
-        // change the distribution set one last time to trigger a quota hit
         assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds3, testTargets));
+                .isThrownBy(() -> assignDistributionSet(ds1, Collections.singletonList(testTarget)));
     }
 
     @Test
-    @Description("Assigns the same distribution set to many targets until the 'max targets per manual assignment' quota is exceeded.")
-    public void assignDistributionSetUntilQuotaIsExceeded() {
+    @Description("An assignment request with more assignments than allowed by 'maxTargetDistributionSetAssignmentsPerManualAssignment' quota throws an exception.")
+    public void assignmentRequestThatIsTooLarge() {
+        final int maxActions = quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment();
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
-        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(maxActions, "assignmentTest1");
+        assignDistributionSet(ds1, targets);
 
-        assignDistributionSet(ds, testdataFactory.createTargets(maxTargets, "ok"));
-        assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds, testdataFactory.createTargets(maxTargets + 1, "fail")));
+        targets.add(testdataFactory.createTarget("assignmentTest2"));
+        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> assignDistributionSet(ds2, targets));
     }
 
     @Test
@@ -455,6 +455,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     public void assignedDistributionSet() {
+
         final List<String> controllerIds = testdataFactory.createTargets(10).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
         final List<Target> onlineAssignedTargets = testdataFactory.createTargets(10, "2");
@@ -464,8 +465,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(testdataFactory.createDistributionSet("2"), onlineAssignedTargets);
 
         final long current = System.currentTimeMillis();
-        final List<Target> targets = deploymentManagement.offlineAssignedDistributionSet(ds.getId(), controllerIds)
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());;
+
+        final List<Entry<String, Long>> offlineAssignments = controllerIds.stream()
+                .map(targetId -> new SimpleEntry<String, Long>(targetId, ds.getId())).collect(Collectors.toList());
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .offlineAssignedDistributionSets(offlineAssignments);
+        assertThat(assignmentResults).hasSize(1);
+        final List<Target> targets = assignmentResults.get(0).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive());
@@ -478,6 +486,33 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .allMatch(target -> TargetUpdateStatus.IN_SYNC.equals(target.getUpdateStatus()))
                 .as("InstallationDate equal to LastModifiedAt")
                 .allMatch(target -> target.getLastModifiedAt() == target.getInstallationDate());
+    }
+
+    @Test
+    @Description("Offline assign multiple DSs to multiple Targets in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+    public void multiOfflineAssignment() {
+        final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
+                .collect(Collectors.toList());
+
+        enableMultiAssignments();
+        final List<Entry<String, Long>> offlineAssignments = new ArrayList<>();
+        targetIds.forEach(targetId -> dsIds
+                .forEach(dsId -> offlineAssignments.add(new SimpleEntry<String, Long>(targetId, dsId))));
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .offlineAssignedDistributionSets(offlineAssignments);
+
+        assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
+        targetIds.forEach(controllerId -> {
+            final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, controllerId).stream()
+                    .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+            assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
+        });
     }
 
     @Test
@@ -555,6 +590,92 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
     }
 
+    @Test
+    @Description("Assign multiple DSs to multiple Targets in one request in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = MultiActionEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+    public void multiassignmentInOneRequest() {
+        final List<Target> targets = testdataFactory.createTargets(2);
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+        final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets);
+
+        enableMultiAssignments();
+        final List<DistributionSetAssignmentResult> results = deploymentManagement
+                .assignDistributionSets(deploymentRequests);
+
+        assertThat(getResultingActionCount(results)).isEqualTo(deploymentRequests.size());
+        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        targets.forEach(target -> {
+            final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, target.getControllerId())
+                    .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+            assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
+        });
+
+    }
+
+    @Test
+    @Description("A Request resulting in multiple assignments to a single target is only allowed when multiassignment is enabled.")
+    public void multipleAssignmentsToTargetOnlyAllowedInMultiAssignMode() {
+        final Target target = testdataFactory.createTarget();
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+
+        final DeploymentRequest targetToDS0 = DeploymentManagement
+                .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).build();
+        final DeploymentRequest targetToDS1 = DeploymentManagement
+                .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).build();
+
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)));
+
+        enableMultiAssignments();
+        assertThat(getResultingActionCount(
+                deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)))).isEqualTo(2);
+    }
+
+    @Test
+    @Description("Duplicate Assignments are removed from a request when multiassignment is disabled, otherwise not")
+    public void duplicateAssignmentsInRequestAreOnlyRemovedIfMultiassignmentDisabled() {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final List<DeploymentRequest> twoEqualAssignments = Collections.nCopies(2,
+                DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build());
+
+        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
+                .isEqualTo(1);
+
+        enableMultiAssignments();
+        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
+                .isEqualTo(2);
+    }
+
+    private int getResultingActionCount(final List<DistributionSetAssignmentResult> results) {
+        return results.stream().map(DistributionSetAssignmentResult::getTotal).reduce(0, Integer::sum);
+    }
+
+    @Test
+    @Description("An assignment request is not accepted if it would lead to a target exceeding the max actions per target quota.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+    public void maxActionsPerTargetIsCheckedBeforeAssignmentExecution() {
+        final int maxActions = quotaManagement.getMaxActionsPerTarget();
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<DeploymentRequest> deploymentRequests = Collections.nCopies(maxActions + 1,
+                DeploymentManagement.deploymentRequest(controllerId, dsId).build());
+
+        enableMultiAssignments();
+        Assertions.assertThatExceptionOfType(QuotaExceededException.class)
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
+        assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(0);
+    }
+
     /**
      * test a simple deployment by calling the
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
@@ -563,11 +684,11 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
-    @ExpectEvents({@Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 30), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = TargetUpdatedEvent.class, count = 20),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3)})
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     public void assignDistributionSet2Targets() {
 
         final String myCtrlIDPref = "myCtrlID";
@@ -617,7 +738,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
-    @ExpectEvents({@Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 10), @Expect(type = ActionCreatedEvent.class, count = 10),
             @Expect(type = TargetUpdatedEvent.class, count = 10),
@@ -650,14 +771,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Multiple deployments or distribution set to target assignment test. Expected behaviour is that a new deployment "
             + "overides unfinished old one which are canceled as part of the operation.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 5 + 4),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5 + 4),
             @Expect(type = TargetUpdatedEvent.class, count = 3 * 4),
             @Expect(type = ActionCreatedEvent.class, count = 3 * 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4 * 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 4 * 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2)})
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
     public void mutipleDeployments() throws InterruptedException {
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 5;
@@ -982,10 +1103,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget("knownControllerId");
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
-        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.SOFT,
-                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Collections.singletonList(target.getControllerId()));
+        final DistributionSetAssignmentResult assignDistributionSet = assignDistributionSet(ds.getId(),
+                target.getControllerId(), ActionType.SOFT);
         final Long actionId = getFirstAssignedActionId(assignDistributionSet);
         // verify preparation
         Action findAction = deploymentManagement.findAction(actionId).get();
@@ -1006,10 +1125,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget("knownControllerId");
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
-        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.FORCED,
-                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
-                Collections.singletonList(target.getControllerId()));
+        final DistributionSetAssignmentResult assignDistributionSet = assignDistributionSet(ds.getId(),
+                target.getControllerId(), ActionType.FORCED);
         final Long actionId = getFirstAssignedActionId(assignDistributionSet);
         // verify perparation
         Action findAction = deploymentManagement.findAction(actionId).get();
@@ -1023,23 +1140,22 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         findAction = deploymentManagement.findAction(actionId).get();
         assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
     }
-    
+
     @Test
     @Description("Tests the computation of already assigned entities returned as a result of an assignment")
     public void testAlreadyAssignedAndAssignedActionsInAssignmentResult(){
         // create target1, distributionSet, assign ds to target1 and finish update (close all actions)
         final Action action = prepareFinishedUpdate("target1", "ds", false);
-        final Target target2 = testdataFactory.createTarget("target2"); 
+        final Target target2 = testdataFactory.createTarget("target2");
         final Target target3 = testdataFactory.createTarget("target3");
 
         // assign ds to target2, but don't finish update (actions should be still open)
         assignDistributionSet(action.getDistributionSet().getId(), target2.getControllerId());
 
-        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(
                 action.getDistributionSet().getId(),
-                Arrays.asList(new TargetWithActionType(action.getTarget().getControllerId()),
-                        new TargetWithActionType(target3.getControllerId())));
-        
+                Arrays.asList(action.getTarget().getControllerId(), target3.getControllerId()), ActionType.FORCED);
+
         assertThat(assignmentResult).isNotNull();
         assertThat(assignmentResult.getTotal()).as("Total count of assigned and already assigned targets").isEqualTo(2);
         assertThat(assignmentResult.getAssigned()).as("Total count of assigned targets").isEqualTo(1);
@@ -1168,10 +1284,6 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             return undeployedTargetIDs;
         }
 
-    }
-
-    private void enableMultiAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
 }

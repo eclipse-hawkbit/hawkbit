@@ -19,11 +19,10 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -143,11 +142,11 @@ public class AutoAssignChecker {
 
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
                 Isolation.READ_COMMITTED.value(), status -> {
-                    final List<TargetWithActionType> targets = getTargetsWithActionType(targetFilterQuery.getQuery(),
-                            dsId, targetFilterQuery.getAutoAssignActionType(), PAGE_SIZE);
-                    final int count = targets.size();
+                    final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(
+                            targetFilterQuery.getQuery(), dsId, targetFilterQuery.getAutoAssignActionType(), PAGE_SIZE);
+                    final int count = deploymentRequests.size();
                     if (count > 0) {
-                        deploymentManagement.assignDistributionSet(dsId, targets, actionMessage);
+                        deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage);
                     }
                     return count;
                 });
@@ -168,7 +167,7 @@ public class AutoAssignChecker {
      *            maximum amount of targets to retrieve
      * @return list of targets with action type
      */
-    private List<TargetWithActionType> getTargetsWithActionType(final String targetFilterQuery, final Long dsId,
+    private List<DeploymentRequest> createAssignmentRequests(final String targetFilterQuery, final Long dsId,
             final ActionType type, final int count) {
         final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId,
                 targetFilterQuery);
@@ -176,8 +175,10 @@ public class AutoAssignChecker {
         // specified)
         final ActionType autoAssignActionType = type == null ? ActionType.FORCED : type;
 
-        return targets.getContent().stream().map(t -> new TargetWithActionType(t.getControllerId(),
-                autoAssignActionType, RepositoryModelConstants.NO_FORCE_TIME)).collect(Collectors.toList());
+        return targets.getContent().stream()
+                .map(t -> DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
+                        .setActionType(autoAssignActionType).build())
+                .collect(Collectors.toList());
     }
 
 }
