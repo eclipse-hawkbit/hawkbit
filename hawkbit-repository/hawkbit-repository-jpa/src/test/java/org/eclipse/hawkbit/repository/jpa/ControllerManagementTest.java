@@ -516,6 +516,20 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Register a controller with name which does not exist")
+    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 2)})
+    public void findOrRegisterTargetIfItDoesNotExistWithName() {
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName");
+        assertThat(target).as("target should not be null").isNotNull();
+
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName");
+        assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
+        assertThat(target.getName()).as("Taget names should be equal").isEqualTo(sameTarget.getName());
+        assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
+    }
+
+    @Test
     @Description("Tries to register a target with an invalid controller id")
     public void findOrRegisterTargetIfItDoesNotExistThrowsExceptionForInvalidControllerIdParam() {
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -537,6 +551,27 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Tries to register a target with an invalid controller id")
+    public void findOrRegisterTargetIfItDoesNotExistWithNameThrowsExceptionForInvalidControllerIdParam() {
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(null, LOCALHOST, "TestName"))
+                .as("register target with null as controllerId should fail");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("", LOCALHOST, "TestName"))
+                .as("register target with empty controllerId should fail");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(" ", LOCALHOST, "TestName"))
+                .as("register target with empty controllerId should fail");
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                        RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST, "TestName"))
+                .as("register target with too long controllerId should fail");
+    }
+
+    @Test
     @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the "
             + "exception is rethrown after max retries")
     public void findOrRegisterTargetIfItDoesNotExistThrowsExceptionAfterMaxRetries() {
@@ -546,6 +581,25 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         try {
             controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
+            fail("Expected an ConcurrencyFailureException to be thrown!");
+        } catch (final ConcurrencyFailureException e) {
+            verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
+        } finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
+    }
+
+    @Test
+    @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the "
+            + "exception is rethrown after max retries")
+    public void findOrRegisterTargetIfItDoesNotExistWithNameThrowsExceptionAfterMaxRetries() {
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        when(mockTargetRepository.findOne(any())).thenThrow(ConcurrencyFailureException.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        try {
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName");
             fail("Expected an ConcurrencyFailureException to be thrown!");
         } catch (final ConcurrencyFailureException e) {
             verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
@@ -583,6 +637,33 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the "
+            + "exception is not rethrown when the max retries are not yet reached")
+    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1)})
+    public void findOrRegisterTargetIfItDoesNotExistWithNameDoesNotThrowExceptionBeforeMaxRetries() {
+
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+        final Target target = testdataFactory.createTargetWithName("TestName");
+
+        when(mockTargetRepository.findOne(any())).thenThrow(ConcurrencyFailureException.class)
+                .thenThrow(ConcurrencyFailureException.class).thenReturn(Optional.of((JpaTarget) target));
+        when(mockTargetRepository.save(any())).thenReturn(target);
+
+        try {
+            final Target targetFromControllerManagement = controllerManagement
+                    .findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST, "TestName");
+            verify(mockTargetRepository, times(3)).findOne(any());
+            verify(mockTargetRepository, times(1)).save(any());
+            assertThat(target).isEqualTo(targetFromControllerManagement);
+        } finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
+    }
+
+    @Test
     @Description("Register a controller which does not exist, if a EntityAlreadyExistsException is raised, the "
             + "exception is rethrown and no further retries will be attempted")
     public void findOrRegisterTargetIfItDoesNotExistDoesntRetryWhenEntityAlreadyExistsException() {
@@ -606,6 +687,29 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Register a controller which does not exist, if a EntityAlreadyExistsException is raised, the "
+            + "exception is rethrown and no further retries will be attempted")
+    public void findOrRegisterTargetIfItDoesNotExistWithNameDoesntRetryWhenEntityAlreadyExistsException() {
+
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        when(mockTargetRepository.findOne(any())).thenReturn(Optional.empty());
+        when(mockTargetRepository.save(any())).thenThrow(EntityAlreadyExistsException.class);
+
+        try {
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST, "TestName");
+            fail("Expected an EntityAlreadyExistsException to be thrown!");
+        } catch (final EntityAlreadyExistsException e) {
+            verify(mockTargetRepository, times(1)).findOne(any());
+            verify(mockTargetRepository, times(1)).save(any());
+        } finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
+    }
+
+    @Test
     @Description("Retry is aborted when an unchecked exception is thrown and the exception should also be "
             + "rethrown")
     public void recoverFindOrRegisterTargetIfItDoesNotExistIsNotInvokedForOtherExceptions() {
@@ -617,6 +721,27 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         try {
             controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST);
+            fail("Expected a RuntimeException to be thrown!");
+        } catch (final RuntimeException e) {
+            verify(mockTargetRepository, times(1)).findOne(any());
+        } finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
+    }
+
+    @Test
+    @Description("Retry is aborted when an unchecked exception is thrown and the exception should also be "
+            + "rethrown")
+    public void recoverFindOrRegisterTargetIfItDoesNotExistWithNameIsNotInvokedForOtherExceptions() {
+
+        final TargetRepository mockTargetRepository = Mockito.mock(TargetRepository.class);
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
+
+        when(mockTargetRepository.findOne(any())).thenThrow(RuntimeException.class);
+
+        try {
+            controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST, "TestName");
             fail("Expected a RuntimeException to be thrown!");
         } catch (final RuntimeException e) {
             verify(mockTargetRepository, times(1)).findOne(any());
@@ -650,6 +775,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     public void targetPollEventNotSendIfDisabled() {
         repositoryProperties.setPublishTargetPollEvent(false);
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
+        repositoryProperties.setPublishTargetPollEvent(true);
+    }
+
+    @Test
+    @Description("Verify that controller registration does not result in a TargetPollEvent if feature is disabled")
+    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 0)})
+    public void targetPollEventNotSendIfDisabledWithName() {
+        repositoryProperties.setPublishTargetPollEvent(false);
+        controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName");
         repositoryProperties.setPublishTargetPollEvent(true);
     }
 

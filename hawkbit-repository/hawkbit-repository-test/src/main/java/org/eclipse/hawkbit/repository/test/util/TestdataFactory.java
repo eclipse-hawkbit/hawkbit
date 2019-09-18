@@ -630,6 +630,22 @@ public class TestdataFactory {
     }
 
     /**
+     * @param targetName
+     *            name of the target
+     * @return persisted {@link Target}
+     */
+    public Target createTargetWithName(final String targetName) {
+        final Target target = targetManagement.create(entityFactory.target().create().controllerId(DEFAULT_CONTROLLER_ID).name(targetName));
+        assertThat(target.getCreatedBy()).isNotNull();
+        assertThat(target.getCreatedAt()).isNotNull();
+        assertThat(target.getLastModifiedBy()).isNotNull();
+        assertThat(target.getLastModifiedAt()).isNotNull();
+
+        assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+        return target;
+    }
+
+    /**
      * Creates {@link DistributionSet}s in repository including three
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
      * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an
