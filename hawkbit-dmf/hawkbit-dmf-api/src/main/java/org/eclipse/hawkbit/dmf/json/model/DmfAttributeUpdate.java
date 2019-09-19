@@ -19,13 +19,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * JSON representation of the Attribute Update message.
  */
-@JsonInclude(Include.NON_NULL) @JsonIgnoreProperties(ignoreUnknown = true) public class DmfAttributeUpdate {
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DmfAttributeUpdate {
 
-    @JsonProperty private final Map<String, String> attributes = new HashMap<>();
+    @JsonProperty
+    private final Map<String, String> attributes = new HashMap<>();
 
-    @JsonProperty private DmfUpdateMode mode;
+    @JsonProperty
+    private DmfUpdateMode mode;
 
-    @JsonProperty private String name;
+    @JsonProperty
+    private String name;
 
     public DmfUpdateMode getMode() {
         return mode;

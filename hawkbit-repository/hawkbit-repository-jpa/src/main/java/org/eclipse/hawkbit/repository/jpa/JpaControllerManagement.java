@@ -107,38 +107,54 @@ import com.google.common.collect.Sets;
  * JPA based {@link ControllerManagement} implementation.
  *
  */
-@Transactional(readOnly = true) @Validated public class JpaControllerManagement implements ControllerManagement {
+@Transactional(readOnly = true)
+@Validated
+public class JpaControllerManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
-    @Autowired private EntityManager entityManager;
+    @Autowired
+    private EntityManager entityManager;
 
-    @Autowired private ActionRepository actionRepository;
+    @Autowired
+    private ActionRepository actionRepository;
 
-    @Autowired private TargetRepository targetRepository;
+    @Autowired
+    private TargetRepository targetRepository;
 
-    @Autowired private SoftwareModuleRepository softwareModuleRepository;
+    @Autowired
+    private SoftwareModuleRepository softwareModuleRepository;
 
-    @Autowired private ActionStatusRepository actionStatusRepository;
+    @Autowired
+    private ActionStatusRepository actionStatusRepository;
 
-    @Autowired private QuotaManagement quotaManagement;
+    @Autowired
+    private QuotaManagement quotaManagement;
 
-    @Autowired private TenantConfigurationManagement tenantConfigurationManagement;
+    @Autowired
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
-    @Autowired private SystemSecurityContext systemSecurityContext;
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
 
-    @Autowired private EntityFactory entityFactory;
+    @Autowired
+    private EntityFactory entityFactory;
 
-    @Autowired private EventPublisherHolder eventPublisherHolder;
+    @Autowired
+    private EventPublisherHolder eventPublisherHolder;
 
-    @Autowired private AfterTransactionCommitExecutor afterCommit;
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
-    @Autowired private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
+    @Autowired
+    private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
 
-    @Autowired private PlatformTransactionManager txManager;
+    @Autowired
+    private PlatformTransactionManager txManager;
 
-    @Autowired private TenantAware tenantAware;
+    @Autowired
+    private TenantAware tenantAware;
 
     private final RepositoryProperties repositoryProperties;
 
@@ -146,9 +162,9 @@ import com.google.common.collect.Sets;
             final RepositoryProperties repositoryProperties) {
 
         if (!repositoryProperties.isEagerPollPersistence()) {
-            executorService
-                    .scheduleWithFixedDelay(this::flushUpdateQueue, repositoryProperties.getPollPersistenceFlushTime(),
-                            repositoryProperties.getPollPersistenceFlushTime(), TimeUnit.MILLISECONDS);
+            executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
+                    repositoryProperties.getPollPersistenceFlushTime(),
+                    repositoryProperties.getPollPersistenceFlushTime(), TimeUnit.MILLISECONDS);
 
             queue = new LinkedBlockingDeque<>(repositoryProperties.getPollPersistenceQueueSize());
         } else {
@@ -158,7 +174,8 @@ import com.google.common.collect.Sets;
         this.repositoryProperties = repositoryProperties;
     }
 
-    @Override public String getPollingTime() {
+    @Override
+    public String getPollingTime() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
     }
@@ -168,7 +185,8 @@ import com.google.common.collect.Sets;
      *
      * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
      */
-    @Override public String getMinPollingTime() {
+    @Override
+    public String getMinPollingTime() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL, String.class).getValue());
     }
@@ -180,12 +198,14 @@ import com.google.common.collect.Sets;
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
      */
-    @Override public int getMaintenanceWindowPollCount() {
+    @Override
+    public int getMaintenanceWindowPollCount() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
     }
 
-    @Override public String getPollingTimeForAction(final long actionId) {
+    @Override
+    public String getPollingTimeForAction(final long actionId) {
 
         final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
 
@@ -218,11 +238,11 @@ import com.google.common.collect.Sets;
          * Constructor.
          *
          * @param defaultEventInterval
-         *            default timer value to use for interval between events.
-         *            This puts an upper bound for the timer value
+         *            default timer value to use for interval between events. This puts
+         *            an upper bound for the timer value
          * @param minimumEventInterval
-         *            for loading {@link DistributionSet#getModules()}. This
-         *            puts a lower bound to the timer value
+         *            for loading {@link DistributionSet#getModules()}. This puts a
+         *            lower bound to the timer value
          * @param timerUnit
          *            representing the unit of time to be used for timer.
          */
@@ -237,16 +257,15 @@ import com.google.common.collect.Sets;
         }
 
         /**
-         * This method calculates the time interval until the next event based
-         * on the desired number of events before the time when interval is
-         * reset to default. The return value is bounded by
-         * {@link EventTimer#defaultEventInterval} and
+         * This method calculates the time interval until the next event based on the
+         * desired number of events before the time when interval is reset to default.
+         * The return value is bounded by {@link EventTimer#defaultEventInterval} and
          * {@link EventTimer#minimumEventInterval}.
          *
          * @param eventCount
-         *            number of events desired until the interval is reset to
-         *            default. This is not guaranteed as the interval between
-         *            events cannot be less than the minimum interval
+         *            number of events desired until the interval is reset to default.
+         *            This is not guaranteed as the interval between events cannot be
+         *            less than the minimum interval
          * @param timerResetTime
          *            time when exponential forwarding should reset to default
          *
@@ -280,7 +299,8 @@ import com.google.common.collect.Sets;
         }
     }
 
-    @Override public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
+    @Override
+    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
@@ -312,44 +332,52 @@ import com.google.common.collect.Sets;
         }
     }
 
-    @Override public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
+    @Override
+    public boolean hasTargetArtifactAssigned(final String controllerId, final String sha1Hash) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(controllerId, sha1Hash)) > 0;
     }
 
-    @Override public boolean hasTargetArtifactAssigned(final long targetId, final String sha1Hash) {
+    @Override
+    public boolean hasTargetArtifactAssigned(final long targetId, final String sha1Hash) {
         throwExceptionIfTargetDoesNotExist(targetId);
         return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(targetId, sha1Hash)) > 0;
     }
 
-    @Override public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
+    @Override
+    public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
         if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
             return Optional.empty();
         }
 
         // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
         // DATAJPA-841 issue.
-        return actionRepository
-                .findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId, true);
+        return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
+                true);
     }
 
-    @Override public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+    @Override
+    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
         if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
             return Page.empty();
         }
         return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
     }
 
-    @Override public Optional<Action> findActionWithDetails(final long actionId) {
+    @Override
+    public Optional<Action> findActionWithDetails(final long actionId) {
         return actionRepository.getById(actionId);
     }
 
-    @Override public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
+    @Override
+    public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
         return actionRepository.findByExternalRefInAndActive(externalRefs, true);
     }
 
-    @Override @Transactional(isolation = Isolation.READ_COMMITTED) @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Target findOrRegisterTargetIfItDoesNotExist(
-            final String controllerId, final URI address) {
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
@@ -357,8 +385,10 @@ import com.google.common.collect.Sets;
                 .orElseGet(() -> createTarget(controllerId, address));
     }
 
-    @Override @Transactional(isolation = Isolation.READ_COMMITTED) @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Target findOrRegisterTargetIfItDoesNotExist(
-            final String controllerId, final URI address, String name) {
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, String name) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
@@ -375,11 +405,10 @@ import com.google.common.collect.Sets;
     }
 
     private Target createTarget(final String controllerId, final URI address) {
-        final Target result = targetRepository
-                .save((JpaTarget) entityFactory.target().create().controllerId(controllerId)
-                        .description("Plug and Play target: " + controllerId).name(controllerId)
-                        .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                        .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
@@ -389,11 +418,10 @@ import com.google.common.collect.Sets;
 
     private Target createTarget(final String controllerId, final URI address, final String name) {
 
-        final Target result = targetRepository
-                .save((JpaTarget) entityFactory.target().create().controllerId(controllerId)
-                        .description("Plug and Play target: " + controllerId).name(name)
-                        .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                        .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
@@ -439,9 +467,9 @@ import com.google.common.collect.Sets;
     private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
         LOG.debug("Persist {} targetqueries.", polls.size());
 
-        final List<List<String>> pollChunks = Lists
-                .partition(polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
-                        Constants.MAX_ENTRIES_IN_STATEMENT);
+        final List<List<String>> pollChunks = Lists.partition(
+                polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
+                Constants.MAX_ENTRIES_IN_STATEMENT);
 
         pollChunks.forEach(chunk -> {
             setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
@@ -454,9 +482,8 @@ import com.google.common.collect.Sets;
 
     /**
      * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
-     * raising opt lock revision as this update is not mission critical and in
-     * fact only written by {@link ControllerManagement}, i.e. the target
-     * itself.
+     * raising opt lock revision as this update is not mission critical and in fact
+     * only written by {@link ControllerManagement}, i.e. the target itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
         final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
@@ -484,8 +511,8 @@ import com.google.common.collect.Sets;
     }
 
     /**
-     * Stores target directly to DB in case either {@link Target#getAddress()}
-     * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * Stores target directly to DB in case either {@link Target#getAddress()} or
+     * {@link Target#getUpdateStatus()} changes or the buffer queue is full.
      *
      */
     private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
@@ -519,9 +546,11 @@ import com.google.common.collect.Sets;
         }
     }
 
-    @Override @Transactional(isolation = Isolation.READ_COMMITTED) @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Action addCancelActionStatus(
-            final ActionStatusCreate c) {
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
@@ -568,9 +597,11 @@ import com.google.common.collect.Sets;
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
     }
 
-    @Override @Transactional(isolation = Isolation.READ_COMMITTED) @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Action addUpdateActionStatus(
-            final ActionStatusCreate c) {
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action addUpdateActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus actionStatus = create.build();
@@ -588,16 +619,16 @@ import com.google.common.collect.Sets;
      * ActionStatus updates are allowed mainly if the action is active. If the
      * action is not active we accept further status updates if permitted so by
      * repository configuration. In this case, only the values: Status.ERROR and
-     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we
-     * accept status updates only once.
+     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we accept
+     * status updates only once.
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
-        final boolean isIntermediateFeedback =
-                (FINISHED != actionStatus.getStatus()) && (Status.ERROR != actionStatus.getStatus());
+        final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
+                && (Status.ERROR != actionStatus.getStatus());
 
-        final boolean isAllowedByRepositoryConfiguration =
-                !repositoryProperties.isRejectActionStatusForClosedAction() && isIntermediateFeedback;
+        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
+                && isIntermediateFeedback;
 
         final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
 
@@ -667,8 +698,8 @@ import com.google.common.collect.Sets;
 
         target.setRequestControllerAttributes(true);
 
-        eventPublisherHolder.getEventPublisher().publishEvent(
-                new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
                         target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
                         JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()));
     }
@@ -705,8 +736,8 @@ import com.google.common.collect.Sets;
 
         // check if the assigned set is equal to the installed set (not
         // necessarily the case as another update might be pending already).
-        if (target.getAssignedDistributionSet() != null && target.getAssignedDistributionSet().getId()
-                .equals(target.getInstalledDistributionSet().getId())) {
+        if (target.getAssignedDistributionSet() != null
+                && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         }
 
@@ -716,13 +747,16 @@ import com.google.common.collect.Sets;
         return target.getControllerId();
     }
 
-    @Override @Transactional @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Target updateControllerAttributes(
-            final String controllerId, final Map<String, String> data, final UpdateMode mode) {
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
+            final UpdateMode mode) {
 
         /*
-         * Constraints on attribute keys & values are not validated by
-         * EclipseLink. Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by EclipseLink.
+         * Hence, they are validated here.
          */
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
@@ -759,9 +793,11 @@ import com.google.common.collect.Sets;
         return targetRepository.save(target);
     }
 
-    @Override @Transactional @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Target updateControllerName(
-            final String controllerId, final String controllerName) {
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target updateControllerName(final String controllerId, final String controllerName) {
 
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
@@ -804,15 +840,17 @@ import com.google.common.collect.Sets;
                 Target.class.getSimpleName(), null);
     }
 
-    @Override @Transactional @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public Action registerRetrieved(
-            final long actionId, final String message) {
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action registerRetrieved(final long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
     }
 
     /**
-     * Registers retrieved status for given {@link Target} and {@link Action} if
-     * it does not exist yet.
+     * Registers retrieved status for given {@link Target} and {@link Action} if it
+     * does not exist yet.
      *
      * @param actionId
      *            to the handle status for
@@ -863,9 +901,11 @@ import com.google.common.collect.Sets;
         return action;
     }
 
-    @Override @Transactional @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY)) public ActionStatus addInformationalActionStatus(
-            final ActionStatusCreate c) {
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
         final JpaActionStatus statusMessage = create.build();
@@ -882,15 +922,18 @@ import com.google.common.collect.Sets;
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
-    @Override public Optional<Target> getByControllerId(final String controllerId) {
+    @Override
+    public Optional<Target> getByControllerId(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
-    @Override public Optional<Target> get(final long targetId) {
+    @Override
+    public Optional<Target> get(final long targetId) {
         return targetRepository.findById(targetId).map(t -> (Target) t);
     }
 
-    @Override public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
+    @Override
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
         if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
@@ -898,7 +941,8 @@ import com.google.common.collect.Sets;
         return actionStatusRepository.findByActionId(pageReq, actionId);
     }
 
-    @Override public List<String> getActionHistoryMessages(final long actionId, final int messageCount) {
+    @Override
+    public List<String> getActionHistoryMessages(final long actionId, final int messageCount) {
         // Just return empty list in case messageCount is zero.
         if (messageCount == 0) {
             return Collections.emptyList();
@@ -906,9 +950,9 @@ import com.google.common.collect.Sets;
 
         // For negative and large value of messageCount, limit the number of
         // messages.
-        final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT ?
-                RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT :
-                messageCount;
+        final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+                ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
+                : messageCount;
 
         final PageRequest pageable = PageRequest.of(0, limit, new Sort(Direction.DESC, "occurredAt"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
@@ -920,16 +964,19 @@ import com.google.common.collect.Sets;
         return messages.getContent();
     }
 
-    @Override public Optional<SoftwareModule> getSoftwareModule(final long id) {
+    @Override
+    public Optional<SoftwareModule> getSoftwareModule(final long id) {
         return softwareModuleRepository.findById(id).map(s -> (SoftwareModule) s);
     }
 
-    @Override public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
+    @Override
+    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
             final Collection<Long> moduleId) {
 
         return softwareModuleMetadataRepository
                 .findBySoftwareModuleIdInAndTargetVisible(PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT),
-                        moduleId, true).getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
+                        moduleId, true)
+                .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
                         Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
 
@@ -951,7 +998,8 @@ import com.google.common.collect.Sets;
             return controllerId;
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + (controllerId == null ? 0 : controllerId.hashCode());
@@ -959,7 +1007,8 @@ import com.google.common.collect.Sets;
             return result;
         }
 
-        @Override public boolean equals(final Object obj) {
+        @Override
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -991,10 +1040,10 @@ import com.google.common.collect.Sets;
 
     /**
      * Cancels given {@link Action} for this {@link Target}. The method will
-     * immediately add a {@link Status#CANCELED} status to the action. However,
-     * it might be possible that the controller will continue to work on the
-     * cancelation. The controller needs to acknowledge or reject the
-     * cancelation using {@link DdiRootController#postCancelActionFeedback}.
+     * immediately add a {@link Status#CANCELED} status to the action. However, it
+     * might be possible that the controller will continue to work on the
+     * cancelation. The controller needs to acknowledge or reject the cancelation
+     * using {@link DdiRootController#postCancelActionFeedback}.
      *
      * @param actionId
      *            to be canceled
@@ -1006,8 +1055,10 @@ import com.google.common.collect.Sets;
      * @throws EntityNotFoundException
      *             if action with given actionId does not exist.
      */
-    @Override @Modifying @Transactional(isolation = Isolation.READ_COMMITTED) public Action cancelAction(
-            final long actionId) {
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Action cancelAction(final long actionId) {
         LOG.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
@@ -1034,7 +1085,8 @@ import com.google.common.collect.Sets;
         }
     }
 
-    @Override public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
+    @Override
+    public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
         actionRepository.updateExternalRef(actionId, externalRef);
     }
 
