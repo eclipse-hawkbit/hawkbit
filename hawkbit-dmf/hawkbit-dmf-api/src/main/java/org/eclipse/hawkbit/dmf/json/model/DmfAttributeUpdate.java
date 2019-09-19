@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,18 +19,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * JSON representation of the Attribute Update message.
  */
-@JsonInclude(Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class DmfAttributeUpdate {
+@JsonInclude(Include.NON_NULL) @JsonIgnoreProperties(ignoreUnknown = true) public class DmfAttributeUpdate {
 
-    @JsonProperty
-    private final Map<String, String> attributes = new HashMap<>();
+    @JsonProperty private final Map<String, String> attributes = new HashMap<>();
 
-    @JsonProperty
-    private DmfUpdateMode mode;
+    @JsonProperty private DmfUpdateMode mode;
 
-    @JsonProperty
-    private String name;
+    @JsonProperty private String name;
 
     public DmfUpdateMode getMode() {
         return mode;

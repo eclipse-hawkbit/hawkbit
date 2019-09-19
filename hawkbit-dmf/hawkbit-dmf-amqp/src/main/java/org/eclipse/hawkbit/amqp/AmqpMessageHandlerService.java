@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,11 +63,9 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.util.StringUtils;
 
 /**
- *
  * {@link AmqpMessageHandlerService} handles all incoming target interaction
  * AMQP messages (e.g. create target, check for updates etc.) for the queue
  * which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
- *
  */
 public class AmqpMessageHandlerService extends BaseAmqpService {
 
@@ -85,19 +83,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     /**
      * Constructor.
-     * 
-     * @param rabbitTemplate
-     *            for converting messages
-     * @param amqpMessageDispatcherService
-     *            to sending events to DMF client
-     * @param controllerManagement
-     *            for target repo access
-     * @param entityFactory
-     *            to create entities
-     * @param systemSecurityContext
-     *            the system Security Context
-     * @param tenantConfigurationManagement
-     *            the tenant configuration Management
+     *
+     * @param rabbitTemplate                for converting messages
+     * @param amqpMessageDispatcherService  to sending events to DMF client
+     * @param controllerManagement          for target repo access
+     * @param entityFactory                 to create entities
+     * @param systemSecurityContext         the system Security Context
+     * @param tenantConfigurationManagement the tenant configuration Management
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
@@ -115,33 +107,24 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to handle all incoming DMF amqp messages.
      *
-     * @param message
-     *            incoming message
-     * @param type
-     *            the message type
-     * @param tenant
-     *            the contentType of the message
-     * 
+     * @param message incoming message
+     * @param type    the message type
+     * @param tenant  the contentType of the message
      * @return a message if <null> no message is send back to sender
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message,
-            @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory") public Message onMessage(
+            final Message message, @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
             @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
     /**
      * * Executed if a amqp message arrives.
-     * 
-     * @param message
-     *            the message
-     * @param type
-     *            the type
-     * @param tenant
-     *            the tenant
-     * @param virtualHost
-     *            the virtual host
+     *
+     * @param message     the message
+     * @param type        the type
+     * @param tenant      the tenant
+     * @param virtualHost the virtual host
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
@@ -153,21 +136,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         try {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
-                case THING_CREATED :
-                    handleThingCreatedRequest(message, tenant, virtualHost);
-                    break;
-                case EVENT :
-                    checkContentTypeJson(message);
-                    setTenantSecurityContext(tenant);
-                    handleIncomingEvent(message);
-                    break;
-                case PING :
-                    if (isCorrelationIdNotEmpty(message)) {
-                        amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
-                    }
-                    break;
-                default :
-                    logAndThrowMessageError(message, "No handle method was found for the given message type.");
+            case THING_CREATED:
+                handleThingCreatedRequest(message, tenant, virtualHost);
+                break;
+            case EVENT:
+                checkContentTypeJson(message);
+                setTenantSecurityContext(tenant);
+                handleIncomingEvent(message);
+                break;
+            case PING:
+                if (isCorrelationIdNotEmpty(message)) {
+                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
+                }
+                break;
+            default:
+                logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
@@ -194,8 +177,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to register a new target.
      *
-     * @param message
-     *            the message that contains the target/thing
+     * @param message     the message that contains the target/thing
      * @param virtualHost
      */
     private void registerTarget(final Message message, final String virtualHost) {
@@ -219,13 +201,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to register a new target.
      *
-     * @param message
-     *            the message that contains the target/thing
-     * @param virtualHost
-     *            the virtualHost of the target/thing
-     * @param name
-     *            the name of the target/thing, can be null and would then be
-     *            replaced by targetId
+     * @param message     the message that contains the target/thing
+     * @param virtualHost the virtualHost of the target/thing
+     * @param name        the name of the target/thing, can be null and would then be
+     *                    replaced by targetId
      */
     private void registerTarget(final Message message, final String virtualHost, final String name) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
@@ -276,8 +255,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
-                    action.getId(), target.getAddress());
+            amqpMessageDispatcherService
+                    .sendCancelMessageToTarget(target.getTenant(), target.getControllerId(), action.getId(),
+                            target.getAddress());
         } else {
             amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
                     getSoftwareModulesWithMetadata(action.getDistributionSet()));
@@ -300,22 +280,20 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to handle the different topics to an event.
      *
-     * @param message
-     *            the incoming event message.
-     * @param topic
-     *            the topic of the event.
+     * @param message the incoming event message.
+     * @param topic   the topic of the event.
      */
     private void handleIncomingEvent(final Message message) {
         switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
-            case UPDATE_ACTION_STATUS :
-                updateActionStatus(message);
-                break;
-            case UPDATE_ATTRIBUTES :
-                updateAttributes(message);
-                break;
-            default :
-                logAndThrowMessageError(message, "Got event without appropriate topic.");
-                break;
+        case UPDATE_ACTION_STATUS:
+            updateActionStatus(message);
+            break;
+        case UPDATE_ATTRIBUTES:
+            updateAttributes(message);
+            break;
+        default:
+            logAndThrowMessageError(message, "Got event without appropriate topic.");
+            break;
         }
 
     }
@@ -324,20 +302,19 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
 
-        //If new name provided in body, then change the name
+        // If new name provided in body, then change the name
         if (attributeUpdate.getName() != null && attributeUpdate.getName().length() != 0) {
             controllerManagement.updateControllerName(thingId, attributeUpdate.getName());
         }
 
-        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
-                getUpdateMode(attributeUpdate));
+        controllerManagement
+                .updateControllerAttributes(thingId, attributeUpdate.getAttributes(), getUpdateMode(attributeUpdate));
     }
 
     /**
      * Method to update the action status of an action through the event.
      *
-     * @param actionUpdateStatus
-     *            the object form the ampq message
+     * @param actionUpdateStatus the object form the ampq message
      */
     private void updateActionStatus(final Message message) {
         final DmfActionUpdateStatus actionUpdateStatus = convertMessage(message, DmfActionUpdateStatus.class);
@@ -346,17 +323,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<String> messages = actionUpdateStatus.getMessage();
 
         if (isCorrelationIdNotEmpty(message)) {
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + message.getMessageProperties().getCorrelationId());
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id " + message
+                    .getMessageProperties().getCorrelationId());
         }
 
         final Status status = mapStatus(message, actionUpdateStatus, action);
         final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
                 .messages(messages);
 
-        final Action updatedAction = (Status.CANCELED == status)
-                ? controllerManagement.addCancelActionStatus(actionStatus)
-                : controllerManagement.addUpdateActionStatus(actionStatus);
+        final Action updatedAction = (Status.CANCELED == status) ?
+                controllerManagement.addCancelActionStatus(actionStatus) :
+                controllerManagement.addUpdateActionStatus(actionStatus);
 
         if (shouldTargetProceed(updatedAction)) {
             sendUpdateCommandToTarget(action.getTarget());
@@ -373,40 +350,39 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
     // mapping
-    @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
-            final Action action) {
+    @SuppressWarnings("squid:MethodCyclomaticComplexity") private static Status mapStatus(final Message message,
+            final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
-            case DOWNLOAD :
-                status = Status.DOWNLOAD;
-                break;
-            case RETRIEVED :
-                status = Status.RETRIEVED;
-                break;
-            case RUNNING :
-                status = Status.RUNNING;
-                break;
-            case CANCELED :
-                status = Status.CANCELED;
-                break;
-            case FINISHED :
-                status = Status.FINISHED;
-                break;
-            case ERROR :
-                status = Status.ERROR;
-                break;
-            case WARNING :
-                status = Status.WARNING;
-                break;
-            case DOWNLOADED :
-                status = Status.DOWNLOADED;
-                break;
-            case CANCEL_REJECTED :
-                status = handleCancelRejectedState(message, action);
-                break;
-            default :
-                logAndThrowMessageError(message, "Status for action does not exisit.");
+        case DOWNLOAD:
+            status = Status.DOWNLOAD;
+            break;
+        case RETRIEVED:
+            status = Status.RETRIEVED;
+            break;
+        case RUNNING:
+            status = Status.RUNNING;
+            break;
+        case CANCELED:
+            status = Status.CANCELED;
+            break;
+        case FINISHED:
+            status = Status.FINISHED;
+            break;
+        case ERROR:
+            status = Status.ERROR;
+            break;
+        case WARNING:
+            status = Status.WARNING;
+            break;
+        case DOWNLOADED:
+            status = Status.DOWNLOADED;
+            break;
+        case CANCEL_REJECTED:
+            status = handleCancelRejectedState(message, action);
+            break;
+        default:
+            logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
         return status;
@@ -423,8 +399,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
     // get will not be called
-    @SuppressWarnings("squid:S3655")
-    private Action checkActionExist(final Message message, final DmfActionUpdateStatus actionUpdateStatus) {
+    @SuppressWarnings("squid:S3655") private Action checkActionExist(final Message message,
+            final DmfActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
 
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
