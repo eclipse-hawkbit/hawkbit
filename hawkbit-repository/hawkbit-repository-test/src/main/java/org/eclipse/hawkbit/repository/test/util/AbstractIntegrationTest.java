@@ -234,24 +234,31 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
+            final Integer weight) {
+        return assignDistributionSet(dsID, Collections.singletonList(controllerId), ActionType.FORCED,
+                RepositoryModelConstants.NO_FORCE_TIME, weight);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType) {
         return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType, final long forcedTime) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime);
+        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType) {
-        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME);
+        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
-            final ActionType actionType, final long forcedTime) {
-        final List<DeploymentRequest> deploymentRequests = controllerIds.stream().map(id -> DeploymentManagement
-                .deploymentRequest(id, dsID).setActionType(actionType).setForceTime(forcedTime).build())
+            final ActionType actionType, final long forcedTime, final Integer weight) {
+        final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
+                .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
+                        .setForceTime(forcedTime).setWeight(weight).build())
                 .collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> results = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
@@ -263,6 +270,13 @@ public abstract class AbstractIntegrationTest {
             final List<Target> targets) {
         final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
         return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
+            final List<Target> targets, final Integer weight) {
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
+        return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
+                weight);
     }
 
     private DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
@@ -320,6 +334,14 @@ public abstract class AbstractIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
                 .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build())));
+        return deploymentRequests;
+    }
+
+    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
+            final Collection<Target> targets, final Integer weight) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests.add(DeploymentManagement
+                .deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight).build())));
         return deploymentRequests;
     }
 

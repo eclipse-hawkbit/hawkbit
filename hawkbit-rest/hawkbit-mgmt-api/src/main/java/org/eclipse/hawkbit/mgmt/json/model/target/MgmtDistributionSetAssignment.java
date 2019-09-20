@@ -52,7 +52,7 @@ public class MgmtDistributionSetAssignment extends MgmtId {
         return weight;
     }
 
-    public void setWeight(final Integer weight) {
+    public void setWeight(final int weight) {
         this.weight = weight;
     }
 

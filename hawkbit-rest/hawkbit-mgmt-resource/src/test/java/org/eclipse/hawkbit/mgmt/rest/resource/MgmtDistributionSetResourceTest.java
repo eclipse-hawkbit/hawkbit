@@ -1247,8 +1247,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of " +
-            "DOWNLOAD_ONLY.")
+    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of "
+            + "DOWNLOAD_ONLY.")
     public void assignMultipleTargetsToDistributionSetAsDownloadOnly() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
@@ -1263,8 +1263,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
-                .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
@@ -1272,7 +1272,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
-        @Test
+    @Test
     @Description("A request for assigning a target multiple times results in a Bad Request when multiassignment is disabled.")
     public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
@@ -1320,8 +1320,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(body.length())));
     }
-
-
 
     public static JSONObject getAssignmentObject(final String targetId, final MgmtActionType type)
             throws JSONException {

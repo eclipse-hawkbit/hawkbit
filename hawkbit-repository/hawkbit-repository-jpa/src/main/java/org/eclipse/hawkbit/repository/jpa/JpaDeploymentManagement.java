@@ -194,6 +194,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        if (isMultiAssignmentsEnabled()) {
+            validateWeightForMultiAssignment(deploymentRequests);
+        }
+
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -230,6 +234,18 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         final long distinctTargetsInRequest = deploymentRequests.stream()
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         if (distinctTargetsInRequest < deploymentRequests.size()) {
+            throw new MultiAssignmentIsNotEnabledException();
+        }
+    }
+
+    private static void validateWeightForMultiAssignment(final List<DeploymentRequest> deploymentRequests) {
+        final List<TargetWithActionType> targetsWithActionType = deploymentRequests.stream()
+                .map(DeploymentRequest::getTargetWithActionType).collect(Collectors.toList());
+        final List<Integer> weights = targetsWithActionType.stream().map(TargetWithActionType::getWeight)
+                .collect(Collectors.toList());
+        if (weights.contains(null)) {
+            // TODO : update this exception with a reliable Spring level or if
+            // not then new exception
             throw new MultiAssignmentIsNotEnabledException();
         }
     }
@@ -275,8 +291,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct()
-                .collect(Collectors.toList());
+        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+                .distinct().collect(Collectors.toList());
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
                 distributionSetEntity.getId());

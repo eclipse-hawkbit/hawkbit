@@ -38,7 +38,7 @@ public final class MgmtDeploymentRequestMapper {
             final String targetId) {
 
         return createAssignmentRequest(targetId, dsAssignment.getId(), dsAssignment.getType(),
-                dsAssignment.getForcetime(),dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow());
+                dsAssignment.getForcetime(), dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow());
     }
 
     /**
@@ -54,11 +54,12 @@ public final class MgmtDeploymentRequestMapper {
             final Long dsId) {
 
         return createAssignmentRequest(targetAssignment.getId(), dsId, targetAssignment.getType(),
-                targetAssignment.getForcetime(), targetAssignment.getWeight(),targetAssignment.getMaintenanceWindow());
+                targetAssignment.getForcetime(), targetAssignment.getWeight(), targetAssignment.getMaintenanceWindow());
     }
 
     private static DeploymentRequest createAssignmentRequest(final String targetId, final Long dsId,
-            final MgmtActionType type, final long forcetime, final Integer weight, final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
+            final MgmtActionType type, final long forcetime, final Integer weight,
+            final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(targetId, dsId)
                 .setActionType(MgmtRestModelMapper.convertActionType(type)).setForceTime(forcetime).setWeight(weight);
         if (maintenanceWindow != null) {
@@ -70,5 +71,4 @@ public final class MgmtDeploymentRequestMapper {
         }
         return request.build();
     }
-
 }

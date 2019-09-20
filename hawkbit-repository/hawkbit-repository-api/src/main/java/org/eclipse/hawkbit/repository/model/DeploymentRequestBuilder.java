@@ -70,7 +70,7 @@ public class DeploymentRequestBuilder {
      *            the priority given to the action.
      * @return builder
      */
-    public DeploymentRequestBuilder setWeight(final int weight) {
+    public DeploymentRequestBuilder setWeight(final Integer weight) {
         this.weight = weight;
         return this;
     }
