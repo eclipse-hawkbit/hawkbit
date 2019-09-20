@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- * <p>
+ * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -290,7 +290,7 @@ public class TestdataFactory {
     /**
      * Adds {@link SoftwareModuleMetadata} to every module of given
      * {@link DistributionSet}.
-     * <p>
+     * 
      * {@link #VISIBLE_SM_MD_VALUE}, {@link #VISIBLE_SM_MD_KEY} with
      * {@link SoftwareModuleMetadata#isTargetVisible()} and
      * {@link #INVISIBLE_SM_MD_KEY}, {@link #INVISIBLE_SM_MD_VALUE} without
@@ -619,7 +619,7 @@ public class TestdataFactory {
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative
      * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
-     * <p>
+     * 
      * In addition it updates the created {@link DistributionSet}s and
      * {@link SoftwareModule}s to ensure that {@link BaseEntity#getLastModifiedAt()}
      * and {@link BaseEntity#getLastModifiedBy()} is filled.
