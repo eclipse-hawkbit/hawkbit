@@ -13,12 +13,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -30,20 +25,11 @@ import org.eclipse.hawkbit.dmf.json.model.DmfTargetProperties;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.UpdateMode;
+import org.eclipse.hawkbit.repository.*;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -80,6 +66,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
     private final SystemSecurityContext systemSecurityContext;
+
+    private static final String THING_ID_NULL = "ThingId is null";
 
     /**
      * Constructor.
@@ -196,7 +184,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param virtualHost
      */
     private void registerTarget(final Message message, final String virtualHost) {
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
@@ -208,7 +196,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
-        } catch (EntityAlreadyExistsException e) {
+        } catch (final EntityAlreadyExistsException e) {
             throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
         }
     }
@@ -225,7 +213,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            replaced by targetId
      */
     private void registerTarget(final Message message, final String virtualHost, final String name) {
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
@@ -237,7 +225,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
-        } catch (EntityAlreadyExistsException e) {
+        } catch (final EntityAlreadyExistsException e) {
             throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
         }
     }
@@ -319,7 +307,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         // If new name provided in body, then change the name
         if (attributeUpdate.getName() != null && attributeUpdate.getName().length() != 0) {
@@ -456,7 +444,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
-    private void handleThingCreatedRequest(Message message, String tenant, String virtualHost) {
+    private void handleThingCreatedRequest(final Message message, final String tenant, final String virtualHost) {
         if (message.toString().contains("name")) {
             handleNameContainedRequest(message, tenant, virtualHost);
         } else {
@@ -464,7 +452,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void handleNameContainedRequest(Message message, String tenant, String virtualHost) {
+    private void handleNameContainedRequest(final Message message, final String tenant, final String virtualHost) {
         // If name never reassigned, so still null, then per default:
         // targetName = targetId
         String name = null;
@@ -484,7 +472,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void handleNoNameContainedRequest(Message message, String tenant, String virtualHost) {
+    private void handleNoNameContainedRequest(final Message message, final String tenant, final String virtualHost) {
         setTenantSecurityContext(tenant);
         registerTarget(message, virtualHost);
     }
