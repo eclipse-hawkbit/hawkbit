@@ -206,7 +206,7 @@ public final class MgmtTargetMapper {
         if (ActionType.TIMEFORCED == action.getActionType()) {
             result.setForceTime(action.getForcedTime());
         }
-        result.setWeight(action.getWeight());
+        action.getWeight().ifPresent(result::setWeight);
         result.setActionType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
         if (action.isActive()) {

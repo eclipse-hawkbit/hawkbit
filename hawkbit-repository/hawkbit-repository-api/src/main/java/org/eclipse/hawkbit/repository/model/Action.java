@@ -87,7 +87,7 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * @return priority of the {@link Action}.
      */
-    Integer getWeight();
+    Optional<Integer> getWeight();
 
     /**
      * @return rolloutGroup related to this {@link Action}.

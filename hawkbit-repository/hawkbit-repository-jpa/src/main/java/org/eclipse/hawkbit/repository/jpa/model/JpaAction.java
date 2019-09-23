@@ -198,8 +198,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public Integer getWeight() {
-        return weight;
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
     }
 
     public void setWeight(final Integer weight) {
