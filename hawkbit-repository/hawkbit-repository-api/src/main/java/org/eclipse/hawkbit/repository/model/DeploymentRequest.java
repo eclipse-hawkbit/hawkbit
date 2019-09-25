@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Objects;
 
+import javax.validation.Valid;
+
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
@@ -19,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  */
 public class DeploymentRequest {
     private final Long distributionSetId;
+    @Valid
     private final TargetWithActionType targetWithActionType;
 
     /**

@@ -271,10 +271,9 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
-            final List<Target> targets, final int weight) {
-        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
-        return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
+    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsId, final List<String> targetIds,
+            final int weight) {
+        return assignDistributionSet(dsId, targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
                 weight);
     }
 
@@ -332,9 +331,9 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(pset, Arrays.asList(target));
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target,
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String targetId,
             final int weight) {
-        return assignDistributionSet(pset, Collections.singletonList(target), weight);
+        return assignDistributionSet(dsId, Collections.singletonList(targetId), weight);
     }
 
     protected void enableMultiAssignments() {

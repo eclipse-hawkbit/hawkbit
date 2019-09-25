@@ -658,8 +658,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1, target, DEFAULT_TEST_WEIGHT));
-        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2, target, DEFAULT_TEST_WEIGHT));
+        final Action action1 = getFirstAssignedAction(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), DEFAULT_TEST_WEIGHT));
+        final Long action2Id = getFirstAssignedActionId(
+                assignDistributionSet(ds2.getId(), target.getControllerId(), DEFAULT_TEST_WEIGHT));
 
         assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
         sendDeploymentActionFeedback(target, action1, "closed", "success");

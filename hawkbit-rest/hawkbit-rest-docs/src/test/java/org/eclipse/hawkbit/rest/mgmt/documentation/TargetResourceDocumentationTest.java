@@ -515,7 +515,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
-                                        .description(MgmtApiModelProperties.WEIGHT),
+                                        .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER),
                                 optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),

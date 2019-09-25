@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Objects;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
@@ -21,6 +24,8 @@ public class TargetWithActionType {
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
+    @Min(0)
+    @Max(Action.PRIORITY_MAX_WEIGHT)
     private final Integer weight;
     private String maintenanceSchedule;
     private String maintenanceWindowDuration;

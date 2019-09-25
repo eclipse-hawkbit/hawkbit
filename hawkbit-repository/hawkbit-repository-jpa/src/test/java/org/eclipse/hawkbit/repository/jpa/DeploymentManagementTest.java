@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -173,7 +175,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(
-                        () -> assignDistributionSet(ds1, testTarget, DEFAULT_TEST_WEIGHT));
+                        () -> assignDistributionSet(ds1.getId(), testTarget.getControllerId(), DEFAULT_TEST_WEIGHT));
     }
 
     @Test
@@ -565,16 +567,17 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         enableMultiAssignments();
         final List<Target> targets = testdataFactory.createTargets(10);
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
 
         // First assignment
         final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
-        assignDistributionSet(ds1, targets, DEFAULT_TEST_WEIGHT);
+        assignDistributionSet(ds1.getId(), targetIds, DEFAULT_TEST_WEIGHT);
 
         assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
 
         // Second assignment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
-        assignDistributionSet(ds2, targets, DEFAULT_TEST_WEIGHT);
+        assignDistributionSet(ds2.getId(), targetIds, DEFAULT_TEST_WEIGHT);
 
         assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
         assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
@@ -729,6 +732,39 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class).isThrownBy(
                 () -> deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight)));
+    }
+
+    @Test
+    @Description("Weights are validated and contained in the resulting Action.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = ActionCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = MultiActionEvent.class, count = 2) })
+    public void weightValidatedAndSaved() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int valideWeight1 = 1000;
+        final int valideWeight2 = 0;
+        final DeploymentRequest valideRequest1 = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(valideWeight1).build();
+        final DeploymentRequest valideRequest2 = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(valideWeight2).build();
+        final DeploymentRequest weightTooLow = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(-1)
+                .build();
+        final DeploymentRequest weightTooHigh = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(1001)
+                .build();
+        enableMultiAssignments();
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooLow)));
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooHigh)));
+        final Long valideActionId1 = getFirstAssignedAction(
+                deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest1)).get(0)).getId();
+        final Long valideActionId2 = getFirstAssignedAction(
+                deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest2)).get(0)).getId();
+        assertThat(actionRepository.getById(valideActionId1).get().getWeight()).get().isEqualTo(valideWeight1);
+        assertThat(actionRepository.getById(valideActionId2).get().getWeight()).get().isEqualTo(valideWeight2);
     }
 
     /**
