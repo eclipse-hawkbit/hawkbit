@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -194,10 +195,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        if (isMultiAssignmentsEnabled()) {
-            validateWeightForMultiAssignment(deploymentRequests);
-        }
-
+        validateOnlineAssignment(deploymentRequests);
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -238,14 +236,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         }
     }
 
-    private static void validateWeightForMultiAssignment(final List<DeploymentRequest> deploymentRequests) {
-        final List<TargetWithActionType> targetsWithActionType = deploymentRequests.stream()
-                .map(DeploymentRequest::getTargetWithActionType).collect(Collectors.toList());
-        final List<Integer> weights = targetsWithActionType.stream().map(TargetWithActionType::getWeight)
-                .collect(Collectors.toList());
-        if (weights.contains(null)) {
-            // TODO : update this exception with a reliable Spring level or if
-            // not then new exception
+    private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
+        final long nullWeights = deploymentRequests.stream()
+                .filter(request -> request.getTargetWithActionType().getWeight() == null).count();
+        final boolean allWeightsNull = nullWeights >= deploymentRequests.size();
+        final boolean nullWeightExists = nullWeights > 0;
+        if (isMultiAssignmentsEnabled() && nullWeightExists) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
+        } else if (!isMultiAssignmentsEnabled() && !allWeightsNull) {
             throw new MultiAssignmentIsNotEnabledException();
         }
     }

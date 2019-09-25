@@ -98,8 +98,13 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
     }
 
     public static MyFieldFieldDesc requestFieldWithPath(final String path, final boolean mandatory) {
+        return requestFieldWithPath(path, mandatory, mandatory ? "X" : "");
+    }
+
+    private static MyFieldFieldDesc requestFieldWithPath(final String path, final boolean mandatory,
+            final String mandatoryMessage) {
         final MyFieldFieldDesc myFieldDesc = new MyFieldFieldDesc(path);
-        myFieldDesc.attributes(key("mandatory").value(mandatory ? "X" : ""));
+        myFieldDesc.attributes(key("mandatory").value(mandatoryMessage));
         // defaults
         myFieldDesc.attributes(key("value").value(""));
 
@@ -116,6 +121,10 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected static MyFieldFieldDesc optionalRequestFieldWithPath(final String path) {
         return requestFieldWithPath(path, false);
+    }
+
+    public static MyFieldFieldDesc requestFieldWithPathMandatoryInMultiAssignMode(final String path) {
+        return requestFieldWithPath(path, false, "when multi-assignment is enabled");
     }
 
     public static class MyFieldFieldDesc extends SubsectionDescriptor {

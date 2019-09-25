@@ -385,6 +385,8 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(
                                 requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                        .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER),
                                 optionalRequestFieldWithPath("[].forcetime")
                                         .description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("[].maintenanceWindow")

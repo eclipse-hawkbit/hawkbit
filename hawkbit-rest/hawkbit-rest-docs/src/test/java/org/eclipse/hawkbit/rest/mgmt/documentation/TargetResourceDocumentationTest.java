@@ -514,6 +514,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                        .description(MgmtApiModelProperties.WEIGHT),
                                 optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
@@ -537,12 +539,12 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final long forceTime = System.currentTimeMillis();
         final JSONArray body = new JSONArray();
-        body.put(new JSONObject().put("id", sets.get(1).getId()).put("type", "timeforced")
+        body.put(new JSONObject().put("id", sets.get(1).getId()).put("weight", 500).put("type", "timeforced")
                 .put("forcetime", forceTime)
                 .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
                         .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())))
                 .toString();
-        body.put(new JSONObject().put("id", sets.get(0).getId()).put("type", "forced"));
+        body.put(new JSONObject().put("id", sets.get(0).getId()).put("type", "forced").put("weight", 800));
 
         enableMultiAssignments();
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
@@ -555,6 +557,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(
                                 requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                        .description(MgmtApiModelProperties.WEIGHT),
                                 optionalRequestFieldWithPath("[].forcetime")
                                         .description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("[].maintenanceWindow")

@@ -70,9 +70,4 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      */
     ActionType getAutoAssignActionType();
 
-    /**
-     * @return the priority of the {@link Action}.
-     */
-    Integer getWeight();
-
 }

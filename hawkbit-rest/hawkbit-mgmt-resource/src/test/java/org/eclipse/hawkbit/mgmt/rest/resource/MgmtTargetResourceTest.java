@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -61,7 +61,6 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -1877,7 +1876,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
                 .collect(Collectors.toList());
 
-        final JSONArray body = getAssignmentBody(dsIds);
+        final JSONArray body = new JSONArray();
+        dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT)));
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1890,7 +1890,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final JSONArray body = getAssignmentBody(Collections.singletonList(dsId));
+        final JSONArray body = new JSONArray().put(getAssignmentObject(dsId, MgmtActionType.FORCED));
             
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1903,7 +1903,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final JSONArray body = getAssignmentBody(Arrays.asList(dsId, dsId));
+        final JSONObject assignment = getAssignmentObject(dsId, MgmtActionType.FORCED);
+        final JSONArray body = new JSONArray().put(assignment).put(assignment);
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -1917,21 +1918,12 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
                 .collect(Collectors.toList());
 
-        final JSONArray body = getAssignmentBody(dsIds);
+        final JSONArray body = new JSONArray();
+        dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT)));
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)));
-    }
-
-    public static JSONArray getAssignmentBody(final Collection<Long> dsIds) throws JSONException {
-        final JSONArray body = new JSONArray();
-        for (final Long id : dsIds) {
-            final JSONObject obj = new JSONObject();
-            obj.put("id", id);
-            body.put(obj);
-        }
-        return body;
     }
 }

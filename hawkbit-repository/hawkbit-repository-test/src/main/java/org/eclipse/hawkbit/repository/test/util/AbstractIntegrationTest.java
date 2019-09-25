@@ -16,9 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -117,6 +115,8 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
+
+    protected static final int DEFAULT_TEST_WEIGHT = 500;
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -234,24 +234,23 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
-            final Integer weight) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), ActionType.FORCED,
-                RepositoryModelConstants.NO_FORCE_TIME, weight);
-    }
-
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType) {
         return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType, final long forcedTime) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime, null);
+        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType) {
-        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME, null);
+        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
+            final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
@@ -273,7 +272,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
-            final List<Target> targets, final Integer weight) {
+            final List<Target> targets, final int weight) {
         final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
         return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
                 weight);
@@ -329,24 +328,13 @@ public abstract class AbstractIntegrationTest {
                 .build());
     }
 
-    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
-            final Collection<Target> targets) {
-        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
-                .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build())));
-        return deploymentRequests;
-    }
-
-    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
-            final Collection<Target> targets, final Integer weight) {
-        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests.add(DeploymentManagement
-                .deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight).build())));
-        return deploymentRequests;
-    }
-
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
         return assignDistributionSet(pset, Arrays.asList(target));
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target,
+            final int weight) {
+        return assignDistributionSet(pset, Collections.singletonList(target), weight);
     }
 
     protected void enableMultiAssignments() {

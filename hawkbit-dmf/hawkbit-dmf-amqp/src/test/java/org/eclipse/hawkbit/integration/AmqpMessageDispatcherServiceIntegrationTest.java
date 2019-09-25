@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ON
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,8 +50,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -171,12 +175,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignMultipleDsInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final Long actionId1 = assignNewDsToTarget(controllerId);
+        final Long actionId1 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install));
 
-        final Long actionId2 = assignNewDsToTarget(controllerId);
+        final Long actionId2 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
@@ -197,8 +201,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final long actionId1 = assignNewDsToTarget(controllerId);
-        final long actionId2 = assignNewDsToTarget(controllerId);
+        final long actionId1 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
+        final long actionId2 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
         deploymentManagement.cancelAction(actionId1);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
@@ -229,8 +233,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final long actionId1 = assignNewDsToTarget(controllerId);
-        final long actionId2 = assignNewDsToTarget(controllerId);
+        final long actionId1 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
+        final long actionId2 = assignNewDsToTarget(controllerId, DEFAULT_TEST_WEIGHT);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
 
@@ -252,18 +256,17 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 1) })
     public void assignDsMultipleTimesInMultiAssignMode() {
         enableMultiAssignments();
-        final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
-        registerAndAssertTargetWithExistingTenant(controllerId);
+        final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
 
-        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        final Long actionId1 = assignWithDefaultWeight(ds, target).getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        final Long actionId2 = assignWithDefaultWeight(ds, target).getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
-        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
+        assertLatestMultiActionMessage(target.getControllerId(), Arrays.asList(action1Install, action2Install));
     }
 
     private void updateActionViaDmfClient(final String controllerId, final long actionId,
@@ -272,8 +275,14 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Long assignNewDsToTarget(final String controllerId) {
+        return assignNewDsToTarget(controllerId, null);
+    }
+
+    private Long assignNewDsToTarget(final String controllerId, final Integer weight) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(),
+                Collections.singletonList(controllerId), ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
+                weight));
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         return actionId;
     }
@@ -506,6 +515,10 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
         return multiActionElement.getTopic().equals(EventTopic.DOWNLOAD)
                 || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+
+    private Action assignWithDefaultWeight(final DistributionSet ds, final Target target) {
+        return getFirstAssignedAction(assignDistributionSet(ds, target, DEFAULT_TEST_WEIGHT));
     }
 
 }

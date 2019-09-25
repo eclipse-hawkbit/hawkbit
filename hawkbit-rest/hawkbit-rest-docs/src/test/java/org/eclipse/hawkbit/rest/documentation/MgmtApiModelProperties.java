@@ -188,6 +188,7 @@ public final class MgmtApiModelProperties {
     // request parameter
     public static final String FORCETIME = "Forcetime in milliseconds.";
     public static final String FORCE = "Force as boolean.";
+    public static final String WEIGHT = "Priority of the assignment";
     public static final String ASSIGNMENT_TYPE = "The type of the assignment.";
     public static final String TARGET_ASSIGNED = "The number of targets that have been assigned as part of this operation.";
     public static final String TARGET_ASSIGNED_ALREADY = "The number of targets which already had been the assignment.";

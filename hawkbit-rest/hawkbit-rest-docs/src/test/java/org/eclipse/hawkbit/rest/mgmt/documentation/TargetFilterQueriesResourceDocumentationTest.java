@@ -52,7 +52,6 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
 
     private static final String EXAMPLE_TFQ_NAME = "filter1";
     private static final String EXAMPLE_TFQ_QUERY = "name==*";
-    private static final Integer EXAMPLE_TFQ_WEIGHT = new Integer(10);
 
     @Override
     @Before
@@ -110,7 +109,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the POST request of creating a new target filter query within SP. Required Permission: CREATE_TARGET.")
     public void postTargetFilterQuery() throws Exception {
-        final String tfqJson = createTargetFilterQueryJson(EXAMPLE_TFQ_NAME, EXAMPLE_TFQ_QUERY, EXAMPLE_TFQ_WEIGHT);
+        final String tfqJson = createTargetFilterQueryJson(EXAMPLE_TFQ_NAME, EXAMPLE_TFQ_QUERY);
 
         this.mockMvc
                 .perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
@@ -153,8 +152,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Description("Handles the PUT request of updating a target filter query within SP. Required Permission: UPDATE_TARGET.")
     public void putTargetFilterQuery() throws Exception {
         final TargetFilterQuery tfq = createTargetFilterQuery();
-        final String targetAsJson = createTargetFilterQueryJson("newFilterName", "attribute.hwRevision==2",
-                new Integer(34));
+        final String targetAsJson = createTargetFilterQueryJson("newFilterName", "attribute.hwRevision==2");
         this.mockMvc
                 .perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}", tfq.getId())
                         .contentType(MediaType.APPLICATION_JSON).content(targetAsJson))
@@ -237,18 +235,17 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS));
     }
 
-    private String createTargetFilterQueryJson(final String name, final String query, final Integer weight)
+    private String createTargetFilterQueryJson(final String name, final String query)
             throws JsonProcessingException {
         final Map<String, Object> target = new HashMap<>();
         target.put("name", name);
         target.put("query", query);
-        target.put("weight", weight);
         return objectMapper.writeValueAsString(target);
     }
 
     private TargetFilterQuery createTargetFilterQuery() {
-        return targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(EXAMPLE_TFQ_NAME)
-                .query(EXAMPLE_TFQ_QUERY).weight(EXAMPLE_TFQ_WEIGHT));
+        return targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name(EXAMPLE_TFQ_NAME).query(EXAMPLE_TFQ_QUERY));
     }
 
     private TargetFilterQuery createTargetFilterQueryWithDS(final DistributionSet distributionSet) {

@@ -1310,22 +1310,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final JSONArray body = new JSONArray();
-        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.SOFT));
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT));
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.SOFT, DEFAULT_TEST_WEIGHT));
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(body.length())));
-    }
-
-    public static JSONObject getAssignmentObject(final String targetId, final MgmtActionType type)
-            throws JSONException {
-        final JSONObject obj = new JSONObject();
-        obj.put("id", targetId);
-        obj.put("type", type.getName());
-        return obj;
     }
 }

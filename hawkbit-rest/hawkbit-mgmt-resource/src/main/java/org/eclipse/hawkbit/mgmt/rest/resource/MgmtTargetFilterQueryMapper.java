@@ -47,7 +47,6 @@ public final class MgmtTargetFilterQueryMapper {
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
         targetRest.setQuery(filter.getQuery());
-        targetRest.setWeight(filter.getWeight());
 
         targetRest.setCreatedBy(filter.getCreatedBy());
         targetRest.setLastModifiedBy(filter.getLastModifiedBy());
@@ -74,8 +73,7 @@ public final class MgmtTargetFilterQueryMapper {
     static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory,
             final MgmtTargetFilterQueryRequestBody filterRest) {
 
-        return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery())
-                .weight(filterRest.getWeight());
+        return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
     }
 
 }

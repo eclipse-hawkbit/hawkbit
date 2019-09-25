@@ -10,11 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -41,13 +39,6 @@ public interface TargetFilterQueryCreate {
      * @return updated builder instance
      */
     TargetFilterQueryCreate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String query);
-
-    /**
-     * @param weight
-     *            of {@link TargetFilterQuery#getWeight()}
-     * @return updated builder instance
-     */
-    TargetFilterQueryCreate weight(@Max(Action.PRIORITY_MAX_WEIGHT) @NotNull Integer weight);
 
     /**
      * @param distributionSet

@@ -654,12 +654,12 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.")
     public void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
-        setMultiAssignmentsEnabled();
+        enableMultiAssignments();
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1, target));
-        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2, target));
+        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1, target, DEFAULT_TEST_WEIGHT));
+        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2, target, DEFAULT_TEST_WEIGHT));
 
         assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
         sendDeploymentActionFeedback(target, action1, "closed", "success");
@@ -670,7 +670,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("The system should not create a new target because of a too long controller id.")
     public void rootRsWithInvalidControllerId() throws Exception {
-        String invalidControllerId = RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1);
+        final String invalidControllerId = RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1);
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), invalidControllerId))
                 .andExpect(status().isBadRequest());
     }
@@ -683,9 +683,5 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)));
 
-    }
-
-    private void setMultiAssignmentsEnabled() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 }
