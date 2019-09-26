@@ -1045,7 +1045,8 @@ public class TestdataFactory {
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
-        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet, successCondition, errorCondition, Action.ActionType.FORCED);
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, Action.ActionType.FORCED, null);
     }
 
     /**
@@ -1071,7 +1072,8 @@ public class TestdataFactory {
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final Action.ActionType actionType) {
+            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final Integer weight) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
@@ -1079,7 +1081,7 @@ public class TestdataFactory {
 
         final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create().name(rolloutName)
                         .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet)
-                        .actionType(actionType), groupSize, conditions);
+                .actionType(actionType).weight(weight), groupSize, conditions);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();

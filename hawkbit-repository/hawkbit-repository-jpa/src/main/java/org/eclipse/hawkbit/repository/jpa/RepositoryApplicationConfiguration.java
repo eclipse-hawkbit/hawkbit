@@ -620,10 +620,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
                 distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
+                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**

@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -43,6 +44,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -74,6 +77,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,9 +169,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
         this.eventPublisherHolder = eventPublisherHolder;
         this.database = database;
     }
@@ -226,6 +233,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
+        if (isMultiAssignmentsEnabled() && !rollout.getWeight().isPresent()) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
+        } else if (!isMultiAssignmentsEnabled() && rollout.getWeight().isPresent()) {
+            throw new MultiAssignmentIsNotEnabledException();
+        }
 
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {

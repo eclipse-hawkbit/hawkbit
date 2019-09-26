@@ -17,12 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -42,6 +45,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -598,7 +603,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String successCondition = "50";
         final String errorCondition = "80";
         final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition, ActionType.DOWNLOAD_ONLY);
+                amountOtherTargets, amountGroups, successCondition, errorCondition, ActionType.DOWNLOAD_ONLY, null);
 
         // targets have not started
         Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
@@ -1748,14 +1753,56 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify that all running actions keep running
         assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.RUNNING)
                 .getNumberOfElements()).isEqualTo(2);
+    }
 
+    @Test
+    @Description("Creating a rollout without a weight causes an error when multi assignment in enabled.")
+    public void weightRequiredInMultiAssignmentMode() {
+        enableMultiAssignments();
+        Assertions.assertThatExceptionOfType(NoWeightProvidedInMultiAssignmentModeException.class)
+                .isThrownBy(() -> createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50", "80",
+                        ActionType.FORCED, null));
+    }
+
+    @Test
+    @Description("Creating a rollout with a weight causes an error when multi assignment in disabled.")
+    public void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
+                .isThrownBy(() -> createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50", "80",
+                        ActionType.FORCED, DEFAULT_TEST_WEIGHT));
+    }
+
+    @Test
+    @Description("Weight is validated and contained in saved Rollout.")
+    public void weightValidatedAndSaved() {
+        final String targetPrefix = UUID.randomUUID().toString();
+        testdataFactory.createTargets(4, targetPrefix);
+        final int weightTooHigh = 1001;
+        final int weightTooLow = -1;
+        final int valideWeight1 = 1000;
+        final int valideWeight2 = 0;
+        enableMultiAssignments();
+
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> createTestRolloutWithTargetsAndDistributionSet(4, 2, "50", "80",
+                        UUID.randomUUID().toString(), UUID.randomUUID().toString(), weightTooHigh));
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> createTestRolloutWithTargetsAndDistributionSet(4, 2, "50", "80",
+                        UUID.randomUUID().toString(), UUID.randomUUID().toString(), weightTooLow));
+        final Rollout createdRollout1 = createTestRolloutWithTargetsAndDistributionSet(4, 2, "50", "80",
+                UUID.randomUUID().toString(), UUID.randomUUID().toString(), valideWeight1);
+        final Rollout createdRollout2 = createTestRolloutWithTargetsAndDistributionSet(4, 2, "50", "80",
+                UUID.randomUUID().toString(), UUID.randomUUID().toString(), valideWeight2);
+        assertThat(rolloutRepository.findById(createdRollout1.getId()).get().getWeight()).get()
+                .isEqualTo(valideWeight1);
+        assertThat(rolloutRepository.findById(createdRollout2.getId()).get().getWeight()).get()
+                .isEqualTo(valideWeight2);
     }
 
     private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,
             final String targetFilter) {
         return entityFactory.rolloutGroup().create().name("Group" + index).description("Group" + index + "desc")
                 .targetPercentage(Float.valueOf(percentage)).targetFilterQuery(targetFilter);
-
     }
 
     private RolloutCreate generateTargetsAndRollout(final String rolloutName, final int amountTargetsForRollout) {
@@ -1793,27 +1840,34 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             final int amountOtherTargets, final int groupSize, final String successCondition,
             final String errorCondition) {
         return createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                groupSize, successCondition, errorCondition, ActionType.FORCED);
+                groupSize, successCondition, errorCondition, ActionType.FORCED, null);
     }
 
     private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int amountOtherTargets, final int groupSize, final String successCondition,
-            final String errorCondition, final ActionType actionType) {
+            final String errorCondition, final ActionType actionType, final Integer weight) {
         final DistributionSet rolloutDS = testdataFactory.createDistributionSet("rolloutDS");
         testdataFactory.createTargets(amountTargetsForRollout, "rollout-", "rollout");
         testdataFactory.createTargets(amountOtherTargets, "others-", "rollout");
         final String filterQuery = "controllerId==rollout-*";
         return testdataFactory.createRolloutByVariables("test-rollout-name-1", "test-rollout-description-1", groupSize,
-                filterQuery, rolloutDS, successCondition, errorCondition, actionType);
+                filterQuery, rolloutDS, successCondition, errorCondition, actionType, weight);
+    }
+    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
+            final String targetPrefixName) {
+        return createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, groupSize,
+                successCondition, errorCondition, rolloutName, targetPrefixName, null);
     }
 
     private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
-            final String targetPrefixName) {
+            final String targetPrefixName, final Integer weight) {
         final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsFor" + rolloutName);
         testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
         return testdataFactory.createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
-                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition);
+                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition,
+                Action.ActionType.FORCED, weight);
     }
 
     private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {

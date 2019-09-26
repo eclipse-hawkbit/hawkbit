@@ -10,7 +10,11 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.ValidString;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +33,9 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     protected ActionType actionType;
     protected Long forcedTime;
     protected Long startAt;
+
+    @Min(0)
+    @Max(Action.PRIORITY_MAX_WEIGHT)
     protected Integer weight;
 
     public T set(final long set) {

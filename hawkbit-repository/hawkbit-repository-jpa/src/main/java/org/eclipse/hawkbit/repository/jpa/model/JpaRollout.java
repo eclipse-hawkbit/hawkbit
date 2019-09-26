@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.Column;
@@ -210,8 +211,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     }
 
     @Override
-    public Integer getWeight() {
-        return null;
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
     }
 
     public void setWeight(final Integer weight) {
