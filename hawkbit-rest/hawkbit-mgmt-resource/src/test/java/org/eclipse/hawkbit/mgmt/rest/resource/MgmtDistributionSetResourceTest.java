@@ -1320,4 +1320,40 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(body.length())));
     }
+
+    @Test
+    @Description("An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray bodyValide = new JSONArray()
+                .put(getAssignmentObject(targetId, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT));
+        final JSONArray bodyInvalide = new JSONArray().put(getAssignmentObject(targetId, MgmtActionType.FORCED, -1));
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyInvalide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("An assignment request must contain a weight when multi assignment is enabled")
+    public void weightMandetoryInMultiAssignmentMode() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final JSONArray body = new JSONArray()
+                .put(getAssignmentObject(dsId, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT))
+                .put(getAssignmentObject(dsId, MgmtActionType.FORCED));
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
 }

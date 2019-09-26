@@ -1926,4 +1926,60 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)));
     }
+
+    @Test
+    @Description("An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONObject bodyValide = getAssignmentObject(dsId, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT);
+        final JSONObject bodyInvalide = getAssignmentObject(dsId, MgmtActionType.FORCED, -1);
+
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("An assignment request must contain a weight when multi assignment is enabled")
+    public void weightMandetoryInMultiAssignmentMode() throws Exception{
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final JSONArray body = new JSONArray()
+                .put(getAssignmentObject(dsId, MgmtActionType.FORCED, DEFAULT_TEST_WEIGHT))
+                .put(getAssignmentObject(dsId, MgmtActionType.FORCED));
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Get weight of action")
+    public void getActionWeight() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int customWeightHigh = 800;
+        final int customWeightLow = 300;
+        assignDistributionSet(dsId, targetId);
+        enableMultiAssignments();
+        assignDistributionSet(dsId, targetId, customWeightHigh);
+        assignDistributionSet(dsId, targetId, customWeightLow);
+
+        mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("content.[0].weight").doesNotExist())
+                .andExpect(jsonPath("content.[1].weight", equalTo(customWeightLow)))
+                .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
+
+    }
+
 }
