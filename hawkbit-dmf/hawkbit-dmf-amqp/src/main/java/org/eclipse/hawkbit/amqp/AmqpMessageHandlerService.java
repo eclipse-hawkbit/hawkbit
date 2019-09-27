@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.springframework.util.StringUtils.hasText;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -217,7 +218,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final DmfCreateThing targetProperties = convertMessage(message, DmfCreateThing.class);
                 // Will be true if "name" properly in body and not just contained in some
                 // attributes
-                if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
+                if (hasText(targetProperties.getName())) {
                     name = targetProperties.getName();
                     target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
                 } else {
@@ -313,7 +314,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         // If new name provided in body, then change the name
-        if (attributeUpdate.getName() != null && attributeUpdate.getName().length() != 0) {
+        if (hasText(attributeUpdate.getName())) {
             controllerManagement.updateControllerName(thingId, attributeUpdate.getName());
         }
 
