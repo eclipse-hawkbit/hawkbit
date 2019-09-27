@@ -394,20 +394,16 @@ public class JpaControllerManagement implements ControllerManagement {
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
         return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
-                .orElseGet(() -> createNewTarget(controllerId, address, name));
+                .orElseGet(() -> createTargetWithName(controllerId, address, name));
     }
 
-    private Target createNewTarget(final String controllerId, final URI address, final String name) {
+    private Target createTargetWithName(final String controllerId, final URI address, final String name) {
         // In case of a true expression, the targetId will be set as name
         if (name == null || name.length() == 0) {
             return createTarget(controllerId, address);
         }
-        return createTarget(controllerId, address, name);
-    }
-
-    private Target createTarget(final String controllerId, final URI address) {
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
@@ -417,10 +413,9 @@ public class JpaControllerManagement implements ControllerManagement {
         return result;
     }
 
-    private Target createTarget(final String controllerId, final URI address, final String name) {
-
+    private Target createTarget(final String controllerId, final URI address) {
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
@@ -798,16 +793,14 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateControllerName(final String controllerId, final String controllerName) {
+    public void updateControllerName(final String controllerId, final String controllerName) {
 
         final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         target.setName(controllerName);
 
-        assertTargetAttributesQuota(target);
-
-        return targetRepository.save(target);
+        targetRepository.save(target);
     }
 
     private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {
@@ -1043,7 +1036,7 @@ public class JpaControllerManagement implements ControllerManagement {
      * Cancels given {@link Action} for this {@link Target}. The method will
      * immediately add a {@link Status#CANCELED} status to the action. However, it
      * might be possible that the controller will continue to work on the
-     * cancelation. The controller needs to acknowledge or reject the cancelation
+     * cancellation. The controller needs to acknowledge or reject the cancelation
      * using {@link DdiRootController#postCancelActionFeedback}.
      *
      * @param actionId

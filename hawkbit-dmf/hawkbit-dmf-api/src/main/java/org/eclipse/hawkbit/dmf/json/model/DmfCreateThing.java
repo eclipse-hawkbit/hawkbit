@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DmfTargetProperties {
+public class DmfCreateThing {
 
     @JsonProperty
     private String name;

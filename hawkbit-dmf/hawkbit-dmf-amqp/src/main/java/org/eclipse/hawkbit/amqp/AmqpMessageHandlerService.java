@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
-import org.eclipse.hawkbit.dmf.json.model.DmfTargetProperties;
+import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -139,7 +139,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
             case THING_CREATED:
-                handleThingCreatedRequest(message, tenant, virtualHost);
+                setTenantSecurityContext(tenant);
+                registerTarget(message, virtualHost);
                 break;
             case EVENT:
                 checkContentTypeJson(message);
@@ -182,10 +183,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param message
      *            the message that contains the target/thing
      * @param virtualHost
+     *            the virtual host
      */
     private void registerTarget(final Message message, final String virtualHost) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
+        String name = null;
+        final Target target;
 
         if (StringUtils.isEmpty(replyTo)) {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
@@ -193,36 +197,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         try {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
-            LOG.debug("Target {} reported online state.", thingId);
-            sendUpdateCommandToTarget(target);
-        } catch (final EntityAlreadyExistsException e) {
-            throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
-        }
-    }
-
-    /**
-     * Method to register a new target.
-     *
-     * @param message
-     *            the message that contains the target/thing
-     * @param virtualHost
-     *            the virtualHost of the target/thing
-     * @param name
-     *            the name of the target/thing, can be null and would then be
-     *            replaced by targetId
-     */
-    private void registerTarget(final Message message, final String virtualHost, final String name) {
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
-        final String replyTo = message.getMessageProperties().getReplyTo();
-
-        if (StringUtils.isEmpty(replyTo)) {
-            logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
-        }
-
-        try {
-            final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-            final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
+            if (message.toString().contains("name")) {
+                checkContentTypeJson(message);
+                // Check whether name property set
+                final DmfCreateThing targetProperties = convertMessage(message, DmfCreateThing.class);
+                // Will be true if "name" properly in body and not just contained in some
+                // attributes
+                if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
+                    name = targetProperties.getName();
+                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
+                } else {
+                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+                }
+            } else {
+                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            }
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (final EntityAlreadyExistsException e) {
@@ -442,39 +431,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
         return systemSecurityContext
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
-    }
-
-    private void handleThingCreatedRequest(final Message message, final String tenant, final String virtualHost) {
-        if (message.toString().contains("name")) {
-            handleNameContainedRequest(message, tenant, virtualHost);
-        } else {
-            handleNoNameContainedRequest(message, tenant, virtualHost);
-        }
-    }
-
-    private void handleNameContainedRequest(final Message message, final String tenant, final String virtualHost) {
-        // If name never reassigned, so still null, then per default:
-        // targetName = targetId
-        String name = null;
-
-        checkContentTypeJson(message);
-        // Check whether name property set
-        final DmfTargetProperties targetProperties = convertMessage(message, DmfTargetProperties.class);
-        // Will be true if "name" properly in body and not just
-        // contained in some attributes
-        if (targetProperties.getName() != null && targetProperties.getName().length() != 0) {
-            name = targetProperties.getName();
-            setTenantSecurityContext(tenant);
-            registerTarget(message, virtualHost, name);
-        } else {
-            setTenantSecurityContext(tenant);
-            registerTarget(message, virtualHost);
-        }
-    }
-
-    private void handleNoNameContainedRequest(final Message message, final String tenant, final String virtualHost) {
-        setTenantSecurityContext(tenant);
-        registerTarget(message, virtualHost);
     }
 
     // for testing

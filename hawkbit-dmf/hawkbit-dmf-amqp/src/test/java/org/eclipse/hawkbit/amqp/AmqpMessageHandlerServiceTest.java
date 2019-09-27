@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +37,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.DmfTargetProperties;
+import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -203,7 +204,7 @@ public class AmqpMessageHandlerServiceTest {
         final String knownThingId = "2";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
-        final DmfTargetProperties targetProperties = new DmfTargetProperties();
+        final DmfCreateThing targetProperties = new DmfCreateThing();
         targetProperties.setName("NonDefaultTargetName");
 
         final Message message = messageConverter.toMessage(targetProperties, messageProperties);
@@ -298,8 +299,7 @@ public class AmqpMessageHandlerServiceTest {
 
         when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
                 modeCaptor.capture())).thenReturn(null);
-        when(controllerManagementMock.updateControllerName(targetIdCaptor.capture(), targetNameCaptor.capture()))
-                .thenReturn(null);
+        doNothing().when(controllerManagementMock).updateControllerName(targetIdCaptor.capture(), targetNameCaptor.capture());
 
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 

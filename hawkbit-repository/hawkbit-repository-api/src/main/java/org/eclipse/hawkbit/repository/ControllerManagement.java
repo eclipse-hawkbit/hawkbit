@@ -377,14 +377,14 @@ public interface ControllerManagement {
      *            to update
      * @param controllerName
      *            the update mode or <code>null</code>
-     * @return updated {@link Target}
+     * @return void
      * @throws EntityNotFoundException
      *             if target that has to be updated could not be found
      * @throws QuotaExceededException
      *             if maximum number of attributes per target is exceeded
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target updateControllerName(final String controllerId, final String controllerName);
+    void updateControllerName(final String controllerId, final String controllerName);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target
