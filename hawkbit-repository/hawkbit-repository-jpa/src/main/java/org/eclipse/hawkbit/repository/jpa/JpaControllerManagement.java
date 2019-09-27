@@ -243,7 +243,7 @@ public class JpaControllerManagement implements ControllerManagement {
          * @param minimumEventInterval
          *            for loading {@link DistributionSet#getModules()}. This
          *            puts a lower bound to the timer value
-         * @param timerUnit
+         * @param timeUnit
          *            representing the unit of time to be used for timer.
          */
         EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
@@ -373,6 +373,14 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
         return actionRepository.findByExternalRefInAndActive(externalRefs, true);
+    }
+
+    @Override
+    public void deleteExistingTarget(@NotEmpty String controllerId) {
+        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        targetRepository.deleteById(target.getId());
     }
 
     @Override

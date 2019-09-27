@@ -58,6 +58,24 @@ Header                                                                          
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
 type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lwm2m | content\_type=application/json <br /> reply_to (optional) =sp.connector.replyTo
 
+
+### THING_REMOVED
+
+Message to remove a single target.
+
+Header | Description                                      | Type                         | Mandatory
+-------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
+type           | Type of the message                              | Fixed string "THING_REMOVED" | true
+thingId        | The ID of the registered provisioning target   | String                       | true
+tenant         | The tenant this provisioning target belongs to | String                       | false
+
+Example headers
+
+Header                                                                             | MessageProperties
+----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
+type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc   | 
+
+
 ### UPDATE_ATTRIBUTES
 
 Message to update target attributes. This message can be send in response to a _REQUEST_ATTRIBUTES_UPDATE_ event, sent by hawkBit.
