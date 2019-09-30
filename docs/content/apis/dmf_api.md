@@ -61,7 +61,7 @@ type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lw
 
 ### THING_REMOVED
 
-Message to remove a single target.
+Message to request the deletion of a provisioning target.
 
 Header | Description                                      | Type                         | Mandatory
 -------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
@@ -69,11 +69,15 @@ type           | Type of the message                              | Fixed string
 thingId        | The ID of the registered provisioning target   | String                       | true
 tenant         | The tenant this provisioning target belongs to | String                       | false
 
+Message Properties | Description                                                                                          | Type   | Mandatory
+------------------ | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
+content_type       | The content type of the payload                                                                      | String | true
+
 Example headers
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
-type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc   | 
+type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc | content\_type=application/json
 
 
 ### UPDATE_ATTRIBUTES
