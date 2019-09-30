@@ -311,11 +311,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Set<Long> smIds = getSoftwareModuleIds(ds);
         final String filterQuery = "controllerId==" + controllerId;
 
-        createAndStartRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery, DEFAULT_TEST_WEIGHT);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds));
 
-        createAndStartRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery, DEFAULT_TEST_WEIGHT);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds, smIds));
     }
@@ -343,10 +343,10 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
 
-        createAndStartRollout(ds1, filterQuery);
-        createAndStartRollout(ds2, filterQuery);
+        createAndStartRollout(ds1, filterQuery, DEFAULT_TEST_WEIGHT);
+        createAndStartRollout(ds2, filterQuery, DEFAULT_TEST_WEIGHT);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
-        createAndStartRollout(ds1, filterQuery);
+        createAndStartRollout(ds1, filterQuery, DEFAULT_TEST_WEIGHT);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
 
@@ -368,8 +368,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery) {
+        return createAndStartRollout(ds, filterQuery, null);
+    }
+
+    private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
-                filterQuery, ds, "50", "5");
+                filterQuery, ds, "50", "5", ActionType.FORCED, weight);
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
         return rollout;

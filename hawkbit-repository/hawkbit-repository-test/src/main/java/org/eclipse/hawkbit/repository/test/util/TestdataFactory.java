@@ -1068,6 +1068,8 @@ public class TestdataFactory {
      *            to switch to next group
      * @param actionType
      *            the type of the Rollout
+     * @param weight
+     *            weight of the Rollout
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,

@@ -1946,6 +1946,10 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        assertThat(actions).size().isEqualTo(1);
+        assertThat(actions.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
     }
 
     @Test
