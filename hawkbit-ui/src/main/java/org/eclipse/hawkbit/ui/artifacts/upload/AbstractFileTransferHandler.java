@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -106,6 +107,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         interruptUploadAndSetReason(i18n.getMessage("message.upload.failed"));
     }
 
+    protected void interruptUploadDueToQuotaExceeded() {
+        interruptUploadAndSetReason(i18n.getMessage("message.upload.quota"));
+    }
+
     protected void interruptUploadDueToDuplicateFile() {
         interruptUploadAndSetReason(i18n.getMessage("message.no.duplicateFiles"));
     }
@@ -175,6 +180,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         LOG.info("Upload failed for file {} due to reason: {}, exception: {}", fileUploadId, failureReason,
                 uploadException.getMessage());
 
+        uiNotification.displayValidationError(uploadException.getMessage());
+
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? i18n.getMessage("message.upload.failed") : failureReason);
@@ -230,6 +237,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 UI.setCurrent(vaadinUi);
                 streamToRepository();
+            } catch (final QuotaExceededException e) {
+                interruptUploadDueToQuotaExceeded();
+                publishUploadFailedAndFinishedEvent(fileUploadId, e);
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed();
                 publishUploadFailedAndFinishedEvent(fileUploadId, e);

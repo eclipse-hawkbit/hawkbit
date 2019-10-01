@@ -53,10 +53,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaArtifactManagement.class);
 
-    private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s bytes.";
-
-    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s bytes) cannot be uploaded. The maximum total artifact storage of %s bytes would be exceeded.";
-
     private final LocalArtifactRepository localArtifactRepository;
 
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -105,8 +101,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
 
         assertArtifactQuota(moduleId, 1);
-        assertMaxArtifactSizeQuota(filename, moduleId, artifactUpload.getFilesize());
-        assertMaxArtifactStorageQuota(filename, artifactUpload.getFilesize());
 
         return getOrCreateArtifact(artifactUpload)
                 .map(artifact -> storeArtifactMetadata(softwareModule, filename, artifact, existing)).orElse(null);
@@ -125,10 +119,22 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
+        AbstractDbArtifact dbArtifact = null;
         try {
-            return artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
+            dbArtifact = artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
                     artifactUpload.getFilename(), artifactUpload.getContentType(),
-                    new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum(), artifactUpload.getProvidedSha256Sum()));
+                    new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum(),
+                            artifactUpload.getProvidedSha256Sum()));
+
+            assertMaxArtifactStorageQuota(artifactUpload.getFilename(), dbArtifact.getSize());
+            assertMaxArtifactSizeQuota(artifactUpload.getFilename(), artifactUpload.getModuleId(),
+                    dbArtifact.getSize());
+            return dbArtifact;
+        } catch (QuotaExceededException e) {
+            if (dbArtifact != null) {
+                artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), dbArtifact.getHashes().getSha1());
+            }
+            throw e;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
@@ -147,29 +153,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private void assertMaxArtifactSizeQuota(final String filename, final long id, final long artifactSize) {
         final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
-        if (maxArtifactSize <= 0) {
-            return;
-        }
-        if (artifactSize > maxArtifactSize) {
-            final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename, artifactSize, id, maxArtifactSize);
-            LOG.warn(msg);
-            throw new QuotaExceededException(msg);
-        }
+        QuotaHelper.assertMaxArtifactSizeQuota(filename, id, artifactSize, maxArtifactSize);
     }
 
     private void assertMaxArtifactStorageQuota(final String filename, final long artifactSize) {
-        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
-        if (maxArtifactSizeTotal <= 0) {
-            return;
-        }
-
         final Long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
-        if (currentlyUsed + artifactSize > maxArtifactSizeTotal) {
-            final String msg = String.format(MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED, filename, artifactSize,
-                    maxArtifactSizeTotal);
-            LOG.warn(msg);
-            throw new QuotaExceededException(msg);
-        }
+        final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
+
+        QuotaHelper.assertMaxArtifactStorageQuota(filename, artifactSize, currentlyUsed, maxArtifactSizeTotal);
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
- * Thrown if too many entries are added to repository.
+ * Thrown if quota is exceeded (too many entries, file size, storage size).
  *
  */
 public final class QuotaExceededException extends AbstractServerRtException {
@@ -22,22 +22,45 @@ public final class QuotaExceededException extends AbstractServerRtException {
 
     private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'. The maximum is %s.";
 
+    public enum QuotaType {
+        SIZE_QUOTA(SpServerError.SP_SIZE_QUOTA_EXCEEDED), ASSIGNMENT_QUOTA(SpServerError.SP_QUOTA_EXCEEDED);
+
+        private final SpServerError errorType;
+
+        QuotaType(SpServerError errorType) {
+            this.errorType = errorType;
+        }
+    }
+
     /**
      * Creates a new QuotaExceededException with
      * {@link SpServerError#SP_QUOTA_EXCEEDED} error.
      */
     public QuotaExceededException() {
-        super(SpServerError.SP_QUOTA_EXCEEDED);
+        super(QuotaType.ASSIGNMENT_QUOTA.errorType);
     }
 
     /**
      * Creates a new QuotaExceededException with a custom error message.
-     * 
+     *
      * @param message
      *            The custom error message.
      */
     public QuotaExceededException(final String message) {
-        super(message, SpServerError.SP_QUOTA_EXCEEDED);
+        this(message, QuotaType.ASSIGNMENT_QUOTA);
+    }
+
+    /**
+     * Creates a new QuotaExceededException with a custom error message and
+     * quota type.
+     *
+     * @param message
+     *            The custom error message.
+     * @param quotaType
+     *            {@link QuotaType} that will lead to the connected error type
+     */
+    public QuotaExceededException(final String message, QuotaType quotaType) {
+        super(message, quotaType.errorType);
     }
 
     /**
@@ -50,7 +73,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            for the exception
      */
     public QuotaExceededException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_QUOTA_EXCEEDED, cause);
+        super(message, QuotaType.ASSIGNMENT_QUOTA.errorType, cause);
     }
 
     /**
@@ -76,7 +99,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
      */
     public QuotaExceededException(final String type, final long inserted, final int quota) {
         super("Request contains too many entries of {" + type + "}. {" + inserted + "} is beyond the permitted {"
-                + quota + "}.", SpServerError.SP_QUOTA_EXCEEDED);
+                + quota + "}.", QuotaType.ASSIGNMENT_QUOTA.errorType);
     }
 
     /**
@@ -121,10 +144,9 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            parent entity.
      */
     public QuotaExceededException(final String type, final String parentType, final Object parentId,
-            final long requested,
-            final long quota) {
+            final long requested, final long quota) {
         super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type, parentType,
-                parentId != null ? String.valueOf(parentId) : "<new>", quota), SpServerError.SP_QUOTA_EXCEEDED);
+                parentId != null ? String.valueOf(parentId) : "<new>", quota), QuotaType.ASSIGNMENT_QUOTA.errorType);
     }
 
 }
