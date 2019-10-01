@@ -630,6 +630,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             action.setStatus(Status.SCHEDULED);
             action.setRollout(rollout);
             action.setRolloutGroup(rolloutGroup);
+            rollout.getWeight().ifPresent(action::setWeight);
             actionRepository.save(action);
         });
     }

@@ -1773,7 +1773,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Weight is validated and contained in saved Rollout.")
+    @Description("Weight is validated and saved to the Rollout.")
     public void weightValidatedAndSaved() {
         final String targetPrefix = UUID.randomUUID().toString();
         testdataFactory.createTargets(4, targetPrefix);
@@ -1797,6 +1797,34 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(valideWeight1);
         assertThat(rolloutRepository.findById(createdRollout2.getId()).get().getWeight()).get()
                 .isEqualTo(valideWeight2);
+    }
+
+    @Test
+    @Description("A Rollout with weight creats actions with weights")
+    public void actionsWithWeightAreCreated() {
+        final int amountOfTargets = 5;
+        enableMultiAssignments();
+        final Long rolloutId = createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
+                "80", "50", null, DEFAULT_TEST_WEIGHT).getId();
+        rolloutManagement.start(rolloutId);
+        rolloutManagement.handleRollouts();
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
+        assertThat(actions).hasSize(amountOfTargets);
+        assertThat(actions).allMatch(action -> action.getWeight().get() == DEFAULT_TEST_WEIGHT);
+    }
+
+    @Test
+    @Description("Rollout can be created without weight in single assignment and be started in multi assignment")
+    public void createInSingleStartInMultiassigMode() {
+        final int amountOfTargets = 5;
+        final Long rolloutId = createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
+                "80", "50", null, null).getId();
+
+        rolloutManagement.start(rolloutId);
+        rolloutManagement.handleRollouts();
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
+        assertThat(actions).hasSize(amountOfTargets);
+        assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
     }
 
     private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,

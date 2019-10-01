@@ -277,7 +277,7 @@ public abstract class AbstractIntegrationTest {
                 weight);
     }
 
-    private DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
+    protected DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
         final List<DistributionSetAssignmentResult> results = deploymentManagement
                 .assignDistributionSets(Collections.singletonList(request));
         assertThat(results).hasSize(1);
@@ -315,14 +315,6 @@ public abstract class AbstractIntegrationTest {
             final String maintenanceWindowTimeZone) {
 
         return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
-                .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
-                .build());
-    }
-
-    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
-            final String controllerId, final ActionType type, final String maintenanceWindowSchedule,
-            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone) {
-        return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID).setActionType(type)
                 .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
                 .build());
     }

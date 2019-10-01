@@ -203,6 +203,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET.")
     public void getActionsFromTarget() throws Exception {
+        enableMultiAssignments();
         generateActionForTarget(targetId);
 
         mockMvc.perform(
@@ -229,12 +230,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
-                                fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID))));
+                                fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT))));
     }
 
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target with maintenance window. Required Permission: READ_TARGET.")
     public void getActionsFromTargetWithMaintenanceWindow() throws Exception {
+        enableMultiAssignments();
         generateActionForTarget(targetId, true, false, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
 
         mockMvc.perform(
@@ -262,6 +265,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['finished', 'pending']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("content[].maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
                                 fieldWithPath("content[].maintenanceWindow.schedule")
@@ -317,6 +321,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTarget() throws Exception {
+        enableMultiAssignments();
         final Action action = generateActionForTarget(targetId, true, true);
         assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
                 .isEqualTo(ActionType.TIMEFORCED);
@@ -330,6 +335,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY)
                                         .type("String"),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -351,6 +357,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTargetWithMaintenanceWindow() throws Exception {
+        enableMultiAssignments();
         final Action action = generateActionForTarget(targetId, true, true, getTestSchedule(2), getTestDuration(1),
                 getTestTimeZone());
 
@@ -363,6 +370,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY)
                                         .type("String"),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -515,7 +523,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
-                                        .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER),
+                                        .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER)
+                                        .attributes(key("value").value("(0, 1000)")),
                                 optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
@@ -558,7 +567,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
-                                        .description(MgmtApiModelProperties.WEIGHT),
+                                        .description(MgmtApiModelProperties.WEIGHT)
+                                        .attributes(key("value").value("(0, 1000)")),
                                 optionalRequestFieldWithPath("[].forcetime")
                                         .description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("[].maintenanceWindow")

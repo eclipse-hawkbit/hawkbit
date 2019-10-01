@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -915,6 +917,64 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 10, dsA.getId(), "id==target*", 20, Action.ActionType.DOWNLOAD_ONLY);
     }
+    
+    @Test
+    @Description("A rollout create request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final String invalideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, -1);
+        final String valideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, DEFAULT_TEST_WEIGHT);
+        
+        System.out.println(valideWeightRequest);
+
+        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/rollouts").content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated());
+
+        final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).stream().collect(Collectors.toList());
+        assertThat(rollouts).hasSize(1);
+        assertThat(rollouts.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
+    }
+
+    @Test
+    @Description("A rollout create request must contain a weight when multi assignment is enabled")
+    public void weightMandetoryInMultiAssignmentMode() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        enableMultiAssignments();
+        final String rolloutwithoutWeight = JsonBuilder.rollout("withWeight", "", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, ActionType.FORCED.toString());
+        mvc.perform(post("/rest/v1/rollouts").content(rolloutwithoutWeight).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Get weight of rollout")
+    public void getRolloutWeight() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int weight = 300;
+        enableMultiAssignments();
+        final Long rolloutId = rolloutManagement.create(entityFactory.rollout().create().name("rollout").set(dsId)
+                .targetFilterQuery("id==rollout*").weight(weight), 2,
+                new RolloutGroupConditionBuilder().withDefaults().build()).getId();
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rolloutId).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.weight", equalTo(weight)));
+    }
 
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
@@ -955,8 +1015,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type) throws Exception {
-        String actionType = MgmtRestModelMapper.convertActionType(type).getName();
-        String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
+        final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
+        final String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType);
 
         mvc.perform(post("/rest/v1/rollouts")
