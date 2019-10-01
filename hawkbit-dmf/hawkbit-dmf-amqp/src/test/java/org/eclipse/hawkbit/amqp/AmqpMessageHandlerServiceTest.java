@@ -295,8 +295,6 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
                 messageProperties);
 
-        final ArgumentCaptor<String> targetNameCaptor = ArgumentCaptor.forClass(String.class);
-
         when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
                 modeCaptor.capture())).thenReturn(null);
         doNothing().when(controllerManagementMock).updateControllerName(targetIdCaptor.capture(), targetNameCaptor.capture());

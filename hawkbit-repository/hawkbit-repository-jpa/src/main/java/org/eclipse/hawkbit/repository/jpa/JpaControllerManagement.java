@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+import static org.flywaydb.core.internal.util.StringUtils.hasText;
 
 import java.net.URI;
 import java.time.Duration;
@@ -378,11 +379,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
-        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
-                .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
-
-        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
-                .orElseGet(() -> createTarget(controllerId, address));
+       String name = controllerId;
+       return findOrRegisterTargetIfItDoesNotExist (controllerId, address, name);
     }
 
     @Override
@@ -394,28 +392,16 @@ public class JpaControllerManagement implements ControllerManagement {
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
         return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
-                .orElseGet(() -> createTargetWithName(controllerId, address, name));
+                .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTargetWithName(final String controllerId, final URI address, final String name) {
+    private Target createTarget(final String controllerId, final URI address,  String name) {
         // In case of a true expression, the targetId will be set as name
-        if (name == null || name.length() == 0) {
-            return createTarget(controllerId, address);
+        if (!hasText(name)) {
+           name = controllerId;
         }
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
-                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
-
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
-
-        return result;
-    }
-
-    private Target createTarget(final String controllerId, final URI address) {
-        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
