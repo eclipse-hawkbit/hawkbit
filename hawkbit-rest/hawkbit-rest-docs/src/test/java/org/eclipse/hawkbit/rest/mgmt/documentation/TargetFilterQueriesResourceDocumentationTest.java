@@ -250,6 +250,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
 
     private TargetFilterQuery createTargetFilterQueryWithDS(final DistributionSet distributionSet) {
         final TargetFilterQuery targetFilterQuery = createTargetFilterQuery();
-        return targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), distributionSet.getId());
+        return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
     }
 }

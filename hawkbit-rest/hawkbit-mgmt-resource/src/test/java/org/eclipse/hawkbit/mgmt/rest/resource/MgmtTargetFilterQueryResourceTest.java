@@ -485,7 +485,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final DistributionSet set = testdataFactory.createDistributionSet(dsName);
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        targetFilterQueryManagement.updateAutoAssignDS(tfq.getId(), set.getId());
+        targetFilterQueryManagement
+                .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(tfq.getId()).ds(set.getId()));
 
         final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
 

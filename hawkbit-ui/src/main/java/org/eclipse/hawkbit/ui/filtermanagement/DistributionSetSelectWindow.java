@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -54,6 +55,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
     private final EventBus.UIEventBus eventBus;
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final EntityFactory entityFactory;
 
     private CheckBox checkBox;
     private ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
@@ -62,12 +64,13 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
 
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final UINotification notification, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.entityFactory = entityFactory;
     }
 
     private VerticalLayout initView() {
@@ -197,7 +200,8 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         if (dsId != null) {
             confirmWithConsequencesDialog(tfq, dsId, actionType);
         } else {
-            targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryId, null);
+            targetFilterQueryManagement.updateAutoAssignDS(
+                    entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQueryId).ds(null));
             eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
         }
     }
@@ -206,7 +210,8 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
             final ActionType actionType) {
         final ConfirmConsequencesDialog dialog = new ConfirmConsequencesDialog(tfq, dsId, accepted -> {
             if (accepted) {
-                targetFilterQueryManagement.updateAutoAssignDSWithActionType(tfq.getId(), dsId, actionType);
+                targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                        .updateAutoAssign(tfq.getId()).ds(dsId).actionType(actionType));
                 eventBus.publish(this, CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY);
             }
         });

@@ -31,6 +31,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     protected ActionType actionType;
 
+    protected Integer weight;
+
     public T autoAssignDistributionSet(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
         return (T) this;
@@ -43,6 +45,15 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     public T autoAssignActionType(final ActionType actionType) {
         this.actionType = actionType;
         return (T) this;
+    }
+
+    public T autoAssignWeight(final Integer weight) {
+        this.weight = weight;
+        return (T) this;
+    }
+
+    public Optional<Integer> getAutoAssignWeight() {
+        return Optional.ofNullable(weight);
     }
 
     public Optional<ActionType> getAutoAssignActionType() {

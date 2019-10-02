@@ -23,6 +23,13 @@ public interface TargetFilterQueryBuilder {
     TargetFilterQueryUpdate update(long id);
 
     /**
+     * @param id
+     *            of the updatable entity
+     * @return builder instance
+     */
+    AutoAssignDistributionSetUpdate updateAutoAssign(long id);
+
+    /**
      * @return builder instance
      */
     TargetFilterQueryCreate create();

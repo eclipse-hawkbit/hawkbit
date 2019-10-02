@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,12 +20,16 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -37,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -67,19 +74,24 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private final DistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final SystemSecurityContext systemSecurityContext;
 
     private final Database database;
 
     JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
-            final Database database) {
+            final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
         this.database = database;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -95,7 +107,17 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             create.getQuery().ifPresent(this::assertMaxTargetsQuota);
         }
 
+        verifyWeightAndThrowExceptionIfNotValid(create.getAutoAssignWeight().orElse(null));
+
         return targetFilterQueryRepository.save(create.build());
+    }
+    
+    private void verifyWeightAndThrowExceptionIfNotValid(final Integer weight) {
+        if (isMultiAssignmentsEnabled() && weight == null) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
+        } else if (!isMultiAssignmentsEnabled() && weight != null) {
+            throw new MultiAssignmentIsNotEnabledException();
+        }
     }
 
     @Override
@@ -222,30 +244,25 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public TargetFilterQuery updateAutoAssignDSWithActionType(final long queryId, final Long dsId,
-            final ActionType actionType) {
-        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(queryId);
-
-        if (dsId == null) {
+    public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
+        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getTargetFilterId());
+        verifyWeightAndThrowExceptionIfNotValid(update.getWeight());
+        if (update.getDsId() == null) {
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
+            targetFilterQuery.setAutoAssignWeight(null);
         } else {
             // we cannot be sure that the quota was enforced at creation time
             // because the Target Filter Query REST API does not allow to
             // specify an
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
-
-            final JpaDistributionSet distributionSetToAutoAssign = findDistributionSetAndThrowExceptionIfNotFound(dsId);
-            // must be completed and not soft deleted
-            verifyDistributionSetAndThrowExceptionIfNotValid(distributionSetToAutoAssign);
-
-            targetFilterQuery.setAutoAssignDistributionSet(distributionSetToAutoAssign);
-            // the action type is set to FORCED per default (when not explicitly
-            // specified)
-            targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(actionType));
+            final JpaDistributionSet ds = findDistributionSetAndThrowExceptionIfNotFound(update.getDsId());
+            verifyDistributionSetAndThrowExceptionIfNotValid(ds);
+            targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
+            targetFilterQuery.setAutoAssignWeight(update.getWeight());
         }
-
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
@@ -287,6 +304,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         QuotaHelper.assertAssignmentQuota(
                 targetRepository.count(RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database)),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
 }

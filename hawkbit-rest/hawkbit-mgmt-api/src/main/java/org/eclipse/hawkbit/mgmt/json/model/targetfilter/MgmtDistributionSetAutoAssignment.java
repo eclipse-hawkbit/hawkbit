@@ -22,11 +22,21 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
     @JsonProperty(required = false)
     private MgmtActionType type;
 
+    private Integer weight;
+
     public MgmtActionType getType() {
         return type;
     }
 
     public void setType(final MgmtActionType type) {
         this.type = type;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 }

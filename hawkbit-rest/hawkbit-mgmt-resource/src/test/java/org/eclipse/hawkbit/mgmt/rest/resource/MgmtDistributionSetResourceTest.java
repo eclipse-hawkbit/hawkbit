@@ -555,9 +555,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
 
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("name==y")).getId(),
-                createdDs.getId());
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(knownFilterName)
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
 
         // create some dummy target filter queries
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==y"));
@@ -615,12 +614,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries that should be found
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("name==y"))
-                .getId(), createdDs.getId());
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("name==y"))
-                .getId(), createdDs.getId());
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1")
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2")
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
         // create some dummy target filter queries
         targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("name==y"));

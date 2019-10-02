@@ -38,6 +38,11 @@ public interface Action extends TenantAwareBaseEntity {
      * Maximum length of external reference.
      */
     int EXTERNAL_REF_MAX_LENGTH = 512;
+
+    /**
+     * Minimum weight to indicate the priority of {@link Action}.
+     */
+    int PRIORITY_MIN_WEIGHT = 0;
     /**
      * Maximum weight to indicate the priority of {@link Action}.
      */
