@@ -205,7 +205,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // try to upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_SIZE_QUOTA_EXCEEDED.getKey())));
     }
 
     @Test
@@ -431,7 +433,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_SIZE_QUOTA_EXCEEDED.getKey())));
 
     }
 

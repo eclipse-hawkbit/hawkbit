@@ -32,6 +32,8 @@ public final class QuotaHelper {
     private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s) cannot be uploaded. The maximum total artifact storage of %s bytes would be exceeded.";
 
     private static final String MAX_ASSIGNMENT_QUOTA_EXCEEDED = "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.";
+    public static final String KB = "KB";
+    public static final String MB = "MB";
 
     private QuotaHelper() {
         // no need to instantiate this class
@@ -213,12 +215,12 @@ public final class QuotaHelper {
      */
     private static String byteValueToReadableString(long byteValue) {
         double outputValue = byteValue / 1024.0;
-        String unit = "KB";
+        String unit = KB;
         if (outputValue >= 1024) {
             outputValue = outputValue / 1024.0;
-            unit = "MB";
+            unit = MB;
         }
         DecimalFormat df = new DecimalFormat("#.##");
-        return String.format("%s %s", df.format(outputValue), unit);
+        return new StringBuilder(df.format(outputValue)).append(" ").append(unit).toString();
     }
 }
