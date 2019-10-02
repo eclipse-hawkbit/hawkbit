@@ -13,7 +13,6 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
-import static org.flywaydb.core.internal.util.StringUtils.hasText;
 
 import java.net.URI;
 import java.time.Duration;
@@ -81,6 +80,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.flywaydb.core.internal.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -397,7 +397,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     private Target createTarget(final String controllerId, final URI address,  String name) {
         // In case of a true expression, the targetId will be set as name
-        if (!hasText(name)) {
+        if (!StringUtils.hasText(name)) {
            name = controllerId;
         }
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
