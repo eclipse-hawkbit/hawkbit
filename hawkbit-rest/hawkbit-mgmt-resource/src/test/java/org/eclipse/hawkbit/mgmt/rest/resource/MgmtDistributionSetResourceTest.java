@@ -27,10 +27,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -40,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -299,11 +300,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that multi target assignment is protected by our 'max targets per manual assignment' quota.")
+    @Description("Ensures that multi target assignment is protected by our getMaxTargetDistributionSetAssignmentsPerManualAssignment quota.")
     public void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
-
-        final int maxTargets = quotaManagement.getMaxTargetsPerManualAssignment();
-        final List<Target> targets = testdataFactory.createTargets(maxTargets + 1);
+        final int maxActions = quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment();
+        final List<Target> targets = testdataFactory.createTargets(maxActions + 1);
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
         final JSONArray payload = new JSONArray();
@@ -943,8 +943,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
-        deploymentManagement.assignDistributionSet(set.getId(),
-                Arrays.asList(new TargetWithActionType(testdataFactory.createTarget().getControllerId())));
+        assignDistributionSet(set.getId(), testdataFactory.createTarget().getControllerId());
 
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
@@ -1271,6 +1270,65 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @Test
+    @Description("A request for assigning a target multiple times results in a Bad Request when multiassignment is disabled.")
+    public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = new JSONArray();
+        body.put(getAssignmentObject(targetId, MgmtActionType.SOFT));
+        body.put(getAssignmentObject(targetId, MgmtActionType.FORCED));
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Description("Identical assignments in a single request are removed when multiassignment is disabled.")
+    public void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = new JSONArray();
+        body.put(getAssignmentObject(targetId, MgmtActionType.FORCED));
+        body.put(getAssignmentObject(targetId, MgmtActionType.FORCED));
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1)));
+    }
+
+    @Test
+    @Description("Assigning targets multiple times to a DS in one request works in multiassignment mode.")
+    public void multiAssignment() throws Exception {
+        final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONArray body = new JSONArray();
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.FORCED));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.SOFT));
+
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(body.length())));
+    }
+
+
+
+    public static JSONObject getAssignmentObject(final String targetId, final MgmtActionType type)
+            throws JSONException {
+        final JSONObject obj = new JSONObject();
+        obj.put("id", targetId);
+        obj.put("type", type.getName());
+        return obj;
     }
 
 }

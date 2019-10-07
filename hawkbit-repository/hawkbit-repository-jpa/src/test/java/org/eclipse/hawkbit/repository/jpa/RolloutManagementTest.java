@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,8 +101,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String knownControllerId = "controller12345";
         final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
         testdataFactory.createTarget(knownControllerId);
-        final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
-                knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(knownDistributionSet.getId(),
+                knownControllerId);
         final Long manuallyAssignedActionId = getFirstAssignedActionId(assignmentResult);
 
         // create rollout with the same distribution set already assigned
@@ -142,8 +141,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
             final DistributionSet firstDistributionSet = testdataFactory.createDistributionSet();
             final DistributionSet secondDistributionSet = testdataFactory.createDistributionSet("second");
             testdataFactory.createTarget(knownControllerId);
-            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
-                    firstDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(firstDistributionSet.getId(),
+                    knownControllerId);
             final Long manuallyAssignedActionId = getFirstAssignedActionId(assignmentResult);
 
             // create rollout with the same distribution set already assigned

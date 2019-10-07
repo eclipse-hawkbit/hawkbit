@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -1328,8 +1327,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final String knownExternalref = "externalRefId" + i;
 
             testdataFactory.createTarget(knownControllerId);
-            final DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSet(
-                    knownDistributionSet.getId(), ActionType.FORCED, 0, Collections.singleton(knownControllerId));
+            final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(knownDistributionSet.getId(),
+                    knownControllerId);
             final Long actionId = getFirstAssignedActionId(assignmentResult);
             controllerManagement.updateActionExternalRef(actionId, knownExternalref);
 

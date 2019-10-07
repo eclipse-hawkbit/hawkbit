@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,20 +22,21 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,71 +50,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface DeploymentManagement {
 
     /**
-     * Assigns the addressed {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and {@code forcetime}.
+     * Assigns {@link DistributionSet}s to {@link Target}s according to the
+     * {@link DeploymentRequest}.
      *
-     * @param dsID
-     *            the ID of the distribution set to assign
-     * @param actionType
-     *            the type of the action to apply on the assignment
-     * @param forcedTimestamp
-     *            the time when the action should be forced, only necessary for
-     *            {@link ActionType#TIMEFORCED}
-     * @param controllerIDs
-     *            the IDs of the target to assign the distribution set
-     * @return the assignment result
-     *
-     * @throws IncompleteDistributionSetException
-     *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             define by the {@link DistributionSetType}.
-     *
-     * @throws EntityNotFoundException
-     *             if either provided {@link DistributionSet} or {@link Target}s
-     *             do not exist
+     * @param deploymentRequests
+     *            information about all target-ds-assignments that shall be made
      * 
-     * @throws QuotaExceededException
-     *             if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotNull ActionType actionType,
-            long forcedTimestamp, @NotEmpty Collection<String> controllerIDs);
-
-    /**
-     * Assigns the addressed {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and {@code forcetime}.
-     *
-     * @param dsID
-     *            the ID of the distribution set to assign
-     * @param targets
-     *            a list of all targets and their action type
-     * @return the assignment result
-     *
-     * @throws IncompleteDistributionSetException
-     *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             define by the {@link DistributionSetType}.
-     *
-     * @throws EntityNotFoundException
-     *             if either provided {@link DistributionSet} or {@link Target}s
-     *             do not exist
-     * 
-     * @throws QuotaExceededException
-     *             if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(long dsID,
-            @NotEmpty Collection<TargetWithActionType> targets);
-
-    /**
-     * Assigns the given set of {@link DistributionSet} entities to the given
-     * {@link Target}s using the specified {@link ActionType} and
-     * {@code forcetime}.
-     *
-     * @param dsIDs
-     *            the set of IDs of the distribution sets to assign
-     * @param targets
-     *            a list of all targets and their action type
      * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
@@ -126,26 +69,29 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
+     * @throws MultiAssignmentIsNotEnabledException
+     *             if the request results in multiple assignments to the same
+     *             target and multiassignment is disabled
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(@NotEmpty Set<Long> dsIDs,
-            @NotEmpty Collection<TargetWithActionType> targets);
+    List<DistributionSetAssignmentResult> assignDistributionSets(
+            @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
-     * Assigns the addressed {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and an action message.
+     * Assigns {@link DistributionSet}s to {@link Target}s according to the
+     * {@link DeploymentRequest}.
      *
-     * @param dsID
-     *            the ID of the distribution set to assign
-     * @param targets
-     *            a list of all targets and their action type
+     * @param deploymentRequests
+     *            information about all target-ds-assignments that shall be made
      * @param actionMessage
      *            an optional message for the action status
-     * @return the assignment result
+     * 
+     * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
      *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             define by the {@link DistributionSetType}.
+     *             defined by the {@link DistributionSetType}.
      *
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
@@ -154,14 +100,32 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
+     * @throws MultiAssignmentIsNotEnabledException
+     *             if the request results in multiple assignments to the same
+     *             target and multiassignment is disabled
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult assignDistributionSet(long dsID, @NotEmpty Collection<TargetWithActionType> targets,
-            String actionMessage);
+    List<DistributionSetAssignmentResult> assignDistributionSets(
+            @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
 
     /**
-     * Registers an "offline" assignment, i.e. adds a completed action for the
-     * given {@link DistributionSet} to the given {@link Target}s.
+     * build a {@link DeploymentRequest} for a target distribution set
+     * assignment
+     * 
+     * @param controllerId
+     *            ID of target
+     * @param distributionSetId
+     *            ID of distribution set
+     * @return the builder
+     */
+    static DeploymentRequestBuilder deploymentRequest(final String controllerId, final long distributionSetId) {
+        return new DeploymentRequestBuilder(controllerId, distributionSetId);
+    }
+
+    /**
+     * Registers "offline" assignments. "offline" assignment means adding a
+     * completed action for a {@link DistributionSet} to a {@link Target}.
      * 
      * The handling differs to hawkBit-managed updates by means that:<br/>
      * 
@@ -174,11 +138,10 @@ public interface DeploymentManagement {
      * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
      * </ol>
      * 
-     * @param dsID
-     *            the ID of the distribution set that was assigned
-     * @param controllerIDs
-     *            a list of IDs of the targets that where assigned
-     * @return the assignment result
+     * @param assignments
+     *            target IDs with the respective distribution set ID which they
+     *            are supposed to be assigned to
+     * @return the assignment results
      * 
      * @throws IncompleteDistributionSetException
      *             if mandatory {@link SoftwareModuleType} are not assigned as
@@ -191,9 +154,13 @@ public interface DeploymentManagement {
      * @throws QuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
+     * 
+     * @throws MultiAssignmentIsNotEnabledException
+     *             if the request results in multiple assignments to the same
+     *             target and multiassignment is disabled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetAssignmentResult offlineAssignedDistributionSet(Long dsID, Collection<String> controllerIDs);
+    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments);
 
     /**
      * Cancels the {@link Action} with the given ID. The method will immediately

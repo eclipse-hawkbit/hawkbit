@@ -120,7 +120,8 @@ public final class QuotaExceededException extends AbstractServerRtException {
      *            The maximum number of entities that can be assigned to the
      *            parent entity.
      */
-    public QuotaExceededException(final String type, final String parentType, final Long parentId, final long requested,
+    public QuotaExceededException(final String type, final String parentType, final Object parentId,
+            final long requested,
             final long quota) {
         super(String.format(ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE, requested, type, parentType,
                 parentId != null ? String.valueOf(parentId) : "<new>", quota), SpServerError.SP_QUOTA_EXCEEDED);
