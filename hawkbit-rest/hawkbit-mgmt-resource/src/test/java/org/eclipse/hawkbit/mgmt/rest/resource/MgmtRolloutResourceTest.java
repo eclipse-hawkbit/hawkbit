@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.rest.util.SuccessCondition;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -942,24 +941,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
-    }
-
-    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
-    @Test
-    @Description("A rollout create request must contain a weight when multi assignment is enabled")
-    public void weightMandetoryInMultiAssignmentMode() throws Exception {
-        testdataFactory.createTargets(4, "rollout", "description");
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-
-        enableMultiAssignments();
-        final String rolloutwithoutWeight = JsonBuilder.rollout("withWeight", "", 2, dsId, "id==rollout*",
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, null);
-
-        mvc.perform(post("/rest/v1/rollouts").content(rolloutwithoutWeight).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest())
-                .andExpect(
-                        jsonPath("errorCode", equalTo("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode")));
     }
 
     @Test

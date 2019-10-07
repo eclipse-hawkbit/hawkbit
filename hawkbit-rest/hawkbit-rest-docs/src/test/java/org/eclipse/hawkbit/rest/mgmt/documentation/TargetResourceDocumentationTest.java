@@ -522,7 +522,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
                         requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                requestFieldWithPathMandatoryInMultiAssignMode("weight")
                                         .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER)
                                         .attributes(key("value").value("(0, 1000)")),
                                 optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
