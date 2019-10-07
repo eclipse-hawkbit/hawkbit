@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -21,6 +24,9 @@ public class AutoAssignDistributionSetUpdate {
     private final long targetFilterId;
     private Long dsId;
     private ActionType actionType;
+
+    @Min(Action.PRIORITY_MIN_WEIGHT)
+    @Max(Action.PRIORITY_MAX_WEIGHT)
     private Integer weight;
 
     /**

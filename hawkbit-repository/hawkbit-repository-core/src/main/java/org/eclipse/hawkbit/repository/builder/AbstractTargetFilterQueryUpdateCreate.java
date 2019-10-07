@@ -10,7 +10,11 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.ValidString;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.springframework.util.StringUtils;
 
@@ -31,6 +35,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     protected ActionType actionType;
 
+    @Min(Action.PRIORITY_MIN_WEIGHT)
+    @Max(Action.PRIORITY_MAX_WEIGHT)
     protected Integer weight;
 
     public T autoAssignDistributionSet(final Long distributionSetId) {

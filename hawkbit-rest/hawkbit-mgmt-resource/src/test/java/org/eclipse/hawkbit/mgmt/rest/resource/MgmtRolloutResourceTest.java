@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -34,7 +33,6 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -46,6 +44,7 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.rest.util.SuccessCondition;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -928,8 +927,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, null, -1);
         final String valideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, null, DEFAULT_TEST_WEIGHT);
-        
-        System.out.println(valideWeightRequest);
 
         mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -942,11 +939,12 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
 
-        final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).stream().collect(Collectors.toList());
+        final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
     }
 
+    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
     @Test
     @Description("A rollout create request must contain a weight when multi assignment is enabled")
     public void weightMandetoryInMultiAssignmentMode() throws Exception {
@@ -955,10 +953,13 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
         enableMultiAssignments();
         final String rolloutwithoutWeight = JsonBuilder.rollout("withWeight", "", 2, dsId, "id==rollout*",
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, ActionType.FORCED.toString());
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null);
+
         mvc.perform(post("/rest/v1/rollouts").content(rolloutwithoutWeight).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("errorCode", equalTo("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode")));
     }
 
     @Test

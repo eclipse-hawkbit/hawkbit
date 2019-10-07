@@ -20,6 +20,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -32,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -507,6 +510,48 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
+    }
+
+    @Test
+    @Description("An auto assignment containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        final Long filterId = createSingleTargetFilterQuery("filter1", "name==*").getId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final String invalideWeightRequest = new JSONObject().put("id", dsId).put("weight", -1).toString();
+        final String valideWeightRequest = new JSONObject().put("id", dsId).put("weight", DEFAULT_TEST_WEIGHT)
+                .toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isBadRequest());
+        enableMultiAssignments();
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isBadRequest());
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isOk());
+
+        final List<TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
+        assertThat(filters).hasSize(1);
+        assertThat(filters.get(0).getAutoAssignWeight()).isEqualTo(DEFAULT_TEST_WEIGHT);
+    }
+
+    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
+    @Test
+    @Description("An auto assignment must contain a weight when multi assignment is enabled")
+    public void weightMandetoryInMultiAssignmentMode() throws Exception {
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final Long filterId = createSingleTargetFilterQuery("filter1", "name==*").getId();
+
+        final String body = new JSONObject().put("id", dsId).toString();
+
+        enableMultiAssignments();
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                filterId).content(body).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isBadRequest()).andExpect(
+                        jsonPath("errorCode", equalTo("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode")));
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {

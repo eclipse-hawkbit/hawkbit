@@ -233,18 +233,27 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-        if (isMultiAssignmentsEnabled() && !rollout.getWeight().isPresent()) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
-        } else if (!isMultiAssignmentsEnabled() && rollout.getWeight().isPresent()) {
-            throw new MultiAssignmentIsNotEnabledException();
-        }
-
+        validateRolloutWeight(rollout);
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
         return rolloutRepository.save(rollout);
+    }
+
+    private void validateRolloutWeight(final JpaRollout rollout) {
+        // TODO remove bypassing the weight enforcement as soon as weight can be
+        // set via UI
+        final boolean bypassWeightEnforcement = true;
+        if (!isMultiAssignmentsEnabled() && rollout.getWeight().isPresent()) {
+            throw new MultiAssignmentIsNotEnabledException();
+        } else if (bypassWeightEnforcement) {
+            return;
+        } else if (isMultiAssignmentsEnabled() && !rollout.getWeight().isPresent()) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
+        }
+        
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,

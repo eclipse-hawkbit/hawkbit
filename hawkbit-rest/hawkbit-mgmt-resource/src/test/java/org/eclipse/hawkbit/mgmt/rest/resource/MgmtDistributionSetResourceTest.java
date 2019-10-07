@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -1344,6 +1345,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(actions.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
     }
 
+    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
     @Test
     @Description("An assignment request must contain a weight when multi assignment is enabled")
     public void weightMandetoryInMultiAssignmentMode() throws Exception {
@@ -1355,6 +1357,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest()).andExpect(
+                        jsonPath("errorCode", equalTo("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode")));
     }
 }

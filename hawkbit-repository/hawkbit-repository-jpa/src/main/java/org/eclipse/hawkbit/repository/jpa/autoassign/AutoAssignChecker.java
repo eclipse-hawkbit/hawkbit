@@ -146,7 +146,8 @@ public class AutoAssignChecker {
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
                 Isolation.READ_COMMITTED.value(), status -> {
                     final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(
-                            targetFilterQuery.getQuery(), dsId, targetFilterQuery.getAutoAssignActionType(), PAGE_SIZE);
+                            targetFilterQuery.getQuery(), dsId, targetFilterQuery.getAutoAssignActionType(),
+                            targetFilterQuery.getAutoAssignWeight(), PAGE_SIZE);
                     final int count = deploymentRequests.size();
                     if (count > 0) {
                         deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage);
@@ -171,7 +172,7 @@ public class AutoAssignChecker {
      * @return list of targets with action type
      */
     private List<DeploymentRequest> createAssignmentRequests(final String targetFilterQuery, final Long dsId,
-            final ActionType type, final int count) {
+            final ActionType type, final Integer weight, final int count) {
         final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId,
                 targetFilterQuery);
         // the action type is set to FORCED per default (when not explicitly
@@ -181,7 +182,7 @@ public class AutoAssignChecker {
         // TODO: right now the weight is NULL here, but need to check again in
         // INC 3 stage
         return targets.getContent().stream().map(t -> DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
-                .setActionType(autoAssignActionType).build()).collect(Collectors.toList());
+                .setActionType(autoAssignActionType).setWeight(weight).build()).collect(Collectors.toList());
     }
 
 }

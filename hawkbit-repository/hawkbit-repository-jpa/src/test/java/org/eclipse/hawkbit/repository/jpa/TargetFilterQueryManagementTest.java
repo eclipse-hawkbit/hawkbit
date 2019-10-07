@@ -20,6 +20,9 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
@@ -28,6 +31,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreat
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -36,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -432,5 +438,103 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .findWithAutoAssignDS(PageRequest.of(0, 500));
 
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
+    }
+
+    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
+    @Test
+    @Description("Creating or updating a target filter query with autoassignment requires a weight when multi assignment in enabled.")
+    public void weightRequiredInMultiAssignmentMode() {
+        enableMultiAssignments();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long filterId = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
+
+        Assertions.assertThatExceptionOfType(NoWeightProvidedInMultiAssignmentModeException.class)
+                .isThrownBy(() -> targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("b").query("name==*")
+                                .autoAssignDistributionSet(ds)));
+        Assertions.assertThatExceptionOfType(NoWeightProvidedInMultiAssignmentModeException.class)
+                .isThrownBy(() -> targetFilterQueryManagement
+                        .updateAutoAssignDS(
+                                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())));
+    }
+
+    @Test
+    @Description("Creating or updating a target filter query with autoassignment requires a weight when multi assignment in enabled.")
+    public void weightNotRequiredInMultiAssignmentMode() {
+        enableMultiAssignments();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long filterId = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
+
+        targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("b").query("name==*").autoAssignDistributionSet(ds));
+        targetFilterQueryManagement
+                .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()));
+    }
+
+    @Test
+    @Description("Creating or updating a target filter query with autoassignment with a weight causes an error when multi assignment in disabled.")
+    public void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long filterId = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
+
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
+                        .name("b").query("name==*").autoAssignDistributionSet(ds)
+                        .autoAssignWeight(DEFAULT_TEST_WEIGHT)));
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
+                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())
+                                .weight(DEFAULT_TEST_WEIGHT)));
+    }
+
+    @Test
+    @Description("Auto assignment can be removed from filter when multi assignment in enabled.")
+    public void removeDsFromFilterWhenMultiAssignmentModeNotEnabled() {
+        enableMultiAssignments();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a")
+                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(DEFAULT_TEST_WEIGHT)).getId();
+        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId)
+                .ds(null).weight(null));
+    }
+
+    @Test
+    @Description("Weight is validated and saved to the Filter.")
+    public void weightValidatedAndSaved() {
+        final int weightTooHigh = 1001;
+        final int weightTooLow = -1;
+        final int valideWeight1 = 1000;
+        final int valideWeight2 = 0;
+
+        enableMultiAssignments();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+        .isThrownBy(() -> targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery().create().name("a").query("name==*")
+                                .autoAssignDistributionSet(ds).autoAssignWeight(weightTooHigh)));
+        
+        final Long filterId = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")
+                        .autoAssignDistributionSet(ds).autoAssignWeight(valideWeight1))
+                .getId();
+        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).isEqualTo(valideWeight1);
+
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
+                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())
+                                .weight(weightTooHigh)));
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
+                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())
+                                .weight(weightTooLow)));
+        targetFilterQueryManagement.updateAutoAssignDS(
+                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(valideWeight1));
+        targetFilterQueryManagement.updateAutoAssignDS(
+                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(valideWeight2));
+        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).isEqualTo(valideWeight2);
     }
 }

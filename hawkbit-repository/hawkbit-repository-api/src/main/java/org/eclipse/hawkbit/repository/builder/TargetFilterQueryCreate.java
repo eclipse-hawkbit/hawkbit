@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -71,8 +69,7 @@ public interface TargetFilterQueryCreate {
      *            weight of {@link Action} generated within auto assignment
      * @return updated builder instance
      */
-    TargetFilterQueryCreate autoAssignWeight(
-            @Min(Action.PRIORITY_MIN_WEIGHT) @Max(Action.PRIORITY_MAX_WEIGHT) Integer weight);
+    TargetFilterQueryCreate autoAssignWeight(Integer weight);
 
     /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder

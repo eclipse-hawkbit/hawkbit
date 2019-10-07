@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -75,6 +74,6 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * @return the weight of the {@link Action}s created during an auto
      *         assignment.
      */
-    Optional<Integer> getAutoAssignWeight();
+    Integer getAutoAssignWeight();
 
 }

@@ -104,19 +104,23 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         // enforce the 'max targets per auto assign' quota right here even if
         // the result of the filter query can vary over time
         if (create.getAutoAssignDistributionSetId().isPresent()) {
+            verifyWeightAndThrowExceptionIfNotValid(create.getAutoAssignWeight().orElse(null));
             create.getQuery().ifPresent(this::assertMaxTargetsQuota);
         }
-
-        verifyWeightAndThrowExceptionIfNotValid(create.getAutoAssignWeight().orElse(null));
 
         return targetFilterQueryRepository.save(create.build());
     }
     
     private void verifyWeightAndThrowExceptionIfNotValid(final Integer weight) {
-        if (isMultiAssignmentsEnabled() && weight == null) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
-        } else if (!isMultiAssignmentsEnabled() && weight != null) {
+        // TODO remove bypassing the weight enforcement as soon as weight can be
+        // set via UI
+        final boolean bypassWeightEnforcement = true;
+        if (!isMultiAssignmentsEnabled() && weight != null) {
             throw new MultiAssignmentIsNotEnabledException();
+        } else if (bypassWeightEnforcement) {
+            return;
+        } else if (isMultiAssignmentsEnabled() && weight == null) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }
 
@@ -246,12 +250,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getTargetFilterId());
-        verifyWeightAndThrowExceptionIfNotValid(update.getWeight());
         if (update.getDsId() == null) {
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
         } else {
+            verifyWeightAndThrowExceptionIfNotValid(update.getWeight());
             // we cannot be sure that the quota was enforced at creation time
             // because the Target Filter Query REST API does not allow to
             // specify an

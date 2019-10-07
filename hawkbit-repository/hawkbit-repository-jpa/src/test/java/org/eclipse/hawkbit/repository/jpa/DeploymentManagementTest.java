@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -699,6 +700,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(0);
     }
 
+    @Ignore("Setting a weight is not enforced because it is not jet possible via UI.")
     @Test
     @Description("An assignment request without a weight causes an error when multi assignment in enabled.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -716,6 +718,20 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         Assertions.assertThatExceptionOfType(NoWeightProvidedInMultiAssignmentModeException.class)
                 .isThrownBy(() -> deploymentManagement
                         .assignDistributionSets(Arrays.asList(assignWithoutWeight, assignWithWeight)));
+    }
+
+    @Test
+    @Description("An assignment request without a weight is ok when multi assignment in enabled.")
+    public void weightNotRequiredInMultiAssignmentMode() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId).build();
+        final DeploymentRequest assignWithWeight = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(DEFAULT_TEST_WEIGHT).build();
+
+        enableMultiAssignments();
+        deploymentManagement.assignDistributionSets(Arrays.asList(assignWithoutWeight, assignWithWeight));
     }
 
     @Test
