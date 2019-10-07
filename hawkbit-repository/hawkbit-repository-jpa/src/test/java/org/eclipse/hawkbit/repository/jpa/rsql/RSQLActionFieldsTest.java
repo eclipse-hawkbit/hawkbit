@@ -46,6 +46,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         action.setDistributionSet(dsA);
         action.setTarget(target);
         action.setStatus(Status.RUNNING);
+        action.setWeight(45);
         target.addAction(action);
 
         actionRepository.save(action);
@@ -56,6 +57,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             newAction.setActive(i % 2 == 0);
             newAction.setStatus(Status.RUNNING);
             newAction.setTarget(target);
+            newAction.setWeight(45);
             actionRepository.save(newAction);
             target.addAction(newAction);
         }

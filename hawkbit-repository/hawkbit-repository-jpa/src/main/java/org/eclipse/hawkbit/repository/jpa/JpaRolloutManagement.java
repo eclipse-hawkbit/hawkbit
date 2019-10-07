@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -43,6 +44,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -57,6 +60,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -74,6 +78,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,9 +170,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
         this.eventPublisherHolder = eventPublisherHolder;
         this.database = database;
     }
@@ -226,13 +234,29 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-
+        validateRolloutWeight(rollout);
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
         return rolloutRepository.save(rollout);
+    }
+
+    private void validateRolloutWeight(final JpaRollout rollout) {
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
+        final boolean bypassWeightEnforcement = true;
+        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext,
+                tenantConfigurationManagement);
+        if (!multiAssignmentsEnabled && rollout.getWeight().isPresent()) {
+            throw new MultiAssignmentIsNotEnabledException();
+        } else if (bypassWeightEnforcement) {
+            return;
+        } else if (multiAssignmentsEnabled && !rollout.getWeight().isPresent()) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
+        }
+        
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
@@ -618,6 +642,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             action.setStatus(Status.SCHEDULED);
             action.setRollout(rollout);
             action.setRolloutGroup(rolloutGroup);
+            rollout.getWeight().ifPresent(action::setWeight);
             actionRepository.save(action);
         });
     }
@@ -1008,6 +1033,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         update.getDescription().ifPresent(rollout::setDescription);
         update.getActionType().ifPresent(rollout::setActionType);
         update.getForcedTime().ifPresent(rollout::setForcedTime);
+        update.getWeight().ifPresent(rollout::setWeight);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.get(setId)
@@ -1136,5 +1162,4 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
-
 }

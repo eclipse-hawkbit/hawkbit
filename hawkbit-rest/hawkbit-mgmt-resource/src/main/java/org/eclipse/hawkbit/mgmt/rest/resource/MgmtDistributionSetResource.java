@@ -266,7 +266,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final List<DistributionSetAssignmentResult> assignmentResults = deployManagament
                 .assignDistributionSets(deploymentRequests);
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
-
     }
 
     @Override

@@ -15,11 +15,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.util.CollectionUtils;
@@ -58,6 +61,7 @@ public final class MgmtTargetFilterQueryMapper {
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
             targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(filter.getAutoAssignActionType()));
+            targetRest.setAutoAssignWeight(filter.getAutoAssignWeight());
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
@@ -74,6 +78,14 @@ public final class MgmtTargetFilterQueryMapper {
             final MgmtTargetFilterQueryRequestBody filterRest) {
 
         return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
+    }
+
+    static AutoAssignDistributionSetUpdate fromRequest(final EntityFactory entityFactory, final long filterId,
+            final MgmtDistributionSetAutoAssignment assignRest) {
+        final ActionType type = MgmtRestModelMapper.convertActionType(assignRest.getType());
+
+        return entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(assignRest.getId()).actionType(type)
+                .weight(assignRest.getWeight());
     }
 
 }

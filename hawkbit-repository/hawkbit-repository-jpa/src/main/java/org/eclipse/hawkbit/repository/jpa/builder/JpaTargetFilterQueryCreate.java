@@ -36,7 +36,8 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
         return new JpaTargetFilterQuery(name, query,
                 getAutoAssignDistributionSetId().map(this::findDistributionSetAndThrowExceptionIfNotFound).orElse(null),
-                getAutoAssignActionType().filter(JpaTargetFilterQueryCreate::isAutoAssignActionTypeValid).orElse(null));
+                getAutoAssignActionType().filter(JpaTargetFilterQueryCreate::isAutoAssignActionTypeValid).orElse(null),
+                weight);
     }
 
     private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {

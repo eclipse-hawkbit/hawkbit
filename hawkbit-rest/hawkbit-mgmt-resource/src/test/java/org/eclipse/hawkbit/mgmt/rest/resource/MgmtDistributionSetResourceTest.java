@@ -555,9 +555,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
 
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(knownFilterName).query("name==y")).getId(),
-                createdDs.getId());
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(knownFilterName)
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
 
         // create some dummy target filter queries
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==y"));
@@ -615,12 +614,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries that should be found
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1").query("name==y"))
-                .getId(), createdDs.getId());
-        targetFilterQueryManagement.updateAutoAssignDS(targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2").query("name==y"))
-                .getId(), createdDs.getId());
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1")
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2")
+                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
         // create some dummy target filter queries
         targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("name==y"));
@@ -1247,8 +1244,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of " +
-            "DOWNLOAD_ONLY.")
+    @Description("Ensures that multi target assignment through API is reflected by the repository in the case of "
+            + "DOWNLOAD_ONLY.")
     public void assignMultipleTargetsToDistributionSetAsDownloadOnly() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
@@ -1263,8 +1260,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
-                .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
@@ -1310,10 +1307,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final JSONArray body = new JSONArray();
-        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.FORCED));
-        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.SOFT));
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED, 56));
+        body.put(getAssignmentObject(targetIds.get(0), MgmtActionType.FORCED, 78));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.FORCED, 67));
+        body.put(getAssignmentObject(targetIds.get(1), MgmtActionType.SOFT, 34));
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
@@ -1321,14 +1318,32 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("total", equalTo(body.length())));
     }
 
+    @Test
+    @Description("An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int weight = 78;
 
+        final JSONArray bodyValide = new JSONArray().put(getAssignmentObject(targetId, MgmtActionType.FORCED, weight));
+        final JSONArray bodyInvalide = new JSONArray()
+                .put(getAssignmentObject(targetId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1));
 
-    public static JSONObject getAssignmentObject(final String targetId, final MgmtActionType type)
-            throws JSONException {
-        final JSONObject obj = new JSONObject();
-        obj.put("id", targetId);
-        obj.put("type", type.getName());
-        return obj;
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyInvalide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyValide.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        assertThat(actions).size().isEqualTo(1);
+        assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
     }
-
 }

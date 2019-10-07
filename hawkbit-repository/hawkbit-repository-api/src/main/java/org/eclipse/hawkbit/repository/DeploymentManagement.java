@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -76,7 +77,7 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            @NotEmpty List<DeploymentRequest> deploymentRequests);
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
      * Assigns {@link DistributionSet}s to {@link Target}s according to the
@@ -107,9 +108,9 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
-
-    /**
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
+            
+                /**
      * build a {@link DeploymentRequest} for a target distribution set
      * assignment
      * 

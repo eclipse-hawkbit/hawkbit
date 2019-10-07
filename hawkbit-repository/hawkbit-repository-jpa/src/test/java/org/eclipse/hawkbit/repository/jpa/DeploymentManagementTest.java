@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -171,7 +173,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds1, Collections.singletonList(testTarget)));
+                .isThrownBy(() -> assignDistributionSet(ds1.getId(), testTarget.getControllerId(), 77));
     }
 
     @Test
@@ -563,16 +565,17 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         enableMultiAssignments();
         final List<Target> targets = testdataFactory.createTargets(10);
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
 
         // First assignment
         final DistributionSet ds1 = testdataFactory.createDistributionSet("Multi-assign-1");
-        assignDistributionSet(ds1, targets);
+        assignDistributionSet(ds1.getId(), targetIds, 77);
 
         assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
 
         // Second assignment
         final DistributionSet ds2 = testdataFactory.createDistributionSet("Multi-assign-2");
-        assignDistributionSet(ds2, targets);
+        assignDistributionSet(ds2.getId(), targetIds, 45);
 
         assertDsExclusivelyAssignedToTargets(targets, ds2.getId(), STATE_ACTIVE, Status.RUNNING);
         assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, Status.RUNNING);
@@ -601,7 +604,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     public void multiassignmentInOneRequest() {
         final List<Target> targets = testdataFactory.createTargets(2);
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
-        final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets);
+        final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
 
         enableMultiAssignments();
         final List<DistributionSetAssignmentResult> results = deploymentManagement
@@ -614,7 +617,14 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });
+    }
 
+    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
+            final Collection<Target> targets, final int weight) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests.add(DeploymentManagement
+                .deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight).build())));
+        return deploymentRequests;
     }
 
     @Test
@@ -624,9 +634,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
 
         final DeploymentRequest targetToDS0 = DeploymentManagement
-                .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).build();
+                .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).setWeight(78).build();
         final DeploymentRequest targetToDS1 = DeploymentManagement
-                .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).build();
+                .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).setWeight(565).build();
 
         Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)));
@@ -638,17 +648,25 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Duplicate Assignments are removed from a request when multiassignment is disabled, otherwise not")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 1) })
     public void duplicateAssignmentsInRequestAreOnlyRemovedIfMultiassignmentDisabled() {
-        final Target target = testdataFactory.createTarget();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
         final List<DeploymentRequest> twoEqualAssignments = Collections.nCopies(2,
-                DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build());
+                DeploymentManagement.deploymentRequest(targetId, dsId).build());
 
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
                 .isEqualTo(1);
 
         enableMultiAssignments();
-        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
+        final List<DeploymentRequest> twoEqualAssignmentsWithWeight = Collections.nCopies(2,
+                DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(555).build());
+        assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignmentsWithWeight)))
                 .isEqualTo(2);
     }
 
@@ -668,12 +686,73 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final List<DeploymentRequest> deploymentRequests = Collections.nCopies(maxActions + 1,
-                DeploymentManagement.deploymentRequest(controllerId, dsId).build());
+                DeploymentManagement.deploymentRequest(controllerId, dsId).setWeight(24).build());
 
         enableMultiAssignments();
         Assertions.assertThatExceptionOfType(QuotaExceededException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
         assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(0);
+    }
+
+    @Test
+    @Description("An assignment request without a weight is ok when multi assignment in enabled.")
+    public void weightNotRequiredInMultiAssignmentMode() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId).build();
+        final DeploymentRequest assignWithWeight = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(567)
+                .build();
+
+        enableMultiAssignments();
+        deploymentManagement.assignDistributionSets(Arrays.asList(assignWithoutWeight, assignWithWeight));
+    }
+
+    @Test
+    @Description("An assignment request containing a weight causes an error when multi assignment in disabled.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+    public void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(456).build();
+
+        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class).isThrownBy(
+                () -> deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight)));
+    }
+
+    @Test
+    @Description("Weights are validated and contained in the resulting Action.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = MultiActionEvent.class, count = 2) })
+    public void weightValidatedAndSaved() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final DeploymentRequest valideRequest1 = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(Action.WEIGHT_MAX).build();
+        final DeploymentRequest valideRequest2 = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(Action.WEIGHT_MIN).build();
+        final DeploymentRequest weightTooLow = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(Action.WEIGHT_MIN - 1).build();
+        final DeploymentRequest weightTooHigh = DeploymentManagement.deploymentRequest(targetId, dsId)
+                .setWeight(Action.WEIGHT_MAX + 1).build();
+        enableMultiAssignments();
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooLow)));
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
+                () -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooHigh)));
+        final Long valideActionId1 = getFirstAssignedAction(
+                deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest1)).get(0)).getId();
+        final Long valideActionId2 = getFirstAssignedAction(
+                deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest2)).get(0)).getId();
+        assertThat(actionRepository.getById(valideActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
+        assertThat(actionRepository.getById(valideActionId2).get().getWeight()).get().isEqualTo(Action.WEIGHT_MIN);
     }
 
     /**
@@ -1143,13 +1222,15 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the computation of already assigned entities returned as a result of an assignment")
-    public void testAlreadyAssignedAndAssignedActionsInAssignmentResult(){
-        // create target1, distributionSet, assign ds to target1 and finish update (close all actions)
+    public void testAlreadyAssignedAndAssignedActionsInAssignmentResult() {
+        // create target1, distributionSet, assign ds to target1 and finish
+        // update (close all actions)
         final Action action = prepareFinishedUpdate("target1", "ds", false);
         final Target target2 = testdataFactory.createTarget("target2");
         final Target target3 = testdataFactory.createTarget("target3");
 
-        // assign ds to target2, but don't finish update (actions should be still open)
+        // assign ds to target2, but don't finish update (actions should be
+        // still open)
         assignDistributionSet(action.getDistributionSet().getId(), target2.getControllerId());
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(
@@ -1283,7 +1364,5 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         public List<Long> getUndeployedTargetIDs() {
             return undeployedTargetIDs;
         }
-
     }
-
 }

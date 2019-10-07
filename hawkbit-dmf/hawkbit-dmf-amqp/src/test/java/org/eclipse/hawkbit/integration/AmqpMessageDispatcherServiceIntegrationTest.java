@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ON
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,8 +50,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -100,7 +103,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "sendDownloadStatusBeforeWindowStartTime";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(2),
                 getTestDuration(10), getTestTimeZone());
@@ -122,7 +125,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
         assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), controllerId, getTestSchedule(-5),
                 getTestDuration(10), getTestTimeZone());
@@ -145,7 +148,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
@@ -171,12 +174,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignMultipleDsInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final Long actionId1 = assignNewDsToTarget(controllerId);
+        final Long actionId1 = assignNewDsToTarget(controllerId, 450);
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install));
 
-        final Long actionId2 = assignNewDsToTarget(controllerId);
+        final Long actionId2 = assignNewDsToTarget(controllerId, 111);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
@@ -197,8 +200,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final long actionId1 = assignNewDsToTarget(controllerId);
-        final long actionId2 = assignNewDsToTarget(controllerId);
+        final long actionId1 = assignNewDsToTarget(controllerId, 675);
+        final long actionId2 = assignNewDsToTarget(controllerId, 343);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
         deploymentManagement.cancelAction(actionId1);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
@@ -229,8 +232,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final long actionId1 = assignNewDsToTarget(controllerId);
-        final long actionId2 = assignNewDsToTarget(controllerId);
+        final long actionId1 = assignNewDsToTarget(controllerId, 66);
+        final long actionId2 = assignNewDsToTarget(controllerId, 767);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
 
@@ -254,11 +257,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        final Long actionId1 = getFirstAssignedAction(assignDistributionSet(dsId, controllerId, 344)).getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        final Long actionId2 = getFirstAssignedAction(assignDistributionSet(dsId, controllerId, 775)).getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
@@ -272,8 +275,14 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Long assignNewDsToTarget(final String controllerId) {
-        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(), controllerId));
+        return assignNewDsToTarget(controllerId, null);
+    }
+
+    private Long assignNewDsToTarget(final String controllerId, final Integer weight) {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long actionId = getFirstAssignedActionId(
+                assignDistributionSet(ds.getId(), Collections.singletonList(controllerId), ActionType.FORCED,
+                        RepositoryModelConstants.NO_FORCE_TIME, weight));
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         return actionId;
     }
@@ -296,15 +305,15 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "startRolloutsWithSameDsInMultiAssignMode";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds = testdataFactory.createDistributionSet();
         final Set<Long> smIds = getSoftwareModuleIds(ds);
         final String filterQuery = "controllerId==" + controllerId;
 
-        createAndStartRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery, 122);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds));
 
-        createAndStartRollout(ds, filterQuery);
+        createAndStartRollout(ds, filterQuery, 43);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds, smIds));
     }
@@ -327,15 +336,15 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         registerAndAssertTargetWithExistingTenant(controllerId);
         final String filterQuery = "controllerId==" + controllerId;
-        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds1 = testdataFactory.createDistributionSet();
         final Set<Long> smIds1 = getSoftwareModuleIds(ds1);
-        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds2 = testdataFactory.createDistributionSet();
         final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
 
-        createAndStartRollout(ds1, filterQuery);
-        createAndStartRollout(ds2, filterQuery);
+        createAndStartRollout(ds1, filterQuery, 12);
+        createAndStartRollout(ds2, filterQuery, 45);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
-        createAndStartRollout(ds1, filterQuery);
+        createAndStartRollout(ds1, filterQuery, 65);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
 
@@ -357,8 +366,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery) {
+        return createAndStartRollout(ds, filterQuery, null);
+    }
+
+    private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
-                filterQuery, ds, "50", "5");
+                filterQuery, ds, "50", "5", ActionType.FORCED, weight);
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
         return rollout;

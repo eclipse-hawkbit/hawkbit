@@ -13,6 +13,7 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -27,6 +28,8 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  */
 public interface TargetFilterQueryCreate {
     /**
+     * Set filter name
+     * 
      * @param name
      *            of {@link TargetFilterQuery#getName()}
      * @return updated builder instance
@@ -34,6 +37,8 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
+     * Set filter query
+     * 
      * @param query
      *            of {@link TargetFilterQuery#getQuery()}
      * @return updated builder instance
@@ -41,6 +46,8 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String query);
 
     /**
+     * Set {@link DistributionSet} for auto assignment
+     * 
      * @param distributionSet
      *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return updated builder instance
@@ -50,6 +57,8 @@ public interface TargetFilterQueryCreate {
     }
 
     /**
+     * Set ID of {@link DistributionSet} for auto assignment
+     * 
      * @param dsId
      *            for {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return updated builder instance
@@ -57,11 +66,22 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate autoAssignDistributionSet(Long dsId);
 
     /**
+     * Set {@link ActionType} for auto assignment
+     * 
      * @param actionType
      *            for {@link TargetFilterQuery#getAutoAssignActionType()}
      * @return updated builder instance
      */
     TargetFilterQueryCreate autoAssignActionType(ActionType actionType);
+
+    /**
+     * Set weight of {@link Action} created during auto assignment
+     * 
+     * @param weight
+     *            weight of {@link Action} generated within auto assignment
+     * @return updated builder instance
+     */
+    TargetFilterQueryCreate autoAssignWeight(Integer weight);
 
     /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder

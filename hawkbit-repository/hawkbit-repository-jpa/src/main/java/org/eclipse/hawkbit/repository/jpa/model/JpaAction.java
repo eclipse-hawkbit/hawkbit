@@ -28,6 +28,8 @@ import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
@@ -89,6 +91,11 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "forced_time")
     private long forcedTime;
 
+    @Column(name = "weight")
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
+    private Integer weight;
+
     @Column(name = "status", nullable = false)
     @ObjectTypeConverter(name = "status", objectType = Action.Status.class, dataType = Integer.class, conversionValues = {
             @ConversionValue(objectValue = "FINISHED", dataValue = "0"),
@@ -126,7 +133,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
-    
+
     @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
     private String externalRef;
 
@@ -193,6 +200,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
+    }
+
+    @Override
     public RolloutGroup getRolloutGroup() {
         return rolloutGroup;
     }
@@ -213,8 +229,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public String toString() {
         return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
-                + getId() + ", actionType=" + getActionType() + ", isActive=" + isActive() + ",  createdAt="
-                + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + "]";
+                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight().orElse(null) + ", isActive="
+                + isActive() + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + "]";
     }
 
     @Override
@@ -337,7 +353,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public void setExternalRef(String externalRef) {
+    public void setExternalRef(final String externalRef) {
         this.externalRef = externalRef;
     }
 

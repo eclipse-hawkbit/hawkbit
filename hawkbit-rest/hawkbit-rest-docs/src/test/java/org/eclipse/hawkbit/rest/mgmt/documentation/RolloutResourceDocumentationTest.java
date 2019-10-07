@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
@@ -80,7 +81,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving all rollouts. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRollouts() throws Exception {
-
+        enableMultiAssignments();
         createRolloutEntity();
 
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING).accept(MediaTypes.HAL_JSON_VALUE))
@@ -113,6 +114,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "id").description(ApiModelPropertiesGeneric.ITEM_ID));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "name").description(ApiModelPropertiesGeneric.NAME));
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "weight")
+                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT).type(JsonFieldType.NUMBER).optional());
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "deleted").description(ApiModelPropertiesGeneric.DELETED));
         allFieldDescriptor
                 .add(fieldWithPath(arrayPrefix + "description").description(ApiModelPropertiesGeneric.DESCRPTION));
@@ -159,7 +162,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving a single rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRollout() throws Exception {
-
+        enableMultiAssignments();
         final Rollout rollout = createRolloutEntity();
 
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", rollout.getId())
@@ -192,6 +195,9 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(requestFields(
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                        requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
+                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -274,6 +280,9 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
                 .andDo(this.document.document(requestFields(
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                        requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
+                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -615,11 +624,13 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
     private Rollout createRolloutEntity() {
         testdataFactory.createTargets(20, "exampleTarget");
-        final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("exampleRollout")
-                        .targetFilterQuery("controllerId==exampleTarget*").set(testdataFactory.createDistributionSet()),
-                10, new RolloutGroupConditionBuilder().withDefaults()
-                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
+        final RolloutCreate rolloutCreate = entityFactory.rollout().create().name("exampleRollout")
+                .targetFilterQuery("controllerId==exampleTarget*").set(testdataFactory.createDistributionSet());
+        if (isMultiAssignmentsEnabled()) {
+            rolloutCreate.weight(400);
+        }
+        final Rollout rollout = rolloutManagement.create(rolloutCreate, 10, new RolloutGroupConditionBuilder()
+                .withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();

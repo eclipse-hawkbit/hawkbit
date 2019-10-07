@@ -33,8 +33,7 @@ public class MgmtTargetFilterQueryRequestBody {
         return query;
     }
 
-    public void setQuery(String query) {
+    public void setQuery(final String query) {
         this.query = query;
     }
-
 }

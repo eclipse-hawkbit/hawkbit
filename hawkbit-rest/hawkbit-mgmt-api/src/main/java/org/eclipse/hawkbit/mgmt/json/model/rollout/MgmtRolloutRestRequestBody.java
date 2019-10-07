@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Model for request containing a rollout body e.g. in a POST request of
@@ -33,6 +34,9 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
     private Long forcetime;
 
     private Long startAt;
+
+    @JsonProperty(required = false)
+    private Integer weight;
 
     private MgmtActionType type;
 
@@ -124,7 +128,7 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      * @param groups
      *            List of {@link MgmtRolloutGroup}
      */
-    public void setGroups(List<MgmtRolloutGroup> groups) {
+    public void setGroups(final List<MgmtRolloutGroup> groups) {
         this.groups = groups;
     }
 
@@ -139,7 +143,22 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      * @param startAt
      *            the start at timestamp in millis or null
      */
-    public void setStartAt(Long startAt) {
+    public void setStartAt(final Long startAt) {
         this.startAt = startAt;
+    }
+
+    /**
+     * @return the priority of {@link Rollout}
+     */
+    public Integer getWeight() {
+        return weight;
+    }
+
+    /**
+     * @param weight
+     *            the priority of {@link Rollout}
+     */
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 }

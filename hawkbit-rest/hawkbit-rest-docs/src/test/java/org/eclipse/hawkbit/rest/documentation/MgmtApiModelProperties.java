@@ -109,6 +109,8 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_LINKS_GROUPS = "Link to retrieve the groups a rollout";
     public static final String ROLLOUT_START_ASYNC = "Start the rollout asynchronous";
 
+    public static final String RESULTING_ACTIONS_WEIGHT = "Weight of the resulting Actions";
+
     public static final String UPDATE_STATUS = "Current update status of the target.";
     public static final String TARGET_ATTRIBUTES = "Target attributes.";
 
@@ -137,6 +139,8 @@ public final class MgmtApiModelProperties {
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
 
     public static final String ACTION_LIST = "List of actions.";
+
+    public static final String ACTION_WEIGHT = "Weight of the action showing the importance of the update.";
 
     public static final String IP_ADDRESS = "Last known IP address of the target. Only presented if IP address of the target itself is known (connected directly through DDI API).";
 
@@ -188,6 +192,7 @@ public final class MgmtApiModelProperties {
     // request parameter
     public static final String FORCETIME = "Forcetime in milliseconds.";
     public static final String FORCE = "Force as boolean.";
+    public static final String ASSIGNMENT_WEIGHT = "Importance of the assignment.";
     public static final String ASSIGNMENT_TYPE = "The type of the assignment.";
     public static final String TARGET_ASSIGNED = "The number of targets that have been assigned as part of this operation.";
     public static final String TARGET_ASSIGNED_ALREADY = "The number of targets which already had been the assignment.";

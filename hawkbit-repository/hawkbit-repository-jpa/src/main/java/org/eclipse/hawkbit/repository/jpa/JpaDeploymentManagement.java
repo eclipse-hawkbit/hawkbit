@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
@@ -45,6 +44,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -57,6 +57,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -194,6 +195,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        validateOnlineAssignment(deploymentRequests);
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -231,6 +233,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         if (distinctTargetsInRequest < deploymentRequests.size()) {
             throw new MultiAssignmentIsNotEnabledException();
+        }
+    }
+
+    private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
+        final boolean bypassWeightEnforcement = true;
+        final long assignmentsWithWeight = deploymentRequests.stream()
+                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
+        final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
+        final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
+        if (!isMultiAssignmentsEnabled() && containsAssignmentWithWeight) {
+            throw new MultiAssignmentIsNotEnabledException();
+        } else if (bypassWeightEnforcement) {
+            return;
+        } else if (isMultiAssignmentsEnabled() && containsAssignmentWithoutWeight) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }
 
@@ -275,8 +294,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct()
-                .collect(Collectors.toList());
+        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+                .distinct().collect(Collectors.toList());
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
                 distributionSetEntity.getId());
@@ -285,8 +304,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
-                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType, actionMessage,
+                assignmentStrategy, distributionSetEntity, targetEntities);
         return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType.size());
     }
 
@@ -823,7 +842,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
+        return TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext, tenantConfigurationManagement);
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {

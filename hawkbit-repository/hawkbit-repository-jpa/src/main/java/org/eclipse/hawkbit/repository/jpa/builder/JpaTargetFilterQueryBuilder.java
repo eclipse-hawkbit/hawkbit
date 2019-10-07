@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.builder;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
@@ -34,6 +35,11 @@ public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
     @Override
     public TargetFilterQueryCreate create() {
         return new JpaTargetFilterQueryCreate(distributionSetManagement);
+    }
+
+    @Override
+    public AutoAssignDistributionSetUpdate updateAutoAssign(final long id) {
+        return new AutoAssignDistributionSetUpdate(id);
     }
 
 }
