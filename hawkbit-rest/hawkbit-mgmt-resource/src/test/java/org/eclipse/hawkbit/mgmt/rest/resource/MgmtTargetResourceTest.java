@@ -1869,6 +1869,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
     }
 
+
     @Test
     @Description("A request for assigning multiple DS to a target results in a Bad Request when multiassignment in disabled.")
     public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {

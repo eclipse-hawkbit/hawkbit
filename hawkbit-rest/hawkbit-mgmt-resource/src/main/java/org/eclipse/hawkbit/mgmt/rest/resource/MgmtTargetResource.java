@@ -286,7 +286,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @PathVariable("targetId") final String targetId,
             @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
-        if (offline) {
+   if (offline) {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
                     .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
                     .collect(Collectors.toList());

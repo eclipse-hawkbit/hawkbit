@@ -216,6 +216,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // set the new query
             targetFilterQuery.setQuery(query);
         });
+        update.getWeight().ifPresent(targetFilterQuery::setWeight);
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }

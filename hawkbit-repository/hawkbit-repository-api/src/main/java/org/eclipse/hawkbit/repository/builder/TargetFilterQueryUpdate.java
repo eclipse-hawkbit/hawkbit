@@ -8,8 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
@@ -32,5 +35,12 @@ public interface TargetFilterQueryUpdate {
      * @return updated builder instance
      */
     TargetFilterQueryUpdate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) String query);
+
+    /**
+     * @param weight
+     *            of {@link TargetFilterQuery#getWeight()}
+     * @return updated builder instance
+     */
+    TargetFilterQueryUpdate weight(@Max(Action.PRIORITY_MAX_WEIGHT) @NotNull Integer weight);
 
 }

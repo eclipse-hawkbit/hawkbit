@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -105,8 +104,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     public void updateTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
         final String notExistingId = "4395";
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + notExistingId).content("{}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isNotFound());
+                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
     }
 
     @Test
@@ -167,8 +165,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         createSingleTargetFilterQuery(idB, testQuery);
         createSingleTargetFilterQuery(idC, testQuery);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)).andExpect(status().isOk())
-                .andDo(print())
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)).andExpect(status().isOk()).andDo(print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(knownTargetAmount)))
@@ -253,9 +250,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
                 + tfq.getId();
         // test
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
-                .andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId())).andDo(print())
+                .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
                 .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(knownQuery)))
                 .andExpect(jsonPath("$._links.self.href", equalTo(hrefPrefix)))
                 .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")));
@@ -403,8 +399,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 ? "{\"id\":" + set.getId() + ", \"type\":\"" + actionType.getName() + "\"}"
                 : "{\"id\":" + set.getId() + "}";
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content(payload).contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isOk());
+                .content(payload).contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
         final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
@@ -413,9 +408,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(updatedFilterQuery.getAutoAssignActionType())
                 .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
-                .andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId())).andDo(print())
+                .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
                 .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(tfq.getQuery())))
                 .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_DS, equalTo(set.getId().intValue())))
                 .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_ACTION_TYPE, equalTo(expectedActionType.getName())))
@@ -428,8 +422,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
             throws Exception {
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + set.getId() + ", \"type\":\"" + MgmtActionType.TIMEFORCED.getName() + "\"}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isBadRequest())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
                         equalTo(InvalidAutoAssignActionTypeException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE,

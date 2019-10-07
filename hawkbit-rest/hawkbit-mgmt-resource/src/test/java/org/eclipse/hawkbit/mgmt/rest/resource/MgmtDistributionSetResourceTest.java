@@ -1272,7 +1272,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
-    @Test
+        @Test
     @Description("A request for assigning a target multiple times results in a Bad Request when multiassignment is disabled.")
     public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
@@ -1330,5 +1330,4 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         obj.put("type", type.getName());
         return obj;
     }
-
 }

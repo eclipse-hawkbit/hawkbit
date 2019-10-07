@@ -34,6 +34,8 @@ public class DeploymentRequest {
      *            specified for the action.
      * @param forceTime
      *            at what time the type soft turns into forced.
+     * @param weight
+     *            the priority of an {@link Action}.
      * @param maintenanceSchedule
      *            is the cron expression to be used for scheduling maintenance
      *            windows. Expression has 6 mandatory fields and 1 last optional
@@ -51,11 +53,10 @@ public class DeploymentRequest {
      *             if the parameters do not define a valid maintenance schedule.
      */
     public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
-            final long forceTime, final String maintenanceSchedule, final String maintenanceWindowDuration,
-            final String maintenanceWindowTimeZone) {
-        this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime, maintenanceSchedule,
-                maintenanceWindowDuration,
-                maintenanceWindowTimeZone);
+            final long forceTime, final Integer weight, final String maintenanceSchedule,
+            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone) {
+        this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime, weight,
+                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
         this.distributionSetId = distributionSetId;
     }
 
@@ -71,14 +72,13 @@ public class DeploymentRequest {
         return targetWithActionType;
     }
 
-
     @Override
     public String toString() {
         return String.format(
-                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s]",
+                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, weight=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s]",
                 targetWithActionType.getControllerId(), getDistributionSetId(), targetWithActionType.getActionType(),
-                targetWithActionType.getForceTime(), targetWithActionType.getMaintenanceSchedule(),
-                targetWithActionType.getMaintenanceWindowDuration(),
+                targetWithActionType.getForceTime(), targetWithActionType.getWeight(),
+                targetWithActionType.getMaintenanceSchedule(), targetWithActionType.getMaintenanceWindowDuration(),
                 targetWithActionType.getMaintenanceWindowTimeZone());
     }
 
@@ -86,7 +86,7 @@ public class DeploymentRequest {
     public int hashCode() {
         return Objects.hash(distributionSetId, targetWithActionType);
     }
-
+    
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {

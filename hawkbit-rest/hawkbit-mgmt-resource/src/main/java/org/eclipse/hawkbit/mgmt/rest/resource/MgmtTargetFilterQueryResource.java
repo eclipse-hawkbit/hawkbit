@@ -108,8 +108,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement.update(entityFactory.targetFilterQuery()
-                .update(filterId).name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
+        final TargetFilterQuery updateFilter = filterManagement
+                .update(entityFactory.targetFilterQuery().update(filterId).name(targetFilterRest.getName())
+                        .query(targetFilterRest.getQuery()).weight(targetFilterRest.getWeight()));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
         MgmtTargetFilterQueryMapper.addLinks(response);

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetAssignment extends MgmtId {
 
     private long forcetime;
+    private Integer weight;
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
@@ -45,6 +46,14 @@ public class MgmtDistributionSetAssignment extends MgmtId {
 
     public void setForcetime(final long forcetime) {
         this.forcetime = forcetime;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 
     /**

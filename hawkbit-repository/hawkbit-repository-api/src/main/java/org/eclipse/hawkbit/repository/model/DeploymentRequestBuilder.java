@@ -18,7 +18,7 @@ public class DeploymentRequestBuilder {
 
     private final String controllerId;
     private final Long distributionSetId;
-
+    private Integer weight;
     private long forceTime = RepositoryModelConstants.NO_FORCE_TIME;
     private ActionType actionType = ActionType.FORCED;
     private String maintenanceSchedule;
@@ -64,6 +64,18 @@ public class DeploymentRequestBuilder {
     }
 
     /**
+     * Set the weight of the action.
+     * 
+     * @param weight
+     *            the priority given to the action.
+     * @return builder
+     */
+    public DeploymentRequestBuilder setWeight(final int weight) {
+        this.weight = weight;
+        return this;
+    }
+
+    /**
      * Set a maintenanceWindow
      * 
      * @param maintenanceSchedule
@@ -94,8 +106,8 @@ public class DeploymentRequestBuilder {
      * @return the request object
      */
     public DeploymentRequest build() {
-        return new DeploymentRequest(controllerId, distributionSetId, actionType, forceTime, maintenanceSchedule,
-                maintenanceWindowDuration, maintenanceWindowTimeZone);
+        return new DeploymentRequest(controllerId, distributionSetId, actionType, forceTime, weight,
+                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
     }
 
 }

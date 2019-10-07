@@ -250,9 +250,8 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType, final long forcedTime) {
-        final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
-                .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
-                        .setForceTime(forcedTime).build())
+        final List<DeploymentRequest> deploymentRequests = controllerIds.stream().map(id -> DeploymentManagement
+                .deploymentRequest(id, dsID).setActionType(actionType).setForceTime(forcedTime).build())
                 .collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> results = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
@@ -302,7 +301,7 @@ public abstract class AbstractIntegrationTest {
     protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
             final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
-        
+
         return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
                 .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
                 .build());
@@ -310,8 +309,7 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
             final String controllerId, final ActionType type, final String maintenanceWindowSchedule,
-            final String maintenanceWindowDuration,
-            final String maintenanceWindowTimeZone) {
+            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone) {
         return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID).setActionType(type)
                 .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
                 .build());
@@ -320,10 +318,8 @@ public abstract class AbstractIntegrationTest {
     protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
             final Collection<Target> targets) {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        distributionSets.forEach(ds -> targets.forEach(
-                target -> deploymentRequests
-                        .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build()))
-        );
+        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
+                .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build())));
         return deploymentRequests;
     }
 
@@ -477,12 +473,14 @@ public abstract class AbstractIntegrationTest {
         return randomStringBuilder.toString();
     }
 
-    protected static Action getFirstAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Action getFirstAssignedAction(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
     }
 
-    protected static Long getFirstAssignedActionId(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Long getFirstAssignedActionId(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return getFirstAssignedAction(distributionSetAssignmentResult).getId();
     }
 

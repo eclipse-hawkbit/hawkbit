@@ -489,7 +489,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Offline assign multiple DSs to multiple Targets in multiassignment mode.")
+     @Description("Offline assign multiple DSs to multiple Targets in multiassignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
@@ -590,7 +590,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
     }
 
-    @Test
+       @Test
     @Description("Assign multiple DSs to multiple Targets in one request in multiassignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
@@ -1283,7 +1283,5 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         public List<Long> getUndeployedTargetIDs() {
             return undeployedTargetIDs;
         }
-
     }
-
 }

@@ -25,6 +25,7 @@ public class MgmtTargetAssignmentRequestBody {
     private long forcetime;
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
+    private Integer weight;
 
     /**
      * JsonCreator Constructor
@@ -61,6 +62,14 @@ public class MgmtTargetAssignmentRequestBody {
         this.forcetime = forcetime;
     }
 
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
+    }
+
     public MgmtMaintenanceWindowRequestBody getMaintenanceWindow() {
         return maintenanceWindow;
     }
@@ -68,5 +77,4 @@ public class MgmtTargetAssignmentRequestBody {
     public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
     }
-
 }

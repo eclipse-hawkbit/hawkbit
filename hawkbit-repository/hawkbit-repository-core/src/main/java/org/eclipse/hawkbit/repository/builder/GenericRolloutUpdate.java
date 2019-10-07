@@ -16,5 +16,4 @@ public class GenericRolloutUpdate extends AbstractRolloutUpdateCreate<RolloutUpd
     public GenericRolloutUpdate(final Long id) {
         super.id = id;
     }
-
 }

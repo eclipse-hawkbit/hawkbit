@@ -102,6 +102,11 @@ public interface Rollout extends NamedEntity {
     String getApprovalRemark();
 
     /**
+     * @return the priority of {@link Rollout}.
+     */
+    Integer getWeight();
+
+    /**
      *
      * State machine for rollout.
      *
@@ -197,5 +202,4 @@ public interface Rollout extends NamedEntity {
          */
         DENIED
     }
-
 }

@@ -34,6 +34,8 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
 
     private Long startAt;
 
+    private Integer weight;
+
     private MgmtActionType type;
 
     private List<MgmtRolloutGroup> groups;
@@ -124,7 +126,7 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      * @param groups
      *            List of {@link MgmtRolloutGroup}
      */
-    public void setGroups(List<MgmtRolloutGroup> groups) {
+    public void setGroups(final List<MgmtRolloutGroup> groups) {
         this.groups = groups;
     }
 
@@ -139,7 +141,22 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      * @param startAt
      *            the start at timestamp in millis or null
      */
-    public void setStartAt(Long startAt) {
+    public void setStartAt(final Long startAt) {
         this.startAt = startAt;
+    }
+
+    /**
+     * @return the priority of {@link Rollout}
+     */
+    public Integer getWeight() {
+        return weight;
+    }
+
+    /**
+     * @param weight
+     *            the priority of {@link Rollout}
+     */
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 }

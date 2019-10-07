@@ -98,5 +98,4 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         assertThat(actionProperties).isEqualToComparingFieldByField(new ActionProperties(action));
         assertThat(underTest.getDistributionSetId()).isEqualTo(action.getDistributionSet().getId());
     }
-
 }

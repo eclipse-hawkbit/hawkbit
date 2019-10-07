@@ -1008,6 +1008,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         update.getDescription().ifPresent(rollout::setDescription);
         update.getActionType().ifPresent(rollout::setActionType);
         update.getForcedTime().ifPresent(rollout::setForcedTime);
+        update.getWeight().ifPresent(rollout::setWeight);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.get(setId)
@@ -1136,5 +1137,4 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
-
 }

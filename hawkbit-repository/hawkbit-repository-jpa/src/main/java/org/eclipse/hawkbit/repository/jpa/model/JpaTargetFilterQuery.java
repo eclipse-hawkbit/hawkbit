@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -66,10 +67,15 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @ObjectTypeConverter(name = "autoAssignActionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
             @ConversionValue(objectValue = "FORCED", dataValue = "0"),
             @ConversionValue(objectValue = "SOFT", dataValue = "1"),
-            // Conversion for 'TIMEFORCED' is disabled because it is not permitted in autoAssignment
-            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3")})
+            // Conversion for 'TIMEFORCED' is disabled because it is not
+            // permitted in autoAssignment
+            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3") })
     @Convert("autoAssignActionType")
     private ActionType autoAssignActionType;
+
+    @Column(name = "weight")
+    @Max(Action.PRIORITY_MAX_WEIGHT)
+    private Integer weight;
 
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
@@ -129,6 +135,15 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
 
     public void setAutoAssignActionType(final ActionType actionType) {
         this.autoAssignActionType = actionType;
+    }
+
+    @Override
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 
     @Override

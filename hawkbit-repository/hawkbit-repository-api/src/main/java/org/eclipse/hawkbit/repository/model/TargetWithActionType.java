@@ -21,6 +21,7 @@ public class TargetWithActionType {
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
+    private final Integer weight;
     private String maintenanceSchedule;
     private String maintenanceWindowDuration;
     private String maintenanceWindowTimeZone;
@@ -32,7 +33,7 @@ public class TargetWithActionType {
      *            ID if the controller
      */
     public TargetWithActionType(final String controllerId) {
-        this(controllerId, ActionType.FORCED, 0);
+        this(controllerId, ActionType.FORCED, 0, null);
     }
 
     /**
@@ -43,13 +44,17 @@ public class TargetWithActionType {
      * @param actionType
      *            specified for the action.
      * @param forceTime
-     *            after that point in time the action is exposed as forcen in
+     *            after that point in time the action is exposed as forced in
      *            case the type is {@link ActionType#TIMEFORCED}
+     * @param weight
+     *            the priority of an {@link Action}
      */
-    public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
+    public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime,
+            final Integer weight) {
         this.controllerId = controllerId;
         this.actionType = actionType != null ? actionType : ActionType.FORCED;
         this.forceTime = forceTime;
+        this.weight = weight;
     }
 
     /**
@@ -63,6 +68,8 @@ public class TargetWithActionType {
      * @param forceTime
      *            after that point in time the action is exposed as forcen in
      *            case the type is {@link ActionType#TIMEFORCED}
+     * @param weight
+     *            the priority of an {@link Action}
      * @param maintenanceSchedule
      *            is the cron expression to be used for scheduling maintenance
      *            windows. Expression has 6 mandatory fields and 1 last optional
@@ -80,9 +87,9 @@ public class TargetWithActionType {
      *             if the parameters do not define a valid maintenance schedule.
      */
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime,
-            final String maintenanceSchedule, final String maintenanceWindowDuration,
+            final Integer weight, final String maintenanceSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
-        this(controllerId, actionType, forceTime);
+        this(controllerId, actionType, forceTime, weight);
 
         this.maintenanceSchedule = maintenanceSchedule;
         this.maintenanceWindowDuration = maintenanceWindowDuration;
@@ -102,6 +109,11 @@ public class TargetWithActionType {
             return forceTime;
         }
         return RepositoryModelConstants.NO_FORCE_TIME;
+    }
+
+    public Integer getWeight() {
+        return weight;
+
     }
 
     public String getControllerId() {
@@ -138,14 +150,14 @@ public class TargetWithActionType {
     @Override
     public String toString() {
         return "TargetWithActionType [controllerId=" + controllerId + ", actionType=" + getActionType() + ", forceTime="
-                + getForceTime() + ", maintenanceSchedule=" + getMaintenanceSchedule() + ", maintenanceWindowDuration="
-                + getMaintenanceWindowDuration() + ", maintenanceWindowTimeZone=" + getMaintenanceWindowTimeZone()
-                + "]";
+                + getForceTime() + ", weight=" + getWeight() + ", maintenanceSchedule=" + getMaintenanceSchedule()
+                + ", maintenanceWindowDuration=" + getMaintenanceWindowDuration() + ", maintenanceWindowTimeZone="
+                + getMaintenanceWindowTimeZone() + "]";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(actionType, controllerId, forceTime, maintenanceSchedule, maintenanceWindowDuration,
+        return Objects.hash(actionType, controllerId, forceTime, weight, maintenanceSchedule, maintenanceWindowDuration,
                 maintenanceWindowTimeZone);
     }
 
@@ -163,10 +175,9 @@ public class TargetWithActionType {
         }
         final TargetWithActionType other = (TargetWithActionType) obj;
         return Objects.equals(actionType, other.actionType) && Objects.equals(controllerId, other.controllerId)
-                && Objects.equals(forceTime, other.forceTime)
+                && Objects.equals(forceTime, other.forceTime) && Objects.equals(weight, other.weight)
                 && Objects.equals(maintenanceSchedule, other.maintenanceSchedule)
                 && Objects.equals(maintenanceWindowDuration, other.maintenanceWindowDuration)
                 && Objects.equals(maintenanceWindowTimeZone, other.maintenanceWindowTimeZone);
     }
-
 }

@@ -57,10 +57,16 @@ public interface RolloutUpdate {
     RolloutUpdate forcedTime(Long forcedTime);
 
     /**
+     * @param weight
+     *            for {@link Rollout#getWeight()}
+     * @return updated builder instance
+     */
+    RolloutUpdate weight(Integer weight);
+
+    /**
      * @param startAt
      *            for {@link Rollout#getStartAt()}
      * @return updated builder instance
      */
     RolloutUpdate startAt(Long startAt);
-
 }

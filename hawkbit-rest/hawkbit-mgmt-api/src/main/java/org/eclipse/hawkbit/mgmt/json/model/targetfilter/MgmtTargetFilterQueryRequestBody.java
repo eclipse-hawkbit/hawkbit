@@ -21,6 +21,9 @@ public class MgmtTargetFilterQueryRequestBody {
     @JsonProperty(required = true)
     private String query;
 
+    @JsonProperty(required = true)
+    private Integer weight;
+
     public String getName() {
         return name;
     }
@@ -33,8 +36,15 @@ public class MgmtTargetFilterQueryRequestBody {
         return query;
     }
 
-    public void setQuery(String query) {
+    public void setQuery(final String query) {
         this.query = query;
     }
 
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
+    }
 }

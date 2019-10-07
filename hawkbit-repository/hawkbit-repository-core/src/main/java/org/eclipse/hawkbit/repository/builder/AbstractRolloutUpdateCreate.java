@@ -29,6 +29,7 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     protected ActionType actionType;
     protected Long forcedTime;
     protected Long startAt;
+    protected Integer weight;
 
     public T set(final long set) {
         this.set = set;
@@ -50,6 +51,11 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
         return (T) this;
     }
 
+    public T weight(final Integer weight) {
+        this.weight = weight;
+        return (T) this;
+    }
+
     public T startAt(final Long startAt) {
         this.startAt = startAt;
         return (T) this;
@@ -65,6 +71,10 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
 
     public Optional<Long> getForcedTime() {
         return Optional.ofNullable(forcedTime);
+    }
+
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
     }
 
     public Optional<Long> getStartAt() {

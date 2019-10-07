@@ -285,8 +285,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
-                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType, actionMessage,
+                assignmentStrategy, distributionSetEntity, targetEntities);
         return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType.size());
     }
 
