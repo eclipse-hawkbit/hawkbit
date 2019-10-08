@@ -98,12 +98,10 @@ Payload Template:
         "exampleKey1" : "exampleValue1",
         "exampleKey2" : "exampleValue2"
     },
-    "name": "String",
     "mode": "String"
 }
 ```
 
-The "name" property specifies the name of the thing. This property is optional. <br />
 The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
 
 Value           | Description

@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +26,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import net.bytebuddy.asm.Advice;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
@@ -36,8 +37,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
-import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
+import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -46,6 +47,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.jpa.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -73,6 +75,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import io.qameta.allure.Description;
@@ -113,8 +116,8 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private AmqpControllerAuthentication authenticationManagerMock;
 
-    @Mock
-    private ArtifactRepository artifactRepositoryMock;
+    @Autowired
+    TargetRepository targetRepository;
 
     @Mock
     private DownloadIdCache downloadIdCache;
@@ -136,9 +139,6 @@ public class AmqpMessageHandlerServiceTest {
 
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
-
-    @Captor
-    private ArgumentCaptor<String> targetNameCaptor;
 
     @Before
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -277,35 +277,6 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(attributesCaptor.getValue()).as("Attributes is not right")
                 .isEqualTo(attributeUpdate.getAttributes());
-
-    }
-
-    @Test
-    @Description("Tests the target attribute update with name update by calling the same method that incoming RabbitMQ messages would access.")
-    public void updateAttributesWithName() {
-        final String knownThingId = "1";
-        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
-        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.getAttributes().put("testKey1", "testValue1");
-        attributeUpdate.getAttributes().put("testKey2", "testValue2");
-        attributeUpdate.setName("UpdatedTargetName");
-
-        final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate,
-                messageProperties);
-
-        when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
-                modeCaptor.capture())).thenReturn(null);
-        doNothing().when(controllerManagementMock).updateControllerName(targetIdCaptor.capture(), targetNameCaptor.capture());
-
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-
-        // verify
-        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
-        assertThat(attributesCaptor.getValue()).as("Attributes is not right")
-                .isEqualTo(attributeUpdate.getAttributes());
-        assertThat(targetNameCaptor.getValue()).as("Thing name is wrong").isEqualTo(attributeUpdate.getName());
 
     }
 

@@ -311,12 +311,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
-
-        // If new name provided in body, then change the name
-        if (hasText(attributeUpdate.getName())) {
-            controllerManagement.updateControllerName(thingId, attributeUpdate.getName());
-        }
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));

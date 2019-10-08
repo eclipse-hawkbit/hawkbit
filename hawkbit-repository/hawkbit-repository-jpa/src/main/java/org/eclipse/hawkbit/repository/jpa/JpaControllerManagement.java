@@ -80,7 +80,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.flywaydb.core.internal.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +97,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -379,8 +379,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
-       String name = controllerId;
-       return findOrRegisterTargetIfItDoesNotExist (controllerId, address, name);
+        String name = controllerId;
+        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, name);
     }
 
     @Override
@@ -391,14 +391,14 @@ public class JpaControllerManagement implements ControllerManagement {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
+        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name))
                 .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTarget(final String controllerId, final URI address,  String name) {
+    private Target createTarget(final String controllerId, final URI address, String name) {
         // In case of a true expression, the targetId will be set as name
         if (!StringUtils.hasText(name)) {
-           name = controllerId;
+            name = controllerId;
         }
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
@@ -497,16 +497,22 @@ public class JpaControllerManagement implements ControllerManagement {
      * {@link Target#getUpdateStatus()} changes or the buffer queue is full.
      *
      */
-    private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
-        boolean storeEager = isStoreEager(toUpdate, address);
+    private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
+        boolean adressStoreEager = isStoreEager(toUpdate, address);
+        boolean nameStoreEager = isNameStoreEager(toUpdate, name);
 
         if (TargetUpdateStatus.UNKNOWN == toUpdate.getUpdateStatus()) {
             toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            storeEager = true;
+            adressStoreEager = true;
         }
 
-        if (storeEager || !queue.offer(new TargetPoll(toUpdate))) {
-            toUpdate.setAddress(address.toString());
+        if (adressStoreEager || nameStoreEager || !queue.offer(new TargetPoll(toUpdate))) {
+            if (adressStoreEager) {
+                toUpdate.setAddress(address.toString());
+            }
+            if (nameStoreEager) {
+                toUpdate.setName(name);
+            }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
 
             afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
@@ -525,6 +531,17 @@ public class JpaControllerManagement implements ControllerManagement {
             return true;
         } else {
             return !toUpdate.getAddress().equals(address);
+        }
+    }
+
+    private boolean isNameStoreEager(final JpaTarget toUpdate, final String name) {
+        if (toUpdate.getName() == null) {
+            return true;
+            // avoid overwriting once configured name with default (controller id)
+        } else if (!name.equals(toUpdate.getControllerId())) {
+            return !toUpdate.getName().equals(name);
+        } else {
+            return false;
         }
     }
 
@@ -773,20 +790,6 @@ public class JpaControllerManagement implements ControllerManagement {
         assertTargetAttributesQuota(target);
 
         return targetRepository.save(target);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateControllerName(final String controllerId, final String controllerName) {
-
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
-        target.setName(controllerName);
-
-        targetRepository.save(target);
     }
 
     private static boolean isAttributeEntryValid(final Map.Entry<String, String> e) {

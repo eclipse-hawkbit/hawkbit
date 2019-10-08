@@ -639,6 +639,28 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Register a controller which does not exist, then update the controller twice, first time by preventing a name property and second time without a new name")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+                          @Expect(type = TargetPollEvent.class, count = 3) ,
+                          @Expect(type = TargetUpdatedEvent.class, count = 1)})
+    public void findOrRegisterTargetIfItDoesNotExistDoesUpdateNameOnExistingTargetProperly() {
+
+        String controllerId = "12345";
+        String targetName = "UpdatedName";
+
+        final Target newTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST);
+        assertThat(newTarget.getName()).isEqualTo(controllerId);
+
+
+        Target firstTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST, targetName);
+        assertThat(firstTimeUpdatedTarget.getName()).isEqualTo(targetName);
+
+        //Name should not change to default (name=targetId) if target is updated without new name provided
+       Target secondTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST);
+        assertThat(secondTimeUpdatedTarget.getName()).isEqualTo(targetName);
+    }
+
+    @Test
     @Description("Register a controller which does not exist, when a ConcurrencyFailureException is raised, the "
             + "exception is not rethrown when the max retries are not yet reached")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
