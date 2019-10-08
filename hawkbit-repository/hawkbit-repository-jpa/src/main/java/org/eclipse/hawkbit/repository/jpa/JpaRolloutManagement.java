@@ -243,8 +243,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private void validateRolloutWeight(final JpaRollout rollout) {
-        // TODO remove bypassing the weight enforcement as soon as weight can be
-        // set via UI
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
         final boolean bypassWeightEnforcement = true;
         if (!isMultiAssignmentsEnabled() && rollout.getWeight().isPresent()) {
             throw new MultiAssignmentIsNotEnabledException();

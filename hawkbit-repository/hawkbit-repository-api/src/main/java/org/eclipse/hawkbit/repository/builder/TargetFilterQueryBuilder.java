@@ -16,6 +16,8 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  */
 public interface TargetFilterQueryBuilder {
     /**
+     * Used to update a {@link TargetFilterQuery}
+     * 
      * @param id
      *            of the updatable entity
      * @return builder instance
@@ -23,6 +25,8 @@ public interface TargetFilterQueryBuilder {
     TargetFilterQueryUpdate update(long id);
 
     /**
+     * Used to update a the auto assignment of a {@link TargetFilterQuery}
+     * 
      * @param id
      *            of the updatable entity
      * @return builder instance

@@ -237,8 +237,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
-        // TODO remove bypassing the weight enforcement as soon as weight can be
-        // set via UI
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
         final boolean bypassWeightEnforcement = true;
         final long nullWeights = deploymentRequests.stream()
                 .filter(request -> request.getTargetWithActionType().getWeight() == null).count();

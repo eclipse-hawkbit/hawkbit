@@ -28,6 +28,8 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  */
 public interface RolloutCreate {
     /**
+     * Set name
+     * 
      * @param name
      *            for {@link Rollout#getName()}
      * @return updated builder instance
@@ -35,6 +37,8 @@ public interface RolloutCreate {
     RolloutCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
+     * Set description
+     * 
      * @param description
      *            for {@link Rollout#getDescription()}
      * @return updated builder instance
@@ -42,6 +46,8 @@ public interface RolloutCreate {
     RolloutCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
+     * Set the {@link DistributionSet}
+     * 
      * @param set
      *            for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
@@ -51,6 +57,8 @@ public interface RolloutCreate {
     }
 
     /**
+     * Set the id of the {@link DistributionSet}
+     * 
      * @param setId
      *            for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
@@ -58,6 +66,8 @@ public interface RolloutCreate {
     RolloutCreate set(long setId);
 
     /**
+     * Set the {@link TargetFilterQuery}
+     * 
      * @param targetFilterQuery
      *            for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
@@ -66,6 +76,8 @@ public interface RolloutCreate {
             @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String targetFilterQuery);
 
     /**
+     * Set the {@link ActionType}
+     * 
      * @param actionType
      *            for {@link Rollout#getActionType()}
      * @return updated builder instance
@@ -73,6 +85,8 @@ public interface RolloutCreate {
     RolloutCreate actionType(@NotNull ActionType actionType);
 
     /**
+     * Set the forcedTime of the resulting {@link Actions}
+     * 
      * @param forcedTime
      *            for {@link Rollout#getForcedTime()}
      * @return updated builder instance
@@ -80,6 +94,8 @@ public interface RolloutCreate {
     RolloutCreate forcedTime(Long forcedTime);
 
     /**
+     * Set the weight of the resulting {@link Actions}
+     * 
      * @param weight
      *            for {@link Rollout#getWeight()}
      * @return updated builder instance
@@ -87,6 +103,8 @@ public interface RolloutCreate {
     RolloutCreate weight(Integer weight);
 
     /**
+     * set start
+     * 
      * @param startAt
      *            for {@link Rollout#getStartAt()}
      * @return updated builder instance

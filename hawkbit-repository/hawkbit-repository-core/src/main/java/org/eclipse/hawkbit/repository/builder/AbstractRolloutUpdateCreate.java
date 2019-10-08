@@ -16,6 +16,7 @@ import javax.validation.constraints.Min;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,31 +39,73 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     @Max(Action.PRIORITY_MAX_WEIGHT)
     protected Integer weight;
 
+    /**
+     * {@link DistributionSet} of rollout
+     * 
+     * @param set
+     *            ID of the set
+     * @return this builder
+     */
     public T set(final long set) {
         this.set = set;
         return (T) this;
     }
 
+    /**
+     * Filter of the rollout
+     * 
+     * @param targetFilterQuery
+     *            query
+     * @return this builder
+     */
     public T targetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
         return (T) this;
     }
 
+    /**
+     * {@link ActionType} used for {@link Action}s
+     * 
+     * @param actionType
+     *            type
+     * @return this builder
+     */
     public T actionType(final ActionType actionType) {
         this.actionType = actionType;
         return (T) this;
     }
 
+    /**
+     * forcedTime used for {@link Action}s
+     * 
+     * @param forcedTime
+     *            time
+     * @return this builder
+     */
     public T forcedTime(final Long forcedTime) {
         this.forcedTime = forcedTime;
         return (T) this;
     }
 
+    /**
+     * weight used for {@link Action}s
+     * 
+     * @param weight
+     *            weight
+     * @return this builder
+     */
     public T weight(final Integer weight) {
         this.weight = weight;
         return (T) this;
     }
 
+    /**
+     * Set start of the Rollout
+     * 
+     * @param startAt
+     *            start time point
+     * @return this builder
+     */
     public T startAt(final Long startAt) {
         this.startAt = startAt;
         return (T) this;

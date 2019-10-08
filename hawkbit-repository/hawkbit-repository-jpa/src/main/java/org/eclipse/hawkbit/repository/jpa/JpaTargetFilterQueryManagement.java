@@ -112,8 +112,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
     
     private void verifyWeightAndThrowExceptionIfNotValid(final Integer weight) {
-        // TODO remove bypassing the weight enforcement as soon as weight can be
-        // set via UI
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
         final boolean bypassWeightEnforcement = true;
         if (!isMultiAssignmentsEnabled() && weight != null) {
             throw new MultiAssignmentIsNotEnabledException();

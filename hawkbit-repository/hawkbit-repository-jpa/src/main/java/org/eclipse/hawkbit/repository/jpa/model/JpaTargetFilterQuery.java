@@ -90,6 +90,8 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
      *            of the {@link TargetFilterQuery}.
      * @param autoAssignActionType
      *            of the {@link TargetFilterQuery}.
+     * @param autoAssignWeight
+     *            of the {@link TargetFilterQuery}.
      */
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
             final ActionType autoAssignActionType, final Integer autoAssignWeight) {
