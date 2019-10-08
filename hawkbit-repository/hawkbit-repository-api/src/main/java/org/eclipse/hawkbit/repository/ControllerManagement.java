@@ -140,7 +140,7 @@ public interface ControllerManagement {
      * {@link Target}.
      *
      * For performance reasons this method does not throw
-     * {@link EntityNotFoundException} in case target with given controlelrId
+     * {@link EntityNotFoundException} in case target with given controllerId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
@@ -244,7 +244,7 @@ public interface ControllerManagement {
 
     /**
      * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction()}.
+     * {@link ControllerManagement#getPollingTimeForAction(long)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.

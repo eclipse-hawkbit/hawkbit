@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -184,15 +183,15 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnUpdate(actionId);
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("set invalid description text should not be created")
                 .isThrownBy(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus()
-                        .create(actionId).status(Action.Status.FINISHED).message(INVALID_TEXT_HTML)))
-                .as("set invalid description text should not be created");
+                        .create(actionId).status(Action.Status.FINISHED).message(INVALID_TEXT_HTML)));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("set invalid description text should not be created")
                 .isThrownBy(() -> controllerManagement.addUpdateActionStatus(
                         entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)
-                                .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))))
-                .as("set invalid description text should not be created");
+                                .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))));
 
         assertThat(actionStatusRepository.count()).isEqualTo(6);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
@@ -232,20 +231,16 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     public void cancellationFeedbackRejectedIfActionIsNotInCanceling() {
         final Long actionId = createTargetAndAssignDs();
 
-        try {
-            controllerManagement.addCancelActionStatus(
-                    entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
-            fail("Expected " + CancelActionNotAllowedException.class.getName());
-        } catch (final CancelActionNotAllowedException e) {
-            // expected
-        }
+        assertThatExceptionOfType(CancelActionNotAllowedException.class)
+                .as("Expected " + CancelActionNotAllowedException.class.getName())
+                .isThrownBy(() -> controllerManagement.addCancelActionStatus(
+                        entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
 
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
                 Action.Status.RUNNING, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(1);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(1);
-
     }
 
     @Test
@@ -520,21 +515,21 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Description("Tries to register a target with an invalid controller id")
     public void findOrRegisterTargetIfItDoesNotExistThrowsExceptionForInvalidControllerIdParam() {
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(null, LOCALHOST))
-                .as("register target with null as controllerId should fail");
+                .as("register target with null as controllerId should fail")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(null, LOCALHOST));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("", LOCALHOST))
-                .as("register target with empty controllerId should fail");
+                .as("register target with empty controllerId should fail")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("", LOCALHOST));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(" ", LOCALHOST))
-                .as("register target with empty controllerId should fail");
+                .as("register target with empty controllerId should fail")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(" ", LOCALHOST));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("register target with too long controllerId should fail")
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                        RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST))
-                .as("register target with too long controllerId should fail");
+                        RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST));
     }
 
     @Test
@@ -545,15 +540,13 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         when(mockTargetRepository.findOne(any())).thenThrow(ConcurrencyFailureException.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
-        try {
-            controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
-            fail("Expected an ConcurrencyFailureException to be thrown!");
-        } catch (final ConcurrencyFailureException e) {
-            verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
-        } finally {
-            // revert
-            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
-        }
+        assertThatExceptionOfType(ConcurrencyFailureException.class)
+                .as("Expected an ConcurrencyFailureException to be thrown!")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
+
+        verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
+        // revert
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
     }
 
     @Test
@@ -594,16 +587,13 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         when(mockTargetRepository.findOne(any())).thenReturn(Optional.empty());
         when(mockTargetRepository.save(any())).thenThrow(EntityAlreadyExistsException.class);
 
-        try {
-            controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST);
-            fail("Expected an EntityAlreadyExistsException to be thrown!");
-        } catch (final EntityAlreadyExistsException e) {
-            verify(mockTargetRepository, times(1)).findOne(any());
-            verify(mockTargetRepository, times(1)).save(any());
-        } finally {
-            // revert
-            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
-        }
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("Expected an EntityAlreadyExistsException to be thrown!")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST));
+        verify(mockTargetRepository, times(1)).findOne(any());
+        verify(mockTargetRepository, times(1)).save(any());
+        // revert
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
     }
 
     @Test
@@ -616,15 +606,14 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         when(mockTargetRepository.findOne(any())).thenThrow(RuntimeException.class);
 
-        try {
-            controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId", LOCALHOST);
-            fail("Expected a RuntimeException to be thrown!");
-        } catch (final RuntimeException e) {
-            verify(mockTargetRepository, times(1)).findOne(any());
-        } finally {
-            // revert
-            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
-        }
+        assertThatExceptionOfType(RuntimeException.class)
+                .as("Expected a RuntimeException to be thrown!")
+                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId",
+                        LOCALHOST));
+
+        verify(mockTargetRepository, times(1)).findOne(any());
+        // revert
+        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
     }
 
     @Test
@@ -1003,24 +992,24 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(controllerId);
 
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key too long should not be created")
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyTooLong, valueValid), null))
-                .as("Attribute with key too long should not be created");
+                        Collections.singletonMap(keyTooLong, valueValid), null));
 
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key too long and value too long should not be created")
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyTooLong, valueTooLong), null))
-                .as("Attribute with key too long and value too long should not be created");
+                        Collections.singletonMap(keyTooLong, valueTooLong), null));
 
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with value too long should not be created")
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyValid, valueTooLong), null))
-                .as("Attribute with value too long should not be created");
+                        Collections.singletonMap(keyValid, valueTooLong), null));
 
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key NULL should not be created")
                 .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyNull, valueValid), null))
-                .as("Attribute with key NULL should not be created");
+                        Collections.singletonMap(keyNull, valueValid), null));
     }
 
     @Test
@@ -1261,26 +1250,20 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
-            fail("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
+                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR)));
-            fail("No QuotaExceededException thrown for too many ERROR updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
+                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
-            fail("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
+                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
     }
 
     @Test
@@ -1295,26 +1278,20 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
         assertThat(actionId).isNotNull();
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
-            fail("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
+                .isThrownBy( ()-> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR)));
-            fail("No QuotaExceededException thrown for too many ERROR updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
+                .isThrownBy(()->IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        try {
-            IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED)));
-            fail("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates");
-        } catch (final QuotaExceededException e) {
-        }
+        assertThatExceptionOfType(QuotaExceededException.class)
+                .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
+                .isThrownBy(()->IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
     }
 
     @Test
@@ -1348,11 +1325,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify that a null externalRef cannot be assigned to an action")
     public void externalRefCannotBeNull() {
-        try {
-            controllerManagement.updateActionExternalRef(1L, null);
-            fail("No ConstraintViolationException thrown when a null externalRef was set on an action");
-        } catch (final ConstraintViolationException e) {
-        }
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("No ConstraintViolationException thrown when a null externalRef was set on an action")
+                .isThrownBy(() -> controllerManagement.updateActionExternalRef(1L, null));
     }
 
     @Test
@@ -1489,16 +1464,13 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Delete a target with a not existing thingId")
+    @Description("Delete a target with a non existing thingId")
     @ExpectEvents({@Expect(type = TargetDeletedEvent.class, count = 0)})
     public void deleteTargetWithInvalidThingId() {
-        try {
-            controllerManagement.deleteExistingTarget("BB");
-            assertThat(targetRepository.count()).as("target should not exist").isEqualTo(0L);
-            fail("No EntityNotFoundException thrown when deleting a non-existing target");
-        } catch (final EntityNotFoundException e) {
-            // test ok - expected exception was thrown
-        }
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .as("No EntityNotFoundException thrown when deleting a non-existing target")
+                .isThrownBy(() -> controllerManagement.deleteExistingTarget("BB"));
+        assertThat(targetRepository.count()).as("target should not exist").isEqualTo(0L);
     }
 
     @Test
@@ -1514,11 +1486,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.deleteExistingTarget(target.getControllerId());
         assertThat(targetRepository.count()).as("target should not exist anymore").isEqualTo(0L);
 
-        try{
-            controllerManagement.deleteExistingTarget(target.getControllerId());
-            fail("No EntityNotFoundException thrown when deleting a non-existing target");
-        } catch (final EntityNotFoundException e) {
-            // test ok - expected exception was thrown
-        }
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .as("No EntityNotFoundException thrown when deleting a non-existing target")
+                .isThrownBy(() -> controllerManagement.deleteExistingTarget(target.getControllerId()));
     }
 }
