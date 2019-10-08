@@ -204,7 +204,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         actions.forEach(action -> {
             final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
                     getSoftwareModuleMetaData.apply(action));
-            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest);
+            // TODO specify default value of weight somewhere else
+            final int weight = action.getWeight().orElse(Action.PRIORITY_MAX_WEIGHT);
+            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
         });
 
         final Message message = getMessageConverter().toMessage(multiActionRequest,

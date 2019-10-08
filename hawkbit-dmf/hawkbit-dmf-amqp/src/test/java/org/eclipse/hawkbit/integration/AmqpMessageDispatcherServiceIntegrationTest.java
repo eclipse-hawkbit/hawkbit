@@ -27,11 +27,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -184,6 +186,65 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
+
+    @Test
+    @Description("Verify payload of multi action messages.")
+    public void assertMultiActionMessagePayloads() {
+        final int expectedWeightIfNotSet = 1000;
+        final int weight1 = 600;
+        final String controllerId = UUID.randomUUID().toString();
+        registerAndAssertTargetWithExistingTenant(controllerId);
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(ds);
+
+        final Long installActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
+                .setActionType(ActionType.FORCED).build()).getAssignedEntity().get(0).getId();
+        enableMultiAssignments();
+        final Long downloadActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
+                .setActionType(ActionType.DOWNLOAD_ONLY).setWeight(weight1).build()).getAssignedEntity().get(0).getId();
+        final Long cancelActionId = makeAssignment(
+                DeploymentManagement.deploymentRequest(controllerId, ds.getId()).setWeight(DEFAULT_TEST_WEIGHT).build())
+                        .getAssignedEntity().get(0).getId();
+        // make sure the latest message in the queue is the one triggered by the
+        // cancellation
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL, EventTopic.MULTI_ACTION,
+                EventTopic.MULTI_ACTION);
+        deploymentManagement.cancelAction(cancelActionId);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
+
+        final List<DmfMultiActionElement> multiActionMessages = getLatestMultiActionMessages(controllerId);
+        assertThat(multiActionMessages).hasSize(3);
+        final DmfMultiActionElement installMessage = multiActionMessages.stream()
+                .filter(message -> message.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL)).findFirst().get();
+        final DmfMultiActionElement downloadMessage = multiActionMessages.stream()
+                .filter(message -> message.getTopic().equals(EventTopic.DOWNLOAD)).findFirst().get();
+        final DmfMultiActionElement cancelMessage = multiActionMessages.stream()
+                .filter(message -> message.getTopic().equals(EventTopic.CANCEL_DOWNLOAD)).findFirst().get();
+        assertThat(installMessage.getWeight()).isEqualTo(expectedWeightIfNotSet);
+        assertThat(downloadMessage.getWeight()).isEqualTo(weight1);
+        assertThat(cancelMessage.getWeight()).isEqualTo(DEFAULT_TEST_WEIGHT);
+
+        assertThat(installMessage.getAction()).isExactlyInstanceOf(DmfDownloadAndUpdateRequest.class)
+                .hasFieldOrPropertyWithValue("actionId", installActionId);
+        assertThat(downloadMessage.getAction()).isExactlyInstanceOf(DmfDownloadAndUpdateRequest.class)
+                .hasFieldOrPropertyWithValue("actionId", downloadActionId);
+        assertThat(cancelMessage.getAction()).isExactlyInstanceOf(DmfActionRequest.class)
+                .hasFieldOrPropertyWithValue("actionId", cancelActionId);
+        assertDmfDownloadAndUpdateRequest((DmfDownloadAndUpdateRequest) installMessage.getAction(), ds.getModules(),
+                controllerId);
+        assertDmfDownloadAndUpdateRequest((DmfDownloadAndUpdateRequest) downloadMessage.getAction(), ds.getModules(),
+                controllerId);
+    }
+
+    private List<DmfMultiActionElement> getLatestMultiActionMessages(final String expectedControllerId) {
+        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(expectedControllerId);
+        return ((DmfMultiActionRequest) getDmfClient().getMessageConverter().fromMessage(multiactionMessage))
+                .getElements();
+    }
+
+    // TODO create action with non default weight
 
     @Test
     @Description("Handle cancelation process of an action in multi assignment mode.")
@@ -498,11 +559,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
-        final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(expectedControllerId);
-        final List<DmfMultiActionElement> multiActionRequest = ((DmfMultiActionRequest) getDmfClient()
-                .getMessageConverter().fromMessage(multiactionMessage)).getElements();
+        final List<DmfMultiActionElement> multiActionRequest = getLatestMultiActionMessages(expectedControllerId);
         return multiActionRequest.stream()
                 .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
                 .collect(Collectors.toList());
