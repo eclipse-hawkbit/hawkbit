@@ -193,18 +193,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     /**
-     * Method to register a new target.
+     * Method to create a new target or to find the target if it already exists and
+     * update its poll time, status and optionally its name.
      *
      * @param message
-     *            the message that contains the target/thing
+     *            the message that contains replyTo property and optionally the name
+     *            in body
      * @param virtualHost
      *            the virtual host
      */
     private void registerTarget(final Message message, final String virtualHost) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
-        String name = null;
-        final Target target;
 
         if (StringUtils.isEmpty(replyTo)) {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
@@ -212,26 +212,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         try {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
-            if (message.toString().contains("name")) {
-                checkContentTypeJson(message);
-                // Check whether name property set
-                final DmfCreateThing targetProperties = convertMessage(message, DmfCreateThing.class);
-                // Will be true if "name" properly in body and not just contained in some
-                // attributes
-                if (hasText(targetProperties.getName())) {
-                    name = targetProperties.getName();
-                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, name);
-                } else {
-                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
-                }
-            } else {
+            final Target target;
+            if (!isMessageBodyEmpty(message)) {
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
+            } else {
+                checkContentTypeJson(message);
+                final DmfCreateThing createThing = convertMessage(message, DmfCreateThing.class);
+                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
+                        createThing.getName());
             }
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (final EntityAlreadyExistsException e) {
-            throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
+            throw new AmqpRejectAndDontRequeueException(
+                    "Tried to register previously registered target, message will be ignored!", e);
         }
+    }
+
+    protected static boolean isMessageBodyEmpty(final Message message) {
+        return message.getBody() == null || message.getBody().length == 0;
     }
 
     private void sendUpdateCommandToTarget(final Target target) {

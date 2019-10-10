@@ -66,7 +66,7 @@ Payload Template (optional):
 }
 ```
 
-The "name" property specifies the name of the thing, which per default is the thing ID. This property is optional.
+The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.
 
 ### UPDATE_ATTRIBUTES
 

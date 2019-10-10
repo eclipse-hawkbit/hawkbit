@@ -29,9 +29,6 @@ public class DmfAttributeUpdate {
     @JsonProperty
     private DmfUpdateMode mode;
 
-    @JsonProperty
-    private String name;
-
     public DmfUpdateMode getMode() {
         return mode;
     }
@@ -42,14 +39,6 @@ public class DmfAttributeUpdate {
 
     public Map<String, String> getAttributes() {
         return attributes;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
     }
 
 }

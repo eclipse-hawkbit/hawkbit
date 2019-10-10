@@ -207,7 +207,7 @@ public interface ControllerManagement {
     /**
      * Register new target in the repository (plug-and-play) and in case it already
      * exists updates {@link Target#getAddress()} and
-     * {@link Target#getLastTargetQuery()} and switches if
+     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and switches if
      * {@link TargetUpdateStatus#UNKNOWN} to {@link TargetUpdateStatus#REGISTERED}.
      *
      * @param controllerId

@@ -379,8 +379,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
-        String name = controllerId;
-        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, name);
+        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null);
     }
 
     @Override
@@ -396,12 +395,9 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private Target createTarget(final String controllerId, final URI address, String name) {
-        // In case of a true expression, the targetId will be set as name
-        if (!StringUtils.hasText(name)) {
-            name = controllerId;
-        }
+
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(name)
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
@@ -494,55 +490,39 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Stores target directly to DB in case either {@link Target#getAddress()} or
-     * {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * {@link Target#getUpdateStatus()} or {@link Target#getName()} changes or the buffer queue is full.
      *
      */
     private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
-        boolean adressStoreEager = isStoreEager(toUpdate, address);
-        boolean nameStoreEager = isNameStoreEager(toUpdate, name);
-
-        if (TargetUpdateStatus.UNKNOWN == toUpdate.getUpdateStatus()) {
-            toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            adressStoreEager = true;
-        }
-
-        if (adressStoreEager || nameStoreEager || !queue.offer(new TargetPoll(toUpdate))) {
-            if (adressStoreEager) {
+        if (isStoreEager(toUpdate, address, name) || !queue.offer(new TargetPoll(toUpdate))) {
+            if (isAddressChanged(toUpdate.getAddress(), address)) {
                 toUpdate.setAddress(address.toString());
             }
-            if (nameStoreEager) {
+            if (isNameChanged(toUpdate.getName(), name)) {
                 toUpdate.setName(name);
             }
+            if (isStatusUnknown(toUpdate.getUpdateStatus())) {
+                toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
-
             afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                     .publishEvent(new TargetPollEvent(toUpdate, eventPublisherHolder.getApplicationId())));
-
             return targetRepository.save(toUpdate);
         }
-
         return toUpdate;
     }
-
-    private boolean isStoreEager(final JpaTarget toUpdate, final URI address) {
-        if (repositoryProperties.isEagerPollPersistence()) {
-            return true;
-        } else if (toUpdate.getAddress() == null) {
-            return true;
-        } else {
-            return !toUpdate.getAddress().equals(address);
-        }
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name) {
+        return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
+                || isNameChanged(toUpdate.getName(), name) || isStatusUnknown(toUpdate.getUpdateStatus());
     }
-
-    private boolean isNameStoreEager(final JpaTarget toUpdate, final String name) {
-        if (toUpdate.getName() == null) {
-            return true;
-            // avoid overwriting once configured name with default (controller id)
-        } else if (!name.equals(toUpdate.getControllerId())) {
-            return !toUpdate.getName().equals(name);
-        } else {
-            return false;
-        }
+    private boolean isAddressChanged(final URI addressToUpdate, final URI address) {
+        return addressToUpdate == null || !addressToUpdate.equals(address);
+    }
+    private boolean isNameChanged(final String nameToUpdate, final String name) {
+        return StringUtils.hasText(name) && !nameToUpdate.equals(name);
+    }
+    private boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
+        return TargetUpdateStatus.UNKNOWN == statusToUpdate;
     }
 
     @Override
