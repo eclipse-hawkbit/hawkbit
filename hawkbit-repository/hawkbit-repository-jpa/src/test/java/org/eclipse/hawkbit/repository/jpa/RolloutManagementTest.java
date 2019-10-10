@@ -1817,6 +1817,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final Long rolloutId = createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
                 "80", "50", null, null).getId();
 
+        enableMultiAssignments();
         rolloutManagement.start(rolloutId);
         rolloutManagement.handleRollouts();
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();

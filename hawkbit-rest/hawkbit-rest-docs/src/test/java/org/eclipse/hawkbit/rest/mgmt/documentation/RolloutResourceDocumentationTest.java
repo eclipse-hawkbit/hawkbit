@@ -114,8 +114,10 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "id").description(ApiModelPropertiesGeneric.ITEM_ID));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "name").description(ApiModelPropertiesGeneric.NAME));
-        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "weight").description(MgmtApiModelProperties.ROLLOUT_WEIGHT)
-                .type(JsonFieldType.NUMBER).optional());
+        if (isMultiAssignmentsenabled()) {
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "weight")
+                    .description(MgmtApiModelProperties.ROLLOUT_WEIGHT).type(JsonFieldType.NUMBER).optional());
+        }
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "deleted").description(ApiModelPropertiesGeneric.DELETED));
         allFieldDescriptor
                 .add(fieldWithPath(arrayPrefix + "description").description(ApiModelPropertiesGeneric.DESCRPTION));

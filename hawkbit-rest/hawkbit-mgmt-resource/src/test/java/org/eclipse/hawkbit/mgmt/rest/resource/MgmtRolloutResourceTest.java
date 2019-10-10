@@ -929,11 +929,13 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
         mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/rollouts").content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
         mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
@@ -941,21 +943,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(DEFAULT_TEST_WEIGHT);
-    }
-
-    @Test
-    @Description("Get weight of rollout")
-    public void getRolloutWeight() throws Exception {
-        testdataFactory.createTargets(4, "rollout", "description");
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        final int weight = 300;
-        enableMultiAssignments();
-        final Long rolloutId = rolloutManagement.create(entityFactory.rollout().create().name("rollout").set(dsId)
-                .targetFilterQuery("id==rollout*").weight(weight), 2,
-                new RolloutGroupConditionBuilder().withDefaults().build()).getId();
-        mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rolloutId).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$.weight", equalTo(weight)));
     }
 
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,

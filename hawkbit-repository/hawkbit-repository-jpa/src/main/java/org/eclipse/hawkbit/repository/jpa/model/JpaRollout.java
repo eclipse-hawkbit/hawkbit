@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -134,6 +135,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private String approvalRemark;
 
     @Column(name = "weight")
+    @Min(Action.PRIORITY_MIN_WEIGHT)
     @Max(Action.PRIORITY_MAX_WEIGHT)
     private Integer weight;
 

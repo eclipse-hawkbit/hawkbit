@@ -29,6 +29,7 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
@@ -91,6 +92,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private long forcedTime;
 
     @Column(name = "weight")
+    @Min(Action.PRIORITY_MIN_WEIGHT)
     @Max(Action.PRIORITY_MAX_WEIGHT)
     private Integer weight;
 

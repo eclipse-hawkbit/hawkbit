@@ -240,15 +240,15 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         // remove bypassing the weight enforcement as soon as weight can be set
         // via UI
         final boolean bypassWeightEnforcement = true;
-        final long nullWeights = deploymentRequests.stream()
-                .filter(request -> request.getTargetWithActionType().getWeight() == null).count();
-        final boolean allWeightsNull = nullWeights >= deploymentRequests.size();
-        final boolean nullWeightExists = nullWeights > 0;
-        if (!isMultiAssignmentsEnabled() && !allWeightsNull) {
+        final long assignmentsWithWeight = deploymentRequests.stream()
+                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
+        final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
+        final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
+        if (!isMultiAssignmentsEnabled() && containsAssignmentWithWeight) {
             throw new MultiAssignmentIsNotEnabledException();
         } else if (bypassWeightEnforcement) {
             return;
-        } else if (isMultiAssignmentsEnabled() && nullWeightExists) {
+        } else if (isMultiAssignmentsEnabled() && containsAssignmentWithoutWeight) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }

@@ -1938,11 +1938,13 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
