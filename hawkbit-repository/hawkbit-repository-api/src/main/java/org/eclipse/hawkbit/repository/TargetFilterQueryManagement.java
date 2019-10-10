@@ -52,7 +52,7 @@ public interface TargetFilterQueryManagement {
      *             if the maximum number of targets that is addressed by the
      *             given query is exceeded (auto-assignments only)
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET_FILTER)
     TargetFilterQuery create(@NotNull @Valid TargetFilterQueryCreate create);
 
     /**
@@ -64,7 +64,7 @@ public interface TargetFilterQueryManagement {
      * @throws EntityNotFoundException
      *             if filter with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET_FILTER)
     void delete(long targetFilterQueryId);
 
     /**
