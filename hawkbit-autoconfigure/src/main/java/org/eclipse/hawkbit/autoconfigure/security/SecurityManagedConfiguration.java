@@ -76,8 +76,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -89,6 +92,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationEn
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
@@ -462,6 +466,12 @@ public class SecurityManagedConfiguration {
         @Autowired
         private UserAuthenticationFilter userAuthenticationFilter;
 
+        @Autowired(required = false)
+        private OidcBearerTokenAuthenticationFilter oidcBearerTokenAuthenticationFilter;
+
+        @Autowired(required = false)
+        private InMemoryClientRegistrationRepository clientRegistrationRepository;
+
         @Autowired
         private SystemManagement systemManagement;
 
@@ -497,38 +507,61 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
-            basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
-
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
             if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            httpSec.addFilterBefore(new Filter() {
-                @Override
-                public void init(final FilterConfig filterConfig) throws ServletException {
-                    userAuthenticationFilter.init(filterConfig);
-                }
-
-                @Override
-                public void doFilter(final ServletRequest request, final ServletResponse response,
-                        final FilterChain chain) throws IOException, ServletException {
-                    userAuthenticationFilter.doFilter(request, response, chain);
-                }
-
-                @Override
-                public void destroy() {
-                    userAuthenticationFilter.destroy();
-                }
-            }, RequestHeaderAuthenticationFilter.class)
-                    .addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement,
-                            systemSecurityContext), SessionManagementFilter.class)
+            httpSec
                     .authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
 
-            httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
+            if (oidcBearerTokenAuthenticationFilter != null) {
+
+                // Only get the first client registration. Testing against every client could increase the
+                // attack vector
+                ClientRegistration clientRegistration = null;
+                for (ClientRegistration cr : clientRegistrationRepository) {
+                    clientRegistration = cr;
+                    break;
+                }
+
+                Assert.notNull(clientRegistration, "There must be a valid client registration");
+                httpSec.oauth2ResourceServer()
+                        .jwt().jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri());
+
+                oidcBearerTokenAuthenticationFilter.setClientRegistration(clientRegistration);
+
+                httpSec.addFilterAfter(oidcBearerTokenAuthenticationFilter, BearerTokenAuthenticationFilter.class);
+            }
+            else {
+                final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
+                basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
+
+                httpSec.addFilterBefore(new Filter() {
+                    @Override
+                    public void init(final FilterConfig filterConfig) throws ServletException {
+                        userAuthenticationFilter.init(filterConfig);
+                    }
+
+                    @Override
+                    public void doFilter(final ServletRequest request, final ServletResponse response,
+                                         final FilterChain chain) throws IOException, ServletException {
+                        userAuthenticationFilter.doFilter(request, response, chain);
+                    }
+
+                    @Override
+                    public void destroy() {
+                        userAuthenticationFilter.destroy();
+                    }
+                }, RequestHeaderAuthenticationFilter.class);
+                httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
+            }
+
+            httpSec.addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement,
+                    systemSecurityContext), SessionManagementFilter.class);
+
             httpSec.anonymous().disable();
             httpSec.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         }
