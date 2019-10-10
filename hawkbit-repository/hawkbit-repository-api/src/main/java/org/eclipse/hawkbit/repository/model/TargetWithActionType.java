@@ -24,8 +24,8 @@ public class TargetWithActionType {
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
-    @Min(Action.PRIORITY_MIN_WEIGHT)
-    @Max(Action.PRIORITY_MAX_WEIGHT)
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
     private final Integer weight;
     private String maintenanceSchedule;
     private String maintenanceWindowDuration;

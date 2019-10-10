@@ -42,11 +42,11 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * Minimum weight to indicate the priority of {@link Action}.
      */
-    int PRIORITY_MIN_WEIGHT = 0;
+    int WEIGHT_MIN = 0;
     /**
      * Maximum weight to indicate the priority of {@link Action}.
      */
-    int PRIORITY_MAX_WEIGHT = 1000;
+    int WEIGHT_MAX = 1000;
 
     /**
      * @return the distributionSet

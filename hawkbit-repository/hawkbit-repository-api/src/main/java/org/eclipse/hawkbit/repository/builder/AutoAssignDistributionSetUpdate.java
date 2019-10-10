@@ -25,8 +25,8 @@ public class AutoAssignDistributionSetUpdate {
     private Long dsId;
     private ActionType actionType;
 
-    @Min(Action.PRIORITY_MIN_WEIGHT)
-    @Max(Action.PRIORITY_MAX_WEIGHT)
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
     /**

@@ -135,8 +135,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private String approvalRemark;
 
     @Column(name = "weight")
-    @Min(Action.PRIORITY_MIN_WEIGHT)
-    @Max(Action.PRIORITY_MAX_WEIGHT)
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
     @Transient

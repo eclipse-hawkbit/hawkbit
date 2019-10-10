@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +55,9 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
     protected final RolloutApprovalStrategy rolloutApprovalStrategy;
 
-    private final TenantConfigurationManagement tenantConfigurationManagement;
+    protected final TenantConfigurationManagement tenantConfigurationManagement;
 
-    private final SystemSecurityContext systemSecurityContext;
+    protected final SystemSecurityContext systemSecurityContext;
 
     protected AbstractRolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
@@ -166,10 +164,5 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
         return new AsyncResult<>(validateTargetsInGroups(
                 groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
-    }
-
-    protected boolean isMultiAssignmentsEnabled() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

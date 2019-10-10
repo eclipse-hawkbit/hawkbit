@@ -60,6 +60,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -246,11 +247,13 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         // remove bypassing the weight enforcement as soon as weight can be set
         // via UI
         final boolean bypassWeightEnforcement = true;
-        if (!isMultiAssignmentsEnabled() && rollout.getWeight().isPresent()) {
+        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext,
+                tenantConfigurationManagement);
+        if (!multiAssignmentsEnabled && rollout.getWeight().isPresent()) {
             throw new MultiAssignmentIsNotEnabledException();
         } else if (bypassWeightEnforcement) {
             return;
-        } else if (isMultiAssignmentsEnabled() && !rollout.getWeight().isPresent()) {
+        } else if (multiAssignmentsEnabled && !rollout.getWeight().isPresent()) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }
         

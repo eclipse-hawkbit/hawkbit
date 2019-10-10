@@ -35,8 +35,8 @@ public abstract class AbstractRolloutUpdateCreate<T> extends AbstractNamedEntity
     protected Long forcedTime;
     protected Long startAt;
 
-    @Min(Action.PRIORITY_MIN_WEIGHT)
-    @Max(Action.PRIORITY_MAX_WEIGHT)
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
     protected Integer weight;
 
     /**

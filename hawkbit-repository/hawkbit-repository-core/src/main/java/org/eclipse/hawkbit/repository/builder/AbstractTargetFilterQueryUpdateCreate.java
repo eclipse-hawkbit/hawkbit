@@ -36,8 +36,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     protected ActionType actionType;
 
-    @Min(Action.PRIORITY_MIN_WEIGHT)
-    @Max(Action.PRIORITY_MAX_WEIGHT)
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
     protected Integer weight;
 
     /**

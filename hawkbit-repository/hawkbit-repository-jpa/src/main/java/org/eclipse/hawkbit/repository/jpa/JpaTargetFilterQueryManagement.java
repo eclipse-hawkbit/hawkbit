@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +36,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -115,11 +114,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         // remove bypassing the weight enforcement as soon as weight can be set
         // via UI
         final boolean bypassWeightEnforcement = true;
-        if (!isMultiAssignmentsEnabled() && weight != null) {
+        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext,
+                tenantConfigurationManagement);
+        if (!multiAssignmentsEnabled && weight != null) {
             throw new MultiAssignmentIsNotEnabledException();
         } else if (bypassWeightEnforcement) {
             return;
-        } else if (isMultiAssignmentsEnabled() && weight == null) {
+        } else if (multiAssignmentsEnabled && weight == null) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }
@@ -309,10 +310,4 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                 targetRepository.count(RSQLUtility.parse(query, TargetFields.class, virtualPropertyReplacer, database)),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
     }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
-    }
-
 }
