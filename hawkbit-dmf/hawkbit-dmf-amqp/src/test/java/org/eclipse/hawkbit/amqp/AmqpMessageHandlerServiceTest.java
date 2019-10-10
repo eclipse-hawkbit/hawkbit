@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -82,10 +82,14 @@ import io.qameta.allure.Story;
 @Story("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
+    private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class.getSimpleName()
+            + " was expected, ";
+
     private static final String SHA1 = "12345";
+    private static final String VIRTUAL_HOST = "vHost";
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 123L;
-    private static final String CONTROLLLER_ID = "123";
+    private static final String CONTROLLER_ID = "123";
     private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
@@ -162,11 +166,10 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted due to worng content type");
-        } catch (final AmqpRejectAndDontRequeueException e) {
-        }
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to wrong content type")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
@@ -185,12 +188,11 @@ public class AmqpMessageHandlerServiceTest {
                 uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
 
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
-        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
-
+        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://"+VIRTUAL_HOST+"/MyTest");
     }
 
     @Test
@@ -210,13 +212,12 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
                 modeCaptor.capture())).thenReturn(null);
 
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
 
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(attributesCaptor.getValue()).as("Attributes is not right")
                 .isEqualTo(attributeUpdate.getAttributes());
-
     }
 
     @Test
@@ -235,7 +236,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // send a message which does not specify a update mode
         Message message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that NO fallback is made on the way to the controller
         // management layer
         assertThat(modeCaptor.getValue()).isNull();
@@ -243,40 +244,36 @@ public class AmqpMessageHandlerServiceTest {
         // send a message which specifies update mode MERGE
         attributeUpdate.setMode(DmfUpdateMode.MERGE);
         message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.MERGE);
 
         // send a message which specifies update mode REPLACE
         attributeUpdate.setMode(DmfUpdateMode.REPLACE);
         message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REPLACE);
 
         // send a message which specifies update mode REMOVE
         attributeUpdate.setMode(DmfUpdateMode.REMOVE);
         message = amqpMessageHandlerService.getMessageConverter().toMessage(attributeUpdate, messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThat(modeCaptor.getValue()).isEqualTo(UpdateMode.REMOVE);
-
     }
 
     @Test
     @Description("Tests the creation of a thing without a 'reply to' header in message.")
-    public void createThingWitoutReplyTo() {
+    public void createThingWithoutReplyTo() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED, null);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = messageConverter.toMessage("", messageProperties);
 
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted since no replyTo header was set");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
-
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no replyTo header was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
@@ -284,12 +281,11 @@ public class AmqpMessageHandlerServiceTest {
     public void createThingWithoutID() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted since no thingID was set");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
+
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
@@ -300,12 +296,9 @@ public class AmqpMessageHandlerServiceTest {
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "");
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
-        try {
-            amqpMessageHandlerService.onMessage(message, type, TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown message type")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
@@ -313,27 +306,23 @@ public class AmqpMessageHandlerServiceTest {
     public void invalidEventTopic() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
-        try {
-            amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown message type");
-        } catch (final AmqpRejectAndDontRequeueException e) {
-        }
 
-        try {
-            messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted due to unknown topic");
-        } catch (final AmqpRejectAndDontRequeueException e) {
-        }
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown message type")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT,
+                        VIRTUAL_HOST));
+
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown topic")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                        VIRTUAL_HOST));
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted because there was no event topic");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
-
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "because there was no event topic")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
@@ -346,12 +335,10 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no action id was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
@@ -365,20 +352,17 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(actionUpdateStatus,
                 messageProperties);
 
-        try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail("AmqpRejectAndDontRequeueException was excepeted since no action id was set");
-        } catch (final AmqpRejectAndDontRequeueException exception) {
-            // test ok - exception was excepted
-        }
-
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no action id was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                        VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -397,7 +381,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -419,7 +403,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLLER_ID,
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -473,7 +457,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         // test
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
 
         final ArgumentCaptor<ActionProperties> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionProperties.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
@@ -485,7 +469,6 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
         assertThat(targetCaptor.getValue().getControllerId()).as("event has wrong controller id").isEqualTo("target1");
         assertThat(actionProperties.getId()).as("event has wrong action id").isEqualTo(22L);
-
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {
@@ -515,7 +498,7 @@ public class AmqpMessageHandlerServiceTest {
 
     private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
-        initalizeSecurityTokenGenerator();
+        initializeSecurityTokenGenerator();
 
         // Mock
         final Action actionMock = mock(Action.class);
@@ -531,7 +514,7 @@ public class AmqpMessageHandlerServiceTest {
         return actionMock;
     }
 
-    private void initalizeSecurityTokenGenerator() throws IllegalAccessException {
+    private void initializeSecurityTokenGenerator() throws IllegalAccessException {
         final SecurityTokenGeneratorHolder instance = SecurityTokenGeneratorHolder.getInstance();
         final Field[] fields = instance.getClass().getDeclaredFields();
         for (final Field field : fields) {
@@ -541,4 +524,34 @@ public class AmqpMessageHandlerServiceTest {
             }
         }
     }
+
+    @Test
+    @Description("Tests the deletion of a target/thing, requested by the target itself.")
+    public void deleteThing() {
+        // prepare valid message
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        final Message message = messageConverter.toMessage(new byte[0],messageProperties);
+
+        // test
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT, VIRTUAL_HOST);
+
+        //verify
+        verify(controllerManagementMock).deleteExistingTarget(knownThingId);
+    }
+
+    @Test
+    @Description("Tests the deletion of a target/thing with missing thingId")
+    public void deleteThingWithoutThingId() {
+        // prepare invalid message
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
+        final Message message = messageConverter.toMessage(new byte[0], messageProperties);
+        
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT,
+                        VIRTUAL_HOST));
+    }
+
 }
