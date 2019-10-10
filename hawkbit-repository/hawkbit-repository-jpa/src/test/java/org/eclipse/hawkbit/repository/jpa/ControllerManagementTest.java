@@ -540,13 +540,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         when(mockTargetRepository.findOne(any())).thenThrow(ConcurrencyFailureException.class);
         ((JpaControllerManagement) controllerManagement).setTargetRepository(mockTargetRepository);
 
-        assertThatExceptionOfType(ConcurrencyFailureException.class)
-                .as("Expected an ConcurrencyFailureException to be thrown!")
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
+        try {
+            assertThatExceptionOfType(ConcurrencyFailureException.class)
+                    .as("Expected an ConcurrencyFailureException to be thrown!")
+                    .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
 
-        verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
-        // revert
-        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+            verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
+        }
+        finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
     }
 
     @Test
@@ -587,13 +591,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         when(mockTargetRepository.findOne(any())).thenReturn(Optional.empty());
         when(mockTargetRepository.save(any())).thenThrow(EntityAlreadyExistsException.class);
 
-        assertThatExceptionOfType(EntityAlreadyExistsException.class)
-                .as("Expected an EntityAlreadyExistsException to be thrown!")
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST));
-        verify(mockTargetRepository, times(1)).findOne(any());
-        verify(mockTargetRepository, times(1)).save(any());
-        // revert
-        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        try {
+            assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                    .as("Expected an EntityAlreadyExistsException to be thrown!")
+                    .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST));
+            verify(mockTargetRepository, times(1)).findOne(any());
+            verify(mockTargetRepository, times(1)).save(any());
+        }
+        finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
     }
 
     @Test
@@ -606,14 +614,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         when(mockTargetRepository.findOne(any())).thenThrow(RuntimeException.class);
 
-        assertThatExceptionOfType(RuntimeException.class)
-                .as("Expected a RuntimeException to be thrown!")
-                .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId",
-                        LOCALHOST));
-
-        verify(mockTargetRepository, times(1)).findOne(any());
-        // revert
-        ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        try {
+            assertThatExceptionOfType(RuntimeException.class)
+                    .as("Expected a RuntimeException to be thrown!")
+                    .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId",
+                            LOCALHOST));
+            verify(mockTargetRepository, times(1)).findOne(any());
+        }
+        finally {
+            // revert
+            ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
+        }
     }
 
     @Test
