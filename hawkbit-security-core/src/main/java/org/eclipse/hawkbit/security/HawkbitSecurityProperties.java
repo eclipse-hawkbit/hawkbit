@@ -259,7 +259,7 @@ public class HawkbitSecurityProperties {
          * Maximum number of targets for an automatic distribution set
          * assignment
          */
-        private int maxTargetsPerAutoAssignment = 5000;
+        private int maxTargetsPerAutoAssignment = 20000;
 
         /**
          * Maximum size of artifacts in bytes. Defaults to 1 GB.
