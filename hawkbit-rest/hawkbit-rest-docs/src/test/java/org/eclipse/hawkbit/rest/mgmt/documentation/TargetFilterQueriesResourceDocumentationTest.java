@@ -203,8 +203,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                         .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
                                 requestFieldWithPathMandatoryInMultiAssignMode("weight")
-                                        .description(MgmtApiModelProperties.WEIGHT)
-                                        .attributes(key("value").value("(0, 1000)"))),
+                                        .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                        .attributes(key("value").value("0 - 1000"))),
                         getResponseFieldTargetFilterQuery(false)));
     }
 
@@ -232,7 +232,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "autoAssignActionType")
                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE).type(JsonFieldType.STRING.toString())
                         .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
-                fieldWithPath(arrayPrefix + "autoAssignWeight").description(MgmtApiModelProperties.WEIGHT)
+                fieldWithPath(arrayPrefix + "autoAssignWeight")
+                        .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                         .type(JsonFieldType.NUMBER.toString()),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),

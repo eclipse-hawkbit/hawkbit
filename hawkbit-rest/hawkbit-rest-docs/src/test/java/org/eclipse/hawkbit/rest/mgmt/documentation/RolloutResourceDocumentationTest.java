@@ -114,10 +114,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "id").description(ApiModelPropertiesGeneric.ITEM_ID));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "name").description(ApiModelPropertiesGeneric.NAME));
-        if (isMultiAssignmentsenabled()) {
-            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "weight")
-                    .description(MgmtApiModelProperties.ROLLOUT_WEIGHT).type(JsonFieldType.NUMBER).optional());
-        }
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "weight")
+                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT).type(JsonFieldType.NUMBER).optional());
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "deleted").description(ApiModelPropertiesGeneric.DELETED));
         allFieldDescriptor
                 .add(fieldWithPath(arrayPrefix + "description").description(ApiModelPropertiesGeneric.DESCRPTION));
@@ -198,8 +196,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .andDo(this.document.document(requestFields(
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                         requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
-                                .description(MgmtApiModelProperties.ROLLOUT_WEIGHT)
-                                .attributes(key("value").value("(0, 1000)")),
+                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -283,8 +281,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .andDo(this.document.document(requestFields(
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                         requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
-                                .description(MgmtApiModelProperties.ROLLOUT_WEIGHT)
-                                .attributes(key("value").value("(0, 1000)")),
+                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),

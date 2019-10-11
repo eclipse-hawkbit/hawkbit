@@ -523,8 +523,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 requestFieldWithPathMandatoryInMultiAssignMode("weight")
-                                        .description(MgmtApiModelProperties.WEIGHT).type(JsonFieldType.NUMBER)
-                                        .attributes(key("value").value("(0, 1000)")),
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_WEIGHT)
+                                        .type(JsonFieldType.NUMBER).attributes(key("value").value("0 - 1000")),
                                 optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
@@ -567,8 +567,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
-                                        .description(MgmtApiModelProperties.WEIGHT)
-                                        .attributes(key("value").value("(0, 1000)")),
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_WEIGHT)
+                                        .attributes(key("value").value("0 - 1000")),
                                 optionalRequestFieldWithPath("[].forcetime")
                                         .description(MgmtApiModelProperties.FORCETIME),
                                 optionalRequestFieldWithPath("[].maintenanceWindow")
