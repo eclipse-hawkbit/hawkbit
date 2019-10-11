@@ -99,8 +99,8 @@ public class HonoDeviceSync {
 
         // Since ApplicationReadyEvent is emitted multiple times make sure it is synced at most once during startup.
         if (!syncedInitially) {
-            synchronize(false);
             syncedInitially = true;
+            synchronize(false);
         }
     }
 
@@ -238,8 +238,10 @@ public class HonoDeviceSync {
                     HttpURLConnection jwtConnection = (HttpURLConnection) oidcTokenUrl.openConnection();
                     jwtConnection.setDoOutput(true);
                     DataOutputStream outputStream = new DataOutputStream(jwtConnection.getOutputStream());
-                    outputStream.writeBytes("grant_type=password&client_id=" + URLEncoder.encode(oidcClientId)
-                            + "&username=" + URLEncoder.encode(username) + "&password=" + URLEncoder.encode(password));
+                    outputStream.writeBytes("grant_type=password"
+                            + "&client_id=" + URLEncoder.encode(oidcClientId, "UTF-8")
+                            + "&username=" + URLEncoder.encode(username, "UTF-8")
+                            + "&password=" + URLEncoder.encode(password, "UTF-8"));
                     outputStream.flush();
                     outputStream.close();
 
