@@ -138,9 +138,14 @@ public enum SpServerError {
     SP_QUOTA_EXCEEDED("hawkbit.server.error.quota.tooManyEntries", "Too many entries have been inserted."),
 
     /**
-     *
+     * error that describes that size of uploaded file exceeds size quota
      */
-    SP_SIZE_QUOTA_EXCEEDED("hawkbit.server.error.quota.sizeExceeded", "File size exceeds quota."),
+    SP_FILE_SIZE_QUOTA_EXCEEDED("hawkbit.server.error.quota.fileSizeExceeded", "File exceeds size quota."),
+
+    /**
+     * error that describes that size of uploaded file exceeds storage quota
+     */
+    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded", "File size exceeds storage quota."),
 
     /**
      * error message, which describes that the action can not be canceled cause

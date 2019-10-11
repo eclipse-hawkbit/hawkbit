@@ -207,7 +207,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_SIZE_QUOTA_EXCEEDED.getKey())));
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED.getKey())));
     }
 
     @Test
@@ -433,7 +433,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_SIZE_QUOTA_EXCEEDED.getKey())));
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_STORAGE_QUOTA_EXCEEDED.getKey())));
 
     }
 

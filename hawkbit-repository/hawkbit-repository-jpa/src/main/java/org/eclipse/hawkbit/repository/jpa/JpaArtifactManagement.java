@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -23,11 +24,11 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaInputStream;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -121,20 +122,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
         AbstractDbArtifact dbArtifact = null;
         try {
-            dbArtifact = artifactRepository.store(tenantAware.getCurrentTenant(), artifactUpload.getInputStream(),
+            final InputStream quotaStream = wrapInQuotaStream(artifactUpload.getInputStream());
+
+            dbArtifact = artifactRepository.store(tenantAware.getCurrentTenant(), quotaStream,
                     artifactUpload.getFilename(), artifactUpload.getContentType(),
                     new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum(),
                             artifactUpload.getProvidedSha256Sum()));
 
-            assertMaxArtifactStorageQuota(artifactUpload.getFilename(), dbArtifact.getSize());
-            assertMaxArtifactSizeQuota(artifactUpload.getFilename(), artifactUpload.getModuleId(),
-                    dbArtifact.getSize());
             return dbArtifact;
-        } catch (QuotaExceededException e) {
-            if (dbArtifact != null) {
-                artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), dbArtifact.getHashes().getSha1());
-            }
-            throw e;
         } catch (final ArtifactStoreException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
@@ -151,16 +146,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
     }
 
-    private void assertMaxArtifactSizeQuota(final String filename, final long id, final long artifactSize) {
+    private InputStream wrapInQuotaStream(final InputStream in) {
         final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
-        QuotaHelper.assertMaxArtifactSizeQuota(filename, id, artifactSize, maxArtifactSize);
-    }
 
-    private void assertMaxArtifactStorageQuota(final String filename, final long artifactSize) {
-        final Long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
+        final long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
-        QuotaHelper.assertMaxArtifactStorageQuota(filename, artifactSize, currentlyUsed, maxArtifactSizeTotal);
+        return new QuotaInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
     }
 
     @Override

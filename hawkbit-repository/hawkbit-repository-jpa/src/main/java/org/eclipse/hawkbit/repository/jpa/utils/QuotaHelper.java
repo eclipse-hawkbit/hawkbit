@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
-import java.text.DecimalFormat;
 import java.util.function.ToLongFunction;
 
 import javax.validation.constraints.NotNull;
@@ -27,13 +26,7 @@ public final class QuotaHelper {
      */
     private static final Logger LOG = LoggerFactory.getLogger(QuotaHelper.class);
 
-    private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Quota exceeded: The artifact '%s' (%s) which has been uploaded for software module '%s' exceeds the maximum artifact size of %s.";
-
-    private static final String MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED = "Quota exceeded: The artifact '%s' (%s) cannot be uploaded. The maximum total artifact storage of %s bytes would be exceeded.";
-
     private static final String MAX_ASSIGNMENT_QUOTA_EXCEEDED = "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.";
-    public static final String KB = "KB";
-    public static final String MB = "MB";
 
     private QuotaHelper() {
         // no need to instantiate this class
@@ -155,72 +148,5 @@ public final class QuotaHelper {
             LOG.warn(message);
             throw new QuotaExceededException(message);
         }
-    }
-
-    /**
-     * Assert that the size of a single artifact does not exceed the limit
-     *
-     * @param filename
-     *            name of the artifact, used in logs
-     * @param softwareModuleId
-     *            id of the software module, used on logs
-     * @param artifactSize
-     *            size of the artifact
-     * @param maxArtifactSize
-     *            max allowed file size
-     */
-    public static void assertMaxArtifactSizeQuota(final String filename, final long softwareModuleId,
-            final long artifactSize, final long maxArtifactSize) {
-        if (maxArtifactSize <= 0) {
-            return;
-        }
-        if (artifactSize > maxArtifactSize) {
-            final String msg = String.format(MAX_ARTIFACT_SIZE_EXCEEDED, filename,
-                    byteValueToReadableString(artifactSize), softwareModuleId,
-                    byteValueToReadableString(maxArtifactSize));
-            LOG.warn(msg);
-            throw new QuotaExceededException(msg, QuotaExceededException.QuotaType.SIZE_QUOTA);
-        }
-    }
-
-    /**
-     * Assert that the size of an artifact does not exceed the allowed total
-     * artifact storage size
-     *
-     * @param filename
-     *            name of the artifact, used in logs
-     * @param artifactSize
-     *            size of the artifact
-     * @param currentlyUsed
-     *            currently occupied artifact storage
-     * @param maxArtifactSizeTotal
-     *            max allowed total artifact storage size
-     */
-    public static void assertMaxArtifactStorageQuota(final String filename, final long artifactSize,
-            final long currentlyUsed, final long maxArtifactSizeTotal) {
-        if (maxArtifactSizeTotal <= 0) {
-            return;
-        }
-
-        if (currentlyUsed + artifactSize > maxArtifactSizeTotal) {
-            final String msg = String.format(MAX_ARTIFACT_SIZE_TOTAL_EXCEEDED, filename,
-                    byteValueToReadableString(artifactSize), byteValueToReadableString(maxArtifactSizeTotal));
-            LOG.warn(msg);
-            throw new QuotaExceededException(msg, QuotaExceededException.QuotaType.SIZE_QUOTA);
-        }
-    }
-
-    /**
-     * Convert byte values to human readable strings with units
-     */
-    private static String byteValueToReadableString(long byteValue) {
-        double outputValue = byteValue / 1024.0;
-        String unit = KB;
-        if (outputValue >= 1024) {
-            outputValue = outputValue / 1024.0;
-            unit = MB;
-        }
-        DecimalFormat df = new DecimalFormat("#.##");
-        return new StringBuilder(df.format(outputValue)).append(" ").append(unit).toString();
     }
 }

@@ -103,12 +103,16 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         this.failureReason = failureReason;
     }
 
+    protected void interruptUploadDueToUploadFailed(final String msg) {
+        interruptUploadAndSetReason(StringUtils.isBlank(msg) ? i18n.getMessage("message.upload.failed") : msg);
+    }
+
     protected void interruptUploadDueToUploadFailed() {
         interruptUploadAndSetReason(i18n.getMessage("message.upload.failed"));
     }
 
-    protected void interruptUploadDueToQuotaExceeded() {
-        interruptUploadAndSetReason(i18n.getMessage("message.upload.quota"));
+    protected void interruptUploadDueToQuotaExceeded(final String msg) {
+        interruptUploadAndSetReason(StringUtils.isBlank(msg) ? i18n.getMessage("message.upload.quota") : msg);
     }
 
     protected void interruptUploadDueToDuplicateFile() {
@@ -180,8 +184,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         LOG.info("Upload failed for file {} due to reason: {}, exception: {}", fileUploadId, failureReason,
                 uploadException.getMessage());
 
-        uiNotification.displayValidationError(uploadException.getMessage());
-
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? i18n.getMessage("message.upload.failed") : failureReason);
@@ -236,12 +238,13 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         public void run() {
             try {
                 UI.setCurrent(vaadinUi);
-                streamToRepository();
+                synchronized (vaadinUi) {
+                    streamToRepository();
+                }
             } catch (final QuotaExceededException e) {
-                interruptUploadDueToQuotaExceeded();
-                publishUploadFailedAndFinishedEvent(fileUploadId, e);
+                interruptUploadDueToQuotaExceeded(e.getMessage());
             } catch (final RuntimeException e) {
-                interruptUploadDueToUploadFailed();
+                interruptUploadDueToUploadFailed(e.getMessage());
                 publishUploadFailedAndFinishedEvent(fileUploadId, e);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {

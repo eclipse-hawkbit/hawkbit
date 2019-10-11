@@ -22,12 +22,17 @@ public final class QuotaExceededException extends AbstractServerRtException {
 
     private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'. The maximum is %s.";
 
+    /**
+     * Enum that describes the types of quota that may be exceeded
+     */
     public enum QuotaType {
-        SIZE_QUOTA(SpServerError.SP_SIZE_QUOTA_EXCEEDED), ASSIGNMENT_QUOTA(SpServerError.SP_QUOTA_EXCEEDED);
+        STORAGE_QUOTA(SpServerError.SP_STORAGE_QUOTA_EXCEEDED),
+        SIZE_QUOTA(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED),
+        ASSIGNMENT_QUOTA(SpServerError.SP_QUOTA_EXCEEDED);
 
         private final SpServerError errorType;
 
-        QuotaType(SpServerError errorType) {
+        QuotaType(final SpServerError errorType) {
             this.errorType = errorType;
         }
     }
@@ -59,7 +64,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
      * @param quotaType
      *            {@link QuotaType} that will lead to the connected error type
      */
-    public QuotaExceededException(final String message, QuotaType quotaType) {
+    public QuotaExceededException(final String message, final QuotaType quotaType) {
         super(message, quotaType.errorType);
     }
 
