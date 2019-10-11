@@ -57,7 +57,7 @@ public class HonoDeviceSync {
     private TargetManagement targetManagement;
 
     @Autowired
-    PermissionService permissionService;
+    private PermissionService permissionService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,10 +75,11 @@ public class HonoDeviceSync {
     private String oidcClientId;
     private String username;
     private String password;
+    private String targetNameFieldInDeviceExtension;
 
     HonoDeviceSync(String honoTenantListUri, String honoDevicesEndpoint, String honoCredentialsListUri,
                    String authenticationMethod, String oidcTokenUri, String oidcClientId, String username,
-                   String password) {
+                   String password, String targetNameFieldInDeviceExtension) {
         this.honoTenantListUri = honoTenantListUri;
         this.honoDeviceListUri = honoDevicesEndpoint;
         this.honoCredentialsListUri = honoCredentialsListUri;
@@ -87,6 +88,7 @@ public class HonoDeviceSync {
         this.oidcClientId = oidcClientId;
         this.username = username;
         this.password = password;
+        this.targetNameFieldInDeviceExtension = targetNameFieldInDeviceExtension;
 
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -169,7 +171,7 @@ public class HonoDeviceSync {
         }
     }
 
-    public List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {
+    private List<IdentifiableHonoTenant> getAllHonoTenants() throws IOException {
         List<IdentifiableHonoTenant> tenants = new ArrayList<>();
         long offset = 0;
         long total = Long.MAX_VALUE;
@@ -187,7 +189,7 @@ public class HonoDeviceSync {
         return tenants;
     }
 
-    public Map<String, IdentifiableHonoDevice> getAllHonoDevices(String tenant) throws IOException {
+    private Map<String, IdentifiableHonoDevice> getAllHonoDevices(String tenant) throws IOException {
         Map<String, IdentifiableHonoDevice> devices = new HashMap<>();
         long offset = 0;
         long total = Long.MAX_VALUE;
@@ -309,12 +311,37 @@ public class HonoDeviceSync {
     private Target createTarget(IdentifiableHonoDevice honoDevice) {
         systemManagement.getTenantMetadata(honoDevice.getTenant());
         return targetManagement.create(entityFactory.target().create()
-                .controllerId(honoDevice.getId()).description(honoDevice.getDevice().getExt().toString()));
+                .controllerId(honoDevice.getId())
+                .name(getDeviceName(honoDevice))
+                .description(honoDevice.getDevice().getExt().toString()));
     }
 
     private Target updateTarget(IdentifiableHonoDevice honoDevice) {
         return targetManagement.update(entityFactory.target()
                 .update(honoDevice.getId())
+                .name(getDeviceName(honoDevice))
                 .description(honoDevice.getDevice().getExt().toString()));
+    }
+
+    private String getDeviceName(IdentifiableHonoDevice honoDevice) {
+        if (targetNameFieldInDeviceExtension != null) {
+            Object ext = honoDevice.getDevice().getExt();
+            if (ext instanceof JsonNode) {
+                JsonNode nameValue = ((JsonNode) ext).get(targetNameFieldInDeviceExtension);
+                if (nameValue != null) {
+                    return nameValue.asText();
+                }
+                else {
+                    LOG.warn("The extension object of the device with id = '{}' does not contain the field '{}'.",
+                            honoDevice.getId(), targetNameFieldInDeviceExtension);
+                }
+            }
+            else {
+                LOG.warn("The extension field of the device with id = '{}' is not a valid JSON object.",
+                        honoDevice.getId());
+            }
+        }
+
+        return honoDevice.getId();
     }
 }

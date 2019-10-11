@@ -27,11 +27,12 @@ public class DmfHonoConfiguration {
     private String oidcClientId = "";
     private String username = "";
     private String password = "";
+    private String targetNameField = "";
 
     @Bean
     public HonoDeviceSync honoDeviceSync() {
         return new HonoDeviceSync(tenantListUri, deviceListUri, credentialsListUri, authenticationMethod,
-                oidcTokenUri, oidcClientId, username, password);
+                oidcTokenUri, oidcClientId, username, password, targetNameField);
     }
 
     public String getTenantListUri() {
@@ -96,5 +97,13 @@ public class DmfHonoConfiguration {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getTargetNameField() {
+        return targetNameField;
+    }
+
+    public void setTargetNameField(String targetNameField) {
+        this.targetNameField = targetNameField;
     }
 }

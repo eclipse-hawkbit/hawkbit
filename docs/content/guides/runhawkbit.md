@@ -106,6 +106,12 @@ spring.cloud.stream.bindings.device-deleted.group=hawkBit
 ```
 For Google Cloud Pub/Sub disable the default Maven profile `hono-amqp` and enable the profile `amqp-gcp-pubsub`.
 
+Additionally, you can specify a field of the device's extension object which will be used as the corresponding target's name:
+```
+hawkbit.dmf.hono.target-name-field=fancyFieldName
+```
+If none is specified the device's ID is used as the target's name.
+
 
 ### Adapt hostname of example scenario [creation script](https://github.com/eclipse/hawkbit-examples/blob/master/hawkbit-example-mgmt-simulator/src/main/resources/application.properties)
 
