@@ -82,6 +82,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final SystemSecurityContext systemSecurityContext;
 
+    private static final String THING_ID_NULL = "ThingId is null";
+
     /**
      * Constructor.
      * 
@@ -156,6 +158,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 setTenantSecurityContext(tenant);
                 registerTarget(message, virtualHost);
                 break;
+            case THING_REMOVED:
+                setTenantSecurityContext(tenant);
+                deleteTarget(message);
+                break;
             case EVENT:
                 checkContentTypeJson(message);
                 setTenantSecurityContext(tenant);
@@ -200,7 +206,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the ip of the target/thing
      */
     private void registerTarget(final Message message, final String virtualHost) {
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
@@ -274,8 +280,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *
      * @param message
      *            the incoming event message.
-     * @param topic
-     *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message) {
         switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
@@ -292,9 +296,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     }
 
+    private void deleteTarget(final Message message) {
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
+        controllerManagement.deleteExistingTarget(thingId);
+    }
+
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));
@@ -303,7 +312,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to update the action status of an action through the event.
      *
-     * @param actionUpdateStatus
+     * @param message
      *            the object form the ampq message
      */
     private void updateActionStatus(final Message message) {
