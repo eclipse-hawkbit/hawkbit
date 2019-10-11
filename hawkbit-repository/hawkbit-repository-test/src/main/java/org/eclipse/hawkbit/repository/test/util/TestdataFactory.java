@@ -586,24 +586,24 @@ public class TestdataFactory {
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId) {
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId(controllerId));
-       assertTargetProperlyCreated(target);
-        return target;
+        return createTarget(controllerId, controllerId);
     }
 
     /**
+     * @param controllerId
+     *            of the target
      * @param targetName
      *            name of the target
      * @return persisted {@link Target}
      */
-    public Target createTargetWithName(final String targetName) {
+    public Target createTarget(final String controllerId, final String targetName) {
         final Target target = targetManagement
-                .create(entityFactory.target().create().controllerId(DEFAULT_CONTROLLER_ID).name(targetName));
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
         assertTargetProperlyCreated(target);
         return target;
     }
 
-    private void assertTargetProperlyCreated (Target target){
+    private void assertTargetProperlyCreated(Target target) {
         assertThat(target.getCreatedBy()).isNotNull();
         assertThat(target.getCreatedAt()).isNotNull();
         assertThat(target.getLastModifiedBy()).isNotNull();

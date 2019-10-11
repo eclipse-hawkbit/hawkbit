@@ -173,7 +173,6 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests the creation of a target/thing by calling the same method that incoming RabbitMQ messages would access.")
     public void createThing() {
         final String knownThingId = "1";
-        final Message message = messageConverter.toMessage(new byte[0], getThingCreatedMessageProperties(knownThingId));
 
         final Target targetMock = mock(Target.class);
 
@@ -183,7 +182,7 @@ public class AmqpMessageHandlerServiceTest {
                 uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(createMessage(new byte[0], getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, "vHost");
 
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
@@ -198,8 +197,6 @@ public class AmqpMessageHandlerServiceTest {
         final DmfCreateThing targetProperties = new DmfCreateThing();
         targetProperties.setName("NonDefaultTargetName");
 
-        final Message message = messageConverter.toMessage(targetProperties, getThingCreatedMessageProperties(knownThingId));
-
         final Target targetMock = mock(Target.class);
 
         targetIdCaptor = ArgumentCaptor.forClass(String.class);
@@ -210,11 +207,23 @@ public class AmqpMessageHandlerServiceTest {
                 uriCaptor.capture(), targetNameCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(createMessage(targetProperties, getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, "vHost");
 
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
         assertThat(targetNameCaptor.getValue()).as("Thing name is not right").isEqualTo(targetProperties.getName());
+    }
+
+    @Test
+    @Description("Tests not allowed body in message")
+    public void createThingWithWrongBody() {
+        final String knownThingId = "3";
+
+        try {
+            amqpMessageHandlerService.onMessage(createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, "vHost");
+            fail("AmqpRejectAndDontRequeueException was excepeted due to wrong body");
+        } catch (final AmqpRejectAndDontRequeueException e) {
+        }
     }
 
     @Test
@@ -566,9 +575,13 @@ public class AmqpMessageHandlerServiceTest {
         }
     }
 
-    private MessageProperties getThingCreatedMessageProperties (String thingId){
+    private MessageProperties getThingCreatedMessageProperties(String thingId) {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, thingId);
         return messageProperties;
+    }
+
+    private Message createMessage (Object object, MessageProperties messageProperties){
+        return messageConverter.toMessage(object, messageProperties);
     }
 }

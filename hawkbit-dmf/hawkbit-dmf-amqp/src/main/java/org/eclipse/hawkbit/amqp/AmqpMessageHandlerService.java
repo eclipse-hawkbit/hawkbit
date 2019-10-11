@@ -53,6 +53,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -83,6 +84,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final SystemSecurityContext systemSecurityContext;
 
     private static final String THING_ID_NULL = "ThingId is null";
+
+    private static final String EMPTY_MESSAGE_BODY = "\"\"";
 
     /**
      * Constructor.
@@ -213,13 +216,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         try {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
             final Target target;
-            if (!isMessageBodyEmpty(message)) {
+            if (isOptionalMessageBodyEmpty(message)) {
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             } else {
                 checkContentTypeJson(message);
-                final DmfCreateThing createThing = convertMessage(message, DmfCreateThing.class);
-                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
-                        createThing.getName());
+                try {
+                    final DmfCreateThing createThing = convertMessage(message, DmfCreateThing.class);
+                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, createThing.getName());
+                } catch (final MessageConversionException e){
+                    throw new AmqpRejectAndDontRequeueException(
+                            "Tried to register target with wrong body, message will be ignored!", e);
+                }
             }
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
@@ -229,8 +236,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    protected static boolean isMessageBodyEmpty(final Message message) {
-        return message.getBody() == null || message.getBody().length == 0;
+    private static boolean isOptionalMessageBodyEmpty(final Message message) {
+        // empty byte array message body is serialized to double-quoted string
+        // by message converter and should also be considered as empty
+        return isMessageBodyEmpty(message) || EMPTY_MESSAGE_BODY.equals(new String(message.getBody()));
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
