@@ -54,6 +54,11 @@ public class RepositoryProperties {
      */
     private boolean eagerPollPersistence;
 
+    /**
+     * If an {@link Action} has a weight of null this value is used as weight.
+     */
+    private int actionWeightIfAbsent = 1000;
+
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;
     }
@@ -92,6 +97,14 @@ public class RepositoryProperties {
 
     public void setPublishTargetPollEvent(final boolean publishTargetPollEvent) {
         this.publishTargetPollEvent = publishTargetPollEvent;
+    }
+
+    public int getActionWeightIfAbsent() {
+        return actionWeightIfAbsent;
+    }
+
+    public void setActionWeightIfAbsent(final int actionWeightIfAbsent) {
+        this.actionWeightIfAbsent = actionWeightIfAbsent;
     }
 
 }

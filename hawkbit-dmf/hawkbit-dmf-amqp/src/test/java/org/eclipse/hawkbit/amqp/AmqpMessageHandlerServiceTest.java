@@ -186,7 +186,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(targetMock);
-        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActiveActionWithHighestPriorityByTarget(any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
 
@@ -448,7 +448,8 @@ public class AmqpMessageHandlerServiceTest {
         when(create.status(any())).thenReturn(create);
         when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.findActiveActionWithHighestPriorityByTarget(any()))
+                .thenReturn(Optional.of(action));
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());

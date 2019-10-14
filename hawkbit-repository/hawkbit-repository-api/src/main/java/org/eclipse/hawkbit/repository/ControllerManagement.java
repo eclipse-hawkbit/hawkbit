@@ -136,33 +136,44 @@ public interface ControllerManagement {
     Action addUpdateActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
-     * Retrieves oldest {@link Action} that is active and assigned to a
+     * Retrieves active {@link Action} with highest priority that is assigned to a
      * {@link Target}.
-     *
+     * 
      * For performance reasons this method does not throw
-     * {@link EntityNotFoundException} in case target with given controllerId
+     * {@link EntityNotFoundException} in case target with given controlelrId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
-     *            identifies the target to retrieve the actions from
-     * @return a list of actions assigned to given target which are active
-     *
+     *            identifies the target to retrieve the action from
+     * @return the action
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
+    Optional<Action> findActiveActionWithHighestPriorityByTarget(@NotEmpty String controllerId);
 
     /**
-     * Retrieves all active actions which are assigned to the target with the
-     * given controller ID.
-     *
-     * @param pageable
-     *            pagination parameter
+     * Retrieves active {@link Action}s with highest priority that is assigned
+     * to a {@link Target}.
+     * 
      * @param controllerId
-     *            of the target
-     * @return the requested {@link Page} with {@link Action}s
+     *            identifies the target to retrieve the action from
+     * @param maxActionCount
+     *            max size of returned list
+     * @return the action
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
+    List<Action> findActiveActionsWithHighestPriority(final String controllerId, final int maxActionCount);
+
+    /**
+     * Get weight of an Action. Returns the default value if the weight is null
+     * according to the properties.
+     * 
+     * @param action
+     *            to extract the weight from
+     * @return weight of the action
+     */
+    int getWeightConsideringDefault(final Action action);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy

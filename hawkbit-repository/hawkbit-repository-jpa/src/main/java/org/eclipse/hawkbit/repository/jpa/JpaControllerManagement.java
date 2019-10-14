@@ -19,8 +19,10 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -346,23 +348,32 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Optional.empty();
-        }
-
-        // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
-        // DATAJPA-841 issue.
-        return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
-                true);
+    public Optional<Action> findActiveActionWithHighestPriorityByTarget(final String controllerId) {
+        return findActiveActionsWithHighestPriority(controllerId, 1).stream().findFirst();
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+    public List<Action> findActiveActionsWithHighestPriority(final String controllerId,
+            final int maxActionCount) {
         if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Page.empty();
+            return Collections.emptyList();
         }
-        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
+        final List<Action> actions = new ArrayList<>();
+        final PageRequest pageable = PageRequest.of(0, maxActionCount);
+        actions.addAll(actionRepository
+                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNotNullOrderByWeightDescIdAsc(pageable, controllerId)
+                .getContent());
+        actions.addAll(actionRepository
+                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(pageable, controllerId)
+                .getContent());
+        final Comparator<Action> actionImportance = Comparator.comparing(this::getWeightConsideringDefault).reversed()
+                .thenComparing(Action::getId);
+        return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
 
     @Override

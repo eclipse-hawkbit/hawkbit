@@ -51,7 +51,6 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -218,7 +217,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
-        } catch (EntityAlreadyExistsException e) {
+        } catch (final EntityAlreadyExistsException e) {
             throw new AmqpRejectAndDontRequeueException("Target already registered, message will be ignored!", e);
         }
     }
@@ -233,7 +232,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
         final List<Action> actions = controllerManagement
-                .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId()).getContent();
+                .findActiveActionsWithHighestPriority(target.getControllerId(), MAX_ACTION_COUNT);
 
         final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
                 .collect(Collectors.toSet());
@@ -246,7 +245,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void sendOldestActionToTarget(final Target target) {
         final Optional<Action> actionOptional = controllerManagement
-                .findOldestActiveActionByTarget(target.getControllerId());
+                .findActiveActionWithHighestPriorityByTarget(target.getControllerId());
 
         if (!actionOptional.isPresent()) {
             return;

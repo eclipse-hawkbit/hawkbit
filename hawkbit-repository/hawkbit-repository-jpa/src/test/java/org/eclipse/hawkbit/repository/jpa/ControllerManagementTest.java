@@ -104,7 +104,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
-        assertThat(controllerManagement.findOldestActiveActionByTarget(NOT_EXIST_ID)).isNotPresent();
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(NOT_EXIST_ID)).isNotPresent();
 
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
@@ -457,7 +457,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .getContent();
         assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
         if (actionActive) {
-            assertThat(controllerManagement.findOldestActiveActionByTarget(controllerId).get().getId())
+            assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(controllerId).get().getId())
                     .isEqualTo(actionId);
         }
     }
@@ -1434,6 +1434,39 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void addUpdateActionStatus(final Long actionId, final String controllerId, final Status actionStatus) {
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(actionStatus));
         assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
+    }
+
+    @Test
+    @Description("Actions are exposed according to thier weight in multi assignment mode.")
+    public void actionsAreExposedAccordingToTheirWeight() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
+        enableMultiAssignments();
+        final Long actionWeight500old = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
+                .getId();
+        final Long actionWeight500new = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
+                .getId();
+        final Long actionWeight1000 = assignDistributionSet(ds.getId(), targetId, 1000).getAssignedEntity().get(0)
+                .getId();
+
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(targetId).get().getId())
+                .isEqualTo(actionWeightNull);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(targetId).get().getId())
+                .isEqualTo(actionWeight1000);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight1000).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(targetId).get().getId())
+                .isEqualTo(actionWeight500old);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500old).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(targetId).get().getId())
+                .isEqualTo(actionWeight500new);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestPriorityByTarget(targetId)).isEmpty();
     }
 
     private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
