@@ -65,9 +65,11 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.util.StringUtils;
 
 /**
+ *
  * {@link AmqpMessageHandlerService} handles all incoming target interaction
  * AMQP messages (e.g. create target, check for updates etc.) for the queue
  * which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
+ *
  */
 public class AmqpMessageHandlerService extends BaseAmqpService {
 
@@ -89,7 +91,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     /**
      * Constructor.
-     *
+     * 
      * @param rabbitTemplate
      *            for converting messages
      * @param amqpMessageDispatcherService
@@ -136,7 +138,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     /**
      * * Executed if a amqp message arrives.
-     *
+     * 
      * @param message
      *            the message
      * @param type
@@ -159,6 +161,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             case THING_CREATED:
                 setTenantSecurityContext(tenant);
                 registerTarget(message, virtualHost);
+                break;
+            case THING_REMOVED:
+                setTenantSecurityContext(tenant);
+                deleteTarget(message);
                 break;
             case EVENT:
                 checkContentTypeJson(message);
@@ -304,8 +310,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *
      * @param message
      *            the incoming event message.
-     * @param topic
-     *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message) {
         switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
@@ -322,9 +326,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     }
 
+    private void deleteTarget(final Message message) {
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
+        controllerManagement.deleteExistingTarget(thingId);
+    }
+
     private void updateAttributes(final Message message) {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
-        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
                 getUpdateMode(attributeUpdate));
@@ -333,7 +342,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to update the action status of an action through the event.
      *
-     * @param actionUpdateStatus
+     * @param message
      *            the object form the ampq message
      */
     private void updateActionStatus(final Message message) {

@@ -68,6 +68,28 @@ Payload Template (optional):
 
 The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.
 
+
+### THING_REMOVED
+
+Message to request the deletion of a provisioning target.
+
+Header | Description                                      | Type                         | Mandatory
+-------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
+type           | Type of the message                              | Fixed string "THING_REMOVED" | true
+thingId        | The ID of the registered provisioning target   | String                       | true
+tenant         | The tenant this provisioning target belongs to | String                       | false
+
+Message Properties | Description                                                                                          | Type   | Mandatory
+------------------ | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
+content_type       | The content type of the payload                                                                      | String | true
+
+Example headers
+
+Header                                                                             | MessageProperties
+----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
+type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc | content\_type=application/json
+
+
 ### UPDATE_ATTRIBUTES
 
 Message to update target attributes. This message can be send in response to a _REQUEST_ATTRIBUTES_UPDATE_ event, sent by hawkBit.

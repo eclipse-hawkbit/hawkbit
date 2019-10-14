@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -20,18 +21,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentRequestBody {
 
-    @JsonProperty
     private String id;
-
     private long forcetime;
-
     private MgmtActionType type;
+    private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
     /**
-     * {@link MgmtMaintenanceWindowRequestBody} object containing schedule,
-     * duration and timezone.
+     * JsonCreator Constructor
+     * 
+     * @param id
+     *            Mandatory ID of the target that should be assigned
      */
-    private MgmtMaintenanceWindowRequestBody maintenanceWindow;
+    @JsonCreator
+    public MgmtTargetAssignmentRequestBody(@JsonProperty(required = true, value = "id") final String id) {
+        this.id = id;
+    }
 
     public String getId() {
         return id;

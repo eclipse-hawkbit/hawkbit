@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -59,6 +61,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -81,8 +84,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.retry.RetryCallback;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,6 +138,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final Database database;
+    private final RetryTemplate retryTemplate;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
@@ -150,80 +158,88 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisherHolder,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit,
-                eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement);
+                eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement,
+                this::isMultiAssignmentsEnabled);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;
+        retryTemplate = createRetryTemplate();
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult offlineAssignedDistributionSet(final Long dsID,
-            final Collection<String> controllerIDs) {
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
-                controllerIDs.stream()
-                        .map(controllerId -> new TargetWithActionType(controllerId, ActionType.FORCED, -1))
-                        .collect(Collectors.toList()),
-                null, offlineDsAssignmentStrategy);
-        offlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final long dsID, final ActionType actionType,
-            final long forcedTimestamp, final Collection<String> controllerIDs) {
-
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID,
-                controllerIDs.stream()
-                        .map(controllerId -> new TargetWithActionType(controllerId, actionType, forcedTimestamp))
-                        .collect(Collectors.toList()),
-                null, onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
-            final Collection<TargetWithActionType> targets) {
-
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, null,
-                onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
-    }
-
-    @Override
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final Set<Long> dsIDs,
-            final Collection<TargetWithActionType> targets) {
-
-        final List<DistributionSetAssignmentResult> results = dsIDs.stream()
-                .map(dsID -> assignDistributionSetToTargets(dsID, targets, null, onlineDsAssignmentStrategy))
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
+            final Collection<Entry<String, Long>> assignments) {
+        final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct()
                 .collect(Collectors.toList());
-        onlineDsAssignmentStrategy.sendDeploymentEvents(results);
+
+        enforceMaxAssignmentsPerRequest(distinctAssignments.size());
+        final List<DeploymentRequest> deploymentRequests = distinctAssignments.stream()
+                .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
+                .collect(Collectors.toList());
+
+        return assignDistributionSets(deploymentRequests, null, offlineDsAssignmentStrategy);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> assignDistributionSets(
+            final List<DeploymentRequest> deploymentRequests) {
+        return assignDistributionSets(deploymentRequests, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> assignDistributionSets(
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSets(
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage,
+            final AbstractDsAssignmentStrategy strategy) {
+        final List<DeploymentRequest> validatedRequests = validateRequestForAssignments(deploymentRequests);
+        final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
+
+        final List<DistributionSetAssignmentResult> results = assignmentsByDsIds.entrySet().stream()
+                .map(entry -> assignDistributionSetToTargetsWithRetry(entry.getKey(), entry.getValue(), actionMessage,
+                        strategy))
+                .collect(Collectors.toList());
+        strategy.sendDeploymentEvents(results);
         return results;
     }
 
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetAssignmentResult assignDistributionSet(final long dsID,
-            final Collection<TargetWithActionType> targets, final String actionMessage) {
+    private List<DeploymentRequest> validateRequestForAssignments(List<DeploymentRequest> deploymentRequests) {
+        if (!isMultiAssignmentsEnabled()) {
+            deploymentRequests = deploymentRequests.stream().distinct().collect(Collectors.toList());
+            checkIfRequiresMultiAssignment(deploymentRequests);
+        }
+        checkQuotaForAssignment(deploymentRequests);
+        return deploymentRequests;
+    }
 
-        final DistributionSetAssignmentResult result = assignDistributionSetToTargets(dsID, targets, actionMessage,
-                onlineDsAssignmentStrategy);
-        onlineDsAssignmentStrategy.sendDeploymentEvents(result);
-        return result;
+    private static Map<Long, List<TargetWithActionType>> convertRequest(
+            final Collection<DeploymentRequest> deploymentRequests) {
+        return deploymentRequests.stream().collect(Collectors.groupingBy(DeploymentRequest::getDistributionSetId,
+                Collectors.mapping(DeploymentRequest::getTargetWithActionType, Collectors.toList())));
+    }
+
+    private static void checkIfRequiresMultiAssignment(final Collection<DeploymentRequest> deploymentRequests) {
+        final long distinctTargetsInRequest = deploymentRequests.stream()
+                .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
+        if (distinctTargetsInRequest < deploymentRequests.size()) {
+            throw new MultiAssignmentIsNotEnabledException();
+        }
+    }
+
+    private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final Long dsID,
+            final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final AbstractDsAssignmentStrategy assignmentStrategy) {
+        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback = retryContext -> assignDistributionSetToTargets(
+                dsID, targetsWithActionType, actionMessage, assignmentStrategy);
+        return retryTemplate.execute(retryCallback);
     }
 
     /**
@@ -259,10 +275,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        checkQuotaForAssignment(targetsWithActionType, distributionSetEntity);
+        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct()
+                .collect(Collectors.toList());
 
-        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(
-                targetsWithActionType.stream().map(TargetWithActionType::getControllerId).collect(Collectors.toList()),
+        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
@@ -288,7 +304,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
-        closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
+
+        if (!isMultiAssignmentsEnabled()) {
+            closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
+        }
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done
         // cancels them
@@ -320,7 +339,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
     private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
             final List<JpaAction> assignedActions, final int totalTargetsForAssignment) {
-        int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
+        final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
 
         return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
     }
@@ -337,37 +356,31 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         return distributionSet;
     }
 
-    private void checkQuotaForAssignment(final Collection<TargetWithActionType> targetsWithActionType,
-            final JpaDistributionSet distributionSet) {
-        // enforce the 'max targets per manual assignment' quota
-        if (!targetsWithActionType.isEmpty()) {
-            assertMaxTargetsPerManualAssignmentQuota(distributionSet.getId(), targetsWithActionType.size());
+    private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {
+        if (!deploymentRequests.isEmpty()) {
+            enforceMaxAssignmentsPerRequest(deploymentRequests.size());
+            enforceMaxActionsPerTarget(deploymentRequests);
         }
     }
 
-    /**
-     * Enforces the quota defining the maximum number of {@link Target}s per
-     * manual {@link DistributionSet} assignment.
-     * 
-     * @param id
-     *            of the distribution set
-     * @param requested
-     *            number of targets to check
-     */
-    private void assertMaxTargetsPerManualAssignmentQuota(final Long distributionSetId,
-            final int requestedTargetsCount) {
-        QuotaHelper.assertAssignmentQuota(distributionSetId, requestedTargetsCount,
-                quotaManagement.getMaxTargetsPerManualAssignment(), Target.class, DistributionSet.class, null);
+    private void enforceMaxAssignmentsPerRequest(final int requestedActions) {
+        QuotaHelper.assertAssignmentRequestSizeQuota(requestedActions,
+                quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment());
+    }
+
+    private void enforceMaxActionsPerTarget(final Collection<DeploymentRequest> deploymentRequests) {
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+
+        final Map<String, Long> countOfTargtInRequest = deploymentRequests.stream()
+                .map(DeploymentRequest::getControllerId)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        countOfTargtInRequest.forEach((controllerId, count) -> QuotaHelper.assertAssignmentQuota(controllerId, count,
+                quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
     }
 
     private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
             final List<List<Long>> targetIdsChunks) {
-
-        if (isMultiAssignmentsEnabled()) {
-            LOG.debug("Multi Assignments feature is enabled: No need to close /cancel active actions.");
-            return;
-        }
-
         if (isActionsAutocloseEnabled()) {
             assignmentStrategy.closeActiveActions(targetIdsChunks);
         } else {
@@ -396,10 +409,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     private List<JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
             final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set) {
-        final Map<String, TargetWithActionType> targetsWithActionMap = targetsWithActionType.stream()
-                .collect(Collectors.toMap(TargetWithActionType::getControllerId, Function.identity()));
 
-        return targets.stream().map(trg -> assignmentStrategy.createTargetAction(targetsWithActionMap, trg, set))
+        return targetsWithActionType.stream().map(twt -> assignmentStrategy.createTargetAction(twt, targets, set))
                 .filter(Objects::nonNull).map(actionRepository::save).collect(Collectors.toList());
     }
 
@@ -820,4 +831,17 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
+    private static RetryTemplate createRetryTemplate() {
+        final RetryTemplate template = new RetryTemplate();
+
+        final FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+        backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
+        template.setBackOffPolicy(backOffPolicy);
+
+        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(Constants.TX_RT_MAX,
+                Collections.singletonMap(ConcurrencyFailureException.class, true));
+        template.setRetryPolicy(retryPolicy);
+
+        return template;
+    }
 }

@@ -30,12 +30,17 @@ public enum MessageType {
     THING_DELETED,
 
     /**
+     * The request to delete a target.
+     */
+    THING_REMOVED,
+
+    /**
      * DMF receiver health check type.
      */
     PING,
 
     /**
-     * DMF receiver health check reponse type.
+     * DMF receiver health check response type.
      */
     PING_RESPONSE
 

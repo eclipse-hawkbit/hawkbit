@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
-import java.util.function.Function;
+import java.util.function.ToLongFunction;
 
 import javax.validation.constraints.NotNull;
 
@@ -76,8 +76,8 @@ public final class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
-            @NotNull final Class<?> type, @NotNull final Class<?> parentType, final Function<Long, Long> countFct) {
+    public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
+            @NotNull final Class<?> type, @NotNull final Class<?> parentType, final ToLongFunction<T> countFct) {
         assertAssignmentQuota(parentId, requested, limit, type.getSimpleName(), parentType.getSimpleName(), countFct);
     }
 
@@ -104,8 +104,8 @@ public final class QuotaHelper {
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
-    public static void assertAssignmentQuota(final Long parentId, final long requested, final long limit,
-            @NotNull final String type, @NotNull final String parentType, final Function<Long, Long> countFct) {
+    public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
+            @NotNull final String type, @NotNull final String parentType, final ToLongFunction<T> countFct) {
 
         // check if the quota is unlimited
         if (limit <= 0) {
@@ -121,13 +121,31 @@ public final class QuotaHelper {
         }
 
         if (parentId != null && countFct != null) {
-            final long currentCount = countFct.apply(parentId);
+            final long currentCount = countFct.applyAsLong(parentId);
             if (currentCount + requested > limit) {
                 LOG.warn(
                         "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
                         requested, type, parentType, parentId, limit, currentCount, type);
                 throw new QuotaExceededException(type, parentType, parentId, requested, limit);
             }
+        }
+    }
+
+    /**
+     * Assert that the number of assignments in a request does not exceed the
+     * limit.
+     * 
+     * @param requested
+     *            the number of assignments that are to be made
+     * @param limit
+     *            the maximum number of assignments per request
+     */
+    public static void assertAssignmentRequestSizeQuota(final long requested, final long limit) {
+        if (requested > limit) {
+            final String message = String.format(
+                    "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.", requested, limit);
+            LOG.warn(message);
+            throw new QuotaExceededException(message);
         }
     }
 }

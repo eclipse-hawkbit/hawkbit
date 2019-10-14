@@ -52,7 +52,7 @@ public interface ControllerManagement {
      * @param create
      *            to be added
      * @return the updated {@link Action}
-     *
+     * 
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      *
@@ -140,8 +140,8 @@ public interface ControllerManagement {
      * {@link Target}.
      *
      * For performance reasons this method does not throw
-     * {@link EntityNotFoundException} in case target with given controlelrId does
-     * not exist but will return an {@link Optional#empty()} instead.
+     * {@link EntityNotFoundException} in case target with given controlelrId
+     * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
      *            identifies the target to retrieve the actions from
@@ -258,7 +258,7 @@ public interface ControllerManagement {
 
     /**
      * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction()}.
+     * {@link ControllerManagement#getPollingTimeForAction(long)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
@@ -462,4 +462,13 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     List<Action> getActiveActionsByExternalRef(@NotNull List<String> externalRefs);
+
+    /**
+     * Delete a single target.
+     *
+     * @param controllerId
+     *            of the target to delete
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void deleteExistingTarget(@NotEmpty String controllerId);
 }

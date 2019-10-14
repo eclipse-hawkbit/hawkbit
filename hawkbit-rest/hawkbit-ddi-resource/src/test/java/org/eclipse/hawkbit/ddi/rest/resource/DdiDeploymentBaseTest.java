@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -154,10 +153,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> targetsAssignedToDs = deploymentManagement
-                .assignDistributionSet(ds.getId(), ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
-                        Collections.singletonList(savedTarget.getControllerId()))
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());;
+        final List<Target> targetsAssignedToDs = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
+                ActionType.FORCED).getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -208,9 +206,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
-        final Long actionId = getFirstAssignedActionId(
-                deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                        System.currentTimeMillis() + 2_000, Collections.singletonList(target.getControllerId())));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(), target.getControllerId(),
+                ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000));
 
         MvcResult mvcResult = performGet("/{tenant}/controller/v1/" + DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON,
                 status().isOk(), tenantAware.getCurrentTenant()).andReturn();
@@ -257,8 +254,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.SOFT,
-                RepositoryModelConstants.NO_FORCE_TIME, Collections.singletonList(savedTarget.getControllerId()))
+        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.SOFT)
                 .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -317,8 +313,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis(), Collections.singletonList(savedTarget.getControllerId()))
+        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
+                ActionType.TIMEFORCED)
                 .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -385,8 +381,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.DOWNLOAD_ONLY,
-                RepositoryModelConstants.NO_FORCE_TIME, Collections.singletonList(savedTarget.getControllerId()))
+        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
+                ActionType.DOWNLOAD_ONLY)
                 .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 

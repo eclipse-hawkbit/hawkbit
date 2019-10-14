@@ -13,8 +13,12 @@
 - ENTITYsrest classes have been removed; List<ENTITYrest> used instead (e.g. List<TargetRest> instead of TargetsRest)
 
 ### Renamed api annotations
-- Annotation `org.eclipse.hawkbit.rest.resource.EnableRestResources` have changed to `org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi`
-- Annotation `org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi` have changed to `org.eclipse.hawkbit.ddi.annotation.EnableDdiApi`
+- Annotation `org.eclipse.hawkbit.rest.resource.EnableRestResources` has changed to `org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi`
+- Annotation `org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi` has changed to `org.eclipse.hawkbit.ddi.annotation.EnableDdiApi`
 
 ### Renamed maven modules
-- Module hawkbit-mgmt-api-client have changed to hawkbit-example-mgmt-simulator
+- Module hawkbit-mgmt-api-client has changed to hawkbit-example-mgmt-simulator
+
+## Milestone 0.3.0M6
+### Configuration Property changes
+- hawkbit.server.security.dos.maxTargetsPerManualAssignment has changed to hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment

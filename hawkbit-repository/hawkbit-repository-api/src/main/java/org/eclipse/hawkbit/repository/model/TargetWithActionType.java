@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Objects;
+
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
@@ -16,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  *
  */
 public class TargetWithActionType {
-
     private final String controllerId;
     private final ActionType actionType;
     private final long forceTime;
@@ -24,10 +25,27 @@ public class TargetWithActionType {
     private String maintenanceWindowDuration;
     private String maintenanceWindowTimeZone;
 
+    /**
+     * Constructor that uses {@link ActionType#FORCED}
+     * 
+     * @param controllerId
+     *            ID if the controller
+     */
     public TargetWithActionType(final String controllerId) {
         this(controllerId, ActionType.FORCED, 0);
     }
 
+    /**
+     * Constructor that leaves the maintenance info empty
+     *
+     * @param controllerId
+     *            for which the action is created.
+     * @param actionType
+     *            specified for the action.
+     * @param forceTime
+     *            after that point in time the action is exposed as forcen in
+     *            case the type is {@link ActionType#TIMEFORCED}
+     */
     public TargetWithActionType(final String controllerId, final ActionType actionType, final long forceTime) {
         this.controllerId = controllerId;
         this.actionType = actionType != null ? actionType : ActionType.FORCED;
@@ -42,6 +60,9 @@ public class TargetWithActionType {
      *            for which the action is created.
      * @param actionType
      *            specified for the action.
+     * @param forceTime
+     *            after that point in time the action is exposed as forcen in
+     *            case the type is {@link ActionType#TIMEFORCED}
      * @param maintenanceSchedule
      *            is the cron expression to be used for scheduling maintenance
      *            windows. Expression has 6 mandatory fields and 1 last optional
@@ -120,6 +141,32 @@ public class TargetWithActionType {
                 + getForceTime() + ", maintenanceSchedule=" + getMaintenanceSchedule() + ", maintenanceWindowDuration="
                 + getMaintenanceWindowDuration() + ", maintenanceWindowTimeZone=" + getMaintenanceWindowTimeZone()
                 + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(actionType, controllerId, forceTime, maintenanceSchedule, maintenanceWindowDuration,
+                maintenanceWindowTimeZone);
+    }
+
+    @SuppressWarnings("squid:S1067")
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TargetWithActionType other = (TargetWithActionType) obj;
+        return Objects.equals(actionType, other.actionType) && Objects.equals(controllerId, other.controllerId)
+                && Objects.equals(forceTime, other.forceTime)
+                && Objects.equals(maintenanceSchedule, other.maintenanceSchedule)
+                && Objects.equals(maintenanceWindowDuration, other.maintenanceWindowDuration)
+                && Objects.equals(maintenanceWindowTimeZone, other.maintenanceWindowTimeZone);
     }
 
 }
