@@ -83,8 +83,8 @@ import io.qameta.allure.Story;
 @Story("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
-    private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class.getSimpleName()
-            + " was expected, ";
+    private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class
+            .getSimpleName() + " was expected, ";
 
     private static final String SHA1 = "12345";
     private static final String VIRTUAL_HOST = "vHost";
@@ -189,11 +189,13 @@ public class AmqpMessageHandlerServiceTest {
                 uriCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(createMessage(new byte[0], getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
+        amqpMessageHandlerService.onMessage(createMessage(new byte[0], getThingCreatedMessageProperties(knownThingId)),
+                MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
 
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
-        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://"+VIRTUAL_HOST+"/MyTest");
+        assertThat(uriCaptor.getValue().toString()).as("Uri is not right")
+                .isEqualTo("amqp://" + VIRTUAL_HOST + "/MyTest");
     }
 
     @Test
@@ -213,7 +215,9 @@ public class AmqpMessageHandlerServiceTest {
                 uriCaptor.capture(), targetNameCaptor.capture())).thenReturn(targetMock);
         when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(createMessage(targetProperties, getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, "vHost");
+        amqpMessageHandlerService.onMessage(
+                createMessage(targetProperties, getThingCreatedMessageProperties(knownThingId)),
+                MessageType.THING_CREATED.name(), TENANT, "vHost");
 
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
         assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
@@ -225,11 +229,11 @@ public class AmqpMessageHandlerServiceTest {
     public void createThingWithWrongBody() {
         final String knownThingId = "3";
 
-        try {
-            amqpMessageHandlerService.onMessage(createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties(knownThingId)), MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
-            fail("AmqpRejectAndDontRequeueException was excepeted due to wrong body");
-        } catch (final AmqpRejectAndDontRequeueException e) {
-        }
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as("AmqpRejectAndDontRequeueException was excepeted due to wrong body")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(
+                        createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties(knownThingId)),
+                        MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST));
     }
 
     @Test
@@ -345,15 +349,13 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
 
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown message type")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT,
-                        VIRTUAL_HOST));
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown message type").isThrownBy(
+                        () -> amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, VIRTUAL_HOST));
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown topic")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
-                        VIRTUAL_HOST));
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown topic").isThrownBy(() -> amqpMessageHandlerService
+                        .onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST));
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
@@ -569,12 +571,12 @@ public class AmqpMessageHandlerServiceTest {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
-        final Message message = messageConverter.toMessage(new byte[0],messageProperties);
+        final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT, VIRTUAL_HOST);
 
-        //verify
+        // verify
         verify(controllerManagementMock).deleteExistingTarget(knownThingId);
     }
 
@@ -591,14 +593,13 @@ public class AmqpMessageHandlerServiceTest {
                         VIRTUAL_HOST));
     }
 
-
     private MessageProperties getThingCreatedMessageProperties(String thingId) {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, thingId);
         return messageProperties;
     }
 
-    private Message createMessage (Object object, MessageProperties messageProperties){
+    private Message createMessage(Object object, MessageProperties messageProperties) {
         return messageConverter.toMessage(object, messageProperties);
     }
 }
