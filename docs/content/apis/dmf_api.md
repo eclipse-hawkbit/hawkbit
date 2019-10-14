@@ -371,6 +371,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 ```json
 [{
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -403,6 +404,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 },
 {
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -444,6 +446,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 ```json
 [{
 "topic": "DOWNLOAD_AND_INSTALL",
+"weight": 600,
 "action": {
   "actionId":137,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
@@ -476,6 +479,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 },
 {
 "topic": "DOWNLOAD",
+"weight": 500,
 "action": {
   "actionId":138,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",

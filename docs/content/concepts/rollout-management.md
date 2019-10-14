@@ -64,11 +64,10 @@ While this feature provides more flexibility to the user and enables new use-cas
 
 * This feature is in beta and may change unannounced.
 * For now, this feature is **opt-in only**. Once activated, it cannot be deactivated.
-* Currently, the weight of an action is not considered (and also not passed) when the action is exposed to the device via DDI or DMF.
 
 **Minor**
 
-* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the oldest open action. 
+* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the most urgent open action (according to the weight of the actions). 
 * All information regarding the currently assigned or installed Distribution Set does only respect the last assignment, as well as the last successfully installed Distribution set. This also affects:
     * Pinning a target or Distribution Set in Deployment View.
     * Statistics about installed or assigned Distribution Sets.
