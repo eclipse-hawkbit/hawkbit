@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
-import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -85,7 +85,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
-    private final ControllerManagement controllerManagement;
+    private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
 
     /**
@@ -114,7 +114,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
             final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final ControllerManagement controllerManagement) {
+            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -124,7 +124,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
-        this.controllerManagement = controllerManagement;
+        this.deploymentManagement = deploymentManagement;
     }
 
     /**
@@ -175,8 +175,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         targetManagement.getByControllerID(controllerIds).stream()
                 .filter(target -> IpUtil.isAmqpUri(target.getAddress())).forEach(target -> {
 
-                    final List<Action> activeActions = controllerManagement
-                            .findActiveActionsWithHighestPriority(target.getControllerId(), MAX_ACTION_COUNT);
+                    final List<Action> activeActions = deploymentManagement
+                            .findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
 
                     activeActions.forEach(action -> action.getDistributionSet().getModules().forEach(
                             module -> softwareModuleMetadata.computeIfAbsent(module, this::getSoftwareModuleMetadata)));
@@ -203,7 +203,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         actions.forEach(action -> {
             final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
                     getSoftwareModuleMetaData.apply(action));
-            final int weight = controllerManagement.getWeightConsideringDefault(action);
+            final int weight = deploymentManagement.getWeightConsideringDefault(action);
             multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
         });
 

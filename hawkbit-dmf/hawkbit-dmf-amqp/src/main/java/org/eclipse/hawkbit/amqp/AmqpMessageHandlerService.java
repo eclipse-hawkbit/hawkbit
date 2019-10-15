@@ -232,7 +232,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
         final List<Action> actions = controllerManagement
-                .findActiveActionsWithHighestPriority(target.getControllerId(), MAX_ACTION_COUNT);
+                .findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
 
         final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
                 .collect(Collectors.toSet());
@@ -245,7 +245,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private void sendOldestActionToTarget(final Target target) {
         final Optional<Action> actionOptional = controllerManagement
-                .findActiveActionWithHighestPriorityByTarget(target.getControllerId());
+                .findActiveActionWithHighestWeight(target.getControllerId());
 
         if (!actionOptional.isPresent()) {
             return;

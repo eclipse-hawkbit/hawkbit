@@ -149,11 +149,11 @@ public interface ControllerManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findActiveActionWithHighestPriorityByTarget(@NotEmpty String controllerId);
+    Optional<Action> findActiveActionWithHighestWeight(@NotEmpty String controllerId);
 
     /**
-     * Retrieves active {@link Action}s with highest priority that is assigned
-     * to a {@link Target}.
+     * Retrieves active {@link Action}s with highest weight that are assigned to
+     * a {@link Target}.
      * 
      * @param controllerId
      *            identifies the target to retrieve the action from
@@ -163,7 +163,7 @@ public interface ControllerManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> findActiveActionsWithHighestPriority(final String controllerId, final int maxActionCount);
+    List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
 
     /**
      * Get weight of an Action. Returns the default value if the weight is null

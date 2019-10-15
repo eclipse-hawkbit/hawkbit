@@ -19,10 +19,8 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,16 +109,13 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaControllerManagement implements ControllerManagement {
+public class JpaControllerManagement extends ActionManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
     @Autowired
     private EntityManager entityManager;
-
-    @Autowired
-    private ActionRepository actionRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -158,10 +153,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private TenantAware tenantAware;
 
-    private final RepositoryProperties repositoryProperties;
-
     JpaControllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
+        super(actionRepository, repositoryProperties);
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
@@ -172,8 +166,6 @@ public class JpaControllerManagement implements ControllerManagement {
         } else {
             queue = null;
         }
-
-        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
@@ -348,32 +340,19 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findActiveActionWithHighestPriorityByTarget(final String controllerId) {
-        return findActiveActionsWithHighestPriority(controllerId, 1).stream().findFirst();
+    public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
+        return findActiveActionsWithHighestWeight(controllerId, 1).stream().findFirst();
     }
 
     @Override
-    public List<Action> findActiveActionsWithHighestPriority(final String controllerId,
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId,
             final int maxActionCount) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Collections.emptyList();
-        }
-        final List<Action> actions = new ArrayList<>();
-        final PageRequest pageable = PageRequest.of(0, maxActionCount);
-        actions.addAll(actionRepository
-                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNotNullOrderByWeightDescIdAsc(pageable, controllerId)
-                .getContent());
-        actions.addAll(actionRepository
-                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(pageable, controllerId)
-                .getContent());
-        final Comparator<Action> actionImportance = Comparator.comparing(this::getWeightConsideringDefault).reversed()
-                .thenComparing(Action::getId);
-        return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
     }
 
     @Override
     public int getWeightConsideringDefault(final Action action) {
-        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
+        return super.getWeightConsideringDefault(action);
     }
 
     @Override
@@ -387,7 +366,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public void deleteExistingTarget(@NotEmpty String controllerId) {
+    public void deleteExistingTarget(@NotEmpty final String controllerId) {
         final Target target = targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
          targetRepository.deleteById(target.getId());

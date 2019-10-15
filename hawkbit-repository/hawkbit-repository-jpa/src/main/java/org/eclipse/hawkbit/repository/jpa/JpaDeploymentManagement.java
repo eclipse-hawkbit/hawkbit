@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -104,7 +105,7 @@ import com.google.common.collect.Lists;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaDeploymentManagement implements DeploymentManagement {
+public class JpaDeploymentManagement extends ActionManagement implements DeploymentManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
@@ -125,7 +126,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private final EntityManager entityManager;
-    private final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -147,9 +147,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
+            final RepositoryProperties repositoryProperties) {
+        super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
-        this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
@@ -676,6 +677,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(pageable, controllerId, false);
+    }
+
+    @Override
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return super.getWeightConsideringDefault(action);
     }
 
     @Override
