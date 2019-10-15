@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
@@ -48,8 +49,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     FileTransferHandlerStreamVariable(final String fileName, final long fileSize, final long maxSize,
             final String mimeType, final SoftwareModule selectedSw, final ArtifactManagement artifactManagement,
-            final VaadinMessageSource i18n) {
-        super(artifactManagement, i18n);
+            final VaadinMessageSource i18n, final Lock uploadLock) {
+        super(artifactManagement, i18n, uploadLock);
         this.fileSize = fileSize;
         this.maxSize = maxSize;
         this.mimeType = mimeType;

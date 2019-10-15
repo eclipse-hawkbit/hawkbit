@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
 import com.vaadin.ui.UI;
 
 /**
@@ -64,15 +64,18 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected final UINotification uiNotification;
 
+    private final transient Lock uploadLock;
+
     protected static final RegexCharacterCollection ILLEGAL_FILENAME_CHARACTERS = new RegexCharacterCollection(
             RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
 
-    AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n) {
+    AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n, final Lock uploadLock) {
         this.artifactManagement = artifactManagement;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
         this.uiNotification = SpringContextHelper.getBean(UINotification.class);
+        this.uploadLock = uploadLock;
     }
 
     protected boolean isUploadInterrupted() {
@@ -95,7 +98,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
         SpringContextHelper.getBean("asyncExecutor", ExecutorService.class).execute(
-                new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent()));
+                new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(), uploadLock));
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -111,8 +114,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         interruptUploadAndSetReason(i18n.getMessage("message.upload.failed"));
     }
 
-    protected void interruptUploadDueToQuotaExceeded(final String msg) {
-        interruptUploadAndSetReason(StringUtils.isBlank(msg) ? i18n.getMessage("message.upload.quota") : msg);
+    protected void interruptUploadDueToQuotaExceeded(final String msgCode, final String exceededValue) {
+        interruptUploadAndSetReason(StringUtils.isBlank(msgCode) ? i18n.getMessage("message.upload.quota") : i18n.getMessage(msgCode, exceededValue));
     }
 
     protected void interruptUploadDueToDuplicateFile() {
@@ -225,30 +228,32 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         private final FileUploadId fileUploadId;
         private final String mimeType;
         private final UI vaadinUi;
+        private final Lock uploadLock;
 
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
-                final String mimeType, final UI vaadinUi) {
+                final String mimeType, final UI vaadinUi, final Lock uploadLock) {
             this.inputStream = inputStream;
             this.fileUploadId = fileUploadId;
             this.mimeType = mimeType;
             this.vaadinUi = vaadinUi;
+            this.uploadLock = uploadLock;
         }
 
         @Override
         public void run() {
             try {
                 UI.setCurrent(vaadinUi);
-                synchronized (vaadinUi) {
-                    streamToRepository();
-                }
+                uploadLock.lock();
+                streamToRepository();
             } catch (final QuotaExceededException e) {
-                interruptUploadDueToQuotaExceeded(e.getMessage());
+                interruptUploadDueToQuotaExceeded(e.getQuotaType().messageId, e.getExceededQuotaValueString());
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed(e.getMessage());
                 publishUploadFailedAndFinishedEvent(fileUploadId, e);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {
                 tryToCloseIOStream(inputStream);
+                uploadLock.unlock();
             }
         }
 

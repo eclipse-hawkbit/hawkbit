@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -121,8 +122,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
         AbstractDbArtifact dbArtifact = null;
-        try {
-            final InputStream quotaStream = wrapInQuotaStream(artifactUpload.getInputStream());
+        try(final InputStream quotaStream = wrapInQuotaStream(artifactUpload.getInputStream())) {
 
             dbArtifact = artifactRepository.store(tenantAware.getCurrentTenant(), quotaStream,
                     artifactUpload.getFilename(), artifactUpload.getContentType(),
@@ -130,7 +130,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
                             artifactUpload.getProvidedSha256Sum()));
 
             return dbArtifact;
-        } catch (final ArtifactStoreException e) {
+        } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
             if (e.getHashFunction().equals(HashNotMatchException.SHA1)) {

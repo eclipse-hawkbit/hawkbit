@@ -42,6 +42,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Container for drag and drop area in the upload view.
  */
@@ -67,6 +70,8 @@ public class UploadDropAreaLayout extends AbstractComponent {
     private final transient ArtifactManagement artifactManagement;
 
     private final UploadProgressButtonLayout uploadButtonLayout;
+
+    private final Lock uploadLock = new ReentrantLock();
 
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.
@@ -99,7 +104,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
         this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
-                multipartConfigElement, artifactManagement, softwareManagement);
+                multipartConfigElement, artifactManagement, softwareManagement, uploadLock);
 
         buildLayout();
 
@@ -186,7 +191,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
                 } else {
                     file.setStreamVariable(new FileTransferHandlerStreamVariable(file.getFileName(), file.getFileSize(),
                             multipartConfigElement.getMaxFileSize(), file.getType(), softwareModule, artifactManagement,
-                            i18n));
+                            i18n, uploadLock));
                 }
             }
             if (duplicateFound) {
