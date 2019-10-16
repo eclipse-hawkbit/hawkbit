@@ -183,7 +183,7 @@
       <!-- Release - END -->
 
       <!-- Sonar - START -->
-      <sonar.host.url>http://localhost:9000</sonar.host.url>
+      <sonar.host.url>https://sonar.ops.bosch-iot-rollouts.com</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
