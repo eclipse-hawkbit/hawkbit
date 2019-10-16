@@ -183,7 +183,7 @@
       <!-- Release - END -->
 
       <!-- Sonar - START -->
-      <sonar.host.url>https://sonar.ops.bosch-iot-rollouts.com</sonar.host.url>
+      <sonar.host.url>http://localhost:9000</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
@@ -420,33 +420,34 @@
                   <includes>
                      <include>**/*Tests.java</include>
                      <include>**/*Test.java</include>
+                     <include>**/*IT.java</include>
                   </includes>
                   <excludes>
                      <exclude>**/Abstract*.java</exclude>
-                     <exclude>**/*IntegrationTest.java</exclude>
                   </excludes>
+               </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-failsafe-plugin</artifactId>
+               <configuration>
+                  <reuseForks>false</reuseForks>
+                  <forkCount>${surefire.forkcount}</forkCount>
+                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
+                  <properties>
+                     <property>
+                        <name>listener</name>
+                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                     </property>
+                  </properties>
                </configuration>
                <executions>
                   <execution>
                      <id>integration-test</id>
-                     <goals>
-                        <goal>test</goal>
-                     </goals>
                      <phase>integration-test</phase>
-                     <configuration>
-                        <reuseForks>true</reuseForks>
-                        <forkCount>${surefire.forkcount}</forkCount>
-                        <argLine>
-                           ${jacoco.agent.it.arg}
-                        </argLine>
-                        <excludes>
-                           <exclude>none</exclude>
-                        </excludes>
-                        <includes>
-                           <include>**/*IntegrationTest.java</include>
-                           <include>**/*IT.java</include>
-                        </includes>
-                     </configuration>
+                     <goals>
+                        <goal>integration-test</goal>
+                     </goals>
                   </execution>
                </executions>
             </plugin>
