@@ -71,6 +71,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.http.HttpStatus;
 
@@ -229,8 +230,8 @@ public class AmqpMessageHandlerServiceTest {
     public void createThingWithWrongBody() {
         final String knownThingId = "3";
 
-        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .as("AmqpRejectAndDontRequeueException was excepeted due to wrong body")
+        assertThatExceptionOfType(MessageConversionException.class)
+                .as("MessageConversionException was excepeted due to wrong body")
                 .isThrownBy(() -> amqpMessageHandlerService.onMessage(
                         createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties(knownThingId)),
                         MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST));

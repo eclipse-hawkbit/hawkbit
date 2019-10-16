@@ -595,7 +595,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Register a controller which does not exist, then update the controller twice, first time by preventing a name property and second time without a new name")
+    @Description("Register a controller which does not exist, then update the controller twice, first time by providing a name property and second time without a new name")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
                           @Expect(type = TargetPollEvent.class, count = 3) ,
                           @Expect(type = TargetUpdatedEvent.class, count = 1)})

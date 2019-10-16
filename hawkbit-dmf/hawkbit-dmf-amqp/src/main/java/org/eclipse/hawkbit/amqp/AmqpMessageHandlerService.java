@@ -227,7 +227,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             } else {
                 checkContentTypeJson(message);
 
-                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, tryConvertThingCreatedMessage(message).getName());
+                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, convertMessage(message, DmfCreateThing.class).getName());
 
             }
             LOG.debug("Target {} reported online state.", thingId);
@@ -235,15 +235,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } catch (final EntityAlreadyExistsException e) {
             throw new AmqpRejectAndDontRequeueException(
                     "Tried to register previously registered target, message will be ignored!", e);
-        }
-    }
-
-    private DmfCreateThing tryConvertThingCreatedMessage (Message message){
-        try {
-            return convertMessage(message, DmfCreateThing.class);
-        } catch (final MessageConversionException e){
-            throw new AmqpRejectAndDontRequeueException(
-                    "Tried to register target with wrong body, message will be ignored!", e);
         }
     }
 
