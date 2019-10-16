@@ -247,6 +247,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 streamToRepository();
             } catch (final QuotaExceededException e) {
                 interruptUploadDueToQuotaExceeded(e.getQuotaType().messageId, e.getExceededQuotaValueString());
+                LOG.debug("Upload failed due to quota exceeded:", e);
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed(e.getMessage());
                 publishUploadFailedAndFinishedEvent(fileUploadId, e);

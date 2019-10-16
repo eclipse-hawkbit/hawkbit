@@ -71,7 +71,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
 
     private final UploadProgressButtonLayout uploadButtonLayout;
 
-    private final Lock uploadLock = new ReentrantLock();
+    private final transient Lock uploadLock = new ReentrantLock();
 
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.

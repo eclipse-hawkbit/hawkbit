@@ -56,7 +56,7 @@ public class UploadProgressButtonLayout extends VerticalLayout {
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final Lock uploadLock;
+    private final transient Lock uploadLock;
 
     /**
      * Creates a new {@link UploadProgressButtonLayout} instance.

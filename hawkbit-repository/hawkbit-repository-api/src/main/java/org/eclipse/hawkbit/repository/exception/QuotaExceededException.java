@@ -37,7 +37,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
     public enum QuotaType {
         STORAGE_QUOTA(SpServerError.SP_STORAGE_QUOTA_EXCEEDED, "message.upload.storageQuota"),
         SIZE_QUOTA(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED, "message.upload.fileSizeQuota"),
-        ASSIGNMENT_QUOTA(SpServerError.SP_QUOTA_EXCEEDED, "message.upload.quota");
+        ASSIGNMENT_QUOTA(SpServerError.SP_QUOTA_EXCEEDED, "message.upload.artifactCountQuota");
 
         private final SpServerError errorType;
         public final String messageId;
@@ -71,8 +71,7 @@ public final class QuotaExceededException extends AbstractServerRtException {
     }
 
     /**
-     * Creates a new QuotaExceededException with a custom error message and
-     * quota type.
+     * Creates a new QuotaExceededException with quota type and quota value.
      *
      * @param quotaType
      *            {@link QuotaType} that will lead to the connected error type
@@ -182,7 +181,14 @@ public final class QuotaExceededException extends AbstractServerRtException {
     }
 
     public String getExceededQuotaValueString() {
-        return byteValueToReadableString(exceededQuotaValue);
+        switch (quotaType){
+            case STORAGE_QUOTA:
+            case SIZE_QUOTA:
+                return byteValueToReadableString(exceededQuotaValue);
+            default:
+                return String.valueOf(exceededQuotaValue);
+        }
+
     }
 
     private static String createQuotaErrorMessage(final QuotaType quotaType, final long exceededQuotaValue) {
