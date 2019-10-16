@@ -132,31 +132,34 @@ public class HonoDeviceSync {
         Semaphore semaphore = mutexes.computeIfAbsent(tenant, t -> new Semaphore(1));
         semaphore.acquire();
 
-        Map<String, IdentifiableHonoDevice> honoDevices = getAllHonoDevices(tenant);
-        Slice<Target> targets = systemSecurityContext.runAsSystemAsTenant(
-                () -> targetManagement.findAll(Pageable.unpaged()), tenant);
+        try {
+            Map<String, IdentifiableHonoDevice> honoDevices = getAllHonoDevices(tenant);
+            Slice<Target> targets = systemSecurityContext.runAsSystemAsTenant(
+                    () -> targetManagement.findAll(Pageable.unpaged()), tenant);
 
-        for (Target target : targets) {
-            String controllerId = target.getControllerId();
-            if (honoDevices.containsKey(controllerId)) {
-                IdentifiableHonoDevice honoDevice = honoDevices.remove(controllerId);
-                honoDevice.setTenant(tenant);
-                systemSecurityContext.runAsSystemAsTenant(() -> updateTarget(honoDevice), tenant);
+            for (Target target : targets) {
+                String controllerId = target.getControllerId();
+                if (honoDevices.containsKey(controllerId)) {
+                    IdentifiableHonoDevice honoDevice = honoDevices.remove(controllerId);
+                    honoDevice.setTenant(tenant);
+                    systemSecurityContext.runAsSystemAsTenant(() -> updateTarget(honoDevice), tenant);
+                }
+                else {
+                    systemSecurityContext.runAsSystemAsTenant(() -> {
+                        targetManagement.deleteByControllerID(target.getControllerId());
+                        return true;
+                    }, tenant);
+                }
             }
-            else {
-                systemSecurityContext.runAsSystemAsTenant(() -> {
-                    targetManagement.deleteByControllerID(target.getControllerId());
-                    return true;
-                }, tenant);
+
+            // At this point honoTargets only contains objects which were not found in hawkBit's target repository
+            for (Map.Entry<String, IdentifiableHonoDevice> entry : honoDevices.entrySet()) {
+                systemSecurityContext.runAsSystemAsTenant(() -> createTarget(entry.getValue()), tenant);
             }
         }
-
-        // At this point honoTargets only contains objects which were not found in hawkBit's target repository
-        for (Map.Entry<String, IdentifiableHonoDevice> entry : honoDevices.entrySet()) {
-            systemSecurityContext.runAsSystemAsTenant(() -> createTarget(entry.getValue()), tenant);
+        finally {
+            semaphore.release();
         }
-
-        semaphore.release();
     }
 
     public void checkDeviceIfAbsentSync(String tenant, String deviceID) {

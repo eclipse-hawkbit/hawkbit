@@ -8,12 +8,14 @@
  */
 package org.eclipse.hawkbit.dmf.hono.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import java.util.Collection;
 
 @JsonTypeName("psk")
 public class HonoPSKCredentials extends HonoCredentials {
+    @JsonProperty("secrets")
     public void setSecrets(Collection<Secret> secrets) {
         this.secrets = secrets;
     }
@@ -21,10 +23,12 @@ public class HonoPSKCredentials extends HonoCredentials {
     public static class Secret extends HonoSecret {
         private String key;
 
+        @JsonProperty("key")
         public String getKey() {
             return key;
         }
 
+        @JsonProperty("key")
         public void setKey(String key) {
             this.key = key;
         }

@@ -8,56 +8,69 @@
  */
 package org.eclipse.hawkbit.dmf.hono.model;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.ZonedDateTime;
 
 public abstract class HonoSecret {
     private String id;
     private boolean enabled = true;
-    private LocalDateTime notBefore;
-    private LocalDateTime notAfter;
+    private ZonedDateTime notBefore;
+    private ZonedDateTime notAfter;
 
+    @JsonProperty("id")
     public String getId() {
         return id;
     }
 
+    @JsonProperty("enabled")
     public boolean isEnabled() {
         return enabled;
     }
 
-    public LocalDateTime getNotBefore() {
+    @JsonProperty("not-before")
+    public ZonedDateTime getNotBefore() {
         return notBefore;
     }
 
-    public LocalDateTime getNotAfter() {
+    @JsonProperty("not-after")
+    public ZonedDateTime getNotAfter() {
         return notAfter;
     }
 
+    @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
     }
 
+    @JsonProperty("enabled")
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
-    public void setNotBefore(LocalDateTime notBefore) {
+    @JsonProperty("not-before")
+    public void setNotBefore(ZonedDateTime notBefore) {
         this.notBefore = notBefore;
     }
 
+    @JsonProperty("not-before")
     public void setNotBefore(String notBefore) {
-        this.notBefore = LocalDateTime.parse(notBefore);
+        this.notBefore = ZonedDateTime.parse(notBefore);
     }
 
-    public void setNotAfter(LocalDateTime notAfter) {
+    @JsonProperty("not-after")
+    public void setNotAfter(ZonedDateTime notAfter) {
         this.notAfter = notAfter;
     }
 
+    @JsonProperty("not-after")
     public void setNotAfter(String notAfter) {
-        this.notAfter = LocalDateTime.parse(notAfter);
+        this.notAfter = ZonedDateTime.parse(notAfter);
     }
 
     public boolean isValid() {
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now();
         return (notBefore == null || now.compareTo(notBefore) >= 0) && (notAfter == null || now.compareTo(notAfter) <= 0);
     }
 

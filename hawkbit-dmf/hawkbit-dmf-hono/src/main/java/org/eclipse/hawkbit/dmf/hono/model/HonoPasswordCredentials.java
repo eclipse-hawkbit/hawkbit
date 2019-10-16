@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.hono.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
@@ -17,6 +18,7 @@ import java.util.Collection;
 
 @JsonTypeName("hashed-password")
 public class HonoPasswordCredentials extends HonoCredentials {
+    @JsonProperty("secrets")
     public void setSecrets(Collection<Secret> secrets) {
         this.secrets = secrets;
     }
@@ -45,28 +47,34 @@ public class HonoPasswordCredentials extends HonoCredentials {
             return encoder.matches(password + (salt != null ? salt : ""), pwdHash);
         }
 
+        @JsonProperty("hash-function")
         public String getHashFunction() {
             return hashFunction;
         }
 
+        @JsonProperty("salt")
         public String getSalt() {
             return salt;
         }
 
+        @JsonProperty("pwd-hash")
         public String getPwdHash() {
             return pwdHash;
         }
 
+        @JsonProperty("hash-function")
         public void setHashFunction(String hashFunction) {
             this.hashFunction = hashFunction;
         }
 
-        public void setSalt(String salt) {
-            this.salt = salt;
+        @JsonProperty("salt")
+        public void setSalt(byte[] salt) {
+            this.salt = new String(salt);
         }
 
-        public void setPwdHash(String pwdHash) {
-            this.pwdHash = pwdHash;
+        @JsonProperty("pwd-hash")
+        public void setPwdHash(byte[] pwdHash) {
+            this.pwdHash = new String(pwdHash);
         }
     }
 }
