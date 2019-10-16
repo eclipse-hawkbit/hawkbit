@@ -54,8 +54,9 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
 
-    JpaTargetTagManagement(final TargetTagRepository targetTagRepository, final TargetRepository targetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+    public JpaTargetTagManagement(final TargetTagRepository targetTagRepository,
+            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final Database database) {
         this.targetTagRepository = targetTagRepository;
         this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
