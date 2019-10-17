@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
+import org.eclipse.hawkbit.repository.event.remote.GenericRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
@@ -136,6 +137,9 @@ public class EventType {
 
         // deployment event for assignments and /or cancellations
         TYPES.put(38, MultiActionEvent.class);
+        
+        //generic event for internal communication between service nodes.
+        TYPES.put(39, GenericRemoteEvent.class);
     }
 
     private int value;
