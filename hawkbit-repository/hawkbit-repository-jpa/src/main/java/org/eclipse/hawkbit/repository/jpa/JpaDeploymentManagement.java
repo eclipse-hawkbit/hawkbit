@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -58,6 +57,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -237,20 +237,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
-        // remove bypassing the weight enforcement as soon as weight can be set
-        // via UI
-        final boolean bypassWeightEnforcement = true;
         final long assignmentsWithWeight = deploymentRequests.stream()
                 .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
         final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
         final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
-        if (!isMultiAssignmentsEnabled() && containsAssignmentWithWeight) {
-            throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
-            return;
-        } else if (isMultiAssignmentsEnabled() && containsAssignmentWithoutWeight) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
-        }
+
+        WeightValidationHelper.verifyWeight(containsAssignmentWithWeight, containsAssignmentWithoutWeight,
+                systemSecurityContext, tenantConfigurationManagement);
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final Long dsID,

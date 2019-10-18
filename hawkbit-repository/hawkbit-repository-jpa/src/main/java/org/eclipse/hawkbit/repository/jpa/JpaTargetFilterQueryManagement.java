@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -36,7 +34,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -103,26 +101,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         // enforce the 'max targets per auto assign' quota right here even if
         // the result of the filter query can vary over time
         if (create.getAutoAssignDistributionSetId().isPresent()) {
-            verifyWeight(create.getAutoAssignWeight().orElse(null));
+            WeightValidationHelper.verifyWeight(create.getAutoAssignWeight().orElse(null), systemSecurityContext,
+                    tenantConfigurationManagement);
             create.getQuery().ifPresent(this::assertMaxTargetsQuota);
         }
 
         return targetFilterQueryRepository.save(create.build());
-    }
-
-    private void verifyWeight(final Integer weight) {
-        // remove bypassing the weight enforcement as soon as weight can be set
-        // via UI
-        final boolean bypassWeightEnforcement = true;
-        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext,
-                tenantConfigurationManagement);
-        if (!multiAssignmentsEnabled && weight != null) {
-            throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
-            return;
-        } else if (multiAssignmentsEnabled && weight == null) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
-        }
     }
 
     @Override
@@ -257,7 +241,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
         } else {
-            verifyWeight(update.getWeight());
+            WeightValidationHelper.verifyWeight(update.getWeight(), systemSecurityContext,
+                    tenantConfigurationManagement);
             // we cannot be sure that the quota was enforced at creation time
             // because the Target Filter Query REST API does not allow to
             // specify an

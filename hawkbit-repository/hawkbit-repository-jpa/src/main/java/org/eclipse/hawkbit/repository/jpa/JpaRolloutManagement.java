@@ -44,8 +44,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -60,7 +58,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -234,29 +232,14 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-        validateRolloutWeight(rollout.getWeight());
+        WeightValidationHelper.verifyWeight(rollout.getWeight().orElse(null), systemSecurityContext,
+                tenantConfigurationManagement);
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
         return rolloutRepository.save(rollout);
-    }
-
-    private void validateRolloutWeight(final Optional<Integer> weight) {
-        // remove bypassing the weight enforcement as soon as weight can be set
-        // via UI
-        final boolean bypassWeightEnforcement = true;
-        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext,
-                tenantConfigurationManagement);
-        if (!multiAssignmentsEnabled && weight.isPresent()) {
-            throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
-            return;
-        } else if (multiAssignmentsEnabled && !weight.isPresent()) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
-        }
-
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,

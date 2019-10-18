@@ -148,7 +148,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
