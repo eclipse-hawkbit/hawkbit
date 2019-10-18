@@ -279,7 +279,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Long assignNewDsToTarget(final String controllerId, final Integer weight) {
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), Collections.singletonList(controllerId), ActionType.FORCED,
                         RepositoryModelConstants.NO_FORCE_TIME, weight));
@@ -336,9 +336,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         registerAndAssertTargetWithExistingTenant(controllerId);
         final String filterQuery = "controllerId==" + controllerId;
-        final DistributionSet ds1 = testdataFactory.createDistributionSet();
+        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final Set<Long> smIds1 = getSoftwareModuleIds(ds1);
-        final DistributionSet ds2 = testdataFactory.createDistributionSet();
+        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
 
         createAndStartRollout(ds1, filterQuery, 12);
