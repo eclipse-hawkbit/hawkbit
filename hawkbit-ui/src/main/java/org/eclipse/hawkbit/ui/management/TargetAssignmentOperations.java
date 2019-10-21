@@ -105,7 +105,7 @@ public final class TargetAssignmentOperations {
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
-               final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         dsIds.forEach(dsId -> targets.forEach(t -> {
             final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
                     .setActionType(actionType).setForceTime(forcedTimeStamp);
