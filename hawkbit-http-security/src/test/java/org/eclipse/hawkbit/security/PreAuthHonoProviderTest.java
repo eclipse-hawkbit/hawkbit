@@ -54,8 +54,8 @@ public class PreAuthHonoProviderTest {
 
         HonoPasswordCredentials.Secret secret = new HonoPasswordCredentials.Secret();
         secret.setHashFunction("sha-256");
-        secret.setSalt("salt");
-        secret.setPwdHash("hash");
+        secret.setSalt("salt".getBytes());
+        secret.setPwdHash("hash".getBytes());
 
         HonoPasswordCredentials credentials = new HonoPasswordCredentials();
         credentials.setAuthId("authId");
@@ -86,8 +86,8 @@ public class PreAuthHonoProviderTest {
 
         HonoPasswordCredentials.Secret secret = new HonoPasswordCredentials.Secret();
         secret.setHashFunction("sha-256");
-        secret.setSalt("salt");
-        secret.setPwdHash("7a37b85c8918eac19a9089c0fa5a2ab4dce3f90528dcdeec108b23ddf3607b99");
+        secret.setSalt("salt".getBytes());
+        secret.setPwdHash("7a37b85c8918eac19a9089c0fa5a2ab4dce3f90528dcdeec108b23ddf3607b99".getBytes());
 
         HonoPasswordCredentials credentials = new HonoPasswordCredentials();
         credentials.setAuthId("authId");
