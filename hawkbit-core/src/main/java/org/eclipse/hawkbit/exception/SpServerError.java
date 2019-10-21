@@ -145,7 +145,7 @@ public enum SpServerError {
     /**
      * error that describes that size of uploaded file exceeds storage quota
      */
-    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded", "File size exceeds storage quota."),
+    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded", "Storage quota will be exceeded if file is uploaded."),
 
     /**
      * error message, which describes that the action can not be canceled cause

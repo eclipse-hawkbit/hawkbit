@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 
-public class QuotaInputStream extends FilterInputStream {
+public class FileSizeAndStorageQuotaCheckingInputStream extends FilterInputStream {
 
     private final long quota;
 
@@ -31,7 +31,7 @@ public class QuotaInputStream extends FilterInputStream {
      * @param storageLeft
      *            Storage left until quota is reached
      */
-    public QuotaInputStream(final InputStream in, final long sizeLimit, final long storageLeft) {
+    public FileSizeAndStorageQuotaCheckingInputStream(final InputStream in, final long sizeLimit, final long storageLeft) {
         super(in);
 
         // only limit to lower bound and set appropriate error type
@@ -47,7 +47,7 @@ public class QuotaInputStream extends FilterInputStream {
     public int read() throws IOException {
         final int read = super.read();
 
-        if (size + read > quota) {
+        if ((size + read) > quota) {
             throw new QuotaExceededException(quotaType, quota);
         } else if (read >= 0) {
             size += read;
@@ -60,7 +60,7 @@ public class QuotaInputStream extends FilterInputStream {
     public int read(final byte[] b) throws IOException {
         final int read = super.read(b);
 
-        if (size + read > quota) {
+        if ((size + read) > quota) {
             throw new QuotaExceededException(quotaType, quota);
         } else if (read >= 0) {
             size += read;
@@ -73,7 +73,7 @@ public class QuotaInputStream extends FilterInputStream {
     public int read(final byte[] b, final int off, final int len) throws IOException {
         final int read = super.read(b, off, len);
 
-        if (size + read > quota) {
+        if ((size + read) > quota) {
             throw new QuotaExceededException(quotaType, quota);
         } else if (read >= 0) {
             size += read;

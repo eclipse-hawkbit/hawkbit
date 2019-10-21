@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaInputStream;
+import org.eclipse.hawkbit.repository.jpa.utils.FileSizeAndStorageQuotaCheckingInputStream;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -152,7 +152,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
-        return new QuotaInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
+        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
     }
 
     @Override
