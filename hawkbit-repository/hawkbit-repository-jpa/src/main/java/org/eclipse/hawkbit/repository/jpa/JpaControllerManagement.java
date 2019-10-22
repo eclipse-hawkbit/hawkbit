@@ -193,7 +193,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction()}.
+     * {@link ControllerManagement#getPollingTimeForAction(long)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
@@ -243,7 +243,7 @@ public class JpaControllerManagement implements ControllerManagement {
          * @param minimumEventInterval
          *            for loading {@link DistributionSet#getModules()}. This
          *            puts a lower bound to the timer value
-         * @param timerUnit
+         * @param timeUnit
          *            representing the unit of time to be used for timer.
          */
         EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
@@ -373,6 +373,13 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
         return actionRepository.findByExternalRefInAndActive(externalRefs, true);
+    }
+
+    @Override
+    public void deleteExistingTarget(@NotEmpty String controllerId) {
+        final Target target = targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+         targetRepository.deleteById(target.getId());
     }
 
     @Override
@@ -997,8 +1004,8 @@ public class JpaControllerManagement implements ControllerManagement {
      * Cancels given {@link Action} for this {@link Target}. The method will
      * immediately add a {@link Status#CANCELED} status to the action. However,
      * it might be possible that the controller will continue to work on the
-     * cancelation. The controller needs to acknowledge or reject the
-     * cancelation using {@link DdiRootController#postCancelActionFeedback}.
+     * cancellation. The controller needs to acknowledge or reject the
+     * cancellation using {@link DdiRootController#postCancelActionFeedback}.
      *
      * @param actionId
      *            to be canceled

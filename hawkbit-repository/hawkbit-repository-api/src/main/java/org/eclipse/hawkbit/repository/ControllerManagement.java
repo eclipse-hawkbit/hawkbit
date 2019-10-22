@@ -48,14 +48,14 @@ public interface ControllerManagement {
     /**
      * Adds an {@link ActionStatus} for a cancel {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
-     * 
+     *
      * @param create
      *            to be added
      * @return the updated {@link Action}
-     * 
+     *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * 
+     *
      * @throws QuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
@@ -64,14 +64,14 @@ public interface ControllerManagement {
      * @throws ConstraintViolationException
      *             if fields are not filled as specified. Check
      *             {@link ActionStatusCreate} for field constraints.
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action addCancelActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
      * Retrieves assigned {@link SoftwareModule} of a target.
-     * 
+     *
      * @param moduleId
      *            of the {@link SoftwareModule}
      * @return {@link SoftwareModule} identified by ID
@@ -82,7 +82,7 @@ public interface ControllerManagement {
     /**
      * Retrieves {@link SoftwareModuleMetadata} where
      * {@link SoftwareModuleMetadata#isTargetVisible()}.
-     * 
+     *
      * @param moduleId
      *            of the {@link SoftwareModule}
      * @return list of {@link SoftwareModuleMetadata} with maximum size of
@@ -95,12 +95,12 @@ public interface ControllerManagement {
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
      * . No state changes.
-     * 
+     *
      * @param create
      *            to add to the action
-     * 
+     *
      * @return created {@link ActionStatus} entity
-     * 
+     *
      * @throws QuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
@@ -138,15 +138,15 @@ public interface ControllerManagement {
     /**
      * Retrieves oldest {@link Action} that is active and assigned to a
      * {@link Target}.
-     * 
+     *
      * For performance reasons this method does not throw
-     * {@link EntityNotFoundException} in case target with given controlelrId
+     * {@link EntityNotFoundException} in case target with given controllerId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
      *            identifies the target to retrieve the actions from
      * @return a list of actions assigned to given target which are active
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
@@ -154,7 +154,7 @@ public interface ControllerManagement {
     /**
      * Retrieves all active actions which are assigned to the target with the
      * given controller ID.
-     * 
+     *
      * @param pageable
      *            pagination parameter
      * @param controllerId
@@ -184,7 +184,7 @@ public interface ControllerManagement {
      * @param actionId
      *            to be filtered on
      * @return the corresponding {@link Page} of {@link ActionStatus}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -217,7 +217,7 @@ public interface ControllerManagement {
      *            of the the {@link SoftwareModule} that should be assigned to
      *            the target
      * @return last {@link Action} for given combination
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      *
@@ -244,7 +244,7 @@ public interface ControllerManagement {
 
     /**
      * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction()}.
+     * {@link ControllerManagement#getPollingTimeForAction(long)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
@@ -277,7 +277,7 @@ public interface ControllerManagement {
      * a target is allowed to download a given artifact because it has currently
      * assigned or had ever been assigned to the target and so it's visible to a
      * specific target e.g. for downloading.
-     * 
+     *
      * @param controllerId
      *            the ID of the target to check
      * @param sha1Hash
@@ -286,7 +286,7 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -299,7 +299,7 @@ public interface ControllerManagement {
      * a target is allowed to download a given artifact because it has currently
      * assigned or had ever been assigned to the target and so it's visible to a
      * specific target e.g. for downloading.
-     * 
+     *
      * @param targetId
      *            the ID of the target to check
      * @param sha1Hash
@@ -308,7 +308,7 @@ public interface ControllerManagement {
      * @return {@code true} if the given target has currently or had ever a
      *         relation to the given artifact through the action history,
      *         otherwise {@code false}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -325,7 +325,7 @@ public interface ControllerManagement {
      *            for the status
      * @return the update action in case the status has been changed to
      *         {@link Status#RETRIEVED}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -432,7 +432,7 @@ public interface ControllerManagement {
 
     /**
      * Updates given {@link Action} with its external id.
-     * 
+     *
      * @param actionId
      *            to be updated
      * @param externalRef
@@ -451,4 +451,13 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     List<Action> getActiveActionsByExternalRef(@NotNull List<String> externalRefs);
+
+    /**
+     * Delete a single target.
+     *
+     * @param controllerId
+     *            of the target to delete
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void deleteExistingTarget(@NotEmpty String controllerId);
 }
