@@ -968,7 +968,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected boolean hasDeletePermission() {
-        return getPermChecker().hasDeleteRepositoryPermission() || getPermChecker().hasDeleteTargetPermission();
+        return getPermChecker().hasDeleteTargetPermission();
     }
 
     @Override
