@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,37 +8,27 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * JSON representation of the Attribute Update message.
+ * JSON representation of the Attribute THING_CREATED message.
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DmfAttributeUpdate {
+public class DmfCreateThing {
 
     @JsonProperty
-    private final Map<String, String> attributes = new HashMap<>();
+    private String name;
 
-    @JsonProperty
-    private DmfUpdateMode mode;
-
-    public DmfUpdateMode getMode() {
-        return mode;
+    public String getName() {
+        return name;
     }
 
-    public void setMode(final DmfUpdateMode mode) {
-        this.mode = mode;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
+    public void setName(final String name) {
+        this.name = name;
     }
 
 }
