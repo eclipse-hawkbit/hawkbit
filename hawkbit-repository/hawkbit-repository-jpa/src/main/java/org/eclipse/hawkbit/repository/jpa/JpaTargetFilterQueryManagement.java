@@ -101,8 +101,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         // enforce the 'max targets per auto assign' quota right here even if
         // the result of the filter query can vary over time
         if (create.getAutoAssignDistributionSetId().isPresent()) {
-            WeightValidationHelper.verifyWeight(create.getAutoAssignWeight().orElse(null), systemSecurityContext,
-                    tenantConfigurationManagement);
+            WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(create);
             create.getQuery().ifPresent(this::assertMaxTargetsQuota);
         }
 
@@ -241,8 +240,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
         } else {
-            WeightValidationHelper.verifyWeight(update.getWeight(), systemSecurityContext,
-                    tenantConfigurationManagement);
+            WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             // we cannot be sure that the quota was enforced at creation time
             // because the Target Filter Query REST API does not allow to
             // specify an

@@ -232,8 +232,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-        WeightValidationHelper.verifyWeight(rollout.getWeight().orElse(null), systemSecurityContext,
-                tenantConfigurationManagement);
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");

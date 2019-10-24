@@ -195,7 +195,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        validateOnlineAssignment(deploymentRequests);
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .validate(deploymentRequests);
+
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -234,16 +236,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         if (distinctTargetsInRequest < deploymentRequests.size()) {
             throw new MultiAssignmentIsNotEnabledException();
         }
-    }
-
-    private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
-        final long assignmentsWithWeight = deploymentRequests.stream()
-                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
-        final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
-        final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
-
-        WeightValidationHelper.verifyWeight(containsAssignmentWithWeight, containsAssignmentWithoutWeight,
-                systemSecurityContext, tenantConfigurationManagement);
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final Long dsID,
@@ -835,7 +827,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.isMultiAssignmentsEnabled(systemSecurityContext, tenantConfigurationManagement);
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .isMultiAssignmentsEnabled();
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {

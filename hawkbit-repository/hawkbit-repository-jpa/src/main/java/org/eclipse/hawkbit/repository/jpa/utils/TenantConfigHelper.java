@@ -18,12 +18,17 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
  */
 public final class TenantConfigHelper {
 
-    private TenantConfigHelper() {
-        // utility class
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final SystemSecurityContext systemSecurityContext;
+
+    private TenantConfigHelper(final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        this.systemSecurityContext = systemSecurityContext;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
-     * Is multi-assignments enabled for the current tenant
+     * Setting the context of the tenant.
      * 
      * @param systemSecurityContext
      *            Security context used to get the tenant and for execution
@@ -31,10 +36,18 @@ public final class TenantConfigHelper {
      *            to get the value from
      * @return is active
      */
-    public static boolean isMultiAssignmentsEnabled(final SystemSecurityContext systemSecurityContext,
+    public static TenantConfigHelper usingContext(final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
+        return new TenantConfigHelper(systemSecurityContext, tenantConfigurationManagement);
+    }
+
+    /**
+     * Is multi-assignments enabled for the current tenant
+     * 
+     * @return is active
+     */
+    public boolean isMultiAssignmentsEnabled() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
-
 }

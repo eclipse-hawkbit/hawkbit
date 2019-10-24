@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -183,7 +184,7 @@ public class TestdataFactory {
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet() {
-        return createDistributionSet("", DEFAULT_VERSION, false);
+        return createDistributionSet(UUID.randomUUID().toString(), DEFAULT_VERSION, false);
     }
 
     /**
@@ -511,9 +512,10 @@ public class TestdataFactory {
      *
      * @return {@link Artifact} entity.
      */
-    public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename, final int fileSize) {
-        return artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
+    public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename,
+            final int fileSize) {
+        return artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
     }
 
     /**
@@ -1081,9 +1083,10 @@ public class TestdataFactory {
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create().name(rolloutName)
-                        .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet)
-                .actionType(actionType).weight(weight), groupSize, conditions);
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
+                        .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight),
+                groupSize, conditions);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();

@@ -148,7 +148,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         assignDistributionSet(distributionSet2.getId(), controllerId);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
@@ -279,7 +279,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private Long assignNewDsToTarget(final String controllerId, final Integer weight) {
-        final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), Collections.singletonList(controllerId), ActionType.FORCED,
                         RepositoryModelConstants.NO_FORCE_TIME, weight));
@@ -336,9 +336,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         registerAndAssertTargetWithExistingTenant(controllerId);
         final String filterQuery = "controllerId==" + controllerId;
-        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds1 = testdataFactory.createDistributionSet();
         final Set<Long> smIds1 = getSoftwareModuleIds(ds1);
-        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        final DistributionSet ds2 = testdataFactory.createDistributionSet();
         final Set<Long> smIds2 = getSoftwareModuleIds(ds2);
 
         createAndStartRollout(ds1, filterQuery, 12);
