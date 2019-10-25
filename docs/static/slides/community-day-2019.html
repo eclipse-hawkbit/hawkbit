@@ -1,0 +1,240 @@
+<!--
+  ~ Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+  ~
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Eclipse hawkBit</title>
+
+    <meta name="description" content="Eclipse hawkBit - Community Day 2018">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/hawkBit.css" id="theme">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+<body>
+    <div class="reveal">
+        <div class="header">
+            <img src="resources/images/hawkbit_logo.png" width="120px" align="right" />
+        </div>
+        <div class="slides">
+            <section>
+                <div class="intro">
+                    <h1>Community Day - Eclipse hawkBit</h1>
+                    <h6>EclipseCon Europe 2019</h6>
+                </div>
+            </section>
+            <section>
+                <h1>Welcome...</h1>
+                <div style="font-size: 1.5em; position:absolute; left:2em; width: 100%;">
+                    <div style="display: inline-block;">
+                        <a href="https://github.com/laverman"><img
+                                src="https://avatars3.githubusercontent.com/u/9153035?s=120&v=4"
+                                style="border-radius: 50%;" align="left"></a>
+                        <p style="margin-left: 5em; margin-top: 0.5em;">Kai Zimmermann</p>
+                        <i style="margin-left: 4em; margin-top: 0.5em; font-size: 0.5em;">Project Lead - Microsoft</i>
+                    </div>
+                    <br>
+                    <div style="display: inline-block;">
+                        <a href="https://github.com/laverman"><img
+                                src="https://avatars3.githubusercontent.com/u/19288577?s=120&v=4"
+                                style="border-radius: 50%;" align="left"></a>
+                        <p style="margin-left: 5em; margin-top: 0.5em;">Jeroen Laverman</p>
+                        <i style="margin-left: 4em; margin-top: 0.5em; font-size: 0.5em;">Project Lead - Bosch</i>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h1>About</h1>
+                <p>
+                    Eclipse hawkBit aims to create a <b>domain independent</b> back end solution for rolling out
+                    <b>software
+                        updates</b>
+                    to constrained edge devices as well as more powerful controllers and gateways connected to IP based
+                    networking infrastructure
+                </p>
+            </section>
+            <section>
+                <h1>Big picture</h1>
+                <img src="resources/images/hawkBit_overview.jpg">
+            </section>
+            <section>
+                <h1>Project update...</h1>
+            </section>
+
+            <section>
+                <h1>Statistics (10/2019)</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit">hawkbit Core</a>: 207
+                        (+58)
+                        stars, 717 (+95) PRs, 172 (+35) issues</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit-extensions">hawkbit
+                            Extensions</a>: 41 (+11) PRs</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit-examples">hawkbit
+                            Examples</a>: 35 (+10) PRs</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://hub.docker.com/u/hawkbit/">Docker Hub</a>: 50K+
+                        (+47K)
+                        PULLS</li>
+                </ul>
+            </section>
+            <section>
+                <h1>We have been busy</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em">Add Multi-User support (<a
+                            href="https://github.com/eclipse/hawkbit/pull/829">#829</a>)</li>
+                    <li style="margin-bottom: 0.5em">Introduce Multi-Assignments (<a
+                            href="https://github.com/eclipse/hawkbit/pull/833">#833</a>)</li>
+                    <li style="margin-bottom: 0.5em">Introduce new action-type DOWNLOAD_ONLY (<a
+                            href="https://github.com/eclipse/hawkbit/pull/810">#810</a>)</li>
+                    <li style="margin-bottom: 0.5em">Execute Auto-Assignments with different action-types (<a
+                            href="https://github.com/eclipse/hawkbit/pull/789">#789</a>)</li>
+                    <li style="margin-bottom: 0.5em">Introduce THING_REMOVED message on DMF-API (<a
+                            href="https://github.com/eclipse/hawkbit/pull/891">#891</a>)</li>
+                    <li style="margin-bottom: 0.5em">DDI-API supports SHA256 signature for artifacts (<a
+                            href="https://github.com/eclipse/hawkbit/pull/869">#869</a>)</li>
+                    <li style="margin-bottom: 0.5em">... and <a
+                            href="https://github.com/eclipse/hawkbit/pulls?utf8=✓&q=created%3A%3E%3D2018-10-25">many
+                            smaller enhancements and bug fixes </a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h1>Cloud support updates...</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em">Azure: inner cluster messaging (<a
+                            href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about">with Event
+                            Hubs</a>)</li>
+                    <li style="margin-bottom: 0.5em">Azure: deployment guidance and <a
+                            href="https://github.com/helm/helm">k8s helm</a>
+                        as well as <a
+                            href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/template-deployment-overview">Azure
+                            Resource Manager</a> templates</li>
+                    <li style="margin-bottom: 0.5em">More storage providers: <a
+                            href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction">Azure
+                            Blob Storage</a>, <a href="https://cloud.google.com/storage/docs/">Google Cloud Storage</a>
+                    </li>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h1>Roadmap...</h1>
+            </section>
+            <section>
+                <h1>Outlook</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em">Vaadin 8 (<a
+                            href="https://github.com/eclipse/hawkbit/issues/880">#880</a>)</li>
+                    <li style="margin-bottom: 0.5em">Release 0.3.0 (<a
+                            href="https://github.com/eclipse/hawkbit/issues/784">#784</a>)</li>
+                    <li style="margin-bottom: 0.5em">Prioritization of updates (<a
+                            href="https://github.com/eclipse/hawkbit/issues/863">#863</a>)</li>
+                    <li style="margin-bottom: 0.5em">Integration with other device inventories (<a
+                            href="https://github.com/eclipse/hawkbit/issues/796">#796</a>)</li>
+                    <li style="margin-bottom: 0.5em">Support of new <a
+                            href="https://projects.eclipse.org/projects/iot.packages">Eclipse IoT Packages</a> project
+                    </li>
+                </ul>
+            </section>
+
+
+
+            <section>
+                <h1>Thank you</h1>
+                <div style="font-size: 1.5em; position:absolute; left:2em;">
+                    <p><i class="fa fa-bullhorn fa-fw"></i>&nbsp;<a
+                            href="https://www.eclipsecon.org/europe2019/sessions/eclipse-hawkbit-101">101
+                            tutorial</a></p>
+                    <p><i class="fa fa-bullhorn fa-fw"></i>&nbsp;<a
+                            href="https://www.eclipsecon.org/europe2019/sessions/eclipse-hawkbit-update-factory-how-take-open-platform-production-sponsored-bosch">From
+                            Eclipse hawkBit to Update Factory</a></p>
+                    <p><i class="fab fa-docker fa-fw"></i>&nbsp;<a href="https://hub.docker.com/u/hawkbit">hawkbit</a>
+                    </p>
+                    <p><i class="fab fa-gitter fa-fw"></i>&nbsp;<a
+                            href="https://gitter.im/eclipse/hawkbit">eclipse/hawkbit</a></p>
+                    <p><i class="fab fa-github fa-fw"></i>&nbsp;<a
+                            href="https://github.com/eclipse/hawkbit">eclipse/hawkbit</a></p>
+                    <p><i class="fa fa-book-open fa-fw"></i>&nbsp;<a
+                            href="http://www.eclipse.org/hawkbit">eclipse.org/hawkbit</a></p>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="footer">
+        <a href="http://www.eclipse.org" target="_blank">Eclipse Foundation</a> |
+        <a href="http://www.eclipse.org/legal/privacy.php" target="_blank">Privacy Policy</a> |
+        <a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">Terms of Use</a> |
+        <a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a> |
+        <a href="http://www.eclipse.org/legal" target="_blank">Legal</a>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: false,
+            progress: true,
+            history: true,
+            center: true,
+
+            transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+            // Optional reveal.js plugins
+            dependencies: [{
+                src: 'lib/js/classList.js',
+                condition: function () {
+                    return !document.body.classList;
+                }
+            }, {
+                src: 'plugin/markdown/marked.js',
+                condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            }, {
+                src: 'plugin/markdown/markdown.js',
+                condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            }, {
+                src: 'plugin/highlight/highlight.js',
+                async: true,
+                condition: function () {
+                    return !!document.querySelector('pre code');
+                },
+                callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }, {
+                src: 'plugin/zoom-js/zoom.js',
+                async: true
+            }, {
+                src: 'plugin/notes/notes.js',
+                async: true
+            }]
+        });
+
+        Reveal.configure({
+            slideNumber: true
+        });
+    </script>
+
+</body>
+
+</html>

@@ -140,7 +140,7 @@ public interface ControllerManagement {
      * {@link Target}.
      * 
      * For performance reasons this method does not throw
-     * {@link EntityNotFoundException} in case target with given controlelrId
+     * {@link EntityNotFoundException} in case target with given controllerId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
@@ -219,8 +219,25 @@ public interface ControllerManagement {
     Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address);
 
     /**
-     * Retrieves last {@link Action} for a download of an artifact of given
-     * module and target if exists and is not canceled.
+     * Register new target in the repository (plug-and-play) and in case it already
+     * exists updates {@link Target#getAddress()} and
+     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and switches if
+     * {@link TargetUpdateStatus#UNKNOWN} to {@link TargetUpdateStatus#REGISTERED}.
+     *
+     * @param controllerId
+     *            reference
+     * @param address
+     *            the client IP address of the target, might be {@code null}
+     * @param name
+     *            the name of the target
+     * @return target reference
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address, String name);
+
+    /**
+     * Retrieves last {@link Action} for a download of an artifact of given module
+     * and target if exists and is not canceled.
      *
      * @param controllerId
      *            to look for

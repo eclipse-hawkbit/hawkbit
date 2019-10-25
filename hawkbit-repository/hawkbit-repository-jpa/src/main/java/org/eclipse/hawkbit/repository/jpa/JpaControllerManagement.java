@@ -97,6 +97,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -232,11 +233,11 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
          * Constructor.
          *
          * @param defaultEventInterval
-         *            default timer value to use for interval between events.
-         *            This puts an upper bound for the timer value
+         *            default timer value to use for interval between events. This puts
+         *            an upper bound for the timer value
          * @param minimumEventInterval
-         *            for loading {@link DistributionSet#getModules()}. This
-         *            puts a lower bound to the timer value
+         *            for loading {@link DistributionSet#getModules()}. This puts a
+         *            lower bound to the timer value
          * @param timeUnit
          *            representing the unit of time to be used for timer.
          */
@@ -251,16 +252,15 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
         }
 
         /**
-         * This method calculates the time interval until the next event based
-         * on the desired number of events before the time when interval is
-         * reset to default. The return value is bounded by
-         * {@link EventTimer#defaultEventInterval} and
+         * This method calculates the time interval until the next event based on the
+         * desired number of events before the time when interval is reset to default.
+         * The return value is bounded by {@link EventTimer#defaultEventInterval} and
          * {@link EventTimer#minimumEventInterval}.
          *
          * @param eventCount
-         *            number of events desired until the interval is reset to
-         *            default. This is not guaranteed as the interval between
-         *            events cannot be less than the minimum interval
+         *            number of events desired until the interval is reset to default.
+         *            This is not guaranteed as the interval between events cannot be
+         *            less than the minimum interval
          * @param timerResetTime
          *            time when exponential forwarding should reset to default
          *
@@ -376,16 +376,25 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
+        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address,
+            final String name) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
-                .orElseGet(() -> createTarget(controllerId, address));
+        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name))
+                .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTarget(final String controllerId, final URI address) {
+    private Target createTarget(final String controllerId, final URI address, String name) {
+
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))
                 .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
@@ -448,9 +457,8 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
 
     /**
      * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
-     * raising opt lock revision as this update is not mission critical and in
-     * fact only written by {@link ControllerManagement}, i.e. the target
-     * itself.
+     * raising opt lock revision as this update is not mission critical and in fact
+     * only written by {@link ControllerManagement}, i.e. the target itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
         final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
@@ -478,39 +486,40 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
     }
 
     /**
-     * Stores target directly to DB in case either {@link Target#getAddress()}
-     * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * Stores target directly to DB in case either {@link Target#getAddress()} or
+     * {@link Target#getUpdateStatus()} or {@link Target#getName()} changes or the buffer queue is full.
      *
      */
-    private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
-        boolean storeEager = isStoreEager(toUpdate, address);
-
-        if (TargetUpdateStatus.UNKNOWN == toUpdate.getUpdateStatus()) {
-            toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            storeEager = true;
-        }
-
-        if (storeEager || !queue.offer(new TargetPoll(toUpdate))) {
-            toUpdate.setAddress(address.toString());
+    private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
+        if (isStoreEager(toUpdate, address, name) || !queue.offer(new TargetPoll(toUpdate))) {
+            if (isAddressChanged(toUpdate.getAddress(), address)) {
+                toUpdate.setAddress(address.toString());
+            }
+            if (isNameChanged(toUpdate.getName(), name)) {
+                toUpdate.setName(name);
+            }
+            if (isStatusUnknown(toUpdate.getUpdateStatus())) {
+                toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
-
             afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                     .publishEvent(new TargetPollEvent(toUpdate, eventPublisherHolder.getApplicationId())));
-
             return targetRepository.save(toUpdate);
         }
-
         return toUpdate;
     }
-
-    private boolean isStoreEager(final JpaTarget toUpdate, final URI address) {
-        if (repositoryProperties.isEagerPollPersistence()) {
-            return true;
-        } else if (toUpdate.getAddress() == null) {
-            return true;
-        } else {
-            return !toUpdate.getAddress().equals(address);
-        }
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name) {
+        return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
+                || isNameChanged(toUpdate.getName(), name) || isStatusUnknown(toUpdate.getUpdateStatus());
+    }
+    private boolean isAddressChanged(final URI addressToUpdate, final URI address) {
+        return addressToUpdate == null || !addressToUpdate.equals(address);
+    }
+    private boolean isNameChanged(final String nameToUpdate, final String name) {
+        return StringUtils.hasText(name) && !nameToUpdate.equals(name);
+    }
+    private boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
+        return TargetUpdateStatus.UNKNOWN == statusToUpdate;
     }
 
     @Override
@@ -586,8 +595,8 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
      * ActionStatus updates are allowed mainly if the action is active. If the
      * action is not active we accept further status updates if permitted so by
      * repository configuration. In this case, only the values: Status.ERROR and
-     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we
-     * accept status updates only once.
+     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we accept
+     * status updates only once.
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
@@ -722,8 +731,8 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
             final UpdateMode mode) {
 
         /*
-         * Constraints on attribute keys & values are not validated by
-         * EclipseLink. Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by EclipseLink.
+         * Hence, they are validated here.
          */
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
@@ -734,7 +743,6 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
 
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
-
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
         switch (updateMode) {
         case REMOVE:
@@ -801,8 +809,8 @@ public class JpaControllerManagement extends JPAActionManagement implements Cont
     }
 
     /**
-     * Registers retrieved status for given {@link Target} and {@link Action} if
-     * it does not exist yet.
+     * Registers retrieved status for given {@link Target} and {@link Action} if it
+     * does not exist yet.
      *
      * @param actionId
      *            to the handle status for
