@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
@@ -75,7 +75,7 @@ public interface SoftwareModuleManagement
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleMetadata}
      *             entries is exceeded for the addressed {@link SoftwareModule}
      */
@@ -97,7 +97,7 @@ public interface SoftwareModuleManagement
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleMetadata}
      *             entries is exceeded for the addressed {@link SoftwareModule}
      */

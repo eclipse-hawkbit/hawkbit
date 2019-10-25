@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -124,7 +124,7 @@ public interface RolloutManagement {
      *             if given {@link DistributionSet} does not exist
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid.
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of allowed targets per rollout group is
      *             exceeded.
      */
@@ -161,7 +161,7 @@ public interface RolloutManagement {
      *             if given {@link DistributionSet} does not exist
      * @throws ConstraintViolationException
      *             if rollout or group parameters are invalid
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of allowed targets per rollout group is
      *             exceeded.
      */

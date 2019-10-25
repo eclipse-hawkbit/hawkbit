@@ -21,9 +21,11 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -49,6 +51,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFileTransferHandler.class);
+    private static final String MESSAGE_UPLOAD_FAILED = "message.upload.failed";
 
     private volatile boolean uploadInterrupted;
 
@@ -106,16 +109,20 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         this.failureReason = failureReason;
     }
 
-    protected void interruptUploadDueToUploadFailed(final String msg) {
-        interruptUploadAndSetReason(StringUtils.isBlank(msg) ? i18n.getMessage("message.upload.failed") : msg);
-    }
-
     protected void interruptUploadDueToUploadFailed() {
-        interruptUploadAndSetReason(i18n.getMessage("message.upload.failed"));
+        interruptUploadAndSetReason(i18n.getMessage(MESSAGE_UPLOAD_FAILED));
     }
 
-    protected void interruptUploadDueToQuotaExceeded(final String msgCode, final String exceededValue) {
-        interruptUploadAndSetReason(StringUtils.isBlank(msgCode) ? i18n.getMessage("message.upload.quota") : i18n.getMessage(msgCode, exceededValue));
+    protected void interruptUploadDueToAssignmentQuotaExceeded() {
+        interruptUploadAndSetReason(i18n.getMessage("message.upload.assignmentQuota"));
+    }
+
+    protected void interruptUploadDueToFileSizeQuotaExceeded(final String exceededValue) {
+        interruptUploadAndSetReason(i18n.getMessage("message.upload.fileSizeQuota", exceededValue));
+    }
+
+    protected void interruptUploadDueToStorageQuotaExceeded(final String exceededValue) {
+        interruptUploadAndSetReason(i18n.getMessage("message.upload.storageQuota", exceededValue));
     }
 
     protected void interruptUploadDueToDuplicateFile() {
@@ -189,7 +196,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
-                StringUtils.isBlank(failureReason) ? i18n.getMessage("message.upload.failed") : failureReason);
+                StringUtils.isBlank(failureReason) ? i18n.getMessage(MESSAGE_UPLOAD_FAILED) : failureReason);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
         eventBus.publish(this, fileUploadProgress);
         publishUploadFinishedEvent(fileUploadId);
@@ -239,17 +246,29 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             this.uploadLock = uploadLock;
         }
 
+        /**
+         * a lock object is used here that is propagated down from
+         * {@link org.eclipse.hawkbit.ui.artifacts.UploadArtifactView}. It ensures that from within the same UI instance
+         * all uploads are executed sequentially to avoid issues that occur when multiple files are processed at the
+         * same time (e.g. regarding quota checks)
+         */
         @Override
         public void run() {
             try {
                 UI.setCurrent(vaadinUi);
                 uploadLock.lock();
                 streamToRepository();
-            } catch (final QuotaExceededException e) {
-                interruptUploadDueToQuotaExceeded(e.getQuotaType().messageId, e.getExceededQuotaValueString());
-                LOG.debug("Upload failed due to quota exceeded:", e);
+            } catch (final FileSizeQuotaExceededException e) {
+                interruptUploadDueToFileSizeQuotaExceeded(e.getExceededQuotaValueString());
+                LOG.debug("Upload failed due to file size quota exceeded:", e);
+            } catch (final StorageQuotaExceededException e) {
+                interruptUploadDueToStorageQuotaExceeded(e.getExceededQuotaValueString());
+                LOG.debug("Upload failed due to storage quota exceeded:", e);
+            } catch (final AssignmentQuotaExceededException e) {
+                interruptUploadDueToAssignmentQuotaExceeded();
+                LOG.debug("Upload failed due to assignment quota exceeded:", e);
             } catch (final RuntimeException e) {
-                interruptUploadDueToUploadFailed(e.getMessage());
+                interruptUploadDueToUploadFailed();
                 publishUploadFailedAndFinishedEvent(fileUploadId, e);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {

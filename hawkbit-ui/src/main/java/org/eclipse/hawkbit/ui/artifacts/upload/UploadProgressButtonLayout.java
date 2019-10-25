@@ -75,6 +75,8 @@ public class UploadProgressButtonLayout extends VerticalLayout {
      * @param artifactManagement
      *            the {@link ArtifactManagement} for storing the uploaded
      *            artifacts
+     * @param uploadLock
+     *            A common upload lock that enforced sequential upload within an UI instance
      */
     public UploadProgressButtonLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final ArtifactUploadState artifactUploadState, final MultipartConfigElement multipartConfigElement,

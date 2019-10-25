@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -56,7 +56,7 @@ public interface ControllerManagement {
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      *
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -101,7 +101,7 @@ public interface ControllerManagement {
      *
      * @return created {@link ActionStatus} entity
      *
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -123,7 +123,7 @@ public interface ControllerManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -347,7 +347,7 @@ public interface ControllerManagement {
      *
      * @throws EntityNotFoundException
      *             if target that has to be updated could not be found
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if maximum number of attributes per target is exceeded
      * @throws InvalidTargetAttributeException
      *             if attributes violate constraints

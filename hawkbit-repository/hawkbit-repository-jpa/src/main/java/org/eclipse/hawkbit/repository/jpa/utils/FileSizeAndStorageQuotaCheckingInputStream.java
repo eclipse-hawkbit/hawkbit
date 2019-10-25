@@ -12,20 +12,26 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 
+/**
+ * A FilterInputStream that ensures file size and storage quotas are enforced. It check during read operations if the
+ * quota will be exceeded and throws an QuotaExceededException if this happens.
+ */
 public class FileSizeAndStorageQuotaCheckingInputStream extends FilterInputStream {
 
     private final long quota;
-
-    private final QuotaExceededException.QuotaType quotaType;
+    private final long sizeLimit;
 
     private long size;
 
     /**
      * Creates a <code>QuotaInputStream</code> using the input stream in and a
      * limiting quota
-     * 
+     *
+     * @param in
+     *            Inner InputStream that read operations will be forwarded to
      * @param sizeLimit
      *            Quota file size limit in byte
      * @param storageLeft
@@ -34,51 +40,42 @@ public class FileSizeAndStorageQuotaCheckingInputStream extends FilterInputStrea
     public FileSizeAndStorageQuotaCheckingInputStream(final InputStream in, final long sizeLimit, final long storageLeft) {
         super(in);
 
-        // only limit to lower bound and set appropriate error type
+        // only limit to lower bound to avoid two checks
         this.quota = Math.min(sizeLimit, storageLeft);
-        if (quota == sizeLimit) {
-            quotaType = QuotaExceededException.QuotaType.SIZE_QUOTA;
-        } else {
-            quotaType = QuotaExceededException.QuotaType.STORAGE_QUOTA;
-        }
+        this.sizeLimit = sizeLimit;
     }
 
     @Override
     public int read() throws IOException {
         final int read = super.read();
-
-        if ((size + read) > quota) {
-            throw new QuotaExceededException(quotaType, quota);
-        } else if (read >= 0) {
-            size += read;
-        }
-
+        checkQuotaAndUpdateSize(read);
         return read;
     }
 
     @Override
     public int read(final byte[] b) throws IOException {
         final int read = super.read(b);
-
-        if ((size + read) > quota) {
-            throw new QuotaExceededException(quotaType, quota);
-        } else if (read >= 0) {
-            size += read;
-        }
-
+        checkQuotaAndUpdateSize(read);
         return read;
     }
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
         final int read = super.read(b, off, len);
+        checkQuotaAndUpdateSize(read);
+        return read;
+    }
 
+    private void checkQuotaAndUpdateSize(final int read) {
         if ((size + read) > quota) {
-            throw new QuotaExceededException(quotaType, quota);
+            // pick exception based on quota type
+            if (quota == sizeLimit) {
+                throw new FileSizeQuotaExceededException(quota);
+            } else {
+                throw new StorageQuotaExceededException(quota);
+            }
         } else if (read >= 0) {
             size += read;
         }
-
-        return read;
     }
 }

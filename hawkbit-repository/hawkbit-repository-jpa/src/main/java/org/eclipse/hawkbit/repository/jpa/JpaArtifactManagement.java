@@ -121,15 +121,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
-        AbstractDbArtifact dbArtifact = null;
         try(final InputStream quotaStream = wrapInQuotaStream(artifactUpload.getInputStream())) {
-
-            dbArtifact = artifactRepository.store(tenantAware.getCurrentTenant(), quotaStream,
+            return artifactRepository.store(tenantAware.getCurrentTenant(), quotaStream,
                     artifactUpload.getFilename(), artifactUpload.getContentType(),
                     new DbArtifactHash(artifactUpload.getProvidedSha1Sum(), artifactUpload.getProvidedMd5Sum(),
                             artifactUpload.getProvidedSha256Sum()));
-
-            return dbArtifact;
         } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {

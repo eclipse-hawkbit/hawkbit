@@ -12,7 +12,7 @@ import java.util.function.ToLongFunction;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +27,9 @@ public final class QuotaHelper {
     private static final Logger LOG = LoggerFactory.getLogger(QuotaHelper.class);
 
     private static final String MAX_ASSIGNMENT_QUOTA_EXCEEDED = "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.";
+
+    private static final String KB = "KB";
+    private static final String MB = "MB";
 
     private QuotaHelper() {
         // no need to instantiate this class
@@ -46,7 +49,7 @@ public final class QuotaHelper {
      * @param parentType
      *            The type of the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -74,7 +77,7 @@ public final class QuotaHelper {
      *            Function to count the entities that are currently assigned to
      *            the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -102,7 +105,7 @@ public final class QuotaHelper {
      *            Function to count the entities that are currently assigned to
      *            the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -119,7 +122,7 @@ public final class QuotaHelper {
             final String parentIdStr = parentId != null ? String.valueOf(parentId) : "<new>";
             LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
                     type, parentType, parentIdStr, limit);
-            throw new QuotaExceededException(type, parentType, parentId, requested, limit);
+            throw new AssignmentQuotaExceededException(type, parentType, parentId, requested, limit);
         }
 
         if (parentId != null && countFct != null) {
@@ -128,7 +131,7 @@ public final class QuotaHelper {
                 LOG.warn(
                         "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
                         requested, type, parentType, parentId, limit, currentCount, type);
-                throw new QuotaExceededException(type, parentType, parentId, requested, limit);
+                throw new AssignmentQuotaExceededException(type, parentType, parentId, requested, limit);
             }
         }
     }
@@ -146,7 +149,27 @@ public final class QuotaHelper {
         if (requested > limit) {
             final String message = String.format(MAX_ASSIGNMENT_QUOTA_EXCEEDED, requested, limit);
             LOG.warn(message);
-            throw new QuotaExceededException(message);
+            final String t = byteValueToReadableString(10);
+            throw new AssignmentQuotaExceededException(message + t);
         }
+    }
+
+    /**
+     * Convert byte values to human readable strings with units
+     * 
+     * Example: 2048 -> "2 KB"
+     *
+     * @param byteValue
+     *            Value to convert in bytes
+     */
+    public static String byteValueToReadableString(final long byteValue) {
+        double outputValue = byteValue / 1024.0;
+        String unit = KB;
+        if (outputValue >= 1024) {
+            outputValue = outputValue / 1024.0;
+            unit = MB;
+        }
+        // We cut decimal places to avoid localization handling
+        return (long) outputValue + " " + unit;
     }
 }
