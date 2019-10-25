@@ -107,7 +107,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     }
 
     private Snippet getRolloutResponseFields(final boolean isArray, final boolean withDetails,
-            final FieldDescriptor... descriptors) throws JsonProcessingException {
+            final FieldDescriptor... descriptors) {
         final String arrayPrefix = getArrayPrefix(isArray);
         final List<FieldDescriptor> allFieldDescriptor = new ArrayList<>();
         allFieldDescriptor.addAll(Arrays.asList(descriptors));
@@ -151,8 +151,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_GROUPS));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.approve")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_APPROVE));
-            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.deny")
-                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
+            allFieldDescriptor.add(
+                    fieldWithPath(arrayPrefix + "_links.deny").description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
         }
 
         return new DocumenationResponseFieldsSnippet(allFieldDescriptor);
@@ -179,25 +179,35 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         testdataFactory.createTargets(20, "targets-");
 
         final String name = "exampleRollout";
+        final String type = "forced";
         final String description = "Rollout for all named targets";
         final int groupSize = 10;
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final String targetFilter = "id==targets-*";
+
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50")
                 .successAction(RolloutGroupSuccessAction.NEXTGROUP, "")
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, "").build();
-        mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
-                .content(JsonBuilder.rollout(name, description, groupSize, dsId, targetFilter, rolloutGroupConditions))
-                .contentType(MediaTypes.HAL_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
+
+
+        mockMvc.perform(
+                post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
+                        .content(JsonBuilder.rollout(name, description, groupSize, dsId, targetFilter,
+                                rolloutGroupConditions, type))
+                        .contentType(MediaTypes.HAL_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
-                .andDo(this.document.document(requestFields(
-                        requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                .andDo(this.document.document(
+                        requestFields(requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                         requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
                                 .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                                 .attributes(key("value").value("0 - 1000")),
+                        requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                                optionalRequestFieldWithPath("type").description(
+                                        MgmtApiModelProperties.ROLLOUT_TYPE).attributes(
+                                                key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),      
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -278,80 +288,84 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
-                .andDo(this.document.document(requestFields(
-                        requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                        requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
-                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
-                                .attributes(key("value").value("0 - 1000")),
-                        requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
-                        requestFieldWithPath("targetFilterQuery")
-                                .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
-                        optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                        optionalRequestFieldWithPath("successCondition")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION),
-                        optionalRequestFieldWithPath("successCondition.condition")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_CONDITION)
-                                .attributes(key("value").value("['threshold']")),
-                        optionalRequestFieldWithPath("successCondition.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_EXP),
-                        optionalRequestFieldWithPath("successAction")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION),
-                        optionalRequestFieldWithPath("successAction.action")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_ACTION)
-                                .attributes(key("value").value("['nextgroup']")),
-                        optionalRequestFieldWithPath("successAction.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_EXP),
-                        optionalRequestFieldWithPath("errorCondition")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION),
-                        optionalRequestFieldWithPath("errorCondition.condition")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_CONDITION)
-                                .attributes(key("value").value("['threshold']")),
-                        optionalRequestFieldWithPath("errorCondition.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_EXP),
-                        optionalRequestFieldWithPath("errorAction")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION),
-                        optionalRequestFieldWithPath("errorAction.action")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_ACTION)
-                                .attributes(key("value").value("['pause']")),
-                        optionalRequestFieldWithPath("errorAction.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP),
+                .andDo(this.document.document(
+                        requestFields(requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                                requestFieldWithPathMandatoryInMultiAssignMode("weight")
+                                        .type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                        .attributes(key("value").value("0 - 1000")),
+                                requestFieldWithPath("distributionSetId")
+                                        .description(MgmtApiModelProperties.ROLLOUT_DS_ID),
+                                requestFieldWithPath("targetFilterQuery")
+                                        .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
+                                optionalRequestFieldWithPath("description")
+                                        .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("successCondition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION),
+                                optionalRequestFieldWithPath("successCondition.condition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_CONDITION)
+                                        .attributes(key("value").value("['threshold']")),
+                                optionalRequestFieldWithPath("successCondition.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_EXP),
+                                optionalRequestFieldWithPath("successAction")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION),
+                                optionalRequestFieldWithPath("successAction.action")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_ACTION)
+                                        .attributes(key("value").value("['nextgroup']")),
+                                optionalRequestFieldWithPath("successAction.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_EXP),
+                                optionalRequestFieldWithPath("errorCondition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION),
+                                optionalRequestFieldWithPath("errorCondition.condition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_CONDITION)
+                                        .attributes(key("value").value("['threshold']")),
+                                optionalRequestFieldWithPath("errorCondition.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_EXP),
+                                optionalRequestFieldWithPath("errorAction")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION),
+                                optionalRequestFieldWithPath("errorAction.action")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_ACTION)
+                                        .attributes(key("value").value("['pause']")),
+                                optionalRequestFieldWithPath("errorAction.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP),
 
-                        requestFieldWithPath("groups").description(MgmtApiModelProperties.ROLLOUT_GROUPS),
-                        requestFieldWithPath("groups[].name").description(ApiModelPropertiesGeneric.NAME),
-                        requestFieldWithPath("groups[].description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                        optionalRequestFieldWithPath("groups[].targetFilterQuery")
-                                .description(MgmtApiModelProperties.ROLLOUT_GROUP_FILTER_QUERY),
-                        optionalRequestFieldWithPath("groups[].targetPercentage")
-                                .description(MgmtApiModelProperties.ROLLOUT_GROUP_TARGET_PERCENTAGE)
-                                .attributes(key("value").value("0..100")),
-                        optionalRequestFieldWithPath("groups[].successCondition")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION),
-                        optionalRequestFieldWithPath("groups[].successCondition.condition")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_CONDITION)
-                                .attributes(key("value").value("['threshold']")),
-                        optionalRequestFieldWithPath("groups[].successCondition.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_EXP),
-                        optionalRequestFieldWithPath("groups[].successAction")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION),
-                        optionalRequestFieldWithPath("groups[].successAction.action")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_ACTION)
-                                .attributes(key("value").value("['nextgroup']")),
-                        optionalRequestFieldWithPath("groups[].successAction.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_EXP),
-                        optionalRequestFieldWithPath("groups[].errorCondition")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION),
-                        optionalRequestFieldWithPath("groups[].errorCondition.condition")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_CONDITION)
-                                .attributes(key("value").value("['threshold']")),
-                        optionalRequestFieldWithPath("groups[].errorCondition.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_EXP),
-                        optionalRequestFieldWithPath("groups[].errorAction")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION),
-                        optionalRequestFieldWithPath("groups[].errorAction.action")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_ACTION)
-                                .attributes(key("value").value("['pause']")),
-                        optionalRequestFieldWithPath("groups[].errorAction.expression")
-                                .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP)),
+                                requestFieldWithPath("groups").description(MgmtApiModelProperties.ROLLOUT_GROUPS),
+                                requestFieldWithPath("groups[].name").description(ApiModelPropertiesGeneric.NAME),
+                                requestFieldWithPath("groups[].description")
+                                        .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("groups[].targetFilterQuery")
+                                        .description(MgmtApiModelProperties.ROLLOUT_GROUP_FILTER_QUERY),
+                                optionalRequestFieldWithPath("groups[].targetPercentage")
+                                        .description(MgmtApiModelProperties.ROLLOUT_GROUP_TARGET_PERCENTAGE)
+                                        .attributes(key("value").value("0..100")),
+                                optionalRequestFieldWithPath("groups[].successCondition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION),
+                                optionalRequestFieldWithPath("groups[].successCondition.condition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_CONDITION)
+                                        .attributes(key("value").value("['threshold']")),
+                                optionalRequestFieldWithPath("groups[].successCondition.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION_EXP),
+                                optionalRequestFieldWithPath("groups[].successAction")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION),
+                                optionalRequestFieldWithPath("groups[].successAction.action")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_ACTION)
+                                        .attributes(key("value").value("['nextgroup']")),
+                                optionalRequestFieldWithPath("groups[].successAction.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_ACTION_EXP),
+                                optionalRequestFieldWithPath("groups[].errorCondition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION),
+                                optionalRequestFieldWithPath("groups[].errorCondition.condition")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_CONDITION)
+                                        .attributes(key("value").value("['threshold']")),
+                                optionalRequestFieldWithPath("groups[].errorCondition.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_CONDITION_EXP),
+                                optionalRequestFieldWithPath("groups[].errorAction")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION),
+                                optionalRequestFieldWithPath("groups[].errorAction.action")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_ACTION)
+                                        .attributes(key("value").value("['pause']")),
+                                optionalRequestFieldWithPath("groups[].errorAction.expression")
+                                        .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP)),
                         getRolloutResponseFields(false, true)));
     }
 
