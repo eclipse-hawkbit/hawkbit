@@ -69,7 +69,7 @@ public class BaseAmqpService {
         return rabbitTemplate.getMessageConverter();
     }
 
-    private static boolean isMessageBodyEmpty(final Message message) {
+    protected static boolean isMessageBodyEmpty(final Message message) {
         return message.getBody() == null || message.getBody().length == 0;
     }
 
