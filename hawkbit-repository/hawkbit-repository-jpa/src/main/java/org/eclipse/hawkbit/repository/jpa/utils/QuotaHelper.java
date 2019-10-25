@@ -28,9 +28,6 @@ public final class QuotaHelper {
 
     private static final String MAX_ASSIGNMENT_QUOTA_EXCEEDED = "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.";
 
-    private static final String KB = "KB";
-    private static final String MB = "MB";
-
     private QuotaHelper() {
         // no need to instantiate this class
     }
@@ -149,27 +146,7 @@ public final class QuotaHelper {
         if (requested > limit) {
             final String message = String.format(MAX_ASSIGNMENT_QUOTA_EXCEEDED, requested, limit);
             LOG.warn(message);
-            final String t = byteValueToReadableString(10);
-            throw new AssignmentQuotaExceededException(message + t);
+            throw new AssignmentQuotaExceededException(message);
         }
-    }
-
-    /**
-     * Convert byte values to human readable strings with units
-     * 
-     * Example: 2048 -> "2 KB"
-     *
-     * @param byteValue
-     *            Value to convert in bytes
-     */
-    public static String byteValueToReadableString(final long byteValue) {
-        double outputValue = byteValue / 1024.0;
-        String unit = KB;
-        if (outputValue >= 1024) {
-            outputValue = outputValue / 1024.0;
-            unit = MB;
-        }
-        // We cut decimal places to avoid localization handling
-        return (long) outputValue + " " + unit;
     }
 }
