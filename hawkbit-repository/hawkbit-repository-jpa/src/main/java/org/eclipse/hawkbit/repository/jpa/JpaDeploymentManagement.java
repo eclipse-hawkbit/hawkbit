@@ -106,7 +106,7 @@ import com.google.common.collect.Lists;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaDeploymentManagement extends JPAActionManagement implements DeploymentManagement {
+public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 

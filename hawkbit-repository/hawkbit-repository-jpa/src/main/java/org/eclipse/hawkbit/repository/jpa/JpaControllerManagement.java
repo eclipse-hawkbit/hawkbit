@@ -110,7 +110,7 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaControllerManagement extends JPAActionManagement implements ControllerManagement {
+public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;

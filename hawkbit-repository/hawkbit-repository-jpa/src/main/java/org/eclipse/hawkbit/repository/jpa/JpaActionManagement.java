@@ -21,12 +21,12 @@ import org.springframework.data.domain.PageRequest;
 /**
  * Implements utility methods for managing {@link Action}s
  */
-public class JPAActionManagement {
+public class JpaActionManagement {
 
     protected final ActionRepository actionRepository;
     protected final RepositoryProperties repositoryProperties;
 
-    protected JPAActionManagement(final ActionRepository actionRepository,
+    protected JpaActionManagement(final ActionRepository actionRepository,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.repositoryProperties = repositoryProperties;
