@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -236,23 +235,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         if (distinctTargetsInRequest < deploymentRequests.size()) {
             throw new MultiAssignmentIsNotEnabledException();
-        }
-    }
-
-    private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
-        // remove bypassing the weight enforcement as soon as weight can be set
-        // via UI
-        final boolean bypassWeightEnforcement = true;
-        final long assignmentsWithWeight = deploymentRequests.stream()
-                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
-        final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
-        final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
-        if (!isMultiAssignmentsEnabled() && containsAssignmentWithWeight) {
-            throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
-            return;
-        } else if (isMultiAssignmentsEnabled() && containsAssignmentWithoutWeight) {
-            throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }
 
