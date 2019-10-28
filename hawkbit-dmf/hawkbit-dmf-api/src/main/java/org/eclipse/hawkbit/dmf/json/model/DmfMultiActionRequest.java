@@ -52,10 +52,11 @@ public class DmfMultiActionRequest {
         elements.add(element);
     }
 
-    public void addElement(final EventTopic topic, final DmfActionRequest action) {
+    public void addElement(final EventTopic topic, final DmfActionRequest action, final int weight) {
         final DmfMultiActionElement element = new DmfMultiActionElement();
         element.setTopic(topic);
         element.setAction(action);
+        element.setWeight(weight);
         addElement(element);
     }
 
@@ -69,6 +70,9 @@ public class DmfMultiActionRequest {
 
         @JsonProperty
         private DmfActionRequest action;
+
+        @JsonProperty
+        private int weight;
 
         public DmfActionRequest getAction() {
             return action;
@@ -89,6 +93,13 @@ public class DmfMultiActionRequest {
             this.topic = actionType;
         }
 
+        public void setWeight(final int weight) {
+            this.weight = weight;
+        }
+
+        public int getWeight() {
+            return weight;
+        }
     }
 
 }

@@ -158,7 +158,6 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             targetFilterQueryManagement
                     .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(setF.getId()));
         });
-
         // target filter query that matches failed bunch of targets
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
                 .query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA.getId()));

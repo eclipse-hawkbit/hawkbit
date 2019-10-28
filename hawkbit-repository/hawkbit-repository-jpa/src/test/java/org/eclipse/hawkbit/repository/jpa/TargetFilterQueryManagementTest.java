@@ -87,13 +87,16 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
                 "TargetFilterQuery");
+
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
                 entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
                 "DistributionSet");
+
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(
                         entityFactory.targetFilterQuery().updateAutoAssign(NOT_EXIST_IDL).ds(set.getId())),
                 "TargetFilterQuery");
+
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
                 entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
                 "DistributionSet");

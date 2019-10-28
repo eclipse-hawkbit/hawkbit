@@ -1890,7 +1890,6 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final JSONArray body = new JSONArray().put(getAssignmentObject(dsId, MgmtActionType.FORCED));
-
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());

@@ -110,16 +110,13 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaControllerManagement implements ControllerManagement {
+public class JpaControllerManagement extends JPAActionManagement implements ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
     @Autowired
     private EntityManager entityManager;
-
-    @Autowired
-    private ActionRepository actionRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -157,10 +154,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private TenantAware tenantAware;
 
-    private final RepositoryProperties repositoryProperties;
-
     JpaControllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
+        super(actionRepository, repositoryProperties);
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
@@ -171,8 +167,6 @@ public class JpaControllerManagement implements ControllerManagement {
         } else {
             queue = null;
         }
-
-        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
@@ -346,23 +340,19 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Optional.empty();
-        }
-
-        // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
-        // DATAJPA-841 issue.
-        return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
-                true);
+    public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
+        return findActiveActionsWithHighestWeight(controllerId, 1).stream().findFirst();
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Page.empty();
-        }
-        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId,
+            final int maxActionCount) {
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return super.getWeightConsideringDefault(action);
     }
 
     @Override
@@ -376,7 +366,7 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public void deleteExistingTarget(@NotEmpty String controllerId) {
+    public void deleteExistingTarget(@NotEmpty final String controllerId) {
         final Target target = targetRepository.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
          targetRepository.deleteById(target.getId());

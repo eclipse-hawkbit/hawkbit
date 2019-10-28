@@ -635,6 +635,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DeploymentRequest targetToDS0 = DeploymentManagement
                 .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).setWeight(78).build();
+
         final DeploymentRequest targetToDS1 = DeploymentManagement
                 .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).setWeight(565).build();
 
@@ -666,6 +667,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         final List<DeploymentRequest> twoEqualAssignmentsWithWeight = Collections.nCopies(2,
                 DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(555).build());
+
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignmentsWithWeight)))
                 .isEqualTo(2);
     }

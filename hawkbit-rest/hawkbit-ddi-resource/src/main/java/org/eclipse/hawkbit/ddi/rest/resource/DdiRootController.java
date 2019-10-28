@@ -149,7 +149,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        final Action action = controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null);
+        final Action action = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         checkAndCancelExpiredAction(action);
 

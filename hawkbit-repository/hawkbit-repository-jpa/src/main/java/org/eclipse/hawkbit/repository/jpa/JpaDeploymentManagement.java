@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -44,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -104,7 +106,7 @@ import com.google.common.collect.Lists;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaDeploymentManagement implements DeploymentManagement {
+public class JpaDeploymentManagement extends JPAActionManagement implements DeploymentManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
@@ -125,7 +127,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private final EntityManager entityManager;
-    private final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -147,9 +148,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
+            final RepositoryProperties repositoryProperties) {
+        super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
-        this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
@@ -197,7 +199,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .validate(deploymentRequests);
-
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -235,6 +236,23 @@ public class JpaDeploymentManagement implements DeploymentManagement {
                 .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
         if (distinctTargetsInRequest < deploymentRequests.size()) {
             throw new MultiAssignmentIsNotEnabledException();
+        }
+    }
+
+    private void validateOnlineAssignment(final List<DeploymentRequest> deploymentRequests) {
+        // remove bypassing the weight enforcement as soon as weight can be set
+        // via UI
+        final boolean bypassWeightEnforcement = true;
+        final long assignmentsWithWeight = deploymentRequests.stream()
+                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
+        final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
+        final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
+        if (!isMultiAssignmentsEnabled() && containsAssignmentWithWeight) {
+            throw new MultiAssignmentIsNotEnabledException();
+        } else if (bypassWeightEnforcement) {
+            return;
+        } else if (isMultiAssignmentsEnabled() && containsAssignmentWithoutWeight) {
+            throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }
 
@@ -661,6 +679,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
         return actionRepository.findByActiveAndTarget(pageable, controllerId, false);
+    }
+
+    @Override
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return super.getWeightConsideringDefault(action);
     }
 
     @Override

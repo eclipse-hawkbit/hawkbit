@@ -229,8 +229,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public String toString() {
         return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
-                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight().orElse(null) + ", isActive="
-                + isActive() + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + "]";
+                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive()
+                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + "]";
     }
 
     @Override

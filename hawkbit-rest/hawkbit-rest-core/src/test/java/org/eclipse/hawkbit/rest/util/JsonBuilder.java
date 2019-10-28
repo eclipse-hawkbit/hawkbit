@@ -449,18 +449,20 @@ public abstract class JsonBuilder {
 
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null,
+                null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final List<RolloutGroup> groups) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null,
+                null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-             final String type) {
+            final String type) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
                 null);
     }

@@ -191,7 +191,6 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, "").build();
 
-
         mockMvc.perform(
                 post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
                         .content(JsonBuilder.rollout(name, description, groupSize, dsId, targetFilter,
@@ -199,15 +198,14 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                         .contentType(MediaTypes.HAL_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
-                .andDo(this.document.document(
-                        requestFields(requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                .andDo(this.document.document(requestFields(
+                        requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                         requestFieldWithPathMandatoryInMultiAssignMode("weight").type(JsonFieldType.NUMBER)
                                 .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                                 .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                                optionalRequestFieldWithPath("type").description(
-                                        MgmtApiModelProperties.ROLLOUT_TYPE).attributes(
-                                                key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),      
+                        optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ROLLOUT_TYPE)
+                                .attributes(key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -328,7 +326,6 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                         .attributes(key("value").value("['pause']")),
                                 optionalRequestFieldWithPath("errorAction.expression")
                                         .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP),
-
                                 requestFieldWithPath("groups").description(MgmtApiModelProperties.ROLLOUT_GROUPS),
                                 requestFieldWithPath("groups[].name").description(ApiModelPropertiesGeneric.NAME),
                                 requestFieldWithPath("groups[].description")
