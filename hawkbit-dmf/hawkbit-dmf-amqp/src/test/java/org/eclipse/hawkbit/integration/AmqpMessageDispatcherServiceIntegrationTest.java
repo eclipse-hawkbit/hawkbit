@@ -244,8 +244,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 .getElements();
     }
 
-    // TODO create action with non default weight
-
     @Test
     @Description("Handle cancelation process of an action in multi assignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -320,8 +318,8 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         registerAndAssertTargetWithExistingTenant(controllerId);
         final Long dsId = testdataFactory.createDistributionSet(UUID.randomUUID().toString()).getId();
 
-        final Long actionId1 = getFirstAssignedAction(
-                assignDistributionSet(dsId, controllerId, DEFAULT_TEST_WEIGHT)).getId();
+        final Long actionId1 = getFirstAssignedAction(assignDistributionSet(dsId, controllerId, DEFAULT_TEST_WEIGHT))
+                .getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         final Long actionId2 = getFirstAssignedAction(assignDistributionSet(dsId, controllerId, DEFAULT_TEST_WEIGHT))
                 .getId();
@@ -343,9 +341,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Long assignNewDsToTarget(final String controllerId, final Integer weight) {
         final DistributionSet ds = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(),
-                Collections.singletonList(controllerId), ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
-                weight));
+        final Long actionId = getFirstAssignedActionId(
+                assignDistributionSet(ds.getId(), Collections.singletonList(controllerId), ActionType.FORCED,
+                        RepositoryModelConstants.NO_FORCE_TIME, weight));
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         return actionId;
     }
