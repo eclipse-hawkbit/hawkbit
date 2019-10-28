@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository;
  * Helper class that provides simple conversion of byte values to readable
  * strings
  */
-public class SizeConversionHelper {
+public final class SizeConversionHelper {
 
     private static final String KB = "KB";
     private static final String MB = "MB";
