@@ -217,11 +217,7 @@ public interface TargetFilterQueryManagement {
     TargetFilterQuery update(@NotNull @Valid TargetFilterQueryUpdate update);
 
     /**
-<<<<<<< HEAD
      * Updates the auto assign settings of an {@link TargetFilterQuery}.
-=======
-     * Updates the the auto assign settings of an {@link TargetFilterQuery}.
->>>>>>> refs/remotes/origin/feature_expose_action_prioritisation_to_targets
      * 
      * @param autoAssignDistributionSetUpdate
      *            the new auto assignment
