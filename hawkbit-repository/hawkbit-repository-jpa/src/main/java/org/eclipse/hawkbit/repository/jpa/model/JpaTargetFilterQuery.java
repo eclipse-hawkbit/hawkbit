@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Optional;
+
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -139,8 +141,8 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     }
 
     @Override
-    public Integer getAutoAssignWeight() {
-        return autoAssignWeight;
+    public Optional<Integer> getAutoAssignWeight() {
+        return Optional.ofNullable(autoAssignWeight);
     }
 
     public void setAutoAssignWeight(final Integer weight) {

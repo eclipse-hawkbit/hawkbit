@@ -365,7 +365,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_A
 If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or CANCEL_DOWNLOAD
  by hawkBit to initialize update, download, or cancel task(s).
  
- With weight, one can set the priority to the action. Higher the weight, more is the priority of an action.
+ With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
 Header  | Description                      | Type                                | Mandatory
 ------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------

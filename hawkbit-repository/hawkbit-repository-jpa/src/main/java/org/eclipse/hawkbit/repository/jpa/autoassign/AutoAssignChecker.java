@@ -146,7 +146,7 @@ public class AutoAssignChecker {
                 Isolation.READ_COMMITTED.value(), status -> {
                     final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(
                             targetFilterQuery.getQuery(), dsId, targetFilterQuery.getAutoAssignActionType(),
-                            targetFilterQuery.getAutoAssignWeight(), PAGE_SIZE);
+                            targetFilterQuery.getAutoAssignWeight().orElse(null), PAGE_SIZE);
                     final int count = deploymentRequests.size();
                     if (count > 0) {
                         deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage);

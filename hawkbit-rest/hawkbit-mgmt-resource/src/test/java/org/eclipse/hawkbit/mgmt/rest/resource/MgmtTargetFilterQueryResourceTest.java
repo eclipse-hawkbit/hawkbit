@@ -537,7 +537,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final List<TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
         assertThat(filters).hasSize(1);
-        assertThat(filters.get(0).getAutoAssignWeight()).isEqualTo(45);
+        assertThat(filters.get(0).getAutoAssignWeight().get()).isEqualTo(45);
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {

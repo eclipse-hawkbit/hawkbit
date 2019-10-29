@@ -93,8 +93,8 @@ public interface ControllerManagement {
             @NotNull Collection<Long> moduleId);
 
     /**
-     * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
-     * . No state changes.
+     * Simple addition of a new {@link ActionStatus} entry to the
+     * {@link Action}. No state changes.
      *
      * @param create
      *            to add to the action
@@ -136,8 +136,8 @@ public interface ControllerManagement {
     Action addUpdateActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
-     * Retrieves active {@link Action} with highest priority that is assigned to a
-     * {@link Target}.
+     * Retrieves active {@link Action} with highest priority that is assigned to
+     * a {@link Target}.
      * 
      * For performance reasons this method does not throw
      * {@link EntityNotFoundException} in case target with given controllerId
@@ -219,10 +219,11 @@ public interface ControllerManagement {
     Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address);
 
     /**
-     * Register new target in the repository (plug-and-play) and in case it already
-     * exists updates {@link Target#getAddress()} and
-     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and switches if
-     * {@link TargetUpdateStatus#UNKNOWN} to {@link TargetUpdateStatus#REGISTERED}.
+     * Register new target in the repository (plug-and-play) and in case it
+     * already exists updates {@link Target#getAddress()} and
+     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and
+     * switches if {@link TargetUpdateStatus#UNKNOWN} to
+     * {@link TargetUpdateStatus#REGISTERED}.
      *
      * @param controllerId
      *            reference
@@ -236,8 +237,8 @@ public interface ControllerManagement {
     Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address, String name);
 
     /**
-     * Retrieves last {@link Action} for a download of an artifact of given module
-     * and target if exists and is not canceled.
+     * Retrieves last {@link Action} for a download of an artifact of given
+     * module and target if exists and is not canceled.
      *
      * @param controllerId
      *            to look for

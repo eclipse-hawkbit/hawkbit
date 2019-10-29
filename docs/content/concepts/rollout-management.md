@@ -67,7 +67,7 @@ While this feature provides more flexibility to the user and enables new use-cas
 
 **Minor**
 
-* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the most urgent open action (according to the weight of the actions). 
+* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the next action which has the highest priority in the list of open actions(according to their weight property). 
 * All information regarding the currently assigned or installed Distribution Set does only respect the last assignment, as well as the last successfully installed Distribution set. This also affects:
     * Pinning a target or Distribution Set in Deployment View.
     * Statistics about installed or assigned Distribution Sets.

@@ -493,7 +493,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a")
                 .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(Action.WEIGHT_MAX)).getId();
-        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).isEqualTo(Action.WEIGHT_MAX);
+        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight().get())
+                .isEqualTo(Action.WEIGHT_MAX);
 
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
@@ -505,6 +506,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MAX));
         targetFilterQueryManagement.updateAutoAssignDS(
                 entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN));
-        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).isEqualTo(Action.WEIGHT_MIN);
+        assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight().get())
+                .isEqualTo(Action.WEIGHT_MIN);
     }
 }
