@@ -8,6 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -109,7 +118,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     /**
      * Constructor for ArtifactDetailsLayout
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @param eventBus
@@ -264,19 +273,87 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Button generateCell(final Table source, final Object itemId, final Object columnId) {
-                final String fileName = (String) table.getContainerDataSource().getItem(itemId)
-                        .getItemProperty(PROVIDED_FILE_NAME).getValue();
-                final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon",
-                        true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
-                deleteIcon.setData(itemId);
-                deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
-                return deleteIcon;
+            public HorizontalLayout generateCell(final Table source, final Object itemId, final Object columnId) {
+                HorizontalLayout actioncellLayout = new HorizontalLayout();
+                actioncellLayout.addComponent(getArtifactDeleteButton(table, itemId));
+                actioncellLayout.addComponent(getArtifactDownloadButton(table, itemId));
+                actioncellLayout.setImmediate(true);
+                return actioncellLayout;
             }
         });
+    }
 
+    private Button getArtifactDeleteButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button deleteIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
+                i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
+                true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+        deleteIcon.setData(itemId);
+        deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
+        return deleteIcon;
+    }
+
+    private Button getArtifactDownloadButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button downloadIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.ARTIFACT_FILE_DOWNLOAD_ICON, "",
+                ArtifactDetailsLayout.this.i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD),
+                ValoTheme.BUTTON_TINY + " " + "blueicon", true, FontAwesome.DOWNLOAD, SPUIButtonStyleNoBorder.class);
+        downloadIcon.setData(itemId);
+        downloadIcon.addClickListener(event -> downloadArtifact((Long) itemId, fileName));
+        return downloadIcon;
+    }
+
+    private void downloadArtifact(final Long id, final String fileName) {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.getMessage("caption.download.artifact.confirmbox"),
+                i18n.getMessage("message.download.artifact", fileName),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_YES),
+                i18n.getMessage(UIMessageIdProvider.BUTTON_NO), yes -> {
+                    if (yes) {
+                        Optional<Artifact> artifact = this.artifactManagement.get(id);
+
+                        Optional<AbstractDbArtifact> file = artifactManagement
+                                .loadArtifactBinary(artifact.get().getSha1Hash());
+                        if (file.isPresent()) {
+                            FileChannel writeChannel = null;
+                            ReadableByteChannel readChannel = null;
+                            FileOutputStream fileOutputStream = null;
+                            try {
+                                String home = System.getProperty("user.home");
+                                String fileDownloadLoc = home + "\\Downloads\\" + artifact.get().getFilename();
+                                File outputFile = new File(fileDownloadLoc);
+                                InputStream inputStream = file.get().getFileInputStream();
+                                readChannel = Channels.newChannel(inputStream);
+                                fileOutputStream = new FileOutputStream(outputFile);
+                                writeChannel = fileOutputStream.getChannel();
+                                writeChannel.transferFrom(readChannel, 0, Long.MAX_VALUE);
+                                uINotification.displaySuccess(
+                                        i18n.getMessage("message.artifact.downloaded", fileDownloadLoc));
+                            } catch (Exception e) {
+                                uINotification
+                                        .displayValidationError(i18n.getMessage("message.artifact.downloaded.failure"));
+                            } finally {
+                                try {
+                                    if (writeChannel != null) {
+                                        writeChannel.close();
+                                    }
+                                    if (readChannel != null) {
+                                        readChannel.close();
+                                    }
+                                } catch (IOException e) {
+                                    uINotification.displayValidationError(
+                                            i18n.getMessage("message.artifact.downloaded.failure"));
+                                }
+                            }
+                        }
+                    }
+                });
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {

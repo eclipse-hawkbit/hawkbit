@@ -383,6 +383,10 @@ public final class UIComponentIdProvider {
      */
     public static final String UPLOAD_FILE_DELETE_ICON = "upload.file.delete.button";
     /**
+     * Artifact - file download button id
+     */
+    public static final String ARTIFACT_FILE_DOWNLOAD_ICON = "artifact.file.download.button";
+    /**
      * ID-Dist.
      */
     public static final String UPLOAD_SOFTWARE_MODULE_TABLE = "upload.swModule.table";
