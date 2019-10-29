@@ -190,7 +190,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("Verify payload of multi action messages.")
     public void assertMultiActionMessagePayloads() {
-        final int expectedWeightIfNotSet = 1000;
+        final int expectedWeightIfNotSet = 500;
         final int weight1 = 600;
         final String controllerId = UUID.randomUUID().toString();
         registerAndAssertTargetWithExistingTenant(controllerId);
