@@ -12,12 +12,12 @@ import java.util.function.ToLongFunction;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class to check assignment quotas.
+ * Helper class to check quotas.
  */
 public final class QuotaHelper {
 
@@ -25,6 +25,8 @@ public final class QuotaHelper {
      * Class logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(QuotaHelper.class);
+
+    private static final String MAX_ASSIGNMENT_QUOTA_EXCEEDED = "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.";
 
     private QuotaHelper() {
         // no need to instantiate this class
@@ -44,7 +46,7 @@ public final class QuotaHelper {
      * @param parentType
      *            The type of the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -72,7 +74,7 @@ public final class QuotaHelper {
      *            Function to count the entities that are currently assigned to
      *            the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -100,7 +102,7 @@ public final class QuotaHelper {
      *            Function to count the entities that are currently assigned to
      *            the parent entity.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the assignment operation would cause the quota to be
      *             exceeded
      */
@@ -117,7 +119,7 @@ public final class QuotaHelper {
             final String parentIdStr = parentId != null ? String.valueOf(parentId) : "<new>";
             LOG.warn("Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}.", requested,
                     type, parentType, parentIdStr, limit);
-            throw new QuotaExceededException(type, parentType, parentId, requested, limit);
+            throw new AssignmentQuotaExceededException(type, parentType, parentId, requested, limit);
         }
 
         if (parentId != null && countFct != null) {
@@ -126,7 +128,7 @@ public final class QuotaHelper {
                 LOG.warn(
                         "Cannot assign {} {} entities to {} '{}' because of the configured quota limit {}. Currently, there are {} {} entities assigned.",
                         requested, type, parentType, parentId, limit, currentCount, type);
-                throw new QuotaExceededException(type, parentType, parentId, requested, limit);
+                throw new AssignmentQuotaExceededException(type, parentType, parentId, requested, limit);
             }
         }
     }
@@ -142,10 +144,9 @@ public final class QuotaHelper {
      */
     public static void assertAssignmentRequestSizeQuota(final long requested, final long limit) {
         if (requested > limit) {
-            final String message = String.format(
-                    "Quota exceeded: Cannot assign %s entities at once. The maximum is %s.", requested, limit);
+            final String message = String.format(MAX_ASSIGNMENT_QUOTA_EXCEEDED, requested, limit);
             LOG.warn(message);
-            throw new QuotaExceededException(message);
+            throw new AssignmentQuotaExceededException(message);
         }
     }
 }

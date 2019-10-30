@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -67,7 +67,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -98,7 +98,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -152,7 +152,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * 

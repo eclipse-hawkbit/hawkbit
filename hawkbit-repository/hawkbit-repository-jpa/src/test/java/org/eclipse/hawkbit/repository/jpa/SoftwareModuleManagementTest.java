@@ -24,7 +24,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -676,7 +676,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
                         .create(module.getId()).key("k" + maxMetaData).value("v" + maxMetaData)));
 
@@ -687,7 +687,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             create.add(entityFactory.softwareModuleMetadata().create(module2.getId()).key("k" + i).value("v" + i));
         }
         // quota exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(create));
 
         // add some meta data entries
@@ -704,7 +704,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             create2.add(entityFactory.softwareModuleMetadata().create(module3.getId()).key("kk" + i).value("vv" + i));
         }
         // quota exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> softwareModuleManagement.createMetaData(create2));
 
     }

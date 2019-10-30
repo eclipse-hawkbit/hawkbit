@@ -34,7 +34,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -210,7 +210,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonBuilder.ids(Collections.singletonList(moduleIDs.get(moduleIDs.size() - 1)))))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
         // verify quota is also enforced for bulk uploads
@@ -218,7 +218,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
                 .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(moduleIDs)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
         // verify size is still 0

@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -67,7 +67,7 @@ public interface DistributionSetManagement
      *             if {@link SoftwareModule#getType()} is not supported by this
      *             {@link DistributionSet#getType()}.
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModule}s is exceeded
      *             for the addressed {@link DistributionSet}.
      */
@@ -109,7 +109,7 @@ public interface DistributionSetManagement
      *             in case one of the meta data entry already exists for the
      *             specific key
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link MetaData} entries is exceeded
      *             for the addressed {@link DistributionSet}
      */
