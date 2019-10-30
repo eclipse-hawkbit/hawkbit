@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreat
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -112,7 +112,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as there is no distribution set
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
                         .name("testfilter").autoAssignDistributionSet(set.getId()).query("name==target*")));
     }
@@ -282,7 +282,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         // assigning a distribution set is supposed to fail as the query
         // addresses too many targets
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
                 .updateAutoAssignDS(targetFilterQuery.getId(), distributionSet.getId()));
     }
 
@@ -300,7 +300,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .create().name("testfilter").autoAssignDistributionSet(set.getId()).query("name==foo"));
 
         // update with a query string that addresses too many targets
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
                 .update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query("name==target*")));
     }
 

@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -1348,7 +1348,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
                         .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
                 amountGroups, conditions));
@@ -1376,7 +1376,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .targetPercentage(100.0F);
 
         // group1 exceeds the quota
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
                         .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
                 Arrays.asList(group1, group2), conditions));
@@ -1388,7 +1388,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .targetPercentage(100.0F);
 
         // group4 exceeds the quota
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
                         .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet),
                 Arrays.asList(group3, group4), conditions));
@@ -1571,7 +1571,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate rollout = generateTargetsAndRollout(rolloutName, targets);
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> rolloutManagement.create(rollout, maxGroups + 1, conditions))
                 .withMessageContaining("not be greater than " + maxGroups);
 
