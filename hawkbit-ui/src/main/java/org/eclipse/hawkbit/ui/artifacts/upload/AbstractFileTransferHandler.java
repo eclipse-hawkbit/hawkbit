@@ -21,10 +21,10 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+
 import com.vaadin.ui.UI;
 
 /**
@@ -184,6 +185,14 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         eventBus.publish(this, fileUploadProgress);
     }
 
+    protected void publishUploadFailedEvent(final FileUploadId fileUploadId) {
+        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
+                FileUploadStatus.UPLOAD_FAILED,
+                StringUtils.isBlank(failureReason) ? i18n.getMessage(MESSAGE_UPLOAD_FAILED) : failureReason);
+        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
+        eventBus.publish(this, fileUploadProgress);
+    }
+
     protected void publishArtifactsChanged(final FileUploadId fileUploadId) {
         eventBus.publish(this,
                 new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, fileUploadId.getSoftwareModuleId()));
@@ -194,11 +203,14 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         LOG.info("Upload failed for file {} due to reason: {}, exception: {}", fileUploadId, failureReason,
                 uploadException.getMessage());
 
-        final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
-                FileUploadStatus.UPLOAD_FAILED,
-                StringUtils.isBlank(failureReason) ? i18n.getMessage(MESSAGE_UPLOAD_FAILED) : failureReason);
-        artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
+        publishUploadFailedEvent(fileUploadId);
+        publishUploadFinishedEvent(fileUploadId);
+    }
+
+    protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId) {
+        LOG.info("Upload failed for file {} due to reason: {}", fileUploadId, failureReason);
+
+        publishUploadFailedEvent(fileUploadId);
         publishUploadFinishedEvent(fileUploadId);
     }
 
@@ -248,9 +260,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
         /**
          * a lock object is used here that is propagated down from
-         * {@link org.eclipse.hawkbit.ui.artifacts.UploadArtifactView}. It ensures that from within the same UI instance
-         * all uploads are executed sequentially to avoid issues that occur when multiple files are processed at the
-         * same time (e.g. regarding quota checks)
+         * {@link org.eclipse.hawkbit.ui.artifacts.UploadArtifactView}. It
+         * ensures that from within the same UI instance all uploads are
+         * executed sequentially to avoid issues that occur when multiple files
+         * are processed at the same time (e.g. regarding quota checks)
          */
         @Override
         public void run() {

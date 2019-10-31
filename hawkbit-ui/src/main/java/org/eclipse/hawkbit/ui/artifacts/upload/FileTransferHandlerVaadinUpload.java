@@ -16,6 +16,7 @@ import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
+import org.eclipse.hawkbit.repository.SizeConversionHelper;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -147,14 +148,15 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
      */
     @Override
     public void updateProgress(final long readBytes, final long contentLength) {
-        if (readBytes > maxSize || contentLength > maxSize) {
-            LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            interruptUploadDueToFileSizeExceeded(maxSize);
+        if (isUploadInterrupted()) {
+            publishUploadFailedAndFinishedEvent(fileUploadId);
             return;
         }
-        if (isUploadInterrupted()) {
-            // Upload interruption is delayed maybe another event is fired
-            // before
+
+        if (readBytes > maxSize || contentLength > maxSize) {
+            final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
+            LOG.error("User tried to upload more than was allowed ({}).", maxSizeText);
+            interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
             return;
         }
 
