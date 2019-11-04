@@ -329,7 +329,7 @@ public class HonoDeviceSync {
     }
 
     private String getDeviceName(IdentifiableHonoDevice honoDevice) {
-        if (targetNameFieldInDeviceExtension != null) {
+        if (targetNameFieldInDeviceExtension != null && !targetNameFieldInDeviceExtension.isEmpty()) {
             Object ext = honoDevice.getDevice().getExt();
             if (ext instanceof JsonNode) {
                 JsonNode nameValue = ((JsonNode) ext).get(targetNameFieldInDeviceExtension);
