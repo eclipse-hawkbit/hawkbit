@@ -167,7 +167,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected void publishUploadFinishedEvent(final FileUploadId fileUploadId) {
-        LOG.info("Upload finished for file {}", fileUploadId);
+        LOG.debug("Upload finished for file {}", fileUploadId);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FINISHED);
         eventBus.publish(this, fileUploadProgress);
@@ -182,6 +182,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId) {
+        LOG.info("Upload failed for file {} due to reason: {}", fileUploadId, failureReason);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
                 StringUtils.isBlank(failureReason) ? i18n.getMessage(MESSAGE_UPLOAD_FAILED) : failureReason);
@@ -194,18 +195,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, fileUploadId.getSoftwareModuleId()));
     }
 
-    protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId,
-            final Exception uploadException) {
-        LOG.info("Upload failed for file {} due to reason: {}, exception: {}", fileUploadId, failureReason,
-                uploadException.getMessage());
-
-        publishUploadFailedEvent(fileUploadId);
-        publishUploadFinishedEvent(fileUploadId);
-    }
-
     protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId) {
-        LOG.info("Upload failed for file {} due to reason: {}", fileUploadId, failureReason);
-
         publishUploadFailedEvent(fileUploadId);
         publishUploadFinishedEvent(fileUploadId);
     }
@@ -278,7 +268,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 LOG.debug("Upload failed due to assignment quota exceeded:", e);
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed();
-                publishUploadFailedAndFinishedEvent(fileUploadId, e);
+                publishUploadFailedAndFinishedEvent(fileUploadId);
                 LOG.error("Failed to transfer file to repository", e);
             } finally {
                 tryToCloseIOStream(inputStream);
@@ -291,7 +281,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 throw new ArtifactUploadFailedException();
             }
             final String filename = fileUploadId.getFilename();
-            LOG.info("Transfering file {} directly to repository", filename);
+            LOG.debug("Transfering file {} directly to repository", filename);
             final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
             if (isUploadInterrupted()) {
                 handleUploadFailure(artifact);
@@ -308,7 +298,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
                 return Optional.ofNullable(artifactManagement.create(new ArtifactUpload(inputStream,
                         fileUploadId.getSoftwareModuleId(), filename, null, null, true, mimeType, -1)));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
-                LOG.error("Failed to transfer file to repository", e);
+                LOG.debug("Failed to transfer file to repository", e);
                 return Optional.empty();
             }
         }

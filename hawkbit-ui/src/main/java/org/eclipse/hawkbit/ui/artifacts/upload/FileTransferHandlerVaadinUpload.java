@@ -83,16 +83,16 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             interruptUploadDueToDuplicateFile();
             event.getUpload().interruptUpload();
         } else {
-            LOG.info("Uploading file {}", fileUploadId);
+            LOG.debug("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
             if (RegexCharacterCollection.stringContainsCharacter(event.getFilename(), ILLEGAL_FILENAME_CHARACTERS)) {
-                LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
+                LOG.debug("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
                         fileUploadId);
                 interruptUploadDueToIllegalFilename();
                 event.getUpload().interruptUpload();
             } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
-                LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
+                LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
                 interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();
             }
@@ -135,7 +135,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
             interruptUploadDueToUploadFailed();
-            publishUploadFailedAndFinishedEvent(fileUploadId, e);
+            publishUploadFailedAndFinishedEvent(fileUploadId);
             return ByteStreams.nullOutputStream();
         }
         return outputStream;
@@ -155,7 +155,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
         if (readBytes > maxSize || contentLength > maxSize) {
             final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
-            LOG.error("User tried to upload more than was allowed ({}).", maxSizeText);
+            LOG.debug("User tried to upload more than was allowed ({}).", maxSizeText);
             interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
             return;
         }
@@ -202,7 +202,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         if (!isUploadInterrupted()) {
             interruptUploadDueToUploadFailed();
         }
-        publishUploadFailedAndFinishedEvent(fileUploadId, event.getReason());
+        LOG.debug("Upload of file {} failed due to following exception: {}", fileUploadId, event.getReason());
+        publishUploadFailedAndFinishedEvent(fileUploadId);
     }
 
     @Override

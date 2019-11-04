@@ -66,10 +66,10 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         assertStateConsistency(fileUploadId, event.getFileName());
 
         if (RegexCharacterCollection.stringContainsCharacter(event.getFileName(), ILLEGAL_FILENAME_CHARACTERS)) {
-            LOG.info("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
+            LOG.debug("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
             interruptUploadDueToIllegalFilename();
         } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
-            LOG.info("File {} already contained in Software Module {}", fileUploadId.getFilename(),
+            LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(),
                     selectedSoftwareModule);
             interruptUploadDueToDuplicateFile();
         }
@@ -94,7 +94,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
             interruptUploadDueToUploadFailed();
-            publishUploadFailedAndFinishedEvent(fileUploadId, e);
+            publishUploadFailedAndFinishedEvent(fileUploadId);
             return ByteStreams.nullOutputStream();
         }
         return outputStream;
@@ -126,7 +126,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
-            LOG.error("User tried to upload more than was allowed ({}).", maxSizeText);
+            LOG.debug("User tried to upload more than was allowed ({}).", maxSizeText);
             interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
             return;
         }
@@ -159,7 +159,8 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         if (!isUploadInterrupted()) {
             interruptUploadDueToUploadFailed();
         }
-        publishUploadFailedAndFinishedEvent(fileUploadId, event.getException());
+        LOG.debug("Streaming of file {} failed due to following exception: {}", fileUploadId, event.getException());
+        publishUploadFailedAndFinishedEvent(fileUploadId);
     }
 
     @Override
