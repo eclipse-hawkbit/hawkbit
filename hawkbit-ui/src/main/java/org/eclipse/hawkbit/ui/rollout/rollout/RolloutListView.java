@@ -78,7 +78,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     public AbstractOrderedLayout createGridHeader() {
         return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), rolloutManagement,
                 targetManagement, uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
     }
 
     @Override

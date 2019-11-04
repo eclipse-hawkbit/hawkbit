@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -52,6 +53,7 @@ import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayo
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
+import org.eclipse.hawkbit.ui.tenantconfiguration.repository.MultiAssignmentsConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -180,6 +182,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField approvalRemarkField;
 
+    private TextField rolloutWeight;
+
+    private final MultiAssignmentsConfigurationItem multiAssignmentsConfigurationItem;
+
     private final transient RolloutGroupConditions defaultRolloutGroupConditions;
 
     private final NullValidator nullValidator = new NullValidator(null, false);
@@ -189,7 +195,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement) {
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
@@ -202,6 +209,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(tenantConfigurationManagement,
+                this.i18n);
 
         defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement);
@@ -468,7 +477,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         setSpacing(true);
         setSizeUndefined();
-        setRows(8);
+        setRows(9);
         setColumns(4);
         setStyleName("marginTop");
         setColumnExpandRatio(3, 1);
@@ -488,22 +497,29 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
-        addComponent(getLabel("textfield.description"), 0, 3);
-        addComponent(description, 1, 3, 1, 3);
+        if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+            addComponent(getMandatoryLabel("textfield.weight"), 0, 3);
+            addComponent(rolloutWeight, 1, 3);
+            rolloutWeight.addValidator(nullValidator);
+        }
 
-        addComponent(groupsLegendLayout, 3, 0, 3, 3);
-        addComponent(groupsPieChart, 2, 0, 2, 3);
+        addComponent(getLabel("textfield.description"), 0, 4);
+        addComponent(description, 1, 4, 1, 4);
 
-        addComponent(getMandatoryLabel("caption.rollout.action.type"), 0, 4);
-        addComponent(actionTypeOptionGroupLayout, 1, 4, 3, 4);
+        // TODO : check where the charts appear and if they are aligned right!!
+        addComponent(groupsLegendLayout, 3, 0, 3, 4);
+        addComponent(groupsPieChart, 2, 0, 2, 4);
 
-        addComponent(getMandatoryLabel("caption.rollout.start.type"), 0, 5);
-        addComponent(autoStartOptionGroupLayout, 1, 5, 3, 5);
+        addComponent(getMandatoryLabel("caption.rollout.action.type"), 0, 5);
+        addComponent(actionTypeOptionGroupLayout, 1, 5, 3, 5);
 
-        addComponent(groupsDefinitionTabs, 0, 6, 3, 6);
+        addComponent(getMandatoryLabel("caption.rollout.start.type"), 0, 6);
+        addComponent(autoStartOptionGroupLayout, 1, 6, 3, 6);
 
-        addComponent(approvalLabel, 0, 7);
-        addComponent(approvalButtonsLayout, 1, 7, 3, 7);
+        addComponent(groupsDefinitionTabs, 0, 7, 3, 7);
+
+        addComponent(approvalLabel, 0, 8);
+        addComponent(approvalButtonsLayout, 1, 8, 3, 8);
 
         rolloutName.focus();
     }
@@ -545,6 +561,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         targetFilterQueryCombo = createTargetFilterQueryCombo();
         populateTargetFilterQuery();
+
+        rolloutWeight = createRolloutWeightField();
 
         noOfGroups = createNoOfGroupsField();
         groupSizeLabel = createCountLabel();
@@ -909,6 +927,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         return rolloutNameField;
     }
 
+    private TextField createRolloutWeightField() {
+        final TextField rolloutWeightField = createIntegerTextField("textfield.weight",
+                UIComponentIdProvider.ROLLOUT_WEIGHT_FIELD_ID);
+        rolloutWeightField.addValidator(new WeightFieldValidator());
+        rolloutWeightField.setMaxLength(4);
+        return rolloutWeightField;
+    }
+
     class ErrorThresholdOptionValidator implements Validator {
         private static final long serialVersionUID = 1L;
 
@@ -986,6 +1012,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     final String msg = i18n.getMessage(MESSAGE_ROLLOUT_MAX_GROUP_SIZE_EXCEEDED, maxGroupSize);
                     throw new InvalidValueException(msg);
                 }
+            }
+        }
+    }
+
+    class WeightFieldValidator implements Validator {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void validate(final Object value) {
+            if (value != null) {
+                new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 1000), 0, 1000)
+                        .validate(Integer.valueOf(value.toString()));
             }
         }
     }

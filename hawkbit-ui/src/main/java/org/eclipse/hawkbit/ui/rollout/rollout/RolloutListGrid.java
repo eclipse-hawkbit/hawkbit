@@ -170,7 +170,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         this.tenantConfigManagement = tenantConfigManagement;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
         alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);

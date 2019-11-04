@@ -955,6 +955,10 @@ public final class UIComponentIdProvider {
      */
     public static final String ROLLOUT_NAME_FIELD_ID = "rollout.name.field.id";
     /**
+     * Rollout text field weight id.
+     */
+    public static final String ROLLOUT_WEIGHT_FIELD_ID = "rollout.weight.field.id";
+    /**
      * Rollout number of groups id.
      */
     public static final String ROLLOUT_NO_OF_GROUPS_ID = "rollout.no.ofgroups.id";
