@@ -130,10 +130,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         interruptUploadAndSetReason(i18n.getMessage("message.no.duplicateFiles"));
     }
 
-    protected void interruptUploadDueToFileSizeExceeded(final long maxSize) {
-        interruptUploadAndSetReason(i18n.getMessage("message.uploadedfile.size.exceeded", maxSize));
-    }
-
     protected void interruptUploadDueToIllegalFilename() {
         interruptUploadAndSetReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
     }

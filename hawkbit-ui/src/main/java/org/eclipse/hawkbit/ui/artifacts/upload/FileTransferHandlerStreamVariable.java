@@ -16,6 +16,7 @@ import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
+import org.eclipse.hawkbit.repository.SizeConversionHelper;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -118,12 +119,15 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     public void onProgress(final StreamingProgressEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
-        if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
-            LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            interruptUploadDueToFileSizeExceeded(maxSize);
+        if (isUploadInterrupted()) {
+            publishUploadFailedAndFinishedEvent(fileUploadId);
             return;
         }
-        if (isUploadInterrupted()) {
+
+        if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
+            final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
+            LOG.error("User tried to upload more than was allowed ({}).", maxSizeText);
+            interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
             return;
         }
 
