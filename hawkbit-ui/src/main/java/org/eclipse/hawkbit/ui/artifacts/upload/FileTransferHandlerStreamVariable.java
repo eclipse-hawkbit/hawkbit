@@ -90,7 +90,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             publishUploadProgressEvent(fileUploadId, 0, fileSize);
             startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.error("Creating piped Stream failed {}.", e);
+            LOG.warn("Creating piped Stream failed {}.", e);
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
             interruptUploadDueToUploadFailed();
@@ -125,9 +125,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         }
 
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
-            final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
-            LOG.debug("User tried to upload more than was allowed ({}).", maxSizeText);
-            interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
+            interruptUploadDueToFileSizeQuotaExceeded(SizeConversionHelper.byteValueToReadableString(maxSize));
             return;
         }
 

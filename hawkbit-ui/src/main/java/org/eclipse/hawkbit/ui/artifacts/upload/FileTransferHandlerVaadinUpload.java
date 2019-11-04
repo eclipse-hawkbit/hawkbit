@@ -83,7 +83,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             interruptUploadDueToDuplicateFile();
             event.getUpload().interruptUpload();
         } else {
-            LOG.debug("Uploading file {}", fileUploadId);
             publishUploadStarted(fileUploadId);
 
             if (RegexCharacterCollection.stringContainsCharacter(event.getFilename(), ILLEGAL_FILENAME_CHARACTERS)) {
@@ -131,7 +130,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             publishUploadProgressEvent(fileUploadId, 0, 0);
             startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.error("Creating piped Stream failed {}.", e);
+            LOG.warn("Creating piped Stream failed {}.", e);
             tryToCloseIOStream(outputStream);
             tryToCloseIOStream(inputStream);
             interruptUploadDueToUploadFailed();
@@ -154,9 +153,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         }
 
         if (readBytes > maxSize || contentLength > maxSize) {
-            final String maxSizeText = SizeConversionHelper.byteValueToReadableString(maxSize);
-            LOG.debug("User tried to upload more than was allowed ({}).", maxSizeText);
-            interruptUploadDueToFileSizeQuotaExceeded(maxSizeText);
+            interruptUploadDueToFileSizeQuotaExceeded(SizeConversionHelper.byteValueToReadableString(maxSize));
             return;
         }
 

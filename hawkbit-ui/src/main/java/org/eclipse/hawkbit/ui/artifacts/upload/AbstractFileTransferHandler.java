@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 
@@ -73,7 +72,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
     protected static final RegexCharacterCollection ILLEGAL_FILENAME_CHARACTERS = new RegexCharacterCollection(
             RegexChar.GREATER_THAN, RegexChar.LESS_THAN, RegexChar.SLASHES);
 
-    AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n, final Lock uploadLock) {
+    AbstractFileTransferHandler(final ArtifactManagement artifactManagement, final VaadinMessageSource i18n,
+            final Lock uploadLock) {
         this.artifactManagement = artifactManagement;
         this.i18n = i18n;
         this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
@@ -101,8 +101,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class).execute(
-                new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(), uploadLock));
+        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class)
+                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(),
+                        uploadLock));
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -212,7 +213,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 outputStream.close();
             } catch (final IOException e1) {
-                LOG.error("Closing output stream caused an exception {}", e1);
+                LOG.warn("Closing output stream caused an exception {}", e1);
             }
         }
 
@@ -223,7 +224,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 inputStream.close();
             } catch (final IOException e1) {
-                LOG.error("Closing input stream caused an exception {}", e1);
+                LOG.warn("Closing input stream caused an exception {}", e1);
             }
         }
     }
@@ -269,7 +270,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed();
                 publishUploadFailedAndFinishedEvent(fileUploadId);
-                LOG.error("Failed to transfer file to repository", e);
+                LOG.warn("Failed to transfer file to repository", e);
             } finally {
                 tryToCloseIOStream(inputStream);
                 uploadLock.unlock();
@@ -282,7 +283,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             }
             final String filename = fileUploadId.getFilename();
             LOG.debug("Transfering file {} directly to repository", filename);
-            final Artifact artifact = uploadArtifact(filename).orElseThrow(ArtifactUploadFailedException::new);
+            final Artifact artifact = uploadArtifact(filename);
             if (isUploadInterrupted()) {
                 handleUploadFailure(artifact);
                 publishUploadFinishedEvent(fileUploadId);
@@ -293,13 +294,12 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             publishArtifactsChanged(fileUploadId);
         }
 
-        private Optional<Artifact> uploadArtifact(final String filename) {
+        private Artifact uploadArtifact(final String filename) {
             try {
-                return Optional.ofNullable(artifactManagement.create(new ArtifactUpload(inputStream,
-                        fileUploadId.getSoftwareModuleId(), filename, null, null, true, mimeType, -1)));
+                return artifactManagement.create(new ArtifactUpload(inputStream, fileUploadId.getSoftwareModuleId(),
+                        filename, null, null, true, mimeType, -1));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
-                LOG.debug("Failed to transfer file to repository", e);
-                return Optional.empty();
+                throw new ArtifactUploadFailedException(e);
             }
         }
 
