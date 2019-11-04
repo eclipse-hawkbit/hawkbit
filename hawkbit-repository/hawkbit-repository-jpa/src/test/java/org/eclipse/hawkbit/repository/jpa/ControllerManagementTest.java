@@ -1475,29 +1475,29 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
         enableMultiAssignments();
-        final Long actionWeight700old = assignDistributionSet(ds.getId(), targetId, 700).getAssignedEntity().get(0)
+        final Long actionWeight500old = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
                 .getId();
-        final Long actionWeight700new = assignDistributionSet(ds.getId(), targetId, 700).getAssignedEntity().get(0)
+        final Long actionWeight500new = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
                 .getId();
         final Long actionWeight1000 = assignDistributionSet(ds.getId(), targetId, 1000).getAssignedEntity().get(0)
                 .getId();
 
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeightNull);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeight1000);
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight1000).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight700old);
+                .isEqualTo(actionWeight500old);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight700old).status(Status.FINISHED));
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500old).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight700new);
+                .isEqualTo(actionWeight500new);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight700new).status(Status.FINISHED));
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeightNull);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
     }
 

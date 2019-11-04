@@ -57,7 +57,7 @@ public class RepositoryProperties {
     /**
      * If an {@link Action} has a weight of null this value is used as weight.
      */
-    private int actionWeightIfAbsent = 500;
+    private int actionWeightIfAbsent = 1000;
 
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;
