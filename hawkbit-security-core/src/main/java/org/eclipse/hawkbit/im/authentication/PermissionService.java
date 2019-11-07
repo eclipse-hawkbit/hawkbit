@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class PermissionService {
 
     private boolean honoSyncEnabled = false;
-    private final List<String> disabledPermissionsByUsingHono = Arrays.asList(SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
+    private final List<String> disabledPermissionsByUsingHono = Arrays.asList(SpPermission.CREATE_TARGET, SpPermission.DELETE_TARGET);
 
     /**
      * Checks if the given {@code permission} contains in the. In case no
