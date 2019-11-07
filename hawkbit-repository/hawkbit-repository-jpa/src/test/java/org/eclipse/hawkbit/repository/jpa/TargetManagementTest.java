@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
@@ -958,7 +958,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> insertTargetMetadata("k" + maxMetaData, "v" + maxMetaData, target1));
 
         // add multiple meta data entries at once
@@ -968,7 +968,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             metaData2.add(new JpaTargetMetadata("k" + i, "v" + i, target2));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetManagement.createMetaData(target2.getControllerId(), metaData2));
 
         // add some meta data entries
@@ -984,7 +984,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
             metaData3.add(new JpaTargetMetadata("kk" + i, "vv" + i, target3));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetManagement.createMetaData(target3.getControllerId(), metaData3));
 
     }

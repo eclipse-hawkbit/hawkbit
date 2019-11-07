@@ -25,7 +25,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -155,7 +155,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
                 .content(JsonBuilder.configData("", attributes, "closed").toString())
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }

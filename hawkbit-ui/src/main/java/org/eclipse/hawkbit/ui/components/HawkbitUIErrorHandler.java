@@ -25,6 +25,7 @@ import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 import com.vaadin.server.Page;
+import com.vaadin.server.UploadException;
 import com.vaadin.shared.Connector;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification.Type;
@@ -44,6 +45,11 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
     @Override
     public void error(final ErrorEvent event) {
+
+        // filter upload exceptions
+        if (event.getThrowable() instanceof UploadException) {
+            return;
+        }
 
         final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
         if (event instanceof ConnectorErrorEvent) {
