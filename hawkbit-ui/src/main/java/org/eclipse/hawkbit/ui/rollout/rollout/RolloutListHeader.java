@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -49,12 +50,13 @@ public class RolloutListHeader extends AbstractGridHeader {
             final UiProperties uiProperties, final EntityFactory entityFactory, final VaadinMessageSource i18n,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigManagement) {
+            final TenantConfigurationManagement tenantConfigManagement,
+            final RepositoryProperties repositoryProperties) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
     }
 
     @Override

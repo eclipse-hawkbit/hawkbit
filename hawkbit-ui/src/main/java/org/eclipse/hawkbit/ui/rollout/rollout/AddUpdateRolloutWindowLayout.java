@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -95,7 +96,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Rollout add or update popup layout.
  */
-@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2160" })
+@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2160"})
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 1L;
@@ -196,7 +197,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final RepositoryProperties repositoryProperties) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
         this.rolloutManagement = rolloutManagement;
@@ -210,7 +212,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(tenantConfigurationManagement,
-                this.i18n);
+                this.i18n, uiProperties, repositoryProperties);
 
         defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement);
