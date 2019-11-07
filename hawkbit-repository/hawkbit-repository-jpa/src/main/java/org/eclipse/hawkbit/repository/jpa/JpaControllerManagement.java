@@ -134,9 +134,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
-    private SystemSecurityContext systemSecurityContext;
-
-    @Autowired
     private EntityFactory entityFactory;
 
     @Autowired
@@ -155,8 +152,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private TenantAware tenantAware;
 
     JpaControllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
-        super(actionRepository, repositoryProperties);
+            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository,
+                            final SystemSecurityContext systemSecurityContext) {
+        super(actionRepository, repositoryProperties, systemSecurityContext);
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,

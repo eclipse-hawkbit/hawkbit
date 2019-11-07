@@ -15,8 +15,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -80,11 +85,13 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     @Autowired
     TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final UINotification uINotification, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final SecurityTokenGenerator securityTokenGenerator,
-            final ControllerPollProperties controllerPollProperties, final SpPermissionChecker permChecker) {
+                                     final UINotification uINotification, final SystemManagement systemManagement,
+                                     final DistributionSetTypeManagement distributionSetTypeManagement,
+                                     final TenantConfigurationManagement tenantConfigurationManagement,
+                                     final SecurityTokenGenerator securityTokenGenerator,
+                                     final ControllerPollProperties controllerPollProperties,
+                                     final SpPermissionChecker permChecker,
+                                     final RepositoryProperties repositoryProperties) {
         this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
                 distributionSetTypeManagement, i18n, permChecker);
         this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
@@ -92,7 +99,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         this.pollingConfigurationView = new PollingConfigurationView(i18n, controllerPollProperties,
                 tenantConfigurationManagement);
         this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement,
-                uiProperties);
+                uiProperties, repositoryProperties);
         this.rolloutConfigurationView = new RolloutConfigurationView(i18n, tenantConfigurationManagement, uiProperties);
 
         this.i18n = i18n;
