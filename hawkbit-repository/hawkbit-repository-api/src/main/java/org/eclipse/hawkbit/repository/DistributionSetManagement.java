@@ -338,7 +338,7 @@ public interface DistributionSetManagement
     /**
      * Toggles {@link DistributionSetTag} assignment to given
      * {@link DistributionSet}s by means that if some (or all) of the targets in
-     * the list have the {@link Tag} not yet assigned, they will be. If all of
+     * the list have the {@link Tag} not yet assigned, they will be. Only if all of
      * theme have the tag already assigned they will be removed instead.
      *
      * @param setIds

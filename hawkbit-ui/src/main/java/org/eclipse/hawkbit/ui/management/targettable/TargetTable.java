@@ -536,7 +536,7 @@ public class TargetTable extends AbstractTable<Target> {
     /**
      * Toggles {@link TargetTag} assignment to given target ids by means that if
      * some (or all) of the targets in the list have the {@link Tag} not yet
-     * assigned, they will be. If all of theme have the tag already assigned
+     * assigned, they will be. Only if all of them have the tag already assigned
      * they will be removed instead. Additionally a success popup is shown.
      *
      * @param targetIds
