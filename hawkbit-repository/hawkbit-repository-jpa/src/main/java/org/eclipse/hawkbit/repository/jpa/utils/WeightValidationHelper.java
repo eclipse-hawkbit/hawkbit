@@ -116,15 +116,11 @@ public final class WeightValidationHelper {
      *            indicator of the weight if it doesn't have a numerical value
      */
     public void validateWeight(final boolean hasWeight, final boolean hasNoWeight) {
-        // remove bypassing the weight enforcement as soon as weight can be set
-        // via UI
         final boolean bypassWeightEnforcement = true;
         final boolean multiAssignmentsEnabled = TenantConfigHelper
                 .usingContext(systemSecurityContext, tenantConfigurationManagement).isMultiAssignmentsEnabled();
         if (!multiAssignmentsEnabled && hasWeight) {
             throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
-            return;
         } else if (multiAssignmentsEnabled && hasNoWeight) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }
