@@ -20,16 +20,11 @@
    <name>hawkBit :: Repository</name>
    <packaging>pom</packaging>
 
-   <properties>
-      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
-   </properties>
-
    <modules>
       <module>hawkbit-repository-jpa</module>
       <module>hawkbit-repository-api</module>
       <module>hawkbit-repository-test</module>
       <module>hawkbit-repository-core</module>
    </modules>
-
 
 </project>
