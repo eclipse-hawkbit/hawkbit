@@ -449,25 +449,27 @@ public abstract class JsonBuilder {
 
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null,
+                null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final List<RolloutGroup> groups) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null,
+                null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final String type) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
+                null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups, final String type) {
-
+            final List<RolloutGroup> groups, final String type, final Integer weight) {
         final JSONObject json = new JSONObject();
 
         try {
@@ -479,6 +481,10 @@ public abstract class JsonBuilder {
 
             if (type != null) {
                 json.put("type", type);
+            }
+
+            if (weight != null) {
+                json.put("weight", weight);
             }
 
             if (conditions != null) {

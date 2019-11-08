@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -54,12 +55,18 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
 
     protected final RolloutApprovalStrategy rolloutApprovalStrategy;
 
+    protected final TenantConfigurationManagement tenantConfigurationManagement;
+
+    protected final SystemSecurityContext systemSecurityContext;
+
     protected AbstractRolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -70,6 +77,8 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         this.tenantAware = tenantAware;
         this.lockRegistry = lockRegistry;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     protected RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
@@ -156,5 +165,4 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
         return new AsyncResult<>(validateTargetsInGroups(
                 groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
     }
-
 }

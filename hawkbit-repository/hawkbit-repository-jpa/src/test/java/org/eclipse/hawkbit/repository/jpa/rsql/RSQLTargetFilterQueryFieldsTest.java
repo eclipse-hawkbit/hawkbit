@@ -41,14 +41,10 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("AutoAssignedDs_1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("AutoAssignedDs_2");
 
-        filter1 = targetFilterQueryManagement.updateAutoAssignDSWithActionType(
-                targetFilterQueryManagement
-                        .create(entityFactory.targetFilterQuery().create().name(filterName1).query("name==*")).getId(),
-                ds1.getId(), ActionType.SOFT);
-        filter2 = targetFilterQueryManagement.updateAutoAssignDS(
-                targetFilterQueryManagement
-                        .create(entityFactory.targetFilterQuery().create().name(filterName2).query("name==*")).getId(),
-                ds2.getId());
+        filter1 = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterName1)
+                .query("name==*").autoAssignDistributionSet(ds1).autoAssignActionType(ActionType.SOFT));
+        filter2 = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterName2)
+                .query("name==*").autoAssignDistributionSet(ds2));
         targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterName3).query("name==*"));
 

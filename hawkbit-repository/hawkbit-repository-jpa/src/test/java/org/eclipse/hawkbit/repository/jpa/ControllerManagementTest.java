@@ -104,7 +104,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
-        assertThat(controllerManagement.findOldestActiveActionByTarget(NOT_EXIST_ID)).isNotPresent();
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(NOT_EXIST_ID)).isNotPresent();
 
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
@@ -457,7 +457,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .getContent();
         assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
         if (actionActive) {
-            assertThat(controllerManagement.findOldestActiveActionByTarget(controllerId).get().getId())
+            assertThat(controllerManagement.findActiveActionWithHighestWeight(controllerId).get().getId())
                     .isEqualTo(actionId);
         }
     }
@@ -501,7 +501,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Register a controller which does not exist")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 2)})
+            @Expect(type = TargetPollEvent.class, count = 2) })
     public void findOrRegisterTargetIfItDoesNotExist() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
@@ -517,7 +517,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void findOrRegisterTargetIfItDoesNotExistWithName() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName");
-               final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
                 "ChangedTestName");
         assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
         assertThat(target.getName()).as("Taget names should be different").isNotEqualTo(sameTarget.getName());
@@ -560,8 +560,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
 
             verify(mockTargetRepository, times(TX_RT_MAX)).findOne(any());
-        }
-        finally {
+        } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
         }
@@ -597,22 +596,23 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Register a controller which does not exist, then update the controller twice, first time by providing a name property and second time without a new name")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-                          @Expect(type = TargetPollEvent.class, count = 3) ,
-                          @Expect(type = TargetUpdatedEvent.class, count = 1)})
+            @Expect(type = TargetPollEvent.class, count = 3), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void findOrRegisterTargetIfItDoesNotExistDoesUpdateNameOnExistingTargetProperly() {
 
-        String controllerId = "12345";
-        String targetName = "UpdatedName";
+        final String controllerId = "12345";
+        final String targetName = "UpdatedName";
 
-        final Target newTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST);
+        final Target newTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
         assertThat(newTarget.getName()).isEqualTo(controllerId);
 
-
-        Target firstTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST, targetName);
+        final Target firstTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,
+                LOCALHOST, targetName);
         assertThat(firstTimeUpdatedTarget.getName()).isEqualTo(targetName);
 
-        //Name should not change to default (name=targetId) if target is updated without new name provided
-       Target secondTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,  LOCALHOST);
+        // Name should not change to default (name=targetId) if target is
+        // updated without new name provided
+        final Target secondTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,
+                LOCALHOST);
         assertThat(secondTimeUpdatedTarget.getName()).isEqualTo(targetName);
     }
 
@@ -633,8 +633,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("1234", LOCALHOST));
             verify(mockTargetRepository, times(1)).findOne(any());
             verify(mockTargetRepository, times(1)).save(any());
-        }
-        finally {
+        } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
         }
@@ -651,13 +650,11 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         when(mockTargetRepository.findOne(any())).thenThrow(RuntimeException.class);
 
         try {
-            assertThatExceptionOfType(RuntimeException.class)
-                    .as("Expected a RuntimeException to be thrown!")
+            assertThatExceptionOfType(RuntimeException.class).as("Expected a RuntimeException to be thrown!")
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("aControllerId",
                             LOCALHOST));
             verify(mockTargetRepository, times(1)).findOne(any());
-        }
-        finally {
+        } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
         }
@@ -1054,9 +1051,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         Collections.singletonMap(keyValid, valueTooLong), null));
 
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with key NULL should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(keyNull, valueValid), null));
+                .as("Attribute with key NULL should not be created").isThrownBy(() -> controllerManagement
+                        .updateControllerAttributes(controllerId, Collections.singletonMap(keyNull, valueValid), null));
     }
 
     @Test
@@ -1298,9 +1294,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId).isNotNull();
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
-                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
+                        () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
+                                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
@@ -1326,18 +1322,18 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId).isNotNull();
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
-                .isThrownBy( ()-> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
+                        () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
+                                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
-                .isThrownBy(()->IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
-                .isThrownBy(()->IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
     }
 
@@ -1472,6 +1468,39 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
     }
 
+    @Test
+    @Description("Actions are exposed according to thier weight in multi assignment mode.")
+    public void actionsAreExposedAccordingToTheirWeight() {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
+        enableMultiAssignments();
+        final Long actionWeight500old = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
+                .getId();
+        final Long actionWeight500new = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
+                .getId();
+        final Long actionWeight1000 = assignDistributionSet(ds.getId(), targetId, 1000).getAssignedEntity().get(0)
+                .getId();
+
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeightNull);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeight1000);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight1000).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeight500old);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500old).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeight500new);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
+    }
+
     private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
         final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
         assertThat(target).isPresent();
@@ -1494,12 +1523,10 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.activeActionExistsForControllerId(controllerId)).isEqualTo(false);
     }
 
-
     @Test
     @Description("Delete a target on requested target deletion from client side")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TargetDeletedEvent.class, count = 1)})
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1), @Expect(type = TargetDeletedEvent.class, count = 1) })
     public void deleteTargetWithValidThingId() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
@@ -1512,7 +1539,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete a target with a non existing thingId")
-    @ExpectEvents({@Expect(type = TargetDeletedEvent.class, count = 0)})
+    @ExpectEvents({ @Expect(type = TargetDeletedEvent.class, count = 0) })
     public void deleteTargetWithInvalidThingId() {
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
@@ -1522,9 +1549,8 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete a target after it has been deleted already")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TargetDeletedEvent.class, count = 1)})
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1), @Expect(type = TargetDeletedEvent.class, count = 1) })
     public void deleteTargetAfterItWasDeleted() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();

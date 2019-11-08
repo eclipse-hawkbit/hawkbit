@@ -27,8 +27,8 @@ public class RepositoryProperties {
      * especially useful if the action status feedback channel order from the
      * device cannot be guaranteed.
      *
-     * Note: if this is enforced you have to make sure that the feedback
-     * channel from the devices is in order.
+     * Note: if this is enforced you have to make sure that the feedback channel
+     * from the devices is in order.
      */
     private boolean rejectActionStatusForClosedAction;
 
@@ -53,6 +53,11 @@ public class RepositoryProperties {
      * Set to true to persist polls immediately.
      */
     private boolean eagerPollPersistence;
+
+    /**
+     * If an {@link Action} has a weight of null this value is used as weight.
+     */
+    private int actionWeightIfAbsent = 1000;
 
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;
@@ -92,6 +97,14 @@ public class RepositoryProperties {
 
     public void setPublishTargetPollEvent(final boolean publishTargetPollEvent) {
         this.publishTargetPollEvent = publishTargetPollEvent;
+    }
+
+    public int getActionWeightIfAbsent() {
+        return actionWeightIfAbsent;
+    }
+
+    public void setActionWeightIfAbsent(final int actionWeightIfAbsent) {
+        this.actionWeightIfAbsent = actionWeightIfAbsent;
     }
 
 }

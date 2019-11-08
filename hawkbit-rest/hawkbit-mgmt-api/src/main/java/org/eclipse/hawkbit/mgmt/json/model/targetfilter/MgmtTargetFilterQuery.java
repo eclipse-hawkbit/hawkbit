@@ -40,6 +40,9 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
     @JsonProperty
     private MgmtActionType autoAssignActionType;
 
+    @JsonProperty
+    private Integer autoAssignWeight;
+
     public Long getFilterId() {
         return filterId;
     }
@@ -80,4 +83,11 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
         this.autoAssignActionType = actionType;
     }
 
+    public Integer getAutoAssignWeight() {
+        return autoAssignWeight;
+    }
+
+    public void setAutoAssignWeight(final Integer autoAssignWeight) {
+        this.autoAssignWeight = autoAssignWeight;
+    }
 }

@@ -129,7 +129,7 @@ public interface RolloutManagement {
      *             exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
-    Rollout create(@NotNull RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
+    Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, @NotNull RolloutGroupConditions conditions);
 
     /**
      * Persists a new rollout entity. The filter within the
@@ -166,7 +166,7 @@ public interface RolloutManagement {
      *             exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
-    Rollout create(@NotNull @Valid RolloutCreate rollout, @NotNull @Valid List<RolloutGroupCreate> groups,
+    Rollout create(@Valid @NotNull RolloutCreate rollout, @NotNull @Valid List<RolloutGroupCreate> groups,
             RolloutGroupConditions conditions);
 
     /**
@@ -342,9 +342,9 @@ public interface RolloutManagement {
 
     /**
      * Approves or denies a created rollout being in state
-     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
-     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
-     * {@link RolloutStatus#APPROVAL_DENIED}
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
+     * it switches state to {@link RolloutStatus#READY}, otherwise it switches
+     * to state {@link RolloutStatus#APPROVAL_DENIED}
      *
      * @param rolloutId
      *            the rollout to be approved or denied.
@@ -365,9 +365,9 @@ public interface RolloutManagement {
 
     /**
      * Approves or denies a created rollout being in state
-     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved, it
-     * switches state to {@link RolloutStatus#READY}, otherwise it switches to state
-     * {@link RolloutStatus#APPROVAL_DENIED}
+     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
+     * it switches state to {@link RolloutStatus#READY}, otherwise it switches
+     * to state {@link RolloutStatus#APPROVAL_DENIED}
      * 
      * @param rolloutId
      *            the rollout to be approved or denied.

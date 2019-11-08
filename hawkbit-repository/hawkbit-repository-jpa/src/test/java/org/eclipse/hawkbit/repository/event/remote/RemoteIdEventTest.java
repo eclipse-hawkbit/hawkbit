@@ -105,5 +105,4 @@ public class RemoteIdEventTest extends AbstractRemoteEventTest {
         // gets added because events inherit from of java.util.EventObject
         assertThat(underTestCreatedEvent).isEqualToIgnoringGivenFields(event, "source");
     }
-
 }

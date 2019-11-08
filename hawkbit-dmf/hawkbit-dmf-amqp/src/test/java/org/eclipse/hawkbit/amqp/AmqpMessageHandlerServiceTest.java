@@ -181,17 +181,19 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests the creation of a target/thing by calling the same method that incoming RabbitMQ messages would access.")
     public void createThing() {
         final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
+        final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
         final Target targetMock = mock(Target.class);
 
-        targetIdCaptor = ArgumentCaptor.forClass(String.class);
-        uriCaptor = ArgumentCaptor.forClass(URI.class);
+        final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(targetMock);
-        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.empty());
 
-        amqpMessageHandlerService.onMessage(createMessage(new byte[0], getThingCreatedMessageProperties(knownThingId)),
-                MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
 
         // verify
         assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
@@ -214,7 +216,7 @@ public class AmqpMessageHandlerServiceTest {
 
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
                 uriCaptor.capture(), targetNameCaptor.capture())).thenReturn(targetMock);
-        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.empty());
+        when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.empty());
 
         amqpMessageHandlerService.onMessage(
                 createMessage(targetProperties, getThingCreatedMessageProperties(knownThingId)),
@@ -488,7 +490,8 @@ public class AmqpMessageHandlerServiceTest {
         when(create.status(any())).thenReturn(create);
         when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
-        when(controllerManagementMock.findOldestActiveActionByTarget(any())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.findActiveActionWithHighestWeight(any()))
+                .thenReturn(Optional.of(action));
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());

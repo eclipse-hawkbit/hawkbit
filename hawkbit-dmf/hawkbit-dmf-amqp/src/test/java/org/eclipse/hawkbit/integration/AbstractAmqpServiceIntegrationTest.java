@@ -188,16 +188,17 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
                 .getMessageConverter().fromMessage(replyMessage);
 
-        Assert.assertThat(dsModules,
-                SoftwareModuleJsonMatcher.containsExactly(downloadAndUpdateRequest.getSoftwareModules()));
+        assertDmfDownloadAndUpdateRequest(downloadAndUpdateRequest, dsModules, controllerId);
+    }
 
-        downloadAndUpdateRequest.getSoftwareModules()
+    protected void assertDmfDownloadAndUpdateRequest(final DmfDownloadAndUpdateRequest request,
+            final Set<SoftwareModule> softwareModules, final String controllerId) {
+        Assert.assertThat(softwareModules, SoftwareModuleJsonMatcher.containsExactly(request.getSoftwareModules()));
+        request.getSoftwareModules()
                 .forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
                         new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
-
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
-
-        assertThat(updatedTarget.getSecurityToken()).isEqualTo(downloadAndUpdateRequest.getTargetSecurityToken());
+        assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
 
     protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> softwareModules,

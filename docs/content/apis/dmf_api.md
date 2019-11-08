@@ -364,6 +364,8 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_A
 
 If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or CANCEL_DOWNLOAD
  by hawkBit to initialize update, download, or cancel task(s).
+ 
+ With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
 Header  | Description                      | Type                                | Mandatory
 ------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------
@@ -381,6 +383,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 ```json
 [{
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -413,6 +416,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 },
 {
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -454,6 +458,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 ```json
 [{
 "topic": "DOWNLOAD_AND_INSTALL",
+"weight": 600,
 "action": {
   "actionId":137,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
@@ -486,6 +491,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 },
 {
 "topic": "DOWNLOAD",
+"weight": 500,
 "action": {
   "actionId":138,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",

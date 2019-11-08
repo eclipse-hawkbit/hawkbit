@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -61,7 +61,6 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -1876,7 +1875,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
                 .collect(Collectors.toList());
 
-        final JSONArray body = getAssignmentBody(dsIds);
+        final JSONArray body = new JSONArray();
+        dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 67)));
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1889,8 +1889,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final JSONArray body = getAssignmentBody(Collections.singletonList(dsId));
-            
+        final JSONArray body = new JSONArray().put(getAssignmentObject(dsId, MgmtActionType.FORCED));
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -1902,7 +1901,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final JSONArray body = getAssignmentBody(Arrays.asList(dsId, dsId));
+        final JSONObject assignment = getAssignmentObject(dsId, MgmtActionType.FORCED);
+        final JSONArray body = new JSONArray().put(assignment).put(assignment);
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -1916,21 +1916,90 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
                 .collect(Collectors.toList());
 
-        final JSONArray body = getAssignmentBody(dsIds);
+        final JSONArray body = new JSONArray();
+        dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 76)));
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(2)));
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(2)));
     }
 
-    public static JSONArray getAssignmentBody(final Collection<Long> dsIds) throws JSONException {
-        final JSONArray body = new JSONArray();
-        for (final Long id : dsIds) {
-            final JSONObject obj = new JSONObject();
-            obj.put("id", id);
-            body.put(obj);
-        }
-        return body;
+    @Test
+    @Description("An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int weight = 98;
+
+        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
+        final JSONObject bodyInvalid = getAssignmentObject(dsId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1);
+
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalid.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        assertThat(actions).size().isEqualTo(1);
+        assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
     }
+
+    @Test
+    @Description("An assignment request containing a valid weight when multi assignment is off.")
+    public void weightWithSingleAssignment() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, 98);
+
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+    }
+
+    @Test
+    @Description("An assignment request containing a valid weight when multi assignment is on.")
+    public void weightWithMultiAssignment() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int weight = 98;
+
+        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
+
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        assertThat(actions).size().isEqualTo(1);
+        assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
+    }
+
+    @Test
+    @Description("Get weight of action")
+    public void getActionWeight() throws Exception {
+        final String targetId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int customWeightHigh = 800;
+        final int customWeightLow = 300;
+        assignDistributionSet(dsId, targetId);
+        enableMultiAssignments();
+        assignDistributionSet(dsId, targetId, customWeightHigh);
+        assignDistributionSet(dsId, targetId, customWeightLow);
+
+        mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("content.[0].weight").doesNotExist())
+                .andExpect(jsonPath("content.[1].weight", equalTo(customWeightLow)))
+                .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
+
+    }
+
 }

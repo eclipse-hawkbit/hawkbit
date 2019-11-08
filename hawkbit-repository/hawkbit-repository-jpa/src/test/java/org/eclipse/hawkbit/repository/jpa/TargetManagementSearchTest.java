@@ -131,7 +131,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         // try to find several targets with different filter settings
         verifyThat1TargetHasNameAndId("targ-A-special", targSpecialName.getControllerId());
         verifyThat1TargetHasAttributeValue("%c-attribute%", targAttribute.getControllerId());
-        verifyThat1TargetHasAttributeValue("%" + targAttributeId.getControllerId() + "%", targAttributeId.getControllerId());
+        verifyThat1TargetHasAttributeValue("%" + targAttributeId.getControllerId() + "%",
+                targAttributeId.getControllerId());
         verifyThatRepositoryContains400Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);

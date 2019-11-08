@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
@@ -38,6 +37,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -57,6 +57,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -103,7 +105,7 @@ import com.google.common.collect.Lists;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaDeploymentManagement implements DeploymentManagement {
+public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
@@ -124,7 +126,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private final EntityManager entityManager;
-    private final ActionRepository actionRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -146,9 +147,10 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
+            final RepositoryProperties repositoryProperties) {
+        super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
-        this.actionRepository = actionRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
@@ -194,6 +196,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .validate(deploymentRequests);
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
@@ -275,8 +279,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct()
-                .collect(Collectors.toList());
+        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+                .distinct().collect(Collectors.toList());
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
                 distributionSetEntity.getId());
@@ -285,8 +289,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
             return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
         }
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType,
-                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType, actionMessage,
+                assignmentStrategy, distributionSetEntity, targetEntities);
         return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType.size());
     }
 
@@ -660,6 +664,16 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return super.getWeightConsideringDefault(action);
+    }
+
+    @Override
     public long countActionsByTarget(final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         return actionRepository.countByTargetControllerId(controllerId);
@@ -823,7 +837,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .isMultiAssignmentsEnabled();
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
