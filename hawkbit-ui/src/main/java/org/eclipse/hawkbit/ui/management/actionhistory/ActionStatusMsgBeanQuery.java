@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -84,8 +84,7 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
             actionBeans = firstPageMessages;
         } else {
             actionBeans = getDeploymentManagement().findMessagesByActionStatusId(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    currentSelectedActionStatusId);
+                    new OffsetBasedPageRequest(startIndex, count, sort), currentSelectedActionStatusId);
         }
         return createProxyMessages(actionBeans);
     }
@@ -129,7 +128,7 @@ public class ActionStatusMsgBeanQuery extends AbstractBeanQuery<ProxyMessage> {
 
         if (currentSelectedActionStatusId != null) {
             firstPageMessages = getDeploymentManagement().findMessagesByActionStatusId(
-                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionStatusId);
+                    new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionStatusId);
             size = firstPageMessages.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

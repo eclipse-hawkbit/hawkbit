@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -22,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -120,7 +120,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
         } else {
-            distBeans = findDistBeans(PageRequest.of(startIndex / count, count, sort));
+            distBeans = findDistBeans(new OffsetBasedPageRequest(startIndex, count, sort));
         }
 
         for (final DistributionSet distributionSet : distBeans) {
@@ -137,7 +137,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     @Override
     public int size() {
-        firstPageDistributionSets = findDistBeans(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
+        firstPageDistributionSets = findDistBeans(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         final long size = firstPageDistributionSets.getTotalElements();
 
         if (size > Integer.MAX_VALUE) {

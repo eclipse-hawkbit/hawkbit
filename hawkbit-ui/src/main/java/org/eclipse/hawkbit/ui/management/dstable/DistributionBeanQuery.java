@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -148,19 +147,19 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
             firstPageDistributionSets = getDistributionSetManagement()
                     .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(
-                            PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilterBuilder,
-                            pinnedTarget.getControllerId());
+                            new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort),
+                            distributionSetFilterBuilder, pinnedTarget.getControllerId());
         } else if (distributionTags.isEmpty() && StringUtils.isEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
-                    .findByCompleted(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), true);
+                    .findByCompleted(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
                     .setTagNames(distributionTags).build();
 
             firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
-                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+                    new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
 
         }
         final long size = firstPageDistributionSets.getTotalElements();
