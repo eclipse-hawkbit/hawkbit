@@ -8,22 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolationException;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -41,6 +31,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -69,13 +60,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.validation.ConstraintViolationException;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test class testing the functionality of triggering a deployment of
@@ -697,8 +695,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("An assignment request without a weight is ok when multi assignment in enabled.")
-    public void weightNotRequiredInMultiAssignmentMode() {
+    @Description("An assignment request without a weight will cause an error when multi assignment in enabled.")
+    public void weightIsRequiredInMultiAssignmentMode() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
@@ -707,11 +705,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .build();
 
         enableMultiAssignments();
-        deploymentManagement.assignDistributionSets(Arrays.asList(assignWithoutWeight, assignWithWeight));
+        deploymentManagement.assignDistributionSets(Arrays.asList(assignWithWeight));
+        Assertions.assertThatExceptionOfType(NoWeightProvidedInMultiAssignmentModeException.class).isThrownBy(
+                () -> deploymentManagement.assignDistributionSets(Arrays.asList(assignWithoutWeight)));
     }
 
     @Test
-    @Description("An assignment request containing a weight causes an error when multi assignment in disabled.")
+    @Description("An assignment request containing a weight causes an error when multi assignment is disabled.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })

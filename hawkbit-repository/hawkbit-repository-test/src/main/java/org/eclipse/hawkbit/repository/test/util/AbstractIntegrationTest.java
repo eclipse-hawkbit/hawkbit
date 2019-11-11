@@ -8,21 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -45,6 +31,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -91,7 +78,20 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
@@ -330,6 +330,13 @@ public abstract class AbstractIntegrationTest {
 
     protected void enableMultiAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
+    }
+
+    protected void setTenantDefaultWeightValue(int weight) {
+        if (tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED).getValue().equals(false)){
+            throw new MultiAssignmentIsNotEnabledException("Tenant weight can be set only when multi assignment is activated.");
+        }
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, weight);
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
