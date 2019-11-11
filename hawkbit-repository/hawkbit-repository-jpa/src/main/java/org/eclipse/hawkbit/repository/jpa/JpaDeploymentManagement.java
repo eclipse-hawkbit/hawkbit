@@ -199,6 +199,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> assignDistributionSetsAcceptNullWeight(
+            List<DeploymentRequest> deploymentRequests, String actionMessage) {
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .validateAcceptNullWeight(deploymentRequests);
+        return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
+    }
+
     private List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage,
             final AbstractDsAssignmentStrategy strategy) {
