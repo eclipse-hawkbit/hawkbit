@@ -8,13 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
-
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
@@ -35,6 +28,13 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.stream.Collectors;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -212,7 +212,7 @@ public abstract class AbstractDsAssignmentStrategy {
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
-            actionForTarget.setWeight(targetWithActionType.getWeight());
+            targetWithActionType.getWeight().ifPresent(weight -> actionForTarget.setWeight(weight));
             actionForTarget.setActive(true);
             actionForTarget.setTarget(target);
             actionForTarget.setDistributionSet(set);

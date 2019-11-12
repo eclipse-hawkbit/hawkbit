@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
@@ -18,6 +16,8 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+
+import java.util.List;
 
 /**
  * Utility class to handle weight validation in Rollout, Auto Assignments, and
@@ -55,7 +55,7 @@ public final class WeightValidationHelper {
      */
     public void validate(final List<DeploymentRequest> deploymentRequests) {
         final long assignmentsWithWeight = deploymentRequests.stream()
-                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
+                .filter(request -> request.getTargetWithActionType().getWeight().isPresent()).count();
         final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
         final boolean containsAssignmentWithoutWeight = assignmentsWithWeight < deploymentRequests.size();
 
@@ -70,7 +70,7 @@ public final class WeightValidationHelper {
      */
     public void validateAcceptNullWeight(final List<DeploymentRequest> deploymentRequests) {
         final long assignmentsWithWeight = deploymentRequests.stream()
-                .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
+                .filter(request -> request.getTargetWithActionType().getWeight().isPresent()).count();
         final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
 
         validateWeightAcceptingNull(containsAssignmentWithWeight);
