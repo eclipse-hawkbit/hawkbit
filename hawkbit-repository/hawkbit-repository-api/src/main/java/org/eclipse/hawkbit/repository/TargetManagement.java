@@ -554,7 +554,7 @@ public interface TargetManagement {
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
      * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. If all of theme have the tag already assigned
+     * yet assigned, they will be. Only if all of theme have the tag already assigned
      * they will be removed instead.
      *
      * @param controllerIds
