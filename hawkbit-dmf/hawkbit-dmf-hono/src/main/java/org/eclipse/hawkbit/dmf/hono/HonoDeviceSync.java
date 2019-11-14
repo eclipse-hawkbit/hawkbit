@@ -73,19 +73,21 @@ public class HonoDeviceSync {
     private String authenticationMethod;
     private String oidcTokenUri;
     private String oidcClientId;
+    private String oidcClientSecret;
     private String username;
     private String password;
     private String targetNameFieldInDeviceExtension;
 
     HonoDeviceSync(String honoTenantListUri, String honoDevicesEndpoint, String honoCredentialsListUri,
-                   String authenticationMethod, String oidcTokenUri, String oidcClientId, String username,
-                   String password, String targetNameFieldInDeviceExtension) {
+                   String authenticationMethod, String oidcTokenUri, String oidcClientId, String oidcClientSecret,
+                   String username, String password, String targetNameFieldInDeviceExtension) {
         this.honoTenantListUri = honoTenantListUri;
         this.honoDeviceListUri = honoDevicesEndpoint;
         this.honoCredentialsListUri = honoCredentialsListUri;
         this.authenticationMethod = authenticationMethod;
         this.oidcTokenUri = oidcTokenUri;
         this.oidcClientId = oidcClientId;
+        this.oidcClientSecret = oidcClientSecret;
         this.username = username;
         this.password = password;
         this.targetNameFieldInDeviceExtension = targetNameFieldInDeviceExtension;
@@ -242,10 +244,17 @@ public class HonoDeviceSync {
                     HttpURLConnection jwtConnection = (HttpURLConnection) oidcTokenUrl.openConnection();
                     jwtConnection.setDoOutput(true);
                     DataOutputStream outputStream = new DataOutputStream(jwtConnection.getOutputStream());
-                    outputStream.writeBytes("grant_type=password"
-                            + "&client_id=" + URLEncoder.encode(oidcClientId, "UTF-8")
-                            + "&username=" + URLEncoder.encode(username, "UTF-8")
-                            + "&password=" + URLEncoder.encode(password, "UTF-8"));
+                    if (oidcClientSecret != null && !oidcClientSecret.isEmpty()) {
+                        outputStream.writeBytes("grant_type=client_credentials"
+                                + "&client_id=" + URLEncoder.encode(oidcClientId, "UTF-8")
+                                + "&client_secret=" + URLEncoder.encode(oidcClientSecret, "UTF-8"));
+                    }
+                    else {
+                        outputStream.writeBytes("grant_type=password"
+                                + "&client_id=" + URLEncoder.encode(oidcClientId, "UTF-8")
+                                + "&username=" + URLEncoder.encode(username, "UTF-8")
+                                + "&password=" + URLEncoder.encode(password, "UTF-8"));
+                    }
                     outputStream.flush();
                     outputStream.close();
 

@@ -25,6 +25,7 @@ public class DmfHonoConfiguration {
     private String authenticationMethod = "none";
     private String oidcTokenUri = "";
     private String oidcClientId = "";
+    private String oidcClientSecret = "";
     private String username = "";
     private String password = "";
     private String targetNameField = "";
@@ -32,7 +33,7 @@ public class DmfHonoConfiguration {
     @Bean
     public HonoDeviceSync honoDeviceSync() {
         return new HonoDeviceSync(tenantListUri, deviceListUri, credentialsListUri, authenticationMethod,
-                oidcTokenUri, oidcClientId, username, password, targetNameField);
+                oidcTokenUri, oidcClientId, oidcClientSecret, username, password, targetNameField);
     }
 
     public String getTenantListUri() {
@@ -81,6 +82,14 @@ public class DmfHonoConfiguration {
 
     public void setOidcClientId(String oidcClientId) {
         this.oidcClientId = oidcClientId;
+    }
+
+    public String getOidcClientSecret() {
+        return oidcClientSecret;
+    }
+
+    public void setOidcClientSecret(String oidcClientSecret) {
+        this.oidcClientSecret = oidcClientSecret;
     }
 
     public String getUsername() {

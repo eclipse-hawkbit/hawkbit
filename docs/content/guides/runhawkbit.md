@@ -91,6 +91,7 @@ hawkbit.dmf.hono.password=PASSWORD
 // Only for authentication-method = oidc
 hawkbit.dmf.hono.oidc-token-uri=http://OIDC_HOST/auth/realms/REALM/protocol/openid-connect/token
 hawkbit.dmf.hono.oidc-client-id=OIDC_CLIENT_ID
+hawkbit.dmf.hono.oidc-client-secret=OIDC_CLIENT_SECRET # You can use a oidc client secret instead of username+password
 ```
 
 hawkBit handles device registry updates through CUD events emitted by Hono over any Spring Cloud Stream supported channel, such as AMQP or Google Cloud Pub/Sub.
