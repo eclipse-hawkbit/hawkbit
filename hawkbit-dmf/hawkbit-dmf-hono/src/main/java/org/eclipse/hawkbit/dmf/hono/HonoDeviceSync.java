@@ -220,6 +220,7 @@ public class HonoDeviceSync {
             return objectMapper.readValue(connection.getInputStream(), new TypeReference<Collection<HonoCredentials>>() {});
         }
         catch (IOException e) {
+            LOG.error("Could not read credentials for device '{}/{}'.", tenant, deviceId, e);
             return null;
         }
     }
