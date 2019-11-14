@@ -519,7 +519,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
-     * 
+     *
      * @param targetFilterQueryRepository
      *            holding {@link TargetFilterQuery} entities
      * @param targetRepository
@@ -599,9 +599,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaSoftwareModuleManagement} bean.
+     * {@link JpaSoftwareModuleTypeManagement} bean.
      *
-     * @return a new {@link SoftwareModuleManagement}
+     * @return a new {@link SoftwareModuleTypeManagement}
      */
     @Bean
     @ConditionalOnMissingBean
