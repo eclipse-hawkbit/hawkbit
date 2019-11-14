@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -147,8 +149,14 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                     .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
             final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
                     .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
-
-            final SoftwareModule newSoftwareModule = softwareModuleManagement.create(softwareModule);
+            final SoftwareModule newSoftwareModule;
+            try {
+                newSoftwareModule = softwareModuleManagement.create(softwareModule);
+            } catch (ConstraintViolationException ex) {
+                uiNotifcation.displayValidationError(i18n.getMessage("message.save.fail",
+                        name + ":" + version));
+                return;
+            }
             eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
             uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
                     newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
