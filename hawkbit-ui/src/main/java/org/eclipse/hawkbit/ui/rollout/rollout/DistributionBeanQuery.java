@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
@@ -25,7 +26,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -83,7 +83,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distBeans = firstPageDistributionSets;
         } else {
             distBeans = getDistributionSetManagement().findByDistributionSetFilter(
-                    PageRequest.of(startIndex / count, count, sort), distributionSetFilter);
+                    new OffsetBasedPageRequest(startIndex, count, sort), distributionSetFilter);
         }
         return createProxyDistributions(distBeans);
     }
@@ -119,8 +119,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                 .setIsComplete(true).build();
 
-        firstPageDistributionSets = getDistributionSetManagement()
-                .findByDistributionSetFilter(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
+        firstPageDistributionSets = getDistributionSetManagement().findByDistributionSetFilter(
+                new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), distributionSetFilter);
         final long size = firstPageDistributionSets.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;

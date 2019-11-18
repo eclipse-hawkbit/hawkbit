@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -29,7 +30,6 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -90,7 +90,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         return rolloutGroup
                 .map(group -> getProxyRolloutGroupTargetsList(
                         getRolloutGroupManagement().findAllTargetsOfRolloutGroupWithActionStatus(
-                                PageRequest.of(startIndex / count, count), group.getId()).getContent()))
+                                new OffsetBasedPageRequest(startIndex, count), group.getId()).getContent()))
                 .orElse(Collections.emptyList());
     }
 
@@ -137,7 +137,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         try {
             firstPageTargetSets = rolloutGroup
                     .map(group -> getRolloutGroupManagement().findAllTargetsOfRolloutGroupWithActionStatus(
-                            PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
+                            new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), group.getId()))
                     .orElse(null);
 
             size = firstPageTargetSets == null ? 0 : firstPageTargetSets.getTotalElements();

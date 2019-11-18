@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -110,18 +109,15 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findByFilterOrderByLinkedDistributionSet(
-                    new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,
+                    new OffsetBasedPageRequest(startIndex, count, sort), pinnedDistId,
                     new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         } else if (null != targetFilterQueryId) {
-            targetBeans = getTargetManagement().findByTargetFilterQuery(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    targetFilterQueryId);
-        } else if (!isAnyFilterSelected()) {
             targetBeans = getTargetManagement()
-                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findByTargetFilterQuery(new OffsetBasedPageRequest(startIndex, count, sort), targetFilterQueryId);
+        } else if (!isAnyFilterSelected()) {
+            targetBeans = getTargetManagement().findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         } else {
-            targetBeans = getTargetManagement().findByFilters(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+            targetBeans = getTargetManagement().findByFilters(new OffsetBasedPageRequest(startIndex, count, sort),
                     new FilterParams(status, overdueState, searchText, distributionId, noTagClicked, targetTags));
         }
         for (final Target targ : targetBeans) {
