@@ -338,9 +338,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
                     .description(description.getValue()).set(distributionId)
-                    .weight(!rolloutWeight.getValue().isEmpty() ? Integer.valueOf(rolloutWeight.getValue()) : null)
                     .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType())
                     .forcedTime(getForcedTimeStamp());
+            if (!rolloutWeight.isEmpty()) {
+                rolloutCreate.weight(Integer.valueOf(rolloutWeight.getValue()));
+            }
 
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutCreate.startAt(System.currentTimeMillis());
