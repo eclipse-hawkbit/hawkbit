@@ -425,6 +425,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
             addComponent(getMandatoryLabel("textfield.weight"), 0, 3);
             addComponent(rolloutWeight, 1, 3);
+            rolloutWeight.addValidator(nullValidator);
         }
     }
 
@@ -514,14 +515,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
-        addComponent(getMandatoryLabel("textfield.weight"), 0, 3);
-        addComponent(rolloutWeight, 1, 3);
-        rolloutWeight.addValidator(nullValidator);
+        configureWeightComponent();
 
         addComponent(getLabel("textfield.description"), 0, 4);
         addComponent(description, 1, 4, 1, 4);
 
-        // TODO : check where the charts appear and if they are aligned right!!
         addComponent(groupsLegendLayout, 3, 0, 3, 4);
         addComponent(groupsPieChart, 2, 0, 2, 4);
 
@@ -1084,7 +1082,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             rolloutName.setValue(rollout.getName());
             groupsDefinitionTabs.setVisible(false);
 
-            rolloutWeight.setValue(rollout.getWeight().toString());
+            final Optional<Integer> weight = rollout.getWeight();
+            rolloutWeight.setValue(String.valueOf(weight.isPresent() ? weight.get().intValue() : ""));
 
             targetFilterQuery.setValue(rollout.getTargetFilterQuery());
             removeComponent(1, 2);
