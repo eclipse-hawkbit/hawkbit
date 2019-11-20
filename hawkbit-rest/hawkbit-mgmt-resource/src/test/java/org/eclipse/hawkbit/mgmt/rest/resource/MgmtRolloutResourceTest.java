@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -147,7 +147,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
@@ -165,7 +165,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                         new RolloutGroupConditionBuilder().withDefaults().build()))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
@@ -916,6 +916,36 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         postRollout("rollout1", 10, dsA.getId(), "id==target*", 20, Action.ActionType.DOWNLOAD_ONLY);
     }
 
+    @Test
+    @Description("A rollout create request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    public void weightValidation() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        final int weight = 66;
+
+        final String invalideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, Action.WEIGHT_MIN - 1);
+        final String valideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, weight);
+
+        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+        enableMultiAssignments();
+        mvc.perform(post("/rest/v1/rollouts").content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
+        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated());
+
+        final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
+        assertThat(rollouts).hasSize(1);
+        assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
+    }
+
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
     {
@@ -955,14 +985,12 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type) throws Exception {
-        String actionType = MgmtRestModelMapper.convertActionType(type).getName();
-        String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType);
+        final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
+        final String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null);
 
-        mvc.perform(post("/rest/v1/rollouts")
-                .content(rollout)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+        mvc.perform(post("/rest/v1/rollouts").content(rollout).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", equalTo(name))).andExpect(jsonPath("$.status", equalTo("creating")))
                 .andExpect(jsonPath("$.type", equalTo(actionType)))
                 .andExpect(jsonPath("$.targetFilterQuery", equalTo(targetFilterQuery)))

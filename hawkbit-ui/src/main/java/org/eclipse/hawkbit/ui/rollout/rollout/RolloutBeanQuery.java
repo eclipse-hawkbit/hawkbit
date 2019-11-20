@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -21,7 +22,6 @@ import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererDa
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -89,8 +89,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
-        final PageRequest pageRequest = PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE,
-                SPUIDefinitions.PAGE_SIZE, sort);
+        final PageRequest pageRequest = new OffsetBasedPageRequest(startIndex, count, sort);
         if (StringUtils.isEmpty(searchText)) {
             rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(pageRequest, false);
         } else {

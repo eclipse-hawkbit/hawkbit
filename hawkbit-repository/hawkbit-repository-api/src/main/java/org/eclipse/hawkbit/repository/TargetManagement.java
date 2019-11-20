@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -554,7 +554,7 @@ public interface TargetManagement {
     /**
      * Toggles {@link TargetTag} assignment to given {@link Target}s by means
      * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. If all of theme have the tag already assigned
+     * yet assigned, they will be. Only if all of theme have the tag already assigned
      * they will be removed instead.
      *
      * @param controllerIds
@@ -698,7 +698,7 @@ public interface TargetManagement {
      *             in case one of the meta data entry already exists for the
      *             specific key
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link MetaData} entries is exceeded
      *             for the addressed {@link Target}
      */

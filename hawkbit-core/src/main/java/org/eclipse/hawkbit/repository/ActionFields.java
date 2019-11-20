@@ -21,7 +21,11 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
     /**
      * The id field.
      */
-    ID("id");
+    ID("id"),
+    /**
+     * The weight field.
+     */
+    WEIGHT("weight");
 
     private static final String ACTIVE = "pending";
     private static final String INACTIVE = "finished";

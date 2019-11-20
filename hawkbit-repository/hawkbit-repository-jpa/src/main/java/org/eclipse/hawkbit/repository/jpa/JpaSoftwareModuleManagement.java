@@ -112,7 +112,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final Database database;
 
-    JpaSoftwareModuleManagement(final EntityManager entityManager,
+    public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,

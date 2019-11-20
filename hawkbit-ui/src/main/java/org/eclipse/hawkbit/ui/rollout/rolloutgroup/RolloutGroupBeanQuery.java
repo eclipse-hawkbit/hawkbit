@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -30,7 +31,6 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -105,7 +105,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
                 proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
             } else {
                 proxyRolloutGroupsList = getRolloutGroupManagement()
-                        .findByRolloutWithDetailedStatus(PageRequest.of(startIndex / count, count), rolloutId)
+                        .findByRolloutWithDetailedStatus(new OffsetBasedPageRequest(startIndex, count), rolloutId)
                         .getContent();
             }
         }
@@ -156,8 +156,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         long size = 0;
         if (rolloutId != null) {
             try {
-                firstPageRolloutGroupSets = getRolloutGroupManagement()
-                        .findByRolloutWithDetailedStatus(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
+                firstPageRolloutGroupSets = getRolloutGroupManagement().findByRolloutWithDetailedStatus(
+                        new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutId);
                 size = firstPageRolloutGroupSets.getTotalElements();
             } catch (final EntityNotFoundException e) {
                 LOG.error("Rollout does not exists. Redirect to Rollouts overview", e);

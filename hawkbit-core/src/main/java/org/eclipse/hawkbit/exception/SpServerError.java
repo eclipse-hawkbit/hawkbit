@@ -138,6 +138,16 @@ public enum SpServerError {
     SP_QUOTA_EXCEEDED("hawkbit.server.error.quota.tooManyEntries", "Too many entries have been inserted."),
 
     /**
+     * error that describes that size of uploaded file exceeds size quota
+     */
+    SP_FILE_SIZE_QUOTA_EXCEEDED("hawkbit.server.error.quota.fileSizeExceeded", "File exceeds size quota."),
+
+    /**
+     * error that describes that size of uploaded file exceeds storage quota
+     */
+    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded", "Storage quota will be exceeded if file is uploaded."),
+
+    /**
      * error message, which describes that the action can not be canceled cause
      * the action is inactive.
      */
@@ -246,7 +256,13 @@ public enum SpServerError {
     *
     */
     SP_MULTIASSIGNMENT_NOT_ENABLED("hawkbit.server.error.multiassignmentNotEnabled",
-            "The requested operation requires Multiassignments to be enabled.");
+            "The requested operation requires multi assignments to be enabled."),
+
+    /**
+    *
+    */
+    SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode",
+            "The requested operation requires a weight to be specified when multi assignments is enabled.");
 
     private final String key;
     private final String message;

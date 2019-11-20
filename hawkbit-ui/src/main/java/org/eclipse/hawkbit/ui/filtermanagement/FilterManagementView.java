@@ -70,7 +70,7 @@ public class FilterManagementView extends VerticalLayout implements View {
             final AutoCompleteTextFieldComponent queryTextField, final TargetManagement targetManagement) {
         this.targetFilterHeader = new TargetFilterHeader(eventBus, filterManagementUIState, permissionChecker, i18n);
         this.targetFilterTable = new TargetFilterTable(i18n, notification, eventBus, filterManagementUIState,
-                targetFilterQueryManagement, targetManagement, permissionChecker);
+                targetFilterQueryManagement, targetManagement, permissionChecker, entityFactory);
         this.createNewFilterHeader = new CreateOrUpdateFilterHeader(i18n, eventBus, filterManagementUIState,
                 targetFilterQueryManagement, permissionChecker, notification, uiProperties, entityFactory,
                 queryTextField);

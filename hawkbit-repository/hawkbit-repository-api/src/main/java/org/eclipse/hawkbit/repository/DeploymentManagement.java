@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -23,7 +24,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -66,7 +67,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -76,7 +77,7 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            @NotEmpty List<DeploymentRequest> deploymentRequests);
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
      * Assigns {@link DistributionSet}s to {@link Target}s according to the
@@ -97,7 +98,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -107,9 +108,9 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
-
-    /**
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
+            
+                /**
      * build a {@link DeploymentRequest} for a target distribution set
      * assignment
      * 
@@ -151,7 +152,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * 
@@ -371,6 +372,30 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Action> findInActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
+    /**
+     * Retrieves active {@link Action}s with highest weight that are assigned to
+     * a {@link Target}.
+     * 
+     * @param controllerId
+     *            identifies the target to retrieve the action from
+     * @param maxActionCount
+     *            max size of returned list
+     * @return the action
+     * 
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
+
+    /**
+     * Get weight of an Action. Returns the default value if the weight is null
+     * according to the properties.
+     * 
+     * @param action
+     *            to extract the weight from
+     * @return weight of the action
+     */
+    int getWeightConsideringDefault(final Action action);
 
     /**
      * Force cancels given {@link Action} for given {@link Target}. Force

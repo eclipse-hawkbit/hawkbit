@@ -32,5 +32,4 @@ public interface TargetFilterQueryUpdate {
      * @return updated builder instance
      */
     TargetFilterQueryUpdate query(@Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) String query);
-
 }

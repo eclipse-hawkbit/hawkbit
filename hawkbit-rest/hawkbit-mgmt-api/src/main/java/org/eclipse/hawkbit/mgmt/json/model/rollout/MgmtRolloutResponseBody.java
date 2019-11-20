@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 /**
  *
@@ -46,6 +46,9 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     @JsonProperty
     private MgmtActionType type;
+
+    @JsonProperty
+    private Integer weight;
 
     public boolean isDeleted() {
         return deleted;
@@ -113,5 +116,13 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     public MgmtActionType getType() {
         return type;
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
+    }
+
+    public Integer getWeight() {
+        return weight;
     }
 }

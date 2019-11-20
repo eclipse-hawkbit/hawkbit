@@ -20,10 +20,6 @@
    <name>hawkBit :: DMF</name>
    <packaging>pom</packaging>
 
-   <properties>
-      <jacoco.outputDir>${project.basedir}/../../target/</jacoco.outputDir>
-   </properties>
-
    <modules>
       <module>hawkbit-dmf-api</module>
       <module>hawkbit-dmf-amqp</module>

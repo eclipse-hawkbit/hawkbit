@@ -79,6 +79,7 @@ final class MgmtRolloutMapper {
         body.setTotalTargets(rollout.getTotalTargets());
         body.setDeleted(rollout.isDeleted());
         body.setType(MgmtRestModelMapper.convertActionType(rollout.getActionType()));
+        rollout.getWeight().ifPresent(body::setWeight);
 
         if (withDetails) {
             for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
@@ -106,7 +107,8 @@ final class MgmtRolloutMapper {
         return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
                 .set(distributionSet).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
-                .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt());
+                .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt())
+                .weight(restRequest.getWeight());
     }
 
     static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
@@ -249,5 +251,4 @@ final class MgmtRolloutMapper {
     private static String createIllegalArgumentLiteral(final Condition condition) {
         return "Condition " + condition + NOT_SUPPORTED;
     }
-
 }

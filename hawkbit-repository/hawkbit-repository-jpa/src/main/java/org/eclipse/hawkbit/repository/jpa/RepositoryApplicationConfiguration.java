@@ -519,7 +519,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
-     * 
+     *
      * @param targetFilterQueryRepository
      *            holding {@link TargetFilterQuery} entities
      * @param targetRepository
@@ -541,9 +541,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
-            final JpaProperties properties) {
+            final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
-                virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase());
+                virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
+                tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
@@ -597,9 +599,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaSoftwareModuleManagement} bean.
+     * {@link JpaSoftwareModuleTypeManagement} bean.
      *
-     * @return a new {@link SoftwareModuleManagement}
+     * @return a new {@link SoftwareModuleTypeManagement}
      */
     @Bean
     @ConditionalOnMissingBean
@@ -620,10 +622,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
                 distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy);
+                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
@@ -671,11 +676,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final JpaProperties properties) {
+            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
                 actionStatusRepository, auditorProvider, eventPublisherHolder, afterCommit, virtualPropertyReplacer,
                 txManager, tenantConfigurationManagement, quotaManagement, systemSecurityContext, tenantAware,
-                properties.getDatabase());
+                properties.getDatabase(), repositoryProperties);
     }
 
     /**
@@ -686,8 +691,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties) {
-        return new JpaControllerManagement(executorService, repositoryProperties);
+            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
+        return new JpaControllerManagement(executorService, repositoryProperties, actionRepository);
     }
 
     @Bean

@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -56,7 +56,7 @@ public interface ControllerManagement {
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
      *
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -93,15 +93,15 @@ public interface ControllerManagement {
             @NotNull Collection<Long> moduleId);
 
     /**
-     * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
-     * . No state changes.
+     * Simple addition of a new {@link ActionStatus} entry to the
+     * {@link Action}. No state changes.
      *
      * @param create
      *            to add to the action
      *
      * @return created {@link ActionStatus} entity
      *
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -123,7 +123,7 @@ public interface ControllerManagement {
      *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if more than the allowed number of status entries or messages
      *             per entry are inserted
      * @throws EntityNotFoundException
@@ -136,33 +136,44 @@ public interface ControllerManagement {
     Action addUpdateActionStatus(@NotNull @Valid ActionStatusCreate create);
 
     /**
-     * Retrieves oldest {@link Action} that is active and assigned to a
-     * {@link Target}.
-     *
+     * Retrieves active {@link Action} with highest priority that is assigned to
+     * a {@link Target}.
+     * 
      * For performance reasons this method does not throw
      * {@link EntityNotFoundException} in case target with given controllerId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
      * @param controllerId
-     *            identifies the target to retrieve the actions from
-     * @return a list of actions assigned to given target which are active
-     *
+     *            identifies the target to retrieve the action from
+     * @return the action
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> findOldestActiveActionByTarget(@NotEmpty String controllerId);
+    Optional<Action> findActiveActionWithHighestWeight(@NotEmpty String controllerId);
 
     /**
-     * Retrieves all active actions which are assigned to the target with the
-     * given controller ID.
-     *
-     * @param pageable
-     *            pagination parameter
+     * Retrieves active {@link Action}s with highest weight that are assigned to
+     * a {@link Target}.
+     * 
      * @param controllerId
-     *            of the target
-     * @return the requested {@link Page} with {@link Action}s
+     *            identifies the target to retrieve the action from
+     * @param maxActionCount
+     *            max size of returned list
+     * @return the action
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Page<Action> findActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
+    List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
+
+    /**
+     * Get weight of an Action. Returns the default value if the weight is null
+     * according to the properties.
+     * 
+     * @param action
+     *            to extract the weight from
+     * @return weight of the action
+     */
+    int getWeightConsideringDefault(final Action action);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy
@@ -206,6 +217,24 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address);
+
+    /**
+     * Register new target in the repository (plug-and-play) and in case it
+     * already exists updates {@link Target#getAddress()} and
+     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and
+     * switches if {@link TargetUpdateStatus#UNKNOWN} to
+     * {@link TargetUpdateStatus#REGISTERED}.
+     *
+     * @param controllerId
+     *            reference
+     * @param address
+     *            the client IP address of the target, might be {@code null}
+     * @param name
+     *            the name of the target
+     * @return target reference
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address, String name);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given
@@ -347,7 +376,7 @@ public interface ControllerManagement {
      *
      * @throws EntityNotFoundException
      *             if target that has to be updated could not be found
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if maximum number of attributes per target is exceeded
      * @throws InvalidTargetAttributeException
      *             if attributes violate constraints

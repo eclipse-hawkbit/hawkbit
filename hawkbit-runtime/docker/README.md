@@ -38,3 +38,24 @@ $ docker stack deploy -c docker-compose-stack.yml hawkbit
 | hawkBit Device Simulator | [http://localhost:8083/](http://localhost:8083/) | - |  |  | &#10003; | 
 | MySQL | localhost:3306/hawkbit | root |  | &#10003; | &#10003; | 
 | RabbitMQ | [http://localhost:15672](http://localhost:15672) | guest:guest |  | &#10003; | &#10003; | 
+
+# Configuration 
+
+You can override application.properties by setting an environment variable SPRING_APPLICATION_JSON for hawkbit container.
+```
+hawkbit:
+    image: "hawkbit/hawkbit-update-server:latest-mysql"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "jdbc:mysql://mysql:3306/hawkbit",
+        "spring.rabbitmq.host": "rabbitmq",
+        "spring.rabbitmq.username": "guest",
+        "spring.rabbitmq.password": "guest",
+        "spring.datasource.username": "root",
+        "hawkbit.server.im.users[0].username": "hawkbit",
+        "hawkbit.server.im.users[0].password": "{noop}isAwesome!",
+        "hawkbit.server.im.users[0].firstname": "Eclipse",
+        "hawkbit.server.im.users[0].lastname": "HawkBit",
+        "hawkbit.server.im.users[0].permissions": "ALL"
+      }'
+```

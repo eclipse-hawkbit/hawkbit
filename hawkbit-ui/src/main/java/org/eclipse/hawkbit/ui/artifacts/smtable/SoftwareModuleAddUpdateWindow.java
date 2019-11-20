@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -35,6 +37,8 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -53,38 +57,24 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class SoftwareModuleAddUpdateWindow extends CustomComponent {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoftwareModuleAddUpdateWindow.class.getName());
+
     private static final long serialVersionUID = 1L;
-
     private final VaadinMessageSource i18n;
-
     private final UINotification uiNotifcation;
-
     private final transient EventBus.UIEventBus eventBus;
-
     private final transient SoftwareModuleManagement softwareModuleManagement;
-
     private final transient SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     private final transient EntityFactory entityFactory;
-
-    private TextField nameTextField;
-
-    private TextField versionTextField;
-
-    private TextField vendorTextField;
-
-    private ComboBox typeComboBox;
-
-    private TextArea descTextArea;
-
-    private Boolean editSwModule = Boolean.FALSE;
-
-    private Long baseSwModuleId;
-
-    private FormLayout formLayout;
-
     private final AbstractTable<SoftwareModule> softwareModuleTable;
-
+    private TextField nameTextField;
+    private TextField versionTextField;
+    private TextField vendorTextField;
+    private ComboBox typeComboBox;
+    private TextArea descTextArea;
+    private Boolean editSwModule = Boolean.FALSE;
+    private Long baseSwModuleId;
+    private FormLayout formLayout;
     private Label softwareModuleType;
 
     /**
@@ -118,101 +108,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         createRequiredComponents();
     }
 
-    /**
-     * Save or update the sw module.
-     */
-    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
-        @Override
-        public void saveOrUpdate() {
-            if (editSwModule) {
-                updateSwModule();
-                return;
-            }
-            addNewBaseSoftware();
-        }
-
-        @Override
-        public boolean canWindowSaveOrUpdate() {
-            return editSwModule || !isDuplicate();
-        }
-
-        private void addNewBaseSoftware() {
-            final String name = nameTextField.getValue();
-            final String version = versionTextField.getValue();
-            final String vendor = vendorTextField.getValue();
-            final String description = descTextArea.getValue();
-            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-            final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement.getByName(type)
-                    .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
-            final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
-                    .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
-
-            final SoftwareModule newSoftwareModule = softwareModuleManagement.create(softwareModule);
-            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
-            uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                    newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
-            softwareModuleTable.setValue(Sets.newHashSet(newSoftwareModule.getId()));
-        }
-
-        private boolean isDuplicate() {
-            final String name = nameTextField.getValue();
-            final String version = versionTextField.getValue();
-            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-
-            final Optional<Long> moduleType = softwareModuleTypeManagement.getByName(type)
-                    .map(SoftwareModuleType::getId);
-            if (moduleType.isPresent() && softwareModuleManagement
-                    .getByNameAndVersionAndType(name, version, moduleType.get()).isPresent()) {
-                uiNotifcation
-                        .displayValidationError(i18n.getMessage("message.duplicate.softwaremodule", name, version));
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * updates a softwareModule
-         */
-        private void updateSwModule() {
-            final SoftwareModule newSWModule = softwareModuleManagement.update(entityFactory.softwareModule()
-                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
-            if (newSWModule != null) {
-                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
-                        newSWModule.getName() + ":" + newSWModule.getVersion()));
-
-                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
-            }
-        }
-
-    }
-
-    /**
-     * Creates window for new software module.
-     * 
-     * @return reference of {@link com.vaadin.ui.Window} to add new software
-     *         module.
-     */
-    public CommonDialogWindow createAddSoftwareModuleWindow() {
-        return createUpdateSoftwareModuleWindow(null);
-    }
-
-    /**
-     * Creates window for update software module.
-     * 
-     * @param baseSwModuleId
-     *            id of the software module to edit.
-     * @return reference of {@link com.vaadin.ui.Window} to update software
-     *         module.
-     */
-    public CommonDialogWindow createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
-        this.baseSwModuleId = baseSwModuleId;
-        resetComponents();
-        populateTypeNameCombo();
-        populateValuesOfSwModule();
-        return createWindow();
-    }
-
     private void createRequiredComponents() {
 
         nameTextField = createTextField("textfield.name", UIComponentIdProvider.SOFT_MODULE_NAME,
@@ -243,10 +138,30 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
                 .buildTextComponent();
     }
 
-    private void populateTypeNameCombo() {
-        typeComboBox.setContainerDataSource(
-                HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
-        typeComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+    /**
+     * Creates window for new software module.
+     *
+     * @return reference of {@link com.vaadin.ui.Window} to add new software
+     *         module.
+     */
+    public CommonDialogWindow createAddSoftwareModuleWindow() {
+        return createUpdateSoftwareModuleWindow(null);
+    }
+
+    /**
+     * Creates window for update software module.
+     *
+     * @param baseSwModuleId
+     *            id of the software module to edit.
+     * @return reference of {@link com.vaadin.ui.Window} to update software
+     *         module.
+     */
+    public CommonDialogWindow createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
+        this.baseSwModuleId = baseSwModuleId;
+        resetComponents();
+        populateTypeNameCombo();
+        populateValuesOfSwModule();
+        return createWindow();
     }
 
     private void resetComponents() {
@@ -258,6 +173,30 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
             typeComboBox.clear();
         }
         editSwModule = Boolean.FALSE;
+    }
+
+    private void populateTypeNameCombo() {
+        typeComboBox.setContainerDataSource(
+                HawkbitCommonUtil.createLazyQueryContainer(new BeanQueryFactory<>(SoftwareModuleTypeBeanQuery.class)));
+        typeComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+    }
+
+    /**
+     * fill the data of a softwareModule in the content of the window
+     */
+    private void populateValuesOfSwModule() {
+        if (baseSwModuleId == null) {
+            return;
+        }
+        editSwModule = Boolean.TRUE;
+        softwareModuleManagement.get(baseSwModuleId).ifPresent(swModule -> {
+            nameTextField.setValue(swModule.getName());
+            versionTextField.setValue(swModule.getVersion());
+            vendorTextField.setValue(swModule.getVendor());
+            descTextArea.setValue(swModule.getDescription());
+            softwareModuleType = new LabelBuilder().name(swModule.getType().getName())
+                    .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE)).buildLabel();
+        });
     }
 
     private CommonDialogWindow createWindow() {
@@ -293,26 +232,86 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent {
         return window;
     }
 
-    /**
-     * fill the data of a softwareModule in the content of the window
-     */
-    private void populateValuesOfSwModule() {
-        if (baseSwModuleId == null) {
-            return;
-        }
-        editSwModule = Boolean.TRUE;
-        softwareModuleManagement.get(baseSwModuleId).ifPresent(swModule -> {
-            nameTextField.setValue(swModule.getName());
-            versionTextField.setValue(swModule.getVersion());
-            vendorTextField.setValue(swModule.getVendor());
-            descTextArea.setValue(swModule.getDescription());
-            softwareModuleType = new LabelBuilder().name(swModule.getType().getName())
-                    .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE)).buildLabel();
-        });
-    }
-
     public FormLayout getFormLayout() {
         return formLayout;
+    }
+
+    /**
+     * Save or update the sw module.
+     */
+    private final class SaveOnDialogCloseListener implements SaveDialogCloseListener {
+        @Override
+        public boolean canWindowSaveOrUpdate() {
+            return editSwModule || !isDuplicate();
+        }
+
+        @Override
+        public void saveOrUpdate() {
+            if (editSwModule) {
+                updateSwModule();
+                return;
+            }
+            addNewBaseSoftware();
+        }
+
+        /**
+         * updates a softwareModule
+         */
+        private void updateSwModule() {
+            final SoftwareModule newSWModule = softwareModuleManagement.update(entityFactory.softwareModule()
+                    .update(baseSwModuleId).description(descTextArea.getValue()).vendor(vendorTextField.getValue()));
+            if (newSWModule != null) {
+                uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                        newSWModule.getName() + ":" + newSWModule.getVersion()));
+
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
+            }
+        }
+
+        private void addNewBaseSoftware() {
+            final String name = nameTextField.getValue();
+            final String version = versionTextField.getValue();
+            final String vendor = vendorTextField.getValue();
+            final String description = descTextArea.getValue();
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final SoftwareModuleType softwareModuleTypeByName = softwareModuleTypeManagement.getByName(type)
+                    .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type));
+            final SoftwareModuleCreate softwareModule = entityFactory.softwareModule().create()
+                    .type(softwareModuleTypeByName).name(name).version(version).description(description).vendor(vendor);
+            final SoftwareModule newSoftwareModule;
+            try {
+                newSoftwareModule = softwareModuleManagement.create(softwareModule);
+            } catch (ConstraintViolationException ex) {
+                String message = "This SoftwareModuleName is not valid! "
+                        + "Please choose a SoftwareModuleName without the characters /, ?, #, blank, and quota chars"
+                        + ex.getMessage();
+                LOGGER.warn(message, ex);
+                uiNotifcation.displayValidationError(i18n.getMessage("message.save.fail", name + ":" + version));
+                return;
+            }
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.ADD_ENTITY, newSoftwareModule));
+            uiNotifcation.displaySuccess(i18n.getMessage("message.save.success",
+                    newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
+            softwareModuleTable.setValue(Sets.newHashSet(newSoftwareModule.getId()));
+        }
+
+        private boolean isDuplicate() {
+            final String name = nameTextField.getValue();
+            final String version = versionTextField.getValue();
+            final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
+
+            final Optional<Long> moduleType = softwareModuleTypeManagement.getByName(type)
+                    .map(SoftwareModuleType::getId);
+            if (moduleType.isPresent() && softwareModuleManagement
+                    .getByNameAndVersionAndType(name, version, moduleType.get()).isPresent()) {
+                uiNotifcation
+                        .displayValidationError(i18n.getMessage("message.duplicate.softwaremodule", name, version));
+                return true;
+            }
+            return false;
+        }
+
     }
 
 }

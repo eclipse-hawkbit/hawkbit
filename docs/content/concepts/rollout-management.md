@@ -52,6 +52,10 @@ The cascading execution of the deployment groups is based on two thresholds that
 
 One of the main paradigms of Eclipse hawkBit is, that a Distribution Set represents the currently installed software of a device. Hence, a device can have only one Distribution Set assigned/installed at a time. With _Multi-Assignments_ enabled, this paradigm shifts. Multi-Assignments allows to assign multiple Distribution Sets to a device simultaneously, without cancelling each other. As a consequence, an operator can trigger multiple campaigns addressing the same devices in parallel. 
 
+### Action weight
+
+To differentiate between important and less important updates a property called _weight_ is used. When multi-assignments is enabled every action has a weight value between (and including) 0 and 1000. The higher the weight the more important is the assignment represented by the action. Also when defining a _rollout_ or an _auto-assignment_ and multi-assignments is enabled a weight value has to be provided. This value is passed to the actions created during the execution of these _rollouts_ and _auto-assignments_. If no weight was provided the highest value of 1000 is used instead. 
+
 ### Consequences
 
 While this feature provides more flexibility to the user and enables new use-cases, there are also some consequences one should be aware of:
@@ -60,11 +64,10 @@ While this feature provides more flexibility to the user and enables new use-cas
 
 * This feature is in beta and may change unannounced.
 * For now, this feature is **opt-in only**. Once activated, it cannot be deactivated.
-* Currently, there is no mechanism to hint devices to process the actions in a certain order.
 
 **Minor**
 
-* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the oldest open action. 
+* While on DMF-API a MULTI_ACTION request is sent, DDI-API only exposes the next action which has the highest priority in the list of open actions(according to their weight property). 
 * All information regarding the currently assigned or installed Distribution Set does only respect the last assignment, as well as the last successfully installed Distribution set. This also affects:
     * Pinning a target or Distribution Set in Deployment View.
     * Statistics about installed or assigned Distribution Sets.

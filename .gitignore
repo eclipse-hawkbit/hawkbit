@@ -12,6 +12,7 @@ target
 .metadata
 .project
 .idea
+artifactrepo
 
 # Windows image file caches
 Thumbs.db

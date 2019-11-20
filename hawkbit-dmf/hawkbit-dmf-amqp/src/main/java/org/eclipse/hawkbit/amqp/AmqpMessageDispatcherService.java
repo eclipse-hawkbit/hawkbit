@@ -176,8 +176,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .filter(target -> IpUtil.isAmqpUri(target.getAddress())).forEach(target -> {
 
                     final List<Action> activeActions = deploymentManagement
-                            .findActiveActionsByTarget(PageRequest.of(0, MAX_ACTION_COUNT), target.getControllerId())
-                            .getContent();
+                            .findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
 
                     activeActions.forEach(action -> action.getDistributionSet().getModules().forEach(
                             module -> softwareModuleMetadata.computeIfAbsent(module, this::getSoftwareModuleMetadata)));
@@ -204,7 +203,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         actions.forEach(action -> {
             final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
                     getSoftwareModuleMetaData.apply(action));
-            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest);
+            final int weight = deploymentManagement.getWeightConsideringDefault(action);
+            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
         });
 
         final Message message = getMessageConverter().toMessage(multiActionRequest,
