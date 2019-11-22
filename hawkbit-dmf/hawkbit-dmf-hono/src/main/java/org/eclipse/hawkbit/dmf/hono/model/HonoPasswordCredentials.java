@@ -30,14 +30,18 @@ public class HonoPasswordCredentials extends HonoCredentials {
 
         @Override
         public boolean matches(final String password) {
+            if ("none".equals(hashFunction)) {
+                return pwdHash.equals(password);
+            }
+
             PasswordEncoder encoder;
-            if (hashFunction.equals("bcrypt")) {
+            if ("bcrypt".equals(hashFunction)) {
                 encoder = new BCryptPasswordEncoder();
             }
-            else if(hashFunction.equals("sha-256")) {
+            else if("sha-256".equals(hashFunction)) {
                 encoder = new MessageDigestPasswordEncoder("SHA-256");
             }
-            else if(hashFunction.equals("sha-512")) {
+            else if("SHA-512".equals(hashFunction)) {
                 encoder = new MessageDigestPasswordEncoder("SHA-512");
             }
             else {
