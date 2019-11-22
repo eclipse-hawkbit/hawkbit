@@ -17,8 +17,10 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.lang.Nullable;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -55,6 +58,9 @@ public class HonoDeviceSync {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private TargetTagManagement targetTagManagement;
 
     @Autowired
     private PermissionService permissionService;
@@ -325,21 +331,53 @@ public class HonoDeviceSync {
 
     private Target createTarget(IdentifiableHonoDevice honoDevice) {
         systemManagement.getTenantMetadata(honoDevice.getTenant());
-        return targetManagement.create(entityFactory.target().create()
+        Target target = targetManagement.create(entityFactory.target().create()
                 .controllerId(honoDevice.getId())
                 .name(getDeviceName(honoDevice))
                 .description(honoDevice.getDevice().getExt().toString()));
+        syncTags(target, getDeviceTags(honoDevice));
+        return target;
     }
 
     private Target updateTarget(IdentifiableHonoDevice honoDevice) {
-        return targetManagement.update(entityFactory.target()
+        Target target = targetManagement.update(entityFactory.target()
                 .update(honoDevice.getId())
                 .name(getDeviceName(honoDevice))
                 .description(honoDevice.getDevice().getExt().toString()));
+        syncTags(target, getDeviceTags(honoDevice));
+        return target;
+    }
+
+    private void syncTags(Target target, @Nullable String tags) {
+        String controllerId = target.getControllerId();
+        Collection<String> tagNames;
+        if (tags != null) {
+            tagNames = new ArrayList<>(Arrays.asList(tags.split(",")));
+        }
+        else {
+            tagNames = Collections.emptyList();
+        }
+
+        Slice<TargetTag> assignedTags = targetTagManagement.findByTarget(Pageable.unpaged(), target.getControllerId());
+        for (TargetTag tag : assignedTags) {
+            if (tagNames.contains(tag.getName())) {
+                tagNames.remove(tag.getName());
+            }
+            else {
+                targetManagement.unAssignTag(controllerId, tag.getId());
+            }
+        }
+
+        for (String name : tagNames) {
+            TargetTag tag = targetTagManagement.getByName(name).orElseGet(
+                    () -> targetTagManagement.create(entityFactory.tag().create().name(name)));
+
+            targetManagement.assignTag(Collections.singleton(target.getControllerId()), tag.getId());
+        }
     }
 
     private String getDeviceName(IdentifiableHonoDevice honoDevice) {
-        if (targetNameFieldInDeviceExtension != null && !targetNameFieldInDeviceExtension.isEmpty()) {
+        if (targetNameFieldInDeviceExtension != null) {
             Object ext = honoDevice.getDevice().getExt();
             if (ext instanceof JsonNode) {
                 JsonNode nameValue = ((JsonNode) ext).get(targetNameFieldInDeviceExtension);
@@ -347,16 +385,32 @@ public class HonoDeviceSync {
                     return nameValue.asText();
                 }
                 else {
-                    LOG.warn("The extension object of the device with id = '{}' does not contain the field '{}'.",
-                            honoDevice.getId(), targetNameFieldInDeviceExtension);
+                    LOG.warn("The extension object of device '{}/{}' does not contain the field '{}'.",
+                            honoDevice.getTenant(), honoDevice.getId(), targetNameFieldInDeviceExtension);
                 }
             }
             else {
-                LOG.warn("The extension field of the device with id = '{}' is not a valid JSON object.",
+                LOG.warn("The extension field of device '{}/{}' is not a valid JSON object.", honoDevice.getTenant(),
                         honoDevice.getId());
             }
         }
 
         return honoDevice.getId();
+    }
+
+    private String getDeviceTags(IdentifiableHonoDevice honoDevice) {
+        Object ext = honoDevice.getDevice().getExt();
+        if (ext instanceof JsonNode) {
+            JsonNode tagsValue = ((JsonNode) ext).get("TargetTags");
+            if (tagsValue != null) {
+                return tagsValue.asText();
+            }
+        }
+        else {
+            LOG.warn("The extension field of device '{}/{}' is not a valid JSON object.", honoDevice.getTenant(),
+                    honoDevice.getId());
+        }
+
+        return null;
     }
 }
