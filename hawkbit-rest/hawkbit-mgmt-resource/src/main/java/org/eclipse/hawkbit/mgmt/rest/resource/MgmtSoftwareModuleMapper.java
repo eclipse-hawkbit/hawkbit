@@ -132,7 +132,8 @@ public final class MgmtSoftwareModuleMapper {
         final MgmtArtifact artifactRest = new MgmtArtifact();
         artifactRest.setArtifactId(artifact.getId());
         artifactRest.setSize(artifact.getSize());
-        artifactRest.setHashes(new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
+        artifactRest.setHashes(
+                new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
 
         artifactRest.setProvidedFilename(artifact.getFilename());
 

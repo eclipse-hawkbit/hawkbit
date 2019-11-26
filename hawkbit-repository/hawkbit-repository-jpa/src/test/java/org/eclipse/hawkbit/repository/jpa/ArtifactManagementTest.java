@@ -30,9 +30,9 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -84,12 +84,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final int artifactSize = artifactData.length();
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize)),
+                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize)),
+                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");

@@ -297,7 +297,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         private Artifact uploadArtifact(final String filename) {
             try {
                 return artifactManagement.create(new ArtifactUpload(inputStream, fileUploadId.getSoftwareModuleId(),
-                        filename, null, null, true, mimeType, -1));
+                        filename, null, null, null, true, mimeType, -1));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
                 throw new ArtifactUploadFailedException(e);
             }
