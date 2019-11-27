@@ -333,8 +333,7 @@ public class HonoDeviceSync {
         systemManagement.getTenantMetadata(honoDevice.getTenant());
         Target target = targetManagement.create(entityFactory.target().create()
                 .controllerId(honoDevice.getId())
-                .name(getDeviceName(honoDevice))
-                .description(honoDevice.getDevice().getExt().toString()));
+                .name(getDeviceName(honoDevice)));
         syncTags(target, getDeviceTags(honoDevice));
         return target;
     }
@@ -342,8 +341,7 @@ public class HonoDeviceSync {
     private Target updateTarget(IdentifiableHonoDevice honoDevice) {
         Target target = targetManagement.update(entityFactory.target()
                 .update(honoDevice.getId())
-                .name(getDeviceName(honoDevice))
-                .description(honoDevice.getDevice().getExt().toString()));
+                .name(getDeviceName(honoDevice)));
         syncTags(target, getDeviceTags(honoDevice));
         return target;
     }
