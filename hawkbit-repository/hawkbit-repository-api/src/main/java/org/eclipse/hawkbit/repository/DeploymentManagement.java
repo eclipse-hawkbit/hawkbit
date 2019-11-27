@@ -8,23 +8,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -42,6 +32,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * A DeploymentManagement service provides operations for the deployment of
@@ -67,7 +66,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -97,8 +96,8 @@ public interface DeploymentManagement {
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
-     *
-     * @throws QuotaExceededException
+     * 
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -129,7 +128,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      *
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
@@ -183,7 +182,7 @@ public interface DeploymentManagement {
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * 

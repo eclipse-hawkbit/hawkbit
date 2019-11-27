@@ -8,32 +8,22 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.validation.ConstraintViolationException;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -46,10 +36,18 @@ import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import javax.validation.ConstraintViolationException;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link TargetFilterQueryManagement}.
@@ -123,7 +121,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as there is no distribution set
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
                         .name("testfilter").autoAssignDistributionSet(set.getId()).query("name==target*")));
     }
@@ -300,7 +298,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         // assigning a distribution set is supposed to fail as the query
         // addresses too many targets
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                         .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId())));
     }
@@ -319,7 +317,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .create().name("testfilter").autoAssignDistributionSet(set.getId()).query("name==foo"));
 
         // update with a query string that addresses too many targets
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> targetFilterQueryManagement
                 .update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query("name==target*")));
     }
 

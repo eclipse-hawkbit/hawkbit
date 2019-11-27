@@ -115,6 +115,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final String DENY_BUTTON_LABEL = "button.deny";
 
+    private static final String WEIGHT_TEXTFIELD = "textfield.weight";
+
     private final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout;
 
     private final AutoStartOptionGroupLayout autoStartOptionGroupLayout;
@@ -284,7 +286,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId())
                     .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
                     .actionType(getActionType()).forcedTime(getForcedTimeStamp());
-
+            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+                rolloutUpdate.weight(Integer.valueOf(rolloutWeight.getValue()));
+            }
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutUpdate.startAt(System.currentTimeMillis());
             }
@@ -338,16 +342,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
             final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
-                    .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
-                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
-
+                    .description(description.getValue()).set(distributionId)
+                    .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType())
+                    .forcedTime(getForcedTimeStamp());
+            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+                rolloutCreate.weight(Integer.valueOf(rolloutWeight.getValue().replace(",", "")));
+            }
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutCreate.startAt(System.currentTimeMillis());
             }
             if (AutoStartOptionGroupLayout.AutoStartOption.SCHEDULED == getAutoStartOption()) {
                 rolloutCreate.startAt(getScheduledStartTime());
             }
-
             if (isNumberOfGroups()) {
                 return rolloutManagement.create(rolloutCreate, amountGroup, conditions);
             } else if (isGroupsDefinition()) {
@@ -395,6 +401,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     CommonDialogWindow getWindow(final Long rolloutId, final boolean copy) {
         resetComponents();
         window = createWindow();
+        configureWeightComponent();
         populateData(rolloutId, copy);
         return window;
     }
@@ -410,10 +417,23 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     public CommonDialogWindow getWindow() {
         resetComponents();
         window = createWindow();
+        configureWeightComponent();
         window.updateAllComponents(noOfGroups);
         window.updateAllComponents(triggerThreshold);
         window.updateAllComponents(errorThreshold);
         return window;
+    }
+
+    private void configureWeightComponent() {
+        removeComponent(rolloutWeight);
+        removeComponent(0, 3);
+        rolloutWeight.removeAllValidators();
+        if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+            addComponent(getMandatoryLabel(WEIGHT_TEXTFIELD), 0, 3);
+            addComponent(rolloutWeight, 1, 3);
+            rolloutWeight.addValidator(nullValidator);
+            rolloutWeight.addValidator(new WeightFieldValidator());
+        }
     }
 
     /**
@@ -424,6 +444,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         editRolloutEnabled = false;
         rolloutName.clear();
         targetFilterQuery.clear();
+        rolloutWeight.clear();
         resetFields();
         enableFields();
         populateDistributionSet();
@@ -473,6 +494,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThreshold.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         description.clear();
         description.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        rolloutWeight.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+
     }
 
     private void buildLayout() {
@@ -499,16 +522,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         targetFilterQueryCombo.addValidator(new TargetExistsValidator());
         targetFilterQuery.removeValidator(nullValidator);
 
-        if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
-            addComponent(getMandatoryLabel("textfield.weight"), 0, 3);
-            addComponent(rolloutWeight, 1, 3);
-            rolloutWeight.addValidator(nullValidator);
-        }
+        addComponent(getMandatoryLabel(WEIGHT_TEXTFIELD), 0, 3);
+        addComponent(rolloutWeight, 1, 3);
+        rolloutWeight.addValidator(nullValidator);
+        rolloutWeight.addValidator(new WeightFieldValidator());
 
         addComponent(getLabel("textfield.description"), 0, 4);
         addComponent(description, 1, 4, 1, 4);
 
-        // TODO : check where the charts appear and if they are aligned right!!
         addComponent(groupsLegendLayout, 3, 0, 3, 4);
         addComponent(groupsPieChart, 2, 0, 2, 4);
 
@@ -930,9 +951,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private TextField createRolloutWeightField() {
-        final TextField rolloutWeightField = createIntegerTextField("textfield.weight",
+        final TextField rolloutWeightField = createIntegerTextField(WEIGHT_TEXTFIELD,
                 UIComponentIdProvider.ROLLOUT_WEIGHT_FIELD_ID);
-        rolloutWeightField.addValidator(new WeightFieldValidator());
+
         rolloutWeightField.setMaxLength(4);
         return rolloutWeightField;
     }
@@ -1050,6 +1071,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             rolloutName.setValue(i18n.getMessage("textfield.rollout.copied.name", rollout.getName()));
             populateTargetFilterQuery(rollout);
 
+            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+                rolloutWeight.setValue(String.valueOf(rollout.getWeight().orElse(null)));
+            }
+
             defineGroupsLayout.populateByRollout(rollout);
             groupsDefinitionTabs.setSelectedTab(1);
 
@@ -1070,6 +1095,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
             rolloutName.setValue(rollout.getName());
             groupsDefinitionTabs.setVisible(false);
+
+            final Optional<Integer> weight = rollout.getWeight();
+            rolloutWeight.setValue(String.valueOf(weight.isPresent() ? weight.get().intValue() : ""));
 
             targetFilterQuery.setValue(rollout.getTargetFilterQuery());
             removeComponent(1, 2);
@@ -1095,6 +1123,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     private void disableRequiredFieldsOnEdit() {
         noOfGroups.setEnabled(false);
         distributionSet.setEnabled(false);
+        rolloutWeight.setEnabled(false);
         errorThreshold.setEnabled(false);
         triggerThreshold.setEnabled(false);
         errorThresholdOptionGroup.setEnabled(false);
@@ -1106,6 +1135,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private void enableFields() {
         distributionSet.setEnabled(true);
+        rolloutWeight.setEnabled(true);
         errorThreshold.setEnabled(true);
         triggerThreshold.setEnabled(true);
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(true);

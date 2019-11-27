@@ -27,12 +27,12 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -170,8 +170,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .singletonList(new SimpleEntry<String, Long>(testTarget.getControllerId(), ds1.getId())));
         }
 
-        assertThatExceptionOfType(QuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds1.getId(), testTarget.getControllerId(), 77));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds1, Collections.singletonList(testTarget)));
     }
 
     @Test
@@ -185,7 +185,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds1, targets);
 
         targets.add(testdataFactory.createTarget("assignmentTest2"));
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> assignDistributionSet(ds2, targets));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds2, targets));
     }
 
     @Test
@@ -689,7 +690,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 DeploymentManagement.deploymentRequest(controllerId, dsId).setWeight(24).build());
 
         enableMultiAssignments();
-        Assertions.assertThatExceptionOfType(QuotaExceededException.class)
+        Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
         assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(0);
     }

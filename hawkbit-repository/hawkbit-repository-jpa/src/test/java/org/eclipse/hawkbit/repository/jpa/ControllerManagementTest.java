@@ -49,11 +49,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -986,7 +986,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
                     return null;
@@ -1005,7 +1005,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
         // Now rite one more
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
@@ -1067,7 +1067,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeStatus(actionId, allowStatusEntries);
                     return null;
@@ -1123,7 +1123,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
                     .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
                 .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
 
         // test for update status (and mixed case)
@@ -1134,7 +1134,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
                     .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> controllerManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
                 .addInformationalActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
 
     }
@@ -1161,7 +1161,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
 
         messages.add("msg");
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
                         entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
 
@@ -1258,7 +1258,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
     }
 
-    @Test(expected = QuotaExceededException.class)
+    @Test(expected = AssignmentQuotaExceededException.class)
     @Description("Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a "
             + "DOWNLOAD_ONLY action.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -1293,17 +1293,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
                 .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
                 .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
@@ -1321,17 +1321,17 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
         assertThat(actionId).isNotNull();
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
                 .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
                 .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
                         .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
@@ -1475,29 +1475,29 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
         enableMultiAssignments();
-        final Long actionWeight700old = assignDistributionSet(ds.getId(), targetId, 700).getAssignedEntity().get(0)
+        final Long actionWeight500old = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
                 .getId();
-        final Long actionWeight700new = assignDistributionSet(ds.getId(), targetId, 700).getAssignedEntity().get(0)
+        final Long actionWeight500new = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
                 .getId();
         final Long actionWeight1000 = assignDistributionSet(ds.getId(), targetId, 1000).getAssignedEntity().get(0)
                 .getId();
 
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
+                .isEqualTo(actionWeightNull);
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeight1000);
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight1000).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight700old);
+                .isEqualTo(actionWeight500old);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight700old).status(Status.FINISHED));
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500old).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight700new);
+                .isEqualTo(actionWeight500new);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight700new).status(Status.FINISHED));
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeightNull);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
     }
 

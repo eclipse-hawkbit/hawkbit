@@ -107,6 +107,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         final ProxyRollout proxyRollout = new ProxyRollout();
         proxyRollout.setName(rollout.getName());
         proxyRollout.setDescription(rollout.getDescription());
+        proxyRollout.setWeight(rollout.getWeight().orElse(null));
         final DistributionSet distributionSet = rollout.getDistributionSet();
         proxyRollout.setDistributionSetNameVersion(
                 HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ValidationException;
 
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -78,7 +78,7 @@ public final class RolloutHelper {
         if (amountGroup <= 0) {
             throw new ValidationException("The amount of groups cannot be lower than zero");
         } else if (amountGroup > quotaManagement.getMaxRolloutGroupsPerRollout()) {
-            throw new QuotaExceededException(
+            throw new AssignmentQuotaExceededException(
                     "The amount of groups cannot be greater than " + quotaManagement.getMaxRolloutGroupsPerRollout());
 
         }
