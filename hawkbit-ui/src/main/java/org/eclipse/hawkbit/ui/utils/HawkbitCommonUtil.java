@@ -84,8 +84,8 @@ public final class HawkbitCommonUtil {
      *
      * @param text
      *            text to be trimmed
-     * @return null if the text is null or if the text is blank, text.trim() if
-     *         the text is not empty.
+     * @return null if the text is null or if the text is blank, text.trim() if the
+     *         text is not empty.
      */
     public static String trimAndNullIfEmpty(final String text) {
         if (text != null && !text.trim().isEmpty()) {
@@ -95,18 +95,16 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Concatenate the given text all the string arguments with the given
-     * delimiter.
+     * Concatenate the given text all the string arguments with the given delimiter.
      *
      * @param delimiter
      *            the delimiter text to be used while concatenation.
      * @param texts
      *            all these string values will be concatenated with the given
      *            delimiter.
-     * @return null in case no text arguments to be compared. just concatenation
-     *         of all texts arguments if "delimiter" is null or empty.
-     *         concatenation of all texts arguments with "delimiter" if it not
-     *         null.
+     * @return null in case no text arguments to be compared. just concatenation of
+     *         all texts arguments if "delimiter" is null or empty. concatenation of
+     *         all texts arguments with "delimiter" if it not null.
      */
     public static String concatStrings(final String delimiter, final String... texts) {
         final String delim = delimiter == null ? "" : delimiter;
@@ -141,21 +139,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get Label for Artifact Details.
-     *
-     * @param caption
-     *            as caption of the details
-     * @param name
-     *            as name
-     * @return SoftwareModuleName
-     */
-    public static String getSoftwareModuleName(final String caption, final String name) {
-        return new StringBuilder()
-                .append(DIV_DESCRIPTION_START + caption + " : " + getBoldHTMLText(getFormattedName(name)))
-                .append(DIV_DESCRIPTION_END).toString();
-    }
-
-    /**
      * Get tool tip for Poll status.
      *
      * @param pollStatus
@@ -181,7 +164,7 @@ public final class HawkbitCommonUtil {
      * @return String formatted text
      */
     public static String getFormattedName(final String orgText) {
-        return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
+        return trimAndNullIfEmpty(orgText) == null ? "" : orgText;
     }
 
     private static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
@@ -552,7 +535,7 @@ public final class HawkbitCommonUtil {
      * @return complete caption text of the table
      */
     public static String getArtifactoryDetailsLabelId(final String name, final VaadinMessageSource i18n) {
-        String caption;
+        final String caption;
         if (StringUtils.hasText(name)) {
             caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF,
                     HawkbitCommonUtil.getBoldHTMLText(name));

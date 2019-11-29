@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -34,6 +33,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract Layout to show the entity details.
@@ -50,7 +50,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private T selectedBaseEntity;
 
-    private Label caption;
+    private Label captionPrefix;
+
+    private Label captionNameVersion;
 
     private Button editButton;
 
@@ -91,8 +93,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     /**
      * Subscribes the view to the eventBus. Method has to be overriden (return
-     * false) if the view does not contain any listener to avoid Vaadin blowing
-     * up our logs with warnings.
+     * false) if the view does not contain any listener to avoid Vaadin blowing up
+     * our logs with warnings.
      */
     protected boolean doSubscribeToEventBus() {
         return true;
@@ -122,7 +124,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     /**
      * Default implementation to handle an entity event.
-     * 
+     *
      * @param baseEntityEvent
      *            the event
      */
@@ -139,7 +141,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected void setName(final String headerCaption, final String value) {
-        caption.setValue(HawkbitCommonUtil.getSoftwareModuleName(headerCaption, value));
+        captionPrefix.setValue(headerCaption + " : ");
+        captionNameVersion.setValue(HawkbitCommonUtil.getFormattedName(value));
     }
 
     /**
@@ -176,8 +179,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout.removeAllComponents();
         final Label descLabel = SPUIComponentProvider.createNameValueLabel("", description == null ? "" : description);
         /**
-         * By default text will be truncated based on layout width. So removing
-         * it as we need full description.
+         * By default text will be truncated based on layout width. So removing it as we
+         * need full description.
          */
         descLabel.removeStyleName("label-style");
         descLabel.setId(UIComponentIdProvider.DETAILS_DESCRIPTION_LABEL_ID);
@@ -213,10 +216,20 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected void createComponents() {
-        caption = createHeaderCaption();
-        caption.setImmediate(true);
-        caption.setContentMode(ContentMode.HTML);
-        caption.setId(getDetailsHeaderCaptionId());
+        captionPrefix = new Label(getDefaultCaption());
+       captionPrefix.setImmediate(true);
+        captionPrefix.addStyleName(ValoTheme.LABEL_SMALL);
+        captionPrefix.addStyleName(ValoTheme.LABEL_BOLD);
+        captionPrefix.setSizeUndefined();
+
+        captionNameVersion = new Label();
+        captionNameVersion.setImmediate(true);
+        captionNameVersion.setId(getDetailsHeaderCaptionId());
+        captionNameVersion.setWidth("100%");
+        captionNameVersion.addStyleName(ValoTheme.LABEL_SMALL);
+        captionNameVersion.addStyleName("text-bold");
+        captionNameVersion.addStyleName("text-cut");
+        captionNameVersion.addStyleName("header-caption-right");
 
         editButton = SPUIComponentProvider.getButton("", "", i18n.getMessage(UIMessageIdProvider.TOOLTIP_UPDATE), null,
                 false, FontAwesome.PENCIL_SQUARE_O, SPUIButtonStyleNoBorder.class);
@@ -242,16 +255,31 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     protected void buildLayout() {
         nameEditLayout = new HorizontalLayout();
+
+        final HorizontalLayout headerCaptionLayout = new HorizontalLayout();
+        headerCaptionLayout.setMargin(false);
+        headerCaptionLayout.setSpacing(true);
+        headerCaptionLayout.setSizeFull();
+        headerCaptionLayout.addStyleName("header-caption");
+
+        headerCaptionLayout.addComponent(captionPrefix);
+        headerCaptionLayout.setComponentAlignment(captionPrefix, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(captionPrefix, 0.0F);
+
+        headerCaptionLayout.addComponent(captionNameVersion);
+        headerCaptionLayout.setComponentAlignment(captionNameVersion, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(captionNameVersion, 1.0F);
+
         nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
-        nameEditLayout.addComponent(caption);
-        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
+        nameEditLayout.addComponents(headerCaptionLayout);
+        nameEditLayout.setComponentAlignment(headerCaptionLayout, Alignment.TOP_LEFT);
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
             nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
             nameEditLayout.addComponent(manageMetadataBtn);
             nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
         }
-        nameEditLayout.setExpandRatio(caption, 1.0F);
+        nameEditLayout.setExpandRatio(headerCaptionLayout, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
 
         addComponent(nameEditLayout);
@@ -264,13 +292,9 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         addStyleName(SPUIStyleDefinitions.WIDGET_STYLE);
     }
 
-    private Label createHeaderCaption() {
-        return new LabelBuilder().name(getDefaultCaption()).buildCaptionLabel();
-    }
-
     /**
-     * If there is no data in table (i.e. no row selected), then disable the
-     * edit button. If row is selected, enable edit button.
+     * If there is no data in table (i.e. no row selected), then disable the edit
+     * button. If row is selected, enable edit button.
      */
     protected void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;
@@ -307,7 +331,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract void populateMetadataDetails();
 
     /**
-     * Default caption of header to be displayed when no data row selected in
+     * Default captionPrefix of header to be displayed when no data row selected in
      * table.
      * 
      * @return String

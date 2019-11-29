@@ -91,6 +91,14 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     -webkit-text-overflow: ellipsis;
   }
 
+  .text-bold {
+    font-weight: bold;
+  }
+
+  .header-caption-right {
+    padding-right: 0.5em;
+  }
+
   .v-panel,
   .v-textfield {
     background: $widget-bg;
