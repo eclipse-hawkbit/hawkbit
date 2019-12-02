@@ -498,6 +498,32 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Assign not existing target to distribution set.")
+    public void assignNotExistingTargetToDistributionSet() throws Exception {
+        // prepare distribution set
+        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
+        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        // prepare targets
+        final String[] knownTargetIds = new String[] { "1", "2", "3" };
+        final JSONArray list = new JSONArray();
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("type", "forced"));
+        }
+        // assign already one target to DS
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        // put not existing target to request json
+        list.put(new JSONObject().put("id", "notexistingtarget").put("type", "forced"));
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("$.assigned", equalTo(2))).andExpect(jsonPath("$.total", equalTo(3)));
+    }
+
+    @Test
     @Description("Ensures that assigned targets of DS are returned as reflected by the repository.")
     public void getAssignedTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
