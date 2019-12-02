@@ -37,11 +37,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -187,7 +187,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds1, targets);
 
         targets.add(testdataFactory.createTarget("assignmentTest2"));
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> assignDistributionSet(ds2, targets));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> assignDistributionSet(ds2, targets));
     }
 
     @Test
@@ -645,6 +646,34 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         assertThat(getResultingActionCount(
                 deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)))).isEqualTo(2);
+    }
+
+    @Test
+    @Description("Assign distribution set to not existing target.")
+    public void assignDistributionSetToNotExistingTarget() {
+        final String notExistingId = "notExistingTarget";
+        // prepare distribution set
+        final List<DistributionSet> createDistributionSets = testdataFactory.createDistributionSets(1);
+        final DistributionSet createdDs = createDistributionSets.iterator().next();
+        // prepare targets
+        final List<String> knownTargetIds = Lists.newArrayList("1", "2");
+        for (final String targetId : knownTargetIds) {
+            testdataFactory.createTarget(targetId);
+        }
+        // add not existing target to targets
+        knownTargetIds.add(notExistingId);
+        // assign targets to DS
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        for (final String controllerId : knownTargetIds) {
+            deploymentRequests.add(new DeploymentRequest(controllerId, createdDs.getId(), ActionType.FORCED, 0, null,
+                    null, null, null));
+        }
+        final List<DistributionSetAssignmentResult> assignDistributionSetsResults = deploymentManagement
+                .assignDistributionSets(deploymentRequests);
+        for (final DistributionSetAssignmentResult assignDistributionSetsResult : assignDistributionSetsResults) {
+            assertEquals(0, assignDistributionSetsResult.getAlreadyAssigned());
+        }
+
     }
 
     @Test
