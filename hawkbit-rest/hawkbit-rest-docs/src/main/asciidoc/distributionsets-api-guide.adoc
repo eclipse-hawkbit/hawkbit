@@ -440,7 +440,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the POST request for assigning multiple targets to a distribution set.The request body must always be a list of target IDs. Required permissions: READ_REPOSITORY and UPDATE_TARGET
+Handles the POST request for assigning multiple targets to a distribution set.The request body must always be a list of target IDs. If a target is not found, the other given targets will still be assigned and the response code is 200. Required permissions: READ_REPOSITORY and UPDATE_TARGET
 
 === Assign targets to a distribution set
 
