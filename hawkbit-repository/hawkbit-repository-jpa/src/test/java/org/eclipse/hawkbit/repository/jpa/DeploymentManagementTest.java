@@ -672,6 +672,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .assignDistributionSets(deploymentRequests);
         for (final DistributionSetAssignmentResult assignDistributionSetsResult : assignDistributionSetsResults) {
             assertEquals(0, assignDistributionSetsResult.getAlreadyAssigned());
+            assertEquals(2, assignDistributionSetsResult.getAssigned());
+            assertEquals(2, assignDistributionSetsResult.getTotal());
         }
 
     }
