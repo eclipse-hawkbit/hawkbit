@@ -48,7 +48,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -91,7 +90,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final UINotification uINotification;
 
+    private Label prefixTitleOfArtifactDetails;
+
     private Label titleOfArtifactDetails;
+
+    private HorizontalLayout headerCaptionLayout;
 
     private SPUIButton maxMinButton;
 
@@ -163,11 +166,35 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private void createComponents(final String labelSoftwareModule) {
-        titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
-                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule, i18n)).buildCaptionLabel();
-        titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+        prefixTitleOfArtifactDetails = new Label();
+        prefixTitleOfArtifactDetails.setId(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID);
+        prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
+        prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_BOLD);
+        prefixTitleOfArtifactDetails.setSizeUndefined();
+
+        titleOfArtifactDetails = new Label();
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
+        titleOfArtifactDetails.setWidth("100%");
+        titleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
+        titleOfArtifactDetails.addStyleName("text-bold");
+        titleOfArtifactDetails.addStyleName("text-cut");
+        titleOfArtifactDetails.addStyleName("header-caption-right");
+
+        headerCaptionLayout = new HorizontalLayout();
+        headerCaptionLayout.setMargin(false);
+        headerCaptionLayout.setSpacing(true);
+        headerCaptionLayout.setSizeFull();
+        headerCaptionLayout.addStyleName("header-caption");
+
+        headerCaptionLayout.addComponent(prefixTitleOfArtifactDetails);
+        headerCaptionLayout.setComponentAlignment(prefixTitleOfArtifactDetails, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(prefixTitleOfArtifactDetails, 0.0F);
+
+        headerCaptionLayout.addComponent(titleOfArtifactDetails);
+        headerCaptionLayout.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(titleOfArtifactDetails, 1.0F);
+
         maxMinButton = createMaxMinButton();
 
         artifactDetailsTable = createArtifactDetailsTable();
@@ -199,10 +226,10 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         header.setSizeFull();
         header.setHeightUndefined();
         header.setImmediate(true);
-        header.addComponents(titleOfArtifactDetails, maxMinButton);
-        header.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
+        header.addComponents(headerCaptionLayout, maxMinButton);
+        header.setComponentAlignment(headerCaptionLayout, Alignment.TOP_LEFT);
         header.setComponentAlignment(maxMinButton, Alignment.TOP_RIGHT);
-        header.setExpandRatio(titleOfArtifactDetails, 1.0F);
+        header.setExpandRatio(headerCaptionLayout, 1.0F);
 
         setSizeFull();
         setImmediate(true);
@@ -429,8 +456,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             if (StringUtils.isEmpty(swModuleName)) {
                 setTitleOfLayoutHeader();
             } else {
-                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName, i18n));
-                titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+
+                if (StringUtils.hasText(swModuleName)) {
+                    prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
+                    titleOfArtifactDetails.setValue(swModuleName);
+                } else {
+                    prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
+                }
             }
         }
         final Map<String, Object> queryConfiguration;
@@ -452,8 +484,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId("", i18n));
-        titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+        prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

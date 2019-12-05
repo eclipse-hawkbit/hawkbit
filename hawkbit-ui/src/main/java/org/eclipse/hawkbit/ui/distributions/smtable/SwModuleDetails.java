@@ -94,6 +94,9 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
         return artifactDetailsButton;
     }
 
+    // TODO AMMAR here is the third XSS related snippet -> relace usage of
+    // "getArtifactoryDetailsLabelId()", as it sets the name displayed in
+    // DistributionView/SoftwareModule/ShowArtifactDetails
     private void showArtifactDetailsWindow(final SoftwareModule softwareModule) {
         final Window artifactDtlsWindow = new Window();
         artifactDtlsWindow.setCaption(HawkbitCommonUtil

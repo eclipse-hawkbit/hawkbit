@@ -538,11 +538,11 @@ public final class HawkbitCommonUtil {
         final String caption;
         if (StringUtils.hasText(name)) {
             caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF,
-                    HawkbitCommonUtil.getBoldHTMLText(name));
+                    name);
         } else {
             caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS);
         }
-        return getCaptionText(caption);
+        return caption;
     }
 
     /**
