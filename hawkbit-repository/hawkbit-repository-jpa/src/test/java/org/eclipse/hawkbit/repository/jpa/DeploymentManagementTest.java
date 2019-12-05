@@ -649,7 +649,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Assign distribution set to not existing target.")
+    @Description("Assign distribution set to not existing target and expect other targets to be assigned successfully.")
     public void assignDistributionSetToNotExistingTarget() {
         final String notExistingId = "notExistingTarget";
         // prepare distribution set
