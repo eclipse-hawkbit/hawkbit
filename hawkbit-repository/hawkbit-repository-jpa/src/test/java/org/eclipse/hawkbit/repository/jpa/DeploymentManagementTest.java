@@ -652,30 +652,33 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Assign distribution set to not existing target and expect other targets to be assigned successfully.")
     public void assignDistributionSetToNotExistingTarget() {
         final String notExistingId = "notExistingTarget";
-        // prepare distribution set
-        final List<DistributionSet> createDistributionSets = testdataFactory.createDistributionSets(1);
-        final DistributionSet createdDs = createDistributionSets.iterator().next();
-        // prepare targets
+
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
         final List<String> knownTargetIds = Lists.newArrayList("1", "2");
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-        }
+        testdataFactory.createTargets(knownTargetIds);
+
         // add not existing target to targets
         knownTargetIds.add(notExistingId);
-        // assign targets to DS
-        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        for (final String controllerId : knownTargetIds) {
-            deploymentRequests.add(new DeploymentRequest(controllerId, createdDs.getId(), ActionType.FORCED, 0, null,
-                    null, null, null));
-        }
-        final List<DistributionSetAssignmentResult> assignDistributionSetsResults = deploymentManagement
-                .assignDistributionSets(deploymentRequests);
-        for (final DistributionSetAssignmentResult assignDistributionSetsResult : assignDistributionSetsResults) {
-            assertEquals(0, assignDistributionSetsResult.getAlreadyAssigned());
-            assertEquals(2, assignDistributionSetsResult.getAssigned());
-            assertEquals(2, assignDistributionSetsResult.getTotal());
-        }
 
+        final List<DistributionSetAssignmentResult> assignDistributionSetsResults = assignDistributionSetToTargets(
+                createdDs, knownTargetIds);
+
+        for (final DistributionSetAssignmentResult assignDistributionSetsResult : assignDistributionSetsResults) {
+            assertThat(assignDistributionSetsResult.getAlreadyAssigned()).isEqualTo(0);
+            assertThat(assignDistributionSetsResult.getAssigned()).isEqualTo(2);
+            assertThat(assignDistributionSetsResult.getTotal()).isEqualTo(2);
+        }
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSetToTargets(final DistributionSet distributionSet,
+            final Iterable<String> targetIds) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        for (final String controllerId : targetIds) {
+            deploymentRequests.add(new DeploymentRequest(controllerId, distributionSet.getId(), ActionType.FORCED, 0,
+                    null, null, null, null));
+        }
+        return deploymentManagement.assignDistributionSets(deploymentRequests);
     }
 
     @Test
