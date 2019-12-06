@@ -8,12 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +39,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -57,7 +50,9 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -76,8 +71,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public class ArtifactDetailsLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(ArtifactDetailsLayout.class);
 
     private static final String PROVIDED_FILE_NAME = "filename";
 
@@ -306,47 +299,29 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
                 true, FontAwesome.DOWNLOAD, SPUIButtonStyleNoBorder.class);
         downloadIcon.setData(itemId);
-        downloadIcon.addClickListener(event -> downloadArtifact((Long) itemId, fileName));
+        FileDownloader fileDownloader = new FileDownloader(createStreamResource((Long) itemId));
+        fileDownloader.extend(downloadIcon);
         return downloadIcon;
     }
 
-    private void downloadArtifact(final Long id, final String fileName) {
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.download.artifact.confirmbox"),
-                i18n.getMessage("message.download.artifact", fileName), i18n.getMessage(UIMessageIdProvider.BUTTON_YES),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_NO), yes -> {
-                    if (yes) {
-                        performDownload(id);
-                    }
-                });
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-        confirmDialog.getWindow().bringToFront();
-    }
+    private StreamResource createStreamResource(final Long id) {
 
-    private void performDownload(final Long id) {
         Optional<Artifact> artifact = this.artifactManagement.get(id);
         if (artifact.isPresent()) {
             Optional<AbstractDbArtifact> file = artifactManagement.loadArtifactBinary(artifact.get().getSha1Hash());
-            if (file.isPresent()) {
-                try (ReadableByteChannel readChannel = Channels.newChannel(file.get().getFileInputStream())) {
-                    writeToOutputFile(artifact.get().getFilename(), readChannel);
-                } catch (IOException e) {
-                    uINotification.displayValidationError(i18n.getMessage("message.artifact.download.failure"));
-                    LOG.error("Artifact reading during download caused an exception", e);
-                }
-            }
-        }
-    }
+            return new StreamResource(new StreamResource.StreamSource() {
+                private static final long serialVersionUID = 1L;
 
-    private void writeToOutputFile(String fileName, ReadableByteChannel readChannel) {
-        String fileDownloadLoc = System.getProperty("user.home") + "\\Downloads\\" + fileName;
-        try (FileChannel writeChannel = new FileOutputStream(new File(fileDownloadLoc)).getChannel()) {
-            writeChannel.transferFrom(readChannel, 0, Long.MAX_VALUE);
-            uINotification.displaySuccess(i18n.getMessage("message.artifact.download", fileDownloadLoc));
-        } catch (IOException e) {
-            uINotification.displayValidationError(i18n.getMessage("message.artifact.download.failure"));
-            LOG.error("Artifact download caused an exception", e);
+                @Override
+                public InputStream getStream() {
+                    if (file.isPresent()) {
+                        return file.get().getFileInputStream();
+                    }
+                    return null;
+                }
+            }, artifact.get().getFilename());
         }
+        return null;
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
