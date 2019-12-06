@@ -23,10 +23,6 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_SAVE = "button.save";
 
-    public static final String BUTTON_YES = "button.yes";
-
-    public static final String BUTTON_NO = "button.no";
-
     public static final String BUTTON_NO_AUTO_ASSIGNMENT = "button.no.auto.assignment";
 
     public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
