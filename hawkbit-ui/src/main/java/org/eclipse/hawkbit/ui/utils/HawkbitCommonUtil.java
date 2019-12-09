@@ -537,8 +537,7 @@ public final class HawkbitCommonUtil {
     public static String getArtifactoryDetailsLabelId(final String name, final VaadinMessageSource i18n) {
         final String caption;
         if (StringUtils.hasText(name)) {
-            caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF,
-                    name);
+            caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF);
         } else {
             caption = i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS);
         }

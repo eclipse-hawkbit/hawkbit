@@ -38,7 +38,7 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
 
   //Report widget max icon style
   .icon-only {
-    @include sp-icon-style($sp-button-size : $icon-font-size);
+    @include sp-icon-style($sp-button-size: $icon-font-size);
     margin-bottom: 12px !important;
     margin-right: 6px !important;
   }
@@ -97,6 +97,14 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
 
   .header-caption-right {
     padding-right: 0.5em;
+  }
+
+  .v-assistive-device-only {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    overflow: visible;
   }
 
   .v-panel,

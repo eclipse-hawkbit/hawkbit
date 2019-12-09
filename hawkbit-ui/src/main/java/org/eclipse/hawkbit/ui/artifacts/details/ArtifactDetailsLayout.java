@@ -143,7 +143,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             labelSoftwareModule = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.get().getName(),
                     selectedSoftwareModule.get().getVersion());
         }
-        createComponents(labelSoftwareModule);
+        createComponents();
         buildLayout();
         eventBus.subscribe(this);
 
@@ -165,7 +165,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         return Optional.empty();
     }
 
-    private void createComponents(final String labelSoftwareModule) {
+    private void createComponents() {
         prefixTitleOfArtifactDetails = new Label();
         prefixTitleOfArtifactDetails.setId(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID);
         prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
