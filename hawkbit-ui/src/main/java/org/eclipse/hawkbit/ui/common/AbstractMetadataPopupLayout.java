@@ -438,15 +438,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
         return true;
     }
 
-    private String getMetadataCaption() {
-        final StringBuilder caption = new StringBuilder();
-        //TODO Ammar change in next line "HawkbitCommonUtil.getBoldHTMLText(getElementTitle())"
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_START + i18n.getMessage("caption.metadata.popup") + " "
-                + HawkbitCommonUtil.getBoldHTMLText(getElementTitle()));
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION_END);
-        return caption.toString();
-    }
-
     protected String getElementTitle() {
         return getSelectedEntity().getName();
     }

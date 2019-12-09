@@ -418,6 +418,7 @@ public abstract class AbstractTable<E extends NamedEntity> extends Table impleme
 
     private String createConfirmationQuestionForDeletion(final List<Long> entitiesToBeDeleted) {
         if (entitiesToBeDeleted.size() == 1) {
+            //TODO AMMAR adapt this and the "else" part, this is when trying to delete Distr. and then confirmation popup comes up
             return i18n.getMessage(MESSAGE_CONFIRM_DELETE_ENTITY, getEntityType().toLowerCase(),
                     getDeletedEntityName(entitiesToBeDeleted.get(0)), "");
         } else {
