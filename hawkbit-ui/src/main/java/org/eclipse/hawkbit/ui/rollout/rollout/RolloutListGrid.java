@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -163,14 +164,15 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigManagement) {
+            final TenantConfigurationManagement tenantConfigManagement,
+            final RepositoryProperties repositoryProperties) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.tenantConfigManagement = tenantConfigManagement;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
         alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);

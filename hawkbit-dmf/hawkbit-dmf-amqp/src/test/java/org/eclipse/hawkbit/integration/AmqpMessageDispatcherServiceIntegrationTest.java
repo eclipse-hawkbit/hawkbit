@@ -8,23 +8,9 @@
  */
 package org.eclipse.hawkbit.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
-import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
-
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
@@ -66,9 +52,22 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")
@@ -190,7 +189,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @Test
     @Description("Verify payload of multi action messages.")
     public void assertMultiActionMessagePayloads() {
-        final int expectedWeightIfNotSet = 1000;
+        final int tenantDefaultWeight = 432;
         final int weight1 = 600;
         final String controllerId = UUID.randomUUID().toString();
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -200,6 +199,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Long installActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
                 .setActionType(ActionType.FORCED).build()).getAssignedEntity().get(0).getId();
         enableMultiAssignments();
+        setTenantDefaultWeightValue(tenantDefaultWeight);
         final Long downloadActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
                 .setActionType(ActionType.DOWNLOAD_ONLY).setWeight(weight1).build()).getAssignedEntity().get(0).getId();
         final Long cancelActionId = makeAssignment(
@@ -220,7 +220,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 .filter(message -> message.getTopic().equals(EventTopic.DOWNLOAD)).findFirst().get();
         final DmfMultiActionElement cancelMessage = multiActionMessages.stream()
                 .filter(message -> message.getTopic().equals(EventTopic.CANCEL_DOWNLOAD)).findFirst().get();
-        assertThat(installMessage.getWeight()).isEqualTo(expectedWeightIfNotSet);
+        assertThat(installMessage.getWeight()).isEqualTo(tenantDefaultWeight);
         assertThat(downloadMessage.getWeight()).isEqualTo(weight1);
         assertThat(cancelMessage.getWeight()).isEqualTo(DEFAULT_TEST_WEIGHT);
 

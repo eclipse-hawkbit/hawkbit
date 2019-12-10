@@ -8,12 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -28,10 +26,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test class for {@link AutoAssignChecker}.
@@ -261,7 +260,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("An auto assignment target filter with weight creats actions with weights")
-    public void actionsWithWeightAreCreated() throws Exception {
+    public void actionsWithWeightAreCreated() {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
@@ -275,6 +274,25 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
         assertThat(actions).allMatch(action -> action.getWeight().get() == weight);
+    }
+
+    @Test
+    @Description("An auto assignment target filter without auto assignment weight creates actions without a weight when multi assignment is enabled.")
+    public void actionsWithEmptyWeightCreatedWithOldTargetFilter() {
+        final int amountOfTargets = 5;
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("a").query("name==*").autoAssignDistributionSet(ds));
+
+        enableMultiAssignments();
+
+        testdataFactory.createTargets(amountOfTargets);
+        autoAssignChecker.check();
+
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
+        assertThat(actions).hasSize(amountOfTargets);
+        assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
     }
 
     @Test
