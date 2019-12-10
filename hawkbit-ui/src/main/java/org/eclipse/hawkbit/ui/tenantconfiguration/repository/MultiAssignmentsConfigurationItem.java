@@ -157,15 +157,17 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
 
     @Override
     public void save() {
+        if (multiAssignmentsEnabledChanged) {
+            writeConfigValue(MULTI_ASSIGNMENTS_ENABLED, isMultiAssignmentsEnabled);
+            multiAssignmentsEnabledChanged = false;
+        }
+        updateDefaultWeight();
+    }
+
+    private void updateDefaultWeight(){
         if (isMultiAssignmentsEnabled) {
             writeConfigValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, getWeightFromTextField());
         }
-
-        if (!multiAssignmentsEnabledChanged) {
-            return;
-        }
-
-        writeConfigValue(MULTI_ASSIGNMENTS_ENABLED, isMultiAssignmentsEnabled);
     }
 
     private int getWeightFromTextField() {
