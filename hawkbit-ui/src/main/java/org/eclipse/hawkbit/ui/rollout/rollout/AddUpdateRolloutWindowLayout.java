@@ -1070,7 +1070,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             populateTargetFilterQuery(rollout);
 
             if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
-                rolloutWeight.setValue(String.valueOf(rollout.getWeight().orElse(null)));
+                final Optional<Integer> weight = rollout.getWeight();
+                rolloutWeight.setValue(String.valueOf(weight.isPresent() ? weight.get().intValue() : ""));
             }
 
             defineGroupsLayout.populateByRollout(rollout);

@@ -30,10 +30,13 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -49,6 +52,7 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.RefreshDistributionTableByFilterEvent;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.management.miscs.MaintenanceWindowLayout;
+import org.eclipse.hawkbit.ui.management.miscs.WeightLayout;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.push.DistributionSetUpdatedEventContainer;
@@ -117,14 +121,21 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
 
+    private final WeightLayout weightLayout;
+
     private final UiProperties uiProperties;
+
+    private final TenantConfigurationManagement configManagement;
+
+    private final SystemSecurityContext systemSecurityContext;
 
     DistributionTable(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker, final UINotification notification,
             final ManagementUIState managementUIState,
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
-            final TargetTagManagement targetTagManagement, final UiProperties uiProperties) {
+            final TargetTagManagement targetTagManagement, final UiProperties uiProperties,
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
@@ -135,7 +146,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.deploymentManagement = deploymentManagement;
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
+        this.weightLayout = new WeightLayout(i18n, saveButtonToggle(), maintenanceWindowLayout);
         this.uiProperties = uiProperties;
+        this.configManagement = configManagement;
+        this.systemSecurityContext = systemSecurityContext;
         notAllowedMsg = i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
 
         addNewContainerDS();
@@ -453,10 +467,11 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                 saveAllAssignments(targets, Collections.singletonList(distributionSet), managementUIState,
                         actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
-                        getEventBus(), getI18n(), this);
+                        getEventBus(), getI18n(), this, isMultiAssignmentEnabled(), weightLayout.getWeightField());
             }
         }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
-                uiProperties), UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
+                uiProperties, isMultiAssignmentEnabled(), weightLayout),
+                UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
 
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
@@ -752,4 +767,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         return "";
     }
 
+    private boolean isMultiAssignmentEnabled() {
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    }
 }
