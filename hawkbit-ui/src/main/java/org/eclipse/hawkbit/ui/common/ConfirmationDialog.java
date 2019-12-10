@@ -253,9 +253,10 @@ public class ConfirmationDialog implements Button.ClickListener {
     }
 
     private static Label createConfirmationQuestion(final String question) {
-        final Label questionLbl = new Label(String.format("<p>%s</p>", question.replaceAll("\n", "<br/>")),
-                ContentMode.HTML);
+        final Label questionLbl = new Label(question.replaceAll("\n", "<br/>"),
+                ContentMode.TEXT);
         questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
+
         return questionLbl;
     }
 
