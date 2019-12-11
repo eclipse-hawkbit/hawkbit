@@ -163,6 +163,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         final Target testTarget = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final int weight = 500;
 
         enableMultiAssignments();
         for (int i = 0; i < maxActions; i++) {
@@ -171,7 +172,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds1, Collections.singletonList(testTarget)));
+                .isThrownBy(() -> assignDistributionSet(ds1.getId(),
+                        Collections.singletonList(testTarget.getControllerId()),weight));
     }
 
     @Test
