@@ -229,7 +229,7 @@ public final class HawkbitCommonUtil {
      * @return Label
      */
     public static Label getFormatedLabel(final String labelContent) {
-        final Label labelValue = new Label(labelContent, ContentMode.HTML);
+        final Label labelValue = new Label(labelContent, ContentMode.TEXT);
         labelValue.setSizeFull();
         labelValue.addStyleName(SPUIDefinitions.TEXT_STYLE);
         labelValue.addStyleName("label-style");

@@ -79,8 +79,8 @@ public class SoftwareModuleDetailsTable extends Table {
      * @param i18n
      *            I18N
      * @param isUnassignSoftModAllowed
-     *            boolean flag to check for unassign functionality allowed for
-     *            the view.
+     *            boolean flag to check for unassign functionality allowed for the
+     *            view.
      * @param distributionSetManagement
      *            DistributionSetManagement
      * @param permissionChecker
