@@ -1259,7 +1259,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = generateAssignTargetToDSJson(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
@@ -1319,7 +1319,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(body.length())));
+                .andExpect(jsonPath("total", equalTo(2)));
     }
 
     @Test
