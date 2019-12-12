@@ -866,7 +866,7 @@ public class TestdataFactory {
      * 
      * @return {@link List} of {@link Target} entities
      */
-    public List<Target> createTargets(final Iterable<String> targetIds) {
+    public List<Target> createTargets(final String... targetIds) {
 
         final List<TargetCreate> targets = new ArrayList<>();
         for (final String targetId : targetIds) {
