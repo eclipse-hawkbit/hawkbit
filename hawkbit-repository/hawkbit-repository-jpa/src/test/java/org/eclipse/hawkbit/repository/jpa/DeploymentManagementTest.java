@@ -655,8 +655,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
-        final List<String> knownTargetIds = Lists.newArrayList("1", "2");
-        testdataFactory.createTargets((String[]) knownTargetIds.toArray());
+        final String[] knownTargetIdsArray = { "1", "2" };
+        final List<String> knownTargetIds = Lists.newArrayList(knownTargetIdsArray);
+        testdataFactory.createTargets(knownTargetIdsArray);
 
         // add not existing target to targets
         knownTargetIds.add(notExistingId);
