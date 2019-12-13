@@ -1319,7 +1319,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(body.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(2)));
+                .andExpect(jsonPath("total", equalTo(body.length())));
     }
 
     @Test
