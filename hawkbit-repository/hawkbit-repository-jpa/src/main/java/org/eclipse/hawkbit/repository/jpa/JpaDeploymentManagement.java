@@ -289,17 +289,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());
 
-        final int existingTargetsWithActionTypeCount = targetsWithActionType.stream()
-                .filter(target -> existingTargetIds.contains(target.getControllerId())).collect(Collectors.toList())
-                .size();
-
         if (targetEntities.isEmpty()) {
-            return allTargetsAlreadyAssignedResult(distributionSetEntity, existingTargetsWithActionTypeCount);
+            return allTargetsAlreadyAssignedResult(distributionSetEntity, existingTargetIds.size());
         }
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType, actionMessage,
-                assignmentStrategy, distributionSetEntity, targetEntities);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionTypeCount);
+        final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
+                .filter(target -> existingTargetIds.contains(target.getControllerId())).collect(Collectors.toList());
+
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(existingTargetsWithActionType,
+                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionType.size());
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
