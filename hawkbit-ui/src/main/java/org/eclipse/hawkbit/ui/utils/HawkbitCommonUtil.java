@@ -233,6 +233,7 @@ public final class HawkbitCommonUtil {
         labelValue.setSizeFull();
         labelValue.addStyleName(SPUIDefinitions.TEXT_STYLE);
         labelValue.addStyleName("label-style");
+        labelValue.addStyleName("avoid-tooltip");
         return labelValue;
     }
 

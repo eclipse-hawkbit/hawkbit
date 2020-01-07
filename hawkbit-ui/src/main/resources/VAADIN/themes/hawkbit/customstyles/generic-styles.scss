@@ -99,6 +99,10 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     padding-right: 0.5em;
   }
 
+  .avoid-tooltip {
+    pointer-events: none !important;
+  }
+
   .v-assistive-device-only {
     position: static;
     top: auto;
