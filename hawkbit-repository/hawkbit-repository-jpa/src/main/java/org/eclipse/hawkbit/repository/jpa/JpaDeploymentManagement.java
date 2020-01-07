@@ -279,11 +279,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+        final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().collect(Collectors.toList());
 
-        final List<String> existingTargetIds = Lists.partition(targetIds, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(targetRepository::filterNonExistingControllerIds).flatMap(List::stream)
+        final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+                .stream().map(targetRepository::filterNonExistingControllerIds).flatMap(List::stream)
                 .collect(Collectors.toList());
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
