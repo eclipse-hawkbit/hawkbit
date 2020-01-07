@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -458,10 +457,13 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             } else {
 
                 if (StringUtils.hasText(swModuleName)) {
-                    prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
+                    prefixTitleOfArtifactDetails
+                            .setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
                     titleOfArtifactDetails.setValue(swModuleName);
                 } else {
-                    prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
+                    prefixTitleOfArtifactDetails
+                            .setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
+                    titleOfArtifactDetails.setValue("");
                 }
             }
         }
@@ -485,6 +487,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      */
     private void setTitleOfLayoutHeader() {
         prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
+        titleOfArtifactDetails.setValue("");
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
