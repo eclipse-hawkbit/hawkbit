@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -131,17 +130,15 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedEntity, M exten
     public CommonDialogWindow getWindow(final E entity, final String metaDatakey) {
         selectedEntity = entity;
 
-        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
-                .content(this).cancelButtonClickListener(event -> onCancel())
-                .id(UIComponentIdProvider.METADATA_POPUP_ID).layout(mainLayout).i18n(i18n)
-                .saveDialogCloseListener(new SaveOnDialogCloseListener()).buildCommonDialogWindow();
+        metadataWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).content(this)
+                .cancelButtonClickListener(event -> onCancel()).id(UIComponentIdProvider.METADATA_POPUP_ID)
+                .layout(mainLayout).i18n(i18n).saveDialogCloseListener(new SaveOnDialogCloseListener())
+                .buildCommonDialogWindow();
 
         metadataWindow.setCaptionAsHtml(false);
         metadataWindow.setAssistivePrefix(i18n.getMessage("caption.metadata.popup") + " " + "<b>");
         metadataWindow.setCaption(getElementTitle());
         metadataWindow.setAssistivePostfix("</b>");
-
-
 
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
