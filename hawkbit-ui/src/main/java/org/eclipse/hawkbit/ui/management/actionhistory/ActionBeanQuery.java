@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -21,6 +23,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -37,7 +40,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
     private Sort sort = new Sort(Direction.DESC, ProxyAction.PXY_ACTION_ID);
     private transient DeploymentManagement deploymentManagement;
 
-    private String currentSelectedConrollerId;
+    private String currentSelectedControllerId;
     private transient Slice<Action> firstPageActions;
 
     /**
@@ -57,7 +60,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
         if (isNotNullOrEmpty(queryConfig)) {
-            currentSelectedConrollerId = (String) queryConfig.get(SPUIDefinitions.ACTIONS_BY_TARGET);
+            currentSelectedControllerId = (String) queryConfig.get(SPUIDefinitions.ACTIONS_BY_TARGET);
         }
 
         if (sortStates == null || sortStates.length <= 0) {
@@ -82,15 +85,49 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         Slice<Action> actionBeans;
         if (startIndex == 0) {
             if (firstPageActions == null) {
-                firstPageActions = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
+                firstPageActions = getDeploymentManagement().findActionsByTarget(currentSelectedControllerId,
                         PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
             }
-            actionBeans = firstPageActions;
+
+            actionBeans = sortOnWeightWithMultiAssignments(firstPageActions);
         } else {
-            actionBeans = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
+            actionBeans = getDeploymentManagement().findActionsByTarget(currentSelectedControllerId,
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+
+            actionBeans = sortOnWeightWithMultiAssignments(actionBeans);
         }
         return createProxyActions(actionBeans);
+    }
+
+    private Slice<Action> sortActionsByWeight(final Slice<Action> firstPageActions) {
+        
+        // TODO :should the sorting happen per slice or all in together? right
+        // now
+        // sorting is happening per slice
+        // TODO: Also should the canceling actions also need to be considered?
+        final List<Action> pendingActions = firstPageActions.stream()
+                .filter(action -> Action.Status.RUNNING.equals(action.getStatus())).collect(Collectors.toList());
+
+        final List<Action> pendingActionsWithWeight = pendingActions.stream()
+                .filter(action -> action.getWeight().isPresent()).collect(Collectors.toList());
+
+        pendingActions.removeAll(pendingActionsWithWeight);
+
+        Collections.sort(pendingActionsWithWeight, Collections.reverseOrder((final Action action1,
+                final Action action2) -> action1.getWeight().get().compareTo(action2.getWeight().get())));
+
+        pendingActionsWithWeight.addAll(pendingActions);
+
+        final List<Action> otherActions = firstPageActions.stream()
+                .filter(action -> !Action.Status.RUNNING.equals(action.getStatus())).collect(Collectors.toList());
+        
+        pendingActionsWithWeight.addAll(otherActions);
+
+        return new SliceImpl<>(pendingActionsWithWeight);
+    }
+
+    private Slice<Action> sortOnWeightWithMultiAssignments(final Slice<Action> actions) {
+        return isMultiAssignmentEnabled() ? sortActionsByWeight(actions) : actions;
     }
 
     /**
@@ -117,7 +154,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             proxyAction.setStatus(action.getStatus());
             proxyAction.setMaintenanceWindow(
                     action.hasMaintenanceSchedule() ? buildMaintenanceWindowDisplayText(action) : "");
-
+            proxyAction.setWeight(action.getWeight().isPresent() ? action.getWeight().get().intValue() : null);
             proxyActions.add(proxyAction);
         }
         return proxyActions;
@@ -160,8 +197,8 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
     public int size() {
         long size = 0;
 
-        if (currentSelectedConrollerId != null) {
-            size = getDeploymentManagement().countActionsByTarget(currentSelectedConrollerId);
+        if (currentSelectedControllerId != null) {
+            size = getDeploymentManagement().countActionsByTarget(currentSelectedControllerId);
         }
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
@@ -182,4 +219,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         return deploymentManagement;
     }
 
+    private boolean isMultiAssignmentEnabled() {
+        return ActionHistoryGrid.isMultiAssignmentEnabled();
+    }
 }

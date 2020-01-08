@@ -15,13 +15,9 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -29,11 +25,13 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
+import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.collect.Lists;
 import com.vaadin.navigator.View;
@@ -78,13 +76,16 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
 
+    private final UIEventBus eventBus;
+
     private final List<ConfigurationGroup> configurationViews = Lists.newArrayListWithExpectedSize(3);
 
     @Autowired(required = false)
     private Collection<ConfigurationGroup> customConfigurationViews;
 
     @Autowired
-    TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
+    TenantConfigurationDashboardView(final UIEventBus eventBus, final VaadinMessageSource i18n,
+            final UiProperties uiProperties,
                                      final UINotification uINotification, final SystemManagement systemManagement,
                                      final DistributionSetTypeManagement distributionSetTypeManagement,
                                      final TenantConfigurationManagement tenantConfigurationManagement,
@@ -105,6 +106,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.uINotification = uINotification;
+        this.eventBus = eventBus;
     }
 
     /**
@@ -182,6 +184,10 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);
         uINotification.displaySuccess(i18n.getMessage("notification.configuration.save.successful"));
+
+        // publish the event to indicate to re-load action history layout in
+        // case of multiassignments
+        eventBus.publish(this, ManagementUIEvent.SAVE_TENANT_CONFIGURATION);
     }
 
     private void undoConfiguration() {

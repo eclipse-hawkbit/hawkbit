@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Validator;
@@ -27,6 +28,10 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * {@link WeightLayout} defines UI layout that is used to specify the
+ * weight(priority) while assigning distribution set(s) to the target(s).
+ */
 public class WeightLayout extends VerticalLayout {
     private static final long serialVersionUID = 1L;
 
@@ -52,9 +57,11 @@ public class WeightLayout extends VerticalLayout {
         this.i18n = i18n;
         this.saveButtonToggle = saveButtonToggle;
         this.maintenanceWindowLayout = maintenanceWindowLayout;
-        
+
+        setStyleName("dist-window-weightlayout");
+
         createWeightField();
-        createWeightLabel(); 
+        createWeightLabel();
         final HorizontalLayout weightContainer = new HorizontalLayout();
         weightContainer.addComponent(weightField);
         weightContainer.addComponent(weightLabel);
@@ -73,26 +80,27 @@ public class WeightLayout extends VerticalLayout {
     }
 
     private TextField createWeightField() {
-        weightField = new TextFieldBuilder(32).prompt(i18n.getMessage("textfield.weight"))
-                .id(UIComponentIdProvider.ROLLOUT_WEIGHT_FIELD_ID).buildTextComponent();
-        weightField.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-        weightField.setStyleName("dist-window-actiontype");
+        weightField = new TextFieldBuilder(32).prompt("0-1000").id(UIComponentIdProvider.ROLLOUT_WEIGHT_FIELD_ID)
+                .buildTextComponent();
         weightField.setConverter(new StringToIntegerConverter());
+        weightField.setStyleName("dist-window-weight-textfield");
         weightField.setConversionError(i18n.getMessage("message.enter.number"));
-        weightField.setSizeUndefined();
         weightField.setMaxLength(4);
         weightField.addValidator(new NullValidator(null, false));
         weightField.addValidator(new WeightFieldValidator());
         weightField.addTextChangeListener(event -> saveButtonToggle.accept(onWeightChange(event)));
+
         return weightField;
     }
 
     private Label createWeightLabel() {
         weightLabel = new LabelBuilder().name(i18n.getMessage("textfield.weight")).buildLabel();
+        weightLabel.setSizeFull();
         weightLabel.setContentMode(ContentMode.HTML);
-        weightLabel.setValue(weightLabel.getValue().concat(" <span style='color:#ed473b'>*</span>"));
-        weightLabel.setStyleName("dist-window-actiontype");
-
+        weightLabel.setValue(weightLabel.getValue().concat("<span style='color:#ed473b'>*</span>"));
+        weightLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_WEIGHT));
+        weightLabel.setStyleName("dist-window-weight-label");
+        weightLabel.addStyleName(ValoTheme.LABEL_SMALL);
         return weightLabel;
     }
 

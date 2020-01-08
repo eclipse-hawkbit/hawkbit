@@ -139,6 +139,8 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_DOWNLOAD_ONLY_ITEM = "tooltip.downloadonly.item";
 
+    public static final String TOOLTIP_WEIGHT = "tooltip.weight";
+
     public static final String TOOLTIP_FORCED_ITEM = "tooltip.forced.item";
 
     public static final String TOOLTIP_TARGET_PIN = "tooltip.target.pin";
