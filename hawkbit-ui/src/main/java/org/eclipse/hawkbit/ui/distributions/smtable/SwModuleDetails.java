@@ -87,7 +87,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
     }
 
     private Button createShowArtifactDetailsButton() {
-        artifactDetailsButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.FILE_O,
+        artifactDetailsButton = SPUIComponentProvider.getButton(UIComponentIdProvider.UPLOAD_SW_MODULE_SHOW_ARTIFACT_DETAILS_BUTTON, "", "", null, false, FontAwesome.FILE_O,
                 SPUIButtonStyleNoBorder.class);
         artifactDetailsButton.setDescription(getI18n().getMessage(UIMessageIdProvider.TOOLTIP_ARTIFACT_ICON));
         artifactDetailsButton.addClickListener(event -> showArtifactDetailsWindow(getSelectedBaseEntity()));
@@ -96,6 +96,7 @@ public class SwModuleDetails extends AbstractSoftwareModuleDetails {
 
     private void showArtifactDetailsWindow(final SoftwareModule softwareModule) {
         final Window artifactDtlsWindow = new Window();
+        artifactDtlsWindow.setId(UIComponentIdProvider.SHOW_ARTIFACT_DETAILS_POPUP_ID);
         artifactDtlsWindow.setAssistivePrefix(HawkbitCommonUtil
                 .getArtifactoryDetailsLabelId(softwareModule.getName(), getI18n()) + " " + "<b>");
         artifactDtlsWindow.setCaption(softwareModule.getName() + ":" + softwareModule.getVersion());
