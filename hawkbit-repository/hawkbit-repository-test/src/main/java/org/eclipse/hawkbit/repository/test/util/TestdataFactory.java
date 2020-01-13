@@ -859,6 +859,24 @@ public class TestdataFactory {
     }
 
     /**
+     * Creates {@link Target}s in repository and with given targetIds.
+     * 
+     * @param targetIds
+     *            specifies the IDs of the targets
+     * 
+     * @return {@link List} of {@link Target} entities
+     */
+    public List<Target> createTargets(final String... targetIds) {
+
+        final List<TargetCreate> targets = new ArrayList<>();
+        for (final String targetId : targetIds) {
+            targets.add(entityFactory.target().create().controllerId(targetId));
+        }
+
+        return targetManagement.create(targets);
+    }
+
+    /**
      * Builds {@link Target} objects with given prefix for
      * {@link Target#getControllerId()} followed by a number suffix.
      * 
