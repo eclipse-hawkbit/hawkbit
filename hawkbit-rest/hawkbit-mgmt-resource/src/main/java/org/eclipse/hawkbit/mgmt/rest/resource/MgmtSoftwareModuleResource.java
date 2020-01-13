@@ -74,7 +74,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
-            @RequestParam(value = "sha1sum", required = false) final String sha1Sum) {
+            @RequestParam(value = "sha1sum", required = false) final String sha1Sum,
+            @RequestParam(value = "sha256sum", required = false) final String sha256Sum) {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -87,8 +88,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         try (InputStream in = file.getInputStream()) {
             final Artifact result = artifactManagement.create(new ArtifactUpload(in, softwareModuleId, fileName,
-                    md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(), false,
-                    file.getContentType(), file.getSize()));
+                    md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(),
+                    sha256Sum == null ? null : sha256Sum.toLowerCase(), false, file.getContentType(), file.getSize()));
 
             final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
             MgmtSoftwareModuleMapper.addLinks(result, reponse);

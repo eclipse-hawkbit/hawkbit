@@ -52,6 +52,8 @@ public interface MgmtSoftwareModuleRestApi {
      *            checksum for uploaded content check
      * @param sha1Sum
      *            checksum for uploaded content check
+     * @param sha256Sum
+     *            checksum for uploaded content check
      * 
      * @return In case all sets could successful be created the ResponseEntity
      *         with status code 201 - Created but without ResponseBody. In any
@@ -64,7 +66,8 @@ public interface MgmtSoftwareModuleRestApi {
             @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
-            @RequestParam(value = "sha1sum", required = false) final String sha1Sum);
+            @RequestParam(value = "sha1sum", required = false) final String sha1Sum,
+            @RequestParam(value = "sha256sum", required = false) final String sha256sum);
 
     /**
      * Handles the GET request of retrieving all meta data of artifacts assigned

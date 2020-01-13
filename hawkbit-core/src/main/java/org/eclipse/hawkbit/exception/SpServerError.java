@@ -112,6 +112,12 @@ public enum SpServerError {
     /**
     *
     */
+    SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH("hawkbit.server.error.artifact.uploadFailed.checksum.sha256.match",
+            "Upload of artifact failed as the provided SHA256 checksum did not match with the provided artifact."),
+
+    /**
+    *
+    */
     SP_DS_CREATION_FAILED_MISSING_MODULE("hawkbit.server.error.distributionset.creationFailed.missingModule",
             "Creation if Distribution Set failed as module is missing that is configured as mandatory."),
 
@@ -145,7 +151,8 @@ public enum SpServerError {
     /**
      * error that describes that size of uploaded file exceeds storage quota
      */
-    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded", "Storage quota will be exceeded if file is uploaded."),
+    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded",
+            "Storage quota will be exceeded if file is uploaded."),
 
     /**
      * error message, which describes that the action can not be canceled cause

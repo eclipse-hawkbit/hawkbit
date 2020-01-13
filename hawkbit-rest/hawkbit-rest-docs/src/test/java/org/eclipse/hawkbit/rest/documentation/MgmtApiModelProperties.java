@@ -47,6 +47,7 @@ public final class MgmtApiModelProperties {
     public static final String ARTIFACT_PROVIDED_FILENAME = "Filename of the artifact.";
     public static final String ARTIFACT_HASHES_SHA1 = "SHA1 hash of the artifact.";
     public static final String ARTIFACT_HASHES_MD5 = "MD5 hash of the artifact.";
+    public static final String ARTIFACT_HASHES_SHA256 = "SHA256 hash of the artifact.";
 
     public static final String ARTIFACT_DOWNLOAD_LINK = "Download link of the artifact.";
 

@@ -60,7 +60,7 @@ public class ArtifactUpload {
      */
     public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
             final boolean overrideExisting, final long filesize) {
-        this(inputStream, moduleId, filename, null, null, overrideExisting, null, filesize);
+        this(inputStream, moduleId, filename, null, null, null, overrideExisting, null, filesize);
     }
 
     /**
@@ -85,14 +85,14 @@ public class ArtifactUpload {
      *            the size of the file in bytes.
      */
     public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
-            final String providedMd5Sum, final String providedSha1Sum, final boolean overrideExisting,
-            final String contentType, final long filesize) {
+            final String providedMd5Sum, final String providedSha1Sum, final String providedSha256Sum,
+            final boolean overrideExisting, final String contentType, final long filesize) {
         this.inputStream = inputStream;
         this.moduleId = moduleId;
         this.filename = filename;
         this.providedMd5Sum = providedMd5Sum;
         this.providedSha1Sum = providedSha1Sum;
-        this.providedSha256Sum = null;
+        this.providedSha256Sum = providedSha256Sum;
         this.overrideExisting = overrideExisting;
         this.contentType = contentType;
         this.filesize = filesize;
