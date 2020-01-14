@@ -94,6 +94,9 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
@@ -460,6 +463,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(350)
+    @EnableWebSecurity
     @ConditionalOnClass(MgmtApiConfiguration.class)
     public static class RestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
@@ -508,34 +512,37 @@ public class SecurityManagedConfiguration {
         protected void configure(final HttpSecurity http) throws Exception {
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
+
+            if (securityProperties.getCors().isEnabled()) {
+                httpSec = httpSec.cors().and();
+            }
+
             if (securityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            httpSec
-                    .authorizeRequests().anyRequest().authenticated()
+            httpSec.authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
 
             if (oidcBearerTokenAuthenticationFilter != null) {
 
-                // Only get the first client registration. Testing against every client could increase the
+                // Only get the first client registration. Testing against every
+                // client could increase the
                 // attack vector
                 ClientRegistration clientRegistration = null;
-                for (ClientRegistration cr : clientRegistrationRepository) {
+                for (final ClientRegistration cr : clientRegistrationRepository) {
                     clientRegistration = cr;
                     break;
                 }
 
                 Assert.notNull(clientRegistration, "There must be a valid client registration");
-                httpSec.oauth2ResourceServer()
-                        .jwt().jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri());
+                httpSec.oauth2ResourceServer().jwt().jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri());
 
                 oidcBearerTokenAuthenticationFilter.setClientRegistration(clientRegistration);
 
                 httpSec.addFilterAfter(oidcBearerTokenAuthenticationFilter, BearerTokenAuthenticationFilter.class);
-            }
-            else {
+            } else {
                 final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
                 basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
 
@@ -547,7 +554,7 @@ public class SecurityManagedConfiguration {
 
                     @Override
                     public void doFilter(final ServletRequest request, final ServletResponse response,
-                                         final FilterChain chain) throws IOException, ServletException {
+                            final FilterChain chain) throws IOException, ServletException {
                         userAuthenticationFilter.doFilter(request, response, chain);
                     }
 
@@ -559,11 +566,28 @@ public class SecurityManagedConfiguration {
                 httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
             }
 
-            httpSec.addFilterAfter(new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement,
-                    systemSecurityContext), SessionManagementFilter.class);
+            httpSec.addFilterAfter(
+                    new AuthenticationSuccessTenantMetadataCreationFilter(systemManagement, systemSecurityContext),
+                    SessionManagementFilter.class);
 
             httpSec.anonymous().disable();
             httpSec.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "hawkbit.server.security.cors", name = "enabled", matchIfMissing = false)
+        CorsConfigurationSource corsConfigurationSource() {
+            final CorsConfiguration restCorsConfiguration = new CorsConfiguration();
+
+            restCorsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
+            restCorsConfiguration.setAllowCredentials(true);
+            restCorsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
+            restCorsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
+
+            final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/rest/**", restCorsConfiguration);
+
+            return source;
         }
     }
 
@@ -661,7 +685,7 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
-            boolean enableOidc = oidcUserService != null && oidcAuthenticationSuccessHandler != null
+            final boolean enableOidc = oidcUserService != null && oidcAuthenticationSuccessHandler != null
                     && oidcLogoutHandler != null;
 
             // workaround regex: we need to exclude the URL /UI/HEARTBEAT here
