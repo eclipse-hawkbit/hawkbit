@@ -57,6 +57,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_INSUFFICIENT_PERMISSION, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_DELETE_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_LOAD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -118,9 +119,10 @@ public class ResponseExceptionHandler {
 
     /**
      * Method for handling exception of type HttpMessageNotReadableException and
-     * MethodArgumentNotValidException which are thrown in case the request body is
-     * not well formed (e.g. syntax failures, missing/invalid parameters) and cannot
-     * be deserialized. Called by the Spring-Framework for exception handling.
+     * MethodArgumentNotValidException which are thrown in case the request body
+     * is not well formed (e.g. syntax failures, missing/invalid parameters) and
+     * cannot be deserialized. Called by the Spring-Framework for exception
+     * handling.
      *
      * @param request
      *            the Http request
@@ -129,7 +131,7 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class })
     public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);

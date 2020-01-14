@@ -139,11 +139,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // create Targets
         final String[] knownTargetIds = new String[] { "1", "2" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
-        }
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
         // assign DisSet to target and test assignment
         assignDistributionSet(disSet.getId(), knownTargetIds[0]);
         mvc.perform(
@@ -257,11 +253,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
-        }
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -379,16 +371,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Assigns multiple targets to distribution set with only maintenance schedule.")
     public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowStartOnly() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    new JSONObject().put("schedule", getTestSchedule(0))));
-        }
+        final JSONArray list = createTargetAndJsonArray(getTestSchedule(0), null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -402,16 +388,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Assigns multiple targets to distribution set with only maintenance window duration.")
     public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndOnly() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    new JSONObject().put("duration", getTestDuration(10))));
-        }
+        final JSONArray list = createTargetAndJsonArray(null, getTestDuration(10), null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -425,17 +405,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Assigns multiple targets to distribution set with valid maintenance window.")
     public void assignMultipleTargetsToDistributionSetWithValidMaintenanceWindow() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(10))
-                            .put("timezone", getTestTimeZone())));
-        }
+        final JSONArray list = createTargetAndJsonArray(getTestSchedule(10), getTestDuration(10), getTestTimeZone(),
+                null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -449,17 +423,11 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Assigns multiple targets to distribution set with last maintenance window scheduled before current time.")
     public void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)).put("maintenanceWindow",
-                    new JSONObject().put("schedule", getTestSchedule(-30)).put("duration", getTestDuration(5))
-                            .put("timezone", getTestTimeZone())));
-        }
+        final JSONArray list = createTargetAndJsonArray(getTestSchedule(-30), getTestDuration(5), getTestTimeZone(),
+                null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -473,8 +441,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Assigns multiple targets to distribution set with and without maintenance window.")
     public void assignMultipleTargetsToDistributionSetWithAndWithoutMaintenanceWindow() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = new JSONArray();
@@ -498,12 +465,59 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Assigning distribution set to the list of targets with a non-existing one leads to successful assignment of valid targets, while not found targets are silently ignored.")
+    public void assignNotExistingTargetToDistributionSet() throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        final String[] knownTargetIds = new String[] { "1", "2", "3" };
+        final JSONArray assignTargetJson = createTargetAndJsonArray(null, null, null, "forced", knownTargetIds);
+        assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
+
+        assignTargetJson.put(new JSONObject().put("id", "notexistingtarget").put("type", "forced"));
+
+        mvc.perform(post(
+                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets")
+                        .contentType(MediaType.APPLICATION_JSON).content(assignTargetJson.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
+                .andExpect(jsonPath("$.assigned", equalTo(2))).andExpect(jsonPath("$.total", equalTo(3)));
+    }
+
+    private JSONArray createTargetAndJsonArray(final String schedule, final String duration, final String timezone,
+            final String type, final String... targetIds) throws Exception {
+        final JSONArray result = new JSONArray();
+        for (final String targetId : targetIds) {
+            testdataFactory.createTarget(targetId);
+
+            final JSONObject targetJsonObject = new JSONObject();
+            result.put(targetJsonObject);
+            targetJsonObject.put("id", Long.valueOf(targetId));
+            if (type != null) {
+                targetJsonObject.put("type", type);
+            }
+
+            if (schedule != null || duration != null || timezone != null) {
+                final JSONObject maintenanceJsonObject = new JSONObject();
+                targetJsonObject.put("maintenanceWindow", maintenanceJsonObject);
+                if (schedule != null) {
+                    maintenanceJsonObject.put("schedule", schedule);
+                }
+                if (duration != null) {
+                    maintenanceJsonObject.put("duration", duration);
+                }
+                if (timezone != null) {
+                    maintenanceJsonObject.put("timezone", timezone);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Test
     @Description("Ensures that assigned targets of DS are returned as reflected by the repository.")
     public void getAssignedTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         testdataFactory.createTarget(knownTargetId);
         assignDistributionSet(createdDs.getId(), knownTargetId);
 
@@ -516,8 +530,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @Description("Ensures that assigned targets of DS are returned as persisted in the repository.")
     public void getAssignedTargetsOfDistributionSetIsEmpty() throws Exception {
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         mvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(0)))
@@ -529,8 +542,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void getInstalledTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final Target createTarget = testdataFactory.createTarget(knownTargetId);
         // create some dummy targets which are not assigned or installed
         testdataFactory.createTarget("dummy1");
@@ -552,8 +564,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownFilterName = "a";
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(knownFilterName)
                 .query("name==y").autoAssignDistributionSet(createdDs.getId()));
@@ -571,8 +582,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that an error is returned when the query is invalid.")
     public void getAutoAssignTargetFiltersOfDSWithInvalidFilter() throws Exception {
         // prepare distribution set
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String invalidQuery = "unknownField=le=42";
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
@@ -584,8 +594,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that target filters with auto assign DS are returned according to the query.")
     public void getMultipleAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         final String filterNamePrefix = "filter-";
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==" + filterNamePrefix + "*";
 
         prepareTestFilters(filterNamePrefix, createdDs);
@@ -601,8 +610,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that no target filters are returned according to the non matching query.")
     public void getEmptyAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         final String filterNamePrefix = "filter-";
-        final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
-        final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==doesNotExist";
 
         prepareTestFilters(filterNamePrefix, createdDs);
@@ -1251,11 +1259,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = new JSONArray();
-        for (final String targetId : knownTargetIds) {
-            testdataFactory.createTarget(targetId);
-            list.put(new JSONObject().put("id", Long.valueOf(targetId)));
-        }
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 

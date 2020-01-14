@@ -8,10 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
-
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -36,18 +44,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Target details layout which is shown on the Deployment View.
@@ -239,16 +238,23 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
     }
 
     private void updateAttributesLayout(final String controllerId) {
-        final VerticalLayout attributesLayout = getAttributesLayout();
-        attributesLayout.removeAllComponents();
+        final VerticalLayout attributesWrapperLayout = getAttributesLayout();
+        attributesWrapperLayout.removeAllComponents();
 
         if (controllerId == null) {
             return;
         }
 
         final Map<String, String> attributes = targetManagement.getControllerAttributes(controllerId);
+
+        final HorizontalLayout attributesRequestLayout = new HorizontalLayout();
+        attributesRequestLayout.setSizeFull();
+
+        final VerticalLayout attributesLayout = new VerticalLayout();
         updateAttributesLabelsList(attributesLayout, attributes);
-        updateAttributesUpdateComponents(attributesLayout, controllerId);
+        updateAttributesUpdateComponents(attributesRequestLayout, attributesLayout, controllerId);
+
+        attributesWrapperLayout.addComponent(attributesRequestLayout);
     }
 
     private void updateAttributesLabelsList(final VerticalLayout attributesLayout,
@@ -262,14 +268,16 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         }
     }
 
-    private void updateAttributesUpdateComponents(final VerticalLayout attributesLayout, final String controllerId) {
+    private void updateAttributesUpdateComponents(final HorizontalLayout attributesRequestLayout, final VerticalLayout attributesLayout, final String controllerId) {
         final boolean isRequestAttributes = targetManagement.isControllerAttributesRequested(controllerId);
 
         if (isRequestAttributes) {
             attributesLayout.addComponent(buildAttributesUpdateLabel(), 0);
         }
 
-        attributesLayout.addComponent(buildRequestAttributesUpdateButton(controllerId, isRequestAttributes));
+        attributesRequestLayout.addComponent(attributesLayout);
+        attributesRequestLayout.setExpandRatio(attributesLayout, 1.0F);
+        attributesRequestLayout.addComponent(buildRequestAttributesUpdateButton(controllerId, isRequestAttributes));
     }
 
     private Label buildAttributesUpdateLabel() {

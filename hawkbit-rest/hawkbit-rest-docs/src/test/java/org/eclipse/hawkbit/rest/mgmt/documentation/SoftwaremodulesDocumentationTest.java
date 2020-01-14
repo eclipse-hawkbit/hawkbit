@@ -266,6 +266,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("[].hashes.md5").description(MgmtApiModelProperties.ARTIFACT_HASHES_MD5),
                                 fieldWithPath("[].hashes.sha1")
                                         .description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA1),
+                                fieldWithPath("[].hashes.sha256")
+                                        .description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA256),
                                 fieldWithPath("[].providedFilename")
                                         .description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME),
                                 fieldWithPath("[]._links.self").ignored())));
@@ -299,6 +301,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                         .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_LINK),
                                 fieldWithPath("hashes.md5").description(MgmtApiModelProperties.ARTIFACT_HASHES_MD5),
                                 fieldWithPath("hashes.sha1").description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA1),
+                                fieldWithPath("hashes.sha256")
+                                        .description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA256),
                                 fieldWithPath("providedFilename")
                                         .description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME)))
 
@@ -374,6 +378,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                                 fieldWithPath("hashes.md5").description(MgmtApiModelProperties.ARTIFACT_HASHES_MD5),
                                 fieldWithPath("hashes.sha1").description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA1),
+                                fieldWithPath("hashes.sha256")
+                                        .description(MgmtApiModelProperties.ARTIFACT_HASHES_SHA256),
                                 fieldWithPath("providedFilename")
                                         .description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME),
                                 fieldWithPath("_links.self").ignored(), fieldWithPath("_links.download")
