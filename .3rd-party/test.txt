@@ -57,7 +57,7 @@ org.ow2.asm:asm:jar:5.0.4:test
 org.skyscreamer:jsonassert:jar:1.5.0:test
 org.springframework.amqp:spring-rabbit-junit:jar:2.1.5.RELEASE:test
 org.springframework.amqp:spring-rabbit-test:jar:2.1.5.RELEASE:test
-org.springframework.boot:spring-boot-starter-test:jar:2.1.3.RELEASE:test
+org.springframework.boot:spring-boot-starter-test:jar:2.1.4.RELEASE:test
 org.springframework.boot:spring-boot-test-autoconfigure:jar:2.1.4.RELEASE:test
 org.springframework.boot:spring-boot-test:jar:2.1.4.RELEASE:test
 org.springframework.cloud:spring-cloud-function-context:jar:2.0.0.RELEASE:test
