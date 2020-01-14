@@ -8,6 +8,22 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -18,7 +34,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConf
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -42,24 +58,14 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.web.authentication.*;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Auto-configuration for OpenID Connect user management.
@@ -75,7 +81,8 @@ public class OidcUserManagementAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserDetailsService(JwtAuthoritiesExtractor extractor) {
+    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserDetailsService(
+            final JwtAuthoritiesExtractor extractor) {
         return new JwtAuthoritiesOidcUserService(extractor);
     }
 
@@ -98,7 +105,8 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     /**
-     * @return a jwt authorities extractor which interprets the roles of a user as their authorities.
+     * @return a jwt authorities extractor which interprets the roles of a user
+     *         as their authorities.
      */
     @Bean
     @ConditionalOnMissingBean
@@ -127,24 +135,24 @@ class JwtAuthoritiesOidcUserService extends OidcUserService {
 
     private final JwtAuthoritiesExtractor authoritiesExtractor;
 
-    JwtAuthoritiesOidcUserService(JwtAuthoritiesExtractor authoritiesExtractor) {
+    JwtAuthoritiesOidcUserService(final JwtAuthoritiesExtractor authoritiesExtractor) {
         super();
 
         this.authoritiesExtractor = authoritiesExtractor;
     }
 
     @Override
-    public OidcUser loadUser(OidcUserRequest userRequest) {
-        OidcUser user = super.loadUser(userRequest);
-        ClientRegistration clientRegistration = userRequest.getClientRegistration();
+    public OidcUser loadUser(final OidcUserRequest userRequest) {
+        final OidcUser user = super.loadUser(userRequest);
+        final ClientRegistration clientRegistration = userRequest.getClientRegistration();
 
-        Set<GrantedAuthority> authorities = new LinkedHashSet<>(authoritiesExtractor.extract(clientRegistration,
-                userRequest.getAccessToken().getTokenValue()));
+        final Set<GrantedAuthority> authorities = authoritiesExtractor.extract(clientRegistration,
+                userRequest.getAccessToken().getTokenValue());
         if (authorities.isEmpty()) {
             return user;
         }
 
-        String userNameAttributeName = clientRegistration.getProviderDetails().getUserInfoEndpoint()
+        final String userNameAttributeName = clientRegistration.getProviderDetails().getUserInfoEndpoint()
                 .getUserNameAttributeName();
         OidcUser oidcUser;
         if (StringUtils.hasText(userNameAttributeName)) {
@@ -169,12 +177,12 @@ class OidcAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSu
     private SystemSecurityContext systemSecurityContext;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws ServletException, IOException {
+    public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response,
+            final Authentication authentication) throws ServletException, IOException {
         if (authentication instanceof AbstractAuthenticationToken) {
             final String defaultTenant = "DEFAULT";
 
-            AbstractAuthenticationToken token = (AbstractAuthenticationToken) authentication;
+            final AbstractAuthenticationToken token = (AbstractAuthenticationToken) authentication;
             token.setDetails(new TenantAwareAuthenticationDetails(defaultTenant, false));
 
             systemSecurityContext.runAsSystemAsTenant(systemManagement::getTenantMetadata, defaultTenant);
@@ -190,25 +198,27 @@ class OidcAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSu
 class OidcLogoutHandler extends SecurityContextLogoutHandler {
 
     @Override
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void logout(final HttpServletRequest request, final HttpServletResponse response,
+            final Authentication authentication) {
         super.logout(request, response, authentication);
 
-        Object principal = authentication.getPrincipal();
+        final Object principal = authentication.getPrincipal();
         if (principal instanceof OidcUser) {
-            OidcUser user = (OidcUser) authentication.getPrincipal();
-            String endSessionEndpoint = user.getIssuer() + "/protocol/openid-connect/logout";
+            final OidcUser user = (OidcUser) authentication.getPrincipal();
+            final String endSessionEndpoint = user.getIssuer() + "/protocol/openid-connect/logout";
 
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(endSessionEndpoint)
+            final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(endSessionEndpoint)
                     .queryParam("id_token_hint", user.getIdToken().getTokenValue());
 
-            RestTemplate restTemplate = new RestTemplate();
+            final RestTemplate restTemplate = new RestTemplate();
             restTemplate.getForEntity(builder.toUriString(), String.class);
         }
     }
 }
 
 /**
- * Utility class to extract authorities out of the jwt. It interprets the user's role as their authorities.
+ * Utility class to extract authorities out of the jwt. It interprets the user's
+ * role as their authorities.
  */
 class JwtAuthoritiesExtractor {
 
@@ -216,50 +226,46 @@ class JwtAuthoritiesExtractor {
 
     private static final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 
-    JwtAuthoritiesExtractor(GrantedAuthoritiesMapper authoritiesMapper) {
+    JwtAuthoritiesExtractor(final GrantedAuthoritiesMapper authoritiesMapper) {
         super();
 
         this.authoritiesMapper = authoritiesMapper;
     }
 
-    Collection<? extends GrantedAuthority> extract(ClientRegistration clientRegistration,
-                                                                      String tokenValue) {
-        Jwt token;
+    Set<GrantedAuthority> extract(final ClientRegistration clientRegistration, final String tokenValue) {
         try {
             // Token is already verified by spring security
-            JwtDecoder jwtDecoder = new NimbusJwtDecoderJwkSupport(
+            final JwtDecoder jwtDecoder = new NimbusJwtDecoderJwkSupport(
                     clientRegistration.getProviderDetails().getJwkSetUri());
-            token = jwtDecoder.decode(tokenValue);
-        } catch (JwtException e) {
+            final Jwt token = jwtDecoder.decode(tokenValue);
+
+            return extract(clientRegistration.getClientId(), token.getClaims());
+        } catch (final JwtException e) {
             throw new OAuth2AuthenticationException(INVALID_REQUEST, e);
         }
-
-        return extract(clientRegistration.getClientId(), token.getClaims());
     }
 
-    Collection<? extends GrantedAuthority> extract(String clientId, Map<String, Object> claims) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> resourceMap = (Map<String, Object>) claims.get("resource_access");
+    @SuppressWarnings("unchecked")
+    Set<GrantedAuthority> extract(final String clientId, final Map<String, Object> claims) {
+        final Map<String, Object> resourceMap = (Map<String, Object>) claims.get("resource_access");
 
-        @SuppressWarnings("unchecked")
-        Map<String, Map<String, Object>> clientResource = (Map<String, Map<String, Object>>) resourceMap.get(clientId);
+        final Map<String, Map<String, Object>> clientResource = (Map<String, Map<String, Object>>) resourceMap
+                .get(clientId);
         if (CollectionUtils.isEmpty(clientResource)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        @SuppressWarnings("unchecked")
-        List<String> roles = (List<String>) clientResource.get("roles");
+        final List<String> roles = (List<String>) clientResource.get("roles");
         if (CollectionUtils.isEmpty(roles)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        Collection<? extends GrantedAuthority> authorities = AuthorityUtils
-                .createAuthorityList(roles.toArray(new String[0]));
+        final List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[0]));
         if (authoritiesMapper != null) {
-            authorities = authoritiesMapper.mapAuthorities(authorities);
+            return new LinkedHashSet<>(authoritiesMapper.mapAuthorities(authorities));
         }
 
-        return authorities;
+        return new LinkedHashSet<>(authorities);
     }
 }
 
@@ -276,40 +282,36 @@ class OidcBearerTokenAuthenticationFilter implements UserAuthenticationFilter, F
 
     private ClientRegistration clientRegistration;
 
-    void setClientRegistration(ClientRegistration clientRegistration) {
+    void setClientRegistration(final ClientRegistration clientRegistration) {
         this.clientRegistration = clientRegistration;
-    }
-
-    @Override
-    public void init(final FilterConfig filterConfig) {
     }
 
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             final String defaultTenant = "DEFAULT";
 
-            JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
-            Jwt jwt = jwtAuthenticationToken.getToken();
-            OidcIdToken idToken = new OidcIdToken(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(),
+            final JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+            final Jwt jwt = jwtAuthenticationToken.getToken();
+            final OidcIdToken idToken = new OidcIdToken(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(),
                     jwt.getClaims());
-            OidcUserInfo userInfo = new OidcUserInfo(jwt.getClaims());
+            final OidcUserInfo userInfo = new OidcUserInfo(jwt.getClaims());
 
-            Collection<? extends GrantedAuthority> authorities = authoritiesExtractor.extract(
-                    clientRegistration.getClientId(), jwt.getClaims());
+            final Set<GrantedAuthority> authorities = authoritiesExtractor.extract(clientRegistration.getClientId(),
+                    jwt.getClaims());
 
             if (authorities.isEmpty()) {
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
-            DefaultOidcUser user = new DefaultOidcUser(authorities, idToken, userInfo);
+            final DefaultOidcUser user = new DefaultOidcUser(authorities, idToken, userInfo);
 
-            OAuth2AuthenticationToken oAuth2AuthenticationToken = new OAuth2AuthenticationToken(
-                    user, authorities, clientRegistration.getRegistrationId());
+            final OAuth2AuthenticationToken oAuth2AuthenticationToken = new OAuth2AuthenticationToken(user, authorities,
+                    clientRegistration.getRegistrationId());
 
             oAuth2AuthenticationToken.setDetails(new TenantAwareAuthenticationDetails(defaultTenant, false));
 
@@ -321,6 +323,12 @@ class OidcBearerTokenAuthenticationFilter implements UserAuthenticationFilter, F
     }
 
     @Override
+    public void init(final FilterConfig filterConfig) {
+        // Nothing to do
+    }
+
+    @Override
     public void destroy() {
+        // Nothing to do
     }
 }
