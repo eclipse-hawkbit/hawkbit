@@ -58,8 +58,8 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param callback
      *            the callback.
      * @param tab
-     *            ConfirmationTab which contains more information about the
-     *            action which has to be confirmed, e.g. maintenance window
+     *            ConfirmationTab which contains more information about the action
+     *            which has to be confirmed, e.g. maintenance window
      * @param id
      *            the id of the confirmation window
      */
@@ -71,7 +71,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -90,7 +90,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -111,7 +111,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -125,8 +125,8 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param id
      *            the id of the confirmation dialog
      * @param mapCloseToCancel
-     *            Flag indicating whether or not the close event on the
-     *            enclosing window should be mapped to a cancel event.
+     *            Flag indicating whether or not the close event on the enclosing
+     *            window should be mapped to a cancel event.
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final String id,
@@ -136,7 +136,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -157,7 +157,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -173,8 +173,8 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param id
      *            the id of the confirmation dialog
      * @param tab
-     *            ConfirmationTab which contains more information about the
-     *            action which has to be confirmed, e.g. maintenance window
+     *            ConfirmationTab which contains more information about the action
+     *            which has to be confirmed, e.g. maintenance window
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
@@ -185,7 +185,7 @@ public class ConfirmationDialog implements Button.ClickListener {
 
     /**
      * Constructor for configuring confirmation dialog.
-     * 
+     *
      * @param caption
      *            the dialog caption.
      * @param question
@@ -201,11 +201,11 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param id
      *            the id of the confirmation dialog
      * @param tab
-     *            ConfirmationTab which contains more information about the
-     *            action which has to be confirmed, e.g. maintenance window
+     *            ConfirmationTab which contains more information about the action
+     *            which has to be confirmed, e.g. maintenance window
      * @param mapCloseToCancel
-     *            Flag indicating whether or not the close event on the
-     *            enclosing window should be mapped to a cancel event.
+     *            Flag indicating whether or not the close event on the enclosing
+     *            window should be mapped to a cancel event.
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon, final String id,
@@ -253,8 +253,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     }
 
     private static Label createConfirmationQuestion(final String question) {
-        final Label questionLbl = new Label(question.replaceAll("\n", "<br/>"),
-                ContentMode.TEXT);
+        final Label questionLbl = new Label(question, ContentMode.TEXT);
         questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
 
         return questionLbl;

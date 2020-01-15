@@ -166,12 +166,12 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void createComponents() {
         prefixTitleOfArtifactDetails = new Label();
-        prefixTitleOfArtifactDetails.setId(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID);
         prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
         prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_BOLD);
         prefixTitleOfArtifactDetails.setSizeUndefined();
 
         titleOfArtifactDetails = new Label();
+        titleOfArtifactDetails.setId(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
         titleOfArtifactDetails.setWidth("100%");
@@ -452,20 +452,14 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void populateArtifactDetails(final Long baseSwModuleId, final String swModuleName) {
         if (!readOnly) {
-            if (StringUtils.isEmpty(swModuleName)) {
-                setTitleOfLayoutHeader();
-            } else {
 
-                if (StringUtils.hasText(swModuleName)) {
-                    prefixTitleOfArtifactDetails
-                            .setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
-                    titleOfArtifactDetails.setValue(swModuleName);
-                } else {
-                    prefixTitleOfArtifactDetails
-                            .setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
-                    titleOfArtifactDetails.setValue("");
-                }
+            if (StringUtils.hasText(swModuleName)) {
+                prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
+                titleOfArtifactDetails.setValue(swModuleName);
+            } else {
+                setTitleOfLayoutHeader();
             }
+
         }
         final Map<String, Object> queryConfiguration;
         if (baseSwModuleId != null) {

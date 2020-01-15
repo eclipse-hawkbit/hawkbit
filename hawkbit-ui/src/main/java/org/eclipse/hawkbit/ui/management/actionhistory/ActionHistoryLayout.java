@@ -186,7 +186,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          *            name of the target
          */
         public void updateActionHistoryHeader(final String targetName) {
-            updateTitle(targetName);
+            updateTitle(targetName, UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR,
+                    UIMessageIdProvider.CAPTION_ACTION_HISTORY);
         }
 
         /**

@@ -34,7 +34,7 @@ public class DefaultGridHeader extends VerticalLayout {
 
     private final String titleText;
     private Label title;
-    private Label prefixTitleOfActionHistory;
+    private Label prefixText;
     private HorizontalLayout prefixWithTitle;
     private HorizontalLayout titleLayout;
     private transient AbstractHeaderMaximizeSupport maximizeSupport;
@@ -82,11 +82,11 @@ public class DefaultGridHeader extends VerticalLayout {
      */
     protected HorizontalLayout buildTitleHorizontalLayout() {
 
-        prefixTitleOfActionHistory = new Label();
-        prefixTitleOfActionHistory.setValue(titleText);
-        prefixTitleOfActionHistory.addStyleName(ValoTheme.LABEL_SMALL);
-        prefixTitleOfActionHistory.addStyleName(ValoTheme.LABEL_BOLD);
-        prefixTitleOfActionHistory.setSizeUndefined();
+        prefixText = new Label();
+        prefixText.setValue(titleText);
+        prefixText.addStyleName(ValoTheme.LABEL_SMALL);
+        prefixText.addStyleName(ValoTheme.LABEL_BOLD);
+        prefixText.setSizeUndefined();
 
         title = new Label();
         title.setSizeFull();
@@ -103,9 +103,9 @@ public class DefaultGridHeader extends VerticalLayout {
         prefixWithTitle.setSizeFull();
         prefixWithTitle.addStyleName("header-caption");
 
-        prefixWithTitle.addComponent(prefixTitleOfActionHistory);
-        prefixWithTitle.setComponentAlignment(prefixTitleOfActionHistory, Alignment.TOP_LEFT);
-        prefixWithTitle.setExpandRatio(prefixTitleOfActionHistory, 0.0F);
+        prefixWithTitle.addComponent(prefixText);
+        prefixWithTitle.setComponentAlignment(prefixText, Alignment.TOP_LEFT);
+        prefixWithTitle.setExpandRatio(prefixText, 0.0F);
 
         prefixWithTitle.addComponent(title);
         prefixWithTitle.setComponentAlignment(title, Alignment.TOP_LEFT);
@@ -188,13 +188,13 @@ public class DefaultGridHeader extends VerticalLayout {
      *
      * @param newTitle
      */
-    public void updateTitle(final String newTitle) {
+    public void updateTitle(final String newTitle, final String hasTextCasePrefixText, final String hasNoTextCasePrefixText) {
 
         if (StringUtils.hasText(newTitle)) {
-            prefixTitleOfActionHistory.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR));
+            prefixText.setValue(i18n.getMessage(hasTextCasePrefixText));
             title.setValue(newTitle);
         } else {
-            prefixTitleOfActionHistory.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY));
+            prefixText.setValue(i18n.getMessage(hasNoTextCasePrefixText));
             title.setValue("");
         }
     }

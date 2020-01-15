@@ -46,6 +46,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public final class SPUIComponentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(SPUIComponentProvider.class);
 
+    private static final String LABEL_STYLE = "label-style";
+
     /**
      * Prevent Instance creation as utility class.
      */
@@ -204,7 +206,7 @@ public final class SPUIComponentProvider {
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
-        nameValueLabel.addStyleName("label-style");
+        nameValueLabel.addStyleName(LABEL_STYLE);
         return nameValueLabel;
     }
 
@@ -229,7 +231,7 @@ public final class SPUIComponentProvider {
         valueStrLabel.setWidth("100%");
         valueStrLabel.addStyleName("text-cut");
         valueStrLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
-        valueStrLabel.addStyleName("label-style");
+        valueStrLabel.addStyleName(LABEL_STYLE);
 
         final HorizontalLayout nameValueLayout = new HorizontalLayout();
         nameValueLayout.setMargin(false);
@@ -256,7 +258,7 @@ public final class SPUIComponentProvider {
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + loadAndFormatUsername, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
-        nameValueLabel.addStyleName("label-style");
+        nameValueLabel.addStyleName(LABEL_STYLE);
         nameValueLabel.setDescription(loadAndFormatUsername);
         return nameValueLabel;
     }

@@ -103,6 +103,15 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     pointer-events: none !important;
   }
 
+  //This was needed to make the split of prefix "Artifact details of"
+  //and the actual value "smName:smVersion" in context of the XSS vulnerabilities
+  //possible after changing ContentMode
+  //from HTML to TEXT. As no Labels allowed at the windows caption field of the
+  //artifact details window , decision was made to use the methods
+  //Window.setAssistivePrefix() and Window.setAssistivePostfix() to solve the XSS-problem.
+  //Both, assistive postfix and prefix are usually not visible on the page and only for
+  //assistive purpose, but with overwriting this third party html class it's a possible
+  //workaround for the XSS vulnerability. I added a comment in the generic-styles.scss.
   .v-assistive-device-only {
     position: static;
     top: auto;
