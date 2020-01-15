@@ -37,12 +37,14 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -665,6 +667,22 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/installedDS"))
                 .andExpect(status().isNoContent()).andExpect(content().string(""));
+    }
+
+    @Test
+    @Description("Ensures that a target creation with empty name and a controllerId that exceeds the name length limitation is successful and the name gets truncated.")
+    public void createTargetWithEmptyNameAndLongControllerId() throws Exception {
+        final String randomString = RandomStringUtils.random(JpaTarget.CONTROLLER_ID_MAX_SIZE);
+
+        final Target target = entityFactory.target().create().controllerId(randomString).build();
+
+        final String targetList = JsonBuilder.targets(Lists.list(target), false);
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
+                .andExpect(jsonPath("[0].controllerId", equalTo(randomString)))
+                .andExpect(jsonPath("[0].name", equalTo(randomString.substring(0,
+                        Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE)))));
     }
 
     @Test
