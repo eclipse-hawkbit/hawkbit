@@ -10,9 +10,14 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * The action that has to be stopped by the target.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiCancelActionToStop {
 
     @NotNull
@@ -22,9 +27,10 @@ public class DdiCancelActionToStop {
      * Parameterized constructor.
      *
      * @param stopId
-     *            ID of the action to be stoppedW
+     *            ID of the action to be stopped
      */
-    public DdiCancelActionToStop(final String stopId) {
+    @JsonCreator
+    public DdiCancelActionToStop(@JsonProperty("stopId") final String stopId) {
         this.stopId = stopId;
     }
 

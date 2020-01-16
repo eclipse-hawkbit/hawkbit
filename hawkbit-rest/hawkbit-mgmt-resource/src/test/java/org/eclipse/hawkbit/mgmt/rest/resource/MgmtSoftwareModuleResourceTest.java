@@ -37,7 +37,9 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -163,6 +165,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final String sha256sum = HashGeneratorUtils.generateSHA256(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
@@ -173,6 +176,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$.hashes.sha256", equalTo(sha256sum)))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
                 .andExpect(jsonPath("$.providedFilename", equalTo("origFilename"))).andReturn();
 
@@ -205,7 +209,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         // try to upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(FileSizeQuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED.getKey())));
     }
 
     @Test
@@ -243,6 +249,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.getByFilename("origFilename").get().getMd5Hash()).as("Wrong md5 hash")
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
+        assertThat(artifactManagement.getByFilename("origFilename").get().getSha256Hash()).as("Wrong sha256 hash")
+                .isEqualTo(HashGeneratorUtils.generateSHA256(random));
+
         // metadata
         assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
@@ -271,6 +280,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final String sha256sum = HashGeneratorUtils.generateSHA256(random);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
@@ -278,6 +288,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$.hashes.sha256", equalTo(sha256sum)))
                 .andExpect(jsonPath("$.providedFilename", equalTo("orig"))).andExpect(status().isCreated());
 
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file))
@@ -318,13 +329,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final String sha256sum = HashGeneratorUtils.generateSHA256(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
         // wrong sha1
         MvcResult mvcResult = mvc
                 .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                        .param("md5sum", md5sum).param("sha1sum", "afsdff"))
+                        .param("md5sum", md5sum).param("sha1sum", "afsdff").param("sha256sum", sha256sum))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
         // check error result
@@ -332,10 +344,21 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(exceptionInfo.getErrorCode()).as("Exception contains wrong error code")
                 .isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH.getKey());
 
+        // wrong sha256
+        mvcResult = mvc
+                .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                        .param("md5sum", md5sum).param("sha1sum", sha1sum).param("sha256sum", "jdshfsd"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+
+        // check error result
+        exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getErrorCode()).as("Exception contains wrong error code")
+                .isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH.getKey());
+
         // wrong md5
         mvcResult = mvc
                 .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                        .param("md5sum", "sdfsdfs").param("sha1sum", sha1sum))
+                        .param("md5sum", "sdfsdfs").param("sha1sum", sha1sum).param("sha256sum", sha256sum))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
 
         // check error result
@@ -362,6 +385,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
             final byte random[] = randomBytes(5 * 1024);
             final String md5sum = HashGeneratorUtils.generateMD5(random);
             final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+            final String sha256sum = HashGeneratorUtils.generateSHA256(random);
             final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
 
             // upload
@@ -371,21 +395,20 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                     .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                     .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                    .andExpect(jsonPath("$.hashes.sha256", equalTo(sha256sum)))
                     .andExpect(jsonPath("$.size", equalTo(random.length)))
                     .andExpect(jsonPath("$.providedFilename", equalTo("origFilename" + i))).andReturn();
         }
 
         // upload one more file to cause the quota to be exceeded
         final byte random[] = randomBytes(5 * 1024);
-        HashGeneratorUtils.generateMD5(random);
-        HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
@@ -405,6 +428,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
             final byte random[] = randomBytes(artifactSize);
             final String md5sum = HashGeneratorUtils.generateMD5(random);
             final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+            final String sha256sum = HashGeneratorUtils.generateSHA256(random);
             final MockMultipartFile file = new MockMultipartFile("file", "origFilename" + i, null, random);
 
             // upload
@@ -415,14 +439,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                     .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                     .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
+                    .andExpect(jsonPath("$.hashes.sha256", equalTo(sha256sum)))
                     .andExpect(jsonPath("$.size", equalTo(random.length)))
                     .andExpect(jsonPath("$.providedFilename", equalTo("origFilename" + i))).andReturn();
         }
 
         // upload one more file to cause the quota to be exceeded
         final byte random[] = randomBytes(artifactSize);
-        HashGeneratorUtils.generateMD5(random);
-        HashGeneratorUtils.generateSHA1(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
@@ -430,8 +453,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(QuotaExceededException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
+                .andExpect(jsonPath("$.exceptionClass", equalTo(StorageQuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_STORAGE_QUOTA_EXCEEDED.getKey())));
 
     }
 
@@ -486,6 +509,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$._links.download.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
@@ -514,6 +538,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.[0].size", equalTo(random.length)))
                 .andExpect(jsonPath("$.[0].hashes.md5", equalTo(artifact.getMd5Hash())))
                 .andExpect(jsonPath("$.[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.[0].hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.[0].providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
@@ -521,6 +546,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.[1].id", equalTo(artifact2.getId().intValue())))
                 .andExpect(jsonPath("$.[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
                 .andExpect(jsonPath("$.[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
+                .andExpect(jsonPath("$.[1].hashes.sha256", equalTo(artifact2.getSha256Hash())))
                 .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
                 .andExpect(jsonPath("$.[1]._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
@@ -755,7 +781,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system answers as defined in case of a wnon extsing field used in filter. Expected result: BAD REQUEST with error description.")
+    @Description("Verfies that the system answers as defined in case of a non existing field used in filter. Expected result: BAD REQUEST with error description.")
     public void getSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongField==abc").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())

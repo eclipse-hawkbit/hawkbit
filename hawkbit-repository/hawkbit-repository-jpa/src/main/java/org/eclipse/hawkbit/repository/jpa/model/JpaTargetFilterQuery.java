@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Optional;
+
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -66,10 +68,14 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @ObjectTypeConverter(name = "autoAssignActionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
             @ConversionValue(objectValue = "FORCED", dataValue = "0"),
             @ConversionValue(objectValue = "SOFT", dataValue = "1"),
-            // Conversion for 'TIMEFORCED' is disabled because it is not permitted in autoAssignment
-            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3")})
+            // Conversion for 'TIMEFORCED' is disabled because it is not
+            // permitted in autoAssignment
+            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3") })
     @Convert("autoAssignActionType")
     private ActionType autoAssignActionType;
+
+    @Column(name = "auto_assign_weight", nullable = true)
+    private Integer autoAssignWeight;
 
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
@@ -86,13 +92,16 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
      *            of the {@link TargetFilterQuery}.
      * @param autoAssignActionType
      *            of the {@link TargetFilterQuery}.
+     * @param autoAssignWeight
+     *            of the {@link TargetFilterQuery}.
      */
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
-            final ActionType autoAssignActionType) {
+            final ActionType autoAssignActionType, final Integer autoAssignWeight) {
         this.name = name;
         this.query = query;
         this.autoAssignDistributionSet = (JpaDistributionSet) autoAssignDistributionSet;
         this.autoAssignActionType = autoAssignActionType;
+        this.autoAssignWeight = autoAssignWeight;
     }
 
     @Override
@@ -129,6 +138,15 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
 
     public void setAutoAssignActionType(final ActionType actionType) {
         this.autoAssignActionType = actionType;
+    }
+
+    @Override
+    public Optional<Integer> getAutoAssignWeight() {
+        return Optional.ofNullable(autoAssignWeight);
+    }
+
+    public void setAutoAssignWeight(final Integer weight) {
+        this.autoAssignWeight = weight;
     }
 
     @Override

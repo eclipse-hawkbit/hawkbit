@@ -88,7 +88,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -225,11 +224,19 @@ public class TargetTable extends AbstractTable<Target> {
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
         UI.getCurrent().access(() -> {
-            if (managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG
-                    || managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG) {
+            if (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent)
+                    || tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent)) {
                 refreshFilter();
             }
         });
+    }
+
+    private boolean tableIsFilteredByTagsAndTagWasUnassignedFromTarget(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG && isFilteredByTags();
+    }
+
+    private boolean tableIsFilteredByNoTagAndTagWasAssignedToTarget(final ManagementUIEvent managementUIEvent) {
+        return managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG && isFilteredByNoTag();
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)
@@ -533,7 +540,7 @@ public class TargetTable extends AbstractTable<Target> {
     /**
      * Toggles {@link TargetTag} assignment to given target ids by means that if
      * some (or all) of the targets in the list have the {@link Tag} not yet
-     * assigned, they will be. If all of theme have the tag already assigned
+     * assigned, they will be. Only if all of them have the tag already assigned
      * they will be removed instead. Additionally a success popup is shown.
      *
      * @param targetIds
@@ -543,21 +550,19 @@ public class TargetTable extends AbstractTable<Target> {
      * @return TagAssigmentResult with all meta data of the assignment outcome.
      */
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<Long> targetIds, final String targTagName) {
-        final List<String> controllerIds = targetManagement.get(targetIds).stream().map(Target::getControllerId)
-                .collect(Collectors.toList());
-        if (controllerIds.isEmpty()) {
+        final List<Target> targets = targetManagement.get(targetIds);
+        if (targets.isEmpty()) {
             getNotification().displayWarning(getI18n().getMessage("targets.not.exists"));
-            return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
-                    Lists.newArrayListWithCapacity(0), null);
+            return new TargetTagAssignmentResult(0, Collections.emptyList(), Collections.emptyList(), null);
         }
 
         final Optional<TargetTag> tag = tagManagement.getByName(targTagName);
         if (!tag.isPresent()) {
             getNotification().displayWarning(getI18n().getMessage("targettag.not.exists", targTagName));
-            return new TargetTagAssignmentResult(0, 0, 0, Lists.newArrayListWithCapacity(0),
-                    Lists.newArrayListWithCapacity(0), null);
+            return new TargetTagAssignmentResult(0, Collections.emptyList(), Collections.emptyList(), null);
         }
 
+        final List<String> controllerIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(controllerIds, targTagName);
 
         getNotification().displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, getI18n()));
@@ -846,6 +851,10 @@ public class TargetTable extends AbstractTable<Target> {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
 
+    private boolean isFilteredByNoTag() {
+        return managementUIState.getTargetTableFilters().isNoTagSelected();
+    }
+
     private void assignDsToTarget(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final AbstractTable<?> source = (AbstractTable<?>) transferable.getSourceComponent();
@@ -963,7 +972,7 @@ public class TargetTable extends AbstractTable<Target> {
 
     @Override
     protected boolean hasDeletePermission() {
-        return !honoSyncEnabled && (getPermChecker().hasDeleteRepositoryPermission() || getPermChecker().hasDeleteTargetPermission());
+        return !honoSyncEnabled && getPermChecker().hasDeleteTargetPermission();
     }
 
     @Override

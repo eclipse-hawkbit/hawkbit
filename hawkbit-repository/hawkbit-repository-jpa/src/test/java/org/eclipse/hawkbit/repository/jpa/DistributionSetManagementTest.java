@@ -34,13 +34,12 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -352,7 +351,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds1.getId(), createDistributionSetMetadata(ds1.getId(),
                         new JpaDistributionSetMetadata("k" + maxMetaData, ds1, "v" + maxMetaData))));
 
@@ -363,7 +362,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             metaData2.add(new JpaDistributionSetMetadata("k" + i, ds2, "v" + i));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds2.getId(), metaData2));
 
         // add some meta data entries
@@ -379,7 +378,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             metaData3.add(new JpaDistributionSetMetadata("kk" + i, ds3, "vv" + i));
         }
         // verify quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> createDistributionSetMetadata(ds3.getId(), metaData3));
 
     }
@@ -511,7 +510,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             distributionSetManagement.assignSoftwareModules(ds1.getId(), Collections.singletonList(modules.get(i)));
         }
         // add one more to cause the quota to be exceeded
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(ds1.getId(),
                     Collections.singletonList(modules.get(maxModules)));
         });
@@ -519,7 +518,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // assign all software modules at once
         final DistributionSet ds2 = testdataFactory.createDistributionSetWithNoSoftwareModules("ds2", "1.0");
         // verify quota is exceeded
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(ds2.getId(), modules));
 
         // assign some software modules
@@ -529,7 +528,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             distributionSetManagement.assignSoftwareModules(ds3.getId(), Collections.singletonList(modules.get(i)));
         }
         // assign the remaining modules to cause the quota to be exceeded
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(() -> distributionSetManagement
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> distributionSetManagement
                 .assignSoftwareModules(ds3.getId(), modules.subList(firstHalf, modules.size())));
 
     }
@@ -991,23 +990,6 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
         assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(2);
-    }
-
-    @Test
-    @Description("Verify that the DistributionSetAssignmentResult not contains already assigned targets.")
-    public void verifyDistributionSetAssignmentResultNotContainsAlreadyAssignedTargets() {
-        final DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
-
-        // create assigned DS
-        final Target savedTarget = testdataFactory.createTarget();
-        DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(),
-                savedTarget.getControllerId());
-        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
-
-        assignmentResult = assignDistributionSet(dsToTargetAssigned.getId(), savedTarget.getControllerId());
-        assertThat(assignmentResult.getAssignedEntity()).hasSize(0);
-
-        assertThat(distributionSetRepository.findAll()).hasSize(1);
     }
 
     @Test

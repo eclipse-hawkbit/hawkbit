@@ -23,8 +23,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -33,7 +33,8 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.ui.common.tagdetails.TagData;
 import org.eclipse.hawkbit.ui.components.HawkbitErrorNotificationMessage;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
@@ -287,7 +288,7 @@ public class BulkUploadHandler extends CustomComponent
             String dsAssignmentFailedMsg = null;
             String tagAssignmentFailedMsg = null;
             if (ifTargetsCreatedSuccessfully()) {
-                if (ifTagsSelected()) {
+                if (targetBulkTokenTags.isTagSelectedForAssignment()) {
                     tagAssignmentFailedMsg = tagAssignment();
                 }
                 if (ifDsSelected()) {
@@ -301,20 +302,23 @@ public class BulkUploadHandler extends CustomComponent
             final ActionType actionType = ActionType.FORCED;
             final long forcedTimeStamp = new Date().getTime();
             final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
-            final List<String> targetsList = targetBulkUpload.getTargetsCreated();
+            final List<String> targetIds = targetBulkUpload.getTargetsCreated();
             final Long dsSelected = (Long) comboBox.getValue();
             if (!distributionSetManagement.get(dsSelected).isPresent()) {
                 return i18n.getMessage("message.bulk.upload.assignment.failed");
             }
-            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion(), actionType,
-                    forcedTimeStamp, targetsList);
+            final List<DeploymentRequest> deploymentRequests = targetIds.stream()
+                    .map(targetId -> DeploymentManagement
+                            .deploymentRequest(targetId, targetBulkUpload.getDsNameAndVersion())
+                            .setActionType(actionType).setForceTime(forcedTimeStamp).build())
+                    .collect(Collectors.toList());
+            deploymentManagement.assignDistributionSets(deploymentRequests);
             return null;
         }
 
         private String tagAssignment() {
-            final Map<Long, TagData> tokensSelected = targetBulkTokenTags.getTokensAdded();
             final List<String> deletedTags = new ArrayList<>();
-            for (final TagData tagData : tokensSelected.values()) {
+            for (final TagData tagData : targetBulkTokenTags.getSelectedTagsForAssignment()) {
                 if (!tagManagement.get(tagData.getId()).isPresent()) {
                     deletedTags.add(tagData.getName());
                 } else {
@@ -330,10 +334,6 @@ public class BulkUploadHandler extends CustomComponent
                 return i18n.getMessage("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
             }
             return i18n.getMessage("message.bulk.upload.tag.assignments.failed");
-        }
-
-        private boolean ifTagsSelected() {
-            return targetBulkTokenTags.getTokenField().getValue() != null;
         }
 
         private boolean ifDsSelected() {
@@ -375,6 +375,7 @@ public class BulkUploadHandler extends CustomComponent
 
             } catch (final EntityAlreadyExistsException ex) {
                 // Targets that exist already are simply ignored
+                LOG.info("Entity {} - {} already exists and will be ignored", newControllerId, name);
             }
         }
     }

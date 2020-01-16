@@ -108,8 +108,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement.update(entityFactory.targetFilterQuery()
-                .update(filterId).name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
+        final TargetFilterQuery updateFilter = filterManagement
+                .update(entityFactory.targetFilterQuery().update(filterId).name(targetFilterRest.getName())
+                        .query(targetFilterRest.getQuery()));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
         MgmtTargetFilterQueryMapper.addLinks(response);
@@ -127,10 +128,10 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") final Long filterId,
-            @RequestBody final MgmtDistributionSetAutoAssignment dsIdWithActionType) {
+            @RequestBody final MgmtDistributionSetAutoAssignment autoAssignRequest) {
 
-        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDSWithActionType(filterId,
-                dsIdWithActionType.getId(), MgmtRestModelMapper.convertActionType(dsIdWithActionType.getType()));
+        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(
+                MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filterId, autoAssignRequest));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
         MgmtTargetFilterQueryMapper.addLinks(response);
@@ -156,7 +157,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
-        filterManagement.updateAutoAssignDS(filterId, null);
+        filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
 
         return ResponseEntity.noContent().build();
     }

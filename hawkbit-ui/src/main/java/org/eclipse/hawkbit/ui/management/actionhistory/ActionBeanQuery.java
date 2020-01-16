@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -83,12 +83,12 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         if (startIndex == 0) {
             if (firstPageActions == null) {
                 firstPageActions = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
-                        PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
+                        new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             }
             actionBeans = firstPageActions;
         } else {
             actionBeans = getDeploymentManagement().findActionsByTarget(currentSelectedConrollerId,
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    new OffsetBasedPageRequest(startIndex, count, sort));
         }
         return createProxyActions(actionBeans);
     }

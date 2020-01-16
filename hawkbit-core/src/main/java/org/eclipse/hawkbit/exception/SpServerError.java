@@ -112,6 +112,12 @@ public enum SpServerError {
     /**
     *
     */
+    SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH("hawkbit.server.error.artifact.uploadFailed.checksum.sha256.match",
+            "Upload of artifact failed as the provided SHA256 checksum did not match with the provided artifact."),
+
+    /**
+    *
+    */
     SP_DS_CREATION_FAILED_MISSING_MODULE("hawkbit.server.error.distributionset.creationFailed.missingModule",
             "Creation if Distribution Set failed as module is missing that is configured as mandatory."),
 
@@ -136,6 +142,17 @@ public enum SpServerError {
      *
      */
     SP_QUOTA_EXCEEDED("hawkbit.server.error.quota.tooManyEntries", "Too many entries have been inserted."),
+
+    /**
+     * error that describes that size of uploaded file exceeds size quota
+     */
+    SP_FILE_SIZE_QUOTA_EXCEEDED("hawkbit.server.error.quota.fileSizeExceeded", "File exceeds size quota."),
+
+    /**
+     * error that describes that size of uploaded file exceeds storage quota
+     */
+    SP_STORAGE_QUOTA_EXCEEDED("hawkbit.server.error.quota.storageExceeded",
+            "Storage quota will be exceeded if file is uploaded."),
 
     /**
      * error message, which describes that the action can not be canceled cause
@@ -240,7 +257,19 @@ public enum SpServerError {
      * change is not allowed.
      */
     SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED("hawkbit.server.error.repo.tenantConfigurationValueChangeNotAllowed",
-            "The requested tenant configuration value modification is not allowed.");
+            "The requested tenant configuration value modification is not allowed."),
+
+    /**
+    *
+    */
+    SP_MULTIASSIGNMENT_NOT_ENABLED("hawkbit.server.error.multiassignmentNotEnabled",
+            "The requested operation requires multi assignments to be enabled."),
+
+    /**
+    *
+    */
+    SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode",
+            "The requested operation requires a weight to be specified when multi assignments is enabled.");
 
     private final String key;
     private final String message;

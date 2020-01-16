@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -65,7 +65,7 @@ public interface DistributionSetTypeManagement
      *             if the {@link DistributionSetType} while it is already in use
      *             by a {@link DistributionSet}
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleType}s is
      *             exceeded for the addressed {@link DistributionSetType}
      */
@@ -90,7 +90,7 @@ public interface DistributionSetTypeManagement
      *             if the {@link DistributionSetType} while it is already in use
      *             by a {@link DistributionSet}
      * 
-     * @throws QuotaExceededException
+     * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleType}s is
      *             exceeded for the addressed {@link DistributionSetType}
      */

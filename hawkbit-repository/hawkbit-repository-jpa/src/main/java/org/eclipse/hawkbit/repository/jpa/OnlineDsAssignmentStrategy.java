@@ -11,10 +11,9 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,8 +34,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
@@ -47,21 +45,17 @@ import com.google.common.collect.Lists;
  */
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
-    private final Supplier<Boolean> multiAssignmentsConfig;
-
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
-            final Supplier<Boolean> multiAssignmentsConfig) {
-        super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
-                quotaManagement);
-        this.multiAssignmentsConfig = multiAssignmentsConfig;
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+        super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
+                quotaManagement, multiAssignmentsConfig);
     }
 
     @Override
     void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
-        targets.stream().forEach(target -> {
+        targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.PENDING);
             sendTargetUpdatedEvent(target);
         });
@@ -79,7 +73,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
         if (isMultiAssignmentsEnabled()) {
-            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getActions().stream())
+            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedEntity().stream())
                     .collect(Collectors.toList()));
         } else {
             assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
@@ -132,9 +126,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final JpaTarget target,
+    JpaAction createTargetAction(final TargetWithActionType targetWithActionType, final List<JpaTarget> targets,
             final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
         if (result != null) {
             result.setStatus(Status.RUNNING);
         }
@@ -172,7 +166,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
-        final List<Action> filteredActions = filterCancellations(assignmentResult.getActions())
+        final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity())
                 .filter(action -> !hasPendingCancellations(action.getTarget())).collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
@@ -185,8 +179,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetAssignDistributionSetEvent(tenant,
-                distributionSetId, actions, bus.getId(), actions.get(0).isMaintenanceWindowAvailable())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions,
+                        eventPublisherHolder.getApplicationId(), actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     private boolean hasPendingCancellations(final Target target) {
@@ -204,12 +199,8 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      *            of the targets the event refers to
      */
     private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new MultiActionEvent(tenant, bus.getId(), controllerIds)));
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.get();
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new MultiActionEvent(tenant, eventPublisherHolder.getApplicationId(), controllerIds)));
     }
 
     private static Stream<Action> filterCancellations(final List<Action> actions) {

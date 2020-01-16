@@ -76,14 +76,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -98,6 +97,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -110,16 +110,13 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaControllerManagement implements ControllerManagement {
-    private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
+public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
+    private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
     @Autowired
     private EntityManager entityManager;
-
-    @Autowired
-    private ActionRepository actionRepository;
 
     @Autowired
     private TargetRepository targetRepository;
@@ -143,10 +140,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private EntityFactory entityFactory;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    private BusProperties bus;
+    private EventPublisherHolder eventPublisherHolder;
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
@@ -160,10 +154,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private TenantAware tenantAware;
 
-    private final RepositoryProperties repositoryProperties;
-
     JpaControllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
+        super(actionRepository, repositoryProperties);
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
@@ -174,8 +167,6 @@ public class JpaControllerManagement implements ControllerManagement {
         } else {
             queue = null;
         }
-
-        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
@@ -197,7 +188,7 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction()}.
+     * {@link ControllerManagement#getPollingTimeForAction(long)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
@@ -242,12 +233,12 @@ public class JpaControllerManagement implements ControllerManagement {
          * Constructor.
          *
          * @param defaultEventInterval
-         *            default timer value to use for interval between events.
-         *            This puts an upper bound for the timer value
+         *            default timer value to use for interval between events. This puts
+         *            an upper bound for the timer value
          * @param minimumEventInterval
-         *            for loading {@link DistributionSet#getModules()}. This
-         *            puts a lower bound to the timer value
-         * @param timerUnit
+         *            for loading {@link DistributionSet#getModules()}. This puts a
+         *            lower bound to the timer value
+         * @param timeUnit
          *            representing the unit of time to be used for timer.
          */
         EventTimer(final String defaultEventInterval, final String minimumEventInterval, final TemporalUnit timeUnit) {
@@ -261,16 +252,15 @@ public class JpaControllerManagement implements ControllerManagement {
         }
 
         /**
-         * This method calculates the time interval until the next event based
-         * on the desired number of events before the time when interval is
-         * reset to default. The return value is bounded by
-         * {@link EventTimer#defaultEventInterval} and
+         * This method calculates the time interval until the next event based on the
+         * desired number of events before the time when interval is reset to default.
+         * The return value is bounded by {@link EventTimer#defaultEventInterval} and
          * {@link EventTimer#minimumEventInterval}.
          *
          * @param eventCount
-         *            number of events desired until the interval is reset to
-         *            default. This is not guaranteed as the interval between
-         *            events cannot be less than the minimum interval
+         *            number of events desired until the interval is reset to default.
+         *            This is not guaranteed as the interval between events cannot be
+         *            less than the minimum interval
          * @param timerResetTime
          *            time when exponential forwarding should reset to default
          *
@@ -350,23 +340,19 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    public Optional<Action> findOldestActiveActionByTarget(final String controllerId) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Optional.empty();
-        }
-
-        // used in favorite to findFirstByTargetAndActiveOrderByIdAsc due to
-        // DATAJPA-841 issue.
-        return actionRepository.findFirstByTargetControllerIdAndActive(new Sort(Direction.ASC, "id"), controllerId,
-                true);
+    public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
+        return findActiveActionsWithHighestWeight(controllerId, 1).stream().findFirst();
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Page.empty();
-        }
-        return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId,
+            final int maxActionCount) {
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    public int getWeightConsideringDefault(final Action action) {
+        return super.getWeightConsideringDefault(action);
     }
 
     @Override
@@ -380,33 +366,42 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
+    public void deleteExistingTarget(@NotEmpty final String controllerId) {
+        final Target target = targetRepository.findByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+         targetRepository.deleteById(target.getId());
+    }
+
+    @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
+        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address,
+            final String name) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
                 .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        return targetRepository.findOne(spec).map(target -> updateTargetStatus(target, address))
-                .orElseGet(() -> createTarget(controllerId, address));
+        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name))
+                .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTarget(final String controllerId, final URI address) {
-        try {
-            final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                    .controllerId(controllerId).description("Plug and Play target: " + controllerId).name(controllerId)
-                    .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
-                    .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+    private Target createTarget(final String controllerId, final URI address, String name) {
 
-            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(result, bus.getId())));
+        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))
+                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
-            return result;
-        } catch (final EntityAlreadyExistsException e) {
-            LOG.warn(
-                    "Caught an EntityAlreadyExistsException while creating non existing target "
-                            + "[controllerId:{}, address:{}, tenant: {}]",
-                    controllerId, address, tenantAware.getCurrentTenant());
-            throw e;
-        }
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
+
+        return result;
     }
 
     /**
@@ -453,8 +448,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
         pollChunks.forEach(chunk -> {
             setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
-            chunk.forEach(controllerId -> afterCommit.afterCommit(
-                    () -> eventPublisher.publishEvent(new TargetPollEvent(controllerId, tenant, bus.getId()))));
+            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                    .publishEvent(new TargetPollEvent(controllerId, tenant, eventPublisherHolder.getApplicationId()))));
         });
 
         return null;
@@ -462,9 +457,8 @@ public class JpaControllerManagement implements ControllerManagement {
 
     /**
      * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
-     * raising opt lock revision as this update is not mission critical and in
-     * fact only written by {@link ControllerManagement}, i.e. the target
-     * itself.
+     * raising opt lock revision as this update is not mission critical and in fact
+     * only written by {@link ControllerManagement}, i.e. the target itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
         final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
@@ -492,38 +486,40 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     /**
-     * Stores target directly to DB in case either {@link Target#getAddress()}
-     * or {@link Target#getUpdateStatus()} changes or the buffer queue is full.
+     * Stores target directly to DB in case either {@link Target#getAddress()} or
+     * {@link Target#getUpdateStatus()} or {@link Target#getName()} changes or the buffer queue is full.
      *
      */
-    private Target updateTargetStatus(final JpaTarget toUpdate, final URI address) {
-        boolean storeEager = isStoreEager(toUpdate, address);
-
-        if (TargetUpdateStatus.UNKNOWN == toUpdate.getUpdateStatus()) {
-            toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-            storeEager = true;
-        }
-
-        if (storeEager || !queue.offer(new TargetPoll(toUpdate))) {
-            toUpdate.setAddress(address.toString());
+    private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
+        if (isStoreEager(toUpdate, address, name) || !queue.offer(new TargetPoll(toUpdate))) {
+            if (isAddressChanged(toUpdate.getAddress(), address)) {
+                toUpdate.setAddress(address.toString());
+            }
+            if (isNameChanged(toUpdate.getName(), name)) {
+                toUpdate.setName(name);
+            }
+            if (isStatusUnknown(toUpdate.getUpdateStatus())) {
+                toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+            }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
-
-            afterCommit.afterCommit(() -> eventPublisher.publishEvent(new TargetPollEvent(toUpdate, bus.getId())));
-
+            afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                    .publishEvent(new TargetPollEvent(toUpdate, eventPublisherHolder.getApplicationId())));
             return targetRepository.save(toUpdate);
         }
-
         return toUpdate;
     }
-
-    private boolean isStoreEager(final JpaTarget toUpdate, final URI address) {
-        if (repositoryProperties.isEagerPollPersistence()) {
-            return true;
-        } else if (toUpdate.getAddress() == null) {
-            return true;
-        } else {
-            return !toUpdate.getAddress().equals(address);
-        }
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name) {
+        return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
+                || isNameChanged(toUpdate.getName(), name) || isStatusUnknown(toUpdate.getUpdateStatus());
+    }
+    private boolean isAddressChanged(final URI addressToUpdate, final URI address) {
+        return addressToUpdate == null || !addressToUpdate.equals(address);
+    }
+    private boolean isNameChanged(final String nameToUpdate, final String name) {
+        return StringUtils.hasText(name) && !nameToUpdate.equals(name);
+    }
+    private boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
+        return TargetUpdateStatus.UNKNOWN == statusToUpdate;
     }
 
     @Override
@@ -599,8 +595,8 @@ public class JpaControllerManagement implements ControllerManagement {
      * ActionStatus updates are allowed mainly if the action is active. If the
      * action is not active we accept further status updates if permitted so by
      * repository configuration. In this case, only the values: Status.ERROR and
-     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we
-     * accept status updates only once.
+     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we accept
+     * status updates only once.
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
@@ -678,9 +674,10 @@ public class JpaControllerManagement implements ControllerManagement {
 
         target.setRequestControllerAttributes(true);
 
-        eventPublisher.publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                JpaTarget.class.getName(), bus.getId()));
+        eventPublisherHolder.getEventPublisher()
+                .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                        target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
+                        JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()));
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -734,8 +731,8 @@ public class JpaControllerManagement implements ControllerManagement {
             final UpdateMode mode) {
 
         /*
-         * Constraints on attribute keys & values are not validated by
-         * EclipseLink. Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by EclipseLink.
+         * Hence, they are validated here.
          */
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
@@ -746,7 +743,6 @@ public class JpaControllerManagement implements ControllerManagement {
 
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
-
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
         switch (updateMode) {
         case REMOVE:
@@ -813,8 +809,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     /**
-     * Registers retrieved status for given {@link Target} and {@link Action} if
-     * it does not exist yet.
+     * Registers retrieved status for given {@link Target} and {@link Action} if it
+     * does not exist yet.
      *
      * @param actionId
      *            to the handle status for
@@ -1006,8 +1002,8 @@ public class JpaControllerManagement implements ControllerManagement {
      * Cancels given {@link Action} for this {@link Target}. The method will
      * immediately add a {@link Status#CANCELED} status to the action. However,
      * it might be possible that the controller will continue to work on the
-     * cancelation. The controller needs to acknowledge or reject the
-     * cancelation using {@link DdiRootController#postCancelActionFeedback}.
+     * cancellation. The controller needs to acknowledge or reject the
+     * cancellation using {@link DdiRootController#postCancelActionFeedback}.
      *
      * @param actionId
      *            to be canceled
@@ -1055,8 +1051,8 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
-        afterCommit.afterCommit(
-                () -> eventPublisher.publishEvent(new CancelTargetAssignmentEvent(target, actionId, bus.getId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
+                new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
     }
 
     // for testing

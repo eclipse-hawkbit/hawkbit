@@ -70,4 +70,5 @@ Authentication is provided by _RabbitMQ_ [vhost and user credentials](https://ww
 
 ## Management UI
 - Login Dialog
+- OpenID Connect
 

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -45,6 +47,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -54,11 +57,11 @@ import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -112,6 +115,8 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
+
+    protected static final int DEFAULT_TEST_WEIGHT = 500;
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -200,7 +205,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    protected ApplicationEventPublisher eventPublisher;
 
     @Rule
     public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
@@ -230,9 +235,53 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
             final ActionType actionType) {
-        return deploymentManagement.assignDistributionSet(dsID,
-                Collections.singletonList(new TargetWithActionType(controllerId, actionType,
-                        RepositoryModelConstants.NO_FORCE_TIME)));
+        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
+            final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
+            final ActionType actionType) {
+        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
+            final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
+            final ActionType actionType, final long forcedTime, final Integer weight) {
+        final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
+                .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
+                        .setForceTime(forcedTime).setWeight(weight).build())
+                .collect(Collectors.toList());
+        final List<DistributionSetAssignmentResult> results = deploymentManagement
+                .assignDistributionSets(deploymentRequests);
+        assertThat(results).hasSize(1);
+        return results.get(0);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
+            final List<Target> targets) {
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
+        return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED);
+    }
+
+    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsId, final List<String> targetIds,
+            final int weight) {
+        return assignDistributionSet(dsId, targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
+                weight);
+    }
+
+    protected DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
+        final List<DistributionSetAssignmentResult> results = deploymentManagement
+                .assignDistributionSets(Collections.singletonList(request));
+        assertThat(results).hasSize(1);
+        return results.get(0);
     }
 
     /**
@@ -264,34 +313,23 @@ public abstract class AbstractIntegrationTest {
     protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindow(final long dsID,
             final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
-        return deploymentManagement.assignDistributionSet(dsID,
-                Arrays.asList(new TargetWithActionType(controllerId, ActionType.FORCED,
-                        RepositoryModelConstants.NO_FORCE_TIME, maintenanceWindowSchedule, maintenanceWindowDuration,
-                        maintenanceWindowTimeZone)));
-    }
 
-    protected DistributionSetAssignmentResult assignDistributionSetWithMaintenanceWindowTimeForced(final long dsID,
-            final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
-            final String maintenanceWindowTimeZone) {
-        return deploymentManagement.assignDistributionSet(dsID,
-                Arrays.asList(new TargetWithActionType(controllerId, ActionType.TIMEFORCED, System.currentTimeMillis(),
-                        maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)));
-    }
-
-    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset,
-            final List<Target> targets) {
-        return deploymentManagement.assignDistributionSet(pset.getId(),
-                targets.stream().map(Target::getTargetWithActionType).collect(Collectors.toList()));
+        return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
+                .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
+                .build());
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
         return assignDistributionSet(pset, Arrays.asList(target));
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSetTimeForced(final DistributionSet pset,
-            final Target target) {
-        return deploymentManagement.assignDistributionSet(pset.getId(), Arrays.asList(
-                new TargetWithActionType(target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis())));
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String targetId,
+            final int weight) {
+        return assignDistributionSet(dsId, Collections.singletonList(targetId), weight);
+    }
+
+    protected void enableMultiAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
@@ -322,8 +360,8 @@ public abstract class AbstractIntegrationTest {
             final boolean isRequiredMigrationStep) {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
-        savedTarget = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
-                .getAssignedEntity().iterator().next();
+        savedTarget = getFirstAssignedTarget(
+                assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
@@ -434,5 +472,24 @@ public abstract class AbstractIntegrationTest {
         }
 
         return randomStringBuilder.toString();
+    }
+
+    protected static Action getFirstAssignedAction(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
+    }
+
+    protected static Long getFirstAssignedActionId(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return getFirstAssignedAction(distributionSetAssignmentResult).getId();
+    }
+
+    protected static Target getFirstAssignedTarget(final DistributionSetAssignmentResult assignment) {
+        return getFirstAssignedAction(assignment).getTarget();
+    }
+
+    protected static Comparator<Target> controllerIdComparator() {
+        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
     }
 }

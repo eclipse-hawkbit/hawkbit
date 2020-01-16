@@ -30,8 +30,10 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.exception.QuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -82,12 +84,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final int artifactSize = artifactData.length();
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize)),
+                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, false, null, artifactSize)),
+                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
@@ -183,7 +185,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
 
         // create one mode to trigger the quota exceeded error
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> createArtifactForSoftwareModule("file" + maxArtifacts, smId, artifactSize));
 
         // delete one of the artifacts
@@ -217,7 +219,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         // upload one more artifact to trigger the quota exceeded error
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "smd" + numArtifacts, "1.0", null, null));
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(StorageQuotaExceededException.class)
                 .isThrownBy(() -> createArtifactForSoftwareModule("file" + numArtifacts, sm.getId(), artifactSize));
 
         // delete one of the artifacts
@@ -225,18 +227,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // now we should be able to create an artifact again
         createArtifactForSoftwareModule("fileXYZ", sm.getId(), artifactSize);
-    }
-
-    @Test
-    @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
-    public void createArtifactWhichExceedsMaxStorage() throws IOException {
-
-        // create one artifact which exceeds the storage quota at once
-        final long maxBytes = quotaManagement.getMaxArtifactStorage();
-        final JpaSoftwareModule sm = softwareModuleRepository
-                .save(new JpaSoftwareModule(osType, "smd345", "1.0", null, null));
-        assertThatExceptionOfType(QuotaExceededException.class).isThrownBy(
-                () -> createArtifactForSoftwareModule("file345", sm.getId(), Math.toIntExact(maxBytes) + 128));
     }
 
     @Test
@@ -249,7 +239,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // create an artifact that exceeds the configured quota
         final long maxSize = quotaManagement.getMaxArtifactSize();
-        assertThatExceptionOfType(QuotaExceededException.class)
+        assertThatExceptionOfType(FileSizeQuotaExceededException.class)
                 .isThrownBy(() -> createArtifactForSoftwareModule("file", sm1.getId(), Math.toIntExact(maxSize) + 8));
     }
 

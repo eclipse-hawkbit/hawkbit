@@ -20,14 +20,18 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -35,6 +39,7 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +101,13 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
     }
 
     public static MyFieldFieldDesc requestFieldWithPath(final String path, final boolean mandatory) {
+        return requestFieldWithPath(path, mandatory, mandatory ? "X" : "");
+    }
+
+    private static MyFieldFieldDesc requestFieldWithPath(final String path, final boolean mandatory,
+            final String mandatoryMessage) {
         final MyFieldFieldDesc myFieldDesc = new MyFieldFieldDesc(path);
-        myFieldDesc.attributes(key("mandatory").value(mandatory ? "X" : ""));
+        myFieldDesc.attributes(key("mandatory").value(mandatoryMessage));
         // defaults
         myFieldDesc.attributes(key("value").value(""));
 
@@ -114,6 +124,10 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected static MyFieldFieldDesc optionalRequestFieldWithPath(final String path) {
         return requestFieldWithPath(path, false);
+    }
+
+    public static MyFieldFieldDesc requestFieldWithPathMandatoryInMultiAssignMode(final String path) {
+        return requestFieldWithPath(path, false, "when multi-assignment is enabled");
     }
 
     public static class MyFieldFieldDesc extends SubsectionDescriptor {
@@ -152,35 +166,23 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
                 .lastTargetQuery(System.currentTimeMillis()));
-
-        final List<Target> updatedTargets = maintenanceWindowSchedule == null
-                ? assignWithoutMaintenanceWindow(distributionSet, savedTarget, timeforced)
-                : assignWithMaintenanceWindow(distributionSet, savedTarget, timeforced, maintenanceWindowSchedule,
-                        maintenanceWindowDuration, maintenanceWindowTimeZone);
+        final DeploymentRequestBuilder deploymentRequestBuilder = DeploymentManagement
+                .deploymentRequest(savedTarget.getControllerId(), distributionSet.getId())
+                .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
+        if (timeforced) {
+            deploymentRequestBuilder.setActionType(ActionType.TIMEFORCED);
+        }
+        if (isMultiAssignmentsEnabled()) {
+            deploymentRequestBuilder.setWeight(600);
+        }
+        final List<Target> updatedTargets = makeAssignment(deploymentRequestBuilder.build()).getAssignedEntity()
+                .stream().map(Action::getTarget).collect(Collectors.toList());
 
         if (inSync) {
             feedbackToByInSync(distributionSet);
         }
 
         return updatedTargets.get(0);
-    }
-
-    private List<Target> assignWithoutMaintenanceWindow(final DistributionSet distributionSet, final Target savedTarget,
-            final boolean timeforced) {
-        return timeforced ? assignDistributionSetTimeForced(distributionSet, savedTarget).getAssignedEntity()
-                : assignDistributionSet(distributionSet, savedTarget).getAssignedEntity();
-    }
-
-    private List<Target> assignWithMaintenanceWindow(final DistributionSet distributionSet, final Target savedTarget,
-            final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
-            final String maintenanceWindowTimeZone) {
-        return timeforced
-                ? assignDistributionSetWithMaintenanceWindowTimeForced(distributionSet.getId(),
-                        savedTarget.getControllerId(), maintenanceWindowSchedule, maintenanceWindowDuration,
-                        maintenanceWindowTimeZone).getAssignedEntity()
-                : assignDistributionSetWithMaintenanceWindow(distributionSet.getId(), savedTarget.getControllerId(),
-                        maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
-                                .getAssignedEntity();
     }
 
     protected DistributionSet createDistributionSet() {
@@ -306,6 +308,11 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                 parameterWithName("sort").description(ApiModelPropertiesGeneric.SORT),
                 parameterWithName("offset").description(ApiModelPropertiesGeneric.OFFSET),
                 parameterWithName("q").description(ApiModelPropertiesGeneric.FIQL));
+    }
+
+    protected boolean isMultiAssignmentsEnabled() {
+        return Boolean.TRUE.equals(tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
 }

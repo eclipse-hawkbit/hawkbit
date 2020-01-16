@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -183,15 +184,16 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the POST request of setting a distribution set for auto assignment within SP. Required Permission: CREATE_TARGET.")
     public void postAutoAssignDS() throws Exception {
+        enableMultiAssignments();
         final TargetFilterQuery tfq = createTargetFilterQuery();
         final DistributionSet distributionSet = createDistributionSet();
-        final String filterByDistSet = "{\"id\":\"" + distributionSet.getId() + "\", \"type\":\""
-                + MgmtActionType.SOFT.getName() + "\"}";
+        final String autoAssignBody = new JSONObject().put("id", distributionSet.getId())
+                .put("type", MgmtActionType.SOFT.getName()).put("weight", 200).toString();
 
         this.mockMvc
                 .perform(
                         post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
-                                tfq.getId()).contentType(MediaType.APPLICATION_JSON).content(filterByDistSet))
+                                tfq.getId()).contentType(MediaType.APPLICATION_JSON).content(autoAssignBody.toString()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetFilterQueryId")
@@ -199,7 +201,10 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         requestFields(requestFieldWithPath("id").description(MgmtApiModelProperties.DS_ID),
                                 optionalRequestFieldWithPath("type")
                                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
-                                        .attributes(key("value").value("['forced', 'soft', 'downloadonly']"))),
+                                        .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
+                                requestFieldWithPathMandatoryInMultiAssignMode("weight")
+                                        .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                        .attributes(key("value").value("0 - 1000"))),
                         getResponseFieldTargetFilterQuery(false)));
     }
 
@@ -227,6 +232,9 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "autoAssignActionType")
                         .description(MgmtApiModelProperties.ACTION_FORCE_TYPE).type(JsonFieldType.STRING.toString())
                         .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
+                fieldWithPath(arrayPrefix + "autoAssignWeight")
+                        .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                        .type(JsonFieldType.NUMBER.toString()),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
@@ -235,7 +243,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS));
     }
 
-    private String createTargetFilterQueryJson(final String name, final String query) throws JsonProcessingException {
+    private String createTargetFilterQueryJson(final String name, final String query)
+            throws JsonProcessingException {
         final Map<String, Object> target = new HashMap<>();
         target.put("name", name);
         target.put("query", query);
@@ -249,6 +258,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
 
     private TargetFilterQuery createTargetFilterQueryWithDS(final DistributionSet distributionSet) {
         final TargetFilterQuery targetFilterQuery = createTargetFilterQuery();
-        return targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery.getId(), distributionSet.getId());
+        return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
     }
 }

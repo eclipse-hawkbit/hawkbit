@@ -206,7 +206,6 @@
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-web</artifactId>
       </dependency>
-
       <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-themes</artifactId>
@@ -218,10 +217,6 @@
       <dependency>
          <groupId>org.vaadin.addons</groupId>
          <artifactId>flexibleoptiongroup</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.vaadin.addons</groupId>
-         <artifactId>tokenfield</artifactId>
       </dependency>
       <dependency>
          <groupId>org.vaadin.alump.distributionbar</groupId>

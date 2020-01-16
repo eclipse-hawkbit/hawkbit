@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.eclipse.hawkbit.repository.model.AssignmentResult;
+import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -294,7 +294,7 @@ public final class HawkbitCommonUtil {
      * @return message
      */
     public static String createAssignmentMessage(final String tagName,
-            final AssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
+            final AbstractAssignmentResult<? extends NamedEntity> result, final VaadinMessageSource i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
@@ -478,7 +478,7 @@ public final class HawkbitCommonUtil {
         default:
             break;
         }
-        return String.format("%.1f", tmpFinishedPercentage);
+        return String.format(getCurrentLocale(), "%.1f", tmpFinishedPercentage);
     }
 
     /**
@@ -574,14 +574,14 @@ public final class HawkbitCommonUtil {
      */
     public static Locale getLocaleToBeUsed(final UiProperties.Localization localizationProperties,
             final Locale desiredLocale) {
-        final List<String> availableLocals = localizationProperties.getAvailableLocals();
+        final List<Locale> availableLocals = localizationProperties.getAvailableLocals();
         // ckeck if language code of UI locale matches an available local.
         // Country, region and variant are ignored. "availableLocals" must only
         // contain language codes without country or other extensions.
-        if (availableLocals.contains(desiredLocale.getLanguage())) {
+        if (availableLocals.contains(desiredLocale)) {
             return desiredLocale;
         }
-        return new Locale(localizationProperties.getDefaultLocal());
+        return localizationProperties.getDefaultLocal();
     }
 
     /**

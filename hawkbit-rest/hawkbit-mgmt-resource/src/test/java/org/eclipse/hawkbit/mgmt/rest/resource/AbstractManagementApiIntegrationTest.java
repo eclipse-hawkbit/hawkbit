@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -21,6 +22,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -195,6 +198,26 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return mvcResult -> {
             jsonPath("_links.self.href", equalTo(link)).match(mvcResult);
         };
+    }
+
+    protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type) {
+        final JSONObject obj = new JSONObject();
+        try {
+            obj.put("id", id);
+            obj.put("type", type.getName());
+        } catch (final JSONException e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
+
+    protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type, final int weight) {
+        try {
+            return getAssignmentObject(id, type).put("weight", weight);
+        } catch (final JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject();
     }
 
 }

@@ -11,8 +11,9 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -30,8 +31,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.context.ApplicationEventPublisher;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 import com.google.common.collect.Lists;
 
@@ -43,11 +43,11 @@ import com.google.common.collect.Lists;
 public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final ApplicationEventPublisher eventPublisher,
-            final BusProperties bus, final ActionRepository actionRepository,
-            final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement) {
-        super(targetRepository, afterCommit, eventPublisher, bus, actionRepository, actionStatusRepository,
-                quotaManagement);
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+        super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
+                quotaManagement, multiAssignmentsConfig);
     }
 
     @Override
@@ -60,10 +60,15 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
-        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository.findAll(SpecificationsBuilder.combineWithAnd(
-                        Arrays.asList(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
-                                TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING)))))
+        final Function<List<String>, List<JpaTarget>> mapper;
+        if (isMultiAssignmentsEnabled()) {
+            mapper = targetRepository::findAllByControllerId;
+        } else {
+            mapper = ids -> targetRepository.findAll(SpecificationsBuilder.combineWithAnd(
+                    Arrays.asList(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
+                            TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
+        }
+        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 
@@ -85,9 +90,9 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    protected JpaAction createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
-            final JpaTarget target, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetsWithActionMap, target, set);
+    protected JpaAction createTargetAction(final TargetWithActionType targetWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
         if (result != null) {
             result.setStatus(Status.FINISHED);
             result.setActive(Boolean.FALSE);

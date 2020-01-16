@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -43,6 +44,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -57,6 +60,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -74,14 +79,13 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -158,21 +162,23 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
 
-    private final BusProperties bus;
+    private final EventPublisherHolder eventPublisherHolder;
 
     private final Database database;
 
     JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final BusProperties bus, final ApplicationEventPublisher eventPublisher,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
-            final RolloutApprovalStrategy rolloutApprovalStrategy) {
+            final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final Database database, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext systemSecurityContext) {
         super(targetManagement, deploymentManagement, rolloutGroupManagement, distributionSetManagement, context,
-                eventPublisher, virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy);
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
+        this.eventPublisherHolder = eventPublisherHolder;
         this.database = database;
-        this.bus = bus;
     }
 
     @Override
@@ -229,7 +235,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout) {
-
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
         final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
@@ -322,8 +328,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
-        afterCommit.afterCommit(() -> eventPublisher
-                .publishEvent(new RolloutGroupCreatedEvent(group, rollout.getId(), context.getId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
+                new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {
@@ -621,6 +627,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             action.setStatus(Status.SCHEDULED);
             action.setRollout(rollout);
             action.setRolloutGroup(rolloutGroup);
+            rollout.getWeight().ifPresent(action::setWeight);
             actionRepository.save(action);
         });
     }
@@ -942,9 +949,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
                 .collect(Collectors.toList());
 
-        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisher
+        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), bus.getId()))));
+                        JpaRolloutGroup.class.getName(), eventPublisherHolder.getApplicationId()))));
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
@@ -961,8 +968,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false).map(Action::getId)
                         .collect(Collectors.toList());
                 actionRepository.deleteByIdIn(actionIds);
-                afterCommit.afterCommit(() -> eventPublisher.publishEvent(
-                        new RolloutUpdatedEvent(rollout, EventPublisherHolder.getInstance().getApplicationId())));
+                afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                        .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
             } catch (final RuntimeException e) {
                 LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
@@ -1011,6 +1018,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         update.getDescription().ifPresent(rollout::setDescription);
         update.getActionType().ifPresent(rollout::setActionType);
         update.getForcedTime().ifPresent(rollout::setForcedTime);
+        update.getWeight().ifPresent(rollout::setWeight);
         update.getStartAt().ifPresent(rollout::setStartAt);
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.get(setId)
@@ -1139,5 +1147,4 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
-
 }

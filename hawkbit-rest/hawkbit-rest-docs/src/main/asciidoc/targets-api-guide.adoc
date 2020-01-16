@@ -547,13 +547,13 @@ include::../errors/429.adoc[]
 |===
 
 
-== POST /rest/v1/targets/{targetId}/assignedDS
+== POST /rest/v1/targets/{targetId}/assignedDS (assign single distribution set)
 
 === Implementation Notes
 
 Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET
 
-=== Asssin distribution set to target
+=== Assign distribution set to target
 
 ==== Curl
 
@@ -577,6 +577,9 @@ include::{snippets}/targets/post-assign-distribution-set-to-target/http-request.
 
 === Response (Status 200)
 
+==== Response fields
+include::{snippets}/targets/post-assign-distribution-set-to-target/response-fields.adoc[]
+
 ==== Response example 
 
 include::{snippets}/targets/post-assign-distribution-set-to-target/http-response.adoc[]
@@ -587,6 +590,60 @@ include::{snippets}/targets/post-assign-distribution-set-to-target/http-response
 | HTTP Status Code | Reason | Response Model
 
 include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targets/{targetId}/assignedDS (assign multiple distribution sets)
+
+=== Implementation Notes
+
+Handles the POST request for assigning multiple distribution sets to a specific target (only allowed id 'multi assignments' is enabled). Required Permission: READ_REPOSITORY and UPDATE_TARGET
+
+=== Assign distribution sets to target
+
+==== Curl
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/curl-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/request-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/request-fields.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+include::{snippets}/targets/post-assign-distribution-sets-to-target/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/targets/post-assign-distribution-sets-to-target/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400_multiassignment.adoc[]
 include::../errors/401.adoc[]
 include::../errors/403.adoc[]
 include::../errors/404.adoc[]

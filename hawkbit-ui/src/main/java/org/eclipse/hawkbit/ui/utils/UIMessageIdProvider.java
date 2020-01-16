@@ -115,6 +115,12 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_SHOW_TAGS = "tooltip.showTags";
 
+    public static final String TOOLTIP_ASSIGN_TAG = "tooltip.assignTag";
+
+    public static final String TOOLTIP_SELECT_TAG = "tooltip.selectTag";
+
+    public static final String TOOLTIP_CLICK_TO_REMOVE = "tooltip.click.to.remove";
+
     public static final String TOOLTIP_BULK_UPLOAD = "tooltip.bulkUpload";
 
     public static final String TOOLTIP_CONFIGURE = "tooltip.configure";

@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -183,7 +184,7 @@ public class TestdataFactory {
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet() {
-        return createDistributionSet("", DEFAULT_VERSION, false);
+        return createDistributionSet(UUID.randomUUID().toString(), DEFAULT_VERSION, false);
     }
 
     /**
@@ -511,9 +512,10 @@ public class TestdataFactory {
      *
      * @return {@link Artifact} entity.
      */
-    public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename, final int fileSize) {
-        return artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
+    public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename,
+            final int fileSize) {
+        return artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
     }
 
     /**
@@ -619,14 +621,30 @@ public class TestdataFactory {
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId) {
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId(controllerId));
+        return createTarget(controllerId, controllerId);
+    }
+
+    /**
+     * @param controllerId
+     *            of the target
+     * @param targetName
+     *            name of the target
+     * @return persisted {@link Target}
+     */
+    public Target createTarget(final String controllerId, final String targetName) {
+        final Target target = targetManagement
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+        assertTargetProperlyCreated(target);
+        return target;
+    }
+
+    private void assertTargetProperlyCreated(final Target target) {
         assertThat(target.getCreatedBy()).isNotNull();
         assertThat(target.getCreatedAt()).isNotNull();
         assertThat(target.getLastModifiedBy()).isNotNull();
         assertThat(target.getLastModifiedAt()).isNotNull();
 
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
-        return target;
     }
 
     /**
@@ -841,6 +859,24 @@ public class TestdataFactory {
     }
 
     /**
+     * Creates {@link Target}s in repository and with given targetIds.
+     * 
+     * @param targetIds
+     *            specifies the IDs of the targets
+     * 
+     * @return {@link List} of {@link Target} entities
+     */
+    public List<Target> createTargets(final String... targetIds) {
+
+        final List<TargetCreate> targets = new ArrayList<>();
+        for (final String targetId : targetIds) {
+            targets.add(entityFactory.target().create().controllerId(targetId));
+        }
+
+        return targetManagement.create(targets);
+    }
+
+    /**
      * Builds {@link Target} objects with given prefix for
      * {@link Target#getControllerId()} followed by a number suffix.
      * 
@@ -1045,7 +1081,8 @@ public class TestdataFactory {
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
-        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet, successCondition, errorCondition, Action.ActionType.FORCED);
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, Action.ActionType.FORCED, null);
     }
 
     /**
@@ -1067,19 +1104,23 @@ public class TestdataFactory {
      *            to switch to next group
      * @param actionType
      *            the type of the Rollout
+     * @param weight
+     *            weight of the Rollout
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final Action.ActionType actionType) {
+            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final Integer weight) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create().name(rolloutName)
-                        .description(rolloutDescription).targetFilterQuery(filterQuery).set(distributionSet)
-                        .actionType(actionType), groupSize, conditions);
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
+                        .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight),
+                groupSize, conditions);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();

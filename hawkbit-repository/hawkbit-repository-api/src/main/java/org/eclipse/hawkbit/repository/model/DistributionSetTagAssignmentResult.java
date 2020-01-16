@@ -14,7 +14,7 @@ import java.util.List;
  * Result object for {@link DistributionSetTag} assignments.
  *
  */
-public class DistributionSetTagAssignmentResult extends AssignmentResult<DistributionSet> {
+public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
     private final DistributionSetTag distributionSetTag;
 
@@ -24,20 +24,16 @@ public class DistributionSetTagAssignmentResult extends AssignmentResult<Distrib
      * @param alreadyAssigned
      *            number of already assigned/ignored elements
      * @param assigned
-     *            number of newly assigned elements
+     *            newly assigned elements
      * @param unassigned
-     *            number of newly assigned elements
-     * @param assignedDs
-     *            {@link List} of assigned {@link DistributionSet}s.
-     * @param unassignedDs
-     *            {@link List} of unassigned {@link DistributionSet}s.
+     *            unassigned elements
      * @param distributionSetTag
      *            the assigned or unassigned tag
      */
-    public DistributionSetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
-            final List<DistributionSet> assignedDs, final List<DistributionSet> unassignedDs,
+    public DistributionSetTagAssignmentResult(final int alreadyAssigned,
+            final List<DistributionSet> assigned, final List<DistributionSet> unassigned,
             final DistributionSetTag distributionSetTag) {
-        super(assigned, alreadyAssigned, unassigned, assignedDs, unassignedDs);
+        super(alreadyAssigned, assigned, unassigned);
         this.distributionSetTag = distributionSetTag;
     }
 

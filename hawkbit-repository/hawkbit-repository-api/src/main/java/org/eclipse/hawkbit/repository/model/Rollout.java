@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -100,6 +101,11 @@ public interface Rollout extends NamedEntity {
      * @return additional note on approval/denial decision.
      */
     String getApprovalRemark();
+
+    /**
+     * @return the priority of {@link Rollout}.
+     */
+    Optional<Integer> getWeight();
 
     /**
      *
@@ -197,5 +203,4 @@ public interface Rollout extends NamedEntity {
          */
         DENIED
     }
-
 }

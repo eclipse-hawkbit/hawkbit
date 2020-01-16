@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -36,8 +37,8 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
     private final DistributionSetTable distributionSetTable;
 
     public DistributionSetTableLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final ManageDistUIState manageDistUIState,
-            final SoftwareModuleManagement softwareManagement,
+            final SpPermissionChecker permissionChecker, final ManagementUIState managementUIState,
+            final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final UINotification uiNotification,
@@ -61,7 +62,7 @@ public class DistributionSetTableLayout extends AbstractTableLayout<Distribution
                 new DistributionSetTableHeader(
                         i18n, permissionChecker, eventBus, manageDistUIState, distributionAddUpdateWindowLayout),
                 distributionSetTable,
-                new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, null,
+                new DistributionSetDetails(i18n, eventBus, permissionChecker, manageDistUIState, managementUIState,
                         distributionAddUpdateWindowLayout, distributionSetManagement, uiNotification,
                         distributionSetTagManagement, popupLayout, configManagement, systemSecurityContext));
     }

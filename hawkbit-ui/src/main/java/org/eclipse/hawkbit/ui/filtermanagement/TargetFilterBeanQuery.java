@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -24,7 +25,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -86,11 +86,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
             targetFilterQuery = getTargetFilterQueryManagement()
-                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         } else {
-            targetFilterQuery = getTargetFilterQueryManagement().findByName(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    searchText);
+            targetFilterQuery = getTargetFilterQueryManagement()
+                    .findByName(new OffsetBasedPageRequest(startIndex, count, sort), searchText);
         }
         for (final TargetFilterQuery tarFilterQuery : targetFilterQuery) {
             final ProxyTargetFilter proxyTarFilter = new ProxyTargetFilter();
@@ -128,10 +127,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     public int size() {
         if (StringUtils.isEmpty(searchText)) {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findAll(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findByName(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+                    .findByName(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

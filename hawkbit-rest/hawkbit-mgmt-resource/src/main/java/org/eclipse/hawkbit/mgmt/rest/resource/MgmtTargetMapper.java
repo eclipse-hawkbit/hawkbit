@@ -206,6 +206,7 @@ public final class MgmtTargetMapper {
         if (ActionType.TIMEFORCED == action.getActionType()) {
             result.setForceTime(action.getForcedTime());
         }
+        action.getWeight().ifPresent(result::setWeight);
         result.setActionType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
         if (action.isActive()) {
@@ -289,5 +290,4 @@ public final class MgmtTargetMapper {
     static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
         return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).collect(Collectors.toList());
     }
-
 }

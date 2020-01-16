@@ -699,6 +699,16 @@ public final class UIComponentIdProvider {
     public static final String LINK_USERMANAGEMENT = "link.usermanagement";
 
     /**
+     * Prefix for assigned tag button ids.
+     */
+    public static final String ASSIGNED_TAG_ID_PREFIX = "tag.assigned.";
+
+    /**
+     * Assign tag icon id.
+     */
+    public static final String ASSIGN_TAG = "tag.assign";
+
+    /**
      * New Target tag add icon id.
      */
     public static final String ADD_TARGET_TAG = "target.tag.add";
@@ -978,7 +988,10 @@ public final class UIComponentIdProvider {
      * Rollout group remove button id
      */
     public static final String ROLLOUT_GROUP_REMOVE_ID = "rollout.group.remove.id";
-
+    /**
+     * Tag selection combo id.
+     */
+    public static final String TAG_SELECTION_ID = "tag.selection.id";
     /**
      * Rollout distribution set combo id.
      */

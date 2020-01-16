@@ -8,7 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
-import java.util.Locale;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.getCurrentLocale;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -154,9 +155,7 @@ public final class DistributionBarHelper {
         final double minTotalSize = MINIMUM_PART_SIZE * noOfParts;
         final double availableSize = PARENT_SIZE_IN_PCT - minTotalSize;
         final double val = MINIMUM_PART_SIZE + (double) value / totalValue * availableSize;
-        // necessary due the format must contain a dot and other locals might
-        // use a comma
-        return String.format(Locale.ENGLISH, "%.3f", val) + "%";
+        return String.format(getCurrentLocale(), "%.3f", val) + "%";
     }
 
     private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,

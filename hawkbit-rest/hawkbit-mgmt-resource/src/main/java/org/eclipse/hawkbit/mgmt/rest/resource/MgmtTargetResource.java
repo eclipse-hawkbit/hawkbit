@@ -8,14 +8,16 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.util.Arrays;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -25,7 +27,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -33,15 +35,15 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -281,35 +283,25 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("targetId") final String targetId, @RequestBody final MgmtDistributionSetAssignment dsId,
+            @PathVariable("targetId") final String targetId,
+            @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
-
         if (offline) {
+            final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
+                    .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSet(dsId.getId(), Arrays.asList(targetId))));
+                    deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
-
         findTargetWithExceptionIfNotFound(targetId);
-        final MgmtMaintenanceWindowRequestBody maintenanceWindow = dsId.getMaintenanceWindow();
 
-        if (maintenanceWindow == null) {
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement
-                    .assignDistributionSet(dsId.getId(), Arrays.asList(new TargetWithActionType(targetId,
-                            MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime())))));
-        }
+        final List<DeploymentRequest> deploymentRequests = dsAssignments.stream()
+                .map(dsAssignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(dsAssignment, targetId))
+                .collect(Collectors.toList());
 
-        final String cronSchedule = maintenanceWindow.getSchedule();
-        final String duration = maintenanceWindow.getDuration();
-        final String timezone = maintenanceWindow.getTimezone();
-
-        MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
-
-        return ResponseEntity
-                .ok(MgmtDistributionSetMapper.toResponse(this.deploymentManagement.assignDistributionSet(dsId.getId(),
-                        Arrays.asList(new TargetWithActionType(targetId,
-                                MgmtRestModelMapper.convertActionType(dsId.getType()), dsId.getForcetime(),
-                                cronSchedule, duration, timezone)))));
-
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
+                .assignDistributionSets(deploymentRequests);
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
     @Override

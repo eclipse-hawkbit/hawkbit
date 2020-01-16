@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A generic abstract rest model which contains only a ID for use-case e.g.
@@ -19,12 +19,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtId {
-
-    @JsonProperty
     private Long id;
+    
+    /**
+     * Constructor
+     */
+    public MgmtId() {
+    }
 
     /**
-     * @return the id
+     * Constructor
+     * 
+     * @param id
+     *            ID of object
+     */
+    @JsonCreator
+    public MgmtId(final Long id) {
+        this.id = id;
+    }
+
+
+    /**
+     * @return the ID
      */
     public Long getId() {
         return id;
@@ -32,7 +48,7 @@ public class MgmtId {
 
     /**
      * @param id
-     *            the id to set
+     *            the ID to set
      */
     public void setId(final Long id) {
         this.id = id;

@@ -52,11 +52,43 @@ Message Properties | Description                                                
 content_type       | The content type of the payload                                                                      | String | true
 reply_to           | Exchange to reply to. The default is sp.direct.exchange which is bound to the sp_direct_queue | String | false
 
-Example headers
+Example headers and payload:
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
 type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lwm2m | content\_type=application/json <br /> reply_to (optional) =sp.connector.replyTo
+
+Payload Template (optional):
+
+```json
+{
+    "name": "String"
+}
+```
+
+The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.
+
+
+### THING_REMOVED
+
+Message to request the deletion of a provisioning target.
+
+Header | Description                                      | Type                         | Mandatory
+-------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
+type           | Type of the message                              | Fixed string "THING_REMOVED" | true
+thingId        | The ID of the registered provisioning target   | String                       | true
+tenant         | The tenant this provisioning target belongs to | String                       | false
+
+Message Properties | Description                                                                                          | Type   | Mandatory
+------------------ | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
+content_type       | The content type of the payload                                                                      | String | true
+
+Example headers
+
+Header                                                                             | MessageProperties
+----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
+type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc | content\_type=application/json
+
 
 ### UPDATE_ATTRIBUTES
 
@@ -332,6 +364,8 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_A
 
 If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or CANCEL_DOWNLOAD
  by hawkBit to initialize update, download, or cancel task(s).
+ 
+ With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
 Header  | Description                      | Type                                | Mandatory
 ------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------
@@ -349,6 +383,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 ```json
 [{
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -381,6 +416,7 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 },
 {
 "topic": "String",
+"weight": long,
 "action": {
   "actionId": long,
   "targetSecurityToken": "String",
@@ -422,6 +458,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 ```json
 [{
 "topic": "DOWNLOAD_AND_INSTALL",
+"weight": 600,
 "action": {
   "actionId":137,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",
@@ -454,6 +491,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTI
 },
 {
 "topic": "DOWNLOAD",
+"weight": 500,
 "action": {
   "actionId":138,
   "targetSecurityToken":"bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY",

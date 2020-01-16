@@ -13,6 +13,7 @@ import java.util.List;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * {@link DdiActionFeedback}.
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "status", "messages" })
 public class DdiActionHistory {
 

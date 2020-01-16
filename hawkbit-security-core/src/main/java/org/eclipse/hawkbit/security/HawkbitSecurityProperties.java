@@ -245,21 +245,21 @@ public class HawkbitSecurityProperties {
         private int maxTargetsPerRolloutGroup = 20000;
 
         /**
-         * Maximum number of targets per rollout group
+         * Maximum number of overall actions targets per target
          */
         private int maxActionsPerTarget = 2000;
 
         /**
-         * Maximum number of targets for a manual distribution set assignment.
-         * Must be greater than 1000.
+         * Maximum number of actions resulting from a manual assignment of
+         * distribution sets and targets. Must be greater than 1000.
          */
-        private int maxTargetsPerManualAssignment = 5000;
+        private int maxTargetDistributionSetAssignmentsPerManualAssignment = 5000;
 
         /**
          * Maximum number of targets for an automatic distribution set
          * assignment
          */
-        private int maxTargetsPerAutoAssignment = 5000;
+        private int maxTargetsPerAutoAssignment = 20000;
 
         /**
          * Maximum size of artifacts in bytes. Defaults to 1 GB.
@@ -379,14 +379,15 @@ public class HawkbitSecurityProperties {
             this.maxActionsPerTarget = maxActionsPerTarget;
         }
 
-        public int getMaxTargetsPerManualAssignment() {
-            return maxTargetsPerManualAssignment;
+        public int getMaxTargetDistributionSetAssignmentsPerManualAssignment() {
+            return maxTargetDistributionSetAssignmentsPerManualAssignment;
         }
-
-        public void setMaxTargetsPerManualAssignment(final int maxTargetsPerManualAssignment) {
-            this.maxTargetsPerManualAssignment = maxTargetsPerManualAssignment;
+        
+        public void setMaxTargetDistributionSetAssignmentsPerManualAssignment(
+                final int maxTargetDistributionSetAssignmentsPerManualAssignment) {
+            this.maxTargetDistributionSetAssignmentsPerManualAssignment = maxTargetDistributionSetAssignmentsPerManualAssignment;
         }
-
+        
         public int getMaxTargetsPerAutoAssignment() {
             return maxTargetsPerAutoAssignment;
         }

@@ -7,7 +7,7 @@ weight: 52
 Authorization is handled separately for _Direct Device Integration (DDI) API_ and _Device Management Federation (DMF) API_ (where successful authentication includes full authorization) and _Management API_ and _UI_ which is based on Spring security [authorities](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/im/authentication/SpPermission.java).
 <!--more-->
 
-However, keep in mind that hawkBit does not offer an off the shelf authentication provider to leverage these permissions and the underlying multi user/tenant capabilities of hawkBit. Check out [Spring security documentation](http://projects.spring.io/spring-security/) for further information. In hawkBit [SecurityAutoConfiguration](https://github.com/eclipse/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java) is a good starting point for integration.
+However, keep in mind that hawkBit does not offer an off the shelf authentication provider to leverage these permissions and the underlying multi user/tenant capabilities of hawkBit but it supports authentication providers offering an OpenID Connect interface. Check out [Spring security documentation](http://projects.spring.io/spring-security/) for further information. In hawkBit [SecurityAutoConfiguration](https://github.com/eclipse/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java) is a good starting point for integration.
 
 The default implementation is single user/tenant with basic auth and the logged in user is provided with all permissions. Additionally, the application properties may be configured for multiple static users; see [Multiple Users](#multiple-users) for details.
 
@@ -40,6 +40,18 @@ An example configuration is given below.
     hawkbit.server.im.users[1].permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
 
 A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it is recommended to use a hash function designed for passwords such as *bcrypt*. See this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more information on password encoders in Spring Security.
+
+### OpenID Connect
+hawkbit supports authentication providers which use the OpenID Connect standard, an authentication layer built on top of the OAuth 2.0 protocol.
+An example configuration is given below.
+
+    spring.security.oauth2.client.registration.oidc.client-id=clientID
+    spring.security.oauth2.client.registration.oidc.client-secret=oidc-client-secret
+    spring.security.oauth2.client.provider.oidc.issuer-uri=https://oidc-provider/issuer-uri
+    spring.security.oauth2.client.provider.oidc.authorization-uri=https://oidc-provider/authorization-uri
+    spring.security.oauth2.client.provider.oidc.token-uri=https://oidc-provider/token-uri
+    spring.security.oauth2.client.provider.oidc.user-info-uri=https://oidc-provider/user-info-uri
+    spring.security.oauth2.client.provider.oidc.jwk-set-uri=https://oidc-provider/jwk-set-uri
 
 ### Delivered Permissions
 - READ_/UPDATE_/CREATE_/DELETE_TARGETS for:

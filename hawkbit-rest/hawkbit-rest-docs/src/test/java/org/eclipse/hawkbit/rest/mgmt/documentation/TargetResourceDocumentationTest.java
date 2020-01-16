@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +48,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -202,6 +203,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET.")
     public void getActionsFromTarget() throws Exception {
+        enableMultiAssignments();
         generateActionForTarget(targetId);
 
         mockMvc.perform(
@@ -228,12 +230,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
-                                fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID))));
+                                fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT))));
     }
 
     @Test
     @Description("Handles the GET request of retrieving the full action history of a specific target with maintenance window. Required Permission: READ_TARGET.")
     public void getActionsFromTargetWithMaintenanceWindow() throws Exception {
+        enableMultiAssignments();
         generateActionForTarget(targetId, true, false, getTestSchedule(2), getTestDuration(1), getTestTimeZone());
 
         mockMvc.perform(
@@ -261,6 +265,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['finished', 'pending']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("content[].maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
                                 fieldWithPath("content[].maintenanceWindow.schedule")
@@ -316,6 +321,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTarget() throws Exception {
+        enableMultiAssignments();
         final Action action = generateActionForTarget(targetId, true, true);
         assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
                 .isEqualTo(ActionType.TIMEFORCED);
@@ -329,6 +335,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY)
                                         .type("String"),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -350,6 +357,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTargetWithMaintenanceWindow() throws Exception {
+        enableMultiAssignments();
         final Action action = generateActionForTarget(targetId, true, true, getTestSchedule(2), getTestDuration(1),
                 getTestTimeZone());
 
@@ -362,6 +370,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY)
                                         .type("String"),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -395,9 +404,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void switchActionToForced() throws Exception {
         final Target target = testdataFactory.createTarget(targetId);
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final Long actionId = deploymentManagement
-                .assignDistributionSet(set.getId(), ActionType.SOFT, 0, Arrays.asList(target.getControllerId()))
-                .getActionIds().get(0);
+        final Long actionId = getFirstAssignedActionId(
+                assignDistributionSet(set.getId(), target.getControllerId(), ActionType.SOFT));
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final Map<String, Object> body = new HashMap<>();
@@ -486,12 +494,16 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
-
+    
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
-        testdataFactory.createTarget(targetId);
+        // create target and ds, and assign ds
+        testdataFactory.createTarget(targetId + "-old");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assignDistributionSet(set.getId(), targetId + "-old");
+
+        testdataFactory.createTarget(targetId);
 
         final long forceTime = System.currentTimeMillis();
         final String body = new JSONObject().put("id", set.getId()).put("type", "timeforced")
@@ -502,30 +514,92 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
-                        requestFields(requestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
+                        requestFields(
                                 requestFieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPath("maintenanceWindow")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW).optional(),
-                                requestFieldWithPath("maintenanceWindow.schedule")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE).optional(),
-                                requestFieldWithPath("maintenanceWindow.duration")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION).optional(),
-                                requestFieldWithPath("maintenanceWindow.timezone")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE).optional(),
-                                requestFieldWithPath("type").description(MgmtApiModelProperties.FORCETIME_TYPE)
+                                requestFieldWithPathMandatoryInMultiAssignMode("weight")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_WEIGHT)
+                                        .type(JsonFieldType.NUMBER).attributes(key("value").value("0 - 1000")),
+                                optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
                                         .attributes(key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
-                        responseFields(
-                                fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
-                                fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
-                                fieldWithPath("total").type(JsonFieldType.NUMBER)
-                                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
+                        responseFields(getDsAssignmentResponseFieldDescriptors())));
+    }
+
+    @Test
+    @Description("Handles the POST request for assigning distribution sets to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
+    public void postAssignDistributionSetsToTarget() throws Exception {
+        // create target and ds, and assign ds
+        final List<DistributionSet> sets = testdataFactory.createDistributionSets(2);
+        testdataFactory.createTarget(targetId);
+
+        final long forceTime = System.currentTimeMillis();
+        final JSONArray body = new JSONArray();
+        body.put(new JSONObject().put("id", sets.get(1).getId()).put("weight", 500).put("type", "timeforced")
+                .put("forcetime", forceTime)
+                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
+                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())))
+                .toString();
+        body.put(new JSONObject().put("id", sets.get(0).getId()).put("type", "forced").put("weight", 800));
+
+        enableMultiAssignments();
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body.toString())
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        requestParameters(parameterWithName("offline")
+                                .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
+                        requestFields(
+                                requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_WEIGHT)
+                                        .attributes(key("value").value("0 - 1000")),
+                                optionalRequestFieldWithPath("[].forcetime")
+                                        .description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("[].maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("[].type")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
+                                        .attributes(key("[].value")
+                                                .value("['soft', 'forced','timeforced', 'downloadonly']"))),
+                        responseFields(getDsAssignmentResponseFieldDescriptors())));
+    }
+
+    private static FieldDescriptor[] getDsAssignmentResponseFieldDescriptors() {
+        final FieldDescriptor[] descriptors = {
+                fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
+            fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
+            .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+    fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+            .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+    fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+            .description(MgmtApiModelProperties.ACTION_ID),
+    fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+            .description(MgmtApiModelProperties.LINK_TO_ACTION),
+    fieldWithPath("total").type(JsonFieldType.NUMBER)
+                        .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS) };
+        return descriptors;
     }
 
     @Test
@@ -630,7 +704,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String knownValue = "knownValue";
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -652,7 +726,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -679,7 +753,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final Target testTarget = testdataFactory.createTarget(targetId);
         targetManagement.createMetaData(testTarget.getControllerId(),
-                Arrays.asList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
 
         mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{key}",
                 testTarget.getControllerId(), knownKey)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())

@@ -12,12 +12,14 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Download information for all artifacts related to a specific {@link DdiChunk}
  * .
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiArtifact extends ResourceSupport {
 
     @NotNull

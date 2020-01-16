@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
+import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -92,6 +93,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired(required = false)
+    private ServiceMatcher serviceMatcher;
 
     @Autowired
     private BusProperties bus;
@@ -145,7 +149,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        final Action action = controllerManagement.findOldestActiveActionByTarget(controllerId).orElse(null);
+        final Action action = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         checkAndCancelExpiredAction(action);
 
@@ -194,9 +198,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                         requestResponseContextHolder.getHttpServletResponse(),
                         requestResponseContextHolder.getHttpServletRequest(),
-                        (length, shippedSinceLastEvent, total) -> eventPublisher
-                                .publishEvent(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId,
-                                        shippedSinceLastEvent, bus.getId())));
+                        (length, shippedSinceLastEvent,
+                                total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
+                                        tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
+                                        serviceMatcher != null ? serviceMatcher.getServiceId() : bus.getId())));
 
             }
         }

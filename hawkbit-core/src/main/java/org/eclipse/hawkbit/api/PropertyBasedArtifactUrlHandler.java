@@ -85,11 +85,10 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     @Override
     public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api, final URI requestUri) {
 
-        return urlHandlerProperties.getProtocols().entrySet().stream()
-                .filter(entry -> entry.getValue().getSupports().contains(api))
-                .filter(entry -> entry.getValue().isEnabled())
-                .map(entry -> new ArtifactUrl(entry.getValue().getProtocol().toUpperCase(), entry.getValue().getRel(),
-                        generateUrl(entry.getValue(), placeholder, requestUri)))
+        return urlHandlerProperties.getProtocols().values().stream()
+                .filter(urlProtocol -> urlProtocol.getSupports().contains(api) && urlProtocol.isEnabled())
+                .map(urlProtocol -> new ArtifactUrl(urlProtocol.getProtocol().toUpperCase(), urlProtocol.getRel(),
+                        generateUrl(urlProtocol, placeholder, requestUri)))
                 .collect(Collectors.toList());
 
     }

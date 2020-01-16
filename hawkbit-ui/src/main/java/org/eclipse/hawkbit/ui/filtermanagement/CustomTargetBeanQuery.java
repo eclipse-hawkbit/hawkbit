@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -27,7 +28,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -89,12 +89,9 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!StringUtils.isEmpty(filterQuery)) {
-            targetBeans = targetManagement.findByRsql(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    filterQuery);
+            targetBeans = targetManagement.findByRsql(new OffsetBasedPageRequest(startIndex, count, sort), filterQuery);
         } else {
-            targetBeans = targetManagement
-                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = targetManagement.findAll(new OffsetBasedPageRequest(startIndex, count, sort));
         }
 
         for (final Target targ : targetBeans) {

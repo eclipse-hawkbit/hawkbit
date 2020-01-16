@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,12 +18,14 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
@@ -80,6 +83,7 @@ public final class TargetAssignmentOperations {
      *            the Vaadin Message Source for multi language
      * @param eventSource
      *            the source object for sending potential events
+     * @throws MultiAssignmentIsNotEnabledException
      */
     public static void saveAllAssignments(final List<Target> targets, final List<DistributionSet> distributionSets,
             final ManagementUIState managementUIState,
@@ -101,31 +105,39 @@ public final class TargetAssignmentOperations {
         final String maintenanceTimeZone = maintenanceWindowLayout.getMaintenanceTimeZone();
 
         final Set<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toSet());
-        final List<TargetWithActionType> trgActionType = targets.stream()
-                .map(t -> maintenanceWindowLayout.isEnabled()
-                        ? new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp,
-                                maintenanceSchedule, maintenanceDuration, maintenanceTimeZone)
-                        : new TargetWithActionType(t.getControllerId(), actionType, forcedTimeStamp))
-                .collect(Collectors.toList());
+               final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        dsIds.forEach(dsId -> targets.forEach(t -> {
+            final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
+                    .setActionType(actionType).setForceTime(forcedTimeStamp);
+            if (maintenanceWindowLayout.isEnabled()) {
+                request.setMaintenance(maintenanceSchedule, maintenanceDuration, maintenanceTimeZone);
+            }
+            deploymentRequests.add(request.build());
+        }));
 
-        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(dsIds,
-                trgActionType);
+        try {
+            final List<DistributionSetAssignmentResult> results = deploymentManagement
+                    .assignDistributionSets(deploymentRequests);
+            // use the last one for the notification box
+            final DistributionSetAssignmentResult assignmentResult = results.get(results.size() - 1);
+            if (assignmentResult.getAssigned() > 0) {
+                notification
+                        .displaySuccess(i18n.getMessage("message.target.assignment", assignmentResult.getAssigned()));
+            }
+            if (assignmentResult.getAlreadyAssigned() > 0) {
+                notification.displaySuccess(
+                        i18n.getMessage("message.target.alreadyAssigned", assignmentResult.getAlreadyAssigned()));
+            }
 
-        // use the last one for the notification box
-        final DistributionSetAssignmentResult assignmentResult = results.get(results.size() - 1);
-        if (assignmentResult.getAssigned() > 0) {
-            notification.displaySuccess(i18n.getMessage("message.target.assignment", assignmentResult.getAssigned()));
+            final Set<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toSet());
+            refreshPinnedDetails(dsIds, targetIds, managementUIState, eventBus, eventSource);
+
+            notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
+            eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        } catch (final MultiAssignmentIsNotEnabledException e) {
+            notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
+            LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
         }
-        if (assignmentResult.getAlreadyAssigned() > 0) {
-            notification.displaySuccess(
-                    i18n.getMessage("message.target.alreadyAssigned", assignmentResult.getAlreadyAssigned()));
-        }
-
-        final Set<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toSet());
-        refreshPinnedDetails(dsIds, targetIds, managementUIState, eventBus, eventSource);
-
-        notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
-        eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private static void refreshPinnedDetails(final Set<Long> dsIds, final Set<Long> targetIds,

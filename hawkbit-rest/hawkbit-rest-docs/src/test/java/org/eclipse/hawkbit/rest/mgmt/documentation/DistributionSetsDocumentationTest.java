@@ -23,9 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -306,7 +308,8 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         final List<Target> targets = assignDistributionSet(set,
-                testdataFactory.createTargets(5, "targetMisc", "Test targets for query")).getAssignedEntity();
+                testdataFactory.createTargets(5, "targetMisc", "Test targets for query")).getAssignedEntity().stream()
+                        .map(Action::getTarget).collect(Collectors.toList());
         testdataFactory.sendUpdateActionStatusToTargets(targets, Status.FINISHED, "some message");
 
         mockMvc.perform(
@@ -380,22 +383,34 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("offline")
                                 .description(MgmtApiModelProperties.OFFLINE_UPDATE).optional()),
-                        requestFields(requestFieldWithPath("[]forcetime").description(MgmtApiModelProperties.FORCETIME),
-                                requestFieldWithPath("[]id").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                requestFieldWithPath("[]maintenanceWindow")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.schedule")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.duration")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION).optional(),
-                                requestFieldWithPath("[]maintenanceWindow.timezone")
-                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE).optional(),
-                                requestFieldWithPath("[]type").description(MgmtApiModelProperties.FORCETIME_TYPE)
+                        requestFields(
+                                requestFieldWithPath("[].id").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                requestFieldWithPathMandatoryInMultiAssignMode("[].weight")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_WEIGHT)
+                                        .type(JsonFieldType.NUMBER).attributes(key("value").value("0 - 1000")),
+                                optionalRequestFieldWithPath("[].forcetime")
+                                        .description(MgmtApiModelProperties.FORCETIME),
+                                optionalRequestFieldWithPath("[].maintenanceWindow")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.schedule")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_SCHEDULE),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.duration")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_DURATION),
+                                optionalRequestFieldWithPath("[].maintenanceWindow.timezone")
+                                        .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
+                                optionalRequestFieldWithPath("[].type")
+                                        .description(MgmtApiModelProperties.ASSIGNMENT_TYPE)
                                         .attributes(key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
                         responseFields(
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+                                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+                                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+                                        .description(MgmtApiModelProperties.ACTION_ID),
+                                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("total").type(JsonFieldType.NUMBER)
                                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS))));
     }

@@ -10,8 +10,13 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.ValidString;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.util.StringUtils;
 
 /**
@@ -31,6 +36,17 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     protected ActionType actionType;
 
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
+    protected Integer weight;
+
+    /**
+     * Set DS ID of the {@link Action} created during auto assignment
+     * 
+     * @param distributionSetId
+     *            of the {@link TargetFilterQuery}
+     * @return this builder
+     */
     public T autoAssignDistributionSet(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
         return (T) this;
@@ -40,15 +56,46 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
         return Optional.ofNullable(distributionSetId);
     }
 
+    /**
+     * Set {@link ActionType} of the {@link Action} created during auto
+     * assignment
+     * 
+     * @param actionType
+     *            of the {@link TargetFilterQuery}
+     * @return this builder
+     */
     public T autoAssignActionType(final ActionType actionType) {
         this.actionType = actionType;
         return (T) this;
+    }
+
+    /**
+     * Set weight of the {@link Action} created during auto assignment
+     * 
+     * @param weight
+     *            of the {@link TargetFilterQuery}
+     * @return this builder
+     */
+    public T autoAssignWeight(final Integer weight) {
+        this.weight = weight;
+        return (T) this;
+    }
+
+    public Optional<Integer> getAutoAssignWeight() {
+        return Optional.ofNullable(weight);
     }
 
     public Optional<ActionType> getAutoAssignActionType() {
         return Optional.ofNullable(actionType);
     }
 
+    /**
+     * Set name of the filter
+     * 
+     * @param name
+     *            of the {@link TargetFilterQuery}
+     * @return this builder
+     */
     public T name(final String name) {
         this.name = StringUtils.trimWhitespace(name);
         return (T) this;
@@ -58,6 +105,13 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
         return Optional.ofNullable(name);
     }
 
+    /**
+     * Set query used by the filter
+     * 
+     * @param query
+     *            of the {@link TargetFilterQuery}
+     * @return this builder
+     */
     public T query(final String query) {
         this.query = StringUtils.trimWhitespace(query);
         return (T) this;

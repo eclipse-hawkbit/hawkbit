@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -101,20 +100,33 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     List<Action> findByTargetAndActiveOrderByIdAsc(JpaTarget target, boolean active);
 
     /**
-     * Retrieves the oldest {@link Action} that is active and referring to the
-     * given {@link Target}.
-     *
-     * @param sort
-     *            order
+     * Retrieves the active {@link Action}s with the highest weights that refer
+     * to the given {@link Target}. If {@link Action}s have the same weight they
+     * are ordered ascending by ID (oldest ones first).
+     * 
+     * @param pageable
+     *            pageable
      * @param controllerId
      *            the target to find assigned actions
-     * @param active
-     *            the action active flag
-     *
-     * @return the found {@link Action}
+     * @return the found {@link Action}s
      */
     @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Optional<Action> findFirstByTargetControllerIdAndActive(Sort sort, String controllerId, boolean active);
+    Page<Action> findByTargetControllerIdAndActiveIsTrueAndWeightIsNotNullOrderByWeightDescIdAsc(Pageable pageable,
+            String controllerId);
+
+    /**
+     * Retrieves the active {@link Action}s with the lowest IDs (the oldest one)
+     * whose weight is null and that that refers to the given {@link Target}.
+     * 
+     * @param pageable
+     *            pageable
+     * @param controllerId
+     *            the target to find assigned actions
+     * @return the found {@link Action}s
+     */
+    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
+    Page<Action> findByTargetControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(Pageable pageable,
+            String controllerId);
 
     /**
      * Checks if an active action exists for given
@@ -242,7 +254,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Retrieves all {@link Action}s that matches the queried externalRefs.
-     * 
+     *
      * @param externalRefs
      *            for which the actions need to be found
      * @param active
@@ -518,7 +530,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Updates the externalRef of an action by its actionId.
-     * 
+     *
      * @param actionId
      *            for which the externalRef is being updated.
      * @param externalRef

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.Column;
@@ -23,6 +24,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -90,7 +93,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
             @ConversionValue(objectValue = "DELETING", dataValue = "9"),
             @ConversionValue(objectValue = "DELETED", dataValue = "10"),
             @ConversionValue(objectValue = "WAITING_FOR_APPROVAL", dataValue = "11"),
-            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12")})
+            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12") })
     @Convert("rolloutstatus")
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
@@ -130,6 +133,11 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Column(name = "approval_remark")
     @Size(max = Rollout.APPROVAL_REMARK_MAX_SIZE)
     private String approvalRemark;
+
+    @Column(name = "weight")
+    @Min(Action.WEIGHT_MIN)
+    @Max(Action.WEIGHT_MAX)
+    private Integer weight;
 
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -202,6 +210,15 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
+    }
+
+    @Override
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
     }
 
     @Override
@@ -299,5 +316,4 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public void setApprovalRemark(final String approvalRemark) {
         this.approvalRemark = approvalRemark;
     }
-
 }
