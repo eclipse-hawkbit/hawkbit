@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -676,7 +675,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         final Target target = entityFactory.target().create().controllerId(randomString).build();
 
-        final String targetList = JsonBuilder.targets(Lists.list(target), false);
+        final String targetList = JsonBuilder.targets(Arrays.asList(target), false);
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
