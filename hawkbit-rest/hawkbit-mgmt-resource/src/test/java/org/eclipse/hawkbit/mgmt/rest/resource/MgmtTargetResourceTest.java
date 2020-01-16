@@ -672,7 +672,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     @Test
     @Description("Ensures that a target creation with empty name and a controllerId that exceeds the name length limitation is successful and the name gets truncated.")
     public void createTargetWithEmptyNameAndLongControllerId() throws Exception {
-        final String randomString = RandomStringUtils.random(JpaTarget.CONTROLLER_ID_MAX_SIZE);
+        final String randomString = RandomStringUtils.randomAlphanumeric(JpaTarget.CONTROLLER_ID_MAX_SIZE);
 
         final Target target = entityFactory.target().create().controllerId(randomString).build();
 
