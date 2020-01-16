@@ -350,7 +350,7 @@ public class BulkUploadHandler extends CustomComponent
                 errorMessage.append(dsAssignmentFailedMsg);
             }
             if (errorMessage.length() > 0) {
-                errorMessage.append("<br>");
+                errorMessage.append("\n");
             }
             if (tagAssignmentFailedMsg != null) {
                 errorMessage.append(tagAssignmentFailedMsg);

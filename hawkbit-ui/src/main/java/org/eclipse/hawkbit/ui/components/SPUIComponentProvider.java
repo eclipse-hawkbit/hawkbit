@@ -222,9 +222,10 @@ public final class SPUIComponentProvider {
     public static HorizontalLayout createNameValueLayout(final String label, final String... values) {
         final String valueStr = StringUtils.arrayToDelimitedString(values, " ");
 
-        final Label nameValueLabel = new Label("<b>" + label + "</b>");
-        nameValueLabel.setContentMode(ContentMode.HTML);
+        final Label nameValueLabel = new Label( label );
+        nameValueLabel.setContentMode(ContentMode.TEXT);
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
+        nameValueLabel.addStyleName("text-bold");
         nameValueLabel.setSizeUndefined();
 
         final Label valueStrLabel = new Label(valueStr);

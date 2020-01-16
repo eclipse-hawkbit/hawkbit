@@ -285,20 +285,20 @@ public final class HawkbitCommonUtil {
         final int unassignedCount = result.getUnassigned();
         if (assignedCount == 1) {
             formMsg.append(i18n.getMessage("message.target.assigned.one", result.getAssignedEntity().get(0).getName(),
-                    tagName)).append("<br>");
+                    tagName)).append("\n");
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.getMessage("message.target.assigned.many", assignedCount, tagName)).append("<br>");
+            formMsg.append(i18n.getMessage("message.target.assigned.many", assignedCount, tagName)).append("\n");
 
             if (alreadyAssignedCount > 0) {
                 final String alreadyAssigned = i18n.getMessage("message.target.alreadyAssigned", alreadyAssignedCount);
-                formMsg.append(alreadyAssigned).append("<br>");
+                formMsg.append(alreadyAssigned).append("\n");
             }
         }
         if (unassignedCount == 1) {
             formMsg.append(i18n.getMessage("message.target.unassigned.one",
-                    result.getUnassignedEntity().get(0).getName(), tagName)).append("<br>");
+                    result.getUnassignedEntity().get(0).getName(), tagName)).append("\n");
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.getMessage("message.target.unassigned.many", unassignedCount, tagName)).append("<br>");
+            formMsg.append(i18n.getMessage("message.target.unassigned.many", unassignedCount, tagName)).append("\n");
         }
         return formMsg.toString();
     }

@@ -92,7 +92,11 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
   }
 
   .text-bold {
-    font-weight: bold;
+    font-weight: bold !important;
+  }
+
+  .v-Notification-error .v-icon {
+    color: white;
   }
 
   .header-caption-right {
