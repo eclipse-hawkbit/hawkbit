@@ -30,6 +30,10 @@ Questions? Problems? Searching for a quick response from the team behind hawkBit
 ## Mailing List
 A great way to stay up to date with hawkBit activity is to subscribe to the Mailing list provided by Eclipse. Sign up for the mailing list [here](https://dev.eclipse.org/mailman/listinfo/hawkbit-dev).
 
+## Stack Overflow
+
+Find existing questions or raise a new one tagged with `eclipse-hawkbit` [here](https://stackoverflow.com/questions/tagged/eclipse-hawkbit).
+
 ## Issue Tracker
 Issues and bugs related to hawkBit are tracked with the Github Issue tracking system. If you find any issues, please report them [here](https://github.com/eclipse/hawkbit/issues).
 
