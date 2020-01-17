@@ -20,6 +20,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -73,6 +75,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -97,6 +100,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
@@ -236,12 +240,12 @@ public class SecurityManagedConfiguration {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
 
-                final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
+                final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
                         Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
-                anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+                anonymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers(DDI_ANT_MATCHERS).and().securityContext().disable().anonymous()
-                        .authenticationFilter(anoymousFilter);
+                        .authenticationFilter(anonymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
@@ -358,12 +362,12 @@ public class SecurityManagedConfiguration {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
 
-                final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
+                final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
                         Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
-                anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+                anonymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers(DDI_DL_ANT_MATCHER).and().securityContext().disable().anonymous()
-                        .authenticationFilter(anoymousFilter);
+                        .authenticationFilter(anonymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
@@ -421,7 +425,7 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * A Websecruity config to handle and filter the download ids.
+     * A Websecurity config to handle and filter the download ids.
      */
     @Configuration
     @EnableWebSecurity
@@ -673,7 +677,7 @@ public class SecurityManagedConfiguration {
         /**
          * Listener to redirect to login page after session timeout. Close the
          * vaadin session, because it's is not possible to redirect in
-         * atmospehere.
+         * atmosphere.
          *
          * @return the servlet listener.
          */
@@ -731,8 +735,8 @@ public class SecurityManagedConfiguration {
                         .permitAll().anyRequest().authenticated().and()
                         // UI login / logout
                         .exceptionHandling()
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login/#/")).and().logout()
-                        .logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
+                        .authenticationEntryPoint(new LoginUrlWithParametersAuthenticationEntryPoint("/UI/login")).and()
+                        .logout().logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
             }
         }
 
@@ -780,7 +784,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
 }
 
 /**
- * Sevletfilter to create metadata after successful authentication over RESTful.
+ * Servletfilter to create metadata after successful authentication over RESTful.
  */
 class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
 
@@ -816,5 +820,23 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     @Override
     public void destroy() {
         // not needed
+    }
+}
+
+/**
+ * Keep given query parameters when redirecting the login url
+ */
+class LoginUrlWithParametersAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
+
+    public LoginUrlWithParametersAuthenticationEntryPoint(String loginFormUrl) {
+        super(loginFormUrl);
+    }
+
+    @Override
+    protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException exception) {
+        String requestQuery = request.getQueryString();
+        String redirect = super.determineUrlToUseForThisRequest(request, response, exception);
+        return UriComponentsBuilder.fromPath(redirect).replaceQuery(requestQuery).toUriString();
     }
 }
