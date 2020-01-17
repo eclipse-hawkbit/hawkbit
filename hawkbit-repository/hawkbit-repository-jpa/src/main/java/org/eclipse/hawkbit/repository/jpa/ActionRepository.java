@@ -264,6 +264,14 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     List<Action> findByExternalRefInAndActive(@Param("externalRefs") List<String> externalRefs,
             @Param("active") boolean active);
 
+    
+    /**
+     * @param externalRef
+     *            of the action. See {@link Action#getExternalRef()}
+     * @return the found {@link Action}
+     */
+    Optional<Action> findByExternalRef(@Param("externalRef") String externalRef);
+
     /**
      * Switches the status of actions from one specific status into another for
      * given actions IDs, active flag and current status
