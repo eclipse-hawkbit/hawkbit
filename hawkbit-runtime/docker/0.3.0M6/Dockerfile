@@ -1,4 +1,4 @@
-FROM openjdk:8u201-jre-alpine
+FROM openjdk:8u212-jre-alpine
 
 ENV HAWKBIT_VERSION=0.3.0M6 \
     HAWKBIT_HOME=/opt/hawkbit
