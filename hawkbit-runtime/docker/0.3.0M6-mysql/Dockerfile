@@ -1,6 +1,6 @@
 FROM hawkbit/hawkbit-update-server:0.3.0M6
 
-ENV MARIADB_DRIVER_VERSION=2.4.2
+ENV MARIADB_DRIVER_VERSION=2.5.3
 
 COPY KEY .
 
