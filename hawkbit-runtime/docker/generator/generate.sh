@@ -10,8 +10,8 @@ set -euxo pipefail
 #
 
 HAWKBIT_VERSION="0.3.0M6"
-MARIADB_DRIVER_VERSION="2.4.2"
-BASE_IMAGE="openjdk:8u201-jre-alpine"
+MARIADB_DRIVER_VERSION="2.5.3"
+BASE_IMAGE="openjdk:8u212-jre-alpine"
 
 ##################################################
 
