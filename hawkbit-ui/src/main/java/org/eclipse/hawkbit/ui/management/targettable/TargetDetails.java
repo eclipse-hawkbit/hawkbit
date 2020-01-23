@@ -9,11 +9,9 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -263,16 +261,15 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void updateAttributesLabelsList(final VerticalLayout attributesLayout,
             final Map<String, String> attributes) {
-        final List<Entry<String, String>> sortedEntries = attributes.entrySet().stream()
-                .sorted((entry1, entry2) -> entry1.getKey().toLowerCase().compareTo(entry2.getKey().toLowerCase()))
-                .collect(Collectors.toList());
-        for (final Map.Entry<String, String> entry : sortedEntries) {
-            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(entry.getKey().concat("  :  "),
-                    entry.getValue() == null ? "" : entry.getValue());
-            conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
+        final TreeMap<String, String> sortedAttributes = new TreeMap<>((key1, key2) -> key1.compareToIgnoreCase(key2));
+        sortedAttributes.putAll(attributes);
+        sortedAttributes.forEach((key, value) -> {
+            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(key.concat("  :  "),
+                    value == null ? "" : value);
+            conAttributeLabel.setDescription(key.concat("  :  ") + value);
             conAttributeLabel.addStyleName("label-style");
             attributesLayout.addComponent(conAttributeLabel);
-        }
+        });
     }
 
     private void updateAttributesUpdateComponents(final HorizontalLayout attributesRequestLayout,
