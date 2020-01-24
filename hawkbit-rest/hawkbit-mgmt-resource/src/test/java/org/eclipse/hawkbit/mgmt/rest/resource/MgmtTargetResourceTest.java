@@ -677,11 +677,15 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
 
         final String targetList = JsonBuilder.targets(Arrays.asList(target), false);
 
+        final String expectedTargetName = randomString.substring(0,
+                Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE));
+
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
                 .andExpect(jsonPath("[0].controllerId", equalTo(randomString)))
-                .andExpect(jsonPath("[0].name", equalTo(randomString.substring(0,
-                        Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE)))));
+                .andExpect(jsonPath("[0].name", equalTo(expectedTargetName)));
+
+        assertThat(targetManagement.getByControllerID(randomString).get().getName()).isEqualTo(expectedTargetName);
     }
 
     @Test
