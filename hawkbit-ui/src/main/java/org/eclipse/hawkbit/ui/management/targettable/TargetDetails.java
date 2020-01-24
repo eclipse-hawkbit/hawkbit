@@ -8,18 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -44,9 +37,18 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target details layout which is shown on the Deployment View.
@@ -259,16 +261,19 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void updateAttributesLabelsList(final VerticalLayout attributesLayout,
             final Map<String, String> attributes) {
-        for (final Map.Entry<String, String> entry : attributes.entrySet()) {
-            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(entry.getKey().concat("  :  "),
-                    entry.getValue() == null ? "" : entry.getValue());
-            conAttributeLabel.setDescription(entry.getKey().concat("  :  ") + entry.getValue());
+        final TreeMap<String, String> sortedAttributes = new TreeMap<>((key1, key2) -> key1.compareToIgnoreCase(key2));
+        sortedAttributes.putAll(attributes);
+        sortedAttributes.forEach((key, value) -> {
+            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(key.concat("  :  "),
+                    value == null ? "" : value);
+            conAttributeLabel.setDescription(key.concat("  :  ") + value);
             conAttributeLabel.addStyleName("label-style");
             attributesLayout.addComponent(conAttributeLabel);
-        }
+        });
     }
 
-    private void updateAttributesUpdateComponents(final HorizontalLayout attributesRequestLayout, final VerticalLayout attributesLayout, final String controllerId) {
+    private void updateAttributesUpdateComponents(final HorizontalLayout attributesRequestLayout,
+            final VerticalLayout attributesLayout, final String controllerId) {
         final boolean isRequestAttributes = targetManagement.isControllerAttributesRequested(controllerId);
 
         if (isRequestAttributes) {
