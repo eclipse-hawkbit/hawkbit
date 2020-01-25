@@ -108,7 +108,7 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
                 getWeightForTenantOrDefault()));
 
         final Link linkToDefaultWeightHelp = SPUIComponentProvider.getHelpLink(i18n,
-                uiProperties.getLinks().getDocumentation().getRollout()); //TODO: Link right do
+                uiProperties.getLinks().getDocumentation().getMultiAssignments());
         linkToDefaultWeightHelp.setId("weight-help-link");
         row1.addComponent(linkToDefaultWeightHelp);
         row1.setComponentAlignment(linkToDefaultWeightHelp, Alignment.MIDDLE_LEFT);
