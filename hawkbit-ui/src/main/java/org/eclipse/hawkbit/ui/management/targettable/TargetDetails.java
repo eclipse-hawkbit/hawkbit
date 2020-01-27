@@ -264,7 +264,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final TreeMap<String, String> sortedAttributes = new TreeMap<>((key1, key2) -> key1.compareToIgnoreCase(key2));
         sortedAttributes.putAll(attributes);
         sortedAttributes.forEach((key, value) -> {
-            final HorizontalLayout conAttributeLabel = SPUIComponentProvider.createNameValueLabel(key.concat("  :  "),
+            final HorizontalLayout conAttributeLayout = SPUIComponentProvider.createNameValueLayout(key.concat("  :  "),
                     value == null ? "" : value);
             conAttributeLayout.setDescription(key.concat("  :  ") + value);
             conAttributeLayout.addStyleName("label-style");
@@ -323,7 +323,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
      * @return Label as UI
      */
     private static HorizontalLayout getSWModLayout(final String labelName, final SoftwareModule swModule) {
-        return SPUIComponentProvider.createNameValueLayout(labelName + " : ", swModule.getName(), swModule.getVersion());
+        return SPUIComponentProvider.createNameValueLayout(labelName + " : ", swModule.getName(),
+                swModule.getVersion());
     }
 
     @Override
