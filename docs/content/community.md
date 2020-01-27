@@ -23,9 +23,11 @@ Here you can find links to arbitrary material covering Eclipse hawkBit which has
 - 05/25/2016 - jaxenter: Eclipse hawkBit - [english](https://jaxenter.com/eclipse-hawkbit-126445.html) - [german](https://jaxenter.de/eclipse-hawkbit-46372)
 - 09/27/2016 - Eclipse Newsletter - 'IoT is the new black' - [article](http://www.eclipse.org/community/eclipse_newsletter/2016/september/article2.php)
 
+## Ask a question
+Visit [stackoverflow.com](https://stackoverflow.com/questions/tagged/eclipse-hawkbit) to find questions or raise your own tagged with `eclipse-hawkbit`.
 
 ## Chat
-Questions? Problems? Searching for a quick response from the team behind hawkBit and from the hawkBit community, join the [Gitter Chat](https://gitter.im/eclipse/hawkbit).
+Searching for a quick response from the team behind hawkBit and the hawkBit community, join the [Gitter Chat](https://gitter.im/eclipse/hawkbit).
 
 ## Mailing List
 A great way to stay up to date with hawkBit activity is to subscribe to the Mailing list provided by Eclipse. Sign up for the mailing list [here](https://dev.eclipse.org/mailman/listinfo/hawkbit-dev).
