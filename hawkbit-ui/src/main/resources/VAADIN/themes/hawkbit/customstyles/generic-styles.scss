@@ -38,7 +38,7 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
 
   //Report widget max icon style
   .icon-only {
-    @include sp-icon-style($sp-button-size : $icon-font-size);
+    @include sp-icon-style($sp-button-size: $icon-font-size);
     margin-bottom: 12px !important;
     margin-right: 6px !important;
   }
@@ -89,6 +89,39 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     -khtml-text-overflow: ellipsis;
     -moz-text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
+  }
+
+  .text-bold {
+    font-weight: bold !important;
+  }
+
+  .v-Notification-error .v-icon {
+    color: white;
+  }
+
+  .header-caption-right {
+    padding-right: 0.5em;
+  }
+
+  .avoid-tooltip {
+    pointer-events: none !important;
+  }
+
+  //This was needed to make the split of prefix "Artifact details of"
+  //and the actual value "smName:smVersion" in context of the XSS vulnerabilities
+  //possible after changing ContentMode
+  //from HTML to TEXT. As no Labels allowed at the windows caption field of the
+  //artifact details window , decision was made to use the methods
+  //Window.setAssistivePrefix() and Window.setAssistivePostfix() to solve the XSS-problem.
+  //Both, assistive postfix and prefix are usually not visible on the page and only for
+  //assistive purpose, but with overwriting this third party html class it's a possible
+  //workaround for the XSS vulnerability. I added a comment in the generic-styles.scss.
+  .v-assistive-device-only {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    overflow: visible;
   }
 
   .v-panel,

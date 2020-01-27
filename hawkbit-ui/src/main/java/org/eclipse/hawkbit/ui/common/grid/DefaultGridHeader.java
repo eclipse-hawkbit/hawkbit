@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
@@ -16,13 +15,14 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract grid header placed on top of a grid.
@@ -34,6 +34,8 @@ public class DefaultGridHeader extends VerticalLayout {
 
     private final String titleText;
     private Label title;
+    private Label prefixText;
+    private HorizontalLayout prefixWithTitle;
     private HorizontalLayout titleLayout;
     private transient AbstractHeaderMaximizeSupport maximizeSupport;
 
@@ -67,24 +69,49 @@ public class DefaultGridHeader extends VerticalLayout {
      * @return this DefaultGridHeader in order to allow method chaining
      */
     public DefaultGridHeader init() {
-        buildTitleLabel();
+        buildTitleHorizontalLayout();
         buildTitleLayout();
         buildComponent();
         return this;
     }
 
     /**
-     * Builds the title label.
+     * Builds the title HorizontalLayout containing two labels.
      *
-     * @return title-label
+     * @return title as HorizontalLayout
      */
-    protected Label buildTitleLabel() {
-        // create default title - even shown when no data is available
-        title = new LabelBuilder().name(titleText).buildCaptionLabel();
-        title.setImmediate(true);
-        title.setContentMode(ContentMode.HTML);
+    protected HorizontalLayout buildTitleHorizontalLayout() {
 
-        return title;
+        prefixText = new Label();
+        prefixText.setValue(titleText);
+        prefixText.addStyleName(ValoTheme.LABEL_SMALL);
+        prefixText.addStyleName(ValoTheme.LABEL_BOLD);
+        prefixText.setSizeUndefined();
+
+        title = new Label();
+        title.setSizeFull();
+        title.setImmediate(true);
+        title.setWidth("100%");
+        title.addStyleName(ValoTheme.LABEL_SMALL);
+        title.addStyleName("text-bold");
+        title.addStyleName("text-cut");
+        title.addStyleName("header-caption-right");
+
+        prefixWithTitle = new HorizontalLayout();
+        prefixWithTitle.setMargin(false);
+        prefixWithTitle.setSpacing(true);
+        prefixWithTitle.setSizeFull();
+        prefixWithTitle.addStyleName("header-caption");
+
+        prefixWithTitle.addComponent(prefixText);
+        prefixWithTitle.setComponentAlignment(prefixText, Alignment.TOP_LEFT);
+        prefixWithTitle.setExpandRatio(prefixText, 0.0F);
+
+        prefixWithTitle.addComponent(title);
+        prefixWithTitle.setComponentAlignment(title, Alignment.TOP_LEFT);
+        prefixWithTitle.setExpandRatio(title, 1.0F);
+
+        return prefixWithTitle;
     }
 
     /**
@@ -98,9 +125,9 @@ public class DefaultGridHeader extends VerticalLayout {
         titleLayout.setSpacing(false);
         titleLayout.setMargin(false);
         titleLayout.setSizeFull();
-        titleLayout.addComponent(title);
-        titleLayout.setComponentAlignment(title, Alignment.TOP_LEFT);
-        titleLayout.setExpandRatio(title, 0.8F);
+        titleLayout.addComponent(prefixWithTitle);
+        titleLayout.setComponentAlignment(prefixWithTitle, Alignment.TOP_LEFT);
+        titleLayout.setExpandRatio(prefixWithTitle, 0.8F);
 
         if (hasHeaderMaximizeSupport()) {
             titleLayout.addComponents(getHeaderMaximizeSupport().maxMinButton);
@@ -125,12 +152,12 @@ public class DefaultGridHeader extends VerticalLayout {
     }
 
     /**
-     * Enables maximize-support for the header by setting a
-     * HeaderMaximizeSupport implementation.
+     * Enables maximize-support for the header by setting a HeaderMaximizeSupport
+     * implementation.
      *
      * @param maximizeSupport
-     *            encapsulates layout of min-max-button and behavior for
-     *            minimize and maximize.
+     *            encapsulates layout of min-max-button and behavior for minimize
+     *            and maximize.
      */
     public void setHeaderMaximizeSupport(final AbstractHeaderMaximizeSupport maximizeSupport) {
         this.maximizeSupport = maximizeSupport;
@@ -140,8 +167,7 @@ public class DefaultGridHeader extends VerticalLayout {
      * Gets the HeaderMaximizeSupport implementation describing behavior for
      * minimize and maximize.
      *
-     * @return maximizeSupport that encapsulates behavior for minimize and
-     *         maximize.
+     * @return maximizeSupport that encapsulates behavior for minimize and maximize.
      */
     public AbstractHeaderMaximizeSupport getHeaderMaximizeSupport() {
         return maximizeSupport;
@@ -162,8 +188,15 @@ public class DefaultGridHeader extends VerticalLayout {
      *
      * @param newTitle
      */
-    public void updateTitle(final String newTitle) {
-        title.setValue(newTitle);
+    public void updateTitle(final String newTitle, final String hasTextCasePrefixText, final String hasNoTextCasePrefixText) {
+
+        if (StringUtils.hasText(newTitle)) {
+            prefixText.setValue(i18n.getMessage(hasTextCasePrefixText));
+            title.setValue(newTitle);
+        } else {
+            prefixText.setValue(i18n.getMessage(hasNoTextCasePrefixText));
+            title.setValue("");
+        }
     }
 
     /**
@@ -204,14 +237,12 @@ public class DefaultGridHeader extends VerticalLayout {
         }
 
         /**
-         * Additional actions for maximize operation might be performed by this
-         * method.
+         * Additional actions for maximize operation might be performed by this method.
          */
         protected abstract void maximize();
 
         /**
-         * Additional actions for minimize operation might be performed by this
-         * method.
+         * Additional actions for minimize operation might be performed by this method.
          */
         protected abstract void minimize();
 
