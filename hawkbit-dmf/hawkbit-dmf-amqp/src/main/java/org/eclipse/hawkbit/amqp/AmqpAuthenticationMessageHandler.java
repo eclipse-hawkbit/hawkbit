@@ -226,8 +226,8 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             authenticationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             authenticationResponse.setMessage("Building download URI failed");
         } catch (final EntityNotFoundException e) {
-            final String errorMessage = "Artifact for resource " + fileResource + "not found ";
-            LOG.warn(errorMessage, e);
+            final String errorMessage = "Artifact for resource " + fileResource + " not found ";
+            LOG.warn(errorMessage);
             authenticationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
             authenticationResponse.setMessage(errorMessage);
         }
