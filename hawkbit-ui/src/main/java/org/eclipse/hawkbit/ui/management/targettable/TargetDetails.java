@@ -225,18 +225,18 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private void populateDistributionDtls(final VerticalLayout layout, final DistributionSet distributionSet) {
         layout.removeAllComponents();
-        layout.addComponent(SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.name"),
+        layout.addComponent(SPUIComponentProvider.createNameValueLayout(getI18n().getMessage("label.dist.details.name"),
                 distributionSet == null ? "" : distributionSet.getName()));
 
         layout.addComponent(
-                SPUIComponentProvider.createNameValueLabel(getI18n().getMessage("label.dist.details.version"),
+                SPUIComponentProvider.createNameValueLayout(getI18n().getMessage("label.dist.details.version"),
                         distributionSet == null ? "" : distributionSet.getVersion()));
 
         if (distributionSet == null) {
             return;
         }
         distributionSet.getModules()
-                .forEach(module -> layout.addComponent(getSWModlabel(module.getType().getName(), module)));
+                .forEach(module -> layout.addComponent(getSWModLayout(module.getType().getName(), module)));
     }
 
     private void updateAttributesLayout(final String controllerId) {
@@ -264,11 +264,11 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         final TreeMap<String, String> sortedAttributes = new TreeMap<>((key1, key2) -> key1.compareToIgnoreCase(key2));
         sortedAttributes.putAll(attributes);
         sortedAttributes.forEach((key, value) -> {
-            final Label conAttributeLabel = SPUIComponentProvider.createNameValueLabel(key.concat("  :  "),
+            final HorizontalLayout conAttributeLayout = SPUIComponentProvider.createNameValueLayout(key.concat("  :  "),
                     value == null ? "" : value);
-            conAttributeLabel.setDescription(key.concat("  :  ") + value);
-            conAttributeLabel.addStyleName("label-style");
-            attributesLayout.addComponent(conAttributeLabel);
+            conAttributeLayout.setDescription(key.concat("  :  ") + value);
+            conAttributeLayout.addStyleName("label-style");
+            attributesLayout.addComponent(conAttributeLayout);
         });
     }
 
@@ -322,8 +322,9 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
      *            as Module (JVM|OS|AH)
      * @return Label as UI
      */
-    private static Label getSWModlabel(final String labelName, final SoftwareModule swModule) {
-        return SPUIComponentProvider.createNameValueLabel(labelName + " : ", swModule.getName(), swModule.getVersion());
+    private static HorizontalLayout getSWModLayout(final String labelName, final SoftwareModule swModule) {
+        return SPUIComponentProvider.createNameValueLayout(labelName + " : ", swModule.getName(),
+                swModule.getVersion());
     }
 
     @Override

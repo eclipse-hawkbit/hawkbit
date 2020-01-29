@@ -192,8 +192,13 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      */
     public JpaTarget(final String controllerId, final String securityToken) {
         this.controllerId = controllerId;
-        setName(controllerId);
+        setName(truncateControllerIdToMaxNameLength(controllerId));
         this.securityToken = securityToken;
+    }
+
+    private static String truncateControllerIdToMaxNameLength(final String controllerId) {
+        return controllerId != null && controllerId.length() > NAME_MAX_SIZE ? controllerId.substring(0, NAME_MAX_SIZE)
+                : controllerId;
     }
 
     JpaTarget() {
