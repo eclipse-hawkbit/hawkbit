@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 /**
  * Abstract Test for Rest tests.
@@ -39,6 +40,9 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     private FilterHttpResponse filterHttpResponse;
 
     @Autowired
+    private CharacterEncodingFilter characterEncodingFilter;
+
+    @Autowired
     protected WebApplicationContext webApplicationContext;
 
     @Override
@@ -51,6 +55,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
         final DefaultMockMvcBuilder createMvcWebAppContext = MockMvcBuilders.webAppContextSetup(context);
 
+        createMvcWebAppContext.addFilter(characterEncodingFilter);
         createMvcWebAppContext.addFilter(
                 new ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
                         "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",

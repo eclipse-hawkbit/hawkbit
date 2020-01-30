@@ -110,7 +110,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
         this.mockMvc
                 .perform(post(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
                         .content(JsonBuilder.softwareModuleTypesCreatableFieldsOnly(types))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         requestFields(
@@ -194,7 +194,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
 
         this.mockMvc
                 .perform(put(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeID}",
-                        testType.getId()).content(body.toString()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        testType.getId()).content(body.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("softwareModuleTypeID")

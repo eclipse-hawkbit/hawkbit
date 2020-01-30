@@ -8,15 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import org.springframework.hateoas.Identifiable;
-
-public abstract class AbstractBaseEntityBuilder implements Identifiable<Long> {
+public abstract class AbstractBaseEntityBuilder {
 
     protected Long id;
 
-    @Override
     public Long getId() {
         return id;
     }
-
 }

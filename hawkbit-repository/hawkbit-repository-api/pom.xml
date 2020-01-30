@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-repository</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>0.4.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-repository-api</artifactId>
    <name>hawkBit :: Repository :: API</name>
@@ -24,6 +24,10 @@
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-security-core</artifactId>
          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-annotations</artifactId>
       </dependency>
       <dependency>
          <groupId>javax.validation</groupId>

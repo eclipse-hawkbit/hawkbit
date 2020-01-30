@@ -523,9 +523,8 @@ public class SecurityManagedConfiguration {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            httpSec.authorizeRequests().anyRequest().authenticated()
-                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
+            httpSec.authorizeRequests().antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN).anyRequest().authenticated();
 
             if (oidcBearerTokenAuthenticationFilter != null) {
 

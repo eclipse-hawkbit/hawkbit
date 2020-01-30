@@ -14,7 +14,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-rest-parent</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>0.4.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-mgmt-api</artifactId>
    <name>hawkBit :: REST :: Management API</name>
@@ -23,6 +23,10 @@
       <dependency>
          <groupId>org.springframework.hateoas</groupId>
          <artifactId>spring-hateoas</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-webmvc</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>

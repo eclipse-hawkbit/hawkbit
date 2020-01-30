@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,8 +39,9 @@ import io.qameta.allure.Story;
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
         "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + "," + CorsTest.ALLOWED_ORIGIN_SECOND})
-@TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class }, 
+@TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+@DirtiesContext
 @Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest {

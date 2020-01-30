@@ -23,7 +23,7 @@ import org.springframework.data.domain.Sort.Direction;
 public class JpaTestRepositoryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
-    private static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
+    private static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Direction.ASC, "id"));
 
     private final TenantAwareCacheManager cacheManager;
 

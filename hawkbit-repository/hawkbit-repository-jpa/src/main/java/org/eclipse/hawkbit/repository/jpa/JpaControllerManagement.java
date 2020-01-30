@@ -914,7 +914,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 : messageCount;
 
-        final PageRequest pageable = PageRequest.of(0, limit, new Sort(Direction.DESC, "occurredAt"));
+        final PageRequest pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "occurredAt"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
 

@@ -8,24 +8,24 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.Objects;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Objects;
 
 /**
  * Representation of an Action Id as a Json Object with link to the Action resource
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtActionId extends ResourceSupport {
+public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
     private long actionId;
 

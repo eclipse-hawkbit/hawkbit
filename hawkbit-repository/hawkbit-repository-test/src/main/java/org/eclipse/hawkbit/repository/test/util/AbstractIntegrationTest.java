@@ -112,7 +112,7 @@ import com.google.common.io.Files;
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
+    protected static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
 
