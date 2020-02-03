@@ -60,8 +60,8 @@ public final class DashboardMenu extends CustomComponent {
 
     private static final String ID = "dashboard-menu";
 
-    private static String LOGOUT_BASE;
     private static final String LOGIN_BASE = "/UI/login";
+    private final String logoutBase;
 
     private final VaadinMessageSource i18n;
 
@@ -92,7 +92,7 @@ public final class DashboardMenu extends CustomComponent {
         this.serverProperties = serverProperties;
         this.permissionService = permissionService;
         this.dashboardVaadinViews = dashboardVaadinViews;
-        LOGOUT_BASE = uiProperties.getLogout().getPath();
+        logoutBase = uiProperties.getLogout().getPath();
     }
 
     /**
@@ -217,8 +217,8 @@ public final class DashboardMenu extends CustomComponent {
         return settings;
     }
 
-    private static String generateLogoutUrl() {
-        final UriComponentsBuilder logout = ServletUriComponentsBuilder.fromCurrentContextPath().path(LOGOUT_BASE);
+    private String generateLogoutUrl() {
+        final UriComponentsBuilder logout = ServletUriComponentsBuilder.fromCurrentContextPath().path(logoutBase);
 
         UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> logout.queryParam("login",
                 UriComponentsBuilder.fromPath(LOGIN_BASE).queryParam("tenant", tenant).build().toUriString()));
