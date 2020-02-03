@@ -20,8 +20,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -75,7 +73,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -100,7 +97,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
@@ -735,8 +731,8 @@ public class SecurityManagedConfiguration {
                         .permitAll().anyRequest().authenticated().and()
                         // UI login / logout
                         .exceptionHandling()
-                        .authenticationEntryPoint(new LoginUrlWithParametersAuthenticationEntryPoint("/UI/login")).and()
-                        .logout().logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login/#/")).and().logout()
+                        .logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
             }
         }
 
@@ -820,23 +816,5 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     @Override
     public void destroy() {
         // not needed
-    }
-}
-
-/**
- * Keep given query parameters when redirecting the login url
- */
-class LoginUrlWithParametersAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
-
-    public LoginUrlWithParametersAuthenticationEntryPoint(String loginFormUrl) {
-        super(loginFormUrl);
-    }
-
-    @Override
-    protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) {
-        String requestQuery = request.getQueryString();
-        String redirect = super.determineUrlToUseForThisRequest(request, response, exception);
-        return UriComponentsBuilder.fromPath(redirect).replaceQuery(requestQuery).toUriString();
     }
 }

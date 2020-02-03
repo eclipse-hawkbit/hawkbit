@@ -15,7 +15,6 @@ package org.eclipse.hawkbit.ui.menu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.HawkbitServerProperties;
@@ -28,6 +27,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vaadin.server.FontAwesome;
@@ -60,7 +60,7 @@ public final class DashboardMenu extends CustomComponent {
 
     private static final String ID = "dashboard-menu";
 
-    private static final String LOGOUT_BASE = "/UI/logout";
+    private static String LOGOUT_BASE;
     private static final String LOGIN_BASE = "/UI/login";
 
     private final VaadinMessageSource i18n;
@@ -92,6 +92,7 @@ public final class DashboardMenu extends CustomComponent {
         this.serverProperties = serverProperties;
         this.permissionService = permissionService;
         this.dashboardVaadinViews = dashboardVaadinViews;
+        LOGOUT_BASE = uiProperties.getLogout().getPath();
     }
 
     /**
@@ -217,7 +218,7 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static String generateLogoutUrl() {
-        final UriComponentsBuilder logout = UriComponentsBuilder.fromPath(LOGOUT_BASE);
+        final UriComponentsBuilder logout = ServletUriComponentsBuilder.fromCurrentContextPath().path(LOGOUT_BASE);
 
         UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> logout.queryParam("login",
                 UriComponentsBuilder.fromPath(LOGIN_BASE).queryParam("tenant", tenant).build().toUriString()));
