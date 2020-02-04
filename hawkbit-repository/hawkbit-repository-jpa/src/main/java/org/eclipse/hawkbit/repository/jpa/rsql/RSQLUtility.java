@@ -31,6 +31,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.PluralJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
@@ -180,7 +181,7 @@ public final class RSQLUtility {
             query.distinct(true);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
-                    virtualPropertyReplacer, database);
+                    virtualPropertyReplacer, database, query);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (!CollectionUtils.isEmpty(accept)) {
@@ -211,6 +212,7 @@ public final class RSQLUtility {
 
         private final Root<T> root;
         private final CriteriaBuilder cb;
+        private final CriteriaQuery<?> query;
         private final Class<A> enumType;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
         private int level;
@@ -222,9 +224,11 @@ public final class RSQLUtility {
         private final Database database;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-                final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+                final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
+                final CriteriaQuery<?> query) {
             this.root = root;
             this.cb = cb;
+            this.query = query;
             this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
             simpleTypeConverter = new SimpleTypeConverter();
@@ -420,7 +424,8 @@ public final class RSQLUtility {
                 transformedValue.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
             }
 
-            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName, database);
+            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName, database,
+                    finalProperty);
         }
 
         // Exception squid:S2095 - see
@@ -484,8 +489,7 @@ public final class RSQLUtility {
             return value;
         }
 
-        private Object convertBooleanValue(final ComparisonNode node, final String value,
-                final Class<?> javaType) {
+        private Object convertBooleanValue(final ComparisonNode node, final String value, final Class<?> javaType) {
             try {
                 return simpleTypeConverter.convertIfNecessary(value, javaType);
             } catch (final TypeMismatchException e) {
@@ -533,7 +537,7 @@ public final class RSQLUtility {
 
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<String> values, final List<Object> transformedValues, final A enumField,
-                final Database database) {
+                final Database database, final String finalProperty) {
             // only 'equal' and 'notEqual' can handle transformed value like
             // enums. The JPA API cannot handle object types for greaterThan etc
             // methods.
@@ -548,19 +552,19 @@ public final class RSQLUtility {
             final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);
 
             final Predicate valuePredicate = addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath),
-                    transformedValues, transformedValue, value, database);
+                    transformedValues, transformedValue, value, database, finalProperty);
 
             return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
         }
 
         private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<Object> transformedValues, final Object transformedValue, final String value,
-                final Database database) {
+                final Database database, final String finalProperty) {
             switch (node.getOperator().getSymbol()) {
             case "==":
                 return getEqualToPredicate(transformedValue, fieldPath, database);
             case "!=":
-                return getNotEqualToPredicate(transformedValue, fieldPath, database);
+                return getNotEqualToPredicate(transformedValue, fieldPath, database, finalProperty);
             case "=gt=":
                 return cb.greaterThan(pathOfString(fieldPath), value);
             case "=ge=":
@@ -658,15 +662,34 @@ public final class RSQLUtility {
             return cb.equal(fieldPath, transformedValue);
         }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
-                final Database database) {
+                final Database database, final String finalProperty) {
             if (transformedValue instanceof String) {
                 if (StringUtils.isEmpty(transformedValue)) {
                     return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
                 }
 
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
-                return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
+
+                final Class<?> javaType = root.getJavaType();
+                final Subquery<?> subquery = query.subquery(javaType);
+                final Root subqueryRoot = subquery.from(javaType);
+
+                final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+                Path innerFieldPath = subqueryRoot;
+                for (int i = 0; i < split.length; i++) {
+                    innerFieldPath = innerFieldPath.get(split[i]);
+                    if (innerFieldPath instanceof Join) {
+                        subqueryRoot.join(split[i], JoinType.LEFT);
+                    }
+                }
+
+                subquery.select(subqueryRoot);
+                subquery.where(cb.and(cb.equal(root.get("id"), subqueryRoot.get("id")),
+                        cb.like(cb.upper(innerFieldPath), preFormattedValue.toUpperCase())));
+
+                return cb.not(cb.exists(subquery));
             }
 
             if (transformedValue == null) {
