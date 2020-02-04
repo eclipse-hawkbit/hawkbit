@@ -173,7 +173,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by tag name")
     public void testFilterByTag() {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 2);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
         assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 4);
@@ -187,7 +187,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by lastTargetQuery")
     public void testFilterByLastTargetQuery() throws InterruptedException {
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + target.getLastTargetQuery(), 1);
-        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getLastTargetQuery(), 1);
+        assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getLastTargetQuery(), 4);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target.getLastTargetQuery(), 0);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target2.getLastTargetQuery(), 1);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=gt=" + target.getLastTargetQuery(), 1);
