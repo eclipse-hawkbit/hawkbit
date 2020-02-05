@@ -8,14 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
@@ -26,6 +18,13 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import org.eclipse.hawkbit.ui.push.EventContainer;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Button which shows all notification in a popup.
@@ -116,7 +115,8 @@ public class NotificationUnreadButton extends Button {
     private void createNotification(final VerticalLayout notificationsLayout,
             final NotificationUnreadValue notificationUnreadValue) {
         final Label contentLabel = new Label(notificationUnreadValue.getUnreadNotifications() + " "
-                + i18n.getMessage(notificationUnreadValue.getUnreadNotificationMessageKey()));
+                + i18n.getMessage(notificationUnreadValue.getUnreadNotificationMessageKey(),
+                        notificationUnreadValue.getUnreadNotifications() > 1 ? "s" : ""));
         notificationsLayout.addComponent(contentLabel);
     }
 
