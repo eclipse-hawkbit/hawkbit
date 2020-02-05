@@ -176,7 +176,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
         assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
-        assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 5);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 0);
         assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 2);

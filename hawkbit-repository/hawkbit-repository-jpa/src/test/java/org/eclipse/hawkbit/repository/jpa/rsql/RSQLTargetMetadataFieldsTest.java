@@ -64,7 +64,7 @@ public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "==''", 1);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "!=''", 5);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "==1", 1);
-        assertRSQLQuery(TargetMetadataFields.VALUE.name() + "!=1", 4);
+        assertRSQLQuery(TargetMetadataFields.VALUE.name() + "!=1", 5);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "=in=(1,2)", 2);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "=out=(1,2)", 3);
     }
