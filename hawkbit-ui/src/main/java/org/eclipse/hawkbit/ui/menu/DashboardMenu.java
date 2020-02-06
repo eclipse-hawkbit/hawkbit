@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vaadin.server.FontAwesome;
@@ -217,7 +218,7 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private static String generateLogoutUrl() {
-        final UriComponentsBuilder logout = UriComponentsBuilder.fromPath(LOGOUT_BASE);
+        final UriComponentsBuilder logout = ServletUriComponentsBuilder.fromCurrentContextPath().path(LOGOUT_BASE);
 
         UserDetailsFormatter.getCurrentTenant().ifPresent(tenant -> logout.queryParam("login",
                 UriComponentsBuilder.fromPath(LOGIN_BASE).queryParam("tenant", tenant).build().toUriString()));
