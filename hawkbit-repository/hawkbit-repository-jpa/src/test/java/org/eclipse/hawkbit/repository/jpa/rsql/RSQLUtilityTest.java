@@ -25,6 +25,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Attribute;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -74,6 +75,11 @@ public class RSQLUtilityTest {
     private CriteriaQuery<SoftwareModule> criteriaQueryMock;
     @Mock
     private CriteriaBuilder criteriaBuilderMock;
+
+    @Mock
+    private Subquery<SoftwareModule> subqueryMock;
+    @Mock
+    private Root<SoftwareModule> subqueryRootMock;
 
     private final Database testDb = Database.H2;
 
@@ -213,14 +219,19 @@ public class RSQLUtilityTest {
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+        when(criteriaBuilderMock.exists(subqueryMock)).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.not(any(Expression.class))).thenReturn(mock(Predicate.class));
+
+        when(criteriaQueryMock.subquery(SoftwareModule.class)).thenReturn(subqueryMock);
+        when(subqueryMock.from(SoftwareModule.class)).thenReturn(subqueryRootMock);
+
         // test
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
         // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
-        verify(criteriaBuilderMock, times(1)).notLike(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("abc".toUpperCase()), eq('\\'));
+        verify(criteriaBuilderMock, times(1)).not(criteriaBuilderMock.exists(eq(subqueryMock)));
     }
 
     @Test
