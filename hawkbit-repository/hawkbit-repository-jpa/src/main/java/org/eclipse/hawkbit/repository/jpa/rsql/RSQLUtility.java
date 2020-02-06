@@ -367,7 +367,7 @@ public final class RSQLUtility {
          *            dot notated field path
          * @return the Path for a field
          */
-        private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
+        private Path<Object> getFieldPath(final A enumField, final String finalProperty, final ComparisonNode node) {
             Path<Object> fieldPath = null;
             final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
 
@@ -379,6 +379,10 @@ public final class RSQLUtility {
 
                 final String fieldNameSplit = split[i];
                 fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
+                // join is not necessary in this case
+                if (node.getOperator().getSymbol().equals("!=")) {
+                    return fieldPath;
+                }
                 if (fieldPath instanceof PluralJoin) {
                     final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
                     final From<?, Object> joinParent = join.getParent();
@@ -418,7 +422,7 @@ public final class RSQLUtility {
 
             final List<String> values = node.getArguments();
             final List<Object> transformedValue = new ArrayList<>();
-            final Path<Object> fieldPath = getFieldPath(fieldName, finalProperty);
+            final Path<Object> fieldPath = getFieldPath(fieldName, finalProperty, node);
 
             for (final String value : values) {
                 transformedValue.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
