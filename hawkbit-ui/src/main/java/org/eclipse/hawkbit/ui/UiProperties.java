@@ -34,8 +34,6 @@ public class UiProperties implements Serializable {
 
     private final Login login = new Login();
 
-    private final Logout logout = new Logout();
-
     private final Demo demo = new Demo();
 
     private final Event event = new Event();
@@ -385,24 +383,6 @@ public class UiProperties implements Serializable {
     }
 
     /**
-     * Configuration of logout.
-     *
-     */
-    public static class Logout implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private String path = "/UI/logout";
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path){
-            this.path = path;
-        }
-    }
-
-    /**
      * Configuration of the UI event bus.
      */
     public static class Event implements Serializable {
@@ -447,10 +427,6 @@ public class UiProperties implements Serializable {
 
     public Login getLogin() {
         return login;
-    }
-
-    public Logout getLogout() {
-        return logout;
     }
 
     public Event getEvent() {
