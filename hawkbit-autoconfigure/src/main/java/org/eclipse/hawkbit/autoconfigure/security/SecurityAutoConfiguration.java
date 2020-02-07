@@ -22,6 +22,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for security.
@@ -52,9 +60,9 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Creates the auditore aware.
+     * Creates the auditor aware.
      * 
-     * @return the spring security auditore aware
+     * @return the spring security auditor aware
      */
     @Bean
     @ConditionalOnMissingBean
@@ -80,6 +88,44 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public SecurityTokenGenerator securityTokenGenerator() {
         return new SecurityTokenGenerator();
+    }
+
+    /**
+     * @return {@link LogoutHandler} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler();
+    }
+
+    /**
+     * @return {@link LogoutHandler} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public LogoutHandler logoutHandler() {
+        return new SecurityContextLogoutHandler();
+    }
+
+    /**
+     * @return {@link LogoutSuccessHandler} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public LogoutSuccessHandler logoutSuccessHandler() {
+        final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+        simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
+        return simpleUrlLogoutSuccessHandler;
+    }
+
+    /**
+     * @return {@link AuthenticationEntryPoint}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new LoginUrlAuthenticationEntryPoint("/UI/login");
     }
 
 }

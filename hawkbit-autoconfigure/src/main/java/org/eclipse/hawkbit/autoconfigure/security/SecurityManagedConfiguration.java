@@ -20,8 +20,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -75,7 +73,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -84,12 +81,12 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -100,7 +97,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
@@ -613,13 +609,20 @@ public class SecurityManagedConfiguration {
         private final VaadinUrlAuthenticationSuccessHandler handler;
 
         @Autowired(required = false)
-        private AuthenticationSuccessHandler oidcAuthenticationSuccessHandler;
-
-        @Autowired(required = false)
-        private LogoutHandler oidcLogoutHandler;
-
-        @Autowired(required = false)
         private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService;
+
+        @Autowired(required = false)
+        private AuthenticationEntryPoint authenticationEntryPoint;
+
+        @Autowired(required = false)
+        private AuthenticationSuccessHandler authenticationSuccessHandler;
+
+        @Autowired
+        private LogoutHandler logoutHandler;
+
+        @Autowired
+        private LogoutSuccessHandler logoutSuccessHandler;
+
 
         public UISecurityConfigurationAdapter(final VaadinRedirectStrategy redirectStrategy) {
             handler = new TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler();
@@ -689,14 +692,13 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final boolean enableOidc = oidcUserService != null && oidcAuthenticationSuccessHandler != null
-                    && oidcLogoutHandler != null;
+            final boolean enableOidc = oidcUserService != null && authenticationSuccessHandler != null;
 
             // workaround regex: we need to exclude the URL /UI/HEARTBEAT here
             // because we bound the vaadin application to /UI and not to root,
             // described in vaadin-forum:
             // https://vaadin.com/forum#!/thread/3200565.
-            HttpSecurity httpSec = null;
+            HttpSecurity httpSec;
             if (enableOidc) {
                 httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/(UI|oauth2).*$");
             } else {
@@ -717,27 +719,23 @@ public class SecurityManagedConfiguration {
                 httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
             }
 
-            if (enableOidc) {
-                httpSec.authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**")
-                        .permitAll().anyRequest().authenticated().and()
-                        // OIDC
-                        .oauth2Login().userInfoEndpoint().oidcUserService(oidcUserService).and()
-                        .successHandler(oidcAuthenticationSuccessHandler).and().oauth2Client().and()
-                        // logout
-                        .logout().logoutUrl("/UI/logout").addLogoutHandler(oidcLogoutHandler).logoutSuccessUrl("/");
-            } else {
-                final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-                simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
+            // UI
+            httpSec.authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**").permitAll()
+                    .anyRequest().authenticated();
 
-                httpSec
-                        // UI
-                        .authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**")
-                        .permitAll().anyRequest().authenticated().and()
-                        // UI login / logout
-                        .exceptionHandling()
-                        .authenticationEntryPoint(new LoginUrlWithParametersAuthenticationEntryPoint("/UI/login")).and()
-                        .logout().logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
+            if (enableOidc) {
+                // OIDC
+                httpSec.oauth2Login().userInfoEndpoint().oidcUserService(oidcUserService).and()
+                        .successHandler(authenticationSuccessHandler).and().oauth2Client();
+            } else if (authenticationEntryPoint != null) {
+                // UI login / Basic auth
+                httpSec.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
             }
+
+            // UI logout
+            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
+                    .logoutSuccessHandler(logoutSuccessHandler);
+
         }
 
         @Override
@@ -821,22 +819,5 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     public void destroy() {
         // not needed
     }
-}
 
-/**
- * Keep given query parameters when redirecting the login url
- */
-class LoginUrlWithParametersAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
-
-    public LoginUrlWithParametersAuthenticationEntryPoint(String loginFormUrl) {
-        super(loginFormUrl);
-    }
-
-    @Override
-    protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) {
-        String requestQuery = request.getQueryString();
-        String redirect = super.determineUrlToUseForThisRequest(request, response, exception);
-        return UriComponentsBuilder.fromPath(redirect).replaceQuery(requestQuery).toUriString();
-    }
 }

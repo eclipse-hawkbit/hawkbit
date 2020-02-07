@@ -61,7 +61,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -76,14 +78,21 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OidcUserManagementAutoConfiguration {
 
     /**
-     * @return the oauth2 user details service to load a user from oidc user
-     *         manager
+     * @return the oauth2 user details service to load a user from oidc user manager
      */
     @Bean
     @ConditionalOnMissingBean
     public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserDetailsService(
             final JwtAuthoritiesExtractor extractor) {
         return new JwtAuthoritiesOidcUserService(extractor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public LogoutSuccessHandler oidcAuthenticationEntryPoint() {
+        SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+        logoutSuccessHandler.setDefaultTargetUrl("/");
+        return logoutSuccessHandler;
     }
 
     /**
@@ -105,8 +114,8 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     /**
-     * @return a jwt authorities extractor which interprets the roles of a user
-     *         as their authorities.
+     * @return a jwt authorities extractor which interprets the roles of a user as
+     *         their authorities.
      */
     @Bean
     @ConditionalOnMissingBean
