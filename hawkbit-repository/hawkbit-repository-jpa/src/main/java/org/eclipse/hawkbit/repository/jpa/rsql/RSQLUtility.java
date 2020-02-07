@@ -576,7 +576,7 @@ public final class RSQLUtility {
             case "=in=":
                 return getInPredicate(transformedValues, fieldPath);
             case "=out=":
-                return getOutPredicate(transformedValues, fieldPath);
+                return getOutPredicate(transformedValues, finalProperty, enumField);
             default:
                 throw new RSQLParameterSyntaxException("operator symbol {" + node.getOperator().getSymbol()
                         + "} is either not supported or not implemented");
@@ -598,19 +598,39 @@ public final class RSQLUtility {
             }
         }
 
-        private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+        private Predicate getOutPredicate(final List<Object> transformedValues, final String finalProperty,
+                final A enumField) {
             final List<String> outParams = new ArrayList<>();
             for (final Object param : transformedValues) {
                 if (param instanceof String) {
                     outParams.add(((String) param).toUpperCase());
                 }
             }
-            if (!outParams.isEmpty()) {
-                return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
-            } else {
-                return cb.not(fieldPath.in(transformedValues));
 
+            final Class<?> javaType = root.getJavaType();
+            final Subquery<?> subquery = query.subquery(javaType);
+            final Root subqueryRoot = subquery.from(javaType);
+
+            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final boolean isMapKeyField = enumField.isMap();
+            final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
+
+            subquery.select(subqueryRoot);
+            final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, isMapKeyField,
+                    enumField);
+            if (!outParams.isEmpty()) {
+                subquery.where(cb.and(
+                        cb.equal(root.get(enumField.identifierFieldName()),
+                                subqueryRoot.get(enumField.identifierFieldName())),
+                        cb.upper(expressionToCompare).in(outParams)));
+            } else {
+                subquery.where(cb.and(
+                        cb.equal(root.get(enumField.identifierFieldName()),
+                                subqueryRoot.get(enumField.identifierFieldName())),
+                        expressionToCompare.in(transformedValues)));
             }
+
+            return cb.not(cb.exists(subquery));
         }
 
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
@@ -677,23 +697,16 @@ public final class RSQLUtility {
                 final Root subqueryRoot = subquery.from(javaType);
 
                 final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-                Path innerFieldPath = subqueryRoot;
-                boolean isMapKeyField = false;
-                for (int i = 0; i < split.length; i++) {
-                    isMapKeyField = enumField.isMap() && i == (split.length - 1);
-                    if (isMapKeyField) {
-                        break;
-                    }
-                    innerFieldPath = innerFieldPath.get(split[i]);
-                    if (innerFieldPath instanceof Join) {
-                        innerFieldPath = subqueryRoot.join(split[i], JoinType.LEFT);
-                    }
-                }
+                final boolean isMapKeyField = enumField.isMap();
+                final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
 
                 subquery.select(subqueryRoot);
-                final Predicate subqueryPredicate = createNotEqualSubqueryPredicate(enumField, subqueryRoot,
-                        isMapKeyField, innerFieldPath, preFormattedValue);
-                subquery.where(subqueryPredicate);
+                final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, isMapKeyField,
+                        enumField);
+                subquery.where(cb.and(
+                        cb.equal(root.get(enumField.identifierFieldName()),
+                                subqueryRoot.get(enumField.identifierFieldName())),
+                        cb.like(cb.upper(expressionToCompare), preFormattedValue.toUpperCase())));
 
                 return cb.not(cb.exists(subquery));
             }
@@ -705,29 +718,35 @@ public final class RSQLUtility {
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        private Predicate createNotEqualSubqueryPredicate(final A enumField, final Root subqueryRoot,
-                final boolean isMapKeyField, final Path innerFieldPath, final String preFormattedValue) {
-
-            Expression<String> expressionToCompare;
+        private Expression<String> getExpressionToCompare(final Path innerFieldPath, final boolean isMapKeyField,
+                final A enumField) {
             if (!isMapKeyField) {
-                expressionToCompare = innerFieldPath;
-            } else {
-                if (innerFieldPath instanceof MapJoin) {
-                    // Currently we support only string key .So below cast
-                    // is safe.
-                    expressionToCompare = (Expression<String>) (((MapJoin<?, ?, ?>) innerFieldPath).value());
-                } else {
-                    final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
-                            .orElseThrow(() -> new UnsupportedOperationException(
-                                    "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
-                    expressionToCompare = innerFieldPath.get(valueFieldName);
+                return pathOfString(innerFieldPath);
+            }
+            if (innerFieldPath instanceof MapJoin) {
+                // Currently we support only string key .So below cast
+                // is safe.
+                return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(innerFieldPath)).value());
+            }
+            final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
+                    .orElseThrow(() -> new UnsupportedOperationException(
+                            "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
+            return pathOfString(innerFieldPath).get(valueFieldName);
+        }
+
+        private Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
+                final boolean isMapKeyField) {
+            Path<?> innerFieldPath = subqueryRoot;
+            for (int i = 0; i < split.length; i++) {
+                if (isMapKeyField && i == (split.length - 1)) {
+                    break;
+                }
+                innerFieldPath = innerFieldPath.get(split[i]);
+                if (innerFieldPath instanceof Join) {
+                    innerFieldPath = subqueryRoot.join(split[i], JoinType.LEFT);
                 }
             }
-            return cb.and(
-                    cb.equal(root.get(enumField.identifierFieldName()),
-                            subqueryRoot.get(enumField.identifierFieldName())),
-                    cb.like(cb.upper(expressionToCompare), preFormattedValue.toUpperCase()));
+            return innerFieldPath;
         }
 
         private static String escapeValueToSQL(final String transformedValue, final Database database,
