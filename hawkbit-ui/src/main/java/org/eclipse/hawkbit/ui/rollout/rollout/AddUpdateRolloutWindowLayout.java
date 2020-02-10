@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +57,6 @@ import org.eclipse.hawkbit.ui.management.miscs.AbstractActionTypeOptionGroupLayo
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart;
-import org.eclipse.hawkbit.ui.tenantconfiguration.repository.MultiAssignmentsConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -96,7 +98,7 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Rollout add or update popup layout.
  */
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2160"})
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2160" })
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 1L;
@@ -187,7 +189,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextField rolloutWeight;
 
-    private final MultiAssignmentsConfigurationItem multiAssignmentsConfigurationItem;
+    private final transient TenantConfigurationManagement configManagement;
 
     private final transient RolloutGroupConditions defaultRolloutGroupConditions;
 
@@ -199,7 +201,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement configManagement,
             final RepositoryProperties repositoryProperties) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
@@ -213,8 +215,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(tenantConfigurationManagement,
-                this.i18n, uiProperties, repositoryProperties);
+        this.configManagement = configManagement;
 
         defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement);
@@ -286,8 +287,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(rollout.getId())
                     .name(rolloutName.getValue()).description(description.getValue()).set(distributionSetId)
                     .actionType(getActionType()).forcedTime(getForcedTimeStamp());
-            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
-                rolloutUpdate.weight(Integer.valueOf(rolloutWeight.getValue()));
+            if (isMultiAssignmentEnabled()) {
+                rolloutUpdate.weight(Integer.valueOf(rolloutWeight.getValue().replace(",", "")));
             }
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
                 rolloutUpdate.startAt(System.currentTimeMillis());
@@ -342,10 +343,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
             final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(rolloutName.getValue())
-                    .description(description.getValue()).set(distributionId)
-                    .targetFilterQuery(getTargetFilterQuery()).actionType(getActionType())
-                    .forcedTime(getForcedTimeStamp());
-            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+                    .description(description.getValue()).set(distributionId).targetFilterQuery(getTargetFilterQuery())
+                    .actionType(getActionType()).forcedTime(getForcedTimeStamp());
+            if (isMultiAssignmentEnabled()) {
                 rolloutCreate.weight(Integer.valueOf(rolloutWeight.getValue().replace(",", "")));
             }
             if (AutoStartOptionGroupLayout.AutoStartOption.AUTO_START == getAutoStartOption()) {
@@ -428,11 +428,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         removeComponent(rolloutWeight);
         removeComponent(0, 3);
         rolloutWeight.removeAllValidators();
-        if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+        if (isMultiAssignmentEnabled()) {
             addComponent(getMandatoryLabel(WEIGHT_TEXTFIELD), 0, 3);
             addComponent(rolloutWeight, 1, 3);
             rolloutWeight.addValidator(nullValidator);
             rolloutWeight.addValidator(new WeightFieldValidator());
+            rolloutWeight.setValue(String.valueOf(configManagement
+                    .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue()));
         }
     }
 
@@ -1071,9 +1073,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             rolloutName.setValue(i18n.getMessage("textfield.rollout.copied.name", rollout.getName()));
             populateTargetFilterQuery(rollout);
 
-            if (multiAssignmentsConfigurationItem.isConfigEnabled()) {
+            if (isMultiAssignmentEnabled()) {
                 final Optional<Integer> weight = rollout.getWeight();
-                rolloutWeight.setValue(String.valueOf(weight.isPresent() ? weight.get().intValue() : ""));
+                rolloutWeight.setValue(weight.isPresent() ? String.valueOf(weight.get().intValue()) : "");
             }
 
             defineGroupsLayout.populateByRollout(rollout);
@@ -1098,7 +1100,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             groupsDefinitionTabs.setVisible(false);
 
             final Optional<Integer> weight = rollout.getWeight();
-            rolloutWeight.setValue(String.valueOf(weight.isPresent() ? weight.get().intValue() : ""));
+            if (isMultiAssignmentEnabled()) {
+                if (weight.isPresent()) {
+                    rolloutWeight.setValue(String.valueOf(weight.get().intValue()));
+                } else {
+                    rolloutWeight.setValue(String.valueOf(configManagement
+                            .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue()));
+                }
+            }
 
             targetFilterQuery.setValue(rollout.getTargetFilterQuery());
             removeComponent(1, 2);
@@ -1188,5 +1197,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         private String getValue(final VaadinMessageSource i18n) {
             return i18n.getMessage(value);
         }
+    }
+
+    private boolean isMultiAssignmentEnabled() {
+        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 }

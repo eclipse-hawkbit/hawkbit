@@ -8,11 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -48,6 +53,8 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     private transient RolloutManagement rolloutManagement;
 
     private transient RolloutUIState rolloutUIState;
+
+    private transient TenantConfigurationManagement configManagement;
 
     /**
      * Parametric Constructor.
@@ -88,19 +95,43 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
-        final Slice<Rollout> rolloutBeans;
+        final List<ProxyRollout> rolloutBeans;
         final PageRequest pageRequest = PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE,
                 SPUIDefinitions.PAGE_SIZE, sort);
         if (StringUtils.isEmpty(searchText)) {
-            rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(pageRequest, false);
+            rolloutBeans = validateWeightWithMultiAssignments(
+                    getRolloutManagement().findAllWithDetailedStatus(pageRequest, false));
         } else {
-            rolloutBeans = getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText, false);
+            rolloutBeans = validateWeightWithMultiAssignments(
+                    getRolloutManagement().findByFiltersWithDetailedStatus(pageRequest, searchText, false));
         }
-        return getProxyRolloutList(rolloutBeans);
+        return rolloutBeans;
     }
 
     private static List<ProxyRollout> getProxyRolloutList(final Slice<Rollout> rolloutBeans) {
         return rolloutBeans.getContent().stream().map(RolloutBeanQuery::createProxy).collect(Collectors.toList());
+    }
+
+    private List<ProxyRollout> fillDefaultWeightForRolloutsAddedInSingleAssignment(final Slice<Rollout> rollouts) {
+
+        final List<ProxyRollout> finalProxyRollouts = new ArrayList<>();
+        for (final Rollout rollout : rollouts) {
+            final int defaultWeight = rollout.getWeight()
+                    .orElse(getTenantConfigurationManagement()
+                            .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue());
+            final ProxyRollout proxyAction = createProxy(rollout);
+            if (proxyAction.getWeight() == null) {
+                proxyAction.setWeight(defaultWeight);
+            }
+            finalProxyRollouts.add(proxyAction);
+        }
+
+        return finalProxyRollouts;
+    }
+
+    private List<ProxyRollout> validateWeightWithMultiAssignments(final Slice<Rollout> rollouts) {
+        return isMultiAssignmentEnabled() ? fillDefaultWeightForRolloutsAddedInSingleAssignment(rollouts)
+                : getProxyRolloutList(rollouts);
     }
 
     private static ProxyRollout createProxy(final Rollout rollout) {
@@ -161,4 +192,15 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return rolloutUIState;
     }
 
+    private TenantConfigurationManagement getTenantConfigurationManagement() {
+        if (null == configManagement) {
+            configManagement = SpringContextHelper.getBean(TenantConfigurationManagement.class);
+        }
+        return configManagement;
+    }
+
+    private boolean isMultiAssignmentEnabled() {
+        return getTenantConfigurationManagement().getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class)
+                .getValue();
+    }
 }

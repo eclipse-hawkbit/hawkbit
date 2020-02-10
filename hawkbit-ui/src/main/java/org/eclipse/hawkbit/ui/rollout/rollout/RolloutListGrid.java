@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.ui.rollout.DistributionBarHelper.getTooltip;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -32,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -44,6 +47,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractHtmlLabelConvert
 import org.eclipse.hawkbit.ui.customrenderers.renderers.GridButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
+import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.push.RolloutChangeEventContainer;
 import org.eclipse.hawkbit.ui.push.RolloutDeletedEventContainer;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangedEvent;
@@ -100,6 +104,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
     private final transient RolloutGroupManagement rolloutGroupManagement;
 
     private final transient TenantConfigurationManagement tenantConfigManagement;
+
+    private final transient SystemSecurityContext systemSecurityContext;
 
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
@@ -165,11 +171,13 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement,
+            final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.tenantConfigManagement = tenantConfigManagement;
+        this.systemSecurityContext = systemSecurityContext;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
@@ -197,6 +205,17 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             break;
         default:
             break;
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.UI)
+    void onSaveTenantConfigEvent(final ManagementUIEvent tenantConfigSaveEvent) {
+        if (tenantConfigSaveEvent == ManagementUIEvent.SAVE_TENANT_CONFIGURATION && isMultiAssignmentEnabled()) {
+            addContainerProperties();
+            setColumnProperties();
+            setColumnExpandRatio();
+            getColumn(SPUILabelDefinitions.VAR_WEIGHT).setHeaderCaption(i18n.getMessage("header.weight"));
+            refreshContainer();
         }
     }
 
@@ -302,6 +321,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, true,
                 false);
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_WEIGHT, Integer.class, null,
+                true, false);
     }
 
     @Override
@@ -329,7 +350,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_RUN).setMaximumWidth(25);
 
         getColumn(VIRT_PROP_APPROVE).setMinimumWidth(25);
-        getColumn(VIRT_PROP_APPROVE).setMaximumWidth(25);
+        getColumn(VIRT_PROP_APPROVE).setMaximumWidth(70);
 
         getColumn(VIRT_PROP_PAUSE).setMinimumWidth(25);
         getColumn(VIRT_PROP_PAUSE).setMaximumWidth(25);
@@ -344,6 +365,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(VIRT_PROP_DELETE).setMaximumWidth(40);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
+
+        if (isMultiAssignmentEnabled()) {
+            getColumn(SPUILabelDefinitions.VAR_WEIGHT).setMinimumWidth(50);
+            getColumn(SPUILabelDefinitions.VAR_WEIGHT).setMaximumWidth(60);
+        }
     }
 
     @Override
@@ -365,6 +391,10 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
                 .setHeaderCaption(i18n.getMessage("header.detail.status"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
+        if (isMultiAssignmentEnabled()) {
+            getColumn(SPUILabelDefinitions.VAR_WEIGHT).setHeaderCaption(i18n.getMessage("header.weight"));
+        }
 
         getColumn(VIRT_PROP_RUN).setHeaderCaption(i18n.getMessage("header.action.run"));
         getColumn(VIRT_PROP_APPROVE).setHeaderCaption(i18n.getMessage("header.action.approve"));
@@ -389,7 +419,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     @Override
     protected void setColumnProperties() {
-
         final List<String> columnsToShowInOrder = Arrays.asList(ROLLOUT_RENDERER_DATA,
                 SPUILabelDefinitions.VAR_DIST_NAME_VERSION, SPUILabelDefinitions.VAR_STATUS,
                 SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS,
@@ -399,7 +428,16 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 SPUILabelDefinitions.VAR_MODIFIED_BY, SPUILabelDefinitions.VAR_APPROVAL_DECIDED_BY,
                 SPUILabelDefinitions.VAR_APPROVAL_REMARK, SPUILabelDefinitions.VAR_DESC);
 
-        setColumns(columnsToShowInOrder.toArray());
+        final List<String> addWeightColumnToShowInOrder = new ArrayList<>();
+        addWeightColumnToShowInOrder.addAll(columnsToShowInOrder);
+
+        if (isMultiAssignmentEnabled()) {
+            addWeightColumnToShowInOrder.add(6, SPUILabelDefinitions.VAR_WEIGHT);
+            setColumns(addWeightColumnToShowInOrder.toArray());
+        } else {
+            setColumns(columnsToShowInOrder.toArray());
+        }
+
         setCellStyleGenerator(alignGenerator);
     }
 
@@ -875,4 +913,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         setColumns(modifiableColumnsList.toArray());
     }
 
+    private boolean isMultiAssignmentEnabled() {
+        return tenantConfigManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+    }
 }

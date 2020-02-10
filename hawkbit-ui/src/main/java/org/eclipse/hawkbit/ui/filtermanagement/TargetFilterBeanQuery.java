@@ -8,11 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -26,6 +31,7 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -44,6 +50,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     private String searchText = null;
     private transient Page<TargetFilterQuery> firstPageTargetFilter = null;
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private transient TenantConfigurationManagement configManagement;
 
     /**
      *
@@ -79,19 +86,23 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
 
     @Override
     protected List<ProxyTargetFilter> loadBeans(final int startIndex, final int count) {
-        Slice<TargetFilterQuery> targetFilterQuery;
-        final List<ProxyTargetFilter> proxyTargetFilter = new ArrayList<>();
+        List<ProxyTargetFilter> targetFilterQuery;
         if (startIndex == 0 && firstPageTargetFilter != null) {
-            targetFilterQuery = firstPageTargetFilter;
+            targetFilterQuery = validateWeightWithMultiAssignments(firstPageTargetFilter);
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
-            targetFilterQuery = getTargetFilterQueryManagement()
-                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetFilterQuery = validateWeightWithMultiAssignments(getTargetFilterQueryManagement()
+                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort)));
         } else {
-            targetFilterQuery = getTargetFilterQueryManagement().findByName(
+            targetFilterQuery = validateWeightWithMultiAssignments(getTargetFilterQueryManagement().findByName(
                     PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    searchText);
+                    searchText));
         }
+        return targetFilterQuery;
+    }
+
+    private static List<ProxyTargetFilter> createProxyTargetFilters(final Slice<TargetFilterQuery> targetFilterQuery) {
+        final List<ProxyTargetFilter> proxyTargetFilter = new ArrayList<>();
         for (final TargetFilterQuery tarFilterQuery : targetFilterQuery) {
             final ProxyTargetFilter proxyTarFilter = new ProxyTargetFilter();
             proxyTarFilter.setName(tarFilterQuery.getName());
@@ -100,6 +111,9 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(tarFilterQuery));
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
             proxyTarFilter.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(tarFilterQuery));
+            proxyTarFilter.setAutoAssignWeight(
+                    tarFilterQuery.getAutoAssignWeight().isPresent() ? tarFilterQuery.getAutoAssignWeight().get()
+                            : null);
             proxyTarFilter.setQuery(tarFilterQuery.getQuery());
 
             final DistributionSet distributionSet = tarFilterQuery.getAutoAssignDistributionSet();
@@ -115,6 +129,32 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTargetFilter.add(proxyTarFilter);
         }
         return proxyTargetFilter;
+    }
+
+    private List<ProxyTargetFilter> fillDefaultWeightForTFQAddedInSingleAssignment(
+            final Slice<TargetFilterQuery> targetQueryFilters) {
+
+        final List<ProxyTargetFilter> finalProxyTargetFilters = new ArrayList<>();
+        for (final TargetFilterQuery targetQueryFilter : targetQueryFilters) {
+
+            final int defaultWeight = targetQueryFilter.getAutoAssignWeight().orElse(getTenantConfigurationManagement()
+                    .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue());
+
+            final ProxyTargetFilter proxyTargetFilter = createProxyTargetFilters(
+                    new SliceImpl<>(Arrays.asList(targetQueryFilter))).get(0);
+            if (proxyTargetFilter.getAutoAssignWeight() == null) {
+                proxyTargetFilter.setAutoAssignWeight(defaultWeight);
+            }
+            finalProxyTargetFilters.add(proxyTargetFilter);
+        }
+
+        return finalProxyTargetFilters;
+    }
+
+    private List<ProxyTargetFilter> validateWeightWithMultiAssignments(
+            final Slice<TargetFilterQuery> targetQueryFilters) {
+        return isMultiAssignmentEnabled() ? fillDefaultWeightForTFQAddedInSingleAssignment(targetQueryFilters)
+                : createProxyTargetFilters(targetQueryFilters);
     }
 
     @Override
@@ -149,4 +189,15 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         return targetFilterQueryManagement;
     }
 
+    private TenantConfigurationManagement getTenantConfigurationManagement() {
+        if (null == configManagement) {
+            configManagement = SpringContextHelper.getBean(TenantConfigurationManagement.class);
+        }
+        return configManagement;
+    }
+
+    private boolean isMultiAssignmentEnabled() {
+        return getTenantConfigurationManagement().getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class)
+                .getValue();
+    }
 }

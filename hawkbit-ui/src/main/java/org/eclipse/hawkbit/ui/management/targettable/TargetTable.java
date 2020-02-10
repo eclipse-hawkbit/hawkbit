@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
@@ -41,8 +42,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -121,7 +120,6 @@ public class TargetTable extends AbstractTable<Target> {
     private final transient TargetTagManagement tagManagement;
     private final transient DeploymentManagement deploymentManagement;
     private final transient TenantConfigurationManagement configManagement;
-    private final transient SystemSecurityContext systemSecurityContext;
 
     private final ManagementViewClientCriterion managementViewClientCriterion;
     private final ManagementUIState managementUIState;
@@ -139,7 +137,7 @@ public class TargetTable extends AbstractTable<Target> {
             final SpPermissionChecker permChecker, final ManagementViewClientCriterion managementViewClientCriterion,
             final DistributionSetManagement distributionSetManagement, final TargetTagManagement tagManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties) {
+            final UiProperties uiProperties) {
         super(eventBus, i18n, notification, permChecker);
         this.targetManagement = targetManagement;
         this.managementViewClientCriterion = managementViewClientCriterion;
@@ -152,7 +150,6 @@ public class TargetTable extends AbstractTable<Target> {
         this.actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         this.maintenanceWindowLayout = new MaintenanceWindowLayout(i18n);
         this.weightLayout = new WeightLayout(i18n, saveButtonToggle(), maintenanceWindowLayout);
-        this.systemSecurityContext = systemSecurityContext;
 
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
         addNewContainerDS();
@@ -914,7 +911,7 @@ public class TargetTable extends AbstractTable<Target> {
                         getEventBus(), getI18n(), this, isMultiAssignmentEnabled(), weightLayout.getWeightField());
             }
         }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
-                uiProperties, isMultiAssignmentEnabled(), weightLayout),
+                uiProperties, isMultiAssignmentEnabled(), weightLayout, configManagement),
                 UIComponentIdProvider.DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID);
 
         if (isMultiAssignmentEnabled()) {
@@ -988,7 +985,6 @@ public class TargetTable extends AbstractTable<Target> {
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return systemSecurityContext.runAsSystem(() -> configManagement
-                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 }

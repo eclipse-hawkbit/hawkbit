@@ -25,19 +25,18 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * {@link WeightLayout} defines UI layout that is used to specify the
  * weight(priority) while assigning distribution set(s) to the target(s).
  */
-public class WeightLayout extends VerticalLayout {
+public class WeightLayout extends HorizontalLayout {
     private static final long serialVersionUID = 1L;
 
     private final MaintenanceWindowLayout maintenanceWindowLayout;
     private final VaadinMessageSource i18n;
-    private final Consumer<Boolean> saveButtonToggle;
+    private final transient Consumer<Boolean> saveButtonToggle;
     private TextField weightField;
     private Label weightLabel;
 
@@ -63,11 +62,9 @@ public class WeightLayout extends VerticalLayout {
         createWeightField();
         createWeightLabel();
         final HorizontalLayout weightContainer = new HorizontalLayout();
-        weightContainer.addComponent(weightField);
         weightContainer.addComponent(weightLabel);
+        weightContainer.addComponent(weightField);
         addComponent(weightContainer);
-
-        // should a seperate ID be defined like in the other layouts??
     }
 
     /**
@@ -80,7 +77,7 @@ public class WeightLayout extends VerticalLayout {
     }
 
     private TextField createWeightField() {
-        weightField = new TextFieldBuilder(32).prompt("0-1000").id(UIComponentIdProvider.ROLLOUT_WEIGHT_FIELD_ID)
+        weightField = new TextFieldBuilder(32).id(UIComponentIdProvider.CONFIRMATION_WINDOW_WEIGHT_FIELD_ID)
                 .buildTextComponent();
         weightField.setConverter(new StringToIntegerConverter());
         weightField.setStyleName("dist-window-weight-textfield");
@@ -105,7 +102,7 @@ public class WeightLayout extends VerticalLayout {
     }
 
     private boolean onWeightChange(final TextChangeEvent event) {
-        if (event.getText().isEmpty() || event.getText().matches("^\\D*$")) {
+        if (event.getText().isEmpty() || !event.getText().replace(",", "").matches("^[- 0-9][0-9]*$")) {
             return false;
         } else if (checkWeightValue(event.getText())) {
             weightField.setValue(event.getText());

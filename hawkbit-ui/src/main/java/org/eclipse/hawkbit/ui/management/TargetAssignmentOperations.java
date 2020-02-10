@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -205,7 +208,7 @@ public final class TargetAssignmentOperations {
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final Consumer<Boolean> saveButtonToggle,
             final VaadinMessageSource i18n, final UiProperties uiProperties, final boolean isMultiAssigmentsEnabled,
-            final WeightLayout weightLayout) {
+            final WeightLayout weightLayout, final TenantConfigurationManagement configManagement) {
 
         final CheckBox maintenanceWindowControl = maintenanceWindowControl(i18n, maintenanceWindowLayout,
                 saveButtonToggle, isMultiAssigmentsEnabled, weightLayout);
@@ -217,7 +220,7 @@ public final class TargetAssignmentOperations {
                 weightLayout.getWeightField());
         addValueChangeListener(actionTypeOptionGroupLayout, maintenanceWindowControl, maintenanceWindowHelpLink);
         return createAssignmentTab(actionTypeOptionGroupLayout, layout, maintenanceWindowLayout,
-                isMultiAssigmentsEnabled, weightLayout);
+                isMultiAssigmentsEnabled, weightLayout, configManagement);
     }
 
     private static HorizontalLayout createHorizontalLayout(final CheckBox maintenanceWindowControl,
@@ -228,25 +231,18 @@ public final class TargetAssignmentOperations {
         return layout;
     }
 
-    private static HorizontalLayout createHorizontalLayout(
-            final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout, final WeightLayout weightLayout) {
-        final HorizontalLayout layout = new HorizontalLayout();
-        layout.addComponent(actionTypeOptionGroupLayout);
-        layout.addComponent(weightLayout);
-        return layout;
-    }
-
     private static ConfirmationTab createAssignmentTab(
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout, final HorizontalLayout layout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final boolean isMultiAssigmentsEnabled,
-            final WeightLayout weightLayout) {
+            final WeightLayout weightLayout, final TenantConfigurationManagement configManagement) {
         final ConfirmationTab assignmentTab = new ConfirmationTab();
         if (isMultiAssigmentsEnabled) {
             weightLayout.getWeightField().clear();
-            assignmentTab.addComponent(createHorizontalLayout(actionTypeOptionGroupLayout, weightLayout));
-        } else {
-            assignmentTab.addComponent(actionTypeOptionGroupLayout);
+            weightLayout.getWeightField().setValue(String.valueOf(configManagement
+                    .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue()));
+            assignmentTab.addComponent(weightLayout);
         }
+        assignmentTab.addComponent(actionTypeOptionGroupLayout);
         assignmentTab.addComponent(layout);
         assignmentTab.addComponent(maintenanceWindowLayout);
         return assignmentTab;

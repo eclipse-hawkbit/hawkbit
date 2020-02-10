@@ -142,7 +142,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
 
         if (permChecker.hasTargetReadPermission()) {
             this.actionHistoryLayout = new ActionHistoryLayout(i18n, deploymentManagement, eventBus, uiNotification,
-                    managementUIState, permChecker, configManagement, systemSecurityContext);
+                    managementUIState, permChecker, configManagement);
             this.actionStatusLayout = new ActionStatusLayout(i18n, eventBus, managementUIState);
             this.actionStatusMsgLayout = new ActionStatusMsgLayout(i18n, eventBus, managementUIState);
             this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, managementUIState,
@@ -150,7 +150,7 @@ public class DeploymentView extends AbstractNotificationView implements BrowserW
                     targetFilterQueryManagement, targetTagManagement);
             final TargetTable targetTable = new TargetTable(eventBus, i18n, uiNotification, targetManagement,
                     managementUIState, permChecker, managementViewClientCriterion, distributionSetManagement,
-                    targetTagManagement, deploymentManagement, configManagement, systemSecurityContext, uiProperties);
+                    targetTagManagement, deploymentManagement, configManagement, uiProperties);
             this.countMessageLabel = new CountMessageLabel(eventBus, targetManagement, i18n, managementUIState,
                     targetTable);
 

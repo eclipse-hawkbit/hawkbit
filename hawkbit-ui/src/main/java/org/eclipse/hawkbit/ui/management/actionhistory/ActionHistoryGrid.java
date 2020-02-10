@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,8 +21,6 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -112,21 +112,18 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final Map<Action.Status, StatusFontIcon> states;
     private final Map<IsActiveDecoration, StatusFontIcon> activeStates;
-    private static TenantConfigurationManagement configManagement;
-    private static SystemSecurityContext systemSecurityContext;
+    private final transient TenantConfigurationManagement configManagement;
 
     private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
 
     ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
-            final SpPermissionChecker permissionChecker, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SpPermissionChecker permissionChecker, final TenantConfigurationManagement configManagement) {
         super(i18n, eventBus, permissionChecker);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
         this.configManagement = configManagement;
-        this.systemSecurityContext = systemSecurityContext;
 
         setMaximizeSupport(new ActionHistoryMaximizeSupport());
         setSingleSelectionSupport(new SingleSelectionSupport());
@@ -511,7 +508,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
         setColumnsSize(150.0, 200.0, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW);
         if (isMultiAssignmentEnabled()) {
-        setColumnsSize(100.0, 130.0, ProxyAction.PXY_ACTION_WEIGHT);
+            setColumnsSize(60.0, 80.0, ProxyAction.PXY_ACTION_WEIGHT);
         }
         setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
                 VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
@@ -557,8 +554,8 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
     protected void setColumnProperties() {
         clearSortOrder();
         if(isMultiAssignmentEnabled()) {
-            final ArrayList<Object> addWeightColumn = new ArrayList<Object>(Arrays.asList(minColumnOrder));
-            addWeightColumn.add(ProxyAction.PXY_ACTION_WEIGHT);
+            final ArrayList<Object> addWeightColumn = new ArrayList<>(Arrays.asList(minColumnOrder));
+            addWeightColumn.add(7, ProxyAction.PXY_ACTION_WEIGHT);
             setColumns(addWeightColumn.toArray());
             alignColumns();
         }
@@ -815,8 +812,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         }
     }
 
-    public static boolean isMultiAssignmentEnabled() {
-        return systemSecurityContext.runAsSystem(() -> configManagement
-                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    private boolean isMultiAssignmentEnabled() {
+        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 }

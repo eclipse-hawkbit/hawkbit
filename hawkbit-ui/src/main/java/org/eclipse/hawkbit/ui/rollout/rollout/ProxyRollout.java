@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -193,8 +191,8 @@ public class ProxyRollout {
         this.description = description;
     }
 
-    public Optional<Integer> getWeight() {
-        return Optional.ofNullable(weight);
+    public Integer getWeight() {
+        return weight;
     }
 
     public void setWeight(final Integer weight) {

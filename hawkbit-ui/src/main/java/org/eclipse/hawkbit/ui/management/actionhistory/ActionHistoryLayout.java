@@ -13,7 +13,6 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGridComponentLayout;
@@ -50,9 +49,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
 
     private final String actionHistoryCaption;
     private final SpPermissionChecker permChecker;
-    private final TenantConfigurationManagement configManagement;
-    private final SystemSecurityContext systemSecurityContext;
-
+    private transient TenantConfigurationManagement configManagement;
     /**
      * Constructor.
      *
@@ -65,15 +62,13 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
      */
     public ActionHistoryLayout(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
             final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
-            final SpPermissionChecker permChecker, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SpPermissionChecker permChecker, final TenantConfigurationManagement configManagement) {
         super(i18n, eventBus);
         this.deploymentManagement = deploymentManagement;
         this.notification = notification;
         this.managementUIState = managementUIState;
         this.permChecker = permChecker;
         this.configManagement = configManagement;
-        this.systemSecurityContext = systemSecurityContext;
         actionHistoryCaption = getActionHistoryCaption();
         init();
     }
@@ -102,7 +97,7 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     @Override
     public ActionHistoryGrid createGrid() {
         return new ActionHistoryGrid(getI18n(), deploymentManagement, getEventBus(), notification, managementUIState,
-                permChecker, configManagement, systemSecurityContext);
+                permChecker, configManagement);
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

@@ -8,6 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.repository;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
+import java.io.Serializable;
+import java.util.Optional;
+
+import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
 import com.vaadin.data.Validator;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
@@ -17,24 +37,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
-import java.io.Serializable;
-import java.util.Optional;
-
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 /**
  * This class represents the UI item for enabling /disabling the
@@ -101,7 +103,7 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
 
     private void createComponents() {
         final HorizontalLayout row1 = newHorizontalLayout();
-        Label defaultWeightHintLabel = newLabel(MSG_KEY_DEFAULT_WEIGHT);
+        final Label defaultWeightHintLabel = newLabel(MSG_KEY_DEFAULT_WEIGHT);
         row1.addComponent(defaultWeightHintLabel);
         row1.setComponentAlignment(defaultWeightHintLabel, Alignment.MIDDLE_CENTER);
         row1.addComponent(createIntegerTextField(MSG_KEY_DEFAULT_WEIGHT_INPUT_HINT,
@@ -150,7 +152,8 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
         setSettingsVisible(false);
     }
 
-    public void setEnabled(boolean enable) {
+    @Override
+    public void setEnabled(final boolean enable) {
         this.msgBoxLabel.setEnabled(enable);
         this.container.setEnabled(true);
     }
@@ -218,12 +221,17 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
         defaultWeightTextField.setWidthUndefined();
         defaultWeightTextField.setDescription("(0 - 1000)");
         defaultWeightTextField.setValue(value.toString());
+        defaultWeightTextField.setId(UIComponentIdProvider.REPOSITORY_MULTI_ASSIGNMENTS_WEIGHT_DEFAULT);
         return defaultWeightTextField;
 
     }
 
     public TextField getWeightTextField() {
         return defaultWeightTextField;
+    }
+
+    public int getdefaultWeight() {
+        return getWeightForTenantOrDefault();
     }
 
     static class ActionWeightValidator implements Validator {

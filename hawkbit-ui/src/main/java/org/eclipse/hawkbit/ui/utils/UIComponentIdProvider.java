@@ -298,6 +298,11 @@ public final class UIComponentIdProvider {
     public static final String ACTION_BUTTON_LAYOUT = "ActionButtonLayout";
 
     /**
+     * ID for HorizontalLayout containing weight field
+     */
+    public static final String CONFIRMATION_WINDOW_WEIGHT_FIELD_ID = "weight.field.id";
+
+    /**
      * Id for maintenance window layout
      */
     public static final String MAINTENANCE_WINDOW_LAYOUT_ID = "maintenance.window.layout";
@@ -1220,6 +1225,11 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_COMBO_ID = "distribution.set.select.combo";
 
     /**
+     * Distribution set select weight id
+     */
+    public static final String DIST_SET_SELECT_WEIGHT_ID = "distribution.set.weight";
+
+    /**
      * Distribution set select window id
      */
     public static final String DIST_SET_SELECT_WINDOW_ID = "distribution.set.select.window";
@@ -1272,6 +1282,12 @@ public final class UIComponentIdProvider {
      * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_ENABLED}.
      */
     public static final String REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX = "repositorymultiassignmentscheckbox";
+
+    /**
+     * Configuration textfield for
+     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_WEIGHT_DEFAULT}.
+     */
+    public static final String REPOSITORY_MULTI_ASSIGNMENTS_WEIGHT_DEFAULT = "multiassignmentsweightdefault";
 
     /**
      * Configuration checkbox for

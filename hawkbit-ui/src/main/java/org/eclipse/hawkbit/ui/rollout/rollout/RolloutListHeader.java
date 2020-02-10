@@ -56,7 +56,8 @@ public class RolloutListHeader extends AbstractGridHeader {
         this.eventBus = eventBus;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement,
+                repositoryProperties);
     }
 
     @Override
