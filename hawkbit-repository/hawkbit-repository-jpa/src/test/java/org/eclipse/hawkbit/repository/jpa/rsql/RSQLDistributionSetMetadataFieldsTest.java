@@ -67,7 +67,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "==1", 1);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "!=1", 5);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "=in=(1,2)", 2);
-        assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "=out=(1,2)", 3);
+        assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "=out=(1,2)", 4);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {

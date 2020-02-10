@@ -37,6 +37,9 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     private Target target;
     private Target target2;
 
+    private static final String OR = ",";
+    private static final String AND = ";";
+
     @Before
     public void setupBeforeTest() throws InterruptedException {
 
@@ -73,7 +76,8 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         targetManagement.assignTag(Arrays.asList(target3.getControllerId(), target4.getControllerId()),
                 targetTag2.getId());
-        targetManagement.assignTag(Arrays.asList(target3.getControllerId(), target4.getControllerId()),
+        targetManagement.assignTag(
+                Arrays.asList(target.getControllerId(), target3.getControllerId(), target4.getControllerId()),
                 targetTag3.getId());
 
         assignDistributionSet(ds.getId(), target.getControllerId());
@@ -85,6 +89,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ID.name() + "==targetId123", 1);
         assertRSQLQuery(TargetFields.ID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.ID.name() + "==noExist*", 0);
+        assertRSQLQuery(TargetFields.ID.name() + "!=targetId123", 4);
         assertRSQLQuery(TargetFields.ID.name() + "=in=(targetId123,notexist)", 1);
         assertRSQLQuery(TargetFields.ID.name() + "=out=(targetId123,notexist)", 4);
     }
@@ -95,6 +100,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.NAME.name() + "==targetName123", 1);
         assertRSQLQuery(TargetFields.NAME.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.NAME.name() + "==noExist*", 0);
+        assertRSQLQuery(TargetFields.NAME.name() + "!=targetName123", 4);
         assertRSQLQuery(TargetFields.NAME.name() + "=in=(targetName123,notexist)", 1);
         assertRSQLQuery(TargetFields.NAME.name() + "=out=(targetName123,notexist)", 4);
     }
@@ -105,10 +111,11 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==''", 3);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "!=''", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==targetDesc123", 1);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "!=targetDesc123", 4);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==target*", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=in=(targetDesc123,notexist)", 1);
-        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=out=(targetDesc123,notexist)", 1);
+        assertRSQLQuery(TargetFields.DESCRIPTION.name() + "=out=(targetDesc123,notexist)", 4);
     }
 
     @Test
@@ -117,6 +124,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==targetId123", 1);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==noExist*", 0);
+        assertRSQLQuery(TargetFields.CONTROLLERID.name() + "!=targetId123", 4);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=in=(targetId123,notexist)", 1);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "=out=(targetId123,notexist)", 4);
     }
@@ -154,7 +162,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name==A*", 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name==noExist*", 0);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name=in=(AssignedDs,notexist)", 1);
-        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name=out=(AssignedDs,notexist)", 0);
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name=out=(AssignedDs,notexist)", 4);
     }
 
     @Test
@@ -166,7 +174,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(
                 TargetFields.ASSIGNEDDS.name() + ".version=in=(" + TestdataFactory.DEFAULT_VERSION + ",notexist)", 1);
         assertRSQLQuery(
-                TargetFields.ASSIGNEDDS.name() + ".version=out=(" + TestdataFactory.DEFAULT_VERSION + ",notexist)", 0);
+                TargetFields.ASSIGNEDDS.name() + ".version=out=(" + TestdataFactory.DEFAULT_VERSION + ",notexist)", 4);
     }
 
     @Test
@@ -175,12 +183,16 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
         assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=T*", 1);
         assertRSQLQuery(TargetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.TAG.name() + "!=notexist", 5);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "=in=(null)", 0);
-        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 2);
-        assertRSQLQuery(TargetFields.TAG.name() + "=out=(null)", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(Tag1,notexist)", 3);
+        assertRSQLQuery(TargetFields.TAG.name() + "=out=(null)", 5);
+        assertRSQLQuery(TargetFields.TAG.name() + "==Tag1" + OR + TargetFields.TAG.name() + "==Tag2", 4);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag2" + AND + TargetFields.TAG.name() + "==Tag3", 1);
+        assertRSQLQuery(TargetFields.TAG.name() + "!=Tag2" + OR + TargetFields.TAG.name() + "!=Tag3", 3);
     }
 
     @Test
@@ -205,7 +217,19 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist==metaValue", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=metaValue", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".notExist!=metaValue", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=notExist", 2);
+    }
 
+    @Test
+    @Description("Test filter based on more complex RSQL queries")
+    public void testFilterByComplexQueries() {
+        assertRSQLQuery(
+                TargetFields.NAME.name() + "!=targetName123" + AND + TargetFields.METADATA.name() + ".metaKey!=value",
+                0);
+        assertRSQLQuery("(" + TargetFields.TAG.name() + "!=TAG1" + OR + TargetFields.TAG.name() + "!=TAG2)" + AND
+                + TargetFields.CONTROLLERID.name() + "!=targetId1235", 4);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {

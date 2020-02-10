@@ -85,7 +85,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS%", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "=in=(DS,notexist)", 1);
-        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "=out=(DS,notexist)", 3);
+        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "=out=(DS,notexist)", 4);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==T*", 2);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "=in=(Tag1,notexist)", 2);
-        assertRSQLQuery(DistributionSetFields.TAG.name() + "=out=(null)", 2);
+        assertRSQLQuery(DistributionSetFields.TAG.name() + "=out=(null)", 5);
     }
 
     @Test
