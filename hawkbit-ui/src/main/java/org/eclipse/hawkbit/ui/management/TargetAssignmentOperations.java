@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.util.ArrayList;
@@ -96,7 +97,8 @@ public final class TargetAssignmentOperations {
             final ActionTypeOptionGroupAssignmentLayout actionTypeOptionGroupLayout,
             final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
             final UINotification notification, final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final Object eventSource, final boolean isMultiAssigmentsEnabled, final TextField weightField) {
+            final Object eventSource, final TenantConfigurationManagement configManagement,
+            final TextField weightField) {
 
         final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
                 .getValue()).getActionType();
@@ -115,7 +117,7 @@ public final class TargetAssignmentOperations {
         dsIds.forEach(dsId -> targets.forEach(t -> {
             final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
                     .setActionType(actionType).setForceTime(forcedTimeStamp);
-            if (isMultiAssigmentsEnabled) {
+            if (isMultiAssignmentsEnabled(configManagement)) {
                 request.setWeight(Integer.valueOf(weightField.getValue().replace(",", "")));
             }
             if (maintenanceWindowLayout.isEnabled()) {
@@ -342,6 +344,10 @@ public final class TargetAssignmentOperations {
             final VaadinMessageSource i18n) {
         final String maintenanceWindowHelpUrl = uiProperties.getLinks().getDocumentation().getMaintenanceWindowView();
         return SPUIComponentProvider.getHelpLink(i18n, maintenanceWindowHelpUrl);
+    }
+
+    private static boolean isMultiAssignmentsEnabled(final TenantConfigurationManagement configManagement) {
+        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
     }
 
 }

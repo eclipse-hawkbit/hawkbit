@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -107,13 +108,13 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
                 firstPageActions);
 
         final List<ProxyAction> runningActions = weightFilledActions.stream()
-                .filter(action -> Action.Status.RUNNING.equals(action.getStatus())).collect(Collectors.toList());
+                .filter(action -> Action.Status.RUNNING == action.getStatus()).collect(Collectors.toList());
 
         Collections.sort(runningActions, Collections.reverseOrder((final ProxyAction action1,
                 final ProxyAction action2) -> action1.getWeight().compareTo(action2.getWeight())));
 
         final List<ProxyAction> otherActions = weightFilledActions.stream()
-                .filter(action -> !Action.Status.RUNNING.equals(action.getStatus())).collect(Collectors.toList());
+                .filter(action -> Action.Status.RUNNING != action.getStatus()).collect(Collectors.toList());
         
         runningActions.addAll(otherActions);
 
@@ -168,7 +169,8 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             proxyAction.setStatus(action.getStatus());
             proxyAction.setMaintenanceWindow(
                     action.hasMaintenanceSchedule() ? buildMaintenanceWindowDisplayText(action) : "");
-            proxyAction.setWeight(action.getWeight().isPresent() ? action.getWeight().get().intValue() : null);
+            final Optional<Integer> weight = action.getWeight();
+            proxyAction.setWeight(weight.isPresent() ? weight.get().intValue() : null);
             proxyActions.add(proxyAction);
         }
         return proxyActions;

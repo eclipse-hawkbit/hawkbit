@@ -150,7 +150,8 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         final ActionType actionType = tfq.getAutoAssignActionType();
         final Optional<Integer> autoAssignWeight = tfq.getAutoAssignWeight();
 
-        setInitialControlValues(distributionSet, actionType, autoAssignWeight);
+        setInitialControlValues(distributionSet, actionType,
+                autoAssignWeight.isPresent() ? autoAssignWeight.get() : null);
 
         // build window after values are set to view elements
         final CommonDialogWindow window = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
@@ -164,7 +165,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
     }
 
     private void setInitialControlValues(final DistributionSet distributionSet, final ActionType actionType,
-            final Optional<Integer> autoAssignWeight) {
+            final Integer autoAssignWeight) {
         checkBox.setValue(distributionSet != null);
         switchAutoAssignmentInputsVisibility(distributionSet != null);
 
@@ -187,8 +188,8 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         }
         dsCombo.setValue(distributionSet != null ? distributionSet.getId() : null);
         if (isMultiAssignmentEnabled()) {
-            if (autoAssignWeight.isPresent()) {
-                weight.setValue(String.valueOf(autoAssignWeight.get().intValue()));
+            if (autoAssignWeight != null) {
+                weight.setValue(String.valueOf(autoAssignWeight));
             } else {
                 weight.setValue(String.valueOf(configManagement
                         .getConfigurationValue(MULTI_ASSIGNMENTS_WEIGHT_DEFAULT, Integer.class).getValue()));

@@ -463,7 +463,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                 saveAllAssignments(targets, Collections.singletonList(distributionSet), managementUIState,
                         actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
-                        getEventBus(), getI18n(), this, isMultiAssignmentEnabled(), weightLayout.getWeightField());
+                        getEventBus(), getI18n(), this, configManagement, weightLayout.getWeightField());
             }
         }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
                 uiProperties, isMultiAssignmentEnabled(), weightLayout, configManagement),

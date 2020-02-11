@@ -908,7 +908,7 @@ public class TargetTable extends AbstractTable<Target> {
             if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                 saveAllAssignments(Collections.singletonList(target), distributionSets, managementUIState,
                         actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
-                        getEventBus(), getI18n(), this, isMultiAssignmentEnabled(), weightLayout.getWeightField());
+                        getEventBus(), getI18n(), this, configManagement, weightLayout.getWeightField());
             }
         }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
                 uiProperties, isMultiAssignmentEnabled(), weightLayout, configManagement),

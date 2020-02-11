@@ -624,7 +624,7 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
         protected void setMaximizedColumnProperties() {
             clearSortOrder();
             if (isMultiAssignmentEnabled()) {
-                final ArrayList<Object> addWeightColumn = new ArrayList<Object>(Arrays.asList(maxColumnOrder));
+                final ArrayList<Object> addWeightColumn = new ArrayList<>(Arrays.asList(maxColumnOrder));
                 addWeightColumn.add(ProxyAction.PXY_ACTION_WEIGHT);
                 setColumns(addWeightColumn.toArray());
                 alignColumns();

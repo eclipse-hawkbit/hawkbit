@@ -76,7 +76,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
 
-    private final UIEventBus eventBus;
+    private final transient UIEventBus eventBus;
 
     private final List<ConfigurationGroup> configurationViews = Lists.newArrayListWithExpectedSize(3);
 

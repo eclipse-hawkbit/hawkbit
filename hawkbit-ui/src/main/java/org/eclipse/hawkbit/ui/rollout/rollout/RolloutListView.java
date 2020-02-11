@@ -93,8 +93,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     public AbstractGrid<LazyQueryContainer> createGrid() {
         return new RolloutListGrid(getI18n(), getEventBus(), rolloutManagement, uiNotification, rolloutUIState,
                 permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement, systemSecurityContext,
-                repositoryProperties);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
     }
 
 }

@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -105,8 +104,6 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final transient TenantConfigurationManagement tenantConfigManagement;
 
-    private final transient SystemSecurityContext systemSecurityContext;
-
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     private final UINotification uiNotification;
@@ -171,13 +168,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement,
-            final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.tenantConfigManagement = tenantConfigManagement;
-        this.systemSecurityContext = systemSecurityContext;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
