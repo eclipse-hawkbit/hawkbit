@@ -100,7 +100,6 @@ public class TargetFilterTable extends Table {
 
         this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, notification, targetManagement,
                 targetFilterQueryManagement, entityFactory, configManagement);
-
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);

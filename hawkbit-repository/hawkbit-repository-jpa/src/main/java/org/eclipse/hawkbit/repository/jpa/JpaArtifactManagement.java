@@ -25,11 +25,12 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.FileSizeAndStorageQuotaCheckingInputStream;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -131,6 +132,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
         } catch (final HashNotMatchException e) {
             if (e.getHashFunction().equals(HashNotMatchException.SHA1)) {
                 throw new InvalidSHA1HashException(e.getMessage(), e);
+            } else if (e.getHashFunction().equals(HashNotMatchException.SHA256)) {
+                throw new InvalidSHA256HashException(e.getMessage(), e);
             } else {
                 throw new InvalidMD5HashException(e.getMessage(), e);
             }
@@ -148,7 +151,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
-        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
+        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize,
+                maxArtifactSizeTotal - currentlyUsed);
     }
 
     @Override

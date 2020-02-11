@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -81,8 +81,7 @@ public class ActionStatusBeanQuery extends AbstractBeanQuery<ProxyActionStatus> 
             actionBeans = firstPageActionStates;
         } else {
             actionBeans = getDeploymentManagement().findActionStatusByAction(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
-                    currentSelectedActionId);
+                    new OffsetBasedPageRequest(startIndex, count, sort), currentSelectedActionId);
         }
         return createProxyActionStates(actionBeans);
     }
@@ -116,8 +115,8 @@ public class ActionStatusBeanQuery extends AbstractBeanQuery<ProxyActionStatus> 
      * .util.List, java.util.List, java.util.List)
      */
     @Override
-    protected void saveBeans(List<ProxyActionStatus> addedBeans, List<ProxyActionStatus> modifiedBeans,
-            List<ProxyActionStatus> removedBeans) {
+    protected void saveBeans(final List<ProxyActionStatus> addedBeans, final List<ProxyActionStatus> modifiedBeans,
+            final List<ProxyActionStatus> removedBeans) {
         // CRUD operations on Target will be done through repository methods
     }
 
@@ -127,7 +126,7 @@ public class ActionStatusBeanQuery extends AbstractBeanQuery<ProxyActionStatus> 
 
         if (currentSelectedActionId != null) {
             firstPageActionStates = getDeploymentManagement().findActionStatusByAction(
-                    PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionId);
+                    new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), currentSelectedActionId);
             size = firstPageActionStates.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

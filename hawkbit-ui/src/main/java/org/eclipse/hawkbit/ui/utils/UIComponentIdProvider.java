@@ -451,6 +451,11 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SW_MODULE_EDIT_BUTTON = "swmodule.edit.button";
 
     /**
+     * Artifact upload - sw module show artifact details button id.
+     */
+    public static final String UPLOAD_SW_MODULE_SHOW_ARTIFACT_DETAILS_BUTTON = "swmodule.show.artifacts.details.button";
+
+    /**
      * Artifact upload - sw module metadata button id.
      */
     public static final String UPLOAD_SW_MODULE_METADATA_BUTTON = "swmodule.metadata.button";
@@ -1175,6 +1180,11 @@ public final class UIComponentIdProvider {
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
+
+    /**
+     * Show artifact details popup id.
+     */
+    public static final String SHOW_ARTIFACT_DETAILS_POPUP_ID = "show.artifact.details.popup.id";
 
     /**
      * Rollout popup id.

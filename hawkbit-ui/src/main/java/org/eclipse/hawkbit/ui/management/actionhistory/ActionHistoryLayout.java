@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -80,13 +79,12 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     private String getActionHistoryCaption(final String targetName) {
         final String caption;
         if (StringUtils.hasText(targetName)) {
-            caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR,
-                    HawkbitCommonUtil.getBoldHTMLText(targetName));
+            caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR, targetName);
         } else {
             caption = getI18n().getMessage(UIMessageIdProvider.CAPTION_ACTION_HISTORY);
         }
 
-        return HawkbitCommonUtil.getCaptionText(caption);
+        return caption;
     }
 
     @Override
@@ -114,12 +112,12 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
     }
 
     /**
-     * Override default registration for selection propagation in order to
-     * interrupt update cascade in minimized state to prevent updates on
-     * invisible action-status-grid and message-grid.
+     * Override default registration for selection propagation in order to interrupt
+     * update cascade in minimized state to prevent updates on invisible
+     * action-status-grid and message-grid.
      * <p>
-     * The master selection is stored and propagation is performed as soon as
-     * the state changes to maximize and hence the dependent grids are updated.
+     * The master selection is stored and propagation is performed as soon as the
+     * state changes to maximize and hence the dependent grids are updated.
      */
     @Override
     public void registerDetails(final AbstractGrid<?>.DetailsSupport details) {
@@ -189,7 +187,8 @@ public class ActionHistoryLayout extends AbstractGridComponentLayout {
          *            name of the target
          */
         public void updateActionHistoryHeader(final String targetName) {
-            updateTitle(getActionHistoryCaption(targetName));
+            updateTitle(targetName, UIMessageIdProvider.CAPTION_ACTION_HISTORY_FOR,
+                    UIMessageIdProvider.CAPTION_ACTION_HISTORY);
         }
 
         /**

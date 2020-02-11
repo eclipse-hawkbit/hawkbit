@@ -270,4 +270,14 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Transactional
     @Query("DELETE FROM JpaTarget t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    /**
+     * Filters a given list of controllerIds and returns only the existing IDs.
+     * 
+     * @param controllerIds
+     *            The IDs to be filtered
+     * @return only the existing controllerIds
+     */
+    @Query("SELECT t.controllerId FROM JpaTarget t WHERE t.controllerId IN ?1")
+    List<String> filterNonExistingControllerIds(Iterable<String> controllerIds);
 }

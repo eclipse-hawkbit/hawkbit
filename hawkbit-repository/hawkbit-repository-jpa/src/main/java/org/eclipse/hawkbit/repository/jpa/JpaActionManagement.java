@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.TimestampCalculator.getTenantConfigurationManagement;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,9 +24,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.data.domain.PageRequest;
-
-import static org.eclipse.hawkbit.repository.TimestampCalculator.getTenantConfigurationManagement;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 /**
  * Implements utility methods for managing {@link Action}s

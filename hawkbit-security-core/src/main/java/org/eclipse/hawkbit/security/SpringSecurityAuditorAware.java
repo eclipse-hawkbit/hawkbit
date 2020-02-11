@@ -14,6 +14,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
  * Auditor class that allows BaseEntitys to insert current logged in user for
@@ -37,6 +38,9 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
     private static String getCurrentAuditor(final Authentication authentication) {
         if (authentication.getPrincipal() instanceof UserDetails) {
             return ((UserDetails) authentication.getPrincipal()).getUsername();
+        }
+        if (authentication.getPrincipal() instanceof OidcUser) {
+            return ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
         }
         return authentication.getPrincipal().toString();
     }

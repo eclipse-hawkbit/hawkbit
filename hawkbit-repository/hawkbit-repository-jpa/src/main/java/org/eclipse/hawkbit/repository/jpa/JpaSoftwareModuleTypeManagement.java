@@ -58,7 +58,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     private final NoCountPagingRepository criteriaNoCountDao;
     private final Database database;
 
-    JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
+    public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,

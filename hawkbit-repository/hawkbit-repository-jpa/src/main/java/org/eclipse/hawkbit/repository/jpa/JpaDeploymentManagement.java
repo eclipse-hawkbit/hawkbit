@@ -202,7 +202,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSetsAcceptNullWeight(
-            List<DeploymentRequest> deploymentRequests, String actionMessage) {
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .validateAcceptNullWeight(deploymentRequests);
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
@@ -286,19 +286,26 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
         final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
-        final List<String> targetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
+        final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().collect(Collectors.toList());
 
-        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(targetIds,
+        final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+                .stream().map(targetRepository::filterNonExistingControllerIds).flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());
 
         if (targetEntities.isEmpty()) {
-            return allTargetsAlreadyAssignedResult(distributionSetEntity, targetsWithActionType.size());
+            return allTargetsAlreadyAssignedResult(distributionSetEntity, existingTargetIds.size());
         }
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(targetsWithActionType, actionMessage,
-                assignmentStrategy, distributionSetEntity, targetEntities);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, targetsWithActionType.size());
+        final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
+                .filter(target -> existingTargetIds.contains(target.getControllerId())).collect(Collectors.toList());
+
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(existingTargetsWithActionType,
+                actionMessage, assignmentStrategy, distributionSetEntity, targetEntities);
+        return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionType.size());
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(

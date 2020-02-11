@@ -8,7 +8,21 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import com.google.common.io.Files;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -78,20 +92,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import com.google.common.io.Files;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
@@ -332,7 +333,7 @@ public abstract class AbstractIntegrationTest {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
-    protected void setTenantDefaultWeightValue(int weight) {
+    protected void setTenantDefaultWeightValue(final int weight) {
         if (tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED).getValue().equals(false)){
             throw new MultiAssignmentIsNotEnabledException("Tenant weight can be set only when multi assignment is activated.");
         }

@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
+
+import java.util.Objects;
 
 import javax.validation.Valid;
-import java.util.Objects;
+
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * A custom view on assigning a {@link DistributionSet} to a {@link Target}.

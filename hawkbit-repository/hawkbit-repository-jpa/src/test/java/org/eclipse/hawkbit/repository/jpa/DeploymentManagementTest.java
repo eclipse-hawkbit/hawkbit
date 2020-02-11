@@ -8,12 +8,22 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintViolationException;
+
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -60,20 +70,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 
-import javax.validation.ConstraintViolationException;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test class testing the functionality of triggering a deployment of
@@ -646,6 +649,40 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         assertThat(getResultingActionCount(
                 deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)))).isEqualTo(2);
+    }
+
+    @Test
+    @Description("Assigning distribution set to the list of targets with a non-existing one leads to successful assignment of valid targets, while not found targets are silently ignored.")
+    public void assignDistributionSetToNotExistingTarget() {
+        final String notExistingId = "notExistingTarget";
+
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        final String[] knownTargetIdsArray = { "1", "2" };
+        final List<String> knownTargetIds = Lists.newArrayList(knownTargetIdsArray);
+        testdataFactory.createTargets(knownTargetIdsArray);
+
+        // add not existing target to targets
+        knownTargetIds.add(notExistingId);
+
+        final List<DistributionSetAssignmentResult> assignDistributionSetsResults = assignDistributionSetToTargets(
+                createdDs, knownTargetIds);
+
+        for (final DistributionSetAssignmentResult assignDistributionSetsResult : assignDistributionSetsResults) {
+            assertThat(assignDistributionSetsResult.getAlreadyAssigned()).isEqualTo(0);
+            assertThat(assignDistributionSetsResult.getAssigned()).isEqualTo(2);
+            assertThat(assignDistributionSetsResult.getTotal()).isEqualTo(2);
+        }
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSetToTargets(final DistributionSet distributionSet,
+            final Iterable<String> targetIds) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        for (final String controllerId : targetIds) {
+            deploymentRequests.add(new DeploymentRequest(controllerId, distributionSet.getId(), ActionType.FORCED, 0,
+                    null, null, null, null));
+        }
+        return deploymentManagement.assignDistributionSets(deploymentRequests);
     }
 
     @Test

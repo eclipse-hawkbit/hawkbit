@@ -389,7 +389,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTarget(final String controllerId, final URI address, String name) {
+    private Target createTarget(final String controllerId, final URI address, final String name) {
 
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))

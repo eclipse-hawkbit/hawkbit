@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
@@ -94,8 +93,8 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<Artifact> {
     public int size() {
         long size = 0;
         if (baseSwModuleId != null) {
-            firstPagetArtifacts = getArtifactManagement()
-                    .findBySoftwareModule(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
+            firstPagetArtifacts = getArtifactManagement().findBySoftwareModule(
+                    new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), baseSwModuleId);
             size = firstPagetArtifacts.getTotalElements();
         }
         if (size > Integer.MAX_VALUE) {

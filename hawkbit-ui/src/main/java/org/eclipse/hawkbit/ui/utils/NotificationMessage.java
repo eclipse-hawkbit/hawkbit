@@ -65,7 +65,7 @@ public class NotificationMessage extends Notification {
         setCaption(caption);
         setDescription(description);
         setStyleName(styleName);
-        setHtmlContentAllowed(true);
+        setHtmlContentAllowed(false);
         setPosition(Position.BOTTOM_RIGHT);
         if (autoClose) {
             setDelayMsec(SPUILabelDefinitions.SP_DELAY);

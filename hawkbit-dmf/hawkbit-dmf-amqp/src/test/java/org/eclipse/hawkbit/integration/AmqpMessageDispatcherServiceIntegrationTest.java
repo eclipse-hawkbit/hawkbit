@@ -8,9 +8,23 @@
  */
 package org.eclipse.hawkbit.integration;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
@@ -51,23 +65,10 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
+import org.springframework.context.annotation.Description;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
-import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")

@@ -9,8 +9,8 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -187,13 +187,19 @@
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
-      <sonar.exclusions>**/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**</sonar.exclusions>
-      <sonar.coverage.exclusions>**/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**</sonar.coverage.exclusions>
-      <jacoco.version>0.8.2</jacoco.version>
-      <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
-      <jacoco.reportPath>${jacoco.outputDir}/jacoco-ut.exec</jacoco.reportPath>
-      <jacoco.itReportPath>${jacoco.outputDir}/jacoco-it.exec</jacoco.itReportPath>
-      <sonar.jacoco.reportPaths>${jacoco.reportPath},${jacoco.itReportPath}</sonar.jacoco.reportPaths>
+      <sonar.exclusions>
+         **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+      </sonar.exclusions>
+      <sonar.coverage.exclusions>
+         **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
+      </sonar.coverage.exclusions>
+      <jacoco.version>0.8.4</jacoco.version>
+      <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
+      <sonar.coverage.jacoco.xmlReportPaths>
+         ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
+         ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
+      </sonar.coverage.jacoco.xmlReportPaths>
+
       <!-- Sonar - END -->
 
       <!-- ************************ -->
@@ -260,6 +266,7 @@
          <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
             <executions>
                <execution>
                   <id>prepare-ut-agent</id>
@@ -268,21 +275,17 @@
                      <goal>prepare-agent</goal>
                   </goals>
                   <configuration>
-                     <destFile>${jacoco.reportPath}</destFile>
                      <propertyName>jacoco.agent.ut.arg</propertyName>
-                     <append>true</append>
                   </configuration>
                </execution>
                <execution>
                   <id>prepare-it-agent</id>
                   <phase>pre-integration-test</phase>
                   <goals>
-                     <goal>prepare-agent</goal>
+                     <goal>prepare-agent-integration</goal>
                   </goals>
                   <configuration>
-                     <destFile>${jacoco.itReportPath}</destFile>
                      <propertyName>jacoco.agent.it.arg</propertyName>
-                     <append>true</append>
                   </configuration>
                </execution>
             </executions>
@@ -324,6 +327,7 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
                   </validHeaders>
                   <excludes>
                      <exclude>**/banner.txt</exclude>
@@ -384,7 +388,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore />
+                              <ignore/>
                            </action>
                         </pluginExecution>
                      </pluginExecutions>
@@ -693,7 +697,6 @@
                </exclusion>
             </exclusions>
          </dependency>
-
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>

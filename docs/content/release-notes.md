@@ -3,6 +3,12 @@ title: Release notes
 weight: 100
 ---
 
+## 0.3.0M6
+
+**Release Date:** Friday, January 17, 2020 <br />
+[Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M6) /
+[Release](https://github.com/eclipse/hawkbit/milestone/21?closed=1)
+
 ## 0.3.0M5
 
 **Release Date:** Tuesday, July 29, 2019 <br />

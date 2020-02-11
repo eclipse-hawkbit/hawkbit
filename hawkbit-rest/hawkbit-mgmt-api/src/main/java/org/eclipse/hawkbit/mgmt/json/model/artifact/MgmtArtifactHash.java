@@ -23,6 +23,9 @@ public class MgmtArtifactHash {
     @JsonProperty
     private String md5;
 
+    @JsonProperty
+    private String sha256;
+
     /**
      * Default constructor.
      */
@@ -33,9 +36,10 @@ public class MgmtArtifactHash {
     /**
      * Public constructor.
      */
-    public MgmtArtifactHash(final String sha1, final String md5) {
+    public MgmtArtifactHash(final String sha1, final String md5, final String sha256) {
         this.sha1 = sha1;
         this.md5 = md5;
+        this.sha256 = sha256;
     }
 
     public String getSha1() {
@@ -44,6 +48,10 @@ public class MgmtArtifactHash {
 
     public String getMd5() {
         return md5;
+    }
+
+    public String getSha256() {
+        return sha256;
     }
 
 }

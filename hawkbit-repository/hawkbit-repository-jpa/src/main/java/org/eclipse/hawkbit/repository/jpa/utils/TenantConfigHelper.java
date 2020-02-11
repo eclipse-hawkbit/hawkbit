@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 
+import java.io.Serializable;
+
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-
-import java.io.Serializable;
 
 /**
  * A collection of static helper methods for the tenant configuration

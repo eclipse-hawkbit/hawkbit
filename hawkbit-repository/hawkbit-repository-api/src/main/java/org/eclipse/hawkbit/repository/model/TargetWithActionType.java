@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.Objects;
-import java.util.Optional;
+
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * A custom view on {@link Target} with {@link ActionType}.
@@ -118,7 +119,6 @@ public class TargetWithActionType {
 
     public Optional<Integer> getWeight() {
         return Optional.ofNullable(weight);
-
     }
 
     public String getControllerId() {
