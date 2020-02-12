@@ -576,7 +576,7 @@ public final class RSQLUtility {
             case "=in=":
                 return getInPredicate(transformedValues, fieldPath);
             case "=out=":
-                return getOutPredicate(transformedValues, finalProperty, enumField);
+                return getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
             default:
                 throw new RSQLParameterSyntaxException("operator symbol {" + node.getOperator().getSymbol()
                         + "} is either not supported or not implemented");
@@ -599,7 +599,7 @@ public final class RSQLUtility {
         }
 
         private Predicate getOutPredicate(final List<Object> transformedValues, final String finalProperty,
-                final A enumField) {
+                final A enumField, final Path<Object> fieldPath) {
             final List<String> outParams = new ArrayList<>();
             for (final Object param : transformedValues) {
                 if (param instanceof String) {
@@ -607,12 +607,22 @@ public final class RSQLUtility {
                 }
             }
 
+            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final boolean isMapKeyField = enumField.isMap();
+
+            if (isSimpleField(split, isMapKeyField)) {
+                if (!outParams.isEmpty()) {
+                    return cb.or(cb.isNull(pathOfString(fieldPath)),
+                            cb.not(cb.upper(pathOfString(fieldPath)).in(outParams)));
+                } else {
+                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.not(fieldPath.in(transformedValues)));
+                }
+            }
+
             final Class<?> javaType = root.getJavaType();
             final Subquery<?> subquery = query.subquery(javaType);
             final Root subqueryRoot = subquery.from(javaType);
 
-            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-            final boolean isMapKeyField = enumField.isMap();
             final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
 
             subquery.select(subqueryRoot);
@@ -691,13 +701,18 @@ public final class RSQLUtility {
                 }
 
                 final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
+                final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+                final boolean isMapKeyField = enumField.isMap();
+
+                if (isSimpleField(split, isMapKeyField)) {
+                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.notLike(cb.upper(pathOfString(fieldPath)),
+                            preFormattedValue.toUpperCase(), ESCAPE_CHAR));
+                }
 
                 final Class<?> javaType = root.getJavaType();
                 final Subquery<?> subquery = query.subquery(javaType);
                 final Root subqueryRoot = subquery.from(javaType);
 
-                final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-                final boolean isMapKeyField = enumField.isMap();
                 final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
 
                 subquery.select(subqueryRoot);
@@ -716,6 +731,10 @@ public final class RSQLUtility {
             }
 
             return cb.notEqual(fieldPath, transformedValue);
+        }
+
+        private boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
+            return split.length == 1 || (split.length == 2 && isMapKeyField);
         }
 
         private Expression<String> getExpressionToCompare(final Path innerFieldPath, final boolean isMapKeyField,
