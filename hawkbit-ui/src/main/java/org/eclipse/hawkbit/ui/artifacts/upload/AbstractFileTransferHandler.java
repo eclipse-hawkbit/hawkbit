@@ -246,16 +246,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
         /**
          * a lock object is used here that is propagated down from
-<<<<<<< HEAD
-         * {@link org.eclipse.hawkbit.ui.artifacts.UploadArtifactView}. It ensures that from within the same UI instance
-         * all uploads are executed sequentially to avoid issues that occur when multiple files are processed at the
-         * same time (e.g. regarding quota checks)
-=======
          * {@link org.eclipse.hawkbit.ui.artifacts.UploadArtifactView}. It
          * ensures that from within the same UI instance all uploads are
          * executed sequentially to avoid issues that occur when multiple files
          * are processed at the same time (e.g. regarding quota checks)
->>>>>>> refs/remotes/origin/master
          */
         @Override
         public void run() {
