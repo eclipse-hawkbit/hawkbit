@@ -743,7 +743,7 @@ public final class RSQLUtility {
                 }
                 innerFieldPath = innerFieldPath.get(split[i]);
                 if (innerFieldPath instanceof Join) {
-                    innerFieldPath = subqueryRoot.join(split[i], JoinType.LEFT);
+                    innerFieldPath = subqueryRoot.join(split[i], JoinType.INNER);
                 }
             }
             return innerFieldPath;
