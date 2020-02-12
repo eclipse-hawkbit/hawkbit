@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -169,8 +168,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
             proxyAction.setStatus(action.getStatus());
             proxyAction.setMaintenanceWindow(
                     action.hasMaintenanceSchedule() ? buildMaintenanceWindowDisplayText(action) : "");
-            final Optional<Integer> weight = action.getWeight();
-            proxyAction.setWeight(weight.isPresent() ? weight.get().intValue() : null);
+            proxyAction.setWeight(action.getWeight().orElse(null));
             proxyActions.add(proxyAction);
         }
         return proxyActions;

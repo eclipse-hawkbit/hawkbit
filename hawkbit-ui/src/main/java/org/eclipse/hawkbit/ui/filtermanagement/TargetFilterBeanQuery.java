@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -112,9 +111,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(tarFilterQuery));
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
             proxyTarFilter.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(tarFilterQuery));
-            proxyTarFilter.setAutoAssignWeight(
-                    tarFilterQuery.getAutoAssignWeight().isPresent() ? tarFilterQuery.getAutoAssignWeight().get()
-                            : null);
+            proxyTarFilter.setAutoAssignWeight(tarFilterQuery.getAutoAssignWeight().orElse(null));
             proxyTarFilter.setQuery(tarFilterQuery.getQuery());
 
             final DistributionSet distributionSet = tarFilterQuery.getAutoAssignDistributionSet();
