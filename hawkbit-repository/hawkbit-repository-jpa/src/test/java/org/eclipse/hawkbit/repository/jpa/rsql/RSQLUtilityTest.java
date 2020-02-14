@@ -244,7 +244,9 @@ public class RSQLUtilityTest {
         when(criteriaBuilderMock.and(any(), any())).thenReturn(mock(Predicate.class));
 
         when(criteriaQueryMock.subquery(SoftwareModule.class)).thenReturn(subqueryMock);
+
         when(subqueryMock.from(SoftwareModule.class)).thenReturn(subqueryRootMock);
+        when(subqueryMock.select(subqueryRootMock)).thenReturn(subqueryMock);
 
         // test
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
