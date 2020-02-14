@@ -193,6 +193,9 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         return artifact;
     }
 
+    // suppress warning, EntityNotFoundException has not to be logged or
+    // rethrown as the exception has no valuable information
+    @SuppressWarnings("squid:S1166")
     private Message handleAuthenticationMessage(final Message message) {
         final DmfDownloadResponse authenticationResponse = new DmfDownloadResponse();
         final DmfTenantSecurityToken secruityToken = convertMessage(message, DmfTenantSecurityToken.class);
@@ -227,7 +230,7 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
             authenticationResponse.setMessage("Building download URI failed");
         } catch (final EntityNotFoundException e) {
             final String errorMessage = "Artifact for resource " + fileResource + " not found ";
-            LOG.warn(errorMessage);
+            LOG.info(errorMessage);
             authenticationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
             authenticationResponse.setMessage(errorMessage);
         }
