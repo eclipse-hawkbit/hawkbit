@@ -292,7 +292,7 @@ public final class RSQLUtility {
 
         private String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
 
-            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = getSubAttributesFrom(node.getSelector());
 
             validateMapParameter(propertyEnum, node, graph);
 
@@ -369,7 +369,7 @@ public final class RSQLUtility {
          */
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             Path<Object> fieldPath = null;
-            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] split = getSubAttributesFrom(finalProperty);
 
             for (int i = 0; i < split.length; i++) {
                 final boolean isMapKeyField = enumField.isMap() && i == (split.length - 1);
@@ -417,15 +417,14 @@ public final class RSQLUtility {
             final String finalProperty = getAndValidatePropertyFieldName(fieldName, node);
 
             final List<String> values = node.getArguments();
-            final List<Object> transformedValue = new ArrayList<>();
+            final List<Object> transformedValues = new ArrayList<>();
             final Path<Object> fieldPath = getFieldPath(fieldName, finalProperty);
 
             for (final String value : values) {
-                transformedValue.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
+                transformedValues.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
             }
 
-            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName, database,
-                    finalProperty);
+            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValues, fieldName, finalProperty);
         }
 
         // Exception squid:S2095 - see
@@ -458,7 +457,7 @@ public final class RSQLUtility {
 
         private A getFieldEnumByName(final ComparisonNode node) {
             String enumName = node.getSelector();
-            final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = getSubAttributesFrom(enumName);
             if (graph.length != 0) {
                 enumName = graph[0];
             }
@@ -537,11 +536,7 @@ public final class RSQLUtility {
 
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<String> values, final List<Object> transformedValues, final A enumField,
-                final Database database, final String finalProperty) {
-            // only 'equal' and 'notEqual' can handle transformed value like
-            // enums. The JPA API cannot handle object types for greaterThan etc
-            // methods.
-            final Object transformedValue = transformedValues.get(0);
+                final String finalProperty) {
 
             String value = values.get(0);
             // if lookup is available, replace macros ...
@@ -552,19 +547,26 @@ public final class RSQLUtility {
             final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);
 
             final Predicate valuePredicate = addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath),
-                    transformedValues, transformedValue, value, database, finalProperty, enumField);
+                    transformedValues, value, finalProperty, enumField);
 
             return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
         }
 
         private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-                final List<Object> transformedValues, final Object transformedValue, final String value,
-                final Database database, final String finalProperty, final A enumField) {
-            switch (node.getOperator().getSymbol()) {
+                final List<Object> transformedValues, final String value, final String finalProperty,
+                final A enumField) {
+
+            // only 'equal' and 'notEqual' can handle transformed value like
+            // enums. The JPA API cannot handle object types for greaterThan etc
+            // methods.
+            final Object transformedValue = transformedValues.get(0);
+            final String operator = node.getOperator().getSymbol();
+
+            switch (operator) {
             case "==":
-                return getEqualToPredicate(transformedValue, fieldPath, database);
+                return getEqualToPredicate(transformedValue, fieldPath);
             case "!=":
-                return getNotEqualToPredicate(transformedValue, fieldPath, database, finalProperty, enumField);
+                return getNotEqualToPredicate(transformedValue, fieldPath, finalProperty, enumField);
             case "=gt=":
                 return cb.greaterThan(pathOfString(fieldPath), value);
             case "=ge=":
@@ -578,8 +580,8 @@ public final class RSQLUtility {
             case "=out=":
                 return getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
             default:
-                throw new RSQLParameterSyntaxException("operator symbol {" + node.getOperator().getSymbol()
-                        + "} is either not supported or not implemented");
+                throw new RSQLParameterSyntaxException(
+                        "operator symbol {" + operator + "} is either not supported or not implemented");
             }
         }
 
@@ -600,45 +602,53 @@ public final class RSQLUtility {
 
         private Predicate getOutPredicate(final List<Object> transformedValues, final String finalProperty,
                 final A enumField, final Path<Object> fieldPath) {
-            final List<String> outParams = new ArrayList<>();
-            for (final Object param : transformedValues) {
-                if (param instanceof String) {
-                    outParams.add(((String) param).toUpperCase());
-                }
+
+            final String[] fieldNames = getSubAttributesFrom(finalProperty);
+            final List<String> outParams = transformedValues.stream().filter(String.class::isInstance)
+                    .map(String.class::cast).map(String::toUpperCase).collect(Collectors.toList());
+
+            if (isSimpleField(fieldNames, enumField.isMap())) {
+                return toNullOrNotInPredicate(fieldPath, transformedValues, outParams);
             }
 
-            final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-            final boolean isMapKeyField = enumField.isMap();
+            return toOutWithSubQueryPredicate(fieldNames, transformedValues, enumField, outParams);
+        }
 
-            if (isSimpleField(split, isMapKeyField)) {
-                if (!outParams.isEmpty()) {
-                    return cb.or(cb.isNull(pathOfString(fieldPath)),
-                            cb.not(cb.upper(pathOfString(fieldPath)).in(outParams)));
-                } else {
-                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.not(fieldPath.in(transformedValues)));
-                }
+        private Predicate toNullOrNotInPredicate(final Path<Object> fieldPath, final List<Object> transformedValues,
+                final List<String> outParams) {
+
+            Predicate inPredicate;
+            final Path<String> pathOfString = pathOfString(fieldPath);
+
+            if (outParams.isEmpty()) {
+                inPredicate = fieldPath.in(transformedValues);
+            } else {
+                inPredicate = cb.upper(pathOfString).in(outParams);
             }
+
+            return cb.or(cb.isNull(pathOfString), cb.not(inPredicate));
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private Predicate toOutWithSubQueryPredicate(final String[] fieldNames, final List<Object> transformedValues,
+                final A enumField, final List<String> outParams) {
 
             final Class<?> javaType = root.getJavaType();
             final Subquery<?> subquery = query.subquery(javaType);
             final Root subqueryRoot = subquery.from(javaType);
 
-            final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
+            final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
+            final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
 
-            subquery.select(subqueryRoot);
-            final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, isMapKeyField,
-                    enumField);
+            Predicate inPredicate;
             if (!outParams.isEmpty()) {
-                subquery.where(cb.and(
-                        cb.equal(root.get(enumField.identifierFieldName()),
-                                subqueryRoot.get(enumField.identifierFieldName())),
-                        cb.upper(expressionToCompare).in(outParams)));
+                inPredicate = cb.upper(expressionToCompare).in(outParams);
             } else {
-                subquery.where(cb.and(
-                        cb.equal(root.get(enumField.identifierFieldName()),
-                                subqueryRoot.get(enumField.identifierFieldName())),
-                        expressionToCompare.in(transformedValues)));
+                inPredicate = expressionToCompare.in(transformedValues);
             }
+
+            subquery.select(subqueryRoot).where(cb.and(cb.equal(root.get(enumField.identifierFieldName()),
+                    subqueryRoot.get(enumField.identifierFieldName())), inPredicate));
 
             return cb.not(cb.exists(subquery));
         }
@@ -659,7 +669,9 @@ public final class RSQLUtility {
             if (!enumField.isMap()) {
                 return null;
             }
-            final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+
+            final String[] graph = getSubAttributesFrom(node.getSelector());
+
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
                 // Currently we support only string key .So below cast is safe.
@@ -674,15 +686,14 @@ public final class RSQLUtility {
             return cb.equal(cb.upper(fieldPath.get(keyFieldName)), keyValue.toUpperCase());
         }
 
-        private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
-                final Database database) {
+        private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
                 if (StringUtils.isEmpty(transformedValue)) {
                     return cb.or(cb.isNull(pathOfString(fieldPath)), cb.equal(pathOfString(fieldPath), ""));
                 }
 
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
-                return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase(), ESCAPE_CHAR);
+                final String sqlValue = toSQL((String) transformedValue);
+                return cb.like(cb.upper(pathOfString(fieldPath)), sqlValue, ESCAPE_CHAR);
             }
 
             if (transformedValue == null) {
@@ -692,54 +703,78 @@ public final class RSQLUtility {
             return cb.equal(fieldPath, transformedValue);
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
-                final Database database, final String finalProperty, final A enumField) {
-            if (transformedValue instanceof String) {
-                if (StringUtils.isEmpty(transformedValue)) {
-                    return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
-                }
-
-                final String preFormattedValue = escapeValueToSQL((String) transformedValue, database, ESCAPE_CHAR);
-                final String[] split = finalProperty.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-                final boolean isMapKeyField = enumField.isMap();
-
-                if (isSimpleField(split, isMapKeyField)) {
-                    return cb.or(cb.isNull(pathOfString(fieldPath)), cb.notLike(cb.upper(pathOfString(fieldPath)),
-                            preFormattedValue.toUpperCase(), ESCAPE_CHAR));
-                }
-
-                final Class<?> javaType = root.getJavaType();
-                final Subquery<?> subquery = query.subquery(javaType);
-                final Root subqueryRoot = subquery.from(javaType);
-
-                final Path innerFieldPath = getInnerFieldPath(subqueryRoot, split, isMapKeyField);
-
-                subquery.select(subqueryRoot);
-                final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, isMapKeyField,
-                        enumField);
-                subquery.where(cb.and(
-                        cb.equal(root.get(enumField.identifierFieldName()),
-                                subqueryRoot.get(enumField.identifierFieldName())),
-                        cb.like(cb.upper(expressionToCompare), preFormattedValue.toUpperCase())));
-
-                return cb.not(cb.exists(subquery));
-            }
+                final String finalProperty, final A enumField) {
 
             if (transformedValue == null) {
-                return cb.isNotNull(pathOfString(fieldPath));
+                return toNotNullPredicate(fieldPath);
             }
 
+            if (transformedValue instanceof String) {
+                if (StringUtils.isEmpty(transformedValue)) {
+                    return toNotNullOrEmptyPredicate(fieldPath);
+                }
+
+                final String sqlValue = toSQL((String) transformedValue);
+                final String[] fieldNames = getSubAttributesFrom(finalProperty);
+
+                if (isSimpleField(fieldNames, enumField.isMap())) {
+                    return toNullOrNotEqualPredicate(fieldPath, sqlValue);
+                }
+
+                return toNotEqualWithSubQueryPredicate(enumField, sqlValue, fieldNames);
+            }
+
+            return toNotEqualPredicate(fieldPath, transformedValue);
+        }
+
+        private Predicate toNotNullPredicate(final Path<Object> fieldPath) {
+            return cb.isNotNull(pathOfString(fieldPath));
+        }
+
+        private Predicate toNotEqualPredicate(final Path<Object> fieldPath, final Object transformedValue) {
             return cb.notEqual(fieldPath, transformedValue);
+        }
+
+        private Predicate toNullOrNotEqualPredicate(final Path<Object> fieldPath, final String sqlValue) {
+            return cb.or(cb.isNull(pathOfString(fieldPath)),
+                    cb.notLike(cb.upper(pathOfString(fieldPath)), sqlValue, ESCAPE_CHAR));
+        }
+
+        private Predicate toNotNullOrEmptyPredicate(final Path<Object> fieldPath) {
+            return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        private Predicate toNotEqualWithSubQueryPredicate(final A enumField, final String sqlValue,
+                final String[] fieldNames) {
+
+            final Class<?> javaType = root.getJavaType();
+            final Subquery<?> subQuery = query.subquery(javaType);
+            final Root subQueryRoot = subQuery.from(javaType);
+
+            final Path<?> innerFieldPath = getInnerFieldPath(subQueryRoot, fieldNames, enumField.isMap());
+            final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
+
+            subQuery.select(subQueryRoot)
+                    .where(cb.and(
+                            cb.equal(root.get(enumField.identifierFieldName()),
+                                    subQueryRoot.get(enumField.identifierFieldName())),
+                            cb.like(cb.upper(expressionToCompare), sqlValue)));
+
+            return cb.not(cb.exists(subQuery));
+        }
+
+        private String[] getSubAttributesFrom(final String property) {
+            return property.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
         }
 
         private boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
             return split.length == 1 || (split.length == 2 && isMapKeyField);
         }
 
-        private Expression<String> getExpressionToCompare(final Path innerFieldPath, final boolean isMapKeyField,
-                final A enumField) {
-            if (!isMapKeyField) {
+        private Expression<String> getExpressionToCompare(final Path innerFieldPath, final A enumField) {
+            if (!enumField.isMap()) {
                 return pathOfString(innerFieldPath);
             }
             if (innerFieldPath instanceof MapJoin) {
@@ -768,17 +803,16 @@ public final class RSQLUtility {
             return innerFieldPath;
         }
 
-        private static String escapeValueToSQL(final String transformedValue, final Database database,
-                final char escapeChar) {
+        private String toSQL(final String transformedValue) {
             final String escaped;
 
             if (database == Database.SQL_SERVER) {
                 escaped = transformedValue.replace("%", "[%]").replace("_", "[_]");
             } else {
-                escaped = transformedValue.replace("%", escapeChar + "%").replace("_", escapeChar + "_");
+                escaped = transformedValue.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
             }
 
-            return escaped.replace(LIKE_WILDCARD, '%');
+            return escaped.replace(LIKE_WILDCARD, '%').toUpperCase();
         }
 
         @SuppressWarnings("unchecked")
