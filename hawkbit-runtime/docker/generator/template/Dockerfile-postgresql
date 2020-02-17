@@ -1,0 +1,10 @@
+FROM hawkbit/hawkbit-update-server:{{HAWKBIT_VERSION}}
+
+ENV POSTGRESQL_DRIVER_VERSION={{POSTGRESQL_DRIVER_VERSION}}
+
+RUN set -x \
+    && apk add --no-cache --virtual build-dependencies wget \
+    && wget -O $JAVA_HOME/lib/ext/postgresql-java-client.jar --no-verbose "https://jdbc.postgresql.org/download/postgresql-${POSTGRESQL_DRIVER_VERSION}.jar" \
+    && apk del build-dependencies
+
+ENTRYPOINT ["java","-jar","hawkbit-update-server.jar","--spring.profiles.active=postgresql","-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"]
