@@ -153,7 +153,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     JpaControllerManagement(final ScheduledExecutorService executorService,
             final RepositoryProperties repositoryProperties, final ActionRepository actionRepository,
-                            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext) {
         super(actionRepository, repositoryProperties, systemSecurityContext);
 
         if (!repositoryProperties.isEagerPollPersistence()) {

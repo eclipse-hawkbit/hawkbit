@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -96,8 +97,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     @Override
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final List<ProxyRollout> rolloutBeans;
-        final PageRequest pageRequest = PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE,
-                SPUIDefinitions.PAGE_SIZE, sort);
+        final PageRequest pageRequest = new OffsetBasedPageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, count, sort);
         if (StringUtils.isEmpty(searchText)) {
             rolloutBeans = validateWeightWithMultiAssignments(
                     getRolloutManagement().findAllWithDetailedStatus(pageRequest, false));

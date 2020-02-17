@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -92,10 +93,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         } else if (StringUtils.isEmpty(searchText)) {
             // if no search filters available
             targetFilterQuery = validateWeightWithMultiAssignments(getTargetFilterQueryManagement()
-                    .findAll(PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort)));
+                    .findAll(new OffsetBasedPageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, count, sort)));
         } else {
             targetFilterQuery = validateWeightWithMultiAssignments(getTargetFilterQueryManagement().findByName(
-                    PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort),
+                    new OffsetBasedPageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, count, sort),
                     searchText));
         }
         return targetFilterQuery;
@@ -166,10 +167,10 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     public int size() {
         if (StringUtils.isEmpty(searchText)) {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findAll(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
+                    .findAll(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             firstPageTargetFilter = getTargetFilterQueryManagement()
-                    .findByName(PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+                    .findByName(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

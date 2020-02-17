@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
@@ -90,13 +90,13 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         if (startIndex == 0) {
             if (firstPageActions == null) {
                 firstPageActions = getDeploymentManagement().findActionsByTarget(currentSelectedControllerId,
-                        PageRequest.of(0, SPUIDefinitions.PAGE_SIZE, sort));
+                        new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             }
             actionBeans = sortOnWeightWithMultiAssignments(firstPageActions);
         } else {
             actionBeans = sortOnWeightWithMultiAssignments(
                     getDeploymentManagement().findActionsByTarget(currentSelectedControllerId,
-                            PageRequest.of(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort)));
+                            new OffsetBasedPageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort)));
         }
         return actionBeans;
     }
