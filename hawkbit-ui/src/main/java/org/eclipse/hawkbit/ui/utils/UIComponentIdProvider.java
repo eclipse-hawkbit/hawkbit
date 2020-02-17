@@ -1295,9 +1295,9 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration textfield for
-     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_WEIGHT_DEFAULT}.
+     * {@link TenantConfigurationKey#MULTI_ASSIGNMENTS_DEFAULT}.
      */
-    public static final String REPOSITORY_MULTI_ASSIGNMENTS_WEIGHT_DEFAULT = "multiassignmentsweightdefault";
+    public static final String REPOSITORY_MULTI_ASSIGNMENTS_WEIGHT_DEFAULT = "repositorymultiassignmentsweightdefault";
 
     /**
      * Configuration checkbox for

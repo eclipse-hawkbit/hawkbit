@@ -221,7 +221,6 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
         defaultWeightTextField.setWidthUndefined();
         defaultWeightTextField.setDescription("(0 - 1000)");
         defaultWeightTextField.setValue(value.toString());
-        defaultWeightTextField.setId(UIComponentIdProvider.REPOSITORY_MULTI_ASSIGNMENTS_WEIGHT_DEFAULT);
         return defaultWeightTextField;
 
     }
