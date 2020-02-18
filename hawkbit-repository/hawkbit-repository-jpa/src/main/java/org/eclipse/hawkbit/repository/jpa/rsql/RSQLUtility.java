@@ -765,11 +765,11 @@ public final class RSQLUtility {
             return cb.not(cb.exists(subQuery));
         }
 
-        private String[] getSubAttributesFrom(final String property) {
+        private static String[] getSubAttributesFrom(final String property) {
             return property.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
         }
 
-        private boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
+        private static boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
             return split.length == 1 || (split.length == 2 && isMapKeyField);
         }
 
@@ -788,7 +788,7 @@ public final class RSQLUtility {
             return pathOfString(innerFieldPath).get(valueFieldName);
         }
 
-        private Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
+        private static Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
                 final boolean isMapKeyField) {
             Path<?> innerFieldPath = subqueryRoot;
             for (int i = 0; i < split.length; i++) {
