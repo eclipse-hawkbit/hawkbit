@@ -113,7 +113,9 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addComponent(label);
         verticalLayout.addComponent(checkBox);
+        if (isMultiAssignmentEnabled()) {
         verticalLayout.addComponent(weight);
+        }
         verticalLayout.addComponent(actionTypeOptionGroupLayout);
         verticalLayout.addComponent(dsCombo);
 
