@@ -131,6 +131,9 @@ public final class FileStreamingUtil {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
         response.setHeader(HttpHeaders.ETAG, etag);
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+        // set the x-content-type options header to prevent browsers from doing
+        // MIME-sniffing when downloading an artifact, as this could cause a
+        // security vulnerability
         response.setHeader(com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS, "nosniff");
         if (lastModified > 0) {
             response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
