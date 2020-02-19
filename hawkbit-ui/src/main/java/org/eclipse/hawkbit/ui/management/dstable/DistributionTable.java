@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.createAssignmentTab;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.isMaintenanceWindowValid;
 import static org.eclipse.hawkbit.ui.management.TargetAssignmentOperations.saveAllAssignments;
@@ -36,6 +35,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -110,6 +111,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     private final transient TenantConfigurationManagement configManagement;
 
+    private final transient SystemSecurityContext systemSecurityContext;
+
     private final String notAllowedMsg;
 
     private boolean distPinned;
@@ -132,7 +135,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             final ManagementViewClientCriterion managementViewClientCriterion, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
             final TargetTagManagement targetTagManagement, final UiProperties uiProperties,
-            final TenantConfigurationManagement configManagement) {
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         super(eventBus, i18n, notification, permissionChecker);
         this.permissionChecker = permissionChecker;
         this.managementUIState = managementUIState;
@@ -146,6 +149,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         this.weightLayout = new WeightLayout(i18n, saveButtonToggle(), maintenanceWindowLayout);
         this.uiProperties = uiProperties;
         this.configManagement = configManagement;
+        this.systemSecurityContext = systemSecurityContext;
         notAllowedMsg = i18n.getMessage(UIMessageIdProvider.MESSAGE_ACTION_NOT_ALLOWED);
 
         addNewContainerDS();
@@ -463,7 +467,8 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             if (ok && isMaintenanceWindowValid(maintenanceWindowLayout, getNotification())) {
                 saveAllAssignments(targets, Collections.singletonList(distributionSet), managementUIState,
                         actionTypeOptionGroupLayout, maintenanceWindowLayout, deploymentManagement, getNotification(),
-                        getEventBus(), getI18n(), this, configManagement, weightLayout.getWeightField());
+                        getEventBus(), getI18n(), this, configManagement, systemSecurityContext,
+                        weightLayout.getWeightField());
             }
         }, createAssignmentTab(actionTypeOptionGroupLayout, maintenanceWindowLayout, saveButtonToggle(), getI18n(),
                 uiProperties, isMultiAssignmentEnabled(), weightLayout, configManagement),
@@ -768,6 +773,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

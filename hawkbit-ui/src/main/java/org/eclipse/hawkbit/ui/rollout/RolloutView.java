@@ -83,7 +83,8 @@ public class RolloutView extends VerticalLayout implements View {
         this.rolloutManagement = rolloutManagement;
         this.rolloutListView = new RolloutListView(permissionChecker, rolloutUIState, eventBus, rolloutManagement,
                 targetManagement, uiNotification, uiProperties, entityFactory, i18n, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, systemSecurityContext,
+                repositoryProperties);
         this.rolloutGroupsListView = new RolloutGroupsListView(i18n, eventBus, rolloutGroupManagement, rolloutUIState,
                 permissionChecker);
         this.rolloutGroupTargetsListView = new RolloutGroupTargetsListView(eventBus, i18n, rolloutUIState);

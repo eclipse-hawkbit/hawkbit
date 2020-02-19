@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.util.ArrayList;
@@ -30,6 +29,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
@@ -98,7 +99,7 @@ public final class TargetAssignmentOperations {
             final MaintenanceWindowLayout maintenanceWindowLayout, final DeploymentManagement deploymentManagement,
             final UINotification notification, final UIEventBus eventBus, final VaadinMessageSource i18n,
             final Object eventSource, final TenantConfigurationManagement configManagement,
-            final TextField weightField) {
+            final SystemSecurityContext systemSecurityContext, final TextField weightField) {
 
         final ActionType actionType = ((ActionTypeOption) actionTypeOptionGroupLayout.getActionTypeOptionGroup()
                 .getValue()).getActionType();
@@ -117,7 +118,7 @@ public final class TargetAssignmentOperations {
         dsIds.forEach(dsId -> targets.forEach(t -> {
             final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
                     .setActionType(actionType).setForceTime(forcedTimeStamp);
-            if (isMultiAssignmentsEnabled(configManagement)) {
+            if (isMultiAssignmentsEnabled(configManagement, systemSecurityContext)) {
                 request.setWeight(Integer.valueOf(weightField.getValue().replace(",", "")));
             }
             if (maintenanceWindowLayout.isEnabled()) {
@@ -346,8 +347,9 @@ public final class TargetAssignmentOperations {
         return SPUIComponentProvider.getHelpLink(i18n, maintenanceWindowHelpUrl);
     }
 
-    private static boolean isMultiAssignmentsEnabled(final TenantConfigurationManagement configManagement) {
-        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+    private static boolean isMultiAssignmentsEnabled(final TenantConfigurationManagement configManagement,
+            final SystemSecurityContext systemSecurityContext) {
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
-
 }

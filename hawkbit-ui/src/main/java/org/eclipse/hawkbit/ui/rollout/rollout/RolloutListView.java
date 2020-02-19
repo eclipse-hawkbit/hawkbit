@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
@@ -41,6 +42,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
     private final transient QuotaManagement quotaManagement;
     private final transient TenantConfigurationManagement tenantConfigManagement;
+    private final transient SystemSecurityContext systemSecurityContext;
     private final transient RepositoryProperties repositoryProperties;
 
     private final SpPermissionChecker permissionChecker;
@@ -55,6 +57,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement,
+            final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         super(i18n, eventBus);
         this.permissionChecker = permissionChecker;
@@ -68,6 +71,7 @@ public class RolloutListView extends AbstractGridComponentLayout {
         this.entityFactory = entityFactory;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.tenantConfigManagement = tenantConfigManagement;
+        this.systemSecurityContext = systemSecurityContext;
         this.repositoryProperties = repositoryProperties;
 
         init();
@@ -82,14 +86,16 @@ public class RolloutListView extends AbstractGridComponentLayout {
     public AbstractOrderedLayout createGridHeader() {
         return new RolloutListHeader(permissionChecker, rolloutUIState, getEventBus(), rolloutManagement,
                 targetManagement, uiNotification, uiProperties, entityFactory, getI18n(), targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, systemSecurityContext,
+                repositoryProperties);
     }
 
     @Override
     public AbstractGrid<LazyQueryContainer> createGrid() {
         return new RolloutListGrid(getI18n(), getEventBus(), rolloutManagement, uiNotification, rolloutUIState,
                 permissionChecker, targetManagement, entityFactory, uiProperties, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement, repositoryProperties);
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, systemSecurityContext,
+                repositoryProperties);
     }
 
 }

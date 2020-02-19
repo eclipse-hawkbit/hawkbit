@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.util.ArrayList;
@@ -22,6 +21,8 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
@@ -56,6 +57,8 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     private transient RolloutUIState rolloutUIState;
 
     private transient TenantConfigurationManagement configManagement;
+
+    private transient SystemSecurityContext systemSecurityContext;
 
     /**
      * Parametric Constructor.
@@ -199,8 +202,15 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
         return configManagement;
     }
 
+    private SystemSecurityContext getSystemSecurityContext() {
+        if (null == systemSecurityContext) {
+            systemSecurityContext = SpringContextHelper.getBean(SystemSecurityContext.class);
+        }
+        return systemSecurityContext;
+    }
+
     private boolean isMultiAssignmentEnabled() {
-        return getTenantConfigurationManagement().getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class)
-                .getValue();
+        return getSystemSecurityContext().runAsSystem(() -> getTenantConfigurationManagement()
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

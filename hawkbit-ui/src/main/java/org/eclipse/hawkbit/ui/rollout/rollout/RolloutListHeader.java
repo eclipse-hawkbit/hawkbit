@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
@@ -51,12 +52,13 @@ public class RolloutListHeader extends AbstractGridHeader {
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement,
+            final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         super(permissionChecker, rolloutUIState, i18n);
         this.eventBus = eventBus;
         this.addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout(rolloutManagement, targetManagement,
                 uiNotification, uiProperties, entityFactory, i18n, eventBus, targetFilterQueryManagement,
-                rolloutGroupManagement, quotaManagement, tenantConfigManagement,
+                rolloutGroupManagement, quotaManagement, tenantConfigManagement, systemSecurityContext, 
                 repositoryProperties);
     }
 

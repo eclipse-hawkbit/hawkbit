@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.util.ArrayList;
@@ -22,6 +21,8 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.components.ProxyTargetFilter;
@@ -51,6 +52,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     private transient Page<TargetFilterQuery> firstPageTargetFilter = null;
     private transient TargetFilterQueryManagement targetFilterQueryManagement;
     private transient TenantConfigurationManagement configManagement;
+    private transient SystemSecurityContext systemSecurityContext;
 
     /**
      *
@@ -194,8 +196,15 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
         return configManagement;
     }
 
+    private SystemSecurityContext getSystemSecurityContext() {
+        if (null == systemSecurityContext) {
+            systemSecurityContext = SpringContextHelper.getBean(SystemSecurityContext.class);
+        }
+        return systemSecurityContext;
+    }
+
     private boolean isMultiAssignmentEnabled() {
-        return getTenantConfigurationManagement().getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class)
-                .getValue();
+        return getSystemSecurityContext().runAsSystem(() -> getTenantConfigurationManagement()
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

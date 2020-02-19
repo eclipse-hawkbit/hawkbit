@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +19,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
@@ -81,6 +81,8 @@ public class TargetFilterTable extends Table {
 
     private final transient TenantConfigurationManagement configManagement;
 
+    private final transient SystemSecurityContext systemSecurityContext;
+
     private Container container;
 
     private static final int PROPERTY_DEPT = 3;
@@ -89,7 +91,7 @@ public class TargetFilterTable extends Table {
             final UIEventBus eventBus, final FilterManagementUIState filterManagementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
             final SpPermissionChecker permChecker, final EntityFactory entityFactory,
-            final TenantConfigurationManagement configManagement) {
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
@@ -97,9 +99,10 @@ public class TargetFilterTable extends Table {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.permChecker = permChecker;
         this.configManagement = configManagement;
+        this.systemSecurityContext = systemSecurityContext;
 
         this.dsSelectWindow = new DistributionSetSelectWindow(i18n, eventBus, notification, targetManagement,
-                targetFilterQueryManagement, entityFactory, configManagement);
+                targetFilterQueryManagement, entityFactory, configManagement, systemSecurityContext);
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
@@ -336,7 +339,8 @@ public class TargetFilterTable extends Table {
         }).toArray());
     }
 
-    public boolean isMultiAssignmentEnabled() {
-        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+    private boolean isMultiAssignmentEnabled() {
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

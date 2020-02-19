@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.isNotNullOrEmpty;
 
 import java.util.ArrayList;
@@ -22,6 +21,8 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -43,6 +44,7 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
     private Sort sort = new Sort(Direction.DESC, ProxyAction.PXY_ACTION_ID);
     private transient DeploymentManagement deploymentManagement;
     private transient TenantConfigurationManagement configManagement;
+    private transient SystemSecurityContext systemSecurityContext;
 
     private String currentSelectedControllerId;
     private transient Slice<Action> firstPageActions;
@@ -240,8 +242,15 @@ public class ActionBeanQuery extends AbstractBeanQuery<ProxyAction> {
         return configManagement;
     }
 
+    private SystemSecurityContext getSystemSecurityContext() {
+        if (null == systemSecurityContext) {
+            systemSecurityContext = SpringContextHelper.getBean(SystemSecurityContext.class);
+        }
+        return systemSecurityContext;
+    }
+
     private boolean isMultiAssignmentEnabled() {
-        return getTenantConfigurationManagement().getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class)
-                .getValue();
+        return getSystemSecurityContext().runAsSystem(() -> getTenantConfigurationManagement()
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

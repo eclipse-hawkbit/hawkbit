@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.text.SimpleDateFormat;
@@ -44,6 +43,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -191,6 +192,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private final transient TenantConfigurationManagement configManagement;
 
+    private final transient SystemSecurityContext systemSecurityContext;
+
     private final transient RolloutGroupConditions defaultRolloutGroupConditions;
 
     private final NullValidator nullValidator = new NullValidator(null, false);
@@ -201,7 +204,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
             final VaadinMessageSource i18n, final UIEventBus eventBus,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement configManagement,
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         actionTypeOptionGroupLayout = new ActionTypeOptionGroupAssignmentLayout(i18n);
         autoStartOptionGroupLayout = new AutoStartOptionGroupLayout(i18n);
@@ -216,6 +219,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.configManagement = configManagement;
+        this.systemSecurityContext = systemSecurityContext;
 
         defineGroupsLayout = new DefineGroupsLayout(i18n, entityFactory, rolloutManagement, targetFilterQueryManagement,
                 rolloutGroupManagement, quotaManagement);
@@ -1200,6 +1204,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private boolean isMultiAssignmentEnabled() {
-        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 }

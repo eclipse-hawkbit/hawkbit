@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_WEIGHT_DEFAULT;
 
 import java.util.Optional;
@@ -22,6 +21,8 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
@@ -68,6 +69,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final EntityFactory entityFactory;
     private final TenantConfigurationManagement configManagement;
+    private final SystemSecurityContext systemSecurityContext;
 
     private CheckBox checkBox;
     private ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
@@ -78,7 +80,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
     DistributionSetSelectWindow(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final UINotification notification, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
-            final TenantConfigurationManagement configManagement) {
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         this.i18n = i18n;
         this.notification = notification;
         this.eventBus = eventBus;
@@ -86,6 +88,7 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.entityFactory = entityFactory;
         this.configManagement = configManagement;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     private VerticalLayout initView() {
@@ -283,8 +286,9 @@ public class DistributionSetSelectWindow implements CommonDialogWindow.SaveDialo
         dialog.setVisible(true);
     }
 
-    public boolean isMultiAssignmentEnabled() {
-        return configManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue();
+    private boolean isMultiAssignmentEnabled() {
+        return systemSecurityContext.runAsSystem(() -> configManagement
+                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }
 
     /**
