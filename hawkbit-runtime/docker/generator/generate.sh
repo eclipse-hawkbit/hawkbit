@@ -11,20 +11,17 @@ set -euxo pipefail
 
 HAWKBIT_VERSION="0.3.0M6"
 MARIADB_DRIVER_VERSION="2.5.3"
-POSTGRESQL_DRIVER_VERSION="42.2.10"
 BASE_IMAGE="openjdk:8u212-jre-alpine"
 
 ##################################################
 
-mkdir -p "../$HAWKBIT_VERSION" && mkdir -p "../$HAWKBIT_VERSION-mysql" && mkdir -p "../$HAWKBIT_VERSION-postgresql"
+mkdir -p "../$HAWKBIT_VERSION" && mkdir -p "../$HAWKBIT_VERSION-mysql"
 
 cp ./template/KEY "../$HAWKBIT_VERSION/KEY"
 cp ./template/KEY-mysql "../$HAWKBIT_VERSION-mysql/KEY"
 
 cp ./template/Dockerfile "../$HAWKBIT_VERSION/Dockerfile"
 cp ./template/Dockerfile-mysql "../$HAWKBIT_VERSION-mysql/Dockerfile"
-cp ./template/Dockerfile-postgresql "../$HAWKBIT_VERSION-postgresql/Dockerfile"
 
 sed -i -e "s/{{BASE_IMAGE}}/${BASE_IMAGE}/g; s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g" "../$HAWKBIT_VERSION/Dockerfile"
 sed -i -e "s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g; s/{{MARIADB_DRIVER_VERSION}}/$MARIADB_DRIVER_VERSION/g" "../$HAWKBIT_VERSION-mysql/Dockerfile"
-sed -i -e "s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g; s/{{POSTGRESQL_DRIVER_VERSION}}/$POSTGRESQL_DRIVER_VERSION/g" "../$HAWKBIT_VERSION-postgresql/Dockerfile"
