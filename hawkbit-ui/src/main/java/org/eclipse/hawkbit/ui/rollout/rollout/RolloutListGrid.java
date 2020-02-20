@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -100,6 +101,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
 
     private final transient TenantConfigurationManagement tenantConfigManagement;
 
+    private final transient SystemSecurityContext systemSecurityContext;
+
     private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     private final UINotification uiNotification;
@@ -163,7 +166,8 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
             final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigManagement) {
+            final TenantConfigurationManagement tenantConfigManagement,
+            final SystemSecurityContext systemSecurityContext) {
         super(i18n, eventBus, permissionChecker);
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -173,6 +177,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
                 rolloutGroupManagement, quotaManagement);
         this.uiNotification = uiNotification;
         this.rolloutUIState = rolloutUIState;
+        this.systemSecurityContext = systemSecurityContext;
         alignGenerator = new AlignCellStyleGenerator(null, centerAlignedColumns, null);
 
         setGeneratedPropertySupport(new RolloutGeneratedPropertySupport());
@@ -858,8 +863,7 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         if (!permissionChecker.hasRolloutCreatePermission()) {
             modifiableColumnsList.remove(VIRT_PROP_COPY);
         }
-        if (!permissionChecker.hasRolloutApprovalPermission() || !tenantConfigManagement
-                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue()) {
+        if (!permissionChecker.hasRolloutApprovalPermission() || !isRolloutApprovalEnabled()) {
             modifiableColumnsList.remove(VIRT_PROP_APPROVE);
         }
         if (!permissionChecker.hasRolloutDeletePermission()) {
@@ -871,6 +875,11 @@ public class RolloutListGrid extends AbstractGrid<LazyQueryContainer> {
         }
 
         setColumns(modifiableColumnsList.toArray());
+    }
+
+    private boolean isRolloutApprovalEnabled(){
+       return systemSecurityContext.runAsSystem(() -> tenantConfigManagement
+                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue());
     }
 
 }
