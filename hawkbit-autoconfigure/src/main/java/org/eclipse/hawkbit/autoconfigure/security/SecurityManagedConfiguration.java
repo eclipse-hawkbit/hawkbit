@@ -81,10 +81,10 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
@@ -612,9 +612,6 @@ public class SecurityManagedConfiguration {
         private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService;
 
         @Autowired(required = false)
-        private AuthenticationEntryPoint authenticationEntryPoint;
-
-        @Autowired(required = false)
         private AuthenticationSuccessHandler authenticationSuccessHandler;
 
         @Autowired
@@ -720,16 +717,16 @@ public class SecurityManagedConfiguration {
             }
 
             // UI
-            httpSec.authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**").permitAll()
+            httpSec.authorizeRequests().antMatchers("/UI/login/**", "/UI/UIDL/**").permitAll()
                     .anyRequest().authenticated();
 
             if (enableOidc) {
                 // OIDC
                 httpSec.oauth2Login().userInfoEndpoint().oidcUserService(oidcUserService).and()
                         .successHandler(authenticationSuccessHandler).and().oauth2Client();
-            } else if (authenticationEntryPoint != null) {
+            } else {
                 // UI login / Basic auth
-                httpSec.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+                httpSec.exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login"));
             }
 
             // UI logout

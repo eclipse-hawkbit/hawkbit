@@ -88,8 +88,7 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public LogoutSuccessHandler oidcAuthenticationEntryPoint() {
+    public LogoutSuccessHandler oidcLogoutSuccessHandler() {
         SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
         logoutSuccessHandler.setDefaultTargetUrl("/");
         return logoutSuccessHandler;
@@ -99,7 +98,6 @@ public class OidcUserManagementAutoConfiguration {
      * @return the OpenID Connect authentication success handler
      */
     @Bean
-    @ConditionalOnMissingBean
     public AuthenticationSuccessHandler oidcAuthenticationSuccessHandler() {
         return new OidcAuthenticationSuccessHandler();
     }
@@ -108,7 +106,6 @@ public class OidcUserManagementAutoConfiguration {
      * @return the OpenID Connect logout handler
      */
     @Bean
-    @ConditionalOnMissingBean
     public LogoutHandler oidcLogoutHandler() {
         return new OidcLogoutHandler();
     }
