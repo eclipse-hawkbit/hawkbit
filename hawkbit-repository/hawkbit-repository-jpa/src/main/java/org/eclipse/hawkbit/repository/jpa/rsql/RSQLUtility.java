@@ -49,6 +49,8 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Lists;
+
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import cz.jirutka.rsql.parser.ast.AndNode;
@@ -218,6 +220,7 @@ public final class RSQLUtility {
         private int level;
         private boolean isOrLevel;
         private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
+        private boolean joinsNeeded;
 
         private final SimpleTypeConverter simpleTypeConverter;
 
@@ -231,8 +234,9 @@ public final class RSQLUtility {
             this.query = query;
             this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
-            simpleTypeConverter = new SimpleTypeConverter();
+            this.simpleTypeConverter = new SimpleTypeConverter();
             this.database = database;
+            this.joinsNeeded = false;
         }
 
         private void beginLevel(final boolean isOr) {
@@ -424,7 +428,13 @@ public final class RSQLUtility {
                 transformedValues.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
             }
 
+            this.joinsNeeded = this.joinsNeeded || areJoinsNeeded(node);
+
             return mapToPredicate(node, fieldPath, node.getArguments(), transformedValues, fieldName, finalProperty);
+        }
+
+        private boolean areJoinsNeeded(final ComparisonNode node) {
+            return !Lists.newArrayList("!=", "=out=").contains(node.getOperator().getSymbol());
         }
 
         // Exception squid:S2095 - see
@@ -611,6 +621,8 @@ public final class RSQLUtility {
                 return toNullOrNotInPredicate(fieldPath, transformedValues, outParams);
             }
 
+            clearOuterJoinsIfNotNeeded();
+
             return toOutWithSubQueryPredicate(fieldNames, transformedValues, enumField, outParams);
         }
 
@@ -722,10 +734,18 @@ public final class RSQLUtility {
                     return toNullOrNotEqualPredicate(fieldPath, sqlValue);
                 }
 
+                clearOuterJoinsIfNotNeeded();
+
                 return toNotEqualWithSubQueryPredicate(enumField, sqlValue, fieldNames);
             }
 
             return toNotEqualPredicate(fieldPath, transformedValue);
+        }
+
+        private void clearOuterJoinsIfNotNeeded() {
+            if (!joinsNeeded) {
+                root.getJoins().clear();
+            }
         }
 
         private Predicate toNotNullPredicate(final Path<Object> fieldPath) {
