@@ -115,7 +115,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null]not found ");
+                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null] not found ");
 
     }
 
@@ -131,8 +131,8 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 FileResource.createFileResourceBySha1(sha1Hash));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
-        verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=" + sha1Hash + ", artifactId=null, filename=null]not found ");
+        verifyResult(returnMessage, HttpStatus.NOT_FOUND, "Artifact for resource FileResource [sha1=" + sha1Hash
+                + ", artifactId=null, filename=null] not found ");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=12345, artifactId=null, filename=null]not found ");
+                "Artifact for resource FileResource [sha1=12345, artifactId=null, filename=null] not found ");
 
     }
 
@@ -159,8 +159,8 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
                 FileResource.createFileResourceBySha1(sha1Hash));
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
-        verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=" + sha1Hash + ", artifactId=null, filename=null]not found ");
+        verifyResult(returnMessage, HttpStatus.NOT_FOUND, "Artifact for resource FileResource [sha1=" + sha1Hash
+                + ", artifactId=null, filename=null] not found ");
 
     }
 
@@ -176,7 +176,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=2f532b93ed23b4341a81dc9b1ee8a1c44b5526ab, artifactId=null, filename=null]not found ");
+                "Artifact for resource FileResource [sha1=2f532b93ed23b4341a81dc9b1ee8a1c44b5526ab, artifactId=null, filename=null] not found ");
 
     }
 
@@ -258,7 +258,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=Test.txt]not found ");
+                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=Test.txt] not found ");
 
     }
 
@@ -274,7 +274,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=filename0]not found ");
+                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=filename0] not found ");
 
     }
 
@@ -289,7 +289,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND, "Artifact for resource FileResource [sha1=null, artifactId="
-                + artifacts.get(0).getId() + ", filename=null]not found ");
+                + artifacts.get(0).getId() + ", filename=null] not found ");
 
     }
 
@@ -320,7 +320,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null]not found ");
+                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null] not found ");
 
     }
 
@@ -340,7 +340,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
 
         final Message returnMessage = sendAndReceiveAuthenticationMessage(securityToken);
         verifyResult(returnMessage, HttpStatus.NOT_FOUND,
-                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null]not found ");
+                "Artifact for resource FileResource [sha1=null, artifactId=null, filename=null] not found ");
 
     }
 

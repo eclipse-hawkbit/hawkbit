@@ -10,10 +10,7 @@ package org.eclipse.hawkbit.ui.login;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.Cookie;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
@@ -45,7 +42,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -78,11 +74,8 @@ public abstract class AbstractHawkbitLoginUI extends UI {
 
     private static final String USER_PARAMETER = "user";
     private static final String TENANT_PARAMETER = "tenant";
-    private static final int HUNDRED_DAYS_IN_SECONDS = Math.toIntExact(TimeUnit.DAYS.toSeconds(100));
     private static final String LOGIN_TEXTFIELD = "login-textfield";
 
-    private static final String SP_LOGIN_USER = "sp-login-user";
-    private static final String SP_LOGIN_TENANT = "sp-login-tenant";
     private static final Pattern FORBIDDEN_COOKIE_CONTENT = Pattern.compile("(\\s|.)*(<|>)(\\s|.)*");
 
     private final transient ApplicationContext context;
@@ -96,8 +89,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     private final transient MultitenancyIndicator multiTenancyIndicator;
 
     private final boolean isDemo;
-
-    private boolean useCookie = true;
 
     private TextField username;
     private TextField tenant;
@@ -128,7 +119,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         setContent(buildContent());
 
         fillOutUsernameTenantFields();
-        readCookie();
     }
 
     private VerticalLayout buildContent() {
@@ -196,12 +186,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         if (tenant != null && params.containsKey(TENANT_PARAMETER) && !params.get(TENANT_PARAMETER).isEmpty()) {
             tenant.setValue(params.get(TENANT_PARAMETER).get(0));
             tenant.setVisible(false);
-            useCookie = false;
         }
 
         if (params.containsKey(USER_PARAMETER) && !params.get(USER_PARAMETER).isEmpty()) {
             username.setValue(params.get(USER_PARAMETER).get(0));
-            useCookie = false;
         }
     }
 
@@ -271,10 +259,10 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         if (multiTenancyIndicator.isMultiTenancySupported()) {
             final boolean textFieldsNotEmpty = hasTenantFieldText() && hasUserFieldText() && hashPasswordFieldText();
             if (textFieldsNotEmpty) {
-                login(tenant.getValue(), username.getValue(), password.getValue(), true);
+                login(tenant.getValue(), username.getValue(), password.getValue());
             }
         } else if (!multiTenancyIndicator.isMultiTenancySupported() && hasUserFieldText() && hashPasswordFieldText()) {
-            login(null, username.getValue(), password.getValue(), true);
+            login(null, username.getValue(), password.getValue());
         }
     }
 
@@ -379,87 +367,16 @@ public abstract class AbstractHawkbitLoginUI extends UI {
         return webBrowser.isIE() && webBrowser.getBrowserMajorVersion() < 11;
     }
 
-    private void readCookie() {
-        if (!useCookie) {
-            return;
-        }
-
-        final Cookie usernameCookie = getCookieByName(SP_LOGIN_USER);
-
-        if (usernameCookie != null) {
-            final String previousUser = usernameCookie.getValue();
-            if (isAllowedCookieValue(previousUser)) {
-                username.setValue(previousUser);
-                password.focus();
-            }
-        } else {
-            username.focus();
-        }
-
-        final Cookie tenantCookie = getCookieByName(SP_LOGIN_TENANT);
-
-        if (tenantCookie != null && multiTenancyIndicator.isMultiTenancySupported()) {
-            final String previousTenant = tenantCookie.getValue();
-            if (isAllowedCookieValue(previousTenant)) {
-                tenant.setValue(previousTenant.toUpperCase());
-            }
-        } else if (multiTenancyIndicator.isMultiTenancySupported()) {
-            tenant.focus();
-        } else {
-            username.focus();
-        }
-    }
-
     protected static boolean isAllowedCookieValue(final String previousTenant) {
         return !FORBIDDEN_COOKIE_CONTENT.matcher(previousTenant).matches();
     }
 
-    private void setCookies() {
-        if (multiTenancyIndicator.isMultiTenancySupported()) {
-            final Cookie tenantCookie = new Cookie(SP_LOGIN_TENANT, tenant.getValue().toUpperCase());
-            tenantCookie.setPath("/");
-            // 100 days
-            tenantCookie.setMaxAge(HUNDRED_DAYS_IN_SECONDS);
-            tenantCookie.setHttpOnly(true);
-            tenantCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
-            VaadinService.getCurrentResponse().addCookie(tenantCookie);
-        }
-
-        final Cookie usernameCookie = new Cookie(SP_LOGIN_USER, username.getValue());
-        usernameCookie.setPath("/");
-        // 100 days
-        usernameCookie.setMaxAge(HUNDRED_DAYS_IN_SECONDS);
-        usernameCookie.setHttpOnly(true);
-        usernameCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
-        VaadinService.getCurrentResponse().addCookie(usernameCookie);
-    }
-
-    private static Cookie getCookieByName(final String name) {
-        // Fetch all cookies from the request
-        final Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
-
-        if (cookies != null) {
-            // Iterate to find cookie by its name
-            for (final Cookie cookie : cookies) {
-                if (name.equals(cookie.getName())) {
-                    return cookie;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private void login(final String tenant, final String user, final String password, final boolean setCookies) {
+    private void login(final String tenant, final String user, final String password) {
         try {
             if (multiTenancyIndicator.isMultiTenancySupported()) {
                 vaadinSecurity.login(new TenantUserPasswordAuthenticationToken(tenant, user, password));
             } else {
                 vaadinSecurity.login(new UsernamePasswordAuthenticationToken(user, password));
-            }
-            /* set success login cookies */
-            if (setCookies && useCookie) {
-                setCookies();
             }
 
         } catch (final CredentialsExpiredException e) {
