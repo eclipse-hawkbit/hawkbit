@@ -78,7 +78,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OidcUserManagementAutoConfiguration {
 
     /**
-     * @return the oauth2 user details service to load a user from oidc user manager
+     * @return the oauth2 user details service to load a user from oidc user
+     *         manager
      */
     @Bean
     @ConditionalOnMissingBean
@@ -87,6 +88,9 @@ public class OidcUserManagementAutoConfiguration {
         return new JwtAuthoritiesOidcUserService(extractor);
     }
 
+    /**
+     * @return the logout success handler for OpenID Connect
+     */
     @Bean
     public LogoutSuccessHandler oidcLogoutSuccessHandler() {
         SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
@@ -111,8 +115,8 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     /**
-     * @return a jwt authorities extractor which interprets the roles of a user as
-     *         their authorities.
+     * @return a jwt authorities extractor which interprets the roles of a user
+     *         as their authorities.
      */
     @Bean
     @ConditionalOnMissingBean

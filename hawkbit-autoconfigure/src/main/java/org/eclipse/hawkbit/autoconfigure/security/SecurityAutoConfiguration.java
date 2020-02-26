@@ -89,7 +89,7 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * @return {@link LogoutHandler} bean
+     * @return {@link AuthenticationSuccessHandler} bean
      */
     @Bean
     @ConditionalOnMissingBean
