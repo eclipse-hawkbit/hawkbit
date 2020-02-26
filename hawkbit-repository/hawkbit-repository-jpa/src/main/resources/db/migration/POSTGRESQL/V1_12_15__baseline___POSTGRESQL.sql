@@ -272,7 +272,7 @@ CREATE TABLE sp_rollout(
     total_targets BIGINT,
     rollout_groups_created BIGINT,
     start_at BIGINT,
-    deleted SMALLINT,
+    deleted BOOLEAN,
     action_type INTEGER NOT NULL,
     approval_decided_by VARCHAR(64),
     approval_remark VARCHAR(255),
