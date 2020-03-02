@@ -72,9 +72,9 @@
       </developer>
       <developer>
          <id>laverman</id>
-         <email>Jeroen.Laverman@bosch-si.com</email>
-         <organization>Bosch Software Innovations GmbH</organization>
-         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <email>Jeroen.Laverman@bosch.io</email>
+         <organization>Bosch.IO GmbH</organization>
+         <organizationUrl>https://www.bosch.io</organizationUrl>
          <roles>
             <role>Lead</role>
             <role>Committer</role>
@@ -88,18 +88,18 @@
       </developer>
       <developer>
          <id>schabdo</id>
-         <email>Dominic.Schabel@bosch-si.com</email>
-         <organization>Bosch Software Innovations GmbH</organization>
-         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <email>Dominic.Schabel@bosch.io</email>
+         <organization>Bosch.IO GmbH</organization>
+         <organizationUrl>https://www.bosch.io</organizationUrl>
          <roles>
             <role>Committer</role>
          </roles>
       </developer>
       <developer>
          <id>stefbehl</id>
-         <email>Stefan.Behl@bosch-si.com</email>
-         <organization>Bosch Software Innovations GmbH</organization>
-         <organizationUrl>https://www.bosch-si.com</organizationUrl>
+         <email>Stefan.Behl@bosch.io</email>
+         <organization>Bosch.IO GmbH</organization>
+         <organizationUrl>https://www.bosch.io</organizationUrl>
          <roles>
             <role>Committer</role>
          </roles>
