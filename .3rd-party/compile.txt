@@ -67,6 +67,7 @@ org.ow2.asm:asm-analysis:jar:7.0:compile
 org.ow2.asm:asm-commons:jar:7.0:compile
 org.ow2.asm:asm-tree:jar:7.0:compile
 org.ow2.asm:asm:jar:7.0:compile
+org.postgresql:postgresql:jar:42.2.5:compile
 org.reactivestreams:reactive-streams:jar:1.0.2:compile
 org.slf4j:jul-to-slf4j:jar:1.7.26:compile
 org.slf4j:slf4j-api:jar:1.7.26:compile
