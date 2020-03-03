@@ -23,5 +23,5 @@ cp ./template/KEY-mysql "../$HAWKBIT_VERSION-mysql/KEY"
 cp ./template/Dockerfile "../$HAWKBIT_VERSION/Dockerfile"
 cp ./template/Dockerfile-mysql "../$HAWKBIT_VERSION-mysql/Dockerfile"
 
-sed -i '' -e "s/{{BASE_IMAGE}}/${BASE_IMAGE}/g; s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g" "../$HAWKBIT_VERSION/Dockerfile"
-sed -i '' -e "s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g; s/{{MARIADB_DRIVER_VERSION}}/$MARIADB_DRIVER_VERSION/g" "../$HAWKBIT_VERSION-mysql/Dockerfile"
+sed -i -e "s/{{BASE_IMAGE}}/${BASE_IMAGE}/g; s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g" "../$HAWKBIT_VERSION/Dockerfile"
+sed -i -e "s/{{HAWKBIT_VERSION}}/$HAWKBIT_VERSION/g; s/{{MARIADB_DRIVER_VERSION}}/$MARIADB_DRIVER_VERSION/g" "../$HAWKBIT_VERSION-mysql/Dockerfile"
