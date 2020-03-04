@@ -61,7 +61,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -87,10 +89,19 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     /**
+     * @return the logout success handler for OpenID Connect
+     */
+    @Bean
+    public LogoutSuccessHandler oidcLogoutSuccessHandler() {
+        SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+        logoutSuccessHandler.setDefaultTargetUrl("/");
+        return logoutSuccessHandler;
+    }
+
+    /**
      * @return the OpenID Connect authentication success handler
      */
     @Bean
-    @ConditionalOnMissingBean
     public AuthenticationSuccessHandler oidcAuthenticationSuccessHandler() {
         return new OidcAuthenticationSuccessHandler();
     }
@@ -99,7 +110,6 @@ public class OidcUserManagementAutoConfiguration {
      * @return the OpenID Connect logout handler
      */
     @Bean
-    @ConditionalOnMissingBean
     public LogoutHandler oidcLogoutHandler() {
         return new OidcLogoutHandler();
     }
