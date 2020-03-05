@@ -34,7 +34,7 @@ We offer a sandbox installation that is free for everyone to try out hawkBit. Ho
 
 In addition the following vendors offer free trial accounts for their hawkBit compatible products:
 
-- [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/)
+- [Bosch IoT Rollouts](https://developer.bosch-iot-suite.com/service/rollouts)
 - [Kynetics Update Factory](https://www.kynetics.com/iot-platform-update-factory)
 
 # Device Integration
