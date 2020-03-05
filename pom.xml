@@ -319,13 +319,14 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</header>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</header>
                   <validHeaders>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
