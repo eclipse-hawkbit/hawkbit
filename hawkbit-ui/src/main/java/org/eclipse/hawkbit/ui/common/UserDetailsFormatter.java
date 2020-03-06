@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.common;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -34,7 +36,7 @@ import com.vaadin.server.VaadinService;
 public final class UserDetailsFormatter {
 
     private static final String TRIM_APPENDIX = "...";
-    private static final String DETAIL_SEPERATOR = ", ";
+    private static final String DETAIL_SEPARATOR = ", ";
 
     private UserDetailsFormatter() {
     }
@@ -76,7 +78,7 @@ public final class UserDetailsFormatter {
      * 
      * @param baseEntity
      *            the entity
-     * @return the formatted 'last modefied by user name' (max 100 characters)
+     * @return the formatted 'last modified by user name' (max 100 characters)
      *         cannot be <null>
      */
     public static String loadAndFormatLastModifiedBy(final BaseEntity baseEntity) {
@@ -126,20 +128,14 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        String lastname = StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
+        String firstAndLastname = Stream.of(userPrincipal.getLastname(), userPrincipal.getFirstname())
+                .filter(name -> name != null && !name.isEmpty() && !name.equalsIgnoreCase(userPrincipal.getEmail()))
+                .collect(Collectors.joining(DETAIL_SEPARATOR));
 
-        if (!StringUtils.isEmpty(lastname)) {
-            lastname += DETAIL_SEPERATOR;
-        }
-
-        final String firstAndLastname = lastname + StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
-
-        final String trimmedUsername = trimAndFormatDetail(firstAndLastname, expectedNameLength);
-
-        if (StringUtils.isEmpty(trimmedUsername)) {
+        if (!StringUtils.isEmpty(firstAndLastname)) {
+            return trimAndFormatDetail(firstAndLastname, expectedNameLength);
+        } else
             return trimAndFormatDetail(userPrincipal.getLoginname(), expectedNameLength);
-        }
-        return trimmedUsername;
     }
 
     /**
