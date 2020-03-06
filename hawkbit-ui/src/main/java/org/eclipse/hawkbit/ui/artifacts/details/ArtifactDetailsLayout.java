@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,8 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -46,7 +49,10 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
+import com.vaadin.server.ErrorHandler;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -290,19 +296,71 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Button generateCell(final Table source, final Object itemId, final Object columnId) {
-                final String fileName = (String) table.getContainerDataSource().getItem(itemId)
-                        .getItemProperty(PROVIDED_FILE_NAME).getValue();
-                final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon",
-                        true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
-                deleteIcon.setData(itemId);
-                deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
-                return deleteIcon;
+            public HorizontalLayout generateCell(final Table source, final Object itemId, final Object columnId) {
+                HorizontalLayout actioncellLayout = new HorizontalLayout();
+                actioncellLayout.addComponent(getArtifactDeleteButton(table, itemId));
+                actioncellLayout.addComponent(getArtifactDownloadButton(table, itemId));
+                actioncellLayout.setImmediate(true);
+                return actioncellLayout;
+            }
+        });  
+    }
+
+    private Button getArtifactDeleteButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button deleteIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
+                i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
+                true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+        deleteIcon.setData(itemId);
+        deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
+        return deleteIcon;
+    }
+    
+    private Button getArtifactDownloadButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button downloadIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.ARTIFACT_FILE_DOWNLOAD_ICON, "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_ARTIFACT_DOWNLOAD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
+                true, FontAwesome.DOWNLOAD, SPUIButtonStyleNoBorder.class);
+        downloadIcon.setData(itemId);
+        FileDownloader fileDownloader = new FileDownloader(createStreamResource((Long) itemId));
+        fileDownloader.extend(downloadIcon);
+        fileDownloader.setErrorHandler(new ErrorHandler() {
+
+            /**
+             * Error handler for file downloader
+             */
+            private static final long serialVersionUID = 4030230501114422570L;
+
+            @Override
+            public void error(com.vaadin.server.ErrorEvent event) {
+                uINotification.displayValidationError(i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD_FAILURE_MSG));
             }
         });
+        return downloadIcon;
+    }
 
+    private StreamResource createStreamResource(final Long id) {
+
+        Optional<Artifact> artifact = this.artifactManagement.get(id);
+        if (artifact.isPresent()) {
+            Optional<AbstractDbArtifact> file = artifactManagement.loadArtifactBinary(artifact.get().getSha1Hash());
+            return new StreamResource(new StreamResource.StreamSource() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public InputStream getStream() {
+                    if (file.isPresent()) {
+                        return file.get().getFileInputStream();
+                    }
+                    return null;
+                }
+            }, artifact.get().getFilename());
+        }
+        return null;
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {

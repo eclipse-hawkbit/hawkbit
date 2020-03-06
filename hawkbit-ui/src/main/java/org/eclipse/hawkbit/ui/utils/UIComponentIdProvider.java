@@ -388,6 +388,11 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SOFTWARE_MODULE_TABLE = "upload.swModule.table";
 
     /**
+     * Artifact - file download button id
+     */
+    public static final String ARTIFACT_FILE_DOWNLOAD_ICON = "artifact.file.download.button";
+    
+    /**
      * Upload result popup close button.
      */
     public static final String UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE = "upload.resultwindow.close.button";
