@@ -34,7 +34,6 @@ import com.vaadin.server.VaadinService;
 public final class UserDetailsFormatter {
 
     private static final String TRIM_APPENDIX = "...";
-    private static final String DETAIL_SEPARATOR = ", ";
 
     private UserDetailsFormatter() {
     }
@@ -125,24 +124,7 @@ public final class UserDetailsFormatter {
         }
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
-        
-        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
-        String lastname = StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
-
-        if (!StringUtils.isEmpty(lastname) && !StringUtils.isEmpty(firstname)
-                && !StringUtils.equalsIgnoreCase(lastname, userPrincipal.getEmail())) {
-            lastname += DETAIL_SEPARATOR;
-        }
-
-        String firstAndLastname = lastname;        
-        if (!StringUtils.isEmpty(firstname) && !StringUtils.equalsIgnoreCase(firstname, userPrincipal.getEmail())) {
-            firstAndLastname += firstname;
-        }
-
-        if (!StringUtils.isEmpty(firstAndLastname)) {
-            return trimAndFormatDetail(firstAndLastname, expectedNameLength);
-        } else
-            return trimAndFormatDetail(userPrincipal.getLoginname(), expectedNameLength);
+        return trimAndFormatDetail(userPrincipal.getLoginname(), expectedNameLength);
     }
 
     /**
