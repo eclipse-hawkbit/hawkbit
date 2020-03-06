@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.common;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -127,10 +125,19 @@ public final class UserDetailsFormatter {
         }
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+        
+        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), "");
+        String lastname = StringUtils.defaultIfEmpty(userPrincipal.getLastname(), "");
 
-        String firstAndLastname = Stream.of(userPrincipal.getLastname(), userPrincipal.getFirstname())
-                .filter(name -> name != null && !name.isEmpty() && !name.equalsIgnoreCase(userPrincipal.getEmail()))
-                .collect(Collectors.joining(DETAIL_SEPARATOR));
+        if (!StringUtils.isEmpty(lastname) && !StringUtils.isEmpty(firstname)
+                && !StringUtils.equalsIgnoreCase(lastname, userPrincipal.getEmail())) {
+            lastname += DETAIL_SEPARATOR;
+        }
+
+        String firstAndLastname = lastname;        
+        if (!StringUtils.isEmpty(firstname) && !StringUtils.equalsIgnoreCase(firstname, userPrincipal.getEmail())) {
+            firstAndLastname += firstname;
+        }
 
         if (!StringUtils.isEmpty(firstAndLastname)) {
             return trimAndFormatDetail(firstAndLastname, expectedNameLength);
