@@ -130,7 +130,7 @@ public class TargetFilterQueryButtons extends Table {
         if (id != null) {
             button.setCaption(name);
         }
-        button.setDescription(name);
+        button.setDescription(null);
         button.setData(itemId);
         button.addClickListener(event -> customTargetTagFilterButtonClick.processButtonClick(event));
         return button;

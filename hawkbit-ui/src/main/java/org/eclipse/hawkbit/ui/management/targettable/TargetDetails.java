@@ -266,7 +266,7 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         sortedAttributes.forEach((key, value) -> {
             final HorizontalLayout conAttributeLayout = SPUIComponentProvider.createNameValueLayout(key.concat("  :  "),
                     value == null ? "" : value);
-            conAttributeLayout.setDescription(key.concat("  :  ") + value);
+            conAttributeLayout.setDescription(null);
             conAttributeLayout.addStyleName("label-style");
             attributesLayout.addComponent(conAttributeLayout);
         });

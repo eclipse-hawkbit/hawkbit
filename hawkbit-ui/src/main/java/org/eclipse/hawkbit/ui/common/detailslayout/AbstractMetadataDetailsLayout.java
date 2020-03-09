@@ -82,7 +82,7 @@ public abstract class AbstractMetadataDetailsLayout extends Table {
 
     private Button customMetadataDetailButton(final String metadataKey) {
         final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
-                "View " + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleNoBorder.class);
+                null, null, false, null, SPUIButtonStyleNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.BUTTON_TINY + " " + ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link"
                 + " " + "text-style");
