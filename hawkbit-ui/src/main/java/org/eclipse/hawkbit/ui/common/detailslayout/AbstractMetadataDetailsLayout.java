@@ -81,6 +81,7 @@ public abstract class AbstractMetadataDetailsLayout extends Table {
     }
 
     private Button customMetadataDetailButton(final String metadataKey) {
+        //TODO after Vaadin 8 migration: Enable tooltip again, currently it is set to [null] to avoid cross site scripting.
         final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
                 null, null, false, null, SPUIButtonStyleNoBorder.class);
         viewIcon.setData(metadataKey);
