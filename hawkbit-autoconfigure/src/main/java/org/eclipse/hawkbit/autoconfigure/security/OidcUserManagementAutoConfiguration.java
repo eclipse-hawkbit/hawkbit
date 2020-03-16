@@ -61,7 +61,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -84,6 +86,14 @@ public class OidcUserManagementAutoConfiguration {
     public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserDetailsService(
             final JwtAuthoritiesExtractor extractor) {
         return new JwtAuthoritiesOidcUserService(extractor);
+    }
+
+    /**
+     * @return the logout success handler for OpenID Connect
+     */
+    @Bean
+    public LogoutSuccessHandler oidcLogoutSuccessHandler() {
+        return new OidcLogoutSuccessHandler();
     }
 
     /**
@@ -211,6 +221,24 @@ class OidcLogoutHandler extends SecurityContextLogoutHandler {
             final RestTemplate restTemplate = new RestTemplate();
             restTemplate.getForEntity(builder.toUriString(), String.class);
         }
+    }
+}
+
+/**
+ * LogoutSuccessHandler that decides where to redirect to after logout, depending on
+ * the previously used auth mechanism
+ */
+class OidcLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+            throws IOException, ServletException {
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            this.setTargetUrlParameter(null);
+        } else {
+            this.setTargetUrlParameter("login");
+        }
+        super.onLogoutSuccess(request, response, authentication);
     }
 }
 
