@@ -266,6 +266,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     
     /**
+     * Retrieves an {@link Action} that matches the queried externalRef.
+     * 
      * @param externalRef
      *            of the action. See {@link Action#getExternalRef()}
      * @return the found {@link Action}
