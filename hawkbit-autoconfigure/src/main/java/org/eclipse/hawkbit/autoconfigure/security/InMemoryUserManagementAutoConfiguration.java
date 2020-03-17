@@ -93,11 +93,26 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         if (userPrincipals.isEmpty()) {
             final String name = securityProperties.getUser().getName();
             final String password = securityProperties.getUser().getPassword();
-            userPrincipals.add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT,
-                    PermissionUtils.createAllAuthorityList()));
+            List<GrantedAuthority> authorityList;
+            if (securityProperties.getUser().getRoles().isEmpty()) {
+                authorityList = PermissionUtils.createAllAuthorityList();
+            } else {
+                authorityList = createAuthoritiesFromList(securityProperties.getUser().getRoles());
+            }
+            userPrincipals
+                    .add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT, authorityList));
         }
 
         return new FixedInMemoryUserPrincipalUserDetailsService(userPrincipals);
+    }
+
+    private static List<GrantedAuthority> createAuthoritiesFromList(final List<String> userAuthorities) {
+        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userAuthorities.size());
+        for (final String permission : userAuthorities) {
+            grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
+            grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
+        }
+        return grantedAuthorityList;
     }
 
     private static class FixedInMemoryUserPrincipalUserDetailsService implements UserDetailsService {
