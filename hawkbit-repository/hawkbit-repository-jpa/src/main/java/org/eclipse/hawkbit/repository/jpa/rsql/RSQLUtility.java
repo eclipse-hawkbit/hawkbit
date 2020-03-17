@@ -209,6 +209,7 @@ public final class RSQLUtility {
     private static final class JpqQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
             implements RSQLVisitor<List<Predicate>, String> {
         private static final char ESCAPE_CHAR = '\\';
+        private static final List<String> NO_JOINS_OPERATOR = Lists.newArrayList("!=", "=out=");
 
         public static final Character LIKE_WILDCARD = '*';
 
@@ -433,8 +434,8 @@ public final class RSQLUtility {
             return mapToPredicate(node, fieldPath, node.getArguments(), transformedValues, fieldName, finalProperty);
         }
 
-        private boolean areJoinsNeeded(final ComparisonNode node) {
-            return !Lists.newArrayList("!=", "=out=").contains(node.getOperator().getSymbol());
+        private static boolean areJoinsNeeded(final ComparisonNode node) {
+            return !NO_JOINS_OPERATOR.contains(node.getOperator().getSymbol());
         }
 
         // Exception squid:S2095 - see
@@ -629,14 +630,9 @@ public final class RSQLUtility {
         private Predicate toNullOrNotInPredicate(final Path<Object> fieldPath, final List<Object> transformedValues,
                 final List<String> outParams) {
 
-            Predicate inPredicate;
             final Path<String> pathOfString = pathOfString(fieldPath);
-
-            if (outParams.isEmpty()) {
-                inPredicate = fieldPath.in(transformedValues);
-            } else {
-                inPredicate = cb.upper(pathOfString).in(outParams);
-            }
+            final Predicate inPredicate = outParams.isEmpty() ? fieldPath.in(transformedValues)
+                    : cb.upper(pathOfString).in(outParams);
 
             return cb.or(cb.isNull(pathOfString), cb.not(inPredicate));
         }
@@ -652,15 +648,13 @@ public final class RSQLUtility {
             final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
             final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
 
-            Predicate inPredicate;
-            if (!outParams.isEmpty()) {
-                inPredicate = cb.upper(expressionToCompare).in(outParams);
-            } else {
-                inPredicate = expressionToCompare.in(transformedValues);
-            }
+            final Predicate inPredicate = outParams.isEmpty() ? cb.upper(expressionToCompare).in(transformedValues)
+                    : cb.upper(expressionToCompare).in(outParams);
 
-            subquery.select(subqueryRoot).where(cb.and(cb.equal(root.get(enumField.identifierFieldName()),
-                    subqueryRoot.get(enumField.identifierFieldName())), inPredicate));
+            final Predicate equalPredicate = cb.equal(root.get(enumField.identifierFieldName()),
+                    subqueryRoot.get(enumField.identifierFieldName()));
+
+            subquery.select(subqueryRoot).where(cb.and(equalPredicate, inPredicate));
 
             return cb.not(cb.exists(subquery));
         }
@@ -724,14 +718,14 @@ public final class RSQLUtility {
 
             if (transformedValue instanceof String) {
                 if (StringUtils.isEmpty(transformedValue)) {
-                    return toNotNullOrEmptyPredicate(fieldPath);
+                    return toNotNullAndNotEmptyPredicate(fieldPath);
                 }
 
                 final String sqlValue = toSQL((String) transformedValue);
                 final String[] fieldNames = getSubAttributesFrom(finalProperty);
 
                 if (isSimpleField(fieldNames, enumField.isMap())) {
-                    return toNullOrNotEqualPredicate(fieldPath, sqlValue);
+                    return toNullOrNotLikePredicate(fieldPath, sqlValue);
                 }
 
                 clearOuterJoinsIfNotNeeded();
@@ -756,12 +750,12 @@ public final class RSQLUtility {
             return cb.notEqual(fieldPath, transformedValue);
         }
 
-        private Predicate toNullOrNotEqualPredicate(final Path<Object> fieldPath, final String sqlValue) {
+        private Predicate toNullOrNotLikePredicate(final Path<Object> fieldPath, final String sqlValue) {
             return cb.or(cb.isNull(pathOfString(fieldPath)),
                     cb.notLike(cb.upper(pathOfString(fieldPath)), sqlValue, ESCAPE_CHAR));
         }
 
-        private Predicate toNotNullOrEmptyPredicate(final Path<Object> fieldPath) {
+        private Predicate toNotNullAndNotEmptyPredicate(final Path<Object> fieldPath) {
             return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
         }
 
