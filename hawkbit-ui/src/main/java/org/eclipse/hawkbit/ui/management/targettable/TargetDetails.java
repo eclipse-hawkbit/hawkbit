@@ -266,7 +266,8 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         sortedAttributes.forEach((key, value) -> {
             final HorizontalLayout conAttributeLayout = SPUIComponentProvider.createNameValueLayout(key.concat("  :  "),
                     value == null ? "" : value);
-            conAttributeLayout.setDescription(key.concat("  :  ") + value);
+            //After Vaadin 8 migration: Enable tooltip again, currently it is set to [null] to avoid cross site scripting.
+            conAttributeLayout.setDescription(null);
             conAttributeLayout.addStyleName("label-style");
             attributesLayout.addComponent(conAttributeLayout);
         });

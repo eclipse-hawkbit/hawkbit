@@ -130,7 +130,8 @@ public class TargetFilterQueryButtons extends Table {
         if (id != null) {
             button.setCaption(name);
         }
-        button.setDescription(name);
+        //After Vaadin 8 migration: Enable tooltip again, currently it is set to [null] to avoid cross site scripting.
+        button.setDescription(null);
         button.setData(itemId);
         button.addClickListener(event -> customTargetTagFilterButtonClick.processButtonClick(event));
         return button;
