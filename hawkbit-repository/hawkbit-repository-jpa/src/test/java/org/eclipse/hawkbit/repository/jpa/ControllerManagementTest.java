@@ -1384,7 +1384,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Optional<Action> foundAction = controllerManagement.getActionByExternalRef(knownExternalRef);
 
         // THEN
-        assertThat(foundAction.isPresent()).isTrue();
+        assertThat(foundAction).isPresent();
         assertThat(foundAction.get().getId()).isEqualTo(actionId);
     }
 
