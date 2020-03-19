@@ -91,12 +91,9 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
             final String name = securityProperties.getUser().getName();
             final String password = securityProperties.getUser().getPassword();
             final List<String> roles = securityProperties.getUser().getRoles();
-            List<GrantedAuthority> authorityList;
-            if (roles.isEmpty()) {
-                authorityList = PermissionUtils.createAllAuthorityList();
-            } else {
-                authorityList = createAuthoritiesFromList(roles);
-            }
+            List<GrantedAuthority> authorityList = roles.isEmpty()
+                    ? PermissionUtils.createAllAuthorityList()
+                    : createAuthoritiesFromList(roles);
             userPrincipals
                     .add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT, authorityList));
         }
