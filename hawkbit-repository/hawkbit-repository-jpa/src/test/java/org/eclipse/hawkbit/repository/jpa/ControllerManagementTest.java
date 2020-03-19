@@ -1366,6 +1366,29 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verify that getting a single action using externalRef works")
+    public void getActionUsingSingleExternalRef() {
+
+        final String knownControllerId = "controllerId";
+        final String knownExternalRef = "externalRefId";
+        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
+
+        // GIVEN
+        testdataFactory.createTarget(knownControllerId);
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(knownDistributionSet.getId(),
+                knownControllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        controllerManagement.updateActionExternalRef(actionId, knownExternalRef);
+        
+        // WHEN
+        final Optional<Action> foundAction = controllerManagement.getActionByExternalRef(knownExternalRef);
+
+        // THEN
+        assertThat(foundAction).isPresent();
+        assertThat(foundAction.get().getId()).isEqualTo(actionId);
+    }
+
+    @Test
     @Description("Verify that a null externalRef cannot be assigned to an action")
     public void externalRefCannotBeNull() {
         assertThatExceptionOfType(ConstraintViolationException.class)
