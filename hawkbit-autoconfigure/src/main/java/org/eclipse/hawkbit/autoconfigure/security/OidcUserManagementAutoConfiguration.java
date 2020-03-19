@@ -234,7 +234,7 @@ class OidcLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
         if (authentication instanceof OAuth2AuthenticationToken) {
-            this.setTargetUrlParameter(null);
+            this.setTargetUrlParameter("/");
         } else {
             this.setTargetUrlParameter("login");
         }
