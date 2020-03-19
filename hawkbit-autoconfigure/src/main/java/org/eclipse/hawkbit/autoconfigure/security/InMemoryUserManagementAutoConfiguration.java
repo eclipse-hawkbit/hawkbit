@@ -70,16 +70,13 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
 
         final List<UserPrincipal> userPrincipals = new ArrayList<>();
         for (final MultiUserProperties.User user : multiUserProperties.getUsers()) {
+            final List<String> permissions = user.getPermissions();
             List<GrantedAuthority> authorityList;
             // Allows ALL as a shorthand for all permissions
-            if (user.getPermissions().size() == 1 && "ALL".equals(user.getPermissions().get(0))) {
+            if (permissions.size() == 1 && "ALL".equals(permissions.get(0))) {
                 authorityList = PermissionUtils.createAllAuthorityList();
             } else {
-                authorityList = new ArrayList<>(user.getPermissions().size());
-                for (final String permission : user.getPermissions()) {
-                    authorityList.add(new SimpleGrantedAuthority(permission));
-                    authorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
-                }
+                authorityList = createAuthoritiesFromList(permissions);
             }
 
             final UserPrincipal userPrincipal = new UserPrincipal(user.getUsername(), user.getPassword(),
@@ -93,11 +90,12 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         if (userPrincipals.isEmpty()) {
             final String name = securityProperties.getUser().getName();
             final String password = securityProperties.getUser().getPassword();
+            final List<String> roles = securityProperties.getUser().getRoles();
             List<GrantedAuthority> authorityList;
-            if (securityProperties.getUser().getRoles().isEmpty()) {
+            if (roles.isEmpty()) {
                 authorityList = PermissionUtils.createAllAuthorityList();
             } else {
-                authorityList = createAuthoritiesFromList(securityProperties.getUser().getRoles());
+                authorityList = createAuthoritiesFromList(roles);
             }
             userPrincipals
                     .add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT, authorityList));
