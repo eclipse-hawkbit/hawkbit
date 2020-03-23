@@ -93,9 +93,7 @@ public class OidcUserManagementAutoConfiguration {
      */
     @Bean
     public LogoutSuccessHandler oidcLogoutSuccessHandler() {
-        SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-        logoutSuccessHandler.setDefaultTargetUrl("/");
-        return logoutSuccessHandler;
+        return new OidcLogoutSuccessHandler();
     }
 
     /**
@@ -223,6 +221,24 @@ class OidcLogoutHandler extends SecurityContextLogoutHandler {
             final RestTemplate restTemplate = new RestTemplate();
             restTemplate.getForEntity(builder.toUriString(), String.class);
         }
+    }
+}
+
+/**
+ * LogoutSuccessHandler that decides where to redirect to after logout, depending on
+ * the previously used auth mechanism
+ */
+class OidcLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+            throws IOException, ServletException {
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            this.setTargetUrlParameter("/");
+        } else {
+            this.setTargetUrlParameter("login");
+        }
+        super.onLogoutSuccess(request, response, authentication);
     }
 }
 
