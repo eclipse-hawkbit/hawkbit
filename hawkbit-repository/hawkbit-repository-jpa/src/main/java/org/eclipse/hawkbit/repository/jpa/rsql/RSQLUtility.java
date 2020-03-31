@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -372,33 +374,40 @@ public final class RSQLUtility {
          *            dot notated field path
          * @return the Path for a field
          */
-        private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
-            Path<Object> fieldPath = null;
-            final String[] split = getSubAttributesFrom(finalProperty);
 
+        private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
+            return (Path<Object>) getFieldPath(root, getSubAttributesFrom(finalProperty), enumField.isMap(),
+                    this::getJoinFieldPath);
+        }
+
+        private Path<?> getJoinFieldPath(final Path<?> fieldPath, final String fieldNameSplit) {
+            if (fieldPath instanceof PluralJoin) {
+                final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
+                final From<?, Object> joinParent = join.getParent();
+                final Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
+                if (currentJoinOfType.isPresent() && isOrLevel) {
+                    // remove the additional join and use the existing one
+                    joinParent.getJoins().remove(join);
+                    return currentJoinOfType.get();
+                } else {
+                    final Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
+                    addCurrentJoin(newJoin);
+                    return newJoin;
+                }
+            }
+            return fieldPath;
+        }
+
+        private static Path<?> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
+                final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
+            Path<?> fieldPath = null;
             for (int i = 0; i < split.length; i++) {
-                final boolean isMapKeyField = enumField.isMap() && i == (split.length - 1);
-                if (isMapKeyField) {
+                if (isMapKeyField && i == (split.length - 1)) {
                     return fieldPath;
                 }
-
                 final String fieldNameSplit = split[i];
                 fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
-                if (fieldPath instanceof PluralJoin) {
-                    final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
-                    final From<?, Object> joinParent = join.getParent();
-                    final Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
-                    if (currentJoinOfType.isPresent() && isOrLevel) {
-                        // remove the additional join and use the existing one
-                        joinParent.getJoins().remove(join);
-                        fieldPath = currentJoinOfType.get();
-                    } else {
-                        final Join<Object, Object> newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
-                        addCurrentJoin(newJoin);
-                        fieldPath = newJoin;
-                    }
-
-                }
+                fieldPath = joinFieldPathProvider.apply(fieldPath, fieldNameSplit);
             }
             return fieldPath;
         }
@@ -637,26 +646,12 @@ public final class RSQLUtility {
             return cb.or(cb.isNull(pathOfString), cb.not(inPredicate));
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         private Predicate toOutWithSubQueryPredicate(final String[] fieldNames, final List<Object> transformedValues,
                 final A enumField, final List<String> outParams) {
-
-            final Class<?> javaType = root.getJavaType();
-            final Subquery<?> subquery = query.subquery(javaType);
-            final Root subqueryRoot = subquery.from(javaType);
-
-            final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
-            final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
-
-            final Predicate inPredicate = outParams.isEmpty() ? cb.upper(expressionToCompare).in(transformedValues)
-                    : cb.upper(expressionToCompare).in(outParams);
-
-            final Predicate equalPredicate = cb.equal(root.get(enumField.identifierFieldName()),
-                    subqueryRoot.get(enumField.identifierFieldName()));
-
-            subquery.select(subqueryRoot).where(cb.and(equalPredicate, inPredicate));
-
-            return cb.not(cb.exists(subquery));
+            final Function<Expression<String>, Predicate> inPredicateProvider = expressionToCompare -> outParams
+                    .isEmpty() ? cb.upper(expressionToCompare).in(transformedValues)
+                            : cb.upper(expressionToCompare).in(outParams);
+            return toNotExistsSubQueryPredicate(fieldNames, enumField, inPredicateProvider);
         }
 
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
@@ -759,24 +754,26 @@ public final class RSQLUtility {
             return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         private Predicate toNotEqualWithSubQueryPredicate(final A enumField, final String sqlValue,
                 final String[] fieldNames) {
+            final Function<Expression<String>, Predicate> likePredicateProvider = expressionToCompare -> cb
+                    .like(cb.upper(expressionToCompare), sqlValue);
+            return toNotExistsSubQueryPredicate(fieldNames, enumField, likePredicateProvider);
+        }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private Predicate toNotExistsSubQueryPredicate(final String[] fieldNames, final A enumField,
+                final Function<Expression<String>, Predicate> subQueryPredicateProvider) {
             final Class<?> javaType = root.getJavaType();
-            final Subquery<?> subQuery = query.subquery(javaType);
-            final Root subQueryRoot = subQuery.from(javaType);
-
-            final Path<?> innerFieldPath = getInnerFieldPath(subQueryRoot, fieldNames, enumField.isMap());
+            final Subquery<?> subquery = query.subquery(javaType);
+            final Root subqueryRoot = subquery.from(javaType);
+            final Predicate equalPredicate = cb.equal(root.get(enumField.identifierFieldName()),
+                    subqueryRoot.get(enumField.identifierFieldName()));
+            final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
             final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
-
-            subQuery.select(subQueryRoot)
-                    .where(cb.and(
-                            cb.equal(root.get(enumField.identifierFieldName()),
-                                    subQueryRoot.get(enumField.identifierFieldName())),
-                            cb.like(cb.upper(expressionToCompare), sqlValue)));
-
-            return cb.not(cb.exists(subQuery));
+            final Predicate subQueryPredicate = subQueryPredicateProvider.apply(expressionToCompare);
+            subquery.select(subqueryRoot).where(cb.and(equalPredicate, subQueryPredicate));
+            return cb.not(cb.exists(subquery));
         }
 
         private static String[] getSubAttributesFrom(final String property) {
@@ -804,17 +801,16 @@ public final class RSQLUtility {
 
         private static Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
                 final boolean isMapKeyField) {
-            Path<?> innerFieldPath = subqueryRoot;
-            for (int i = 0; i < split.length; i++) {
-                if (isMapKeyField && i == (split.length - 1)) {
-                    break;
-                }
-                innerFieldPath = innerFieldPath.get(split[i]);
-                if (innerFieldPath instanceof Join) {
-                    innerFieldPath = subqueryRoot.join(split[i], JoinType.INNER);
-                }
+            return getFieldPath(subqueryRoot, split, isMapKeyField,
+                    (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit));
+        }
+
+        private static Path<?> getInnerJoinFieldPath(final Root<?> subqueryRoot, final Path<?> fieldPath,
+                final String fieldNameSplit) {
+            if (fieldPath instanceof Join) {
+                return subqueryRoot.join(fieldNameSplit, JoinType.INNER);
             }
-            return innerFieldPath;
+            return fieldPath;
         }
 
         private String toSQL(final String transformedValue) {
