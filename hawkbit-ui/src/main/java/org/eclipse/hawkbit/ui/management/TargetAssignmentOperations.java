@@ -124,15 +124,17 @@ public final class TargetAssignmentOperations {
                 notification
                         .displaySuccess(i18n.getMessage("message.target.assignment", assignmentResult.getAssigned()));
             }
-            if (assignmentResult.getAlreadyAssigned() > 0) {
-                notification.displaySuccess(
-                        i18n.getMessage("message.target.alreadyAssigned", assignmentResult.getAlreadyAssigned()));
-            }
 
             final Set<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toSet());
             refreshPinnedDetails(dsIds, targetIds, managementUIState, eventBus, eventSource);
 
             notification.displaySuccess(i18n.getMessage("message.target.ds.assign.success"));
+
+            if (assignmentResult.getAlreadyAssigned() > 0) {
+                notification.displaySuccess(
+                        i18n.getMessage("message.target.alreadyAssigned", assignmentResult.getAlreadyAssigned()));
+            }
+
             eventBus.publish(eventSource, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
         } catch (final MultiAssignmentIsNotEnabledException e) {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
