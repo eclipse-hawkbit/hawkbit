@@ -81,4 +81,13 @@ public interface FieldNameProvider {
     default boolean isMap() {
         return false;
     }
+
+    /**
+     * Returns the name of the field, that identifies the entity.
+     * 
+     * @return the name of the identifier, by default 'id'
+     */
+    default String identifierFieldName() {
+        return "id";
+    }
 }

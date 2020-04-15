@@ -25,6 +25,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Attribute;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -74,6 +75,11 @@ public class RSQLUtilityTest {
     private CriteriaQuery<SoftwareModule> criteriaQueryMock;
     @Mock
     private CriteriaBuilder criteriaBuilderMock;
+
+    @Mock
+    private Subquery<SoftwareModule> subqueryMock;
+    @Mock
+    private Root<SoftwareModule> subqueryRootMock;
 
     private final Database testDb = Database.H2;
 
@@ -202,25 +208,52 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsNotLikePredicate() {
+    public void correctRsqlBuildsSimpleNotLikePredicate() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+
+        when(criteriaBuilderMock.isNull(any(Expression.class))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.notLike(any(Expression.class), anyString(), eq('\\')))
-                .thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+
         // test
         RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
                 criteriaQueryMock, criteriaBuilderMock);
 
         // verification
-        verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
+        verify(criteriaBuilderMock, times(1)).or(any(Predicate.class), any(Predicate.class));
+        verify(criteriaBuilderMock, times(1)).isNull(eq(pathOfString(baseSoftwareModuleRootMock)));
         verify(criteriaBuilderMock, times(1)).notLike(eq(pathOfString(baseSoftwareModuleRootMock)),
                 eq("abc".toUpperCase()), eq('\\'));
+    }
+
+    @Test
+    public void correctRsqlBuildsNotSimpleNotLikePredicate() {
+        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        // with this query a subquery has to be made, so it is no simple query
+        final String correctRsql = "type!=abc";
+        when(baseSoftwareModuleRootMock.get(anyString())).thenReturn(baseSoftwareModuleRootMock);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+
+        when(subqueryRootMock.get(anyString())).thenReturn(mock(Path.class));
+
+        when(criteriaBuilderMock.and(any(), any())).thenReturn(mock(Predicate.class));
+
+        when(criteriaQueryMock.subquery(SoftwareModule.class)).thenReturn(subqueryMock);
+
+        when(subqueryMock.from(SoftwareModule.class)).thenReturn(subqueryRootMock);
+        when(subqueryMock.select(subqueryRootMock)).thenReturn(subqueryMock);
+
+        // test
+        RSQLUtility.parse(correctRsql, SoftwareModuleFields.class, null, testDb).toPredicate(baseSoftwareModuleRootMock,
+                criteriaQueryMock, criteriaBuilderMock);
+
+        // verification
+        verify(criteriaBuilderMock, times(1)).not(criteriaBuilderMock.exists(eq(subqueryMock)));
     }
 
     @Test

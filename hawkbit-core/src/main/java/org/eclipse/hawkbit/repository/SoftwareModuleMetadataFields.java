@@ -41,4 +41,9 @@ public enum SoftwareModuleMetadataFields implements FieldNameProvider {
     public String getFieldName() {
         return fieldName;
     }
+
+    @Override
+    public String identifierFieldName() {
+        return KEY.getFieldName();
+    }
 }
