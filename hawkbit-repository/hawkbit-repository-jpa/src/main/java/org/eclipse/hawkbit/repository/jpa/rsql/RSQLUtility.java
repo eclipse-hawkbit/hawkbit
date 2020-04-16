@@ -123,14 +123,14 @@ public final class RSQLUtility {
      *            be <code>null</code>
      * @param database
      *            in use
-     * 
+     *
      * @return an specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
-     * 
+     *
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer,
@@ -374,10 +374,9 @@ public final class RSQLUtility {
          *            dot notated field path
          * @return the Path for a field
          */
-
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             return (Path<Object>) getFieldPath(root, getSubAttributesFrom(finalProperty), enumField.isMap(),
-                    this::getJoinFieldPath);
+                    this::getJoinFieldPath).orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
         }
 
         private Path<?> getJoinFieldPath(final Path<?> fieldPath, final String fieldNameSplit) {
@@ -398,18 +397,17 @@ public final class RSQLUtility {
             return fieldPath;
         }
 
-        private static Path<?> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
-                final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
+        private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
+                                                      final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
             Path<?> fieldPath = null;
             for (int i = 0; i < split.length; i++) {
-                if (isMapKeyField && i == (split.length - 1)) {
-                    return fieldPath;
+                if (!(isMapKeyField && i == (split.length - 1))) {
+                    final String fieldNameSplit = split[i];
+                    fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
+                    fieldPath = joinFieldPathProvider.apply(fieldPath, fieldNameSplit);
                 }
-                final String fieldNameSplit = split[i];
-                fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
-                fieldPath = joinFieldPathProvider.apply(fieldPath, fieldNameSplit);
             }
-            return fieldPath;
+            return Optional.ofNullable(fieldPath);
         }
 
         @Override
@@ -800,9 +798,9 @@ public final class RSQLUtility {
         }
 
         private static Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
-                final boolean isMapKeyField) {
+                                                 final boolean isMapKeyField) {
             return getFieldPath(subqueryRoot, split, isMapKeyField,
-                    (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit));
+                    (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit)).orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
         }
 
         private static Path<?> getInnerJoinFieldPath(final Root<?> subqueryRoot, final Path<?> fieldPath,
