@@ -239,7 +239,9 @@ public class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.get(anyString())).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
 
-        when(subqueryRootMock.get(anyString())).thenReturn(mock(Path.class));
+        final Path pathMock = mock(Path.class);
+        when(pathMock.get(anyString())).thenReturn(pathMock);
+        when(subqueryRootMock.get(anyString())).thenReturn(pathMock);
 
         when(criteriaBuilderMock.and(any(), any())).thenReturn(mock(Predicate.class));
 
