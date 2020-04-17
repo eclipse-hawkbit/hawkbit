@@ -84,6 +84,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
 
     public static final String MESSAGE_UPLOAD_ACTION = "upload.action";
+    
+    public static final String MESSAGE_UPLOAD_CANCEL = "message.upload.artifact.cancel";
 
     public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
 
@@ -184,6 +186,10 @@ public final class UIMessageIdProvider {
     public static final String CAPTION_ARTIFACT_UPLOAD_PROGRESS = "artifact.upload.progress.caption";
 
     public static final String CAPTION_ARTIFACT_UPLOAD_REASON = "artifact.upload.reason.caption";
+    
+    public static final String CAPTION_ARTIFACT_UPLOAD_ACTION = "artifact.upload.action.caption";
+    
+    public static final String CAPTION_ARTIFACT_UPLOAD_CANCEL_CONFIRM = "caption.cancel.upload.artifact.confirmbox";
 
     public static final String CAPTION_ARTIFACT_FILENAME = "artifact.filename.caption";
 

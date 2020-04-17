@@ -96,7 +96,8 @@ public class UploadProgressButtonLayout extends VerticalLayout {
         this.softwareModuleManagement = softwareManagement;
         this.upload = new UploadFixed();
         this.uploadLock = uploadLock;
-
+        //store "upload" object in uploadProgressInfoWindow" to invoke "interruptUpload" on CancelUpload Action
+        this.uploadInfoWindow.setUpload(this.upload); 
         createComponents();
         buildLayout();
         restoreState();

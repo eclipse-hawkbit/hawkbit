@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -35,6 +37,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.ProgressBarRenderer;
 import com.vaadin.ui.themes.ValoTheme;
@@ -51,6 +54,7 @@ public class UploadProgressInfoWindow extends Window {
     private static final String COLUMN_PROGRESS = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_PROGRESS;
     private static final String COLUMN_FILE_NAME = UIMessageIdProvider.CAPTION_ARTIFACT_FILENAME;
     private static final String COLUMN_STATUS = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_STATUS;
+    private static final String COLUMN_ACTION = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_ACTION;
     private static final String COLUMN_REASON = UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_REASON;
     private static final String COLUMN_SOFTWARE_MODULE = UIMessageIdProvider.CAPTION_SOFTWARE_MODULE;
 
@@ -73,6 +77,8 @@ public class UploadProgressInfoWindow extends Window {
     private Label windowCaption;
 
     private Button closeButton;
+
+    private UploadFixed upload;
 
     UploadProgressInfoWindow(final UIEventBus eventBus, final ArtifactUploadState artifactUploadState,
             final VaadinMessageSource i18n) {
@@ -153,15 +159,37 @@ public class UploadProgressInfoWindow extends Window {
     private void setGridColumnProperties() {
         grid.getColumn(COLUMN_STATUS).setRenderer(new StatusRenderer());
         grid.getColumn(COLUMN_PROGRESS).setRenderer(new ProgressBarRenderer());
-        grid.setColumnOrder(COLUMN_STATUS, COLUMN_PROGRESS, COLUMN_FILE_NAME, COLUMN_SOFTWARE_MODULE,
+        grid.getColumn(COLUMN_ACTION).setRenderer(new HtmlButtonRenderer(this::onCancel));
+
+        grid.setColumnOrder(COLUMN_STATUS, COLUMN_ACTION, COLUMN_PROGRESS, COLUMN_FILE_NAME, COLUMN_SOFTWARE_MODULE,
                 COLUMN_REASON);
         setColumnWidth();
         grid.getColumn(COLUMN_STATUS).setHeaderCaption(i18n.getMessage(COLUMN_STATUS));
+        grid.getColumn(COLUMN_ACTION).setHeaderCaption(i18n.getMessage(COLUMN_ACTION));
         grid.getColumn(COLUMN_PROGRESS).setHeaderCaption(i18n.getMessage(COLUMN_PROGRESS));
         grid.getColumn(COLUMN_FILE_NAME).setHeaderCaption(i18n.getMessage(COLUMN_FILE_NAME));
         grid.getColumn(COLUMN_SOFTWARE_MODULE).setHeaderCaption(i18n.getMessage(COLUMN_SOFTWARE_MODULE));
         grid.getColumn(COLUMN_REASON).setHeaderCaption(i18n.getMessage(COLUMN_REASON));
-        grid.setFrozenColumnCount(5);
+        grid.setFrozenColumnCount(6);
+    }
+
+    private void onCancel(final RendererClickEvent event) {
+
+        Item item = grid.getContainerDataSource().getItem(event.getItemId());
+        if (STATUS_INPROGRESS.equals(item.getItemProperty(COLUMN_STATUS).getValue())) {
+            Object fileName = item.getItemProperty(COLUMN_FILE_NAME).getValue();
+            final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_UPLOAD_CANCEL_CONFIRM),
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_UPLOAD_CANCEL, fileName),
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                    ok -> {
+                        if (ok) {
+                            upload.interruptUpload();
+                        }
+                    });
+            UI.getCurrent().addWindow(confirmDialog.getWindow());
+            confirmDialog.getWindow().bringToFront();
+        }
     }
 
     private Grid createGrid() {
@@ -178,6 +206,7 @@ public class UploadProgressInfoWindow extends Window {
     private static IndexedContainer getGridContainer() {
         final IndexedContainer uploadContainer = new IndexedContainer();
         uploadContainer.addContainerProperty(COLUMN_STATUS, String.class, "Active");
+        uploadContainer.addContainerProperty(COLUMN_ACTION, String.class, FontAwesome.REMOVE.getHtml());
         uploadContainer.addContainerProperty(COLUMN_FILE_NAME, String.class, null);
         uploadContainer.addContainerProperty(COLUMN_PROGRESS, Double.class, 0D);
         uploadContainer.addContainerProperty(COLUMN_REASON, String.class, "");
@@ -202,6 +231,7 @@ public class UploadProgressInfoWindow extends Window {
 
     private void setColumnWidth() {
         grid.getColumn(COLUMN_STATUS).setWidth(60);
+        grid.getColumn(COLUMN_ACTION).setWidth(50);
         grid.getColumn(COLUMN_PROGRESS).setWidth(150);
         grid.getColumn(COLUMN_FILE_NAME).setWidth(200);
         grid.getColumn(COLUMN_REASON).setWidth(290);
@@ -277,7 +307,7 @@ public class UploadProgressInfoWindow extends Window {
     }
 
     private void setPopupSizeInMinMode() {
-        mainLayout.setWidth(900, Unit.PIXELS);
+        mainLayout.setWidth(950, Unit.PIXELS);
         mainLayout.setHeight(510, Unit.PIXELS);
     }
 
@@ -352,5 +382,16 @@ public class UploadProgressInfoWindow extends Window {
             return "";
         }
         return failureReason;
+    }
+    
+    /**
+     * This method is to store "upload" object to invoke "interruptUpload" api on
+     * CancelUpload Action
+     * 
+     * @param upload
+     *            UploadFixed
+     */
+    public void setUpload(UploadFixed upload) {
+        this.upload = upload;
     }
 }
