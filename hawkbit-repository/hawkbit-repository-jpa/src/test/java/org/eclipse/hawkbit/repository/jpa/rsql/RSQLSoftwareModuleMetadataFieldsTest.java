@@ -71,9 +71,9 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "==''", 1);
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "!=''", 6);
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "==1", 1);
-        assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "!=1", 5);
+        assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "!=1", 6);
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "=in=(1,2)", 2);
-        assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "=out=(1,2)", 4);
+        assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "=out=(1,2)", 5);
     }
 
     @Test

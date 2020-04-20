@@ -80,7 +80,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=in=("
                 + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=out=("
-                + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 1);
+                + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 2);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version=in=("
                 + TestdataFactory.DEFAULT_VERSION + ",notexist)", 2);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version=out=("
-                + TestdataFactory.DEFAULT_VERSION + ",notexist)", 0);
+                + TestdataFactory.DEFAULT_VERSION + ",notexist)", 1);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedFilterQueriesSize) {
