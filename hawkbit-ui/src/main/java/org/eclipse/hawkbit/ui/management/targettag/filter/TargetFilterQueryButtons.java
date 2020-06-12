@@ -162,9 +162,8 @@ public class TargetFilterQueryButtons extends Table implements RefreshableContai
       UI.getCurrent().access(this::refreshContainer);
     }
     if (filterEvent == CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY) {
-      this.eventBus.publish(this, ManagementUIEvent.RESET_TARGET_FILTER_QUERY);
-    }
-    else if (filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
+      customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
+    } else if (filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
       this.eventBus.publish(this, ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE);
     }
   }

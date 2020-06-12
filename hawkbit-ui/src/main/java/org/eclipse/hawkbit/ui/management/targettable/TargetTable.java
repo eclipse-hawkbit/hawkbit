@@ -53,7 +53,6 @@ import org.eclipse.hawkbit.ui.common.entity.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
@@ -220,19 +219,16 @@ public class TargetTable extends AbstractTable<Target> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
-      if(managementUIEvent == ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE)
-        {
-          refreshFilter();
-          getEventBus().publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
-          return;
-        }
-        UI.getCurrent().access(() -> {
-            if (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent)
-                    || tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent)) {
-                refreshFilter();
-            }
-        });
-    }
+    UI.getCurrent().access(() -> {
+      if ((managementUIEvent == ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE &&
+          managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) ||
+          (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent) ||
+              tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent))) {
+        refreshFilter();
+        getEventBus().publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
+      }
+    });
+  }
 
     private boolean tableIsFilteredByTagsAndTagWasUnassignedFromTarget(final ManagementUIEvent managementUIEvent) {
         return managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG && isFilteredByTags();
