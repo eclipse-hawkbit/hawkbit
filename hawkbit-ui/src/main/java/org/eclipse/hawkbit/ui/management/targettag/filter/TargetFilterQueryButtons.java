@@ -13,9 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.ui.components.RefreshableContainer;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
+import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -28,15 +30,17 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target filter query{#link {@link TargetFilterQuery} buttons layout.
  */
-public class TargetFilterQueryButtons extends Table {
+public class TargetFilterQueryButtons extends Table implements RefreshableContainer{
     private static final long serialVersionUID = 9188095103191937850L;
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
 
@@ -143,11 +147,38 @@ public class TargetFilterQueryButtons extends Table {
         setVisibleColumns(columnIds.toArray());
         setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
     }
-
+    
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent event) {
         if (event == ManagementUIEvent.RESET_TARGET_FILTER_QUERY) {
             customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
         }
+    }
+
+  @EventBusListenerMethod(scope = EventScope.UI)
+  void onEvent(final CustomFilterUIEvent filterEvent) {
+    if (filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY ||
+        filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY ||
+        filterEvent == CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY) {
+      UI.getCurrent().access(this::refreshContainer);
+    }
+    if (filterEvent == CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY) {
+      customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
+    } else if (filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
+      this.eventBus.publish(this, ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE);
+    }
+  }
+    
+    
+    /** 
+     * {@inheritDoc}
+     */
+    @Override
+    public void refreshContainer() {
+      final Container container = getContainerDataSource();
+      if (!(container instanceof LazyQueryContainer)) {
+          return;
+      }
+      ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 }
