@@ -14,6 +14,16 @@ theme = "hugo-material-docs"
 metadataformat = "toml"
 canonifyurls = false
 
+[markup]
+	defaultMarkdownHandler = "blackfriday"
+
+	[markup.blackFriday]
+		smartypants	= true
+		fractions = true
+		smartDashes = true
+		plainIDAnchors = true
+		skipHTML = false
+
 [params]
 	# General information
 	author = "The Eclipse hawkBit Project"
@@ -99,9 +109,3 @@ canonifyurls = false
 	name   = "Release notes"
 	url    = "/release-notes/"
 	weight = 100
-
-[blackfriday]
-	smartypants	= true
-	fractions = true
-	smartDashes = true
-	plainIDAnchors = true
