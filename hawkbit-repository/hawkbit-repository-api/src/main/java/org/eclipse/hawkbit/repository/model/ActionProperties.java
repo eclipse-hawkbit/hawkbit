@@ -19,6 +19,7 @@ public class ActionProperties implements Serializable {
 
     private Long id;
     private Action.ActionType actionType;
+    private Action.Status status;
     private String tenant;
     private boolean maintenanceWindowAvailable;
 
@@ -33,6 +34,7 @@ public class ActionProperties implements Serializable {
     public ActionProperties(final Action action) {
         this.id = action.getId();
         this.actionType = action.getActionType();
+        this.status = action.getStatus();
         this.tenant = action.getTenant();
         this.maintenanceWindowAvailable = action.isMaintenanceWindowAvailable();
     }
@@ -67,5 +69,13 @@ public class ActionProperties implements Serializable {
 
     public void setActionType(final Action.ActionType actionType) {
         this.actionType = actionType;
+    }
+
+    public Action.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Action.Status status) {
+        this.status = status;
     }
 }

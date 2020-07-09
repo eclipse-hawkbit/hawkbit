@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -144,14 +146,14 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     void cancelAssignment(final JpaAction action) {
         if (isMultiAssignmentsEnabled()) {
-            sendMultiActionEvent(action.getTarget());
+            sendMultiActionCancelEvent(action);
         } else {
             cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
         }
     }
 
-    private void sendMultiActionEvent(final Target target) {
-        sendMultiActionEvent(target.getTenant(), Collections.singletonList(target.getControllerId()));
+    private void sendMultiActionCancelEvent(final Action action) {
+        sendMultiActionCancelEvent(action.getTenant(), Collections.singletonList(action));
     }
 
     private void sendDeploymentEvent(final List<Action> actions) {
@@ -160,8 +162,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
         final String tenant = filteredActions.get(0).getTenant();
-        sendMultiActionEvent(tenant, filteredActions.stream().map(action -> action.getTarget().getControllerId())
-                .collect(Collectors.toList()));
+        sendMultiActionAssignEvent(tenant, filteredActions);
     }
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
@@ -190,17 +191,31 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     /**
-     * Helper to fire a {@link MultiActionEvent}. This method may only be called
-     * if the Multi-Assignments feature is enabled.
-     * 
+     * Helper to fire a {@link MultiActionCancelEvent}. This method may only be
+     * called if the Multi-Assignments feature is enabled.
+     *
      * @param tenant
      *            the event is scoped to
-     * @param controllerIds
-     *            of the targets the event refers to
+     * @param actions
+     *            assigned to the targets
      */
-    private void sendMultiActionEvent(final String tenant, final List<String> controllerIds) {
+    private void sendMultiActionCancelEvent(final String tenant, final List<Action> actions) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new MultiActionEvent(tenant, eventPublisherHolder.getApplicationId(), controllerIds)));
+                .publishEvent(new MultiActionCancelEvent(tenant, eventPublisherHolder.getApplicationId(), actions)));
+    }
+
+    /**
+     * Helper to fire a {@link MultiActionAssignEvent}. This method may only be
+     * called if the Multi-Assignments feature is enabled.
+     *
+     * @param tenant
+     *            the event is scoped to
+     * @param actions
+     *            assigned to the targets
+     */
+    private void sendMultiActionAssignEvent(final String tenant, final List<Action> actions) {
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new MultiActionAssignEvent(tenant, eventPublisherHolder.getApplicationId(), actions)));
     }
 
     private static Stream<Action> filterCancellations(final List<Action> actions) {

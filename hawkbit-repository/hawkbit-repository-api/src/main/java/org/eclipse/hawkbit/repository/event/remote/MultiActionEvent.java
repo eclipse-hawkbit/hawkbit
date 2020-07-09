@@ -33,7 +33,7 @@ public class MultiActionEvent extends RemoteTenantAwareEvent implements Iterable
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenant
      *            tenant the event is scoped to
      * @param applicationId
