@@ -15,14 +15,10 @@ metadataformat = "toml"
 canonifyurls = false
 
 [markup]
-	defaultMarkdownHandler = "blackfriday"
+  defaultMarkdownHandler = "blackfriday"
 
-	[markup.blackFriday]
-		smartypants	= true
-		fractions = true
-		smartDashes = true
-		plainIDAnchors = true
-		skipHTML = false
+[markup.highlight]
+	codeFences = false
 
 [params]
 	# General information
@@ -53,12 +49,10 @@ canonifyurls = false
 	text = "Ubuntu"
 	code = "Ubuntu Mono"
 
-
 [social]
 	github  = "eclipse/hawkbit"
 	gitter  = "eclipse/hawkbit"
 	docker  = "hawkbit"
-
 
 [[menu.main]]
 	name   = "What is hawkBit"
@@ -109,3 +103,9 @@ canonifyurls = false
 	name   = "Release notes"
 	url    = "/release-notes/"
 	weight = 100
+
+[blackfriday]
+	smartypants	= true
+	fractions = false
+	smartDashes = true
+	plainIDAnchors = true
