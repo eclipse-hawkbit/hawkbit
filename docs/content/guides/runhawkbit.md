@@ -21,7 +21,7 @@ This guide describes a target architecture that is more like one that you will e
 - [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
 - For testing and demonstration purposes we will also use:
 - [hawkBit Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator).
-- [hawkBit Management API example client](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-mgmt-api-client).
+- [hawkBit Management API example client](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-feign-client).
 
 ## Prerequisites
 

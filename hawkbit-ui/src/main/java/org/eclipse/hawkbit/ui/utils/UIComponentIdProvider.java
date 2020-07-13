@@ -388,6 +388,11 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SOFTWARE_MODULE_TABLE = "upload.swModule.table";
 
     /**
+     * Artifact - file download button id
+     */
+    public static final String ARTIFACT_FILE_DOWNLOAD_ICON = "artifact.file.download.button";
+    
+    /**
      * Upload result popup close button.
      */
     public static final String UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE = "upload.resultwindow.close.button";
@@ -444,6 +449,11 @@ public final class UIComponentIdProvider {
      * Artifact upload - sw module edit button id.
      */
     public static final String UPLOAD_SW_MODULE_EDIT_BUTTON = "swmodule.edit.button";
+
+    /**
+     * Artifact upload - sw module show artifact details button id.
+     */
+    public static final String UPLOAD_SW_MODULE_SHOW_ARTIFACT_DETAILS_BUTTON = "swmodule.show.artifacts.details.button";
 
     /**
      * Artifact upload - sw module metadata button id.
@@ -1171,6 +1181,11 @@ public final class UIComponentIdProvider {
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
+
+    /**
+     * Show artifact details popup id.
+     */
+    public static final String SHOW_ARTIFACT_DETAILS_POPUP_ID = "show.artifact.details.popup.id";
 
     /**
      * Rollout popup id.

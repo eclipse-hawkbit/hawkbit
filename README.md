@@ -17,6 +17,7 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/)
 
 # Contact us
 
+- Having questions about hawkBit? Check [Stack Overflow](https://stackoverflow.com/questions/tagged/eclipse-hawkbit)
 - Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 - Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
 - You can also check out our [Project Homepage](https://www.eclipse.org/hawkbit) for further contact options.
@@ -33,7 +34,7 @@ We offer a sandbox installation that is free for everyone to try out hawkBit. Ho
 
 In addition the following vendors offer free trial accounts for their hawkBit compatible products:
 
-- [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/)
+- [Bosch IoT Rollouts](https://developer.bosch-iot-suite.com/service/rollouts)
 - [Kynetics Update Factory](https://www.kynetics.com/iot-platform-update-factory)
 
 # Device Integration
@@ -51,14 +52,14 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 ## SQL database
 
-| Database                          |                         H2                         |                               MySQL/MariaDB                               |                       MS SQL Server                       |      IBM DB2       |
-| --------------------------------- | :------------------------------------------------: | :-----------------------------------------------------------------------: | :-------------------------------------------------------: | :----------------: |
-| DDLs maintained by project        |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     | :white_check_mark: |
-| Test dependencies defined         |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     |                    |
-| Versions tested                   |                        1.4                         |                         MySQL 5.6/5.7, AWS Aurora                         |                    MS SQL Server 2017                     |  DB2 Server v11.1  |
-| Docker image with driver provided |                 :white_check_mark:                 |                    :white_check_mark: (Tag: "-mysql")                     |                    :white_check_mark:                     |                    |
-| JDBC driver                       | [H2 1.4](https://github.com/h2database/h2database) | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc) |                    |
-| Status                            |                  Test, Dev, Trial                  |                             Production grade                              |                     Production grade                      |     Test, Dev      |
+| Database                          |                         H2                         |                               MySQL/MariaDB                               |                       MS SQL Server                       |                                  PostgreSQL                        |      IBM DB2       |
+| --------------------------------- | :------------------------------------------------: | :-----------------------------------------------------------------------: | :-------------------------------------------------------: | :----------------------------------------------------------------: | :----------------: |
+| DDLs maintained by project        |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     |                              :white_check_mark:                    | :white_check_mark: |
+| Test dependencies defined         |                 :white_check_mark:                 |                            :white_check_mark:                             |                    :white_check_mark:                     |                              :white_check_mark:                    |                    |
+| Versions tested                   |                        1.4                         |                         MySQL 5.6/5.7, AWS Aurora                         |                    MS SQL Server 2017                     |                                PostgreSQL 12.1                     |  DB2 Server v11.1  |
+| Docker image with driver provided |                 :white_check_mark:                 |                    :white_check_mark: (Tag: "-mysql")                     |                    :white_check_mark:                     |                              :white_check_mark:                    |                    |
+| JDBC driver                       | [H2 1.4](https://github.com/h2database/h2database) | [MariaDB Connector/J 2.0](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 6.4](https://github.com/Microsoft/mssql-jdbc) | [PostgreSQL JDBC Driver 42.2.10](https://github.com/pgjdbc/pgjdbc) |                    |
+| Status                            |                  Test, Dev                         |                             Production grade                              |                     Production grade                      |                                   Test, Dev                        |      Test, Dev     |
 
 ## (Optional) RabbitMQ: 3.6,3.7
 

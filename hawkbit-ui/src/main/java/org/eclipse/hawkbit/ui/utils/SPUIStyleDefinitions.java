@@ -253,6 +253,16 @@ public final class SPUIStyleDefinitions {
     public static final String COLOR_LABEL_STYLE = "color-label-style";
 
     /**
+     * Label bold style.
+     */
+    public static final String BOLD_LABEL_STYLE = "label-bold-style";
+
+    /**
+     * Label right padding style
+     */
+    public static final String RIGHT_PADDING_LABEL_STYLE = "header-caption-right";
+
+    /**
      * Style - Message.
      */
     public static final String SP_LABEL_MESSAGE_STYLE = "count-msg-box";

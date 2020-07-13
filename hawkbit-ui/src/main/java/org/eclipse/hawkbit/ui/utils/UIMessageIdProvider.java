@@ -15,6 +15,10 @@ package org.eclipse.hawkbit.ui.utils;
  */
 public final class UIMessageIdProvider {
 
+    public static final String TOOLTIP_ARTIFACT_DOWNLOAD = "tooltip.artifact.download";
+    
+    public static final String ARTIFACT_DOWNLOAD_FAILURE_MSG = "message.artifact.download.failure";
+    
     public static final String BUTTON_CANCEL = "button.cancel";
 
     public static final String BUTTON_OK = "button.ok";

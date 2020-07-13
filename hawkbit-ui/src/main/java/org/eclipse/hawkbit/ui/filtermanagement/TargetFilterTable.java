@@ -204,6 +204,7 @@ public class TargetFilterTable extends Table {
 
                         notification
                                 .displaySuccess(i18n.getMessage("message.delete.filter.success", deletedFilterName));
+                        eventBus.publish(this, CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY);
                         refreshContainer();
                     }
                 });

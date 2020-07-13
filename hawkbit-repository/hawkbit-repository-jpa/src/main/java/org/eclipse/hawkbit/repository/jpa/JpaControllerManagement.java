@@ -1050,6 +1050,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         actionRepository.updateExternalRef(actionId, externalRef);
     }
 
+    @Override
+    public Optional<Action> getActionByExternalRef(@NotEmpty final String externalRef) {
+        return actionRepository.findByExternalRef(externalRef);
+    }
+
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
                 new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));

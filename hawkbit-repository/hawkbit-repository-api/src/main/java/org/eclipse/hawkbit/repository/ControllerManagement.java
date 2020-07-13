@@ -482,6 +482,16 @@ public interface ControllerManagement {
     List<Action> getActiveActionsByExternalRef(@NotNull List<String> externalRefs);
 
     /**
+     * Retrieves an {@link Action} using {@link Action#getExternalRef()}
+     * 
+     * @param externalRef
+     *            of the action. See {@link Action#getExternalRef()}
+     * @return {@link Action} or {@code null} if it does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<Action> getActionByExternalRef(@NotEmpty String externalRef);
+
+    /**
      * Delete a single target.
      *
      * @param controllerId

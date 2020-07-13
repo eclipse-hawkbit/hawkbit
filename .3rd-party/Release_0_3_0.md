@@ -66,6 +66,7 @@
 | org.ow2.asm                          | asm-commons                            | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
 | org.ow2.asm                          | asm                                    | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
 | org.ow2.asm                          | asm-tree                               | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
+| org.postgresql                       | postgresql                             | 42.2.5         |  CQ17092 Piggybacked 
 | org.reactivestreams                  | reactive-streams                       | 1.0.2          | [CQ18184](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18184) |
 | org.slf4j                            | jul-to-slf4j                           | 1.7.25         | [CQ12937](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12937) |
 | org.slf4j                            | slf4j-api                              | 1.7.25         | [CQ12940](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12940) |

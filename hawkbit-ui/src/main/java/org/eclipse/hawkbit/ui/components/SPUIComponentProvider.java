@@ -25,9 +25,11 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
@@ -43,6 +45,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public final class SPUIComponentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(SPUIComponentProvider.class);
+
+    private static final String LABEL_STYLE = "label-style";
 
     /**
      * Prevent Instance creation as utility class.
@@ -202,8 +206,48 @@ public final class SPUIComponentProvider {
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
-        nameValueLabel.addStyleName("label-style");
+        nameValueLabel.addStyleName(LABEL_STYLE);
         return nameValueLabel;
+    }
+
+    /**
+     * Method to CreateName value labels.
+     *
+     * @param label
+     *            as string
+     * @param values
+     *            as string
+     * @return HorizontalLayout
+     */
+    public static HorizontalLayout createNameValueLayout(final String label, final String... values) {
+        final String valueStr = StringUtils.arrayToDelimitedString(values, " ");
+
+        final Label nameValueLabel = new Label( label );
+        nameValueLabel.setContentMode(ContentMode.TEXT);
+        nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
+        nameValueLabel.addStyleName("text-bold");
+        nameValueLabel.setSizeUndefined();
+
+        final Label valueStrLabel = new Label(valueStr);
+        valueStrLabel.setWidth("100%");
+        valueStrLabel.addStyleName("text-cut");
+        valueStrLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
+        valueStrLabel.addStyleName(LABEL_STYLE);
+
+        final HorizontalLayout nameValueLayout = new HorizontalLayout();
+        nameValueLayout.setMargin(false);
+        nameValueLayout.setSpacing(true);
+        nameValueLayout.setSizeFull();
+
+        nameValueLayout.addComponent(nameValueLabel);
+        nameValueLayout.setComponentAlignment(nameValueLabel, Alignment.TOP_LEFT);
+        nameValueLayout.setExpandRatio(nameValueLabel, 0.0F);
+
+        nameValueLayout.addComponent(valueStrLabel);
+        nameValueLayout.setComponentAlignment(valueStrLabel, Alignment.TOP_LEFT);
+        nameValueLayout.setExpandRatio(valueStrLabel, 1.0F);
+
+        return nameValueLayout;
     }
 
     private static Label createUsernameLabel(final String label, final String username) {
@@ -215,14 +259,14 @@ public final class SPUIComponentProvider {
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + loadAndFormatUsername, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
-        nameValueLabel.addStyleName("label-style");
+        nameValueLabel.addStyleName(LABEL_STYLE);
         nameValueLabel.setDescription(loadAndFormatUsername);
         return nameValueLabel;
     }
 
     /**
-     * Create label which represents the {@link BaseEntity#getCreatedBy()} by
-     * user name
+     * Create label which represents the {@link BaseEntity#getCreatedBy()} by user
+     * name
      *
      * @param i18n
      *            the i18n
@@ -236,8 +280,8 @@ public final class SPUIComponentProvider {
     }
 
     /**
-     * Create label which represents the {@link BaseEntity#getLastModifiedBy()}
-     * by user name
+     * Create label which represents the {@link BaseEntity#getLastModifiedBy()} by
+     * user name
      *
      * @param i18n
      *            the i18n
@@ -306,11 +350,10 @@ public final class SPUIComponentProvider {
      * @param icon
      *            of the link
      * @param targetOpen
-     *            specify how the link should be open (f. e. new windows =
-     *            _blank)
+     *            specify how the link should be open (f. e. new windows = _blank)
      * @param style
-     *            chosen style of the link. Might be {@code null} if no style
-     *            should be used
+     *            chosen style of the link. Might be {@code null} if no style should
+     *            be used
      * @return a link UI component
      */
     public static Link getLink(final String id, final String name, final String resource, final FontAwesome icon,

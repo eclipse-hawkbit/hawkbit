@@ -47,6 +47,7 @@ public enum ManagementUIEvent {
     //
     RESET_SIMPLE_FILTERS,
     //
-    RESET_TARGET_FILTER_QUERY
-
+    RESET_TARGET_FILTER_QUERY,
+    //
+    REFRESH_TARGETS_ON_FILTER_UPDATE
 }

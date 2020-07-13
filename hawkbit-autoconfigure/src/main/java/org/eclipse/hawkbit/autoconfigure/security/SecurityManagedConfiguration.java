@@ -90,7 +90,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -254,12 +254,12 @@ public class SecurityManagedConfiguration {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
 
-                final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
+                final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
                         Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
-                anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+                anonymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers(DDI_ANT_MATCHERS).and().securityContext().disable().anonymous()
-                        .authenticationFilter(anoymousFilter);
+                        .authenticationFilter(anonymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter);
@@ -397,12 +397,12 @@ public class SecurityManagedConfiguration {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
 
-                final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
+                final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
                         Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
-                anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+                anonymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers(DDI_DL_ANT_MATCHER).and().securityContext().disable().anonymous()
-                        .authenticationFilter(anoymousFilter);
+                        .authenticationFilter(anonymousFilter);
             } else {
 
                 httpSec.addFilter(securityHeaderFilter);
@@ -468,7 +468,7 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * A Websecruity config to handle and filter the download ids.
+     * A Websecurity config to handle and filter the download ids.
      */
     @Configuration
     @EnableWebSecurity
@@ -663,13 +663,17 @@ public class SecurityManagedConfiguration {
         private final VaadinUrlAuthenticationSuccessHandler handler;
 
         @Autowired(required = false)
-        private AuthenticationSuccessHandler oidcAuthenticationSuccessHandler;
-
-        @Autowired(required = false)
-        private LogoutHandler oidcLogoutHandler;
-
-        @Autowired(required = false)
         private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService;
+
+        @Autowired(required = false)
+        private AuthenticationSuccessHandler authenticationSuccessHandler;
+
+        @Autowired
+        private LogoutHandler logoutHandler;
+
+        @Autowired
+        private LogoutSuccessHandler logoutSuccessHandler;
+
 
         public UISecurityConfigurationAdapter(final VaadinRedirectStrategy redirectStrategy) {
             handler = new TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler();
@@ -727,7 +731,7 @@ public class SecurityManagedConfiguration {
         /**
          * Listener to redirect to login page after session timeout. Close the
          * vaadin session, because it's is not possible to redirect in
-         * atmospehere.
+         * atmosphere.
          *
          * @return the servlet listener.
          */
@@ -739,14 +743,13 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
-            final boolean enableOidc = oidcUserService != null && oidcAuthenticationSuccessHandler != null
-                    && oidcLogoutHandler != null;
+            final boolean enableOidc = oidcUserService != null && authenticationSuccessHandler != null;
 
             // workaround regex: we need to exclude the URL /UI/HEARTBEAT here
             // because we bound the vaadin application to /UI and not to root,
             // described in vaadin-forum:
             // https://vaadin.com/forum#!/thread/3200565.
-            HttpSecurity httpSec = null;
+            HttpSecurity httpSec;
             if (enableOidc) {
                 httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/(UI|oauth2).*$");
             } else {
@@ -767,27 +770,23 @@ public class SecurityManagedConfiguration {
                 httpSec.headers().contentSecurityPolicy(hawkbitSecurityProperties.getContentSecurityPolicy());
             }
 
-            if (enableOidc) {
-                httpSec.authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**")
-                        .permitAll().anyRequest().authenticated().and()
-                        // OIDC
-                        .oauth2Login().userInfoEndpoint().oidcUserService(oidcUserService).and()
-                        .successHandler(oidcAuthenticationSuccessHandler).and().oauth2Client().and()
-                        // logout
-                        .logout().logoutUrl("/UI/logout").addLogoutHandler(oidcLogoutHandler).logoutSuccessUrl("/");
-            } else {
-                final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-                simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
+            // UI
+            httpSec.authorizeRequests().antMatchers("/UI/login/**", "/UI/UIDL/**").permitAll()
+                    .anyRequest().authenticated();
 
-                httpSec
-                        // UI
-                        .authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**")
-                        .permitAll().anyRequest().authenticated().and()
-                        // UI login / logout
-                        .exceptionHandling()
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login/#/")).and().logout()
-                        .logoutUrl("/UI/logout").logoutSuccessHandler(simpleUrlLogoutSuccessHandler);
+            if (enableOidc) {
+                // OIDC
+                httpSec.oauth2Login().userInfoEndpoint().oidcUserService(oidcUserService).and()
+                        .successHandler(authenticationSuccessHandler).and().oauth2Client();
+            } else {
+                // UI login / Basic auth
+                httpSec.exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/UI/login"));
             }
+
+            // UI logout
+            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
+                    .logoutSuccessHandler(logoutSuccessHandler);
+
         }
 
         @Override
@@ -834,7 +833,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
 }
 
 /**
- * Sevletfilter to create metadata after successful authentication over RESTful.
+ * Servletfilter to create metadata after successful authentication over RESTful.
  */
 class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
 
@@ -871,4 +870,5 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     public void destroy() {
         // not needed
     }
+
 }

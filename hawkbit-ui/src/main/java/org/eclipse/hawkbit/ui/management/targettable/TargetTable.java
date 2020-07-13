@@ -223,13 +223,16 @@ public class TargetTable extends AbstractTable<Target> {
 
     @EventBusListenerMethod(scope = EventScope.UI)
     void onEvent(final ManagementUIEvent managementUIEvent) {
-        UI.getCurrent().access(() -> {
-            if (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent)
-                    || tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent)) {
-                refreshFilter();
-            }
-        });
-    }
+    UI.getCurrent().access(() -> {
+      if ((managementUIEvent == ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE &&
+          managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) ||
+          (tableIsFilteredByTagsAndTagWasUnassignedFromTarget(managementUIEvent) ||
+              tableIsFilteredByNoTagAndTagWasAssignedToTarget(managementUIEvent))) {
+        refreshFilter();
+        getEventBus().publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
+      }
+    });
+  }
 
     private boolean tableIsFilteredByTagsAndTagWasUnassignedFromTarget(final ManagementUIEvent managementUIEvent) {
         return managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG && isFilteredByTags();

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,15 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -47,8 +49,10 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Container;
+import com.vaadin.server.ErrorHandler;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -91,7 +95,11 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private final UINotification uINotification;
 
+    private Label prefixTitleOfArtifactDetails;
+
     private Label titleOfArtifactDetails;
+
+    private HorizontalLayout headerCaptionLayout;
 
     private SPUIButton maxMinButton;
 
@@ -140,7 +148,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             labelSoftwareModule = HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.get().getName(),
                     selectedSoftwareModule.get().getVersion());
         }
-        createComponents(labelSoftwareModule);
+        createComponents();
         buildLayout();
         eventBus.subscribe(this);
 
@@ -162,12 +170,36 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         return Optional.empty();
     }
 
-    private void createComponents(final String labelSoftwareModule) {
-        titleOfArtifactDetails = new LabelBuilder().id(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID)
-                .name(HawkbitCommonUtil.getArtifactoryDetailsLabelId(labelSoftwareModule, i18n)).buildCaptionLabel();
-        titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+    private void createComponents() {
+        prefixTitleOfArtifactDetails = new Label();
+        prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
+        prefixTitleOfArtifactDetails.addStyleName(ValoTheme.LABEL_BOLD);
+        prefixTitleOfArtifactDetails.setSizeUndefined();
+
+        titleOfArtifactDetails = new Label();
+        titleOfArtifactDetails.setId(UIComponentIdProvider.ARTIFACT_DETAILS_HEADER_LABEL_ID);
         titleOfArtifactDetails.setSizeFull();
         titleOfArtifactDetails.setImmediate(true);
+        titleOfArtifactDetails.setWidth("100%");
+        titleOfArtifactDetails.addStyleName(ValoTheme.LABEL_SMALL);
+        titleOfArtifactDetails.addStyleName("text-bold");
+        titleOfArtifactDetails.addStyleName("text-cut");
+        titleOfArtifactDetails.addStyleName("header-caption-right");
+
+        headerCaptionLayout = new HorizontalLayout();
+        headerCaptionLayout.setMargin(false);
+        headerCaptionLayout.setSpacing(true);
+        headerCaptionLayout.setSizeFull();
+        headerCaptionLayout.addStyleName("header-caption");
+
+        headerCaptionLayout.addComponent(prefixTitleOfArtifactDetails);
+        headerCaptionLayout.setComponentAlignment(prefixTitleOfArtifactDetails, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(prefixTitleOfArtifactDetails, 0.0F);
+
+        headerCaptionLayout.addComponent(titleOfArtifactDetails);
+        headerCaptionLayout.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
+        headerCaptionLayout.setExpandRatio(titleOfArtifactDetails, 1.0F);
+
         maxMinButton = createMaxMinButton();
 
         artifactDetailsTable = createArtifactDetailsTable();
@@ -199,10 +231,10 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         header.setSizeFull();
         header.setHeightUndefined();
         header.setImmediate(true);
-        header.addComponents(titleOfArtifactDetails, maxMinButton);
-        header.setComponentAlignment(titleOfArtifactDetails, Alignment.TOP_LEFT);
+        header.addComponents(headerCaptionLayout, maxMinButton);
+        header.setComponentAlignment(headerCaptionLayout, Alignment.TOP_LEFT);
         header.setComponentAlignment(maxMinButton, Alignment.TOP_RIGHT);
-        header.setExpandRatio(titleOfArtifactDetails, 1.0F);
+        header.setExpandRatio(headerCaptionLayout, 1.0F);
 
         setSizeFull();
         setImmediate(true);
@@ -264,19 +296,71 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Button generateCell(final Table source, final Object itemId, final Object columnId) {
-                final String fileName = (String) table.getContainerDataSource().getItem(itemId)
-                        .getItemProperty(PROVIDED_FILE_NAME).getValue();
-                final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon",
-                        true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
-                deleteIcon.setData(itemId);
-                deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
-                return deleteIcon;
+            public HorizontalLayout generateCell(final Table source, final Object itemId, final Object columnId) {
+                HorizontalLayout actioncellLayout = new HorizontalLayout();
+                actioncellLayout.addComponent(getArtifactDeleteButton(table, itemId));
+                actioncellLayout.addComponent(getArtifactDownloadButton(table, itemId));
+                actioncellLayout.setImmediate(true);
+                return actioncellLayout;
+            }
+        });  
+    }
+
+    private Button getArtifactDeleteButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button deleteIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
+                i18n.getMessage(UIMessageIdProvider.CAPTION_DISCARD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
+                true, FontAwesome.TRASH_O, SPUIButtonStyleNoBorder.class);
+        deleteIcon.setData(itemId);
+        deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
+        return deleteIcon;
+    }
+    
+    private Button getArtifactDownloadButton(final Table table, final Object itemId) {
+        final String fileName = (String) table.getContainerDataSource().getItem(itemId)
+                .getItemProperty(PROVIDED_FILE_NAME).getValue();
+        final Button downloadIcon = SPUIComponentProvider.getButton(
+                fileName + "-" + UIComponentIdProvider.ARTIFACT_FILE_DOWNLOAD_ICON, "",
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_ARTIFACT_DOWNLOAD), ValoTheme.BUTTON_TINY + " " + "blueicon", 
+                true, FontAwesome.DOWNLOAD, SPUIButtonStyleNoBorder.class);
+        downloadIcon.setData(itemId);
+        FileDownloader fileDownloader = new FileDownloader(createStreamResource((Long) itemId));
+        fileDownloader.extend(downloadIcon);
+        fileDownloader.setErrorHandler(new ErrorHandler() {
+
+            /**
+             * Error handler for file downloader
+             */
+            private static final long serialVersionUID = 4030230501114422570L;
+
+            @Override
+            public void error(com.vaadin.server.ErrorEvent event) {
+                uINotification.displayValidationError(i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD_FAILURE_MSG));
             }
         });
+        return downloadIcon;
+    }
 
+    private StreamResource createStreamResource(final Long id) {
+
+        Optional<Artifact> artifact = this.artifactManagement.get(id);
+        if (artifact.isPresent()) {
+            Optional<AbstractDbArtifact> file = artifactManagement.loadArtifactBinary(artifact.get().getSha1Hash());
+            return new StreamResource(new StreamResource.StreamSource() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public InputStream getStream() {
+                    if (file.isPresent()) {
+                        return file.get().getFileInputStream();
+                    }
+                    return null;
+                }
+            }, artifact.get().getFilename());
+        }
+        return null;
     }
 
     private void confirmAndDeleteArtifact(final Long id, final String fileName) {
@@ -426,12 +510,14 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
     private void populateArtifactDetails(final Long baseSwModuleId, final String swModuleName) {
         if (!readOnly) {
-            if (StringUtils.isEmpty(swModuleName)) {
-                setTitleOfLayoutHeader();
+
+            if (StringUtils.hasText(swModuleName)) {
+                prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS_OF));
+                titleOfArtifactDetails.setValue(swModuleName);
             } else {
-                titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId(swModuleName, i18n));
-                titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+                setTitleOfLayoutHeader();
             }
+
         }
         final Map<String, Object> queryConfiguration;
         if (baseSwModuleId != null) {
@@ -452,8 +538,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      * Set title of artifact details header layout.
      */
     private void setTitleOfLayoutHeader() {
-        titleOfArtifactDetails.setValue(HawkbitCommonUtil.getArtifactoryDetailsLabelId("", i18n));
-        titleOfArtifactDetails.setContentMode(ContentMode.HTML);
+        prefixTitleOfArtifactDetails.setValue(i18n.getMessage(UIMessageIdProvider.CAPTION_ARTIFACT_DETAILS));
+        titleOfArtifactDetails.setValue("");
     }
 
     @EventBusListenerMethod(scope = EventScope.UI)

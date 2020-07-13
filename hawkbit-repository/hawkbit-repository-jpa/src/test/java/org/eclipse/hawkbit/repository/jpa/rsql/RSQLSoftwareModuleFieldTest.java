@@ -76,10 +76,10 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==''", 1);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=''", 4);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==agent-hub", 1);
-        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 3);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 4);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=in=(agent-hub,notexist)", 1);
-        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 3);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 4);
     }
 
     @Test
