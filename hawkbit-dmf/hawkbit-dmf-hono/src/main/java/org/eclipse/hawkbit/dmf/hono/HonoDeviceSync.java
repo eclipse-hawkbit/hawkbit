@@ -187,7 +187,7 @@ public class HonoDeviceSync {
         long offset = 0;
         long total = Long.MAX_VALUE;
         while (tenants.size() < total) {
-            HttpURLConnection connection = getHonoData(honoTenantListUri + "?offset=" + offset);
+            HttpURLConnection connection = getHonoData(honoTenantListUri + (honoTenantListUri.contains("?") ? "&" : "?") + "offset=" + offset);
 
             HonoTenantListPage page = objectMapper.readValue(connection.getInputStream(), HonoTenantListPage.class);
             if (page.getItems() != null) {
@@ -205,7 +205,8 @@ public class HonoDeviceSync {
         long offset = 0;
         long total = Long.MAX_VALUE;
         while (devices.size() < total) {
-            HttpURLConnection connection = getHonoData(honoDeviceListUri.replace("$tenantId", tenant) + "?offset=" + offset);
+            HttpURLConnection connection = getHonoData(honoDeviceListUri.replace("$tenantId", tenant)
+                    + (honoDeviceListUri.contains("?") ? "&" : "?") + "offset=" + offset);
 
             HonoDeviceListPage page = objectMapper.readValue(connection.getInputStream(), HonoDeviceListPage.class);
             if (page.getItems() != null) {
