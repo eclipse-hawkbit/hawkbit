@@ -26,7 +26,7 @@ public class CoordinatesToColor implements Coordinates2Color {
     @Override
     public int[] calculate(final Color color) {
         final float[] hsv = color.getHSV();
-        final int x = Math.round(hsv[0] * 220F);
+        final int x = Math.round((double) hsv[0] * (double) 220.0F );
         final int y = calculateYCoordinateOfColor(hsv);
         return new int[] { x, y };
     }
