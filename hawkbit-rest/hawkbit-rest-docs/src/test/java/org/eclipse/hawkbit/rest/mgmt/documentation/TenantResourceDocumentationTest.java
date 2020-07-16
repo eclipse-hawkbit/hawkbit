@@ -54,6 +54,8 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
     protected static final Map<String, String> CONFIG_ITEM_DESCRIPTIONS = new HashMap<>();
 
     static {
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.TARGET_SEARCH_ATTRIBUTES_ENABLED,
+                "if target text search should include target attributes");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED,
                 "if the authentication mode 'gateway security token' is enabled.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
