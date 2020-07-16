@@ -64,6 +64,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     private final RolloutConfigurationView rolloutConfigurationView;
 
+    private final TargetSearchConfigurationView targetSearchConfigurationView;
+
     private final VaadinMessageSource i18n;
 
     private final UiProperties uiProperties;
@@ -80,11 +82,13 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     @Autowired
     TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final UINotification uINotification, final SystemManagement systemManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final SecurityTokenGenerator securityTokenGenerator,
-            final ControllerPollProperties controllerPollProperties, final SpPermissionChecker permChecker) {
+                                     final UINotification uINotification, final SystemManagement systemManagement,
+                                     final DistributionSetTypeManagement distributionSetTypeManagement,
+                                     final TenantConfigurationManagement tenantConfigurationManagement,
+                                     final SecurityTokenGenerator securityTokenGenerator,
+                                     final ControllerPollProperties controllerPollProperties,
+                                     final SpPermissionChecker permChecker)
+    {
         this.defaultDistributionSetTypeLayout = new DefaultDistributionSetTypeLayout(systemManagement,
                 distributionSetTypeManagement, i18n, permChecker);
         this.authenticationConfigurationView = new AuthenticationConfigurationView(i18n, tenantConfigurationManagement,
@@ -94,6 +98,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         this.repositoryConfigurationView = new RepositoryConfigurationView(i18n, tenantConfigurationManagement,
                 uiProperties);
         this.rolloutConfigurationView = new RolloutConfigurationView(i18n, tenantConfigurationManagement, uiProperties);
+        this.targetSearchConfigurationView = new TargetSearchConfigurationView(i18n, tenantConfigurationManagement, uiProperties);
 
         this.i18n = i18n;
         this.uiProperties = uiProperties;
@@ -111,6 +116,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         configurationViews.add(repositoryConfigurationView);
         configurationViews.add(rolloutConfigurationView);
         configurationViews.add(authenticationConfigurationView);
+        configurationViews.add(targetSearchConfigurationView);
         configurationViews.add(pollingConfigurationView);
         if (customConfigurationViews != null) {
             configurationViews.addAll(

@@ -122,6 +122,11 @@ public class TenantConfigurationProperties {
         public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
 
         /**
+         * Option setting for text search in target attributes
+         */
+        public static final String TARGET_SEARCH_ATTRIBUTES_ENABLED = "target.search.attributes.enabled";
+
+        /**
          * Repository on autoclose mode instead of canceling in case of new DS
          * assignment over active actions.
          */

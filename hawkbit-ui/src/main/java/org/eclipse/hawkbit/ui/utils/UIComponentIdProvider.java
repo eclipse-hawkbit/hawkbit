@@ -1291,6 +1291,12 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
 
     /**
+     * Configuration checkbox for
+     * {@link TenantConfigurationKey#TARGET_SEARCH_ATTRIBUTES_ENABLED}
+     */
+    public static final String TARGET_SEARCH_ATTRIBUTES = "target.search.attributes.checkbox";
+
+    /**
      * Id of the rollout approval remark field
      */
     public static final String ROLLOUT_APPROVAL_REMARK_FIELD_ID = "rollout.approve.remark";
