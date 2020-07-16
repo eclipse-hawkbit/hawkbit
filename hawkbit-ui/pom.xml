@@ -36,7 +36,6 @@
                <persistentunitcachedir>${project.build.directory}/gwtdirt</persistentunitcachedir>
                <compileReport>true</compileReport>
                <style>OBF</style>
-               <strict>true</strict>
                <!-- Symbol maps etc, not needed in vaadin app, just target them outside war -->
                <deploy>${project.build.directory}/gwt-deploy</deploy>
             </configuration>
