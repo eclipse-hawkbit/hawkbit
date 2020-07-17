@@ -137,26 +137,55 @@ public class FileUploadProgress implements Serializable {
         this.failureReason = failureReason;
     }
 
+    /**
+     * Getter for file upload ID
+     *
+     * @return FileUploadId
+     */
     public FileUploadId getFileUploadId() {
         return fileUploadId;
     }
 
+    /**
+     * Getter for file content length
+     *
+     * @return long
+     */
     public long getContentLength() {
         return contentLength;
     }
 
+    /**
+     * Getter for bytes read of the file
+     *
+     * @return long
+     */
     public long getBytesRead() {
         return bytesRead;
     }
 
+    /**
+     * Getter for failed reason for upload
+     * @return String
+     */
     public String getFailureReason() {
         return failureReason;
     }
 
+    /**
+     * Getter for file path
+     *
+     * @return String
+     */
     public String getFilePath() {
         return filePath;
     }
 
+    /**
+     * Get Status of a file upload
+     *
+     * @return FileUploadStatus
+     */
     public FileUploadStatus getFileUploadStatus() {
         return fileUploadStatus;
     }

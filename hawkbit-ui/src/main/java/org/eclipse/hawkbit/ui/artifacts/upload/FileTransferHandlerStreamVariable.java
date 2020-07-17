@@ -61,6 +61,11 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         publishUploadStarted(fileUploadId);
     }
 
+    /**
+     * Checks for duplication and invalid file name during feil upload process
+     * @param event
+     *          StreamingStartEvent
+     */
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
@@ -75,6 +80,11 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         }
     }
 
+    /**
+     * get the output stream of uploaded file
+     *
+     * @return OutputStream
+     */
     @Override
     public final OutputStream getOutputStream() {
         if (isUploadInterrupted()) {
@@ -161,6 +171,11 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
         publishUploadFailedAndFinishedEvent(fileUploadId);
     }
 
+    /**
+     * Verify if upload process is interrupted
+     *
+     * @return boolean
+     */
     @Override
     public boolean isInterrupted() {
         return isUploadInterrupted();

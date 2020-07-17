@@ -8,19 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.management.miscs;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.RadioButtonGroup;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Action type option group abstract layout.
@@ -28,11 +23,11 @@ import com.vaadin.ui.Label;
 public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayout {
     private static final long serialVersionUID = 1L;
 
-    protected static final String STYLE_DIST_WINDOW_ACTIONTYPE = "dist-window-actiontype";
-    private static final String STYLE_DIST_WINDOW_ACTIONTYPE_LAYOUT = "dist-window-actiontype-horz-layout";
-
     protected final VaadinMessageSource i18n;
-    protected FlexibleOptionGroup actionTypeOptionGroup;
+
+    protected RadioButtonGroup<ActionType> actionTypeOptionGroup;
+
+    private final String actionTypeOptionGroupId;
 
     /**
      * Constructor
@@ -40,102 +35,78 @@ public abstract class AbstractActionTypeOptionGroupLayout extends HorizontalLayo
      * @param i18n
      *            VaadinMessageSource
      */
-    protected AbstractActionTypeOptionGroupLayout(final VaadinMessageSource i18n) {
+    protected AbstractActionTypeOptionGroupLayout(final VaadinMessageSource i18n,
+            final String actionTypeOptionGroupId) {
         this.i18n = i18n;
+        this.actionTypeOptionGroupId = actionTypeOptionGroupId;
+
         init();
     }
 
     private void init() {
-        createOptionGroup();
-        setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE_LAYOUT);
         setSizeUndefined();
+        createOptionGroup();
+        addOptionGroup();
     }
 
-    protected abstract void createOptionGroup();
+    private void createOptionGroup() {
+        actionTypeOptionGroup = new RadioButtonGroup<>();
+        actionTypeOptionGroup.setId(actionTypeOptionGroupId);
+        actionTypeOptionGroup.setSizeFull();
+        actionTypeOptionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
 
-    protected void addForcedItemWithLabel() {
-        final FlexibleOptionGroupItemComponent forceItem = actionTypeOptionGroup
-                .getItemComponent(ActionTypeOption.FORCED);
-        forceItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        forceItem.setId(UIComponentIdProvider.SAVE_ACTION_RADIO_FORCED);
-        addComponent(forceItem);
-        final Label forceLabel = new Label();
-        forceLabel.setStyleName("statusIconPending");
-        forceLabel.setIcon(FontAwesome.BOLT);
-        forceLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED));
-        forceLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_FORCED_ITEM));
-        forceLabel.setStyleName("padding-right-style");
-        addComponent(forceLabel);
+        actionTypeOptionGroup.setItemIconGenerator(item -> {
+            switch (item) {
+            case FORCED:
+                return VaadinIcons.BOLT;
+            case SOFT:
+                return VaadinIcons.USER_CHECK;
+            case TIMEFORCED:
+                return VaadinIcons.USER_CLOCK;
+            case DOWNLOAD_ONLY:
+                return VaadinIcons.DOWNLOAD;
+            default:
+                return null;
+            }
+        });
+
+        actionTypeOptionGroup.setItemCaptionGenerator(item -> {
+            switch (item) {
+            case FORCED:
+                return i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED);
+            case SOFT:
+                return i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT);
+            case TIMEFORCED:
+                return i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_TIME_FORCED);
+            case DOWNLOAD_ONLY:
+                return i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY);
+            default:
+                return null;
+            }
+        });
+
+        actionTypeOptionGroup.setItemDescriptionGenerator(item -> {
+            switch (item) {
+            case FORCED:
+                return i18n.getMessage(UIMessageIdProvider.TOOLTIP_FORCED_ITEM);
+            case SOFT:
+                return i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM);
+            case TIMEFORCED:
+                return i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_ITEM);
+            case DOWNLOAD_ONLY:
+                return i18n.getMessage(UIMessageIdProvider.TOOLTIP_DOWNLOAD_ONLY_ITEM);
+            default:
+                return null;
+            }
+        });
     }
 
-    protected void addSoftItemWithLabel() {
-        final FlexibleOptionGroupItemComponent softItem = actionTypeOptionGroup.getItemComponent(ActionTypeOption.SOFT);
-        softItem.setId(UIComponentIdProvider.ACTION_DETAILS_SOFT_ID);
-        softItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        addComponent(softItem);
-        final Label softLabel = new Label();
-        softLabel.setSizeFull();
-        softLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT));
-        softLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_SOFT_ITEM));
-        softLabel.setStyleName("padding-right-style");
-        softLabel.setIcon(FontAwesome.STEP_FORWARD);
-        addComponent(softLabel);
-    }
-
-    protected void addDownloadOnlyItemWithLabel() {
-        final FlexibleOptionGroupItemComponent downloadOnlyItem = actionTypeOptionGroup
-                .getItemComponent(ActionTypeOption.DOWNLOAD_ONLY);
-        downloadOnlyItem.setId(UIComponentIdProvider.ACTION_DETAILS_DOWNLOAD_ONLY_ID);
-        downloadOnlyItem.setStyleName(STYLE_DIST_WINDOW_ACTIONTYPE);
-        addComponent(downloadOnlyItem);
-        final Label downloadOnlyLabel = new Label();
-        downloadOnlyLabel.setSizeFull();
-        downloadOnlyLabel.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY));
-        downloadOnlyLabel.setDescription(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DOWNLOAD_ONLY_ITEM));
-        downloadOnlyLabel.setStyleName("padding-right-style");
-        downloadOnlyLabel.setIcon(FontAwesome.DOWNLOAD);
-        addComponent(downloadOnlyLabel);
-    }
+    protected abstract void addOptionGroup();
 
     /**
-     * To Set Default option for save.
+     * @return Radio button group of action type
      */
-    public void selectDefaultOption() {
-        actionTypeOptionGroup.select(ActionTypeOption.FORCED);
-    }
-
-    /**
-     * Enum which described the options for the action type
-     *
-     */
-    public enum ActionTypeOption {
-        FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED), DOWNLOAD_ONLY(
-                ActionType.DOWNLOAD_ONLY);
-
-        private final ActionType actionType;
-
-        ActionTypeOption(final ActionType actionType) {
-            this.actionType = actionType;
-        }
-
-        public ActionType getActionType() {
-            return actionType;
-        }
-
-        /**
-         * Matches the action type to the option
-         * 
-         * @param actionType
-         *            the action type to get option for
-         * @return action type option if matches, otherwise empty Optional
-         */
-        public static Optional<ActionTypeOption> getOptionForActionType(final ActionType actionType) {
-            return Arrays.stream(ActionTypeOption.values()).filter(option -> option.getActionType() == actionType)
-                    .findFirst();
-        }
-    }
-
-    public FlexibleOptionGroup getActionTypeOptionGroup() {
+    public RadioButtonGroup<ActionType> getActionTypeOptionGroup() {
         return actionTypeOptionGroup;
     }
 }

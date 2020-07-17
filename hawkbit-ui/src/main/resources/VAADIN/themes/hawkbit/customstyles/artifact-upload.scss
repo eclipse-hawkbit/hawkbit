@@ -79,7 +79,8 @@
     background-color: $widget-bg;
     line-height: 1;
     text-align: center;
-  }
+    padding: 0;
+  }  
 
   //Upload drop layout - Drop icon style
   .drop-icon {
@@ -87,7 +88,7 @@
     font-size: 40px;
     // drop down arrow icon not able to display with center alignment.
     // Hence provide margin-top so that it appear at center.
-    margin-top: 45px;
+    margin-top: 30px;
   }
   
   .upload-button {

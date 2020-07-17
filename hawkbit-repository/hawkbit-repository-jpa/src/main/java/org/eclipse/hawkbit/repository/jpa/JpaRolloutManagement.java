@@ -44,8 +44,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -61,7 +59,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -1019,7 +1016,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         update.getActionType().ifPresent(rollout::setActionType);
         update.getForcedTime().ifPresent(rollout::setForcedTime);
         update.getWeight().ifPresent(rollout::setWeight);
-        update.getStartAt().ifPresent(rollout::setStartAt);
+        // reseting back to manual start is done by setting start at time to
+        // null
+        rollout.setStartAt(update.getStartAt().orElse(null));
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.get(setId)
                     .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));

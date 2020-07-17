@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.ui.filtermanagement.client;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Suggestion context with the current cursor position
+ */
 public class SuggestionContextDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -28,8 +31,6 @@ public class SuggestionContextDto implements Serializable {
     /**
      * Constructor.
      * 
-     * @param rsqlQuery
-     *            the original RSQL based query the suggestions based on
      * @param cursorPosition
      *            the current cursor position
      * @param suggestions
@@ -40,18 +41,36 @@ public class SuggestionContextDto implements Serializable {
         this.suggestions = suggestions;
     }
 
+    /**
+     * @return Suggestions
+     */
     public List<SuggestTokenDto> getSuggestions() {
         return suggestions;
     }
 
+    /**
+     * @return Current cursor position
+     */
     public int getCursorPosition() {
         return cursorPosition;
     }
 
+    /**
+     * Sets the cursor position
+     *
+     * @param cursorPosition
+     *          Cursor position
+     */
     public void setCursorPosition(final int cursorPosition) {
         this.cursorPosition = cursorPosition;
     }
 
+    /**
+     * Sets the suggestions
+     *
+     * @param suggestions
+     *          List of suggestions
+     */
     public void setSuggestions(final List<SuggestTokenDto> suggestions) {
         this.suggestions = suggestions;
     }

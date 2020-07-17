@@ -8,17 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.data.Binder;
+import com.vaadin.data.ReadOnlyHasValue;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -29,124 +28,74 @@ import com.vaadin.ui.themes.ValoTheme;
  * This class represents the UI item for the gateway security token section in
  * the authentication configuration view.
  */
-public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
+public class GatewaySecurityTokenAuthenticationConfigurationItem extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
     private final transient SecurityTokenGenerator securityTokenGenerator;
-
-    private final Label gatewayTokenkeyLabel;
-
-    private boolean configurationEnabled;
-    private boolean configurationEnabledChange;
-
-    private boolean keyChanged;
-
     private final VerticalLayout detailLayout;
+    private final Binder<ProxySystemConfigWindow> binder;
 
-    public GatewaySecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
-                i18n);
+    /**
+     * Constructor for GatewaySecurityTokenAuthenticationConfigurationItem
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @param securityTokenGenerator
+     *            SecurityTokenGenerator
+     * @param binder
+     *            System config window binder
+     */
+    public GatewaySecurityTokenAuthenticationConfigurationItem(final VaadinMessageSource i18n,
+            final SecurityTokenGenerator securityTokenGenerator, final Binder<ProxySystemConfigWindow> binder) {
         this.securityTokenGenerator = securityTokenGenerator;
-
-        super.init("label.configuration.auth.gatewaytoken");
-
-        configurationEnabled = isConfigEnabled();
+        this.binder = binder;
+        this.setSpacing(false);
+        this.setMargin(false);
+        addComponent(SPUIComponentProvider.generateLabel(i18n, "label.configuration.auth.gatewaytoken"));
 
         detailLayout = new VerticalLayout();
-        detailLayout.setImmediate(true);
+        detailLayout.setMargin(false);
+        detailLayout.setSpacing(false);
 
-        final Button gatewaytokenBtn = SPUIComponentProvider.getButton(null, i18n.getMessage("configuration.button.regenerateKey"), "",
-                ValoTheme.BUTTON_TINY + " " + "redicon", true, null, SPUIButtonStyleSmall.class);
-        gatewaytokenBtn.setImmediate(true);
-        gatewaytokenBtn.setIcon(FontAwesome.REFRESH);
-        gatewaytokenBtn.addClickListener(event -> generateGatewayToken());
+        final Button gatewaytokenBtn = SPUIComponentProvider.getButton(null,
+                i18n.getMessage("configuration.button.regenerateKey"), "", ValoTheme.BUTTON_TINY + " " + "redicon",
+                true, null, SPUIButtonStyleSmall.class);
 
-        gatewayTokenkeyLabel = new LabelBuilder().id("gatewaysecuritytokenkey").name("").buildLabel();
-        gatewayTokenkeyLabel.addStyleName("gateway-token-label");
-        gatewayTokenkeyLabel.setImmediate(true);
+        gatewaytokenBtn.setIcon(VaadinIcons.REFRESH);
+        gatewaytokenBtn.addClickListener(event -> refreshGatewayToken());
+
+        final Label gatewayTokenLabel = new LabelBuilder().id("gatewaysecuritytokenkey").name("").buildLabel();
+        gatewayTokenLabel.addStyleName("gateway-token-label");
+        final ReadOnlyHasValue<String> gatewayTokenFieldBindable = new ReadOnlyHasValue<>(gatewayTokenLabel::setValue);
+        binder.bind(gatewayTokenFieldBindable, ProxySystemConfigWindow::getGatewaySecurityToken, null);
 
         final HorizontalLayout keyGenerationLayout = new HorizontalLayout();
         keyGenerationLayout.setSpacing(true);
-        keyGenerationLayout.setImmediate(true);
-
-        keyGenerationLayout.addComponent(gatewayTokenkeyLabel);
+        keyGenerationLayout.addComponent(gatewayTokenLabel);
         keyGenerationLayout.addComponent(gatewaytokenBtn);
-
         detailLayout.addComponent(keyGenerationLayout);
-
-        if (isConfigEnabled()) {
-            gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
-            setDetailVisible(true);
+        if (binder.getBean().isGatewaySecToken()) {
+            showDetails();
         }
     }
 
-    private void setDetailVisible(final boolean visible) {
-        if (visible) {
-            addComponent(detailLayout);
-        } else {
-            removeComponent(detailLayout);
-        }
-
+    /**
+     * Show gateway token detail
+     */
+    public void showDetails() {
+        addComponent(detailLayout);
     }
 
-    private void generateGatewayToken() {
-        gatewayTokenkeyLabel.setValue(securityTokenGenerator.generateToken());
-        keyChanged = true;
-        notifyConfigurationChanged();
+    /**
+     * Hide gateway token detail
+     */
+    public void hideDetails() {
+        removeComponent(detailLayout);
     }
 
-    @Override
-    public void configEnable() {
-        if (!configurationEnabled) {
-            configurationEnabledChange = true;
-        }
-
-        configurationEnabled = true;
-        setDetailVisible(true);
-        String gatewayTokenKey = getSecurityTokenKey();
-        if (StringUtils.isEmpty(gatewayTokenKey)) {
-            gatewayTokenKey = securityTokenGenerator.generateToken();
-            keyChanged = true;
-        }
-        gatewayTokenkeyLabel.setValue(gatewayTokenKey);
+    private void refreshGatewayToken() {
+        binder.getBean().setGatewaySecurityToken(securityTokenGenerator.generateToken());
+        binder.setBean(binder.getBean());
     }
-
-    private String getSecurityTokenKey() {
-        return getTenantConfigurationManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
-    }
-
-    @Override
-    public void configDisable() {
-        if (configurationEnabled) {
-            configurationEnabledChange = true;
-        }
-        configurationEnabled = false;
-        setDetailVisible(false);
-    }
-
-    @Override
-    public void save() {
-        if (configurationEnabledChange) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, configurationEnabled);
-        }
-
-        if (keyChanged) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
-                    gatewayTokenkeyLabel.getValue());
-        }
-    }
-
-    @Override
-    public void undo() {
-        configurationEnabledChange = false;
-        keyChanged = false;
-        gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
-    }
-
 }

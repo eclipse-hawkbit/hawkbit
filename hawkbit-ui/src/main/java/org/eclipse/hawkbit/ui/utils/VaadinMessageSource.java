@@ -31,6 +31,8 @@ public class VaadinMessageSource implements Serializable {
     private final transient MessageSource source;
 
     /**
+     * Constructor for VaadinMessageSource
+     *
      * @param source
      *            from Spring to resolve messages
      */

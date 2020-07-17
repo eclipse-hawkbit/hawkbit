@@ -8,14 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.eclipse.hawkbit.ui.common.EmptyStringValidator;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
-import com.vaadin.data.Validator;
 import com.vaadin.ui.AbstractTextField;
 
 /**
@@ -34,18 +28,17 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     private String styleName;
     private String prompt;
     private String id;
-    private boolean immediate = true;
-    private boolean required;
     private boolean readOnly;
     private boolean enabled = true;
     private final int maxLengthAllowed;
-    private final List<Validator> validators = new LinkedList<>();
 
     protected AbstractTextFieldBuilder(final int maxLengthAllowed) {
         this.maxLengthAllowed = maxLengthAllowed;
     }
 
     /**
+     * Add caption to text field
+     *
      * @param caption
      *            the caption to set
      * @return the builder
@@ -57,6 +50,8 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
+     * Add style to text field
+     *
      * @param style
      *            the style to set * @return the builder
      * @return the builder
@@ -67,6 +62,8 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
+     * Add style name to text field
+     *
      * @param styleName
      *            the styleName to set
      * @return the builder
@@ -77,21 +74,8 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
-     * @param required
-     *            the required to set
-     * @param i18n
-     *            to translate error message
-     * @return the builder
-     */
-    public T required(final boolean required, final VaadinMessageSource i18n) {
-        this.required = required;
-        if (required) {
-            validators.add(new EmptyStringValidator(i18n, maxLengthAllowed));
-        }
-        return (T) this;
-    }
-
-    /**
+     * Add read only to text field
+     *
      * @param readOnly
      *            the readOnly to set
      * @return the builder
@@ -102,6 +86,8 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
+     * Enable the text field
+     *
      * @param enabled
      *            the enabled to set
      * @return the builder
@@ -112,6 +98,8 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
+     * Add prompt to text field
+     *
      * @param prompt
      *            the prompt to set
      * @return the builder
@@ -122,33 +110,14 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     }
 
     /**
-     * @param immediate
-     *            the immediate to set
-     * @return the builder
-     */
-    public T immediate(final boolean immediate) {
-        this.immediate = immediate;
-        return (T) this;
-    }
-
-    /**
+     * Add id to text field
+     *
      * @param id
      *            the id to set
      * @return the builder
      */
     public T id(final String id) {
         this.id = id;
-        return (T) this;
-    }
-
-    /**
-     * 
-     * @param validator
-     *            the validator to set for this field
-     * @return the builder
-     */
-    public T validator(final Validator validator) {
-        validators.add(validator);
         return (T) this;
     }
 
@@ -160,8 +129,6 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
     public E buildTextComponent() {
         final E textComponent = createTextComponent();
 
-        textComponent.setRequired(required);
-        textComponent.setImmediate(immediate);
         textComponent.setReadOnly(readOnly);
         textComponent.setEnabled(enabled);
 
@@ -177,7 +144,7 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
             textComponent.addStyleName(styleName);
         }
         if (!StringUtils.isEmpty(prompt)) {
-            textComponent.setInputPrompt(prompt);
+            textComponent.setPlaceholder(prompt);
         }
 
         if (maxLengthAllowed > 0) {
@@ -187,12 +154,6 @@ public abstract class AbstractTextFieldBuilder<T, E extends AbstractTextField> {
         if (!StringUtils.isEmpty(id)) {
             textComponent.setId(id);
         }
-
-        if (!validators.isEmpty()) {
-            validators.forEach(textComponent::addValidator);
-        }
-
-        textComponent.setNullRepresentation("");
 
         return textComponent;
     }

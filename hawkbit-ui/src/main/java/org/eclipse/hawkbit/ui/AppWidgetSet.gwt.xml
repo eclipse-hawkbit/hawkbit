@@ -13,17 +13,10 @@
 <module>
    <!-- This file is automatically updated based on new dependencies by the goal "vaadin:update-widgetset". -->
 
-   <!-- Inherit DefaultWidgetSet -->
    <inherits name="com.vaadin.DefaultWidgetSet" />
-
-   <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
-
-   
-
    <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
-
-   <inherits name="org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet" />
    <inherits name="org.eclipse.hawkbit.ui.filtermanagement.TextFieldSuggestionBox" />
    <inherits name="org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart" />
-   <inherits name="org.eclipse.hawkbit.ui.dd.CustomAcceptCriteria" />
+   <inherits
+      name="org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionWidgetset" /> 
 </module>

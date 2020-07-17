@@ -76,7 +76,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
         if (groupTargetCounts != null) {
             long sum = 0;
-            for (Long targetCount : groupTargetCounts) {
+            for (final Long targetCount : groupTargetCounts) {
                 sum += targetCount;
             }
             unassignedTargets = totalTargetCount - sum;
@@ -86,7 +86,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     }
 
-    private static PieArc getPie(Long count, Long total, double startAngle) {
+    private static PieArc getPie(final Long count, final Long total, final double startAngle) {
         final Double percentage = count.doubleValue() / total.doubleValue();
         return new PieArc(startAngle, startAngle + percentage * 2 * Math.PI);
     }
@@ -98,7 +98,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
         final Array<Arc> dataArray = Array.create();
 
-        PieArc pie = getPie(unassignedTargets, totalTargetCount, 0);
+        final PieArc pie = getPie(unassignedTargets, totalTargetCount, 0);
         dataArray.push(pie.getArc());
 
         double lastAngle = pie.getEndAngle();
@@ -108,13 +108,13 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
             lastAngle = arcEntry.getEndAngle();
         }
 
-        UpdateSelection pies = pieGroup.selectAll(".pie").data(dataArray);
+        final UpdateSelection pies = pieGroup.selectAll(".pie").data(dataArray);
         pies.enter().append("path").classed("pie", true).on(BrowserEvents.MOUSEOVER, new DatumFunction<Void>() {
             @Override
-            public Void apply(Element context, Value d, int index) {
-                Array<Double> point = arc.centroid(d.as(Arc.class), index);
-                double x = point.getNumber(0);
-                double y = point.getNumber(1);
+            public Void apply(final Element context, final Value d, final int index) {
+                final Array<Double> point = arc.centroid(d.as(Arc.class), index);
+                final double x = point.getNumber(0);
+                final double y = point.getNumber(1);
                 if (index == 0) {
                     updateHoverText("Unassigned: " + unassignedTargets, x, y);
                 } else {
@@ -125,7 +125,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
             }
         }).on(BrowserEvents.MOUSEOUT, new DatumFunction<Void>() {
             @Override
-            public Void apply(Element context, Value d, int index) {
+            public Void apply(final Element context, final Value d, final int index) {
                 infoText.attr(ATTR_VISIBILITY, "hidden");
                 return null;
             }
@@ -152,7 +152,7 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
         infoText.attr(ATTR_VISIBILITY, "visible");
     }
 
-    private static void moveSelection(Selection sel, double x, double y) {
+    private static void moveSelection(final Selection sel, final double x, final double y) {
         sel.attr(ATTR_TRANSFORM, "translate(" + x + ", " + y + ")");
     }
 
@@ -166,11 +166,11 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
 
     private void initChart() {
         arc = D3.svg().arc().innerRadius(0).outerRadius(90);
-        int height = 200;
-        int width = 260;
+        final int height = 200;
+        final int width = 260;
 
         svg = D3.select(this).append("svg").attr("width", width).attr("height", height).append("g");
-        moveSelection(svg, (float) width / 2, (float) height / 2);
+        moveSelection(svg, (double) width / 2, (double) height / 2);
 
         pieGroup = svg.append("g");
 
@@ -181,19 +181,33 @@ public class GroupsPieChartWidget extends DockLayoutPanel {
     }
 
     private static class PieArc {
-        private double startAngle;
+        private final double startAngle;
 
-        private double endAngle;
+        private final double endAngle;
 
-        public PieArc(double startAngle, double endAngle) {
+        /**
+         * Constructor
+         *
+         * @param startAngle
+         *          Pie arc start angle
+         * @param endAngle
+         *          Pie arc start angle
+         */
+        public PieArc(final double startAngle, final double endAngle) {
             this.startAngle = startAngle;
             this.endAngle = endAngle;
         }
 
+        /**
+         * @return Pie arc end angle
+         */
         public double getEndAngle() {
             return endAngle;
         }
 
+        /**
+         * @return Pie arc
+         */
         public Arc getArc() {
             return Arc.constantArc().startAngle(startAngle).endAngle(endAngle);
         }

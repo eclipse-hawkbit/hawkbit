@@ -8,59 +8,28 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+
+import com.vaadin.ui.HorizontalLayout;
 
 /**
  * This class represents the UI item for the target security token section in
  * the authentication configuration view.
  */
-public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
+public class TargetSecurityTokenAuthenticationConfigurationItem extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean configurationEnabled;
-    private boolean configurationEnabledChange;
-
-    public TargetSecurityTokenAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement,
-                i18n);
-
-        super.init("label.configuration.auth.targettoken");
-        configurationEnabled = isConfigEnabled();
-    }
-
-    @Override
-    public void configEnable() {
-        if (!configurationEnabled) {
-            configurationEnabledChange = true;
-        }
-        configurationEnabled = true;
-    }
-
-    @Override
-    public void configDisable() {
-        if (configurationEnabled) {
-            configurationEnabledChange = true;
-        }
-        configurationEnabled = false;
-    }
-
-    @Override
-    public void save() {
-        if (!configurationEnabledChange) {
-            return;
-        }
-        getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
-    }
-
-    @Override
-    public void undo() {
-        configurationEnabledChange = false;
-        configurationEnabled = getTenantConfigurationManagement()
-                .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
+    /**
+     * Constructor for TargetSecurityTokenAuthenticationConfigurationItem
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     */
+    public TargetSecurityTokenAuthenticationConfigurationItem(final VaadinMessageSource i18n) {
+        this.setSpacing(false);
+        this.setMargin(false);
+        addComponent(SPUIComponentProvider.generateLabel(i18n, "label.configuration.auth.targettoken"));
     }
 }

@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
@@ -110,7 +110,10 @@ public final class DashboardMenu extends CustomComponent {
 
     private Component buildContent() {
         final VerticalLayout dashboardMenuLayout = new VerticalLayout();
+        dashboardMenuLayout.setSpacing(false);
+        dashboardMenuLayout.setMargin(false);
         dashboardMenuLayout.setSizeFull();
+
         final VerticalLayout menuContent = getMenuLayout();
         menuContent.addComponent(buildUserMenu(uiProperties));
         menuContent.addComponent(buildToggleButton());
@@ -124,31 +127,36 @@ public final class DashboardMenu extends CustomComponent {
         menuContent.setExpandRatio(menus, 1.0F);
 
         dashboardMenuLayout.addComponent(menuContent);
+
         return dashboardMenuLayout;
     }
 
     private static VerticalLayout getMenuLayout() {
         final VerticalLayout menuContent = new VerticalLayout();
-        menuContent.addStyleName(ValoTheme.MENU_PART);
-        menuContent.addStyleName("sidebar");
-
-        menuContent.addStyleName("no-vertical-drag-hints");
-        menuContent.addStyleName("no-horizontal-drag-hints");
+        menuContent.setSpacing(false);
+        menuContent.setMargin(false);
         menuContent.setWidth(null);
         menuContent.setHeight("100%");
+
+        menuContent.addStyleName(ValoTheme.MENU_PART);
+        menuContent.addStyleName("sidebar");
+        menuContent.addStyleName("no-vertical-drag-hints");
+        menuContent.addStyleName("no-horizontal-drag-hints");
+
         return menuContent;
     }
 
     private VerticalLayout buildLinksAndVersion() {
         final VerticalLayout links = new VerticalLayout();
         links.setSpacing(true);
+        links.setMargin(false);
         links.addStyleName("links");
         final String linkStyle = "v-link";
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
             final Link docuLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.getMessage("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
-                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle);
+                    VaadinIcons.QUESTION_CIRCLE, "_blank", linkStyle);
             docuLink.setSizeFull();
             links.addComponent(docuLink);
             links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
@@ -157,7 +165,7 @@ public final class DashboardMenu extends CustomComponent {
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.getMessage("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
-                    FontAwesome.USERS, "_blank", linkStyle);
+                    VaadinIcons.USERS, "_blank", linkStyle);
             links.addComponent(userManagementLink);
             userManagementLink.setSizeFull();
             links.setComponentAlignment(userManagementLink, Alignment.BOTTOM_CENTER);
@@ -165,7 +173,7 @@ public final class DashboardMenu extends CustomComponent {
 
         if (!uiProperties.getLinks().getSupport().isEmpty()) {
             final Link supportLink = SPUIComponentProvider.getLink(UIComponentIdProvider.LINK_SUPPORT,
-                    i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O,
+                    i18n.getMessage("link.support.name"), uiProperties.getLinks().getSupport(), VaadinIcons.ENVELOPE_O,
                     "", linkStyle);
             supportLink.setSizeFull();
             links.addComponent(supportLink);
@@ -228,7 +236,7 @@ public final class DashboardMenu extends CustomComponent {
     private Component buildToggleButton() {
         final Button valoMenuToggleButton = new Button(i18n.getMessage("label.menu"),
                 new MenuToggleClickListenerMyClickListener());
-        valoMenuToggleButton.setIcon(FontAwesome.LIST);
+        valoMenuToggleButton.setIcon(VaadinIcons.LIST);
         valoMenuToggleButton.addStyleName("valo-menu-toggle");
         valoMenuToggleButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         valoMenuToggleButton.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -237,6 +245,8 @@ public final class DashboardMenu extends CustomComponent {
 
     private VerticalLayout buildMenuItems() {
         final VerticalLayout menuItemsLayout = new VerticalLayout();
+        menuItemsLayout.setSpacing(false);
+        menuItemsLayout.setMargin(false);
         menuItemsLayout.addStyleName("valo-menuitems");
         menuItemsLayout.setHeight(100.0F, Unit.PERCENTAGE);
 
@@ -272,7 +282,8 @@ public final class DashboardMenu extends CustomComponent {
         notificationLabel.addStyleName(ValoTheme.MENU_BADGE);
         notificationLabel.setWidthUndefined();
         notificationLabel.setVisible(false);
-        notificationLabel.setId(UIComponentIdProvider.NOTIFICATION_MENU_ID + menuItemButton.getCaption().toLowerCase());
+        notificationLabel
+                .setId(UIComponentIdProvider.NOTIFICATION_MENU_ID + "." + menuItemButton.getCaption().toLowerCase());
         dashboardWrapper.addComponent(notificationLabel);
         return dashboardWrapper;
     }
@@ -338,8 +349,7 @@ public final class DashboardMenu extends CustomComponent {
      */
     public DashboardMenuItem getByViewName(final String viewName) {
 
-        return dashboardVaadinViews.stream()
-                .filter(view -> view.getViewName().equals(viewName)).findAny().orElse(null);
+        return dashboardVaadinViews.stream().filter(view -> view.getViewName().equals(viewName)).findAny().orElse(null);
     }
 
     /**
@@ -407,7 +417,7 @@ public final class DashboardMenu extends CustomComponent {
          */
         public void postViewChange(final PostViewChangeEvent event) {
             removeStyleName(STYLE_SELECTED);
-            if (event.getView().equals(view)) {
+            if (event.getView() != null && event.getView().equals(view)) {
                 addStyleName(STYLE_SELECTED);
                 /* disable current selected view */
                 setEnabled(false);

@@ -8,83 +8,48 @@
  */
 package org.eclipse.hawkbit.ui.push.event;
 
+import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+
 /**
  * TenantAwareEvent declaration for the UI to notify the UI that a rollout has
  * been changed.
  * 
  *
  */
-public class RolloutGroupChangedEvent extends TenantAwareUiEvent {
+public class RolloutGroupChangedEvent extends RemoteIdEvent implements EntityUpdatedEvent, ParentIdAwareEvent {
+    private static final long serialVersionUID = 1L;
 
     private final Long rolloutId;
-    private final Long rolloutGroupId;
 
     /**
-     * Constructor.
-     * 
-     * @param tenant
-     *            the tenant of the event
-     * @param rolloutId
-     *            the ID of the rollout which has been changed
-     * @param rolloutGroupId
-     *            the ID of the rollout group which has been changed
+     * Default constructor.
      */
-    public RolloutGroupChangedEvent(final String tenant, final Long rolloutId, final Long rolloutGroupId) {
-        super(tenant);
-        this.rolloutId = rolloutId;
-        this.rolloutGroupId = rolloutGroupId;
+    public RolloutGroupChangedEvent() {
+        // for serialization libs like jackson
+        this.rolloutId = null;
     }
 
-    public Long getRolloutId() {
+    /**
+     * Constructor for json serialization.
+     *
+     * @param tenant
+     *            the tenant
+     * @param rolloutId
+     *            the rollout Id
+     * @param entityId
+     *            the entity Id
+     */
+    public RolloutGroupChangedEvent(final String tenant, final Long rolloutId, final Long entityId) {
+        // application id is not needed, because we compose the event ourselves
+        super(entityId, tenant, RolloutGroup.class.getName(), null);
+
+        this.rolloutId = rolloutId;
+    }
+
+    @Override
+    public Long getParentEntityId() {
         return rolloutId;
     }
-
-    public Long getRolloutGroupId() {
-        return rolloutGroupId;
-    }
-
-    @Override
-    public String toString() {
-        return "RolloutGroupChangeEvent [rolloutId=" + rolloutId + ", rolloutGroupId=" + rolloutGroupId
-                + ", getTenant()=" + getTenant() + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((rolloutGroupId == null) ? 0 : rolloutGroupId.hashCode());
-        result = prime * result + ((rolloutId == null) ? 0 : rolloutId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final RolloutGroupChangedEvent other = (RolloutGroupChangedEvent) obj;
-        if (rolloutGroupId == null) {
-            if (other.rolloutGroupId != null) {
-                return false;
-            }
-        } else if (!rolloutGroupId.equals(other.rolloutGroupId)) {
-            return false;
-        }
-        if (rolloutId == null) {
-            if (other.rolloutId != null) {
-                return false;
-            }
-        } else if (!rolloutId.equals(other.rolloutId)) {
-            return false;
-        }
-        return true;
-    }
-
 }

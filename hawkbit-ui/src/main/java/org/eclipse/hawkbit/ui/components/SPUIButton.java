@@ -20,7 +20,7 @@ public class SPUIButton extends Button {
     SPUIButton(final String id, final String buttonName, final String buttonDesc) {
         super(buttonName);
         setDescription(buttonDesc);
-        setImmediate(false);
+
         if (null != id) {
             setId(id);
         }

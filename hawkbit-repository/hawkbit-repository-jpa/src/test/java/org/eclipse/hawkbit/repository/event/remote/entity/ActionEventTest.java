@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.Constructor;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -45,26 +42,13 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
     }
 
     @Override
-    protected RemoteEntityEvent<?> createRemoteEvent(final Action baseEntity,
-            final Class<? extends RemoteEntityEvent<?>> eventType) {
+    protected int getConstructorParamCount() {
+        return 5;
+    }
 
-        Constructor<?> constructor = null;
-        for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
-            if (constructors.getParameterCount() == 4) {
-                constructor = constructors;
-            }
-        }
-
-        if (constructor == null) {
-            throw new IllegalArgumentException("No suitable constructor foundes");
-        }
-
-        try {
-            return (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, 1L, 2L, "Node");
-        } catch (final ReflectiveOperationException e) {
-            fail("Exception should not happen " + e.getMessage());
-        }
-        return null;
+    @Override
+    protected Object[] getConstructorParams(final Action baseEntity) {
+        return new Object[] { baseEntity, 1L, 1L, 2L, "Node" };
     }
 
     @Override
@@ -72,15 +56,19 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         final AbstractActionEvent event = (AbstractActionEvent) e;
 
         assertThat(event.getEntity()).isSameAs(baseEntity);
+        assertThat(event.getTargetId()).isEqualTo(1L);
         assertThat(event.getRolloutId()).isEqualTo(1L);
+        assertThat(event.getRolloutGroupId()).isEqualTo(2L);
 
         AbstractActionEvent underTestCreatedEvent = createProtoStuffEvent(event);
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getTargetId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
 
         underTestCreatedEvent = createJacksonEvent(event);
         assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getTargetId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
 

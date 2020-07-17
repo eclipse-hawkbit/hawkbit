@@ -16,9 +16,9 @@ package org.eclipse.hawkbit.ui.utils;
 public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_ARTIFACT_DOWNLOAD = "tooltip.artifact.download";
-    
+
     public static final String ARTIFACT_DOWNLOAD_FAILURE_MSG = "message.artifact.download.failure";
-    
+
     public static final String BUTTON_CANCEL = "button.cancel";
 
     public static final String BUTTON_OK = "button.ok";
@@ -29,7 +29,13 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
 
+    public static final String METADATA_LINK_DESCRIPTION = "metadata.link.desc";
+
     public static final String HEADER_DISTRIBUTION_SET = "header.distributionset";
+
+    public static final String HEADER_TARGET_TAG = "header.target.filter.tag";
+
+    public static final String HEADER_TAG = "header.filter.tag";
 
     public static final String CAPTION_ACTION_FORCED = "label.action.forced";
 
@@ -63,17 +69,25 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES = "caption.confirm.assign.consequences";
 
+    public static final String CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX = "caption.entity.assign.action.confirmbox";
+
     public static final String CAPTION_CONFIG_CREATE = "caption.config.create";
 
     public static final String CAPTION_CONFIG_EDIT = "caption.config.edit";
 
     public static final String CAPTION_CONFIG_DELETE = "caption.config.delete";
 
+    public static final String CAPTION_TAG = "caption.tag";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
 
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
+
+    public static final String LABEL_EDIT_FILTER = "label.edit.filter";
+
+    public static final String LABEL_UNKNOWN = "label.unknown";
 
     public static final String LABEL_AUTO_ASSIGNMENT_DESC = "label.auto.assign.description";
 
@@ -87,11 +101,31 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ACTION_NOT_ALLOWED = "message.action.not.allowed";
 
-    public static final String MESSAGE_SELECTED_DS_NOT_FOUND = "message.selected.distributionset.not.found";
-
     public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE = "message.confirm.assign.consequences.none";
 
     public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT = "message.confirm.assign.consequences.text";
+
+    public static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES_TO_ENTITY = "message.confirm.assign.multiple.entities.to.entity";
+
+    public static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
+
+    public static final String MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS = "message.autoassign.create.error.missingElements";
+
+    public static final String MESSAGE_ERROR_NAMEREQUIRED = "message.error.nameRequired";
+
+    public static final String MESSAGE_ERROR_VERSIONREQUIRED = "message.error.versionRequired";
+
+    public static final String MESSAGE_ERROR_DISTRIBUTIONSET_REQUIRED = "message.error.distributionSetRequired";
+
+    public static final String MESSAGE_ERROR_TFQ_REQUIRED = "message.error.tfqRequired";
+
+    public static final String MESSAGE_FILTER_QUERY_ERROR_NOTVALIDE = "message.filter.query.error.notValide";
+
+    public static final String MESSAGE_ERROR_ENTITY_DELETED = "message.entity.error.deleted";
+
+    public static final String MESSAGE_ERROR_ENTITY_READONLY = "message.entity.error.readonly";
+
+    public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";
 
@@ -123,9 +157,13 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_CLICK_TO_REMOVE = "tooltip.click.to.remove";
 
+    public static final String TOOLTIP_CLICK_TO_FILTER = "tooltip.click.to.filter";
+
     public static final String TOOLTIP_BULK_UPLOAD = "tooltip.bulkUpload";
 
     public static final String TOOLTIP_CONFIGURE = "tooltip.configure";
+
+    public static final String TOOLTIP_CONFIGURE_CLOSE = "tooltip.configure.close";
 
     public static final String TOOLTIP_CHECK_FOR_MANDATORY = "tooltip.check.for.mandatory";
 
@@ -146,6 +184,8 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_FORCED_ITEM = "tooltip.forced.item";
 
     public static final String TOOLTIP_TARGET_PIN = "tooltip.target.pin";
+
+    public static final String TOOLTIP_TARGET_STATUS_PREFIX = "tooltip.target.status.";
 
     public static final String TOOLTIP_TARGET_STATUS_UNKNOWN = "tooltip.target.status.unknown";
 
@@ -191,8 +231,6 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
 
-    public static final String CAPTION_ARTIFACT_SOFTWARE_MODULE_TYPE = "artifact.softwaremodule.type.caption";
-
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
@@ -212,6 +250,14 @@ public final class UIMessageIdProvider {
     public static final String VAADIN_SYSTEM_TRYINGRECONNECT = "vaadin.system.tryingreconnect";
 
     public static final String TOOLTIP_ROLLOUT_STATUS_PREFIX = "tooltip.rollout.status.";
+
+    public static final String TOOLTIP_ROLLOUT_GROUP_STATUS_PREFIX = "tooltip.rollout.group.status.";
+
+    public static final String TOOLTIP_ACTION_STATUS_PREFIX = "tooltip.action.status.";
+
+    public static final String TOOLTIP_ACTIVE_ACTION_STATUS_PREFIX = "tooltip.active.action.status.";
+
+    public static final String TOOLTIP_UPLOAD_STATUS_PREFIX = "tooltip.upload.status.";
 
     /**
      * Private Constructor.

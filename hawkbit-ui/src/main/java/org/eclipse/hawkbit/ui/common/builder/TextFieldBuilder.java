@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -19,6 +17,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 public class TextFieldBuilder extends AbstractTextFieldBuilder<TextFieldBuilder, TextField> {
+    private static final int INPUT_DEBOUNCE_TIMEOUT = 500;
 
     /**
      * Constructor.
@@ -31,27 +30,13 @@ public class TextFieldBuilder extends AbstractTextFieldBuilder<TextFieldBuilder,
         styleName(ValoTheme.TEXTAREA_TINY);
     }
 
-    /**
-     * Create a search text field.
-     * 
-     * @param textChangeListener
-     *            listener when text is changed.
-     * @return the textfield
-     */
-    public TextField createSearchField(final TextChangeListener textChangeListener) {
-        final TextField textField = style("filter-box").styleName("text-style filter-box-hide").buildTextComponent();
-        textField.setWidth(100.0F, Unit.PERCENTAGE);
-        textField.addTextChangeListener(textChangeListener);
-        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        // 1 seconds timeout.
-        textField.setTextChangeTimeout(1000);
-        return textField;
-    }
-
     @Override
     protected TextField createTextComponent() {
         final TextField textField = new TextField();
         textField.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        textField.setValueChangeMode(ValueChangeMode.LAZY);
+        textField.setValueChangeTimeout(INPUT_DEBOUNCE_TIMEOUT);
+
         return textField;
     }
 

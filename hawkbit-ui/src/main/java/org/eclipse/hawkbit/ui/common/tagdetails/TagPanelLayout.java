@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,9 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
 import com.vaadin.ui.VerticalLayout;
@@ -39,12 +41,12 @@ public class TagPanelLayout extends VerticalLayout {
      *            done.
      */
     TagPanelLayout(final VaadinMessageSource i18n, final boolean readOnlyMode) {
+        this.assignableTagsComboBox = new TagAssignementComboBox(i18n, readOnlyMode);
+        this.assignedTagField = new TagListField(i18n, readOnlyMode);
 
-        assignableTagsComboBox = new TagAssignementComboBox(i18n, readOnlyMode);
         addComponent(assignableTagsComboBox);
-
-        assignedTagField = new TagListField(i18n, readOnlyMode);
         addComponent(assignedTagField);
+
         setExpandRatio(assignedTagField, 1.0F);
         setExpandRatio(assignableTagsComboBox, 0.0F);
     }
@@ -57,11 +59,15 @@ public class TagPanelLayout extends VerticalLayout {
      * @param assignedTags
      *            assigned tags
      */
-    void initializeTags(final List<TagData> allTags, final List<TagData> assignedTags) {
+    void initializeTags(final List<ProxyTag> allTags, final List<ProxyTag> assignedTags) {
         assignableTagsComboBox.removeAllTags();
         assignedTagField.removeAllTags();
 
-        final List<TagData> assignableTags = Lists.newArrayList(allTags);
+        if (CollectionUtils.isEmpty(allTags)) {
+            return;
+        }
+
+        final List<ProxyTag> assignableTags = Lists.newArrayList(allTags);
         assignableTags.removeAll(assignedTags);
 
         assignableTagsComboBox.initializeAssignableTags(assignableTags);
@@ -73,47 +79,58 @@ public class TagPanelLayout extends VerticalLayout {
      * Sets a tag that is assigned.
      * 
      * @param tagData
-     *            the {@link TagData}
+     *            the {@link ProxyTag}
      */
-    public void setAssignedTag(final TagData tagData) {
+    public void setAssignedTag(final ProxyTag tagData) {
         // the assigned tag is no longer assignable
         assignableTagsComboBox.removeAssignableTag(tagData);
         // show it as an assigned tag
-        assignedTagField.addTag(tagData.getName(), tagData.getColor());
+        assignedTagField.addTag(tagData);
     }
 
     /**
      * Removes an assigned tag.
      * 
      * @param tagData
-     *            the {@link TagData}
+     *            the {@link ProxyTag}
      */
-    public void removeAssignedTag(final TagData tagData) {
+    public void removeAssignedTag(final ProxyTag tagData) {
         // the un-assigned tag is now assignable
         assignableTagsComboBox.addAssignableTag(tagData);
-        // remove ot from the assigned tags
-        assignedTagField.removeTag(tagData.getName());
+        // remove it from the assigned tags
+        assignedTagField.removeTag(tagData);
     }
 
     /**
      * Informs the panel that a new tag was created.
      * 
      * @param tagData
-     *            the {@link TagData}
+     *            the {@link ProxyTag}
      */
-    void tagCreated(final TagData tagData) {
+    void tagCreated(final ProxyTag tagData) {
         assignableTagsComboBox.addAssignableTag(tagData);
+    }
+
+    /**
+     * Informs the panel that a tag was updated.
+     * 
+     * @param tagData
+     *            the {@link ProxyTag}
+     */
+    void tagUpdated(final ProxyTag tagData) {
+        assignableTagsComboBox.updateAssignableTag(tagData);
+        assignedTagField.updateTag(tagData);
     }
 
     /**
      * Informs the panel that a tag was deleted.
      * 
-     * @param tagData
-     *            the {@link TagData}
+     * @param tagId
+     *            the tag Id
      */
-    void tagDeleted(final TagData tagData) {
-        assignableTagsComboBox.removeAssignableTag(tagData);
-        assignedTagField.removeTag(tagData.getName());
+    void tagDeleted(final Long tagId) {
+        assignableTagsComboBox.removeAssignableTag(tagId);
+        assignedTagField.removeTag(tagId);
     }
 
     /**
@@ -126,18 +143,18 @@ public class TagPanelLayout extends VerticalLayout {
         /**
          * User triggers a tag assignment.
          * 
-         * @param tagName
-         *            the name of the tag that should be assigned.
+         * @param tagData
+         *            the tag that should be assigned.
          */
-        void assignTag(String tagName);
+        void assignTag(ProxyTag tagData);
 
         /**
          * User triggers a tag unassignment.
          * 
-         * @param tagName
-         *            the name of the tag that should be unassigned.
+         * @param tagData
+         *            the tag that should be unassigned.
          */
-        void unassignTag(String tagName);
+        void unassignTag(ProxyTag tagData);
     }
 
     /**
@@ -167,7 +184,7 @@ public class TagPanelLayout extends VerticalLayout {
      * 
      * @return {@link List} with tags.
      */
-    public List<String> getAssignedTags() {
+    public List<ProxyTag> getAssignedTags() {
         return assignedTagField.getTags();
     }
 }

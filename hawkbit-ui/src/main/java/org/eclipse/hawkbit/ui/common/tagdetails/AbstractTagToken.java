@@ -8,26 +8,22 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.common.table.BaseUIEntityEvent;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
+import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.util.CollectionUtils;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.ui.UI;
 
 /**
  * Abstract class for target/ds tag token layout.
@@ -35,121 +31,74 @@ import com.vaadin.ui.UI;
  * @param <T>
  *            the special entity
  */
-public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable, TagAssignmentListener {
-
+public abstract class AbstractTagToken<T extends ProxyNamedEntity>
+        implements TagAssignmentListener, MasterEntityAwareComponent<T> {
     protected static final int MAX_TAG_QUERY = 1000;
-
-    private static final long serialVersionUID = 6599386705285184783L;
 
     protected TagPanelLayout tagPanelLayout;
 
-    protected final transient Map<Long, TagData> tagDetailsById = new ConcurrentHashMap<>();
-    protected final transient Map<String, TagData> tagDetailsByName = new ConcurrentHashMap<>();
+    protected final SpPermissionChecker checker;
+    protected final VaadinMessageSource i18n;
+    protected final UINotification uiNotification;
+    protected final UIEventBus eventBus;
 
-    protected SpPermissionChecker checker;
-
-    protected VaadinMessageSource i18n;
-
-    protected UINotification uinotification;
-
-    protected transient EventBus.UIEventBus eventBus;
-
-    protected ManagementUIState managementUIState;
-
-    // BaseEntity implements Serializable so this entity is serializable. Maybe
-    // a sonar bug
-    @SuppressWarnings("squid:S1948")
-    protected T selectedEntity;
+    private T masterEntity;
 
     protected AbstractTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
-            final UINotification uinotification, final UIEventBus eventBus, final ManagementUIState managementUIState) {
+            final UINotification uiNotification, final UIEventBus eventBus) {
         this.checker = checker;
         this.i18n = i18n;
-        this.uinotification = uinotification;
+        this.uiNotification = uiNotification;
         this.eventBus = eventBus;
-        this.managementUIState = managementUIState;
-        createTagPanel();
-        if (doSubscribeToEventBus()) {
-            eventBus.subscribe(this);
+
+        buildTagPanel();
+        tagPanelLayout.setVisible(false);
+    }
+
+    private void buildTagPanel() {
+        tagPanelLayout = new TagPanelLayout(i18n, !isToggleTagAssignmentAllowed());
+        tagPanelLayout.addTagAssignmentListener(this);
+
+        tagPanelLayout.setSpacing(false);
+        tagPanelLayout.setMargin(false);
+        tagPanelLayout.setSizeFull();
+    }
+
+    @Override
+    public void masterEntityChanged(final T changedMasterEntity) {
+        if (changedMasterEntity == null && masterEntity == null) {
+            return;
+        }
+
+        masterEntity = changedMasterEntity;
+
+        if (changedMasterEntity == null) {
+            tagPanelLayout.initializeTags(Collections.emptyList(), Collections.emptyList());
+            tagPanelLayout.setVisible(false);
+        } else {
+            tagPanelLayout.initializeTags(getAllTags(), getAssignedTags());
+            tagPanelLayout.setVisible(true);
         }
     }
 
     /**
-     * Subscribes the view to the eventBus. Method has to be overriden (return
-     * false) if the view does not contain any listener to avoid Vaadin blowing
-     * up our logs with warnings.
+     * @return Master entity
      */
-    protected boolean doSubscribeToEventBus() {
-        return true;
+    public Optional<T> getMasterEntity() {
+        return Optional.ofNullable(masterEntity);
     }
 
-    protected void onBaseEntityEvent(final BaseUIEntityEvent<T> baseEntityEvent) {
-        if (BaseEntityEventType.SELECTED_ENTITY != baseEntityEvent.getEventType()) {
-            return;
-        }
-        UI.getCurrent().access(() -> {
-            final T entity = baseEntityEvent.getEntity();
-            if (entity != null) {
-                selectedEntity = entity;
-                repopulateTags();
-            }
-        });
-    }
-
-    private void createTagPanel() {
-        tagPanelLayout = new TagPanelLayout(i18n, !isToggleTagAssignmentAllowed());
-        tagPanelLayout.addTagAssignmentListener(this);
-        tagPanelLayout.setSizeFull();
-    }
-
-    protected void repopulateTags() {
-        tagDetailsById.clear();
-        tagDetailsByName.clear();
-
-        final List<TagData> allAssignableTags = getAllTags();
-        allAssignableTags.forEach(tagData -> {
-            tagDetailsByName.put(tagData.getName(), tagData);
-            tagDetailsById.put(tagData.getId(), tagData);
-        });
-        tagPanelLayout.initializeTags(allAssignableTags, getAssignedTags());
-    }
-
-    protected void tagCreated(final TagData tagData) {
-        tagDetailsByName.put(tagData.getName(), tagData);
-        tagDetailsById.put(tagData.getId(), tagData);
-
+    protected void tagCreated(final ProxyTag tagData) {
         tagPanelLayout.tagCreated(tagData);
     }
 
-    protected void tagDeleted(final Long id) {
-        final TagData tagData = tagDetailsById.get(id);
-        if (tagData != null) {
-            tagPanelLayout.tagDeleted(tagData);
-
-            tagDetailsByName.remove(tagData.getName());
-            tagDetailsById.remove(id);
-        }
+    protected void tagUpdated(final ProxyTag tagData) {
+        tagPanelLayout.tagUpdated(tagData);
     }
 
-    @Override
-    public void assignTag(final String tagName) {
-        final TagData tagData = tagDetailsByName.get(tagName);
-        if (tagData != null) {
-            assignTag(tagData);
-        }
+    protected void tagDeleted(final Long tagId) {
+        tagPanelLayout.tagDeleted(tagId);
     }
-
-    @Override
-    public void unassignTag(final String tagName) {
-        final TagData tagData = tagDetailsByName.get(tagName);
-        if (tagData != null) {
-            unassignTag(tagData);
-        }
-    }
-
-    protected abstract void assignTag(TagData tagData);
-
-    protected abstract void unassignTag(TagData tagData);
 
     protected boolean checkAssignmentResult(final List<? extends Identifiable<Long>> assignedEntities,
             final Long expectedAssignedEntityId) {
@@ -169,12 +118,53 @@ public abstract class AbstractTagToken<T extends BaseEntity> implements Serializ
                 && unAssignedEntity.getId().equals(expectedUnAssignedEntityId);
     }
 
+    protected String getAssignmentMsgFor(final String assignmentMsgKey, final String assignedEntityType,
+            final String assignedEntityName, final String tagName) {
+        return i18n.getMessage(assignmentMsgKey, assignedEntityType, assignedEntityName, i18n.getMessage("caption.tag"),
+                tagName);
+    }
+
     protected abstract Boolean isToggleTagAssignmentAllowed();
 
-    protected abstract List<TagData> getAllTags();
+    protected abstract List<ProxyTag> getAllTags();
 
-    protected abstract List<TagData> getAssignedTags();
+    protected abstract List<ProxyTag> getAssignedTags();
 
+    /**
+     * Add tags
+     *
+     * @param entityIds
+     *            List of entity id
+     */
+    public void onTagsAdded(final Collection<Long> entityIds) {
+        getTagsById(entityIds).forEach(this::tagCreated);
+    }
+
+    protected abstract List<ProxyTag> getTagsById(final Collection<Long> entityIds);
+
+    /**
+     * Update tags
+     *
+     * @param entityIds
+     *            List of entity id
+     */
+    public void onTagsUpdated(final Collection<Long> entityIds) {
+        getTagsById(entityIds).forEach(this::tagUpdated);
+    }
+
+    /**
+     * Delete tags
+     *
+     * @param entityIds
+     *            List of entity id
+     */
+    public void onTagsDeleted(final Collection<Long> entityIds) {
+        entityIds.forEach(this::tagDeleted);
+    }
+
+    /**
+     * @return Tag panel layout
+     */
     public TagPanelLayout getTagPanel() {
         return tagPanelLayout;
     }

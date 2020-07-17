@@ -45,26 +45,53 @@ public class SuggestTokenDto implements Serializable {
         this.suggestion = suggestion;
     }
 
+    /**
+     * @return Character start position
+     */
     public int getStart() {
         return start;
     }
 
+    /**
+     * @return Character end position
+     */
     public int getEnd() {
         return end;
     }
 
+    /**
+     * @return Suggestion text
+     */
     public String getSuggestion() {
         return suggestion;
     }
 
+    /**
+     * Sets the character start position
+     *
+     * @param start
+     *          Index
+     */
     public void setStart(final int start) {
         this.start = start;
     }
 
+    /**
+     * Sets the character start position
+     *
+     * @param end
+     *          Index
+     */
     public void setEnd(final int end) {
         this.end = end;
     }
 
+    /**
+     * Sets the suggestion text
+     *
+     * @param suggestion
+     *          Suggestion
+     */
     public void setSuggestion(final String suggestion) {
         this.suggestion = suggestion;
     }

@@ -29,6 +29,8 @@ public class ActionCreatedEvent extends AbstractActionEvent implements EntityCre
      * 
      * @param action
      *            the created action
+     * @param targetId
+     *            targetId identifier (optional)
      * @param rolloutId
      *            rollout identifier (optional)
      * @param rolloutGroupId
@@ -36,9 +38,9 @@ public class ActionCreatedEvent extends AbstractActionEvent implements EntityCre
      * @param applicationId
      *            the origin application id
      */
-    public ActionCreatedEvent(final Action action, final Long rolloutId, final Long rolloutGroupId,
+    public ActionCreatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId,
             final String applicationId) {
-        super(action, rolloutId, rolloutGroupId, applicationId);
+        super(action, targetId, rolloutId, rolloutGroupId, applicationId);
     }
 
 }

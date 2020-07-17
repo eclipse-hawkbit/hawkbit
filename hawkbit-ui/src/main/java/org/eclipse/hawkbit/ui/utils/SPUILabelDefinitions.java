@@ -81,32 +81,6 @@ public final class SPUILabelDefinitions {
      * VENDOR.
      */
     public static final String VAR_VENDOR = "vendor";
-    /**
-     * Created By.
-     */
-    public static final String VAR_CREATED_BY = "createdByUser";
-    /**
-     * Created date.
-     */
-    public static final String VAR_CREATED_DATE = "createdDate";
-    /**
-     * Last modified by.
-     */
-    public static final String VAR_LAST_MODIFIED_BY = "modifiedByUser";
-    /**
-     * Last modified by.
-     */
-    public static final String VAR_MODIFIED_BY = "lastModifiedBy";
-
-    /**
-     * Last modified date.
-     */
-    public static final String VAR_LAST_MODIFIED_DATE = "lastModifiedDate";
-
-    /**
-     * Last modified date.
-     */
-    public static final String VAR_MODIFIED_DATE = "modifiedDate";
 
     /**
      * Approve/Deny remark.
@@ -180,11 +154,6 @@ public final class SPUILabelDefinitions {
      * Artifact Details Icon.
      */
     public static final String ARTIFACT_ICON = "artifactDtls";
-
-    /**
-     * Created User.
-     */
-    public static final String VAR_CREATED_USER = "createdBy";
 
     /**
      * Target filter query - target table status icon column name.

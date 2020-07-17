@@ -12,24 +12,31 @@
   //Tag widget header height adjusted to match table header heights
   .filter-btns-header-layout {
     padding-bottom: 14px;
+    border-bottom: 1px solid $widget-border-color;
   }
 
   //Tag layout style
   .filter-btns-main-layout {
     background: none repeat scroll 0 0 $widget-bg;
-    border-radius: $v-border-radius;
+  }
+
+  .filter-btns-layout {
+    border-radius: 0 0 $v-border-radius $v-border-radius;
     border: 1px solid $widget-border-color;
   }
 
-  //Tag button - clicked
-  .filter-btn-clicked {
+  //NO_TAG or Filter tag/type button - clicked
+  .no-tag-btn-clicked, .filter-btn-clicked .v-button {
     color: $tag-button-disabled-grey !important;
   }
 
   //Tag table -  additional style
   .type-button-layout {
     background: $widget-bg;
-    border-top: 1px solid $widget-border-color;
+
+    .v-grid-tablewrapper {
+      border: none;
+    }
 
     .v-table-table {
       box-shadow: none !important;
@@ -42,8 +49,11 @@
 
   //Tag button wrapper style
   .filter-btn-wrapper {
-    width: 118px !important;
     background: none;
+    
+    .font-icon {
+      margin-right: 6px;
+    }
   }
   
   .simple-tag-filter-header{

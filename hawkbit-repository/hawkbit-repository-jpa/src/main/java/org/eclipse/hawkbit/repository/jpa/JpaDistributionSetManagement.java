@@ -630,7 +630,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        if (isDSWithNoTagSelected(distributionSetFilter) || isTagsSelected(distributionSetFilter)) {
+        if (hasTagsFilterActive(distributionSetFilter)) {
             spec = DistributionSetSpecification.hasTags(distributionSetFilter.getTagNames(),
                     distributionSetFilter.getSelectDSWithNoTag());
             specList.add(spec);
@@ -666,12 +666,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
     }
 
-    private static Boolean isDSWithNoTagSelected(final DistributionSetFilter distributionSetFilter) {
-        return distributionSetFilter.getSelectDSWithNoTag() != null && distributionSetFilter.getSelectDSWithNoTag();
-    }
+    private static boolean hasTagsFilterActive(final DistributionSetFilter distributionSetFilter) {
+        final boolean isNoTagActive = Boolean.TRUE.equals(distributionSetFilter.getSelectDSWithNoTag());
+        final boolean isAtLeastOneTagActive = !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
 
-    private static Boolean isTagsSelected(final DistributionSetFilter distributionSetFilter) {
-        return !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
+        return isNoTagActive || isAtLeastOneTagActive;
     }
 
     /**

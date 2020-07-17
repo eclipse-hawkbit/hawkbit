@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 import org.vaadin.spring.events.annotation.EnableEventBus;
-import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
+import org.vaadin.spring.security.annotation.EnableVaadinManagedSecurity;
 
 import com.vaadin.spring.annotation.UIScope;
 
@@ -34,7 +34,7 @@ import com.vaadin.spring.annotation.UIScope;
  * The Management UI auto configuration.
  */
 @Configuration
-@EnableVaadinSecurity
+@EnableVaadinManagedSecurity
 @EnableVaadinExtensions
 @EnableEventBus
 @ConditionalOnClass(MgmtUiConfiguration.class)

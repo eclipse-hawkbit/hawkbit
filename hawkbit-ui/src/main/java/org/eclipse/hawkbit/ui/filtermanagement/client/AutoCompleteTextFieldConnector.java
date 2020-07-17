@@ -43,7 +43,7 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
 
     private final TextFieldSuggestionBoxServerRpc rpc = getRpcProxy(TextFieldSuggestionBoxServerRpc.class);
 
-    private final transient VOverlay panel = new VOverlay(true, false, true);
+    private final transient VOverlay panel = new VOverlay(true, false);
 
     @Override
     protected void init() {
@@ -74,8 +74,7 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
     @Override
     protected void extend(final ServerConnector target) {
         textFieldWidget = (VTextField) ((ComponentConnector) target).getWidget();
-        textFieldWidget.setImmediate(true);
-        textFieldWidget.textChangeEventMode = "EAGER";
+
         panel.setWidget(select);
         panel.setStyleName("suggestion-popup");
         panel.setOwner(textFieldWidget);
@@ -85,8 +84,6 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             public void onKeyUp(final KeyUpEvent event) {
                 if (panel.isAttached()) {
                     handlePanelEventDelegation(event);
-                } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    rpc.executeQuery(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
                 } else {
                     doAskForSuggestion();
                 }

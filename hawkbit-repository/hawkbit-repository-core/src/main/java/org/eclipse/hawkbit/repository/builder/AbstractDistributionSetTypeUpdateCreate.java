@@ -41,18 +41,10 @@ public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends Abstrac
     }
 
     public Optional<Collection<Long>> getMandatory() {
-        if (CollectionUtils.isEmpty(mandatory)) {
-            return Optional.empty();
-        }
-
         return Optional.ofNullable(mandatory);
     }
 
     public Optional<Collection<Long>> getOptional() {
-        if (CollectionUtils.isEmpty(optional)) {
-            return Optional.empty();
-        }
-
         return Optional.ofNullable(optional);
     }
 

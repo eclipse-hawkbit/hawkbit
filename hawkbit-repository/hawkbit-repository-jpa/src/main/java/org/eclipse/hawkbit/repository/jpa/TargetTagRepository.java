@@ -81,4 +81,9 @@ public interface TargetTagRepository
     @Transactional
     @Query("DELETE FROM JpaTargetTag t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("SELECT t FROM JpaTargetTag t WHERE t.id IN ?1")
+    List<JpaTargetTag> findAllById(Iterable<Long> ids);
 }

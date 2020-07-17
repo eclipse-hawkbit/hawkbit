@@ -49,6 +49,8 @@ public class ErrorView extends VerticalLayout implements View {
         this.i18n = i18n;
         this.dashboardMenu = dashboardMenu;
         setMargin(true);
+        setSpacing(false);
+
         message = new Label();
         addComponent(message);
     }

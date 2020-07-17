@@ -29,6 +29,8 @@ public class DistributionSetTypeEvent {
     private String distributionSetTypeName;
 
     /**
+     * Constructor for DistributionSetTypeEvent
+     *
      * @param distributionSetTypeEnum
      * @param distributionSetTypeName
      */
@@ -39,6 +41,8 @@ public class DistributionSetTypeEvent {
     }
 
     /**
+     * Constructor for DistributionSetTypeEvent
+     *
      * @param distributionSetTypeEnum
      * @param distributionSetType
      */

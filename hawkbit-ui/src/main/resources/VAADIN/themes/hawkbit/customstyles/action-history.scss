@@ -8,17 +8,6 @@
  */
 @mixin action-history {
 
-  //Action history headers are adjusted to match other widget header height
-  .action-history-header {
-    padding-bottom: 22px;
-  }
-
-  //Artifact details headers are adjusted to match other widget header height
-  .artifact-details-header {
-    padding-bottom: 25px;
-    padding-top: 5px;
-  }
-  
   .action-history-message-grid {
     .v-grid-cell {
       border: none !important;

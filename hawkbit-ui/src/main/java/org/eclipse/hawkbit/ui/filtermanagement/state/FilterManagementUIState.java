@@ -9,17 +9,12 @@
 package org.eclipse.hawkbit.ui.filtermanagement.state;
 
 import java.io.Serializable;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
- *
- *
+ * Filter management ui state
  */
 @VaadinSessionScope
 @SpringComponent
@@ -27,126 +22,53 @@ public class FilterManagementUIState implements Serializable {
 
     private static final long serialVersionUID = 2477103280605559284L;
 
-    private String targetFilterSearchText;
-
-    private boolean createFilterViewDisplayed;
-
-    private boolean editViewDisplayed;
-
-    private TargetFilterQuery targetFilterQuery;
-
-    private Long targetsTruncated;
-
-    private final AtomicLong targetsCountAll = new AtomicLong();
-
-    private String filterQueryValue;
-
-    private Boolean isFilterByInvalidFilterQuery = Boolean.FALSE;
-
     /**
-     * @return the isFilterByInvalidFilterQuery
+     * Constants for filter view
      */
-    public Boolean getIsFilterByInvalidFilterQuery() {
-        return isFilterByInvalidFilterQuery;
+    public enum FilterView {
+        FILTERS, DETAILS
+    }
+
+    private final TargetFilterGridLayoutUiState gridLayoutUiState;
+
+    private final TargetFilterDetailsLayoutUiState detailsLayoutUiState;
+
+    private FilterView currentView;
+
+    FilterManagementUIState() {
+        this.gridLayoutUiState = new TargetFilterGridLayoutUiState();
+        this.detailsLayoutUiState = new TargetFilterDetailsLayoutUiState();
     }
 
     /**
-     * @param isFilterByInvalidFilterQuery
-     *            the isFilterByInvalidFilterQuery to set
+     * @return Current filter view
      */
-    public void setIsFilterByInvalidFilterQuery(final Boolean isFilterByInvalidFilterQuery) {
-        this.isFilterByInvalidFilterQuery = isFilterByInvalidFilterQuery;
+    public FilterView getCurrentView() {
+        return currentView;
     }
 
     /**
-     * @return the isEditViewDisplayed
+     * Sets the current filter view
+     *
+     * @param currentView
+     *          FilterView
      */
-    public boolean isEditViewDisplayed() {
-        return editViewDisplayed;
+    public void setCurrentView(final FilterView currentView) {
+        this.currentView = currentView;
     }
 
     /**
-     * @param isEditViewDisplayed
-     *            the isEditViewDisplayed to set
+     * @return Target filter grid layout ui state
      */
-    public void setEditViewDisplayed(final boolean isEditViewDisplayed) {
-        this.editViewDisplayed = isEditViewDisplayed;
+    public TargetFilterGridLayoutUiState getGridLayoutUiState() {
+        return gridLayoutUiState;
     }
 
     /**
-     * @return the rsqlSearch
+     * @return Target filter details layout ui state
      */
-    public String getFilterQueryValue() {
-        return filterQueryValue;
-    }
-
-    /**
-     * @param rsqlSearch
-     *            the rsqlSearch to set
-     */
-    public void setFilterQueryValue(final String filterQueryValue) {
-        this.filterQueryValue = filterQueryValue;
-    }
-
-    /**
-     * @return the targetsCountAll
-     */
-    public AtomicLong getTargetsCountAll() {
-        return targetsCountAll;
-    }
-
-    /**
-     * @param targetsCountAll
-     *            the targetsCountAll to set
-     */
-    public void setTargetsCountAll(final long targetsCountAll) {
-        this.targetsCountAll.set(targetsCountAll);
-    }
-
-    /**
-     * @return the targetsTruncated
-     */
-    public Long getTargetsTruncated() {
-        return targetsTruncated;
-    }
-
-    /**
-     * @param targetsTruncated
-     *            the targetsTruncated to set
-     */
-    public void setTargetsTruncated(final Long targetsTruncated) {
-        this.targetsTruncated = targetsTruncated;
-    }
-
-    /**
-     * @return the tfQuery
-     */
-    public Optional<TargetFilterQuery> getTfQuery() {
-        return Optional.ofNullable(targetFilterQuery);
-    }
-
-    /**
-     * @param tfQuery
-     *            the tfQuery to set
-     */
-    public void setTfQuery(final TargetFilterQuery tfQuery) {
-        this.targetFilterQuery = tfQuery;
-    }
-
-    public boolean isCreateFilterViewDisplayed() {
-        return createFilterViewDisplayed;
-    }
-
-    public void setCreateFilterBtnClicked(final boolean isCreateFilterBtnClicked) {
-        this.createFilterViewDisplayed = isCreateFilterBtnClicked;
-    }
-
-    public Optional<String> getCustomFilterSearchText() {
-        return Optional.ofNullable(targetFilterSearchText);
-    }
-
-    public void setCustomFilterSearchText(final String updateCustomFilterSearchText) {
-        this.targetFilterSearchText = updateCustomFilterSearchText;
+    public TargetFilterDetailsLayoutUiState getDetailsLayoutUiState() {
+        return detailsLayoutUiState;
     }
 
 }

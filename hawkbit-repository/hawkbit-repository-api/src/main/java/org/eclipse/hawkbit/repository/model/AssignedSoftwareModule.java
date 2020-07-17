@@ -10,13 +10,15 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 
+import org.springframework.hateoas.Identifiable;
+
 /**
  * Use to display software modules for the selected distribution.
  *
  */
-public class AssignedSoftwareModule implements Serializable {
+public class AssignedSoftwareModule implements Serializable, Identifiable<Long> {
 
-    private static final long serialVersionUID = 6144585781451168439L;
+    private static final long serialVersionUID = 1L;
 
     private final SoftwareModule softwareModule;
 
@@ -87,6 +89,11 @@ public class AssignedSoftwareModule implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Long getId() {
+        return softwareModule.getId();
     }
 
 }

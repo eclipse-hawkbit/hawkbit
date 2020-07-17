@@ -28,6 +28,8 @@ public class LabelBuilder {
     private boolean visible = true;
 
     /**
+     * Add name to label
+     *
      * @param name
      *            the value to set
      * @return builder
@@ -38,6 +40,8 @@ public class LabelBuilder {
     }
 
     /**
+     * Add caption to label
+     *
      * @param caption
      *            the caption to set
      * @return builder
@@ -48,6 +52,8 @@ public class LabelBuilder {
     }
 
     /**
+     * Add id to label
+     *
      * @param id
      *            the id to set
      * @return builder
@@ -58,6 +64,8 @@ public class LabelBuilder {
     }
 
     /**
+     * Toggle label visibility
+     *
      * @param visible
      *            the visible to set
      * @return builder
@@ -85,7 +93,6 @@ public class LabelBuilder {
      */
     public Label buildLabel() {
         final Label label = createLabel();
-        label.setImmediate(false);
         label.setWidth("-1px");
         label.setHeight("-1px");
         if (StringUtils.hasText(caption)) {

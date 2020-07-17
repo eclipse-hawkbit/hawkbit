@@ -68,11 +68,11 @@ $menu-title-bg-color: #551f62;
 $button-icon-color: #551f62;
 
 
-//Color of assigned distribution,when target is selected
-$installed-row-color: $lighter-orange-color;
-
 //Color of installed distribution,when target is selected
-$assigned-row-color:  $dark-green-color;
+$installed-row-color: $dark-green-color;
+
+//Color of assigned distribution,when target is selected
+$assigned-row-color: $lighter-orange-color;
 
 // Background color of accordion caption in confirmation popup
 $accordion-action-history-title-color: #551f62;

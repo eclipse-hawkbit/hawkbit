@@ -15,6 +15,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 public final class SPUIStyleDefinitions {
+
     /**
      * Tag button wrapper style.
      */
@@ -47,15 +48,11 @@ public final class SPUIStyleDefinitions {
      */
     public static final String ERROR_LABEL = "redErrorLabel";
 
-    public static final String DIST_PIN = "distributionPin";
-
-    public static final String DIST_PIN_BLUE = "distributionPinBlue";
-
-    public static final String TARGET_PIN_BLUE = "targetPinBlue";
-
-    public static final String TARGET_STATUS_PIN_TOGGLE = "targetStatusPinToggle";
+    public static final String UN_PINNED_STYLE = "rotate-widget-90-deg";
 
     public static final String SP_FILTER_BTN_CLICKED_STYLE = "filter-btn-clicked";
+
+    public static final String SP_NO_TAG_BTN_CLICKED_STYLE = "no-tag-btn-clicked";
 
     public static final String SOFTWARE_MODULE_EDIT_WINDOW = "sw-edit-window";
 
@@ -124,18 +121,19 @@ public final class SPUIStyleDefinitions {
      */
     public static final String TAG_BUTTON_WITH_BACKGROUND = "button-tag-with-background";
     /**
-     * Simple tag filter header layout.
-     */
-    public static final String ASSIGN_TAG_BUTTON = "button-assign-tag";
-    /**
      * Style to disable top border.
      */
     public static final String NO_TOP_BORDER = "no-border-top";
 
     /**
-     * Create Target filter query - caption style.
+     * Create/Update Target filter main layout style.
      */
-    public static final String TARGET_FILTER_CAPTION_LAYOUT = "caption-header-layout";
+    public static final String ADD_UPDATE_FILTER_LAYOUT = "add-update-filter-layout";
+
+    /**
+     * Create/Update Target filter actions layout style.
+     */
+    public static final String ADD_UPDATE_FILTER_ACTIONS_LAYOUT = "add-update-filter-actions-layout";
 
     /**
      * Query validator icon -success style.
@@ -174,6 +172,11 @@ public final class SPUIStyleDefinitions {
     public static final String UPLOAD_PROGRESS_INDICATOR_STYLE = "app-loading";
 
     /**
+     * Bulk Upload progress indicator style.
+     */
+    public static final String BULK_UPLOAD_PROGRESS_INDICATOR_STYLE = "bulk-upload-loading";
+
+    /**
      * Target filter search progress indicator style.
      */
     public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-spinner";
@@ -187,6 +190,36 @@ public final class SPUIStyleDefinitions {
      * Status icon style - red color.
      */
     public static final String STATUS_ICON_RED = "statusIconRed";
+
+    /**
+     * Status icon style - neutral color.
+     */
+    public static final String STATUS_ICON_NEUTRAL = "statusIconNeutral";
+
+    /**
+     * Status icon style - active color.
+     */
+    public static final String STATUS_ICON_ACTIVE = "statusIconActive";
+
+    /**
+     * Status icon style - forced color.
+     */
+    public static final String STATUS_ICON_FORCED = "statusIconForced";
+
+    /**
+     * Status icon style - time forced color.
+     */
+    public static final String STATUS_ICON_TIME_FORCED = "statusIconTimeForced";
+
+    /**
+     * Status icon style - soft color.
+     */
+    public static final String STATUS_ICON_SOFT = "statusIconSoft";
+
+    /**
+     * Status icon style - download only color.
+     */
+    public static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
 
     /**
      * Status icon style - orange color.
@@ -241,26 +274,14 @@ public final class SPUIStyleDefinitions {
      * Grid style.
      */
     public static final String METADATA_GRID = "metadata-grid";
-
+    /**
+     * Grid style.
+     */
+    public static final String ICON_CELL = "icon-cell";
     /**
      * Tag combo style.
      */
     public static final String FILTER_TYPE_COMBO_STYLE = "filter-combo-specific-style";
-
-    /**
-     * Color label style.
-     */
-    public static final String COLOR_LABEL_STYLE = "color-label-style";
-
-    /**
-     * Label bold style.
-     */
-    public static final String BOLD_LABEL_STYLE = "label-bold-style";
-
-    /**
-     * Label right padding style
-     */
-    public static final String RIGHT_PADDING_LABEL_STYLE = "header-caption-right";
 
     /**
      * Style - Message.

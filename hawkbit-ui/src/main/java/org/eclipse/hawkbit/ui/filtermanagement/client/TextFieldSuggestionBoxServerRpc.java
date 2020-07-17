@@ -15,6 +15,7 @@ import com.vaadin.shared.communication.ServerRpc;
  * make client to server calls in Vaadin. Only void methods are allowed in
  * ServerRpc calls.
  */
+@FunctionalInterface
 public interface TextFieldSuggestionBoxServerRpc extends ServerRpc {
 
     /**
@@ -30,15 +31,4 @@ public interface TextFieldSuggestionBoxServerRpc extends ServerRpc {
      *            the current cursor position
      */
     void suggest(final String text, final int cursor);
-
-    /**
-     * Executes the query text to get the filtered data.
-     * 
-     * @param text
-     *            the current entered text e.g. in a text field to retrieve
-     *            suggestion for
-     * @param cursor
-     *            the current cursor position
-     */
-    void executeQuery(final String text, final int cursor);
 }
