@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +25,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * Event listener for show entity form layout
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            Generic type of ProxyIdentifiableEntity
  */
 public class ShowEntityFormLayoutListener<T extends ProxyIdentifiableEntity> extends LayoutViewAwareListener {
     private final Class<T> entityType;
@@ -36,15 +37,15 @@ public class ShowEntityFormLayoutListener<T extends ProxyIdentifiableEntity> ext
      * Constructor for ShowEntityFormLayoutListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param entityType
-     *          Generic entity type
+     *            Generic entity type
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      * @param addFormCallback
-     *          Runnable
+     *            Runnable
      * @param updateFormCallback
-     *          Update form callback event
+     *            Update form callback event
      */
     public ShowEntityFormLayoutListener(final UIEventBus eventBus, final Class<T> entityType,
             final EventLayoutViewAware layoutViewAware, final Runnable addFormCallback,
@@ -56,17 +57,17 @@ public class ShowEntityFormLayoutListener<T extends ProxyIdentifiableEntity> ext
      * Constructor for ShowEntityFormLayoutListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param entityType
-     *          Generic entity type
+     *            Generic entity type
      * @param parentEntityType
-     *          Identifiable Entity type
+     *            Identifiable Entity type
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      * @param addFormCallback
-     *          Runnable
+     *            Runnable
      * @param updateFormCallback
-     *          Update form callback event
+     *            Update form callback event
      */
     public ShowEntityFormLayoutListener(final UIEventBus eventBus, final Class<T> entityType,
             final Class<? extends ProxyIdentifiableEntity> parentEntityType, final EventLayoutViewAware layoutViewAware,

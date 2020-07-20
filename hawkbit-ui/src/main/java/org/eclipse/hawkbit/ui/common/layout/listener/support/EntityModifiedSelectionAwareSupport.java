@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +23,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.Enti
  * Support for Entity modified with selection aware
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            Generic type of ProxyIdentifiableEntity
  */
 public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEntity>
         implements EntityModifiedAwareSupport {
@@ -35,13 +36,13 @@ public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEnti
      * Constructor for EntityModifiedSelectionAwareSupport
      *
      * @param selectionSupport
-     *          Selection support
+     *            Selection support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param shouldDeselectCallback
-     *          Deselect callback
+     *            Deselect callback
      * @param selectedEntityDeletedCallback
-     *          Delete callback for selected entity
+     *            Delete callback for selected entity
      */
     public EntityModifiedSelectionAwareSupport(final SelectionSupport<T> selectionSupport,
             final LongFunction<Optional<T>> getFromBackendCallback, final Predicate<T> shouldDeselectCallback,
@@ -56,11 +57,11 @@ public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEnti
      * Static method for constructor EntityModifiedSelectionAwareSupport
      *
      * @param selectionSupport
-     *          Selection support
+     *            Selection support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param <E>
-     *         Generic type support
+     *            Generic type support
      *
      * @return Support for Entity modified with selection aware
      */
@@ -73,13 +74,13 @@ public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEnti
      * Static method for constructor EntityModifiedSelectionAwareSupport
      *
      * @param selectionSupport
-     *          Selection support
+     *            Selection support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param selectedEntityDeletedCallback
-     *          Delete callback for selected entity
+     *            Delete callback for selected entity
      * @param <E>
-     *          Generic type support
+     *            Generic type support
      *
      * @return Support for Entity modified with selection aware
      */
@@ -93,13 +94,13 @@ public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEnti
      * Static method for constructor EntityModifiedSelectionAwareSupport
      *
      * @param selectionSupport
-     *          Selection support
+     *            Selection support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param shouldDeselectCallback
-     *          Deselect callback
+     *            Deselect callback
      * @param <E>
-     *          Generic type support
+     *            Generic type support
      *
      * @return Support for Entity modified with selection aware
      */
@@ -113,15 +114,15 @@ public class EntityModifiedSelectionAwareSupport<T extends ProxyIdentifiableEnti
      * Static method for constructor EntityModifiedSelectionAwareSupport
      *
      * @param selectionSupport
-     *          Selection support
+     *            Selection support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param shouldDeselectCallback
-     *          Deselect callback
+     *            Deselect callback
      * @param selectedEntityDeletedCallback
-     *          Delete callback for selected entity
+     *            Delete callback for selected entity
      * @param <E>
-     *          Generic type support
+     *            Generic type support
      *
      * @return Support for Entity modified with selection aware
      */

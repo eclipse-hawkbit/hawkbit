@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,8 +12,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
@@ -25,7 +26,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * Event listener for selection changed
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            Generic type of ProxyIdentifiableEntity
  */
 public class SelectionChangedListener<T extends ProxyIdentifiableEntity> extends LayoutViewAwareListener {
     private final List<MasterEntityAwareComponent<T>> masterEntityAwareComponents;
@@ -34,11 +35,11 @@ public class SelectionChangedListener<T extends ProxyIdentifiableEntity> extends
      * Constructor for SelectionChangedListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      * @param masterEntityAwareComponents
-     *          List of master entity aware components
+     *            List of master entity aware components
      */
     public SelectionChangedListener(final UIEventBus eventBus, final EventLayoutViewAware layoutViewAware,
             final List<MasterEntityAwareComponent<T>> masterEntityAwareComponents) {

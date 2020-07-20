@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +29,7 @@ import com.vaadin.ui.UI;
  * Event listener for entity modified
  *
  * @param <T>
- *          Generic typ of ProxyIdentifiableEntity
+ *            Generic typ of ProxyIdentifiableEntity
  */
 public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends EventListener {
     private final Class<T> entityType;
@@ -38,16 +39,17 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
 
     /**
      * Constructor for EntityModifiedListener
+     * 
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param entityType
-     *          Generic tpe entity
+     *            Generic tpe entity
      * @param parentEntityType
-     *          Identifiable entity
+     *            Identifiable entity
      * @param parentEntityIdProvider
-     *          Parent entity id provider
+     *            Parent entity id provider
      * @param entityModifiedAwareSupports
-     *          List of entity modified aware support
+     *            List of entity modified aware support
      */
     public EntityModifiedListener(final UIEventBus eventBus, final Class<T> entityType,
             final Class<? extends ProxyIdentifiableEntity> parentEntityType,
@@ -121,7 +123,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * On entities added
          *
          * @param entityIds
-         *          List of id
+         *            List of id
          */
         default void onEntitiesAdded(final Collection<Long> entityIds) {
             // do nothing by default
@@ -131,7 +133,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * On entities updated
          *
          * @param entityIds
-         *          List of id
+         *            List of id
          */
         default void onEntitiesUpdated(final Collection<Long> entityIds) {
             // do nothing by default
@@ -141,7 +143,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * On entities deleted
          *
          * @param entityIds
-         *          List of id
+         *            List of id
          */
         default void onEntitiesDeleted(final Collection<Long> entityIds) {
             // do nothing by default
@@ -152,7 +154,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
      * Builder for entity
      *
      * @param <T>
-     *          Generic type of ProxyIdentifiableEntity
+     *            Generic type of ProxyIdentifiableEntity
      */
     public static class Builder<T extends ProxyIdentifiableEntity> {
         private final UIEventBus eventBus;
@@ -165,9 +167,9 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * Constructor for builder
          *
          * @param eventBus
-         *          UIEventBus
+         *            UIEventBus
          * @param entityType
-         *          Generic type entity
+         *            Generic type entity
          */
         public Builder(final UIEventBus eventBus, final Class<T> entityType) {
             this.eventBus = eventBus;
@@ -176,7 +178,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
 
         /**
          * @param parentEntityType
-         *          Parent entity type
+         *            Parent entity type
          *
          * @return builder
          */
@@ -189,7 +191,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * Get parent id
          *
          * @param parentEntityIdProvider
-         *          Parent entity id provider
+         *            Parent entity id provider
          *
          * @return builder
          */
@@ -202,7 +204,7 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
          * Build entity modified support for layout
          *
          * @param entityModifiedAwareSupports
-         *          List of entity modified aware support
+         *            List of entity modified aware support
          * @return builder
          */
         public Builder<T> entityModifiedAwareSupports(

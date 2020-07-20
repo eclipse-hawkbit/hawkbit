@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +23,7 @@ public class EntityModifiedTagTokenAwareSupport implements EntityModifiedAwareSu
      * Constructor for EntityModifiedTagTokenAwareSupport
      *
      * @param tagToken
-     *          Tag token
+     *            Tag token
      */
     public EntityModifiedTagTokenAwareSupport(final AbstractTagToken<?> tagToken) {
         this.tagToken = tagToken;
@@ -32,9 +33,9 @@ public class EntityModifiedTagTokenAwareSupport implements EntityModifiedAwareSu
      * Static method for constructor EntityModifiedTagTokenAwareSupport
      *
      * @param tagToken
-     *          Tag token
+     *            Tag token
      *
-     * @return  Support for Entity modified with tag token aware
+     * @return Support for Entity modified with tag token aware
      */
     public static EntityModifiedTagTokenAwareSupport of(final AbstractTagToken<?> tagToken) {
         return new EntityModifiedTagTokenAwareSupport(tagToken);

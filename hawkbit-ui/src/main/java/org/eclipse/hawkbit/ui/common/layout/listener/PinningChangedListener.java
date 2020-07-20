@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +21,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * Event change listener for pinning changed
  *
  * @param <F>
- *          Generic type
+ *            Generic type
  */
 public class PinningChangedListener<F> extends EventListener {
     private final Class<? extends ProxyIdentifiableEntity> entityType;
@@ -30,11 +31,11 @@ public class PinningChangedListener<F> extends EventListener {
      * Constructor for PinningChangedListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param entityType
-     *          Identifiable Entity type
+     *            Identifiable Entity type
      * @param pinSupport
-     *          Pin support
+     *            Pin support
      */
     public PinningChangedListener(final UIEventBus eventBus, final Class<? extends ProxyIdentifiableEntity> entityType,
             final PinSupport<? extends ProxyIdentifiableEntity, F> pinSupport) {

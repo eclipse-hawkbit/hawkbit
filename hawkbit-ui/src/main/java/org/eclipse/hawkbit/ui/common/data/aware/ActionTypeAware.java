@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,8 +15,10 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  */
 public interface ActionTypeAware {
     void setActionType(ActionType actionType);
+
     ActionType getActionType();
 
     void setForcedTime(Long forcedTime);
+
     Long getForcedTime();
 }

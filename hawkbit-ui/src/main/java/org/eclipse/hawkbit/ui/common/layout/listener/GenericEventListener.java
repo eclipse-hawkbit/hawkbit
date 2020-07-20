@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +18,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * Event listener for generic type
  *
  * @param <T>
- *          Generic type
+ *            Generic type
  */
 public class GenericEventListener<T> extends EventListener {
     private final Consumer<T> eventCallback;
@@ -26,11 +27,11 @@ public class GenericEventListener<T> extends EventListener {
      * Constructor for GenericEventListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param topic
-     *          Topic
+     *            Topic
      * @param eventCallback
- *              Event callback
+     *            Event callback
      */
     public GenericEventListener(final UIEventBus eventBus, final String topic, final Consumer<T> eventCallback) {
         super(eventBus, topic);

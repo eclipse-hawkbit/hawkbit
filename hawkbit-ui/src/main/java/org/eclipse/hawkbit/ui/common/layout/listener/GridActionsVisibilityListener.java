@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,15 +28,15 @@ public class GridActionsVisibilityListener extends LayoutViewAwareListener {
      * Constructor for GridActionsVisibilityListener
      *
      * @param eventBus
-     *          GridActionsVisibilityListener
+     *            GridActionsVisibilityListener
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      * @param hideAllCallback
-     *          Runnable
+     *            Runnable
      * @param showEditCallback
-     *          Runnable
+     *            Runnable
      * @param showDeleteCallback
-     *          Runnable
+     *            Runnable
      */
     public GridActionsVisibilityListener(final UIEventBus eventBus, final EventLayoutViewAware layoutViewAware,
             final Runnable hideAllCallback, final Runnable showEditCallback, final Runnable showDeleteCallback) {

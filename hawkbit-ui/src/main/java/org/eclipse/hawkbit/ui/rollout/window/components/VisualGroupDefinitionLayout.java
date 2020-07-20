@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,9 +38,9 @@ public class VisualGroupDefinitionLayout {
      * Constructor for VisualGroupDefinitionLayout
      *
      * @param groupsPieChart
-     *          GroupsPieChart
+     *            GroupsPieChart
      * @param groupsLegendLayout
-     *          GroupsLegendLayout
+     *            GroupsLegendLayout
      */
     public VisualGroupDefinitionLayout(final GroupsPieChart groupsPieChart,
             final GroupsLegendLayout groupsLegendLayout) {
@@ -51,7 +52,7 @@ public class VisualGroupDefinitionLayout {
      * Set the total count of targets
      *
      * @param totalTargets
-     *          Total targets
+     *            Total targets
      */
     public void setTotalTargets(final Long totalTargets) {
         this.totalTargets = totalTargets;
@@ -117,7 +118,7 @@ public class VisualGroupDefinitionLayout {
      * Sets the total number of groups
      *
      * @param noOfGroups
-     *          Total groups
+     *            Total groups
      */
     public void setNoOfGroups(final int noOfGroups) {
         this.noOfGroups = noOfGroups;
@@ -131,7 +132,7 @@ public class VisualGroupDefinitionLayout {
      * Sets the advance rollout group definitions
      *
      * @param advancedRolloutGroupDefinitions
-     *          List of group definitions
+     *            List of group definitions
      */
     public void setAdvancedRolloutGroupDefinitions(
             final List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions) {
@@ -153,7 +154,7 @@ public class VisualGroupDefinitionLayout {
      * Sets the group definition mode
      *
      * @param groupDefinitionMode
-     *          GroupDefinitionMode
+     *            GroupDefinitionMode
      */
     public void setGroupDefinitionMode(final GroupDefinitionMode groupDefinitionMode) {
         this.groupDefinitionMode = groupDefinitionMode;
@@ -163,11 +164,11 @@ public class VisualGroupDefinitionLayout {
      * Add groups pie chart in the group legend layout
      *
      * @param layout
-     *          GridLayout
+     *            GridLayout
      * @param lastColumnIdx
-     *          Last column index
+     *            Last column index
      * @param heightInRows
-     *          Row height
+     *            Row height
      */
     public void addChartWithLegendToLayout(final GridLayout layout, final int lastColumnIdx, final int heightInRows) {
         layout.addComponent(groupsPieChart, lastColumnIdx - 1, 0, lastColumnIdx - 1, heightInRows);

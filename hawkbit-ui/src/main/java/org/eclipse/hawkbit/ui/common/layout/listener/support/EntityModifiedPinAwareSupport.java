@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +21,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.Enti
  * Support for Entity modified with pinned aware
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            Generic type of ProxyIdentifiableEntity
  */
 public class EntityModifiedPinAwareSupport<T extends ProxyIdentifiableEntity> implements EntityModifiedAwareSupport {
     private final PinSupport<T, ?> pinSupport;
@@ -35,15 +36,15 @@ public class EntityModifiedPinAwareSupport<T extends ProxyIdentifiableEntity> im
      * Constructor for EntityModifiedPinAwareSupport
      *
      * @param pinSupport
- *              Pin support
+     *            Pin support
      * @param shouldUpdatePinStylingOnUpdate
-     *          Configure pin styling on update
+     *            Configure pin styling on update
      * @param shouldReApplyPinningOnUpdate
-     *          Configure pin reapply on update
+     *            Configure pin reapply on update
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param shouldUnpinnOnUpdateCallback
-     *          Unpin on update callback
+     *            Unpin on update callback
      */
     public EntityModifiedPinAwareSupport(final PinSupport<T, ?> pinSupport,
             final boolean shouldUpdatePinStylingOnUpdate, final boolean shouldReApplyPinningOnUpdate,
@@ -61,13 +62,13 @@ public class EntityModifiedPinAwareSupport<T extends ProxyIdentifiableEntity> im
      * Static method for constructor EntityModifiedPinAwareSupport
      *
      * @param pinSupport
-     *          Pin support
+     *            Pin support
      * @param shouldUpdatePinStylingOnUpdate
-     *          Configure pin styling on update
+     *            Configure pin styling on update
      * @param shouldReApplyPinningOnUpdate
-     *          Configure pin reapply on update
+     *            Configure pin reapply on update
      * @param <E>
-     *          Generic type support
+     *            Generic type support
      *
      * @return Support for Entity modified with pinned aware
      */
@@ -79,18 +80,18 @@ public class EntityModifiedPinAwareSupport<T extends ProxyIdentifiableEntity> im
     }
 
     /**
-     *  Static method for constructor EntityModifiedPinAwareSupport
+     * Static method for constructor EntityModifiedPinAwareSupport
      *
      * @param pinSupport
-     *          Pin support
+     *            Pin support
      * @param getFromBackendCallback
-     *          Backend callback
+     *            Backend callback
      * @param shouldUnpinnOnUpdateCallback
-     *          Unpin on update callback
+     *            Unpin on update callback
      * @param <E>
-     *          Generic type support
+     *            Generic type support
      *
-     * @return  Support for Entity modified with pinned aware
+     * @return Support for Entity modified with pinned aware
      */
     public static <E extends ProxyIdentifiableEntity> EntityModifiedPinAwareSupport<E> of(
             final PinSupport<E, ?> pinSupport, final LongFunction<Optional<E>> getFromBackendCallback,

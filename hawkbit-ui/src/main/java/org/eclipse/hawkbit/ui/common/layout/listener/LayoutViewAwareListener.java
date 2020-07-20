@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,11 +25,11 @@ public abstract class LayoutViewAwareListener extends EventListener {
      * Constructor for LayoutViewAwareListener
      *
      * @param eventBus
-     *          LayoutViewAwareListener
+     *            LayoutViewAwareListener
      * @param topic
-     *          Topic
+     *            Topic
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      */
     public LayoutViewAwareListener(final UIEventBus eventBus, final String topic,
             final EventLayoutViewAware layoutViewAware) {

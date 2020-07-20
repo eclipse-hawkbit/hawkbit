@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,11 +24,11 @@ public abstract class ViewAwareListener extends EventListener {
      * Constructor for ViewAwareListener
      *
      * @param eventBus
-     *          ViewAwareListener
+     *            ViewAwareListener
      * @param topic
-     *          Topic
+     *            Topic
      * @param viewAware
-     *          EventViewAware
+     *            EventViewAware
      */
     public ViewAwareListener(final UIEventBus eventBus, final String topic, final EventViewAware viewAware) {
         super(eventBus, topic);

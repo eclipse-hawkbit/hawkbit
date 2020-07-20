@@ -1,3 +1,11 @@
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.common.grid;
 
 import java.util.Collection;
@@ -29,7 +37,7 @@ import com.vaadin.ui.Button;
  * Abstract class of distribution set grid
  *
  * @param <F>
- *          Generic type
+ *            Generic type
  */
 public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSet, F> {
     private static final long serialVersionUID = 1L;
@@ -79,9 +87,9 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
      * Map distribution set to proxy entity
      *
      * @param entityId
-     *          Entity id
+     *            Entity id
      *
-     * @return  Distribution set
+     * @return Distribution set
      */
     public Optional<ProxyDistributionSet> mapIdToProxyEntity(final long entityId) {
         return dsManagement.get(entityId).map(dsToProxyDistributionMapper::map);

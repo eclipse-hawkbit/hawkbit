@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,11 +25,11 @@ public class EntityModifiedGenericSupport implements EntityModifiedAwareSupport 
      * Constructor for EntityModifiedGenericSupport
      *
      * @param onEntitiesAddedCallback
-     *          Entities added callback event
+     *            Entities added callback event
      * @param onEntitiesUpdatedCallback
-     *          Entities updated callback event
+     *            Entities updated callback event
      * @param onEntitiesDeletedCallback
-     *          Entities deleted callback event
+     *            Entities deleted callback event
      */
     public EntityModifiedGenericSupport(final Consumer<Collection<Long>> onEntitiesAddedCallback,
             final Consumer<Collection<Long>> onEntitiesUpdatedCallback,
@@ -42,11 +43,11 @@ public class EntityModifiedGenericSupport implements EntityModifiedAwareSupport 
      * Static method for constructor EntityModifiedGenericSupport
      *
      * @param onEntitiesAddedCallback
-     *          Entities added callback event
+     *            Entities added callback event
      * @param onEntitiesUpdatedCallback
-     *          Entities updated callback event
+     *            Entities updated callback event
      * @param onEntitiesDeletedCallback
-     *          Entities deleted callback event
+     *            Entities deleted callback event
      *
      * @return Support for entity modified
      */

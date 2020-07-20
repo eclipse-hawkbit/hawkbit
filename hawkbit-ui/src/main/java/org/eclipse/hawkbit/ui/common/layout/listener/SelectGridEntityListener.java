@@ -1,4 +1,5 @@
-/** Copyright (c) 2020 Bosch.IO GmbH and others.
+/** 
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +21,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * Event listener for select grid entity
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            Generic type of ProxyIdentifiableEntity
  */
 public class SelectGridEntityListener<T extends ProxyIdentifiableEntity> extends LayoutViewAwareListener {
     private final SelectionSupport<T> selectionSupport;
@@ -29,11 +30,11 @@ public class SelectGridEntityListener<T extends ProxyIdentifiableEntity> extends
      * Constructor for SelectGridEntityListener
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      * @param selectionSupport
-     *          Generic type selection support
+     *            Generic type selection support
      */
     public SelectGridEntityListener(final UIEventBus eventBus, final EventLayoutViewAware layoutViewAware,
             final SelectionSupport<T> selectionSupport) {
