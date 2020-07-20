@@ -100,7 +100,9 @@ public class SuggestionsSelectList extends MenuBar {
          * Constructor.
          * 
          * @param start
+         *            start index of the token
          * @param end
+         *            end index of the token
          */
         public TokenStartEnd(final int start, final int end) {
             this.start = start;

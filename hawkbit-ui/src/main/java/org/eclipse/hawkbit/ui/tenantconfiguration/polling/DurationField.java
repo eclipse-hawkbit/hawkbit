@@ -80,7 +80,7 @@ public class DurationField extends DateTimeField {
      * different parsing schemas are tried. If parsing is not possible a
      * ConversionException is thrown which marks the DurationField as invalid.
      *
-     * @return
+     * @return the Result of the specified date
      */
     @Override
     protected Result<LocalDateTime> handleUnparsableDateString(final String value) {

@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 import com.vaadin.server.StreamVariable;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.SucceededEvent;
 
 /**
  * {@link StreamVariable} implementation to read and upload a file. One instance
@@ -63,15 +61,17 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     /**
      * Checks for duplication and invalid file name during feil upload process
+     * 
      * @param event
-     *          StreamingStartEvent
+     *            StreamingStartEvent
      */
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
         assertStateConsistency(fileUploadId, event.getFileName());
 
         if (RegexCharacterCollection.stringContainsCharacter(event.getFileName(), ILLEGAL_FILENAME_CHARACTERS)) {
-            LOG.debug("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(), fileUploadId);
+            LOG.debug("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
+                    fileUploadId);
             interruptUploadDueToIllegalFilename();
         } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, selectedSoftwareModule)) {
             LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(),
@@ -144,8 +144,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
 
     /**
      * Upload finished for {@link StreamVariable} variant. Called only in good
-     * case. So a combination of {@link #uploadSucceeded(SucceededEvent)} and
-     * {@link #uploadFinished(FinishedEvent)}.
+     * case.
      *
      * @see com.vaadin.server.StreamVariable#streamingFinished(com.vaadin.server.StreamVariable.StreamingEndEvent)
      */

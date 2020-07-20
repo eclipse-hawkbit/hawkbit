@@ -50,7 +50,9 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
      */
     protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         this(i18n, eventBus, null);
@@ -75,8 +77,11 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
      * @param permissionChecker
+     *            permissionChecker
      */
     protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker) {
@@ -121,7 +126,7 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Refresh single item.
      *
      * @param item
-     *          grid item
+     *            grid item
      */
     public void refreshItem(final T item) {
         getDataProvider().refreshItem(item);
@@ -138,7 +143,7 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Add data change event listener
      *
      * @param listener
-     *          Data provider listener
+     *            Data provider listener
      */
     public void addDataChangedListener(final DataProviderListener<T> listener) {
         getDataProvider().addDataProviderListener(listener);

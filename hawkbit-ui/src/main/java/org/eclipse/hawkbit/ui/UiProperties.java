@@ -47,7 +47,7 @@ public class UiProperties implements Serializable {
      * Sets the gravatar
      *
      * @param gravatar
-     *          Menu icon
+     *            Menu icon
      */
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
@@ -64,7 +64,7 @@ public class UiProperties implements Serializable {
      * Sets the fixed time zone
      *
      * @param fixedTimeZone
-     *          Date time zone
+     *            Date time zone
      */
     public void setFixedTimeZone(final String fixedTimeZone) {
         this.fixedTimeZone = fixedTimeZone;
@@ -104,7 +104,7 @@ public class UiProperties implements Serializable {
          * Sets the default locale
          *
          * @param defaultLocal
-         *          Locale
+         *            Locale
          */
         public void setDefaultLocal(final Locale defaultLocal) {
             this.defaultLocal = defaultLocal;
@@ -114,7 +114,7 @@ public class UiProperties implements Serializable {
          * Sets the all available locale
          *
          * @param availableLocals
-         *          List of locale
+         *            List of locale
          */
         public void setAvailableLocals(final List<Locale> availableLocals) {
             this.availableLocals = availableLocals;
@@ -171,7 +171,7 @@ public class UiProperties implements Serializable {
          * Sets the login password
          *
          * @param password
-         *          Password value
+         *            Password value
          */
         public void setPassword(final String password) {
             this.password = password;
@@ -181,7 +181,7 @@ public class UiProperties implements Serializable {
          * Sets the tenant
          *
          * @param tenant
-         *          Tenant value
+         *            Tenant value
          */
         public void setTenant(final String tenant) {
             this.tenant = tenant;
@@ -191,7 +191,7 @@ public class UiProperties implements Serializable {
          * Sets the login user
          *
          * @param user
-         *          username
+         *            username
          */
         public void setUser(final String user) {
             this.user = user;
@@ -208,7 +208,7 @@ public class UiProperties implements Serializable {
          * Sets the disclaimer
          *
          * @param disclaimer
-         *          Disclaimer value
+         *            Disclaimer value
          */
         public void setDisclaimer(final String disclaimer) {
             this.disclaimer = disclaimer;
@@ -307,7 +307,7 @@ public class UiProperties implements Serializable {
             }
 
             /**
-             * @returnLink to documentation of security
+             * @return Link to documentation of security
              */
             public String getSecurity() {
                 return security;
@@ -368,7 +368,7 @@ public class UiProperties implements Serializable {
              * Sets the root documentation link
              *
              * @param root
-             *          link
+             *            link
              */
             public void setRoot(final String root) {
                 this.root = root;
@@ -378,7 +378,7 @@ public class UiProperties implements Serializable {
              * Sets the security documentation link
              *
              * @param security
-             *          link
+             *            link
              */
             public void setSecurity(final String security) {
                 this.security = security;
@@ -388,7 +388,7 @@ public class UiProperties implements Serializable {
              * Sets the rollout documentation link
              *
              * @param rollout
-             *          link
+             *            link
              */
             public void setRollout(final String rollout) {
                 this.rollout = rollout;
@@ -465,7 +465,7 @@ public class UiProperties implements Serializable {
          * Sets the link to request a system account, access
          *
          * @param requestAccount
-         *          Link
+         *            Link
          */
         public void setRequestAccount(final String requestAccount) {
             this.requestAccount = requestAccount;
@@ -475,7 +475,7 @@ public class UiProperties implements Serializable {
          * Sets the link to product support
          *
          * @param support
-         *          Link
+         *            Link
          */
         public void setSupport(final String support) {
             this.support = support;
@@ -485,7 +485,7 @@ public class UiProperties implements Serializable {
          * Sets the link to user management
          *
          * @param userManagement
-         *          Link
+         *            Link
          */
         public void setUserManagement(final String userManagement) {
             this.userManagement = userManagement;

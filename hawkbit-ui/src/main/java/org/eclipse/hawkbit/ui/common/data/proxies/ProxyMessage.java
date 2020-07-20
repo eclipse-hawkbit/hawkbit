@@ -13,7 +13,7 @@ import java.security.SecureRandom;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 
 /**
- * Proxy for an entry of {@link ActionStatus#getMessages()}
+ * Proxy for an entry of {@link ActionStatus} message.
  */
 public class ProxyMessage extends ProxyIdentifiableEntity {
     private static final long serialVersionUID = 1L;

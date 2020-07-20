@@ -21,7 +21,7 @@ public interface TextFieldSuggestionBoxServerRpc extends ServerRpc {
     /**
      * Parses the given RSQL based query and try finding suggestions at the
      * current given cursor position. When suggestions are possible the
-     * {@link TextFieldSuggestionBoxClientRpc#showSuggestions(org.eclipse.hawkbit.rsql.SuggestionContext)}
+     * {@link TextFieldSuggestionBoxClientRpc#showSuggestions(org.eclipse.hawkbit.ui.filtermanagement.client.SuggestionContextDto)}
      * is called as a callback mechanism back to the client.
      * 
      * @param text

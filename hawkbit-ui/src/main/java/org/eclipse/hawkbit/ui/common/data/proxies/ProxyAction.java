@@ -158,6 +158,7 @@ public class ProxyAction extends ProxyIdentifiableEntity {
      * Sets the rolloutName.
      *
      * @param rolloutName
+     *            name of the rollout
      */
     public void setRolloutName(final String rolloutName) {
         this.rolloutName = rolloutName;
@@ -176,7 +177,7 @@ public class ProxyAction extends ProxyIdentifiableEntity {
      * Sets the actionType
      *
      * @param actionType
-     *          ActionType
+     *            ActionType
      */
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
@@ -195,7 +196,7 @@ public class ProxyAction extends ProxyIdentifiableEntity {
      * Sets the maintenanceWindowStartTime
      *
      * @param maintenanceWindowStartTime
-     *          ZonedDateTime
+     *            ZonedDateTime
      */
     public void setMaintenanceWindowStartTime(final ZonedDateTime maintenanceWindowStartTime) {
         this.maintenanceWindowStartTime = maintenanceWindowStartTime;
@@ -214,7 +215,7 @@ public class ProxyAction extends ProxyIdentifiableEntity {
      * Sets the forcedTime
      *
      * @param forcedTime
-     *          forced time in Milli seconds
+     *            forced time in Milli seconds
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
@@ -224,7 +225,7 @@ public class ProxyAction extends ProxyIdentifiableEntity {
      * Flag that indicates if the action type is ForceTime
      *
      * @param hitTimeMillis
-     *          time in Milli seconds
+     *            time in Milli seconds
      *
      * @return <code>true</code> if the hitAutoForceTime is active, otherwise
      *         <code>false</code>
@@ -239,8 +240,8 @@ public class ProxyAction extends ProxyIdentifiableEntity {
     /**
      * Flag that indicates if the status is Canceling or canceled
      *
-     * @return <code>true</code> if the status is canceling or canceled, otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if the status is canceling or canceled,
+     *         otherwise <code>false</code>
      */
     public boolean isCancelingOrCanceled() {
         return Status.CANCELING == getStatus() || Status.CANCELED == getStatus();

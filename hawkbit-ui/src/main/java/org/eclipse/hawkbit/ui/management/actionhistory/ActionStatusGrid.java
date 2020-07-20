@@ -45,8 +45,11 @@ public class ActionStatusGrid extends AbstractGrid<ProxyActionStatus, Long> {
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
      * @param deploymentManagement
+     *            deploymentManagement
      */
     protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final DeploymentManagement deploymentManagement) {
