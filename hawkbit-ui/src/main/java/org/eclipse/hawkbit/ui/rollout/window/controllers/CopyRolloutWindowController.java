@@ -41,9 +41,9 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
      * Constructor for CopyRolloutWindowController
      *
      * @param dependencies
-     *          RolloutWindowDependencies
+     *            RolloutWindowDependencies
      * @param layout
-     *          AddRolloutWindowLayout
+     *            AddRolloutWindowLayout
      */
     public CopyRolloutWindowController(final RolloutWindowDependencies dependencies,
             final AddRolloutWindowLayout layout) {
@@ -100,7 +100,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         proxyRolloutWindow.setAdvancedRolloutGroupDefinitions(advancedGroupDefinitions);
     }
 
-    private void setThresholdsOfFirstGroup(final ProxyRolloutWindow proxyRolloutWindow) {
+    private static void setThresholdsOfFirstGroup(final ProxyRolloutWindow proxyRolloutWindow) {
         final ProxyAdvancedRolloutGroup firstAdvancedRolloutGroup = proxyRolloutWindow
                 .getAdvancedRolloutGroupDefinitions().get(0);
         proxyRolloutWindow.setTriggerThresholdPercentage(firstAdvancedRolloutGroup.getTriggerThresholdPercentage());

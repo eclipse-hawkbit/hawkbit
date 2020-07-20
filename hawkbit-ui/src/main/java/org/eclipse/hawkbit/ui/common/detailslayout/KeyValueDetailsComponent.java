@@ -86,7 +86,7 @@ public class KeyValueDetailsComponent extends CustomField<List<ProxyKeyValueDeta
         keyValueDetailsLayout.addComponent(keyValueDetailLayout);
     }
 
-    private Label buildKeyDetail(final String key) {
+    private static Label buildKeyDetail(final String key) {
         final Label keyLabel = new Label(key + ":");
 
         keyLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
@@ -95,7 +95,7 @@ public class KeyValueDetailsComponent extends CustomField<List<ProxyKeyValueDeta
         return keyLabel;
     }
 
-    private Label buildValueDetail(final String id, final String value) {
+    private static Label buildValueDetail(final String id, final String value) {
         final Label valueLabel = new Label(value);
 
         valueLabel.setId(id);

@@ -48,7 +48,7 @@ public class SystemConfigWindowLayoutComponentBuilder {
                 dependencies.getDistributionSetTypeDataProvider());
         distributionSetType.removeStyleName(ValoTheme.COMBOBOX_SMALL);
         distributionSetType.addStyleName(ValoTheme.COMBOBOX_TINY);
-        distributionSetType.setWidth(330f, Unit.PIXELS);
+        distributionSetType.setWidth(330.0F, Unit.PIXELS);
 
         binder.forField(distributionSetType).withConverter(dstType -> {
             if (dstType == null) {

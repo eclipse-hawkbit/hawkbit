@@ -74,41 +74,41 @@ public class DistributionGridLayout extends AbstractGridComponentLayout {
      * Constructor for DistributionGridLayout
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param permissionChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param smManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      * @param distributionSetTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param distributionSetTagManagement
-     *          DistributionSetTagManagement
+     *            DistributionSetTagManagement
      * @param systemManagement
-     *          SystemManagement
+     *            SystemManagement
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param configManagement
-     *          TenantConfigurationManagement
+     *            TenantConfigurationManagement
      * @param systemSecurityContext
-     *          SystemSecurityContext
+     *            SystemSecurityContext
      * @param uiProperties
-     *          UiProperties
+     *            UiProperties
      * @param distributionGridLayoutUiState
-     *          DistributionGridLayoutUiState
+     *            DistributionGridLayoutUiState
      * @param distributionTagLayoutUiState
-     *          TagFilterLayoutUiState
+     *            TagFilterLayoutUiState
      * @param targetGridLayoutUiState
-     *          TargetGridLayoutUiState
+     *            TargetGridLayoutUiState
      */
     public DistributionGridLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final EntityFactory entityFactory,
@@ -166,12 +166,12 @@ public class DistributionGridLayout extends AbstractGridComponentLayout {
     private List<EntityModifiedAwareSupport> getDsModifiedAwareSupports() {
         return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(distributionGrid::refreshAll),
                 EntityModifiedSelectionAwareSupport.of(distributionGrid.getSelectionSupport(),
-                        distributionGrid::mapIdToProxyEntity, this::isIncomplete),
+                        distributionGrid::mapIdToProxyEntity, DistributionGridLayout::isIncomplete),
                 EntityModifiedPinAwareSupport.of(distributionGrid.getPinSupport(), distributionGrid::mapIdToProxyEntity,
-                        this::isIncomplete));
+                        DistributionGridLayout::isIncomplete));
     }
 
-    private boolean isIncomplete(final ProxyDistributionSet ds) {
+    private static boolean isIncomplete(final ProxyDistributionSet ds) {
         return ds != null && !ds.getIsComplete();
     }
 

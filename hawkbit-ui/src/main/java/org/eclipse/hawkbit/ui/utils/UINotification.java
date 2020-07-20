@@ -58,7 +58,7 @@ public class UINotification implements Serializable {
                 VaadinIcons.EXCLAMATION_CIRCLE);
     }
 
-    private void showNotification(final String styleName, final String caption, final String description,
+    private static void showNotification(final String styleName, final String caption, final String description,
             final Resource icon, final Boolean autoClose) {
         final Notification notification = new Notification(caption, description);
 
@@ -76,7 +76,7 @@ public class UINotification implements Serializable {
         notification.show(Page.getCurrent());
     }
 
-    private void showNotification(final String styleName, final String caption, final String description,
+    private static void showNotification(final String styleName, final String caption, final String description,
             final Resource icon) {
         showNotification(styleName, caption, description, icon, true);
     }

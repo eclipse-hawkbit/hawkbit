@@ -68,15 +68,15 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
      * Constructor for AdvancedGroupsLayout
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param rolloutManagement
-     *          RolloutManagement
+     *            RolloutManagement
      * @param quotaManagement
-     *          QuotaManagement
+     *            QuotaManagement
      * @param targetFilterQueryDataProvider
-     *          TargetFilterQueryDataProvider
+     *            TargetFilterQueryDataProvider
      */
     public AdvancedGroupsLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
@@ -146,13 +146,13 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
     private ProxyAdvancedRolloutGroup getDefaultAdvancedRolloutGroupDefinition() {
         final ProxyAdvancedRolloutGroup advancedGroupRowBean = new ProxyAdvancedRolloutGroup();
         advancedGroupRowBean.setGroupName(i18n.getMessage("textfield.rollout.group.default.name", lastGroupIndex + 1));
-        advancedGroupRowBean.setTargetPercentage(100f);
+        advancedGroupRowBean.setTargetPercentage(100.0F);
         setDefaultThresholds(advancedGroupRowBean);
 
         return advancedGroupRowBean;
     }
 
-    private void setDefaultThresholds(final ProxyAdvancedRolloutGroup advancedGroupRow) {
+    private static void setDefaultThresholds(final ProxyAdvancedRolloutGroup advancedGroupRow) {
         final RolloutGroupConditions defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults()
                 .build();
         advancedGroupRow.setTriggerThresholdPercentage(defaultRolloutGroupConditions.getSuccessConditionExp());
@@ -377,7 +377,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
      * Sets the event change listener in rollout advance group definitions
      *
      * @param advancedGroupDefinitionsChangedListener
-     *          Event change listener
+     *            Event change listener
      */
     public void setAdvancedGroupDefinitionsChangedListener(
             final BiConsumer<List<ProxyAdvancedRolloutGroup>, Boolean> advancedGroupDefinitionsChangedListener) {

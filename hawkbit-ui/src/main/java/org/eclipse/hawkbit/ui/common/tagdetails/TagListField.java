@@ -121,7 +121,7 @@ public class TagListField extends CssLayout {
         return tagButtonLayout;
     }
 
-    private final Label buildColourIcon(final Long clickedFilterId, final String colour) {
+    private static final Label buildColourIcon(final Long clickedFilterId, final String colour) {
         final ProxyFontIcon colourFontIcon = new ProxyFontIcon(VaadinIcons.CIRCLE, ValoTheme.LABEL_TINY, "", colour);
         final String colourIconId = new StringBuilder(UIComponentIdProvider.ASSIGNED_TAG_ID_PREFIX)
                 .append(".colour-icon.").append(clickedFilterId).toString();

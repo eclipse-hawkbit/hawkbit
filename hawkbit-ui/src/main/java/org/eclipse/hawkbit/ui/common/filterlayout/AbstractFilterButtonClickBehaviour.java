@@ -23,7 +23,7 @@ public abstract class AbstractFilterButtonClickBehaviour<T> implements Serializa
      * Process filter click
      *
      * @param clickedFilter
-     *          Generic type of filter button
+     *            Generic type of filter button
      */
     public abstract void processFilterClick(final T clickedFilter);
 
@@ -31,7 +31,9 @@ public abstract class AbstractFilterButtonClickBehaviour<T> implements Serializa
      * Verifies if filter is previously clicked
      *
      * @param clickedFilter
-     *          Generic type of filter button
+     *            Generic type of filter button
+     * @return {@code true}: if the filter button was clicked before
+     *         {@code false}: otherwise
      */
     public abstract boolean isFilterPreviouslyClicked(final T clickedFilter);
 
@@ -39,7 +41,7 @@ public abstract class AbstractFilterButtonClickBehaviour<T> implements Serializa
      * Filter unClicked
      *
      * @param clickedFilter
-     *          Generic type of filter button
+     *            Generic type of filter button
      */
     protected abstract void filterUnClicked(final T clickedFilter);
 
@@ -47,7 +49,7 @@ public abstract class AbstractFilterButtonClickBehaviour<T> implements Serializa
      * Filter clicked
      *
      * @param clickedFilter
-     *          Generic type of filter button
+     *            Generic type of filter button
      */
     protected abstract void filterClicked(final T clickedFilter);
 

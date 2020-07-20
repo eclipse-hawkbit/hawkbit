@@ -76,7 +76,7 @@ public class UploadProgressInfoWindow extends Window {
      * Updates the status of each file uploaded in the grid view
      *
      * @param fileUploadProgress
-     *              FileUploadProgress
+     *            FileUploadProgress
      */
     public void updateUploadProgressInfoRowObject(final FileUploadProgress fileUploadProgress) {
         final FileUploadId fileUploadId = fileUploadProgress.getFileUploadId();
@@ -101,7 +101,7 @@ public class UploadProgressInfoWindow extends Window {
         uploadProgressGrid.getDataProvider().refreshItem(gridUploadItem);
     }
 
-    private ProgressSatus getStatusRepresentaion(final FileUploadStatus uploadStatus) {
+    private static ProgressSatus getStatusRepresentaion(final FileUploadStatus uploadStatus) {
         if (uploadStatus == FileUploadStatus.UPLOAD_FAILED) {
             return ProgressSatus.FAILED;
         } else if (uploadStatus == FileUploadStatus.UPLOAD_SUCCESSFUL) {
@@ -133,7 +133,7 @@ public class UploadProgressInfoWindow extends Window {
      * Starts the file upload process and maximize the upload view
      *
      * @param fileUploadProgress
-     *              FileUploadProgress
+     *            FileUploadProgress
      */
     public void onUploadStarted(final FileUploadProgress fileUploadProgress) {
         updateUploadProgressInfoRowObject(fileUploadProgress);

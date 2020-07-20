@@ -79,39 +79,39 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      * Constructor for TargetGridLayout
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param uiProperties
-     *          UiProperties
+     *            UiProperties
      * @param permissionChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param targetTagManagement
-     *          TargetTagManagement
+     *            TargetTagManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param uiExecutor
-     *          Executor
+     *            Executor
      * @param configManagement
-     *          TenantConfigurationManagement
+     *            TenantConfigurationManagement
      * @param systemSecurityContext
-     *          SystemSecurityContext
+     *            SystemSecurityContext
      * @param targetTagFilterLayoutUiState
-     *          TargetTagFilterLayoutUiState
+     *            TargetTagFilterLayoutUiState
      * @param targetGridLayoutUiState
-     *          TargetGridLayoutUiState
+     *            TargetGridLayoutUiState
      * @param targetBulkUploadUiState
-     *          TargetBulkUploadUiState
+     *            TargetBulkUploadUiState
      * @param distributionGridLayoutUiState
-     *          DistributionGridLayoutUiState
+     *            DistributionGridLayoutUiState
      */
     public TargetGridLayout(final UIEventBus eventBus, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final VaadinMessageSource i18n, final UINotification uiNotification,
@@ -207,6 +207,9 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
 
     /**
      * Actions on target filter tab changed
+     * 
+     * @param eventPayload
+     *            event payload to identify which tab was selected
      */
     public void onTargetFilterTabChanged(final TargetFilterTabChangedEventPayload eventPayload) {
         final boolean isCustomFilterTabSelected = TargetFilterTabChangedEventPayload.CUSTOM == eventPayload;

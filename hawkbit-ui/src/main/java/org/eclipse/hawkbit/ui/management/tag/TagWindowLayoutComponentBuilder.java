@@ -106,7 +106,7 @@ public class TagWindowLayoutComponentBuilder {
 
         private final Color color;
 
-        private BasicColor(final Color color) {
+        BasicColor(final Color color) {
             this.color = color;
         }
 

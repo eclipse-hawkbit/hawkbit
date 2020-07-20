@@ -3,7 +3,6 @@ package org.eclipse.hawkbit.ui.common.data.proxies;
 import java.io.Serializable;
 import java.time.Duration;
 
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCleanupConfigurationItem.ActionStatusOption;
 
 /**
@@ -24,9 +23,9 @@ public class ProxySystemConfigWindow implements Serializable {
     private String gatewaySecurityToken;
     private ActionStatusOption actionCleanupStatus;
     private boolean pollingOverdue;
-    private Duration pollingOverdueDuration;
+    private transient Duration pollingOverdueDuration;
     private boolean pollingTime;
-    private Duration pollingTimeDuration;
+    private transient Duration pollingTimeDuration;
     private String actionExpiryDays;
     private boolean rolloutApproval;
     private boolean actionAutoclose;
@@ -52,7 +51,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the id
      *
      * @param id
-     *         System config window id
+     *            System config window id
      */
     public void setId(final Long id) {
         this.id = id;
@@ -71,7 +70,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the name
      *
      * @param name
-     *         System config window name
+     *            System config window name
      */
     public void setName(final String name) {
         this.name = name;
@@ -90,7 +89,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the caRootAuthority
      *
      * @param caRootAuthority
-     *         System config window caRootAuthority
+     *            System config window caRootAuthority
      */
     public void setCaRootAuthority(final String caRootAuthority) {
         this.caRootAuthority = caRootAuthority;
@@ -109,7 +108,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the gatewaySecurityToken
      *
      * @param gatewaySecurityToken
-     *         System config window gatewaySecurityToken
+     *            System config window gatewaySecurityToken
      */
     public void setGatewaySecurityToken(final String gatewaySecurityToken) {
         this.gatewaySecurityToken = gatewaySecurityToken;
@@ -149,7 +148,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the pollingTimeDuration
      *
      * @param pollingTimeDuration
-     *         System config window pollingTimeDuration
+     *            System config window pollingTimeDuration
      */
     public void setPollingTimeDuration(final Duration pollingTimeDuration) {
         this.pollingTimeDuration = pollingTimeDuration;
@@ -158,19 +157,20 @@ public class ProxySystemConfigWindow implements Serializable {
     /**
      * Flag that indicates if the polling overdue time option is enabled.
      *
-     * @return <code>true</code> if the polling overdue time is enabled, otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if the polling overdue time is enabled,
+     *         otherwise <code>false</code>
      */
     public boolean isPollingOverdue() {
         return pollingOverdue;
     }
 
     /**
-     * Sets the flag that indicates if the polling overdue time option is enabled.
+     * Sets the flag that indicates if the polling overdue time option is
+     * enabled.
      *
      * @param pollingOverdue
-     *            <code>true</code> if the polling overdue time is enabled, otherwise
-     *            <code>false</code>
+     *            <code>true</code> if the polling overdue time is enabled,
+     *            otherwise <code>false</code>
      */
     public void setPollingOverdue(final boolean pollingOverdue) {
         this.pollingOverdue = pollingOverdue;
@@ -189,7 +189,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the pollingOverdueDuration
      *
      * @param pollingOverdueDuration
-     *         System config window pollingOverdueDuration
+     *            System config window pollingOverdueDuration
      */
     public void setPollingOverdueDuration(final Duration pollingOverdueDuration) {
         this.pollingOverdueDuration = pollingOverdueDuration;
@@ -208,7 +208,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the description
      *
      * @param description
-     *         System config window description
+     *            System config window description
      */
     public void setDescription(final String description) {
         this.description = description;
@@ -227,7 +227,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the distributionSetTypeId
      *
      * @param distributionSetTypeId
-     *         System config window distributionSetTypeId
+     *            System config window distributionSetTypeId
      */
     public void setDistributionSetTypeId(final Long distributionSetTypeId) {
         this.distributionSetTypeId = distributionSetTypeId;
@@ -246,7 +246,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the actionExpiryDays
      *
      * @param actionExpiryDays
-     *         System config window actionExpiryDays
+     *            System config window actionExpiryDays
      */
     public void setActionExpiryDays(final String actionExpiryDays) {
         this.actionExpiryDays = actionExpiryDays;
@@ -265,7 +265,7 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the actionCleanupStatus
      *
      * @param actionCleanupStatus
-     *         System config window actionCleanupStatus
+     *            System config window actionCleanupStatus
      */
     public void setActionCleanupStatus(final ActionStatusOption actionCleanupStatus) {
         this.actionCleanupStatus = actionCleanupStatus;
@@ -356,8 +356,8 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the flag that indicates if the downloadAnonymous option is enabled.
      *
      * @param downloadAnonymous
-     *            <code>true</code> if the downloadAnonymous is enabled, otherwise
-     *            <code>false</code>
+     *            <code>true</code> if the downloadAnonymous is enabled,
+     *            otherwise <code>false</code>
      */
     public void setDownloadAnonymous(final boolean downloadAnonymous) {
         this.downloadAnonymous = downloadAnonymous;
@@ -377,8 +377,8 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the flag that indicates if the actionAutocleanup option is enabled.
      *
      * @param actionAutocleanup
-     *            <code>true</code> if the actionAutocleanup is enabled, otherwise
-     *            <code>false</code>
+     *            <code>true</code> if the actionAutocleanup is enabled,
+     *            otherwise <code>false</code>
      */
     public void setActionAutocleanup(final boolean actionAutocleanup) {
         this.actionAutocleanup = actionAutocleanup;
@@ -398,8 +398,8 @@ public class ProxySystemConfigWindow implements Serializable {
      * Sets the flag that indicates if the multiAssignments option is enabled.
      *
      * @param multiAssignments
-     *            <code>true</code> if the multiAssignments is enabled, otherwise
-     *            <code>false</code>
+     *            <code>true</code> if the multiAssignments is enabled,
+     *            otherwise <code>false</code>
      */
     public void setMultiAssignments(final boolean multiAssignments) {
         this.multiAssignments = multiAssignments;

@@ -47,8 +47,8 @@ public class DurationField extends DateTimeField {
 
     private static final Duration MAXIMUM_DURATION = Duration.ofHours(23).plusMinutes(59).plusSeconds(59);
 
-    private LocalDateTime minimumDuration;
-    private LocalDateTime maximumDuration;
+    private transient LocalDateTime minimumDuration;
+    private transient LocalDateTime maximumDuration;
 
     /**
      * Creates a DurationField
@@ -68,7 +68,7 @@ public class DurationField extends DateTimeField {
      * Sets the message source
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
     public void setI18n(final VaadinMessageSource i18n) {
         this.i18n = i18n;
@@ -111,9 +111,10 @@ public class DurationField extends DateTimeField {
      * Sanitize the input date time value
      *
      * @param value
-     *          Input date time value
+     *            Input date time value
      *
-     * @return Validated date time value within range of minimum and maximum duration
+     * @return Validated date time value within range of minimum and maximum
+     *         duration
      */
     public LocalDateTime sanitizeValue(final LocalDateTime value) {
         if (value == null && minimumDuration != null) {

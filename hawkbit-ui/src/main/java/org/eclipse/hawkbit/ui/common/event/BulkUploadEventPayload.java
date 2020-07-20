@@ -56,6 +56,8 @@ public final class BulkUploadEventPayload {
     /**
      * Build bulk upload failed
      *
+     * @param failureReason
+     *            the reason for the failed upload
      * @return Bulk upload failed state
      */
     public static BulkUploadEventPayload buildUploadFailed(final String failureReason) {
@@ -74,6 +76,8 @@ public final class BulkUploadEventPayload {
     /**
      * Build target provisioning progress updated
      *
+     * @param progress
+     *            the progress of the bulk upload
      * @return Bulk upload target provisioning updated state
      */
     public static BulkUploadEventPayload buildTargetProvisioningProgressUpdated(final float progress) {
@@ -92,6 +96,8 @@ public final class BulkUploadEventPayload {
     /**
      * Build tags and distribution set assignment failed
      *
+     * @param failureReason
+     *            the reason for the failed tags or DS assignment
      * @return Bulk upload tags and distribution set assignment failed state
      */
     public static BulkUploadEventPayload buildTagsAndDsAssignmentFailed(final String failureReason) {
@@ -100,7 +106,11 @@ public final class BulkUploadEventPayload {
 
     /**
      * Build bulk upload completed
-     *
+     * 
+     * @param successBulkUploadCount
+     *            amount of successfully uploaded targets
+     * @param failBulkUploadCount
+     *            amount of failed uploaded targets
      * @return Bulk upload completed state
      */
     public static BulkUploadEventPayload buildBulkUploadCompleted(final int successBulkUploadCount,

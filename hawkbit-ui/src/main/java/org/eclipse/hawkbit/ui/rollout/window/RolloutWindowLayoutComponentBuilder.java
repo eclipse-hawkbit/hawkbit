@@ -40,7 +40,7 @@ public final class RolloutWindowLayoutComponentBuilder {
      * Constructor for RolloutWindowLayoutComponentBuilder
      *
      * @param rolloutWindowDependecies
-     *          RolloutWindowDependencies
+     *            RolloutWindowDependencies
      */
     public RolloutWindowLayoutComponentBuilder(final RolloutWindowDependencies rolloutWindowDependecies) {
         this.dependencies = rolloutWindowDependecies;
@@ -84,9 +84,9 @@ public final class RolloutWindowLayoutComponentBuilder {
      * Create group definition tabs
      *
      * @param simpleGroupDefinitionTab
-     *          Simple group definition tab component
+     *            Simple group definition tab component
      * @param advancedGroupDefinitionTab
-     *          Advance group definition tab component
+     *            Advance group definition tab component
      *
      * @return Group definition tab sheet
      */
@@ -111,13 +111,14 @@ public final class RolloutWindowLayoutComponentBuilder {
 
     /**
      * Create visual group definition layout
+     * 
      * @return Group definition layout with Pie chat
      */
     public VisualGroupDefinitionLayout createVisualGroupDefinitionLayout() {
         return new VisualGroupDefinitionLayout(createGroupsPieChart(), createGroupsLegendLayout());
     }
 
-    private GroupsPieChart createGroupsPieChart() {
+    private static GroupsPieChart createGroupsPieChart() {
         final GroupsPieChart groupsPieChart = new GroupsPieChart();
         groupsPieChart.setWidth(260, Unit.PIXELS);
         groupsPieChart.setHeight(220, Unit.PIXELS);

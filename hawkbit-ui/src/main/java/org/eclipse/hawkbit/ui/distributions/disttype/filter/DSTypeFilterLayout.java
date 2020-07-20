@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;

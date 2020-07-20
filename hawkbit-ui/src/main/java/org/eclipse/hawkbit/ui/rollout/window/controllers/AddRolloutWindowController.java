@@ -60,9 +60,9 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
      * Controller for AddRolloutWindowController
      *
      * @param dependencies
-     *          RolloutWindowDependencies
+     *            RolloutWindowDependencies
      * @param layout
-     *          AddRolloutWindowLayout
+     *            AddRolloutWindowLayout
      */
     public AddRolloutWindowController(final RolloutWindowDependencies dependencies,
             final AddRolloutWindowLayout layout) {
@@ -98,7 +98,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
         return proxyRolloutWindow;
     }
 
-    protected void setDefaultThresholds(final ProxyRolloutWindow proxyRolloutWindow) {
+    protected static void setDefaultThresholds(final ProxyRolloutWindow proxyRolloutWindow) {
         final RolloutGroupConditions defaultRolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults()
                 .build();
         proxyRolloutWindow.setTriggerThresholdPercentage(defaultRolloutGroupConditions.getSuccessConditionExp());

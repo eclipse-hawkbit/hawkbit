@@ -81,7 +81,7 @@ public class ActionAutoCleanupConfigurationItem extends VerticalLayout {
         actionStatusCombobox.setDescription("label.combobox.action.status.options");
         actionStatusCombobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_TYPES);
         actionStatusCombobox.addStyleName(ValoTheme.COMBOBOX_TINY);
-        actionStatusCombobox.setWidth(200f, Unit.PIXELS);
+        actionStatusCombobox.setWidth(200.0F, Unit.PIXELS);
         actionStatusCombobox.setEmptySelectionAllowed(false);
         actionStatusCombobox.setItems(ACTION_STATUS_OPTIONS);
         actionStatusCombobox.setItemCaptionGenerator(ActionStatusOption::getName);

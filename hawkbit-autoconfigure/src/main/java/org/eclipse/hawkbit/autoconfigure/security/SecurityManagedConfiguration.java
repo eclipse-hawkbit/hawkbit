@@ -750,7 +750,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
         super.onAuthenticationSuccess(authentication);
     }
 
-    private String getTenantFrom(final Authentication authentication) {
+    private static String getTenantFrom(final Authentication authentication) {
         final Object details = authentication.getDetails();
         if (details instanceof TenantAwareAuthenticationDetails) {
             return ((TenantAwareAuthenticationDetails) details).getTenant();

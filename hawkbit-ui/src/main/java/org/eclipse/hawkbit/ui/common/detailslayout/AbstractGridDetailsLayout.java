@@ -34,7 +34,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Abstract Layout to show the entity details.
  *
  * @param <T>
- *          Generic type of ProxyNamedEntity
+ *            Generic type of ProxyNamedEntity
  */
 public abstract class AbstractGridDetailsLayout<T extends ProxyNamedEntity> extends TabSheet
         implements MasterEntityAwareComponent<T> {
@@ -54,7 +54,7 @@ public abstract class AbstractGridDetailsLayout<T extends ProxyNamedEntity> exte
      * Constructor for AbstractGridDetailsLayout
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
     public AbstractGridDetailsLayout(final VaadinMessageSource i18n) {
         this.i18n = i18n;
@@ -154,7 +154,7 @@ public abstract class AbstractGridDetailsLayout<T extends ProxyNamedEntity> exte
         });
     }
 
-    private VerticalLayout buildTabWrapperDetailsLayout(final Component detailsComponent) {
+    private static VerticalLayout buildTabWrapperDetailsLayout(final Component detailsComponent) {
         final VerticalLayout tabWrapperDetailsLayout = new VerticalLayout();
         tabWrapperDetailsLayout.setSpacing(false);
         tabWrapperDetailsLayout.setMargin(false);

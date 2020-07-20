@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
 
 /**
- * Maps {@link ProxyAdvancedRolloutGroup} entities, fetched from advanced
- * group rows, to the {@link RolloutGroupCreate} entities.
+ * Maps {@link ProxyAdvancedRolloutGroup} entities, fetched from advanced group
+ * rows, to the {@link RolloutGroupCreate} entities.
  */
 public class AdvancedRolloutGroupDefinitionToCreateMapper {
     private final EntityFactory entityFactory;
@@ -29,18 +29,19 @@ public class AdvancedRolloutGroupDefinitionToCreateMapper {
      * Constructor for AdvancedRolloutGroupDefinitionToCreateMapper
      *
      * @param entityFactory
+     *            the entity factory
      */
     public AdvancedRolloutGroupDefinitionToCreateMapper(final EntityFactory entityFactory) {
         this.entityFactory = entityFactory;
     }
 
     /**
-     *  Map rollout group
+     * Map rollout group
      *
      * @param advancedRolloutGroupDefinition
-     *          ProxyAdvancedRolloutGroup
+     *            ProxyAdvancedRolloutGroup
      *
-     * @return  ProxyAdvancedRolloutGroup
+     * @return ProxyAdvancedRolloutGroup
      */
     public RolloutGroupCreate map(final ProxyAdvancedRolloutGroup advancedRolloutGroupDefinition) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()

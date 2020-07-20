@@ -14,9 +14,11 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 /**
  * Maps {@link Type} entities, fetched from backend, to the {@link ProxyType}
  * entities.
+ * 
+ * @param <T>
+ *            type of input type (software module type or distribution set type)
  */
-public class TypeToProxyTypeMapper<T extends Type>
-        extends AbstractNamedEntityToProxyNamedEntityMapper<ProxyType, T> {
+public class TypeToProxyTypeMapper<T extends Type> extends AbstractNamedEntityToProxyNamedEntityMapper<ProxyType, T> {
 
     @Override
     public ProxyType map(final T type) {

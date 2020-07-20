@@ -41,23 +41,23 @@ public class CrudMenuHeaderSupport implements HeaderSupport {
      * Constructor for CrudMenuHeaderSupport
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param crudMenuBarId
-     *          Crud menu bar id
+     *            Crud menu bar id
      * @param hasCreatePermission
-     *          boolean value based on create permission
+     *            boolean value based on create permission
      * @param hasUpdatePermission
-     *          boolean value based on update permission
+     *            boolean value based on update permission
      * @param hasDeletePermission
-     *          boolean value based on delete permission
+     *            boolean value based on delete permission
      * @param addCallback
-     *          Runnable
+     *            Runnable
      * @param editCallback
-     *          Runnable
+     *            Runnable
      * @param deleteCallback
-     *          Runnable
+     *            Runnable
      * @param closeCallback
-     *          Runnable
+     *            Runnable
      */
     public CrudMenuHeaderSupport(final VaadinMessageSource i18n, final String crudMenuBarId,
             final boolean hasCreatePermission, final boolean hasUpdatePermission, final boolean hasDeletePermission,
@@ -166,7 +166,7 @@ public class CrudMenuHeaderSupport implements HeaderSupport {
 
         private String style;
 
-        private Mode(final String style) {
+        Mode(final String style) {
             this.style = style;
         }
 

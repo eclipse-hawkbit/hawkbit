@@ -134,7 +134,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         }
     }
 
-    private void removeModuleTypes(final Collection<Long> currentSmTypeIds, final Collection<Long> updatedSmTypeIds,
+    private static void removeModuleTypes(final Collection<Long> currentSmTypeIds,
+            final Collection<Long> updatedSmTypeIds,
             final LongFunction<JpaDistributionSetType> removeModuleTypeCallback) {
         final Set<Long> smTypeIdsToRemove = currentSmTypeIds.stream().filter(id -> !updatedSmTypeIds.contains(id))
                 .collect(Collectors.toSet());

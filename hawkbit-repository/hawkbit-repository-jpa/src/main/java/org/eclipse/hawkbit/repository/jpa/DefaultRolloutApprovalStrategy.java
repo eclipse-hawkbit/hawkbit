@@ -76,11 +76,11 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
         return (UserPrincipal) getCurrentAuthentication().getPrincipal();
     }
 
-    private Authentication getCurrentAuthentication() {
+    private static Authentication getCurrentAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
-    private boolean hasNoApproveRolloutPermission(final Collection<? extends GrantedAuthority> authorities) {
+    private static boolean hasNoApproveRolloutPermission(final Collection<? extends GrantedAuthority> authorities) {
         return authorities.stream()
                 .noneMatch(authority -> SpPermission.APPROVE_ROLLOUT.equals(authority.getAuthority()));
     }

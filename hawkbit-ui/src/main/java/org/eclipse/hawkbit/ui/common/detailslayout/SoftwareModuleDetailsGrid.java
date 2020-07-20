@@ -198,7 +198,7 @@ public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
         return smLabelWithUnassignButtonLayout;
     }
 
-    private Label buildSmLabel(final Long smId, final String smNameWithVersion) {
+    private static Label buildSmLabel(final Long smId, final String smNameWithVersion) {
         final Label smLabel = new Label(smNameWithVersion);
 
         smLabel.setId("sm-label-" + smId);
@@ -289,7 +289,7 @@ public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
         return HawkbitCommonUtil.getEntitiesByPageableProvider(query -> smManagement.findByAssignedTo(query, dsId));
     }
 
-    private List<ProxySoftwareModuleDetails> getSmDetailsByType(final Collection<SoftwareModule> softwareModules,
+    private static List<ProxySoftwareModuleDetails> getSmDetailsByType(final Collection<SoftwareModule> softwareModules,
             final SoftwareModuleType type, final boolean isMandatory) {
         final List<ProxySoftwareModuleDetails> smDetails = softwareModules.stream()
                 .filter(sm -> sm.getType().getId().equals(type.getId()))

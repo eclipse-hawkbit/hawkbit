@@ -173,7 +173,7 @@ public class DistributionSetFilterDropAreaSupport implements HeaderSupport {
         targetGridLayoutUiState.setFilterDsIdNameVersion(null);
     }
 
-    private String sanitizeDsNameVersion(final String dsNameAndVersion) {
+    private static String sanitizeDsNameVersion(final String dsNameAndVersion) {
         return dsNameAndVersion.length() > SPUITargetDefinitions.DISTRIBUTION_NAME_MAX_LENGTH_ALLOWED
                 ? new StringBuilder(
                         dsNameAndVersion.substring(0, SPUITargetDefinitions.DISTRIBUTION_NAME_LENGTH_ON_FILTER))

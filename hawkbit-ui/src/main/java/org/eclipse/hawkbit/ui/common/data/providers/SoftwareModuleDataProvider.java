@@ -36,9 +36,9 @@ public class SoftwareModuleDataProvider
      * Constructor for SoftwareModuleDataProvider
      *
      * @param softwareModuleManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      * @param entityMapper
-     *          AssignedSoftwareModuleToProxyMapper
+     *            AssignedSoftwareModuleToProxyMapper
      */
     public SoftwareModuleDataProvider(final SoftwareModuleManagement softwareModuleManagement,
             final AssignedSoftwareModuleToProxyMapper entityMapper) {
@@ -75,7 +75,7 @@ public class SoftwareModuleDataProvider
         return mapToAssignedSoftwareModule(softwareModuleManagement.findAll(pageRequest));
     }
 
-    private Slice<AssignedSoftwareModule> mapToAssignedSoftwareModule(final Slice<SoftwareModule> smSlice) {
+    private static Slice<AssignedSoftwareModule> mapToAssignedSoftwareModule(final Slice<SoftwareModule> smSlice) {
         return smSlice.map(sm -> new AssignedSoftwareModule(sm, false));
     }
 

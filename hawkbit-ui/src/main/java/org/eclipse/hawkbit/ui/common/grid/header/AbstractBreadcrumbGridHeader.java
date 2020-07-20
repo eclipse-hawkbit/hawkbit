@@ -109,7 +109,7 @@ public abstract class AbstractBreadcrumbGridHeader extends AbstractGridHeader {
             this.linkComponent = buildLinkComponent(caption, description, clickCallback);
         }
 
-        private Button buildLinkComponent(final String caption, final String description,
+        private static Button buildLinkComponent(final String caption, final String description,
                 final Runnable clickCallback) {
             final Button link = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                     SPUIButtonStyleNoBorder.class);

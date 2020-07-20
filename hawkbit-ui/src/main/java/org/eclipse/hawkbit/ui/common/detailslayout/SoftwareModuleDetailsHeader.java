@@ -203,7 +203,7 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
         UI.getCurrent().addWindow(artifactDtlsWindow);
     }
 
-    private void setInitialArtifactDetailsGridSize(final ArtifactDetailsGrid artifactDetailsGrid) {
+    private static void setInitialArtifactDetailsGridSize(final ArtifactDetailsGrid artifactDetailsGrid) {
         artifactDetailsGrid.setWidth(700, Unit.PIXELS);
         artifactDetailsGrid.setHeight(500, Unit.PIXELS);
     }

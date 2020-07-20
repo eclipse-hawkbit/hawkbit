@@ -28,16 +28,23 @@ public class DsManagementFilterParams implements Serializable {
     private String pinnedTargetControllerId;
 
     /**
+     * Constructor for DsManagementFilterParams
+     */
+    public DsManagementFilterParams() {
+        this("", false, new ArrayList<>(), "");
+    }
+
+    /**
      * Constructor.
      * 
      * @param searchText
-     *          String as search text
+     *            String as search text
      * @param noTagClicked
-     *          boolean
+     *            boolean
      * @param distributionSetTags
-     *          List of String as distribution tags
+     *            List of String as distribution tags
      * @param pinnedTargetControllerId
-     *          String as pinned target controller Id
+     *            String as pinned target controller Id
      */
     public DsManagementFilterParams(final String searchText, final boolean noTagClicked,
             final List<String> distributionSetTags, final String pinnedTargetControllerId) {
@@ -58,7 +65,7 @@ public class DsManagementFilterParams implements Serializable {
      * Setter for searchText
      *
      * @param searchText
-     *          String
+     *            String
      */
     public void setSearchText(final String searchText) {
         this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
@@ -75,7 +82,7 @@ public class DsManagementFilterParams implements Serializable {
      * Setter for distributionSetTags
      *
      * @param distributionSetTags
-     *          collection of String
+     *            collection of String
      */
     public void setDistributionSetTags(final Collection<String> distributionSetTags) {
         this.distributionSetTags = distributionSetTags;
@@ -92,17 +99,10 @@ public class DsManagementFilterParams implements Serializable {
      * Setter for pinnedTargetControllerId
      *
      * @param pinnedTargetControllerId
-     *          String
+     *            String
      */
     public void setPinnedTargetControllerId(final String pinnedTargetControllerId) {
         this.pinnedTargetControllerId = pinnedTargetControllerId;
-    }
-
-    /**
-     * Constructor for DsManagementFilterParams
-     */
-    public DsManagementFilterParams() {
-        this("", false, new ArrayList<>(), "");
     }
 
     /**
@@ -116,7 +116,7 @@ public class DsManagementFilterParams implements Serializable {
      * Setter for noTagClicked
      *
      * @param noTagClicked
-     *          boolean
+     *            boolean
      */
     public void setNoTagClicked(final boolean noTagClicked) {
         this.noTagClicked = noTagClicked;

@@ -32,13 +32,13 @@ public class TargetTagsToDistributionSetAssignmentSupport extends AssignmentSupp
      * Constructor for TargetTagsToDistributionSetAssignmentSupport
      *
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param targetsToDistributionSetAssignmentSupport
-     *          TargetsToDistributionSetAssignmentSupport
+     *            TargetsToDistributionSetAssignmentSupport
      */
     public TargetTagsToDistributionSetAssignmentSupport(final UINotification notification,
             final VaadinMessageSource i18n, final TargetManagement targetManagement,
@@ -76,7 +76,7 @@ public class TargetTagsToDistributionSetAssignmentSupport extends AssignmentSupp
         return HawkbitCommonUtil.getEntitiesByPageableProvider(query -> targetManagement.findByTag(query, tagId));
     }
 
-    private List<ProxyTarget> mapTargetsToProxyTargets(final List<Target> targetsToAssign) {
+    private static List<ProxyTarget> mapTargetsToProxyTargets(final List<Target> targetsToAssign) {
         // it is redundant to use TargetToProxyTargetMapper here
         return targetsToAssign.stream().map(target -> {
             final ProxyTarget proxyTarget = new ProxyTarget();

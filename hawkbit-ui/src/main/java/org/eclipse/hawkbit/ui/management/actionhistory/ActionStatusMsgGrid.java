@@ -60,7 +60,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<ProxyMessage, Long> {
 
         addStyleName(SPUIStyleDefinitions.ACTION_HISTORY_MESSAGE_GRID);
 
-        setDetailsGenerator(this::generateDetails);
+        setDetailsGenerator(ActionStatusMsgGrid::generateDetails);
 
         this.itemClickListenerRegistration = addItemClickListener(event -> {
             final ProxyMessage msg = event.getItem();
@@ -86,7 +86,7 @@ public class ActionStatusMsgGrid extends AbstractGrid<ProxyMessage, Long> {
                 (filter, masterFilter) -> getFilterSupport().setFilter(masterFilter));
     }
 
-    private Component generateDetails(final ProxyMessage msg) {
+    private static Component generateDetails(final ProxyMessage msg) {
         final TextArea textArea = new TextArea();
 
         textArea.addStyleName(ValoTheme.TEXTAREA_BORDERLESS);

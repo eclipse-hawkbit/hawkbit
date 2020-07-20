@@ -78,29 +78,29 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Constructor for TargetBulkUpdateWindowLayout
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param checker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param uinotification
-     *          UINotification
+     *            UINotification
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param tagManagement
-     *          TargetTagManagement
+     *            TargetTagManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param uiproperties
-     *          UiProperties
+     *            UiProperties
      * @param uiExecutor
-     *          Executor
+     *            Executor
      * @param targetBulkUploadUiState
-     *          TargetBulkUploadUiState
+     *            TargetBulkUploadUiState
      */
     public TargetBulkUpdateWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker checker, final UINotification uinotification,
@@ -180,7 +180,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         return upload;
     }
 
-    private Button getCloseButton() {
+    private static Button getCloseButton() {
         final Button closeBtn = SPUIComponentProvider.getButton(UIComponentIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
                 "", "", true, VaadinIcons.CLOSE, SPUIButtonStyleNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -192,7 +192,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Sets the close call back event listener
      *
      * @param closeCallback
-     *          Runnable
+     *            Runnable
      */
     public void setCloseCallback(final Runnable closeCallback) {
         if (closeRegistration != null) {
@@ -291,7 +291,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Sets the upload progress value
      *
      * @param value
-     *          progress percentage
+     *            progress percentage
      */
     public void setProgressBarValue(final float value) {
         progressBar.setVisible(true);
@@ -310,9 +310,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Actions once bulk upload is completed.
      *
      * @param successCount
-     *          Total count of success upload
+     *            Total count of success upload
      * @param failCount
-     *          Total count of fail upload
+     *            Total count of fail upload
      */
     public void onUploadCompletion(final int successCount, final int failCount) {
         final String targetCountLabel = getFormattedCountLabelValue(successCount, failCount);
@@ -337,7 +337,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Actions once upload fails
      *
      * @param failureReason
-     *          Reason for failed upload
+     *            Reason for failed upload
      */
     public void onUploadFailure(final String failureReason) {
         targetsCountLabel.setVisible(true);
@@ -352,7 +352,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Actions once assignment fails
      *
      * @param failureReason
-     *          Reason for failed upload
+     *            Reason for failed upload
      */
     public void onAssignmentFailure(final String failureReason) {
         uinotification.displayValidationError(failureReason);

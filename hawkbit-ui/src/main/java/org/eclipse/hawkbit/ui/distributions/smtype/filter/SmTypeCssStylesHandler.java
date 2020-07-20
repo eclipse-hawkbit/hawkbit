@@ -24,7 +24,7 @@ public class SmTypeCssStylesHandler {
      * Constructor for SmTypeCssStylesHandler
      *
      * @param softwareModuleTypeManagement
-     *          SoftwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
      */
     public SmTypeCssStylesHandler(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -50,7 +50,7 @@ public class SmTypeCssStylesHandler {
                 type -> Optional.ofNullable(type.getColour()).orElse(SPUIDefinitions.DEFAULT_COLOR)));
     }
 
-    private String buildStyleRulesScript(final Map<Long, String> typeIdWithColor) {
+    private static String buildStyleRulesScript(final Map<Long, String> typeIdWithColor) {
         return typeIdWithColor.entrySet().stream().map(entry -> {
             final String typeClass = String.join("-", UIComponentIdProvider.SM_TYPE_COLOR_CLASS,
                     String.valueOf(entry.getKey()));

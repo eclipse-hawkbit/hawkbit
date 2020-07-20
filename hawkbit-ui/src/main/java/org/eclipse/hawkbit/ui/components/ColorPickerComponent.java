@@ -48,9 +48,9 @@ public class ColorPickerComponent extends CustomField<Color> {
      * Constructor for ColorPickerComponent
      *
      * @param coloPickerBtnId
-     *          Id of colour picker button
+     *            Id of colour picker button
      * @param coloPickerBtnCaption
-     *          Caption for colour picker button
+     *            Caption for colour picker button
      */
     public ColorPickerComponent(final String coloPickerBtnId, final String coloPickerBtnCaption) {
         this.colorPickerBtn = new CustomColorPicker(coloPickerBtnId, coloPickerBtnCaption);
@@ -78,9 +78,9 @@ public class ColorPickerComponent extends CustomField<Color> {
          * Constructor for CustomColorPicker
          *
          * @param id
-         *          Id
+         *            Id
          * @param caption
-         *          Caption
+         *            Caption
          */
         public CustomColorPicker(final String id, final String caption) {
             super();
@@ -165,7 +165,7 @@ public class ColorPickerComponent extends CustomField<Color> {
         isColorUpdateInProgress = false;
     }
 
-    private double sanitizeSliderRGBValue(final int colorValue) {
+    private static double sanitizeSliderRGBValue(final int colorValue) {
         return Doubles.constrainToRange(colorValue, RGB_START, RGB_END);
     }
 

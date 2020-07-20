@@ -129,7 +129,7 @@ public class SimpleGroupsLayout extends ValidatableLayout {
         return (int) Math.ceil((double) totalTargets / (double) numberOfGroups);
     }
 
-    private Label createCountLabel() {
+    private static Label createCountLabel() {
         final Label countLabel = new LabelBuilder().visible(false).name("").buildLabel();
         countLabel.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
         countLabel.setSizeUndefined();
@@ -154,7 +154,7 @@ public class SimpleGroupsLayout extends ValidatableLayout {
         return triggerThresholdField;
     }
 
-    private Label getPercentHintLabel() {
+    private static Label getPercentHintLabel() {
         final Label percentSymbol = new Label("%");
         percentSymbol.addStyleName(ValoTheme.LABEL_TINY + " " + ValoTheme.LABEL_BOLD);
         percentSymbol.setSizeUndefined();
