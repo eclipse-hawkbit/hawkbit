@@ -36,6 +36,10 @@
 
     .v-grid-tablewrapper {
       border: none;
+      
+      .v-grid-row > td {
+      	background: $widget-bg;
+      }
     }
 
     .v-table-table {

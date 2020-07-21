@@ -418,7 +418,6 @@ public final class GridComponentBuilder {
         actionButton.setDescription(i18n.getMessage(descriptionMsgProperty));
         actionButton.setEnabled(enabled);
         actionButton.setId(buttonId);
-        actionButton.addStyleName(ValoTheme.LABEL_TINY);
         actionButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         actionButton.addStyleName("button-no-border");
         actionButton.addStyleName("action-type-padding");

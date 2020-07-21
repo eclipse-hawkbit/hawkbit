@@ -22,13 +22,6 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
   }
 }
 
-@mixin sp-icon-style($sp-button-icon-color: $button-icon-color, $sp-button-size : $icon-font-size) {
-  height: 15px !important;
-  width: 15px !important;
-  color: $sp-button-icon-color;
-  font-size: $sp-button-size;
-}
-
 @mixin generic-styles {
 
   //Generic text style used in table details,search text style ,combo text style etc
@@ -51,9 +44,10 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     overflow: hidden;
   }
 
-  //Report widget max icon style
   .icon-only {
-    @include sp-icon-style($sp-button-size: $icon-font-size);
+    height: 15px !important;
+    width: 15px !important;
+    color: $button-icon-color;
     margin-bottom: 6px !important;
     margin-right: 6px !important;
   }
