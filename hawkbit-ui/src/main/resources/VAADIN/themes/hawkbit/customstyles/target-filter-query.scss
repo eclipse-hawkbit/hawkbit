@@ -53,26 +53,25 @@
 	background-color:#f7fafc;
 	border:1px solid #bfc3c8;
 	border-radius:4px;
-	margin-right:10px;
 }   
 
 
 .target-filter-textfield, .target-filter-textfield:focus{
 	border:none !important;
 	box-shadow: none !important;
-	height: 26px !important;
+}
+
+.error-icon, .success-icon {
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .error-icon{
-    margin-left: 5px;
-	color:$success-icon-color !important;
-	padding-left:2px !important;
+	color: $error-icon-color !important;
 }
 
 .success-icon{
-    margin-left: 5px;
-	color:$error-icon-color !important;
-	padding-left:2px !important;
+	color: $success-icon-color !important;
 }
 
 .on-focus-no-border:focus::after{

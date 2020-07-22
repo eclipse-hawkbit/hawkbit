@@ -50,7 +50,7 @@ public class AutoCompleteTextFieldComponent extends CustomField<String> {
      * Constructor for AutoCompleteTextFieldComponent
      *
      * @param rsqlValidationOracle
-     *          RsqlValidationOracle
+     *            RsqlValidationOracle
      */
     public AutoCompleteTextFieldComponent(final RsqlValidationOracle rsqlValidationOracle) {
         this.rsqlValidationOracle = rsqlValidationOracle;
@@ -66,13 +66,16 @@ public class AutoCompleteTextFieldComponent extends CustomField<String> {
     }
 
     private void init() {
-        autoCompleteLayout.setSizeUndefined();
+        autoCompleteLayout.setSizeFull();
         autoCompleteLayout.setSpacing(false);
         autoCompleteLayout.setMargin(false);
         autoCompleteLayout.addStyleName("custom-search-layout");
 
-        autoCompleteLayout.addComponents(validationIcon, queryTextField);
-        autoCompleteLayout.setComponentAlignment(validationIcon, Alignment.TOP_CENTER);
+        autoCompleteLayout.addComponent(validationIcon);
+        autoCompleteLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
+
+        autoCompleteLayout.addComponent(queryTextField);
+        autoCompleteLayout.setExpandRatio(queryTextField, 1.0F);
 
         queryTextField.addValueChangeListener(event -> onQueryFilterChange(event.getValue()));
 
@@ -106,7 +109,7 @@ public class AutoCompleteTextFieldComponent extends CustomField<String> {
      * Add changed listener to text field
      *
      * @param listener
-     *          Value change listener
+     *            Value change listener
      */
     public void addTextfieldChangedListener(final ValueChangeListener<String> listener) {
         queryTextField.addValueChangeListener(listener);
@@ -114,9 +117,7 @@ public class AutoCompleteTextFieldComponent extends CustomField<String> {
 
     private static Label createStatusIcon() {
         final Label statusIcon = new Label(VaadinIcons.CHECK_CIRCLE.getHtml(), ContentMode.HTML);
-
         statusIcon.setId(UIComponentIdProvider.VALIDATION_STATUS_ICON_ID);
-        statusIcon.setSizeFull();
         statusIcon.setVisible(false);
 
         return statusIcon;
@@ -125,12 +126,10 @@ public class AutoCompleteTextFieldComponent extends CustomField<String> {
     private static TextField createSearchField() {
         final TextField textField = new TextFieldBuilder(TargetFilterQuery.QUERY_MAX_SIZE)
                 .id(UIComponentIdProvider.CUSTOM_FILTER_QUERY).buildTextComponent();
-
+        textField.setWidthFull();
         textField.addStyleName("target-filter-textfield");
-        textField.setWidth(900.0F, Unit.PIXELS);
 
         textField.setValueChangeMode(ValueChangeMode.EAGER);
-        textField.setValueChangeTimeout(100);
 
         return textField;
     }

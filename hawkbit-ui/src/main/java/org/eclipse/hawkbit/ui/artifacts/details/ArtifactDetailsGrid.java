@@ -164,7 +164,7 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
 
     private Column<ProxyArtifact, Button> addDownloadColumn() {
         return GridComponentBuilder.addIconColumn(this, this::buildDownloadButton, ARTIFACT_DOWNLOAD_BUTTON_ID,
-                i18n.getMessage("header.action.delete"));
+                i18n.getMessage("header.action.download"));
     }
 
     private Button buildDownloadButton(final ProxyArtifact artifact) {

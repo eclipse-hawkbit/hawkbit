@@ -26,6 +26,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -59,15 +60,15 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param uiProperties
-     *          UiProperties
+     *            UiProperties
      * @param uiState
-     *          TargetFilterDetailsLayoutUiState
+     *            TargetFilterDetailsLayoutUiState
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param rsqlValidationOracle
-     *          RsqlValidationOracle
+     *            RsqlValidationOracle
      */
     public TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final UiProperties uiProperties,
             final TargetFilterDetailsLayoutUiState uiState, final UIEventBus eventBus,
@@ -94,7 +95,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         final FormLayout formLayout = new FormLayout();
         formLayout.setSpacing(true);
         formLayout.setMargin(false);
-        formLayout.setSizeUndefined();
+        formLayout.setWidthFull();
 
         formLayout.addComponent(filterNameInput);
         autoCompleteComponent.setCaption(i18n.getMessage(FILTER_QUERY_CAPTION));
@@ -115,12 +116,14 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         actionsLayout.addComponent(saveButton);
 
         final HorizontalLayout filterQueryLayout = new HorizontalLayout();
-        filterQueryLayout.setSpacing(false);
+        filterQueryLayout.setSpacing(true);
         filterQueryLayout.setMargin(false);
-        filterQueryLayout.setSizeUndefined();
+        filterQueryLayout.setWidth(90.0F, Unit.PERCENTAGE);
         filterQueryLayout.addStyleName(SPUIStyleDefinitions.ADD_UPDATE_FILTER_LAYOUT);
 
         filterQueryLayout.addComponent(formLayout);
+        filterQueryLayout.setExpandRatio(formLayout, 1.0F);
+
         filterQueryLayout.addComponent(actionsLayout);
         filterQueryLayout.setComponentAlignment(actionsLayout, Alignment.BOTTOM_LEFT);
 
@@ -162,7 +165,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * Filter target list by query
      *
      * @param query
-     *          Input query value
+     *            Input query value
      */
     public void filterTargetListByQuery(final String query) {
         eventBus.publish(EventTopics.FILTER_CHANGED, this,
@@ -173,7 +176,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * Save the changes
      *
      * @param saveCallback
-     *          SaveDialogCloseListener
+     *            SaveDialogCloseListener
      */
     public void setSaveCallback(final SaveDialogCloseListener saveCallback) {
         if (saveListener != null) {

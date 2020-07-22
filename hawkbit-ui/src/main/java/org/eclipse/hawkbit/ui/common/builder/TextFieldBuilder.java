@@ -27,7 +27,6 @@ public class TextFieldBuilder extends AbstractTextFieldBuilder<TextFieldBuilder,
      */
     public TextFieldBuilder(final int maxLengthAllowed) {
         super(maxLengthAllowed);
-        styleName(ValoTheme.TEXTAREA_TINY);
     }
 
     @Override

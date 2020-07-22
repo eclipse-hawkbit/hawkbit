@@ -64,7 +64,8 @@ public class TargetFilterAddUpdateLayoutComponentBuilder {
     public TextField createNameField(final Binder<ProxyTargetFilterQuery> binder) {
         final TextField filterName = FormComponentBuilder
                 .createNameInput(binder, i18n, UIComponentIdProvider.CUSTOM_FILTER_ADD_NAME).getComponent();
-        filterName.setWidth(380, Unit.PIXELS);
+        filterName.setWidth(40.0F, Unit.PERCENTAGE);
+
         return filterName;
     }
 
