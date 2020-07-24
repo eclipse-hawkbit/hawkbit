@@ -198,4 +198,14 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
     public void disableSearchButton() {
         searchButton.setEnabled(false);
     }
+
+    /**
+     * Check validity of target filter query.
+     * 
+     * @return {@code true}: if the target filter query is valid {@code false}:
+     *         otherwise
+     */
+    public boolean isFilterQueryValid() {
+        return autoCompleteComponent.isValid();
+    }
 }

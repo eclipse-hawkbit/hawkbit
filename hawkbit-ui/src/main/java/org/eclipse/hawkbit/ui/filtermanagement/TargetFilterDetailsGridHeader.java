@@ -181,4 +181,17 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
 
         return restoredEntity;
     }
+
+    /**
+     * Check validity of target filter query.
+     * 
+     * @return {@code true}: if header form layout is active and the target
+     *         filter query is valid {@code false}: otherwise
+     */
+    public boolean isFilterQueryValid() {
+        final Mode currentMode = uiState.getCurrentMode();
+        final boolean isHeaderInActiveMode = Mode.CREATE == currentMode || Mode.EDIT == currentMode;
+
+        return isHeaderInActiveMode && targetFilterAddUpdateLayout.isFilterQueryValid();
+    }
 }

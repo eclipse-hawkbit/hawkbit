@@ -94,7 +94,9 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      */
     public void restoreState() {
         targetFilterDetailsGridHeader.restoreState();
-        targetFilterTargetGrid.restoreState();
+        if (targetFilterDetailsGridHeader.isFilterQueryValid()) {
+            targetFilterTargetGrid.restoreState();
+        }
     }
 
     /**
