@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.grid.support;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -50,19 +50,19 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Constructor for PinSupport
      *
      * @param refreshItemCallback
-     *          Refresh item call back event
+     *            Refresh item call back event
      * @param publishPinningChangedCallback
-     *          Publish Pin changed call back event
+     *            Publish Pin changed call back event
      * @param updatePinnedUiStateCallback
-     *          Update pin callback event
+     *            Update pin callback event
      * @param getPinFilterCallback
-     *          Pin filter call back event
+     *            Pin filter call back event
      * @param updatePinFilterCallback
-     *          Update pin filter callback event
+     *            Update pin filter callback event
      * @param assignedIdsProvider
- *               Assigned id provider list
+     *            Assigned id provider list
      * @param installedIdsProvider
-     *          Installed Id provider list
+     *            Installed Id provider list
      *
      */
     public PinSupport(final Consumer<T> refreshItemCallback,
@@ -80,8 +80,8 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
 
         this.assignedIdsProvider = assignedIdsProvider;
         this.installedIdsProvider = installedIdsProvider;
-        this.assignedIds = new ArrayList<>();
-        this.installedIds = new ArrayList<>();
+        this.assignedIds = new HashSet<>();
+        this.installedIds = new HashSet<>();
 
         this.pinnedItem = null;
     }
@@ -90,7 +90,7 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Updates the view on pinning changed
      *
      * @param item
-     *          Generic type of entity
+     *            Generic type of entity
      */
     public void changeItemPinning(final T item) {
         if (isPinned(item.getId())) {
@@ -160,9 +160,9 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Gets the pin style
      *
      * @param item
-     *          Pinned item
+     *            Pinned item
      *
-     * @return  Pin style
+     * @return Pin style
      */
     public String getPinningStyle(final T item) {
         if (isPinned(item.getId())) {
@@ -176,9 +176,9 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Gets the style of assigned or installed row
      *
      * @param itemId
-     *          Id of item
+     *            Id of item
      *
-     * @return  Assigned or installed row style
+     * @return Assigned or installed row style
      */
     public String getAssignedOrInstalledRowStyle(final Long itemId) {
         if (!isPinFilterActive()) {
@@ -200,7 +200,7 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Restore the pinning
      *
      * @param itemToRestore
-     *          Pin item to restore
+     *            Pin item to restore
      */
     public void restorePinning(final T itemToRestore) {
         pinnedItem = itemToRestore;
@@ -210,7 +210,7 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Update the pin filter
      *
      * @param pinFilter
-     *          Pin filter item
+     *            Pin filter item
      */
     public void updatePinFilter(final F pinFilter) {
         // used to remove grids' pinned item when applying the pin filter
@@ -243,7 +243,7 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Apply installed and assigned pin filter and refresh the view
      *
      * @param pinFilter
-     *          Pin filter
+     *            Pin filter
      */
     public void repopulateAssignedAndInstalled(final F pinFilter) {
         clearAssignedAndInstalled();
@@ -265,7 +265,7 @@ public class PinSupport<T extends ProxyIdentifiableEntity, F> {
      * Match pin item in the collection of pin id
      *
      * @param itemIds
-     *          List of Pinned Id
+     *            List of Pinned Id
      *
      * @return True if pinned item is found in list of pinned Ids else false
      */

@@ -8,7 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private final List<ProxyTag> allAssignableTags;
+    private final Collection<ProxyTag> allAssignableTags;
     private final transient Set<TagAssignmentListener> listeners = Sets.newConcurrentHashSet();
 
     private final ComboBox<ProxyTag> assignableTagsComboBox;
@@ -58,7 +59,7 @@ public class TagAssignementComboBox extends HorizontalLayout {
         this.assignableTagsComboBox = getAssignableTagsComboBox(
                 i18n.getMessage(UIMessageIdProvider.TOOLTIP_SELECT_TAG));
 
-        this.allAssignableTags = new ArrayList<>();
+        this.allAssignableTags = new HashSet<>();
         this.assignableTagsComboBox.setItems(allAssignableTags);
 
         addComponent(assignableTagsComboBox);
@@ -138,16 +139,17 @@ public class TagAssignementComboBox extends HorizontalLayout {
             return;
         }
 
-        findAssignableTagById(tagData.getId()).map(allAssignableTags::indexOf)
-                .ifPresent(updatedTagIndex -> updateAssignableTag(updatedTagIndex, tagData));
+        findAssignableTagById(tagData.getId()).ifPresent(tagToUpdate -> updateAssignableTag(tagToUpdate, tagData));
     }
 
     private Optional<ProxyTag> findAssignableTagById(final Long id) {
         return allAssignableTags.stream().filter(tag -> tag.getId().equals(id)).findAny();
     }
 
-    private void updateAssignableTag(final int updatedTagIndex, final ProxyTag tagData) {
-        allAssignableTags.set(updatedTagIndex, tagData);
+    private void updateAssignableTag(final ProxyTag oldTag, final ProxyTag newTag) {
+        allAssignableTags.remove(oldTag);
+        allAssignableTags.add(newTag);
+
         assignableTagsComboBox.getDataProvider().refreshAll();
     }
 

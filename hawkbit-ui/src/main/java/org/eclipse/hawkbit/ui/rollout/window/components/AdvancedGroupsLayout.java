@@ -199,6 +199,8 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
         return button;
     }
 
+    // there is limited amount of advanced groups within the rollout
+    @SuppressWarnings("squid:S2250")
     private void removeGroupRow(final AdvancedGroupRow groupRow, final int index) {
         layout.removeRow(index);
         groupRows.remove(groupRow);

@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout.window.layouts;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -38,12 +37,12 @@ public abstract class AbstractRolloutWindowLayout implements EntityWindowLayout<
 
     protected final RolloutWindowLayoutComponentBuilder rolloutComponentBuilder;
 
-    private final List<ValidatableLayout> validatableLayouts;
+    private final Collection<ValidatableLayout> validatableLayouts;
     private Consumer<Boolean> validationCallback;
 
     protected AbstractRolloutWindowLayout(final RolloutWindowDependencies dependencies) {
         this.rolloutComponentBuilder = new RolloutWindowLayoutComponentBuilder(dependencies);
-        this.validatableLayouts = new ArrayList<>();
+        this.validatableLayouts = new HashSet<>();
     }
 
     @Override

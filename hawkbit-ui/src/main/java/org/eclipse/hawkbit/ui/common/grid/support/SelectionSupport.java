@@ -56,7 +56,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Constructor for grids without selection support
      *
      * @param grid
-     *          Vaadin grid
+     *            Vaadin grid
      */
     public SelectionSupport(final Grid<T> grid) {
         this(grid, null, null, null, null, null, null);
@@ -66,20 +66,22 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Constructor for grids with selection support
      *
      * @param grid
-     *          Vaadin grid
+     *            Vaadin grid
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param layout
-     *         UIEventBus
+     *            UIEventBus
      * @param view
-     *          EventView
+     *            EventView
      * @param mapIdToProxyEntityFunction
-     *          Function to map id to proxy entity
+     *            Function to map id to proxy entity
      * @param selectedEntityIdUiStateProvider
-     *          Selected entity id provider
+     *            Selected entity id provider
      * @param setSelectedEntityIdUiStateCallback
-     *          Callback event to set selected entity id
+     *            Callback event to set selected entity id
      */
+    // UI state values are nullable
+    @SuppressWarnings("squid:S4276")
     public SelectionSupport(final Grid<T> grid, final UIEventBus eventBus, final EventLayout layout,
             final EventView view, final LongFunction<Optional<T>> mapIdToProxyEntityFunction,
             final Supplier<Long> selectedEntityIdUiStateProvider,
@@ -135,9 +137,9 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Send selection change event
      *
      * @param selectionType
-     *          SelectionChangedEventType
+     *            SelectionChangedEventType
      * @param itemToSend
-     *          selected item to send
+     *            selected item to send
      *
      */
     public void sendSelectionChangedEvent(final SelectionChangedEventType selectionType, final T itemToSend) {
@@ -266,7 +268,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Select the item in grid
      *
      * @param itemToSelect
-     *          Item for selection
+     *            Item for selection
      */
     public void select(final T itemToSelect) {
         if (isNoSelectionModel()) {
@@ -280,7 +282,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Select entity based on Id
      *
      * @param entityId
-     *          Entity id
+     *            Entity id
      */
     public void selectEntityById(final Long entityId) {
         if (isNoSelectionModel()) {
@@ -309,7 +311,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
      * Deselect the item from the grid
      *
      * @param itemToDeselect
-     *          Item for selection
+     *            Item for selection
      */
     public void deselect(final T itemToDeselect) {
         if (isNoSelectionModel()) {

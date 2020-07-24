@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
+import java.util.HashSet;
 
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -55,7 +55,7 @@ public class FilterByStatusLayout extends VerticalLayout {
     private final Button registered;
     private final Button overdue;
 
-    private final List<TargetUpdateStatus> activeStatusFilters;
+    private final Collection<TargetUpdateStatus> activeStatusFilters;
     private boolean isOverdueFilterActive;
 
     private final EnumMap<TargetUpdateStatus, Button> statusToButtonMap;
@@ -65,7 +65,7 @@ public class FilterByStatusLayout extends VerticalLayout {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
-        this.activeStatusFilters = new ArrayList<>();
+        this.activeStatusFilters = new HashSet<>();
         this.isOverdueFilterActive = false;
 
         this.unknown = buildStatusButton(TargetUpdateStatus.UNKNOWN, UIComponentIdProvider.UNKNOWN_STATUS_ICON,
@@ -243,7 +243,7 @@ public class FilterByStatusLayout extends VerticalLayout {
      * Restore the filter state
      */
     public void restoreState() {
-        final List<TargetUpdateStatus> statusFiltersToRestore = targetTagFilterLayoutUiState
+        final Collection<TargetUpdateStatus> statusFiltersToRestore = targetTagFilterLayoutUiState
                 .getClickedTargetUpdateStatusFilters();
 
         if (!CollectionUtils.isEmpty(statusFiltersToRestore)) {
