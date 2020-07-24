@@ -15,11 +15,11 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow.ConfirmStyle;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.HtmlUtils;
 
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable.Unit;
@@ -152,8 +152,9 @@ public class ConfirmationDialog implements Serializable {
     }
 
     private static Label createConfirmationQuestion(final String question) {
-        String questionHtmlSave = HtmlUtils.htmlEscape(question);
-        questionHtmlSave = questionHtmlSave.replace("\n", "</br>");
+        // ContentMode.HTML is used instead of ContentMode.PREFORMATTED here due
+        // to no linebreaks if an entity name is very long
+        final String questionHtmlSave = HawkbitCommonUtil.sanitizeHtml(question);
         final Label questionLbl = new Label(questionHtmlSave, ContentMode.HTML);
         questionLbl.setWidth(100, Unit.PERCENTAGE);
         questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
@@ -165,7 +166,7 @@ public class ConfirmationDialog implements Serializable {
      * Enables the ok save button
      *
      * @param enabled
-     *          boolean
+     *            boolean
      */
     public void setOkButtonEnabled(final boolean enabled) {
         window.setSaveButtonEnabled(enabled);

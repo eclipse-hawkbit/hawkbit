@@ -34,7 +34,7 @@ public class UINotification implements Serializable {
      *            is the message to displayed as success.
      */
     public void displaySuccess(final String message) {
-        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE, null, message, null);
+        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_SUCCESS_MESSAGE_STYLE, message, VaadinIcons.CHECK_CIRCLE);
     }
 
     /**
@@ -44,7 +44,7 @@ public class UINotification implements Serializable {
      *            is the message to displayed as warning.
      */
     public void displayWarning(final String message) {
-        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE, null, message, null);
+        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE, message, VaadinIcons.WARNING);
     }
 
     /**
@@ -54,8 +54,12 @@ public class UINotification implements Serializable {
      *            as message.
      */
     public void displayValidationError(final String message) {
-        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, message, null,
+        showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, message,
                 VaadinIcons.EXCLAMATION_CIRCLE);
+    }
+
+    private static void showNotification(final String styleName, final String description, final Resource icon) {
+        showNotification(styleName, null, description, icon, true);
     }
 
     private static void showNotification(final String styleName, final String caption, final String description,
@@ -75,10 +79,4 @@ public class UINotification implements Serializable {
 
         notification.show(Page.getCurrent());
     }
-
-    private static void showNotification(final String styleName, final String caption, final String description,
-            final Resource icon) {
-        showNotification(styleName, caption, description, icon, true);
-    }
-
 }

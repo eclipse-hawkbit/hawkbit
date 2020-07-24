@@ -88,8 +88,21 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     border: 1px solid $widget-border-color;
   }
 
+  .v-Notification .v-icon {
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
   .v-Notification-error .v-icon {
     color: white;
+  }
+
+  .v-Notification-warning .v-icon {
+	color: orange;
+  }
+
+  .v-Notification-success .v-icon {
+	color: green;
   }
 
   .avoid-tooltip {

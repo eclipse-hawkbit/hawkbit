@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.ui.UiProperties.Localization;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.HtmlUtils;
 
 import com.vaadin.ui.UI;
 
@@ -63,9 +65,9 @@ public final class HawkbitCommonUtil {
      * Get concatenated string of software module name and version.
      *
      * @param name
-     *          Name
+     *            Name
      * @param version
-     *          Version
+     *            Version
      * @return String concatenated string
      */
     public static String getFormattedNameVersion(final String name, final String version) {
@@ -169,5 +171,21 @@ public final class HawkbitCommonUtil {
      */
     public static Long getSumOf(final Collection<Long> countList) {
         return countList.stream().mapToLong(Long::longValue).sum();
+    }
+
+    /**
+     * Escapes potentially malicious html string.
+     *
+     * @param html
+     *            potentially malicious html string
+     *
+     * @return sanitized html
+     */
+    public static String sanitizeHtml(final String html) {
+        if (StringUtils.isEmpty(html)) {
+            return "";
+        }
+
+        return HtmlUtils.htmlEscape(html).replace("\n", "</br>");
     }
 }

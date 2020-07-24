@@ -63,7 +63,7 @@ public class ErrorView extends VerticalLayout implements View {
             return;
         }
         if (dashboardMenu.isAccessDenied(event.getViewName())) {
-            final Notification nt = new Notification("Access denied",
+            final Notification nt = new Notification(i18n.getMessage("message.accessdenied"),
                     i18n.getMessage("message.accessdenied.view", event.getViewName()), Type.ERROR_MESSAGE, false);
             nt.setStyleName(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
             nt.setPosition(Position.BOTTOM_RIGHT);
