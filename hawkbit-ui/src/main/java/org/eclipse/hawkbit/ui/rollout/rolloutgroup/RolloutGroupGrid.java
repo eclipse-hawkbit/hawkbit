@@ -42,7 +42,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 import com.google.common.base.Predicates;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
@@ -170,16 +169,11 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
     }
 
     private Button buildRolloutGroupLink(final ProxyRolloutGroup rolloutGroup) {
-        final boolean enableButton = RolloutGroupStatus.CREATING != rolloutGroup.getStatus();
-        final ClickListener listener = permissionChecker.hasRolloutTargetsReadPermission()
-                ? (clickEvent -> onClickOfRolloutGroupName(rolloutGroup))
-                : null;
-        final Button link = GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link.", rolloutGroup.getName(),
-                enableButton, listener);
-        if (!enableButton) {
-            link.addStyleName("boldhide");
-        }
-        return link;
+        final boolean enableButton = RolloutGroupStatus.CREATING != rolloutGroup.getStatus()
+                && permissionChecker.hasRolloutTargetsReadPermission();
+
+        return GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link.", rolloutGroup.getName(), enableButton,
+                clickEvent -> onClickOfRolloutGroupName(rolloutGroup));
     }
 
     private void onClickOfRolloutGroupName(final ProxyRolloutGroup rolloutGroup) {

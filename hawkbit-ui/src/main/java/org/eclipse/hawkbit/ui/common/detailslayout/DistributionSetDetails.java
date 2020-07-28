@@ -52,6 +52,7 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
 
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
     private final transient SystemSecurityContext systemSecurityContext;
+    private final transient SpPermissionChecker permissionChecker;
 
     private final transient DistributionTagToken distributionTagToken;
 
@@ -59,27 +60,27 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
      * Constructor for DistributionSetDetails
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param permissionChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param smManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      * @param dsTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param dsTagManagement
-     *          DistributionSetTagManagement
+     *            DistributionSetTagManagement
      * @param tenantConfigurationManagement
-     *          TenantConfigurationManagement
+     *            TenantConfigurationManagement
      * @param systemSecurityContext
-     *          SystemSecurityContext
+     *            SystemSecurityContext
      * @param dsMetaDataWindowBuilder
-     *          DsMetaDataWindowBuilder
+     *            DsMetaDataWindowBuilder
      */
     public DistributionSetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker, final UINotification uiNotification,
@@ -91,6 +92,7 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
 
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.permissionChecker = permissionChecker;
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;
 
         this.smDetailsGrid = new SoftwareModuleDetailsGrid(i18n, eventBus, uiNotification, permissionChecker,
@@ -178,8 +180,8 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
 
     /**
      * @param isUnassignSmAllowed
-     *            <code>true</code> if unassigned software module is allowed, otherwise
-     *            <code>false</code>
+     *            <code>true</code> if unassigned software module is allowed,
+     *            otherwise <code>false</code>
      */
     public void setUnassignSmAllowed(final boolean isUnassignSmAllowed) {
         smDetailsGrid.setUnassignSmAllowed(isUnassignSmAllowed);
@@ -189,10 +191,10 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
      * Add target filter query detail grid
      *
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      */
     public void addTfqDetailsGrid(final TargetFilterQueryManagement targetFilterQueryManagement) {
-        if (tfqDetailsGrid == null) {
+        if (tfqDetailsGrid == null && permissionChecker.hasTargetReadPermission()) {
             tfqDetailsGrid = new TargetFilterQueryDetailsGrid(i18n, targetFilterQueryManagement);
 
             addDetailsComponents(Collections

@@ -142,6 +142,10 @@ public abstract class AbstractGridDetailsLayout<T extends ProxyNamedEntity> exte
         this.detailsComponents.addAll(detailsComponents);
     }
 
+    protected void addDetailsComponent(final Entry<String, Component> detailsComponent) {
+        this.detailsComponents.add(detailsComponent);
+    }
+
     /**
      * Build grid details
      */

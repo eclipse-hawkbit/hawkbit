@@ -79,17 +79,22 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, tagManagement,
                 targetManagement);
 
-        this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, eventBus, UIComponentIdProvider.TARGET_TYPE_PREFIX,
-                this::showMetadataDetails, new TargetMetaDataDataProvider(targetManagement));
-
         addDetailsComponents(Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
                 new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),
                 new SimpleEntry<>(i18n.getMessage("caption.attributes.tab"), attributesLayout),
                 new SimpleEntry<>(i18n.getMessage("header.target.assigned"), assignedDsDetails),
                 new SimpleEntry<>(i18n.getMessage("header.target.installed"), installedDsDetails),
                 new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
-                new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails),
-                new SimpleEntry<>(i18n.getMessage("caption.metadata"), targetMetadataGrid)));
+                new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
+
+        if (permissionChecker.hasCreateRepositoryPermission()) {
+            this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, eventBus,
+                    UIComponentIdProvider.TARGET_TYPE_PREFIX, this::showMetadataDetails,
+                    new TargetMetaDataDataProvider(targetManagement));
+            addDetailsComponent(new SimpleEntry<>(i18n.getMessage("caption.metadata"), targetMetadataGrid));
+        } else {
+            this.targetMetadataGrid = null;
+        }
 
         buildDetails();
     }
@@ -201,8 +206,10 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
     public void masterEntityChanged(final ProxyTarget entity) {
         super.masterEntityChanged(entity);
 
-        targetMetadataGrid.masterEntityChanged(entity != null ? entity.getControllerId() : null);
-        getTargetTagToken().masterEntityChanged(entity);
+        if (targetMetadataGrid != null) {
+            targetMetadataGrid.masterEntityChanged(entity != null ? entity.getControllerId() : null);
+        }
+        targetTagToken.masterEntityChanged(entity);
     }
 
     /**

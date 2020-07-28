@@ -353,12 +353,8 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private Button buildRolloutLink(final ProxyRollout rollout) {
         final boolean enableButton = RolloutStatus.CREATING != rollout.getStatus();
 
-        final Button link = GridComponentBuilder.buildLink(rollout, "rollout.link.", rollout.getName(), enableButton,
+        return GridComponentBuilder.buildLink(rollout, "rollout.link", rollout.getName(), enableButton,
                 clickEvent -> onClickOfRolloutName(rollout));
-        if (!enableButton) {
-            link.addStyleName("boldhide");
-        }
-        return link;
     }
 
     private void onClickOfRolloutName(final ProxyRollout rollout) {

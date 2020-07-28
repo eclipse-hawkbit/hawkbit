@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -47,6 +48,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.server.VaadinSession.State;
 import com.vaadin.server.WrappedSession;
@@ -54,9 +56,9 @@ import com.vaadin.ui.UI;
 
 /**
  * An {@link EventPushStrategy} implementation which retrieves events from
- * {@link com.google.common.eventbus.EventBus} and store them first in a queue
- * where they will dispatched every x (default is 2 and can be configured with
- * the property) seconds to the {@link EventBus} in a Vaadin access thread
+ * Spring internal application events bus and stores them first in a queue to be
+ * dispatched every x (default is 2 and can be configured with the property)
+ * seconds to the {@link EventBus} in a Vaadin access thread
  * {@link UI#access(Runnable)}.
  *
  * This strategy avoids blocking UIs when too many events are fired and
@@ -80,6 +82,7 @@ public class DelayedEventBusPushStrategy
     private final transient ScheduledExecutorService executorService;
     private final transient UIEventBus eventBus;
     private final transient UIEventProvider eventProvider;
+    private final transient UIEventPermissionChecker eventPermissionChecker;
     private final long delay;
 
     private transient ScheduledFuture<?> jobHandle;
@@ -94,20 +97,20 @@ public class DelayedEventBusPushStrategy
      *            the ui event bus
      * @param eventProvider
      *            the event provider
+     * @param eventPermissionChecker
+     *            the event permission checker
      * @param delay
      *            the delay for the event forwarding. Every delay millisecond
      *            the events are forwarded by this strategy
      */
     public DelayedEventBusPushStrategy(final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider, final long delay) {
+            final UIEventProvider eventProvider, final UIEventPermissionChecker eventPermissionChecker,
+            final long delay) {
         this.executorService = executorService;
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
+        this.eventPermissionChecker = eventPermissionChecker;
         this.delay = delay;
-    }
-
-    private boolean isEventProvided(final EntityIdEvent event) {
-        return eventProvider.getEvents().containsKey(event.getClass());
     }
 
     @Override
@@ -116,6 +119,7 @@ public class DelayedEventBusPushStrategy
         LOG.debug("Initialize delayed event push strategy for UI {}", vaadinUI.getUIId());
         if (vaadinUI.getSession() == null) {
             LOG.error("Vaadin session of UI {} is null! Event push disabled!", vaadinUI.getUIId());
+            return;
         }
 
         jobHandle = executorService.scheduleWithFixedDelay(new DispatchRunnable(vaadinUI, vaadinUI.getSession()),
@@ -173,33 +177,6 @@ public class DelayedEventBusPushStrategy
 
         }
 
-        /**
-         * Checks if the tenant within the event is equal with the current
-         * tenant in the context.
-         *
-         * @param userContext
-         *            the security context of the current session
-         * @param event
-         *            the event to dispatch to the UI
-         * @return {@code true} if the event can be dispatched to the UI
-         *         otherwise {@code false}
-         */
-        private boolean eventSecurityCheck(final SecurityContext userContext, final EntityIdEvent event) {
-            if (userContext == null || userContext.getAuthentication() == null) {
-                return false;
-            }
-            final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
-            if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
-                        .equalsIgnoreCase(event.getTenant());
-            }
-            final Object userPrincipalDetails = userContext.getAuthentication().getPrincipal();
-            if (userPrincipalDetails instanceof UserPrincipal) {
-                return ((UserPrincipal) userPrincipalDetails).getTenant().equalsIgnoreCase(event.getTenant());
-            }
-            return false;
-        }
-
         private void doDispatch(final List<EntityIdEvent> events, final WrappedSession wrappedSession) {
             final SecurityContext userContext = (SecurityContext) wrappedSession
                     .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
@@ -208,6 +185,9 @@ public class DelayedEventBusPushStrategy
                 SecurityContextHolder.setContext(userContext);
 
                 final List<EntityModifiedEventPayload> groupedEventPayloads = groupEvents(events, userContext);
+                if (CollectionUtils.isEmpty(groupedEventPayloads)) {
+                    return;
+                }
 
                 vaadinUI.access(() -> {
                     if (vaadinSession.getState() != State.OPEN) {
@@ -228,8 +208,9 @@ public class DelayedEventBusPushStrategy
 
         private List<EntityModifiedEventPayload> groupEvents(final List<EntityIdEvent> events,
                 final SecurityContext userContext) {
-            return events.stream().filter(event -> eventSecurityCheck(userContext, event))
-                    .collect(Collectors.groupingBy(EntityIdEvent::getClass)).entrySet().stream().flatMap(entry -> {
+            return events.stream().filter(event -> eventTenantCheck(userContext, event))
+                    .collect(Collectors.groupingBy(EntityIdEvent::getClass)).entrySet().stream()
+                    .filter(entry -> eventPermissionChecker.isEventAllowed(entry.getKey())).flatMap(entry -> {
                         final EntityModifiedEventPayloadIdentifier eventPayloadIdentifier = eventProvider.getEvents()
                                 .get(entry.getKey());
 
@@ -241,6 +222,39 @@ public class DelayedEventBusPushStrategy
 
                         return mapToEntityModifiedEventPayload(eventPayloadIdentifier, getEventIds(entry.getValue()));
                     }).collect(Collectors.toList());
+        }
+
+        /**
+         * Checks if the tenant within the event is equal with the current
+         * tenant in the context.
+         *
+         * @param userContext
+         *            the security context of the current session
+         * @param event
+         *            the event to dispatch to the UI
+         * @return {@code true} if the event can be dispatched to the UI
+         *         otherwise {@code false}
+         */
+        private boolean eventTenantCheck(final SecurityContext userContext, final EntityIdEvent event) {
+            if (userContext == null || userContext.getAuthentication() == null) {
+                return false;
+            }
+
+            final Authentication currentAuthentication = userContext.getAuthentication();
+            final String eventTenant = event.getTenant();
+
+            final Object tenantAuthenticationDetails = currentAuthentication.getDetails();
+            if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
+                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
+                        .equalsIgnoreCase(eventTenant);
+            }
+
+            final Object userPrincipalDetails = currentAuthentication.getPrincipal();
+            if (userPrincipalDetails instanceof UserPrincipal) {
+                return ((UserPrincipal) userPrincipalDetails).getTenant().equalsIgnoreCase(eventTenant);
+            }
+
+            return false;
         }
 
         private Map<Long, List<Long>> getParentAwareEventIds(final List<EntityIdEvent> events) {
@@ -284,25 +298,14 @@ public class DelayedEventBusPushStrategy
 
         collectRolloutEvent(event);
         collectActionUpdatedEvent(event);
-        // filter out non-relevant UI
+
+        // filter out non-relevant UI events
         if (!isEventProvided(event)) {
             LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
             return;
         }
-        offerEvent(event);
-    }
 
-    private void offerEventIfNotContains(final EntityIdEvent event) {
-        if (queue.contains(event)) {
-            return;
-        }
         offerEvent(event);
-    }
-
-    private void offerEvent(final EntityIdEvent event) {
-        if (!queue.offer(event)) {
-            LOG.trace("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
-        }
     }
 
     private void collectRolloutEvent(final EntityIdEvent event) {
@@ -335,11 +338,28 @@ public class DelayedEventBusPushStrategy
         }
     }
 
+    private void offerEventIfNotContains(final EntityIdEvent event) {
+        if (queue.contains(event)) {
+            return;
+        }
+        offerEvent(event);
+    }
+
+    private void offerEvent(final EntityIdEvent event) {
+        if (!queue.offer(event)) {
+            LOG.trace("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
+        }
+    }
+
     private void collectActionUpdatedEvent(final EntityIdEvent event) {
         if (event instanceof ActionUpdatedEvent) {
             final Long actionId = ((ActionUpdatedEvent) event).getEntityId();
             final Long targetId = ((ActionUpdatedEvent) event).getTargetId();
             offerEventIfNotContains(new ActionChangedEvent(event.getTenant(), targetId, actionId));
         }
+    }
+
+    private boolean isEventProvided(final EntityIdEvent event) {
+        return eventProvider.getEvents().containsKey(event.getClass());
     }
 }

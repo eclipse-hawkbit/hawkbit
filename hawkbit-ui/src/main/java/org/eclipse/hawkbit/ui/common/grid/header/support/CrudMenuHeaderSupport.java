@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.grid.header.support;
 
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Component;
@@ -109,6 +110,11 @@ public class CrudMenuHeaderSupport implements HeaderSupport {
                         activateModifyMode(Mode.DELETE);
                         deleteCallback.run();
                     });
+        }
+
+        // in case of missing CUD permissions we disable the menu button
+        if (CollectionUtils.isEmpty(crudMenuItem.getChildren())) {
+            crudMenuItem.setEnabled(false);
         }
     }
 

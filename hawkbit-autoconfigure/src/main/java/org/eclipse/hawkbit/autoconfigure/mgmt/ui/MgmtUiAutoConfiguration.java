@@ -12,10 +12,13 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
 import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
+import org.eclipse.hawkbit.ui.push.HawkbitEventPermissionChecker;
 import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
+import org.eclipse.hawkbit.ui.push.UIEventPermissionChecker;
 import org.eclipse.hawkbit.ui.push.UIEventProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -69,6 +72,18 @@ public class MgmtUiAutoConfiguration {
     }
 
     /**
+     * A event permission checker bean which verifies supported events for the
+     * UI.
+     * 
+     * @return the permission checker bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    UIEventPermissionChecker eventPermissionChecker(final SpPermissionChecker permChecker) {
+        return new HawkbitEventPermissionChecker(permChecker);
+    }
+
+    /**
      * The UI scoped event push strategy. Session scope is necessary, that every
      * UI has an own strategy.
      * 
@@ -80,6 +95,8 @@ public class MgmtUiAutoConfiguration {
      *            the ui event bus
      * @param eventProvider
      *            the event provider
+     * @param eventPermissionChecker
+     *            the event permission checker
      * @param uiProperties
      *            the ui properties
      * @return the push strategy bean
@@ -89,10 +106,12 @@ public class MgmtUiAutoConfiguration {
     @UIScope
     EventPushStrategy eventPushStrategy(final ConfigurableApplicationContext applicationContext,
             final ScheduledExecutorService executorService, final UIEventBus eventBus,
-            final UIEventProvider eventProvider, final UiProperties uiProperties) {
+            final UIEventProvider eventProvider, final UIEventPermissionChecker eventPermissionChecker,
+            final UiProperties uiProperties) {
         final DelayedEventBusPushStrategy delayedEventBusPushStrategy = new DelayedEventBusPushStrategy(executorService,
-                eventBus, eventProvider, uiProperties.getEvent().getPush().getDelay());
+                eventBus, eventProvider, eventPermissionChecker, uiProperties.getEvent().getPush().getDelay());
         applicationContext.addApplicationListener(delayedEventBusPushStrategy);
+
         return delayedEventBusPushStrategy;
     }
 
