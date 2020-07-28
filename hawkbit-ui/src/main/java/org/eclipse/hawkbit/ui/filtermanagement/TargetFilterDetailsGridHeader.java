@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -48,6 +49,8 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
      *
      * @param i18n
      *            VaadinMessageSource
+     * @param permChecker
+     *            SpPermissionChecker
      * @param eventBus
      *            UIEventBus
      * @param uiNotification
@@ -63,11 +66,11 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
      * @param uiState
      *            TargetFilterDetailsLayoutUiState
      */
-    public TargetFilterDetailsGridHeader(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final EntityFactory entityFactory,
+    public TargetFilterDetailsGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification uiNotification, final EntityFactory entityFactory,
             final TargetFilterQueryManagement targetFilterManagement, final UiProperties uiProperties,
             final RsqlValidationOracle rsqlValidationOracle, final TargetFilterDetailsLayoutUiState uiState) {
-        super(i18n, null, eventBus);
+        super(i18n, permChecker, eventBus);
 
         this.uiState = uiState;
 
@@ -79,8 +82,8 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
                 UIComponentIdProvider.CUSTOM_FILTER_CLOSE, this::closeDetails);
         addHeaderSupport(closeHeaderSupport);
 
-        this.targetFilterAddUpdateLayout = new TargetFilterAddUpdateLayout(i18n, uiProperties, uiState, eventBus,
-                rsqlValidationOracle);
+        this.targetFilterAddUpdateLayout = new TargetFilterAddUpdateLayout(i18n, permChecker, uiProperties, uiState,
+                eventBus, rsqlValidationOracle);
         this.addTargetFilterController = new AddTargetFilterController(i18n, entityFactory, eventBus, uiNotification,
                 targetFilterManagement, targetFilterAddUpdateLayout, this::closeDetails);
         this.updateTargetFilterController = new UpdateTargetFilterController(i18n, entityFactory, eventBus,

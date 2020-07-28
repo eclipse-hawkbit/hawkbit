@@ -69,8 +69,8 @@ public class FilterManagementView extends VerticalLayout implements View {
                 entityFactory, targetFilterQueryManagement, targetManagement, distributionSetManagement,
                 filterManagementUIState);
 
-        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(i18n, eventBus, notification, uiProperties,
-                entityFactory, rsqlValidationOracle, targetManagement, targetFilterQueryManagement,
+        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(i18n, permissionChecker, eventBus, notification,
+                uiProperties, entityFactory, rsqlValidationOracle, targetManagement, targetFilterQueryManagement,
                 filterManagementUIState.getDetailsLayoutUiState());
 
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);

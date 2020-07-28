@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -41,6 +42,7 @@ import com.vaadin.ui.TextField;
  */
 public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<ProxyTargetFilterQuery> {
     private final VaadinMessageSource i18n;
+    private final SpPermissionChecker permChecker;
 
     private static final String FILTER_QUERY_CAPTION = "textfield.query";
 
@@ -61,6 +63,8 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * 
      * @param i18n
      *            VaadinMessageSource
+     * @param permChecker
+     *            Permission checker
      * @param uiProperties
      *            UiProperties
      * @param uiState
@@ -70,12 +74,13 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * @param rsqlValidationOracle
      *            RsqlValidationOracle
      */
-    public TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TargetFilterDetailsLayoutUiState uiState, final UIEventBus eventBus,
+    public TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UiProperties uiProperties, final TargetFilterDetailsLayoutUiState uiState, final UIEventBus eventBus,
             final RsqlValidationOracle rsqlValidationOracle) {
         super();
 
         this.i18n = i18n;
+        this.permChecker = permChecker;
         this.uiState = uiState;
         this.eventBus = eventBus;
         this.filterComponentBuilder = new TargetFilterAddUpdateLayoutComponentBuilder(i18n, uiProperties,
@@ -144,7 +149,10 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
                     }
                 });
         filterNameInput.addValueChangeListener(this::onFilterNameChanged);
-        addValidationListener(saveButton::setEnabled);
+
+        if (permChecker.hasUpdateTargetPermission()) {
+            addValidationListener(saveButton::setEnabled);
+        }
     }
 
     private void onFilterQueryTextfieldChanged(final ValueChangeEvent<String> event) {

@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -45,6 +46,8 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      * 
      * @param i18n
      *            MessageSource
+     * @param permChecker
+     *            SpPermissionChecker
      * @param eventBus
      *            Bus to publish UI events
      * @param uiNotification
@@ -62,13 +65,14 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      * @param uiState
      *            to persist the user interaction
      */
-    public TargetFilterDetailsLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final RsqlValidationOracle rsqlValidationOracle, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterManagement, final TargetFilterDetailsLayoutUiState uiState) {
+    public TargetFilterDetailsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final UINotification uiNotification, final UiProperties uiProperties,
+            final EntityFactory entityFactory, final RsqlValidationOracle rsqlValidationOracle,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterManagement,
+            final TargetFilterDetailsLayoutUiState uiState) {
 
-        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(i18n, eventBus, uiNotification,
-                entityFactory, targetFilterManagement, uiProperties, rsqlValidationOracle, uiState);
+        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(i18n, permChecker, eventBus,
+                uiNotification, entityFactory, targetFilterManagement, uiProperties, rsqlValidationOracle, uiState);
         this.targetFilterTargetGrid = new TargetFilterTargetGrid(i18n, eventBus, targetManagement, uiState);
         this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(i18n);
 

@@ -74,19 +74,19 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
      * Constructor for TargetFilterGrid
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param uiState
-     *          TargetFilterGridLayoutUiState
+     *            TargetFilterGridLayoutUiState
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param autoAssignmentWindowBuilder
-     *          AutoAssignmentWindowBuilder
+     *            AutoAssignmentWindowBuilder
      */
     public TargetFilterGrid(final VaadinMessageSource i18n, final UINotification notification,
             final UIEventBus eventBus, final TargetFilterGridLayoutUiState uiState,
@@ -204,7 +204,8 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
                 : i18n.getMessage(UIMessageIdProvider.BUTTON_NO_AUTO_ASSIGNMENT);
         final String description = i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION);
 
-        final Button link = GridComponentBuilder.buildLink(targetFilter, "distSetButton", caption, true,
+        final Button link = GridComponentBuilder.buildLink(targetFilter, "distSetButton", caption,
+                permissionChecker.hasReadRepositoryPermission(),
                 clickEvent -> onClickOfAutoAssignmentLink(targetFilter));
 
         link.setDescription(description);
