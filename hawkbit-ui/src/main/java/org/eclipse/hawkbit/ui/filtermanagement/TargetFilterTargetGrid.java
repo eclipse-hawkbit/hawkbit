@@ -75,11 +75,13 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
     public void addColumns() {
         GridComponentBuilder.addNameColumn(this, i18n, TARGET_NAME_ID);
 
-        GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
-
         GridComponentBuilder.addDescriptionColumn(this, i18n, TARGET_DESCRIPTION_ID);
 
         GridComponentBuilder.addIconColumn(this, targetStatusIconSupplier::getLabel, TARGET_STATUS_ID,
                 i18n.getMessage("header.status"));
+
+        GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
+
+        getColumns().forEach(column -> column.setHidable(true));
     }
 }

@@ -278,11 +278,12 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
     @Override
     protected void addMaxColumns() {
         addNameColumn().setExpandRatio(7);
-        GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
-        addDescriptionColumn().setExpandRatio(5);
         addVersionColumn();
+        addDescriptionColumn().setExpandRatio(5);
         addVendorColumn();
+        GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
         addDeleteColumn();
+
         getColumns().forEach(column -> column.setHidable(true));
     }
 

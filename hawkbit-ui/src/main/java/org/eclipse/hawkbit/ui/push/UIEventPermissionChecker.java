@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.event.entity.EntityIdEvent;
  * The UI event permission checker verifies permissions of all supported
  * repository events which will be delegated to the UI.
  */
+@FunctionalInterface
 public interface UIEventPermissionChecker {
 
     /**

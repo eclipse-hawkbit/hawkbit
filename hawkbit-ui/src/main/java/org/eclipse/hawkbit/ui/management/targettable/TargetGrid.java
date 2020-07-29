@@ -352,10 +352,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     protected void addMaxColumns() {
         addNameColumn().setExpandRatio(2);
 
+        GridComponentBuilder.addDescriptionColumn(this, i18n, TARGET_DESC_ID).setExpandRatio(2);
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 
         addDeleteColumn();
-        GridComponentBuilder.addDescriptionColumn(this, i18n, TARGET_DESC_ID).setExpandRatio(2);
 
         getColumns().forEach(column -> column.setHidable(true));
     }

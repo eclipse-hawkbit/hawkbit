@@ -132,6 +132,9 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
         GridComponentBuilder.addComponentColumn(this, this::buildRolloutGroupLink).setId(ROLLOUT_GROUP_LINK_ID)
                 .setCaption(i18n.getMessage("header.name")).setHidable(false).setExpandRatio(3);
 
+        GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setHidable(true)
+                .setHidden(true);
+
         GridComponentBuilder.addIconColumn(this, rolloutGroupStatusIconSupplier::getLabel,
                 SPUILabelDefinitions.VAR_STATUS, i18n.getMessage("header.status")).setHidable(true);
 
@@ -163,9 +166,6 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n)
                 .forEach(col -> col.setHidable(true).setHidden(true));
-
-        GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setHidable(true)
-                .setHidden(true);
     }
 
     private Button buildRolloutGroupLink(final ProxyRolloutGroup rolloutGroup) {
