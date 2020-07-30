@@ -404,7 +404,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
-                                                "['closed', 'proceeding', 'canceled','scheduled', 'rejected', 'resumed']")),
+                                                "['closed', 'proceeding', download, downloaded, 'canceled','scheduled', 'rejected', 'resumed']")),
                                 requestFieldWithPath("status.result")
                                         .description(DdiApiModelProperties.TARGET_RESULT_VALUE),
                                 requestFieldWithPath("status.result.finished")
