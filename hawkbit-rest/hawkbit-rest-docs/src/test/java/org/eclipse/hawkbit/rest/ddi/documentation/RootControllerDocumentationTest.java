@@ -64,7 +64,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("This base resource can be regularly polled by the controller on the provisiong target or device "
+    @Description("This base resource can be regularly polled by the controller on the provisioning target or device "
             + "in order to retrieve actions that need to be executed. In this case including a config pull request and a deployment. The resource supports Etag based modification "
             + "checks in order to save traffic.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
@@ -91,7 +91,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("This base resource can be regularly polled by the controller on the provisiong target or device "
+    @Description("This base resource can be regularly polled by the controller on the provisioning target or device "
             + "in order to retrieve actions that need to be executed. In this case including a config pull request and a cancellation. "
             + "Note: as with deployments the cancel action has to be confirmed or rejected in order to move on to the next action.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
@@ -120,8 +120,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("The SP server might cancel an operation, e.g. an unfinished update has a sucessor. "
-            + "It is up to the provisiong target to decide either to accept the cancelation or reject it.")
+    @Description("The SP server might cancel an operation, e.g. an unfinished update has a successor. "
+            + "It is up to the provisioning target to decide either to accept the cancellation or reject it.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getControllerCancelAction() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -390,7 +390,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
                 target.getControllerId(), actionId)
                         .content(
-                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feddback message"))
+                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feedback message"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
