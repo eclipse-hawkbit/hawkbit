@@ -399,7 +399,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         mvc.perform(put("/{tenant}/controller/v1/{controllerId}/configData", tenantAware.getCurrentTenant(),
                 savedTarget.getControllerId())
-                        .content(JsonBuilder.configData(savedTarget.getControllerId(), attributes, "closed").toString())
+                        .content(JsonBuilder.configData(attributes).toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());

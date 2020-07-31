@@ -575,13 +575,11 @@ public abstract class JsonBuilder {
 
     }
 
-    public static JSONObject configData(final String id, final Map<String, String> attributes, final String execution)
-            throws JSONException {
-        return configData(id, attributes, execution, null);
+    public static JSONObject configData(final Map<String, String> attributes) throws JSONException {
+        return configData(attributes, null);
     }
 
-    public static JSONObject configData(final String id, final Map<String, String> attributes, final String execution,
-            final String mode) throws JSONException {
+    public static JSONObject configData(final Map<String, String> attributes, final String mode) throws JSONException {
 
         final JSONObject data = new JSONObject();
         attributes.entrySet().forEach(entry -> {
@@ -592,10 +590,7 @@ public abstract class JsonBuilder {
             }
         });
 
-        final JSONObject json = new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status", new JSONObject().put("execution", execution)
-                        .put("result", new JSONObject().put("finished", "success")).put("details", new JSONArray()))
-                .put("data", data);
+        final JSONObject json = new JSONObject().put("data", data);
         if (mode != null) {
             json.put("mode", mode);
         }

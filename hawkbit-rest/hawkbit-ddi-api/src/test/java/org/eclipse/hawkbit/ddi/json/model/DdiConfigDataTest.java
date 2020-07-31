@@ -37,44 +37,28 @@ public class DdiConfigDataTest {
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        Long id = 123L;
-        String time = "20190809T121314";
-        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
-                new DdiResult(DdiResult.FinalResult.SUCCESS, null), null);
         Map<String, String> data = new HashMap<>();
         data.put("test", "data");
-        DdiConfigData ddiConfigData = new DdiConfigData(id, time, ddiStatus, data, DdiUpdateMode.REPLACE);
+        DdiConfigData ddiConfigData = new DdiConfigData(data, DdiUpdateMode.REPLACE);
 
         // Test
         String serializedDdiConfigData = mapper.writeValueAsString(ddiConfigData);
         DdiConfigData deserializedDdiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
 
-        assertThat(serializedDdiConfigData).contains(id.toString(), time, ddiStatus.getExecution().getName(),
-                ddiStatus.getResult().getFinished().getName(), "test", "data");
-        assertThat(deserializedDdiConfigData.getId()).isEqualTo(id);
-        assertThat(deserializedDdiConfigData.getTime()).isEqualTo(time);
-        assertThat(deserializedDdiConfigData.getStatus().getExecution()).isEqualTo(DdiStatus.ExecutionStatus.CLOSED);
-        assertThat(deserializedDdiConfigData.getStatus().getResult().getFinished()).isEqualTo(
-                DdiResult.FinalResult.SUCCESS);
+        assertThat(serializedDdiConfigData).contains("test", "data");
         assertThat(deserializedDdiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
 
     }
 
     @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
+    @Description("Verify the correct deserialization of a model with an additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiConfigData = "{\"id\":123,\"time\":\"20190809T121314\","
-                + "\"status\":{\"execution\":\"closed\",\"result\":{\"finished\":\"success\",\"progress\":null},"
-                + "\"details\":[]},\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
+        String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
 
         // Test
         DdiConfigData ddiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
 
-        assertThat(ddiConfigData.getId()).isEqualTo(123);
-        assertThat(ddiConfigData.getTime()).isEqualTo("20190809T121314");
-        assertThat(ddiConfigData.getStatus().getExecution()).isEqualTo(DdiStatus.ExecutionStatus.CLOSED);
-        assertThat(ddiConfigData.getStatus().getResult().getFinished()).isEqualTo(DdiResult.FinalResult.SUCCESS);
         assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
     }
 
@@ -82,11 +66,23 @@ public class DdiConfigDataTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiConfigData = "{\"id\":[123],\"time\":\"20190809T121314\","
-                + "\"status\":{\"execution\":\"closed\",\"result\":{\"finished\":\"success\",\"progress\":null},"
-                + "\"details\":[]},\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
+        String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
 
         // Test
         mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
     }
+
+
+    @Test
+    @Description("Verify the correct deserialization of a model with removed unused status property")
+    public void shouldDeserializeObjectWithStatusProperty() throws IOException {
+        // Setup
+        String serializedDdiConfigData = "{\"id\":123,\"time\":\"20190809T121314\","
+                + "\"status\":{\"execution\":\"closed\",\"result\":{\"finished\":\"success\",\"progress\":null},"
+                + "\"details\":[]},\"data\":{\"test\":\"data\"},\"mode\":\"replace\"}";
+
+        // Test
+        DdiConfigData ddiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
+
+        assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);    }
 }
