@@ -72,7 +72,6 @@ public class DdiConfigDataTest {
         mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
     }
 
-
     @Test
     @Description("Verify the correct deserialization of a model with removed unused status property")
     public void shouldDeserializeObjectWithStatusProperty() throws IOException {
@@ -84,5 +83,6 @@ public class DdiConfigDataTest {
         // Test
         DdiConfigData ddiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
 
-        assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);    }
+        assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
+    }
 }

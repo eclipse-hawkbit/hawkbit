@@ -24,8 +24,8 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -121,17 +121,15 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.put(KEY_VALID, VALUE_VALID);
 
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes("4717")).isEqualTo(attributes);
     }
 
@@ -147,14 +145,14 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
             attributes.put("dsafsdf" + i, "sdsds" + i);
         }
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         attributes = new HashMap<>();
         attributes.put("on too many", "sdsds");
         mvc.perform(put("/{tenant}/controller/v1/4717/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden())
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -186,9 +184,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // non existing target
         mvc.perform(put("/{tenant}/controller/v1/456456/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNotFound());
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // bad body
         mvc.perform(put("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant())
@@ -215,8 +212,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> attributes = Collections.singletonMap(KEY_TOO_LONG, VALUE_VALID);
 
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
@@ -227,8 +224,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> attributes = Collections.singletonMap(KEY_VALID, VALUE_TOO_LONG);
 
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
@@ -360,9 +357,8 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // set the initial attributes
         mvc.perform(put(configDataPath, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // verify the initial parameters
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
