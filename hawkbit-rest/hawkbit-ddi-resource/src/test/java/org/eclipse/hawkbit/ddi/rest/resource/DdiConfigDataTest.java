@@ -181,7 +181,7 @@ public class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("dsafsdf", "sdsds");
         mvc.perform(put("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes, "closed").toString()).contentType(MediaTypes.HAL_JSON))
+                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isUnsupportedMediaType());
 
         // non existing target
