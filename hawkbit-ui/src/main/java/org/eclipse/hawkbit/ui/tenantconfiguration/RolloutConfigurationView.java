@@ -93,6 +93,7 @@ public class RolloutConfigurationView extends BaseConfigurationView
     @Override
     public void undo() {
         this.approvalConfigurationItem.undo();
+        this.approvalCheckbox.setValue(approvalConfigurationItem.isConfigEnabled());
     }
 
     @Override
