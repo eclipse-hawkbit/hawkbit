@@ -33,7 +33,7 @@ public class SmTypeSourceGrid extends Grid<ProxyType> {
      * Constructor for SmTypeSourceGrid
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
     public SmTypeSourceGrid(final VaadinMessageSource i18n) {
         this.i18n = i18n;
@@ -52,7 +52,7 @@ public class SmTypeSourceGrid extends Grid<ProxyType> {
         addStyleName(AbstractGrid.MULTI_SELECT_STYLE);
 
         setId(SPUIDefinitions.TWIN_TABLE_SOURCE_ID);
-        setSelectionModel(new RangeSelectionModel<>());
+        setSelectionModel(new RangeSelectionModel<>(i18n));
 
         addColumns();
     }

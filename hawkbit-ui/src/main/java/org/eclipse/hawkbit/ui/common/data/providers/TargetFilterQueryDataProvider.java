@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * corresponding {@link ProxyTargetFilterQuery} entities.
  */
 public class TargetFilterQueryDataProvider
-        extends ProxyDataProvider<ProxyTargetFilterQuery, TargetFilterQuery, String> {
+        extends AbstractProxyDataProvider<ProxyTargetFilterQuery, TargetFilterQuery, String> {
     private static final long serialVersionUID = 1L;
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;

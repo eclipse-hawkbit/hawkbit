@@ -18,7 +18,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Abstract class for layout view aware listener
  */
-public abstract class LayoutViewAwareListener extends EventListener {
+public abstract class LayoutViewAwareListener extends TopicEventListener {
     private final EventLayoutViewAware layoutViewAware;
 
     /**
@@ -38,6 +38,16 @@ public abstract class LayoutViewAwareListener extends EventListener {
         this.layoutViewAware = layoutViewAware;
     }
 
+    /**
+     * Constructor for LayoutViewAwareListener
+     *
+     * @param eventBus
+     *            LayoutViewAwareListener
+     * @param topics
+     *            Topics
+     * @param layoutViewAware
+     *            EventLayoutViewAware
+     */
     public LayoutViewAwareListener(final UIEventBus eventBus, final Collection<String> topics,
             final EventLayoutViewAware layoutViewAware) {
         super(eventBus, topics);

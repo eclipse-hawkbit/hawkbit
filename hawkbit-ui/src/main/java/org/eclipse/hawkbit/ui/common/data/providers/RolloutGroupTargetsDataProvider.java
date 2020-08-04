@@ -21,7 +21,7 @@ import org.springframework.data.domain.Slice;
  * batch of {@link TargetWithActionStatus} entities from backend and maps them
  * to corresponding {@link ProxyTarget} entities.
  */
-public class RolloutGroupTargetsDataProvider extends ProxyDataProvider<ProxyTarget, TargetWithActionStatus, Long> {
+public class RolloutGroupTargetsDataProvider extends AbstractProxyDataProvider<ProxyTarget, TargetWithActionStatus, Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient RolloutGroupManagement rolloutGroupManagement;

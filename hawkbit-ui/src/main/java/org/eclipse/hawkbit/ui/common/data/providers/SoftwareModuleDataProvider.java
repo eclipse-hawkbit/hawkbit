@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * to corresponding {@link ProxySoftwareModule} entities.
  */
 public class SoftwareModuleDataProvider
-        extends ProxyDataProvider<ProxySoftwareModule, AssignedSoftwareModule, SwFilterParams> {
+        extends AbstractProxyDataProvider<ProxySoftwareModule, AssignedSoftwareModule, SwFilterParams> {
 
     private static final long serialVersionUID = 1L;
 

@@ -23,7 +23,7 @@ import org.springframework.data.domain.Sort.Direction;
  * corresponding {@link ProxyTargetFilterQuery} entities.
  */
 public class TargetFilterQueryDetailsDataProvider
-        extends ProxyDataProvider<ProxyTargetFilterQuery, TargetFilterQuery, Long> {
+        extends AbstractProxyDataProvider<ProxyTargetFilterQuery, TargetFilterQuery, Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;

@@ -35,10 +35,12 @@ import com.vaadin.spring.server.SpringVaadinServlet;
 public class AsyncVaadinServletConfiguration extends VaadinServletConfiguration {
 
     /**
+     * Localized system message provider bean.
+     * 
      * @param uiProperties
-     *          UiProperties
+     *            UiProperties
      * @param i18n
-     *         VaadinMessageSource
+     *            VaadinMessageSource
      *
      * @return Localized system message provider
      */
@@ -49,8 +51,10 @@ public class AsyncVaadinServletConfiguration extends VaadinServletConfiguration 
     }
 
     /**
+     * Vaadin servlet bean.
+     * 
      * @param localizedSystemMessagesProvider
-     *          LocalizedSystemMessagesProvider
+     *            LocalizedSystemMessagesProvider
      *
      * @return Vaadin servlet service
      */

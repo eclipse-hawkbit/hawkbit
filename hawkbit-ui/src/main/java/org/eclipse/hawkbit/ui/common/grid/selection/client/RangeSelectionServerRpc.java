@@ -23,15 +23,16 @@ public interface RangeSelectionServerRpc extends ServerRpc {
      *            index of first item
      * @param endIndex
      *            index of last item
-     * @param overwrite
-     *            if <code>false</code> the items are selected additionally to
-     *            the ones that were selected before. Else the previous
-     *            selection is overwritten
      */
-    void selectRange(int startIndex, int endIndex, boolean overwrite);
+    void selectRange(int startIndex, int endIndex);
 
     /**
-     * select all items
+     * Select all items
      */
     void selectAll();
+
+    /**
+     * Show the warning notification in case the selection limit is reached
+     */
+    void showMaxSelectionLimitWarning();
 }

@@ -21,7 +21,7 @@ import org.springframework.data.domain.Slice;
  * {@link RolloutGroup} entities from backend and maps them to corresponding
  * {@link ProxyRolloutGroup} entities.
  */
-public class RolloutGroupDataProvider extends ProxyDataProvider<ProxyRolloutGroup, RolloutGroup, Long> {
+public class RolloutGroupDataProvider extends AbstractProxyDataProvider<ProxyRolloutGroup, RolloutGroup, Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient RolloutGroupManagement rolloutGroupManagement;

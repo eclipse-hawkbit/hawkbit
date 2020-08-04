@@ -23,7 +23,7 @@ public class RolloutToProxyRolloutMapper extends AbstractNamedEntityToProxyNamed
      * Maps the rollout to Proxy rollout
      *
      * @param rollout
-     *          Rollout
+     *            Rollout
      *
      * @return ProxyRollout
      */

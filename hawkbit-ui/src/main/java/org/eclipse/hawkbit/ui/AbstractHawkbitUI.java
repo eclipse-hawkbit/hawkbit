@@ -177,7 +177,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         LOG.debug("Current locale of the application is : {}", getLocale());
     }
 
-    private Panel buildContent() {
+    private static Panel buildContent() {
         final Panel content = new Panel();
         content.setSizeFull();
         content.setStyleName("view-content");
@@ -201,7 +201,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         return viewHeadercontent;
     }
 
-    private Component buildHeader() {
+    private static Component buildHeader() {
         final CssLayout cssLayout = new CssLayout();
         cssLayout.setStyleName("view-header");
         return cssLayout;

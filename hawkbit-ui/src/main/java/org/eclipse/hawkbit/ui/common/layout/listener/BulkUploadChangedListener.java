@@ -21,7 +21,7 @@ import com.vaadin.server.VaadinSession;
 /**
  * Event change listener for bulk upload
  */
-public class BulkUploadChangedListener extends EventListener {
+public class BulkUploadChangedListener extends TopicEventListener {
     private final Consumer<BulkUploadEventPayload> bulkUploadCallback;
 
     /**

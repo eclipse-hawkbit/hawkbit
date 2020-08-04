@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * {@link ProxyDistributionSet} entities.
  */
 public class DistributionSetManagementStateDataProvider
-        extends ProxyDataProvider<ProxyDistributionSet, DistributionSet, DsManagementFilterParams> {
+        extends AbstractProxyDataProvider<ProxyDistributionSet, DistributionSet, DsManagementFilterParams> {
 
     private static final long serialVersionUID = 1L;
 

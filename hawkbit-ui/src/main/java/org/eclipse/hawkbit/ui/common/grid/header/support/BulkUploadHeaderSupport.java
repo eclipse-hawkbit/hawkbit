@@ -36,13 +36,13 @@ public class BulkUploadHeaderSupport implements HeaderSupport {
      * Constructor for BulkUploadHeaderSupport
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param bulkUploadCallback
-     *          Runnable
+     *            Runnable
      * @param bulkUploadInProgressStateSupplier
-     *          BooleanSupplier
+     *            BooleanSupplier
      * @param maximizedStateSupplier
-     *          BooleanSupplier
+     *            BooleanSupplier
      */
     public BulkUploadHeaderSupport(final VaadinMessageSource i18n, final Runnable bulkUploadCallback,
             final BooleanSupplier bulkUploadInProgressStateSupplier, final BooleanSupplier maximizedStateSupplier) {
@@ -66,10 +66,16 @@ public class BulkUploadHeaderSupport implements HeaderSupport {
         return bulkUploadButton;
     }
 
+    /**
+     * Disable bulk upload
+     */
     public void disableBulkUpload() {
         bulkUploadIcon.setEnabled(false);
     }
 
+    /**
+     * Enable bulk upload
+     */
     public void enableBulkUpload() {
         bulkUploadIcon.setEnabled(true);
     }

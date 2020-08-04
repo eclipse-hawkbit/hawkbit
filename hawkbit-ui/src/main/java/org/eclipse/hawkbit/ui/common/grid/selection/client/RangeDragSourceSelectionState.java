@@ -8,17 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.common.grid.selection.client;
 
-import org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionModel;
+import org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionGridDragSource;
 
-import com.vaadin.shared.ui.grid.MultiSelectionModelState;
+import com.vaadin.shared.ui.grid.GridDragSourceState;
 
 /**
- * State class containing parameters for {@link RangeSelectionModel}.
+ * State class containing parameters for {@link RangeSelectionGridDragSource}.
  */
-public class RangeSelectionState extends MultiSelectionModelState {
+public class RangeDragSourceSelectionState extends GridDragSourceState {
     private static final long serialVersionUID = 1L;
-
-    public static final int MAX_SELECTION_LIMIT = 1000;
 
     private int selectionCount;
 
@@ -35,7 +33,7 @@ public class RangeSelectionState extends MultiSelectionModelState {
      * Sets the total selected items
      *
      * @param selectionCount
-     *            Number of selected items
+ *              Number of selected items
      */
     public void setSelectionCount(final int selectionCount) {
         this.selectionCount = selectionCount;

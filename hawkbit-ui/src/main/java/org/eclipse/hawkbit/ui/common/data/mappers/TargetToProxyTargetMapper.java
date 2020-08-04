@@ -29,7 +29,7 @@ public class TargetToProxyTargetMapper extends AbstractNamedEntityToProxyNamedEn
      * Constructor for TargetToProxyTargetMapper
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
     public TargetToProxyTargetMapper(final VaadinMessageSource i18n) {
         this.i18n = i18n;

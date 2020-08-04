@@ -23,7 +23,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * @param <F>
  *            Generic type
  */
-public class PinningChangedListener<F> extends EventListener {
+public class PinningChangedListener<F> extends TopicEventListener {
     private final Class<? extends ProxyIdentifiableEntity> entityType;
     private final PinSupport<? extends ProxyIdentifiableEntity, F> pinSupport;
 

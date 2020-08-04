@@ -26,7 +26,7 @@ import org.springframework.data.domain.Sort.Direction;
  *            output type
  */
 public class SoftwareModuleTypeDataProvider<T extends ProxyIdentifiableEntity>
-        extends ProxyDataProvider<T, SoftwareModuleType, String> {
+        extends AbstractProxyDataProvider<T, SoftwareModuleType, String> {
 
     private static final long serialVersionUID = 1L;
 

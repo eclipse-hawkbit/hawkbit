@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.grid.selection.client;
 
+import java.util.function.IntSupplier;
+
 import com.vaadin.client.widget.grid.CellReference;
 import com.vaadin.client.widget.grid.events.BodyClickHandler;
 import com.vaadin.client.widget.grid.events.BodyKeyDownHandler;
@@ -27,6 +29,7 @@ import elemental.json.JsonObject;
  */
 public class RangeSelectionHandler implements BodyClickHandler, BodyKeyDownHandler, BodyKeyUpHandler {
     private final RangeSelectionServerRpc rangeSelectionServerRpc;
+    private final IntSupplier selectionCount;
 
     private int previousRowIndex;
 
@@ -35,9 +38,14 @@ public class RangeSelectionHandler implements BodyClickHandler, BodyKeyDownHandl
      * 
      * @param rangeSelectionServerRpc
      *            RPC server to forward selection requests to
+     * @param selectionCount
+     *            selection count callback to get the number of currently
+     *            selected items from the shared state
      */
-    public RangeSelectionHandler(final RangeSelectionServerRpc rangeSelectionServerRpc) {
+    public RangeSelectionHandler(final RangeSelectionServerRpc rangeSelectionServerRpc,
+            final IntSupplier selectionCount) {
         this.rangeSelectionServerRpc = rangeSelectionServerRpc;
+        this.selectionCount = selectionCount;
     }
 
     @Override
@@ -46,24 +54,48 @@ public class RangeSelectionHandler implements BodyClickHandler, BodyKeyDownHandl
         final SelectionModel<JsonObject> selectionModel = eventCell.getGrid().getSelectionModel();
         final int currentRowIndex = eventCell.getRowIndex();
         final JsonObject item = eventCell.getRow();
+        final boolean preserveSelection = shouldPreserveSelection(event);
 
-        if (event.isShiftKeyDown()) {
-            rangeSelectionServerRpc.selectRange(previousRowIndex, currentRowIndex, !event.isControlKeyDown());
+        if (event.isShiftKeyDown() && !preserveSelection) {
+            rangeSelectionServerRpc.selectRange(previousRowIndex, currentRowIndex);
             return;
         }
 
-        if (event.isControlKeyDown() || event.isMetaKeyDown()) {
-            if (selectionModel.isSelected(item)) {
-                selectionModel.deselect(item);
-            } else {
-                selectionModel.select(item);
-            }
-        } else {
-            selectionModel.deselectAll();
-            selectionModel.select(item);
+        previousRowIndex = currentRowIndex;
+
+        if (preserveSelection) {
+            adaptSelectionByItem(selectionModel, item);
+            return;
         }
 
-        previousRowIndex = currentRowIndex;
+        selectSingleItemOnly(selectionModel, item);
+    }
+
+    private boolean shouldPreserveSelection(final GridClickEvent event) {
+        return event.isControlKeyDown() || event.isMetaKeyDown();
+    }
+
+    private void adaptSelectionByItem(final SelectionModel<JsonObject> selectionModel, final JsonObject item) {
+        if (selectionModel.isSelected(item)) {
+            selectionModel.deselect(item);
+            return;
+        }
+
+        if (isMaxSelectionLimitReached()) {
+            rangeSelectionServerRpc.showMaxSelectionLimitWarning();
+            return;
+        }
+
+        selectionModel.select(item);
+    }
+
+    private boolean isMaxSelectionLimitReached() {
+        return selectionCount.getAsInt() + 1 > RangeSelectionState.MAX_SELECTION_LIMIT;
+    }
+
+    private static void selectSingleItemOnly(final SelectionModel<JsonObject> selectionModel, final JsonObject item) {
+        selectionModel.deselectAll();
+        selectionModel.select(item);
     }
 
     @Override
@@ -81,11 +113,14 @@ public class RangeSelectionHandler implements BodyClickHandler, BodyKeyDownHandl
             final int currentRowIndex = eventCell.getRowIndex();
             final JsonObject item = eventCell.getRow();
 
-            selectionModel.deselectAll();
-            selectionModel.select(item);
+            if (event.isShiftKeyDown()) {
+                rangeSelectionServerRpc.selectRange(previousRowIndex, currentRowIndex);
+                return;
+            }
 
             previousRowIndex = currentRowIndex;
+
+            selectSingleItemOnly(selectionModel, item);
         }
     }
-
 }

@@ -31,7 +31,7 @@ import com.vaadin.ui.UI;
  * @param <T>
  *            Generic typ of ProxyIdentifiableEntity
  */
-public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends EventListener {
+public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends TopicEventListener {
     private final Class<T> entityType;
     private final Class<? extends ProxyIdentifiableEntity> parentEntityType;
     private final Supplier<Optional<Long>> parentEntityIdProvider;
@@ -177,6 +177,8 @@ public class EntityModifiedListener<T extends ProxyIdentifiableEntity> extends E
         }
 
         /**
+         * Get parent entity type.
+         * 
          * @param parentEntityType
          *            Parent entity type
          *

@@ -20,6 +20,9 @@ public interface UIEventPermissionChecker {
     /**
      * Checks if the event is allowed based on the repository event class
      * 
+     * @param eventClass
+     *            Event type
+     * 
      * @return {@code true}: if event is allowed {@code false}: otherwise
      */
     boolean isEventAllowed(Class<? extends EntityIdEvent> eventClass);

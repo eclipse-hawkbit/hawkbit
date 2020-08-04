@@ -24,7 +24,7 @@ import org.springframework.data.domain.Sort.Direction;
  * {@link ProxyActionStatus} entities. The filter is used for master-details
  * relationship with {@link Action}, using its id.
  */
-public class ActionStatusDataProvider extends ProxyDataProvider<ProxyActionStatus, ActionStatus, Long> {
+public class ActionStatusDataProvider extends AbstractProxyDataProvider<ProxyActionStatus, ActionStatus, Long> {
 
     private static final long serialVersionUID = 1L;
 

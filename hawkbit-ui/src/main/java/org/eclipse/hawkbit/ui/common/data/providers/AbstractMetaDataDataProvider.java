@@ -27,7 +27,7 @@ import org.springframework.data.domain.Sort.Direction;
  *          Generic type of Proxy meta Data provider
  */
 public abstract class AbstractMetaDataDataProvider<U extends MetaData, F>
-        extends GenericDataProvider<ProxyMetaData, U, F> {
+        extends AbstractGenericDataProvider<ProxyMetaData, U, F> {
     private static final long serialVersionUID = 1L;
 
     protected AbstractMetaDataDataProvider() {

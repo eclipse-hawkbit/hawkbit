@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * {@link Rollout} entities from backend and maps them to corresponding
  * {@link ProxyRollout} entities.
  */
-public class RolloutDataProvider extends ProxyDataProvider<ProxyRollout, Rollout, String> {
+public class RolloutDataProvider extends AbstractProxyDataProvider<ProxyRollout, Rollout, String> {
 
     private static final long serialVersionUID = 1L;
 

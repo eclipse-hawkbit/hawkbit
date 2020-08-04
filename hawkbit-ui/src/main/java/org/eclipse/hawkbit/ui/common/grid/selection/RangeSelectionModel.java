@@ -10,11 +10,17 @@ package org.eclipse.hawkbit.ui.common.grid.selection;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.hawkbit.ui.common.grid.selection.client.RangeSelectionServerRpc;
+import org.eclipse.hawkbit.ui.common.grid.selection.client.RangeSelectionState;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.communication.ServerRpc;
@@ -32,6 +38,36 @@ import com.vaadin.ui.components.grid.MultiSelectionModelImpl;
 public class RangeSelectionModel<T> extends MultiSelectionModelImpl<T> {
     private static final long serialVersionUID = 1L;
 
+    private final VaadinMessageSource i18n;
+
+    public RangeSelectionModel(final VaadinMessageSource i18n) {
+        this.i18n = i18n;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        registerRpc(new RangeSelectionServerRpcImp());
+        getGrid().addShortcutListener(new SelectAllListener());
+    }
+
+    @Override
+    protected RangeSelectionState getState() {
+        return (RangeSelectionState) super.getState();
+    }
+
+    @Override
+    protected RangeSelectionState getState(final boolean markAsDirty) {
+        return (RangeSelectionState) super.getState(markAsDirty);
+    }
+
+    @Override
+    protected void updateSelection(final Set<T> addedItems, final Set<T> removedItems, final boolean userOriginated) {
+        super.updateSelection(addedItems, removedItems, userOriginated);
+
+        getState().setSelectionCount(getSelectedItems().size());
+    }
+
     /**
      * {@link ServerRpc} implementation to enable client side code to execute a
      * range selection
@@ -40,16 +76,41 @@ public class RangeSelectionModel<T> extends MultiSelectionModelImpl<T> {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void selectRange(final int startIndex, final int endIndex, final boolean overwrite) {
-            if (overwrite) {
-                onDeselectAll(true);
-            }
+        public void selectRange(final int startIndex, final int endIndex) {
+            onDeselectAll(true);
             onSelectRange(startIndex, endIndex);
         }
 
         @Override
         public void selectAll() {
-            onSelectAll(true);
+            onDeselectAll(true);
+            onSelectRange(0, getGrid().getDataCommunicator().getDataProviderSize());
+        }
+
+        private void onSelectRange(final int startIndex, final int endIndex) {
+            int offset = Math.min(startIndex, endIndex);
+            int limit = Math.abs(startIndex - endIndex) + 1;
+
+            if (limit > RangeSelectionState.MAX_SELECTION_LIMIT) {
+                showMaxSelectionLimitWarning();
+
+                limit = RangeSelectionState.MAX_SELECTION_LIMIT;
+
+                if (startIndex > endIndex) {
+                    offset = startIndex - RangeSelectionState.MAX_SELECTION_LIMIT + 1;
+                }
+            }
+
+            final LinkedHashSet<T> addedItems = new LinkedHashSet<>(
+                    getGrid().getDataCommunicator().fetchItemsWithRange(offset, limit));
+            updateSelection(addedItems, Collections.emptySet(), true);
+        }
+
+        @Override
+        public void showMaxSelectionLimitWarning() {
+            UINotification.showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_WARNING_MESSAGE_STYLE,
+                    i18n.getMessage("action.grid.selection.limit", RangeSelectionState.MAX_SELECTION_LIMIT),
+                    VaadinIcons.WARNING);
         }
     }
 
@@ -92,21 +153,5 @@ public class RangeSelectionModel<T> extends MultiSelectionModelImpl<T> {
 
             return ShortcutAction.ModifierKey.CTRL;
         }
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        registerRpc(new RangeSelectionServerRpcImp());
-        getGrid().addShortcutListener(new SelectAllListener());
-    }
-
-    protected void onSelectRange(final int startIndex, final int endIndex) {
-        final int offset = Math.min(startIndex, endIndex);
-        final int limit = Math.abs(startIndex - endIndex) + 1;
-
-        final LinkedHashSet<T> addedItems = new LinkedHashSet<>(
-                getGrid().getDataCommunicator().fetchItemsWithRange(offset, limit));
-        updateSelection(addedItems, Collections.emptySet(), true);
     }
 }

@@ -18,9 +18,9 @@ public class EventLayoutViewAware extends EventViewAware {
      * Constructor for EventLayoutViewAware
      *
      * @param layout
-     *          EventLayout
+     *            EventLayout
      * @param view
-     *          EventView
+     *            EventView
      */
     public EventLayoutViewAware(final EventLayout layout, final EventView view) {
         super(view);
@@ -32,7 +32,7 @@ public class EventLayoutViewAware extends EventViewAware {
      * Constructor for EventLayoutViewAware
      *
      * @param layoutViewAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      */
     public EventLayoutViewAware(final EventLayoutViewAware layoutViewAware) {
         super(layoutViewAware);
@@ -44,15 +44,24 @@ public class EventLayoutViewAware extends EventViewAware {
      * Verifies if event layout is suitable
      *
      * @param layout
-     *          EventLayout
+     *            EventLayout
      *
-     * @return <code>true</code> if the layout is not null, otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if the event layout matches current layout,
+     *         otherwise <code>false</code>
      */
     public boolean suitableLayout(final EventLayout layout) {
         return this.layout != null && layout != null && this.layout == layout;
     }
 
+    /**
+     * Verifies if event layout view aware is suitable
+     *
+     * @param layoutAware
+     *            EventLayoutViewAware
+     *
+     * @return <code>true</code> if the event layout matches current layout,
+     *         otherwise <code>false</code>
+     */
     public boolean suitableLayout(final EventLayoutViewAware layoutAware) {
         return suitableLayout(layoutAware.getLayout());
     }
@@ -61,12 +70,12 @@ public class EventLayoutViewAware extends EventViewAware {
      * Verifies if event view and layout are suitable
      *
      * @param layout
-     *          EventLayout
+     *            EventLayout
      * @param view
-     *         EventView
+     *            EventView
      *
-     * @return <code>true</code> if the suitableView and suitableLayout exist, otherwise
-     *         <code>false</code>
+     * @return <code>true</code> if the suitableView and suitableLayout exist,
+     *         otherwise <code>false</code>
      */
     public boolean suitableViewLayout(final EventLayout layout, final EventView view) {
         return suitableView(view) && suitableLayout(layout);
@@ -76,7 +85,7 @@ public class EventLayoutViewAware extends EventViewAware {
      * Verifies if layout aware view and layout are suitable
      *
      * @param layoutAware
-     *          EventLayoutViewAware
+     *            EventLayoutViewAware
      *
      * @return <code>true</code> if the suitableViewLayout exist, otherwise
      *         <code>false</code>

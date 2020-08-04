@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.aware.TargetFilterQueryAware;
 import org.eclipse.hawkbit.ui.common.data.aware.TypeInfoAware;
 import org.eclipse.hawkbit.ui.common.data.aware.VersionAware;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
-import org.eclipse.hawkbit.ui.common.data.providers.ProxyDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.AbstractProxyDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -327,7 +327,7 @@ public final class FormComponentBuilder {
      * @return bound ComboBox of sm/ds types
      */
     public static <T extends TypeInfoAware> BoundComponent<ComboBox<ProxyTypeInfo>> createTypeCombo(
-            final Binder<T> binder, final ProxyDataProvider<ProxyTypeInfo, ?, String> dataProvider,
+            final Binder<T> binder, final AbstractProxyDataProvider<ProxyTypeInfo, ?, String> dataProvider,
             final VaadinMessageSource i18n, final String componentId) {
         final ComboBox<ProxyTypeInfo> typeCombo = SPUIComponentProvider.getComboBox(componentId,
                 i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), false,

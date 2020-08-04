@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
@@ -21,7 +21,7 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     private static final long serialVersionUID = 1L;
 
     private Long clickedTargetFilterQueryId;
-    private final Collection<TargetUpdateStatus> clickedTargetUpdateStatusFilters = new HashSet<>();
+    private final Collection<TargetUpdateStatus> clickedTargetUpdateStatusFilters = new ArrayList<>();
     private boolean isOverdueFilterClicked;
     private boolean isCustomFilterTabSelected;
 

@@ -25,7 +25,7 @@ import org.springframework.data.domain.PageRequest;
  * {@link ProxyDistributionSet} entities.
  */
 public class DistributionSetDistributionsStateDataProvider
-        extends ProxyDataProvider<ProxyDistributionSet, DistributionSet, DsDistributionsFilterParams> {
+        extends AbstractProxyDataProvider<ProxyDistributionSet, DistributionSet, DsDistributionsFilterParams> {
 
     private static final long serialVersionUID = 1L;
 

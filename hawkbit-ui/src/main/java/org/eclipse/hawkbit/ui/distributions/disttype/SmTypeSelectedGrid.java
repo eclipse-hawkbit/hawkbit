@@ -62,7 +62,7 @@ public class SmTypeSelectedGrid extends Grid<ProxyType> {
         addStyleName(AbstractGrid.MULTI_SELECT_STYLE);
 
         setId(SPUIDefinitions.TWIN_TABLE_SELECTED_ID);
-        setSelectionModel(new RangeSelectionModel<>());
+        setSelectionModel(new RangeSelectionModel<>(i18n));
 
         addColumns();
     }

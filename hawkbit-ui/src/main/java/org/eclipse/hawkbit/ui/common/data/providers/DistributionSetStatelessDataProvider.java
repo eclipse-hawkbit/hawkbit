@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
  * {@link ProxyDistributionSet} entities.
  */
 public class DistributionSetStatelessDataProvider
-        extends ProxyDataProvider<ProxyDistributionSet, DistributionSet, String> {
+        extends AbstractProxyDataProvider<ProxyDistributionSet, DistributionSet, String> {
 
     private static final long serialVersionUID = 1L;
 

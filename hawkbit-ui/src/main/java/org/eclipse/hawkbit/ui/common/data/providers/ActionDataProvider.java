@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * {@link ProxyAction} entities. The filter is used for master-details
  * relationship with {@link Target}, using its controllerId.
  */
-public class ActionDataProvider extends ProxyDataProvider<ProxyAction, Action, String> {
+public class ActionDataProvider extends AbstractProxyDataProvider<ProxyAction, Action, String> {
 
     private static final long serialVersionUID = 1L;
 

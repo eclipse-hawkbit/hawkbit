@@ -32,7 +32,7 @@ public class RangeSelectionModelConnector extends MultiSelectionModelConnector {
         super.initSelectionModel();
 
         final RangeSelectionHandler selectionHandler = new RangeSelectionHandler(
-                getRpcProxy(RangeSelectionServerRpc.class));
+                getRpcProxy(RangeSelectionServerRpc.class), () -> getState().getSelectionCount());
         final Grid<JsonObject> grid = getGrid();
 
         grid.addBodyClickHandler(selectionHandler);
@@ -42,5 +42,10 @@ public class RangeSelectionModelConnector extends MultiSelectionModelConnector {
             selectionCol.setHidable(false);
             selectionCol.setHidden(true);
         });
+    }
+
+    @Override
+    public RangeSelectionState getState() {
+        return (RangeSelectionState) super.getState();
     }
 }

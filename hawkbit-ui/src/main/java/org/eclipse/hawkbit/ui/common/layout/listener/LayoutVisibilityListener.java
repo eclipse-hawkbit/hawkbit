@@ -61,19 +61,36 @@ public class LayoutVisibilityListener extends ViewAwareListener {
         }
     }
 
+    /**
+     * Handler for visibility layout behaviour.
+     */
     public static class VisibilityHandler {
         private final Runnable show;
         private final Runnable hide;
 
+        /**
+         * Constructor for VisibilityHandler
+         *
+         * @param show
+         *            show callback
+         * @param hide
+         *            hide callback
+         */
         public VisibilityHandler(final Runnable show, final Runnable hide) {
             this.show = show;
             this.hide = hide;
         }
 
+        /**
+         * Execute show callback.
+         */
         public void show() {
             show.run();
         }
 
+        /**
+         * Execute hide callback.
+         */
         public void hide() {
             hide.run();
         }

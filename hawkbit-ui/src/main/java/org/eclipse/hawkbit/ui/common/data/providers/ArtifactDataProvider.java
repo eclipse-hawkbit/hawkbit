@@ -24,7 +24,7 @@ import org.springframework.data.domain.Sort.Direction;
  * {@link ProxyArtifact} entities.The filter is used for master-details
  * relationship with {@link SoftwareModule}, using its id.
  */
-public class ArtifactDataProvider extends ProxyDataProvider<ProxyArtifact, Artifact, Long> {
+public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifact, Artifact, Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient ArtifactManagement artifactManagement;

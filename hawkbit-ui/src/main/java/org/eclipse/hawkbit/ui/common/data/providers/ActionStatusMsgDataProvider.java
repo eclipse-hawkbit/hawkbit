@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * entities. The filter is used for master-details relationship with
  * {@link ActionStatus}, using its id.
  */
-public class ActionStatusMsgDataProvider extends GenericDataProvider<ProxyMessage, String, Long> {
+public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<ProxyMessage, String, Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient DeploymentManagement deploymentManagement;

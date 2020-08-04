@@ -28,8 +28,8 @@ import org.springframework.hateoas.Identifiable;
  * @param <F>
  *          Generic type
  */
-public abstract class ProxyDataProvider<T extends ProxyIdentifiableEntity, U extends Identifiable<Long>, F>
-        extends GenericDataProvider<T, U, F> {
+public abstract class AbstractProxyDataProvider<T extends ProxyIdentifiableEntity, U extends Identifiable<Long>, F>
+        extends AbstractGenericDataProvider<T, U, F> {
     private static final long serialVersionUID = 1L;
 
     private final transient IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> entityMapper;
@@ -40,7 +40,7 @@ public abstract class ProxyDataProvider<T extends ProxyIdentifiableEntity, U ext
      * @param mapper
      *          IdentifiableEntityToProxyIdentifiableEntityMapper of generic type
      */
-    public ProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper) {
+    public AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper) {
         this(mapper, new Sort(Direction.ASC, "id"));
     }
 
@@ -52,7 +52,7 @@ public abstract class ProxyDataProvider<T extends ProxyIdentifiableEntity, U ext
      * @param defaultSortOrder
      *          Sort
      */
-    public ProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper,
+    public AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper,
             final Sort defaultSortOrder) {
         super(defaultSortOrder);
 

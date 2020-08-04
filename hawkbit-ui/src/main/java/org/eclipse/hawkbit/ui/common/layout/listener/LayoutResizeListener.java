@@ -61,19 +61,36 @@ public class LayoutResizeListener extends ViewAwareListener {
         }
     }
 
+    /**
+     * Handler for maximize/minimize layout behaviour.
+     */
     public static class ResizeHandler {
         private final Runnable maximize;
         private final Runnable minimize;
 
+        /**
+         * Constructor for ResizeHandler
+         *
+         * @param maximize
+         *            maximize callback
+         * @param minimize
+         *            minimize callback
+         */
         public ResizeHandler(final Runnable maximize, final Runnable minimize) {
             this.maximize = maximize;
             this.minimize = minimize;
         }
 
+        /**
+         * Execute maximize callback.
+         */
         public void maximize() {
             maximize.run();
         }
 
+        /**
+         * Execute minimize callback.
+         */
         public void minimize() {
             minimize.run();
         }

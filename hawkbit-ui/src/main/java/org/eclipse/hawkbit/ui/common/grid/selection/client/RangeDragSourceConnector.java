@@ -52,8 +52,8 @@ public class RangeDragSourceConnector extends GridDragSourceConnector {
     }
 
     @Override
-    public RangeSelectionState getState() {
-        return (RangeSelectionState) super.getState();
+    public RangeDragSourceSelectionState getState() {
+        return (RangeDragSourceSelectionState) super.getState();
     }
 
 }

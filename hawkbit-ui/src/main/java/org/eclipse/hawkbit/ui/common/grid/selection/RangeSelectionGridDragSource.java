@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.grid.selection;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.common.grid.selection.client.RangeSelectionState;
+import org.eclipse.hawkbit.ui.common.grid.selection.client.RangeDragSourceSelectionState;
 
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.components.grid.GridDragSource;
@@ -45,13 +45,13 @@ public class RangeSelectionGridDragSource<T extends ProxyIdentifiableEntity> ext
     }
 
     @Override
-    protected RangeSelectionState getState() {
-        return (RangeSelectionState) super.getState();
+    protected RangeDragSourceSelectionState getState() {
+        return (RangeDragSourceSelectionState) super.getState();
     }
 
     @Override
-    protected RangeSelectionState getState(final boolean markAsDirty) {
-        return (RangeSelectionState) super.getState(markAsDirty);
+    protected RangeDragSourceSelectionState getState(final boolean markAsDirty) {
+        return (RangeDragSourceSelectionState) super.getState(markAsDirty);
     }
 
     @Override

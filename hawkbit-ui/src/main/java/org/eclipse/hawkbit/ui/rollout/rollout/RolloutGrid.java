@@ -211,12 +211,12 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     }
 
     private static boolean isCopyingAllowed(final RolloutStatus status) {
-        return isDeletionAllowed(status);
+        return isDeletionAllowed(status) && status != RolloutStatus.CREATING;
     }
 
     private static boolean isEditingAllowed(final RolloutStatus status) {
-        final List<RolloutStatus> statesThatAllowEditing = Arrays.asList(RolloutStatus.CREATING, RolloutStatus.PAUSED,
-                RolloutStatus.READY, RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
+        final List<RolloutStatus> statesThatAllowEditing = Arrays.asList(RolloutStatus.PAUSED, RolloutStatus.READY,
+                RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
         return statesThatAllowEditing.contains(status);
     }
 

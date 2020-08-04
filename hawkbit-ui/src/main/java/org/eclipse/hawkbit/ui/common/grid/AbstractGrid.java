@@ -58,21 +58,6 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
         this(i18n, eventBus, null);
     }
 
-    @Override
-    public GridSelectionModel<T> setSelectionMode(final SelectionMode mode) {
-        if (mode == SelectionMode.MULTI) {
-            final RangeSelectionModel<T> model = new RangeSelectionModel<>();
-            setSelectionModel(model);
-
-            // used to deactivate cell text selection by user
-            addStyleName(MULTI_SELECT_STYLE);
-
-            return model;
-        }
-
-        return super.setSelectionMode(mode);
-    }
-
     /**
      * Constructor.
      *
@@ -88,6 +73,21 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;
+    }
+
+    @Override
+    public GridSelectionModel<T> setSelectionMode(final SelectionMode mode) {
+        if (mode == SelectionMode.MULTI) {
+            final RangeSelectionModel<T> model = new RangeSelectionModel<>(i18n);
+            setSelectionModel(model);
+
+            // used to deactivate cell text selection by user
+            addStyleName(MULTI_SELECT_STYLE);
+
+            return model;
+        }
+
+        return super.setSelectionMode(mode);
     }
 
     /**

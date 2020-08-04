@@ -26,7 +26,7 @@ import org.springframework.data.domain.Sort.Direction;
  *            output type
  */
 public class DistributionSetTypeDataProvider<T extends ProxyIdentifiableEntity>
-        extends ProxyDataProvider<T, DistributionSetType, String> {
+        extends AbstractProxyDataProvider<T, DistributionSetType, String> {
     private static final long serialVersionUID = 1L;
 
     private final transient DistributionSetTypeManagement distributionSetTypeManagement;

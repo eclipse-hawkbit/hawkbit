@@ -20,7 +20,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
  * @param <T>
  *            Generic type
  */
-public class GenericEventListener<T> extends EventListener {
+public class GenericEventListener<T> extends TopicEventListener {
     private final Consumer<T> eventCallback;
 
     /**

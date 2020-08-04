@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * {@link Target} entities from backend and maps them to corresponding
  * {@link ProxyTarget} entities.
  */
-public class TargetFilterStateDataProvider extends ProxyDataProvider<ProxyTarget, Target, String> {
+public class TargetFilterStateDataProvider extends AbstractProxyDataProvider<ProxyTarget, Target, String> {
 
     private static final long serialVersionUID = 1L;
 

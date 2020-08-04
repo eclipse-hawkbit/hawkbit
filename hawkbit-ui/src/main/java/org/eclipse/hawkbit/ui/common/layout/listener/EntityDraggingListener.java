@@ -23,7 +23,7 @@ import com.vaadin.ui.Component;
 /**
  * Event listener for entity dragging
  */
-public class EntityDraggingListener extends EventListener {
+public class EntityDraggingListener extends TopicEventListener {
     private static final String DROP_HINT_STYLE = "show-drop-hint";
     private final Collection<String> draggingSourceIds;
     private final Component dropComponent;

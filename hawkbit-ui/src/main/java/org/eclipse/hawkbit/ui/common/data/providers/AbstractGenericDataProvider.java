@@ -33,11 +33,11 @@ import com.vaadin.data.provider.Query;
  * @param <F>
  *          Generic type
  */
-public abstract class GenericDataProvider<T extends ProxyIdentifiableEntity, U, F>
+public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEntity, U, F>
         extends AbstractBackEndDataProvider<T, F> {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDataProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractGenericDataProvider.class);
 
     private final Sort defaultSortOrder;
 
@@ -47,7 +47,7 @@ public abstract class GenericDataProvider<T extends ProxyIdentifiableEntity, U, 
      * @param defaultSortOrder
      *          Sort
      */
-    public GenericDataProvider(final Sort defaultSortOrder) {
+    public AbstractGenericDataProvider(final Sort defaultSortOrder) {
         this.defaultSortOrder = defaultSortOrder;
     }
 

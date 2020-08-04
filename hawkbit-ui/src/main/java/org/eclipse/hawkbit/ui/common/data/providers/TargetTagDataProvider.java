@@ -22,7 +22,7 @@ import org.springframework.data.domain.Sort.Direction;
  * {@link TargetTag} entities from backend and maps them to corresponding
  * {@link ProxyTag} entities.
  */
-public class TargetTagDataProvider extends ProxyDataProvider<ProxyTag, TargetTag, Void> {
+public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, TargetTag, Void> {
     private static final long serialVersionUID = 1L;
 
     private final transient TargetTagManagement tagManagementService;

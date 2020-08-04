@@ -16,12 +16,25 @@ import com.vaadin.ui.Component;
 @FunctionalInterface
 public interface HeaderSupport {
 
+    /**
+     * Header support component.
+     * 
+     * @return header support component
+     */
     Component getHeaderComponent();
 
+    /**
+     * Header support component expand ration.
+     * 
+     * @return expand ration
+     */
     default float getExpandRation() {
         return 0F;
     }
 
+    /**
+     * Callback to restore header support component state.
+     */
     default void restoreState() {
         // empty by default for stateless header supports
     }

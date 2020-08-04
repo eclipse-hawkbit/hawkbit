@@ -53,7 +53,7 @@ public class SmTypeCssStylesHandler {
         return HawkbitCommonUtil.getEntitiesByPageableProvider(softwareModuleTypeManagement::findAll);
     }
 
-    private Map<Long, String> getSmTypeIdWithColor(final List<SoftwareModuleType> smTypes) {
+    private static Map<Long, String> getSmTypeIdWithColor(final List<SoftwareModuleType> smTypes) {
         return smTypes.stream().collect(Collectors.toMap(Type::getId,
                 type -> Optional.ofNullable(type.getColour()).orElse(SPUIDefinitions.DEFAULT_COLOR)));
     }
