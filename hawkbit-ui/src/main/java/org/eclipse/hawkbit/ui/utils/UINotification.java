@@ -19,7 +19,7 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Notification;
 
 /**
- * Show success and error messages.
+ * Show success, warning and error messages.
  */
 @UIScope
 @SpringComponent
@@ -58,6 +58,16 @@ public class UINotification implements Serializable {
                 VaadinIcons.EXCLAMATION_CIRCLE);
     }
 
+    /**
+     * Display generic notification message.
+     * 
+     * @param styleName
+     *            Style of the message
+     * @param description
+     *            Description of the message
+     * @param icon
+     *            Icon of the message
+     */
     public static void showNotification(final String styleName, final String description, final Resource icon) {
         showNotification(styleName, null, description, icon, true);
     }
