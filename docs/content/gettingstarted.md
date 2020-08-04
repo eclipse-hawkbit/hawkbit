@@ -16,7 +16,7 @@ any personal data.
 
 In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
 
-* [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/#plans) (by [Bosch Software Innovations GmbH](https://www.bosch-si.com/corporate/home/homepage.html))
+* [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/#plans) (by [Bosch.IO GmbH](https://bosch.io/))
 
 
 ## From Docker Image
