@@ -43,13 +43,12 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     }
 
     @Test
-    @Description("Verifies that a MultiActionEvent can be properly serialized and deserialized")
-    public void testMultiActionEvents() {
+    @Description("Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized")
+    public void testMultiActionAssignEvent() {
         final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
                 "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
         final List<Action> actions = controllerIds.stream().map(this::createAction).collect(Collectors.toList());
 
-        // Assignment
         final MultiActionAssignEvent assignEvent = new MultiActionAssignEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
                 actions);
 
@@ -60,8 +59,15 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final MultiActionAssignEvent remoteAssignEventJackson = createJacksonEvent(assignEvent);
         assertThat(assignEvent).isEqualTo(remoteAssignEventJackson);
         assertThat(remoteAssignEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
+    }
 
-        // Cancel
+    @Test
+    @Description("Verifies that a MultiActionCancelEvent can be properly serialized and deserialized")
+    public void testMultiActionCancelEvent() {
+        final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
+                "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
+        final List<Action> actions = controllerIds.stream().map(this::createAction).collect(Collectors.toList());
+
         final MultiActionCancelEvent cancelEvent = new MultiActionCancelEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
                 actions);
 

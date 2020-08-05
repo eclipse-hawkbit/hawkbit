@@ -12,21 +12,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.hateoas.Identifiable;
 
 /**
  * Generic deployment event for the Multi-Assignments feature. The event extends
  * the {@link MultiActionEvent} and holds a list of controller IDs to identify
  * the targets which are affected by a deployment action and a list of
- * {@link ActionProperties} containing information's about the affected actions
+ * actionIds containing the identifiers of the affected actions
  * as payload. This event is only published in case of an cancellation.
  */
 public class MultiActionCancelEvent extends MultiActionEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<ActionProperties> actionProperties;
+    private List<Long> actionIds;
 
     /**
      * Default constructor.
@@ -48,11 +48,11 @@ public class MultiActionCancelEvent extends MultiActionEvent {
     public MultiActionCancelEvent(String tenant, String applicationId, List<Action> a) {
         super(tenant, applicationId,
                 a.stream().map(Action::getTarget).map(Target::getControllerId).distinct().collect(Collectors.toList()));
-        actionProperties = a.stream().map(ActionProperties::new).collect(Collectors.toList());
+        actionIds = a.stream().map(Identifiable::getId).collect(Collectors.toList());
     }
 
-    public List<ActionProperties> getActionProperties() {
-        return actionProperties;
+    public List<Long> getActionIds() {
+        return actionIds;
     }
 
 }
