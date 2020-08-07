@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class AutoAssignScheduler {
 
     private final SystemSecurityContext systemSecurityContext;
 
-    private final AutoAssignChecker autoAssignChecker;
+    private final AutoAssignExecutor autoAssignExecutor;
 
     private final LockRegistry lockRegistry;
 
@@ -40,17 +41,17 @@ public class AutoAssignScheduler {
      *            to find all tenants
      * @param systemSecurityContext
      *            to run as system
-     * @param autoAssignChecker
+     * @param autoAssignExecutor
      *            to run a check as tenant
      * @param lockRegistry
      *            to acquire a lock per tenant
      */
     public AutoAssignScheduler(final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
+            final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
             final LockRegistry lockRegistry) {
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
-        this.autoAssignChecker = autoAssignChecker;
+        this.autoAssignExecutor = autoAssignExecutor;
         this.lockRegistry = lockRegistry;
     }
 
@@ -82,7 +83,7 @@ public class AutoAssignScheduler {
         }
 
         try {
-            systemManagement.forEachTenant(tenant -> autoAssignChecker.check());
+            systemManagement.forEachTenant(tenant -> autoAssignExecutor.check());
         } finally {
             lock.unlock();
         }

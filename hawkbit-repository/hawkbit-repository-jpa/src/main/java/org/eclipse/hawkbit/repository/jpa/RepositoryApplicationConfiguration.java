@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
@@ -756,9 +757,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    AutoAssignChecker autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+    AutoAssignExecutor autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+                                         final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+                                         final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
@@ -787,10 +788,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     // test
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
-    AutoAssignScheduler autoAssignScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final AutoAssignChecker autoAssignChecker,
+    AutoAssignScheduler autoAssignScheduler(final SystemManagement systemManagement,
+            final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
             final LockRegistry lockRegistry) {
-        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignChecker, lockRegistry);
+        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignExecutor, lockRegistry);
     }
 
     /**
