@@ -21,9 +21,9 @@ import com.vaadin.data.provider.DataProvider;
  * Support for Filter in Grid
  *
  * @param <T>
- *          Generic type
+ *            Generic type
  * @param <F>
-*           Generic type
+ *            Generic type
  */
 public class FilterSupport<T, F> {
     private final ConfigurableFilterDataProvider<T, Void, F> filterDataProvider;
@@ -36,7 +36,7 @@ public class FilterSupport<T, F> {
      * Constructor for FilterSupport
      *
      * @param dataProvider
-     *          Data provider for filter
+     *            Data provider for filter
      */
     public FilterSupport(final DataProvider<T, F> dataProvider) {
         this(dataProvider, null);
@@ -46,9 +46,9 @@ public class FilterSupport<T, F> {
      * Constructor for FilterSupport
      *
      * @param dataProvider
-     *          Data provider for filter
+     *            Data provider for filter
      * @param afterRefreshFilterCallback
-     *          Runnable
+     *            Runnable
      */
     public FilterSupport(final DataProvider<T, F> dataProvider, final Runnable afterRefreshFilterCallback) {
         this.filterDataProvider = dataProvider.withConfigurableFilter();
@@ -60,11 +60,11 @@ public class FilterSupport<T, F> {
      * Add setter mapping to filter type
      *
      * @param filterType
-     *          Filter type
+     *            Filter type
      * @param setter
-     *          Filter type setter
+     *            Filter type setter
      * @param <R>
-     *          Generic
+     *            Generic
      */
     public <R> void addMapping(final FilterType filterType, final BiConsumer<F, R> setter) {
         filterTypeToSetterMapping.put(filterType, new FilterTypeSetter<>(setter));
@@ -74,13 +74,13 @@ public class FilterSupport<T, F> {
      * Add setter mapping to filter type
      *
      * @param filterType
-     *          Filter type
+     *            Filter type
      * @param setter
-     *          Filter type setter
+     *            Filter type setter
      * @param defaultValue
-     *          Default value for setter
+     *            Default value for setter
      * @param <R>
- *              Generic
+     *            Generic
      */
     public <R> void addMapping(final FilterType filterType, final BiConsumer<F, R> setter, final R defaultValue) {
         filterTypeToSetterMapping.put(filterType, new FilterTypeSetter<>(setter, defaultValue));
@@ -90,11 +90,11 @@ public class FilterSupport<T, F> {
      * Update filter value
      *
      * @param filterType
-     *          Filter type
+     *            Filter type
      * @param filterValue
-     *          Filter value
+     *            Filter value
      * @param <R>
-     *          Generic
+     *            Generic
      */
     public <R> void updateFilter(final FilterType filterType, final R filterValue) {
         updateFilter((BiConsumer<F, R>) filterTypeToSetterMapping.get(filterType).getSetter(), filterValue);
@@ -104,11 +104,11 @@ public class FilterSupport<T, F> {
      * Update filter value
      *
      * @param setter
-     *          Filter type setter
+     *            Filter type setter
      * @param filterValue
-     *          Filter value
+     *            Filter value
      * @param <R>
-     *          Generic
+     *            Generic
      */
     public <R> void updateFilter(final BiConsumer<F, R> setter, final R filterValue) {
         if (setter != null) {
@@ -139,7 +139,7 @@ public class FilterSupport<T, F> {
      * Verifies if filter type is supported
      *
      * @param filterType
-     *          Filter type
+     *            Filter type
      *
      * @return True if filter type exist in the filter to setter map else false
      */
@@ -158,7 +158,7 @@ public class FilterSupport<T, F> {
      * Sets the entity filter
      *
      * @param entityFilter
-     *          Generic type entity filter
+     *            Generic type entity filter
      */
     public void setFilter(final F entityFilter) {
         this.entityFilter = entityFilter;
@@ -180,7 +180,7 @@ public class FilterSupport<T, F> {
          * Constructor for FilterTypeSetter
          *
          * @param setter
-         *          Setter
+         *            Setter
          */
         public FilterTypeSetter(final BiConsumer<F, R> setter) {
             this(setter, null);
@@ -190,9 +190,9 @@ public class FilterSupport<T, F> {
          * Constructor for FilterTypeSetter
          *
          * @param setter
-         *          Setter
+         *            Setter
          * @param defaultValue
-         *          Filter default value
+         *            Filter default value
          */
         public FilterTypeSetter(final BiConsumer<F, R> setter, final R defaultValue) {
             this.setter = setter;
@@ -210,7 +210,9 @@ public class FilterSupport<T, F> {
          * Reset the filter value to default
          */
         public void restoreDefaultValue() {
-            setter.accept(entityFilter, defaultValue);
+            if (defaultValue != null) {
+                setter.accept(entityFilter, defaultValue);
+            }
         }
     }
 }
