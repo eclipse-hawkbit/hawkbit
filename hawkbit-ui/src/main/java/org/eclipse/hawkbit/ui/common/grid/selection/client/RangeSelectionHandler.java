@@ -101,6 +101,9 @@ public class RangeSelectionHandler implements BodyClickHandler, BodyKeyDownHandl
     @Override
     public void onKeyDown(final GridKeyDownEvent event) {
         if ((event.isControlKeyDown() || event.isMetaKeyDown()) && (event.getNativeKeyCode() == KeyCode.A)) {
+            event.preventDefault();
+            event.stopPropagation();
+
             rangeSelectionServerRpc.selectAll();
         }
     }

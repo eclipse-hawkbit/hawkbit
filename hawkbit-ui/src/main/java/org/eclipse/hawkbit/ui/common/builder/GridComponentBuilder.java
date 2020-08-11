@@ -293,7 +293,7 @@ public final class GridComponentBuilder {
                 clickEvent -> deleteSupport.openConfirmationWindowDeleteAction(entity), VaadinIcons.TRASH,
                 UIMessageIdProvider.TOOLTIP_DELETE, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 buttonIdPrefix + "." + entity.getId(), buttonEnabled.test(entity));
-        return addIconColumn(grid, getDelButton, columnId, null).setWidth(60D)
+        return addIconColumn(grid, getDelButton, columnId, i18n.getMessage("header.action.delete")).setWidth(60D)
                 .setHidingToggleCaption(i18n.getMessage("header.action.delete"));
     }
 

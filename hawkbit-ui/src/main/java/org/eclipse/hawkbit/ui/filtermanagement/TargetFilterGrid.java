@@ -148,17 +148,22 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
 
         GridComponentBuilder.addDeleteColumn(this, i18n, FILTER_DELETE_BUTTON_ID, targetFilterDeleteSupport,
                 UIComponentIdProvider.CUSTOM_FILTER_DELETE_ICON, e -> permissionChecker.hasDeleteTargetPermission());
+
+        getColumns().forEach(column -> column.setHidable(true));
     }
 
     private void addAutoAssignmentColumns() {
         final ValueProvider<ProxyTargetFilterQuery, HorizontalLayout> autoAssignmentProvider = filter -> {
             final HorizontalLayout horizontalLayout = new HorizontalLayout();
-            horizontalLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
-            final Label icon = actionTypeIconSupplier.getLabel(filter);
-            final Button link = buildAutoAssignmentLink(filter);
-            horizontalLayout.addComponent(icon);
-            horizontalLayout.addComponent(link);
             horizontalLayout.setWidthUndefined();
+            horizontalLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+
+            final Label icon = actionTypeIconSupplier.getLabel(filter);
+            horizontalLayout.addComponent(icon);
+
+            final Button link = buildAutoAssignmentLink(filter);
+            horizontalLayout.addComponent(link);
+
             return horizontalLayout;
         };
         GridComponentBuilder.addComponentColumn(this, autoAssignmentProvider)
@@ -196,19 +201,22 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     }
 
     private Button buildAutoAssignmentLink(final ProxyTargetFilterQuery targetFilter) {
-        final ProxyIdNameVersion autoAssignDsIdNameVersion = targetFilter.getAutoAssignDsIdNameVersion();
-
-        final String caption = autoAssignDsIdNameVersion != null
-                ? HawkbitCommonUtil.getFormattedNameVersion(autoAssignDsIdNameVersion.getName(),
-                        autoAssignDsIdNameVersion.getVersion())
-                : i18n.getMessage(UIMessageIdProvider.BUTTON_NO_AUTO_ASSIGNMENT);
-        final String description = i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION);
+        final String caption;
+        if (targetFilter.isAutoAssignmentEnabled()) {
+            final ProxyIdNameVersion autoAssignDsIdNameVersion = targetFilter.getAutoAssignDsIdNameVersion();
+            caption = HawkbitCommonUtil.getFormattedNameVersion(autoAssignDsIdNameVersion.getName(),
+                    autoAssignDsIdNameVersion.getVersion());
+        } else {
+            caption = i18n.getMessage(UIMessageIdProvider.BUTTON_NO_AUTO_ASSIGNMENT);
+        }
 
         final Button link = GridComponentBuilder.buildLink(targetFilter, "distSetButton", caption,
                 permissionChecker.hasReadRepositoryPermission(),
                 clickEvent -> onClickOfAutoAssignmentLink(targetFilter));
 
+        final String description = i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION);
         link.setDescription(description);
+
         return link;
     }
 }
