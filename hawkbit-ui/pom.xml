@@ -207,6 +207,10 @@
          <groupId>com.cronutils</groupId>
          <artifactId>cron-utils</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.github.ben-manes.caffeine</groupId>
+         <artifactId>caffeine</artifactId>
+      </dependency>
 
       <!-- Test -->
       <dependency>

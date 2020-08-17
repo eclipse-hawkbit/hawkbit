@@ -29,8 +29,8 @@ import org.vaadin.spring.events.EventBusListenerMethodFilter;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.vaadin.ui.UI;
 
 /**
@@ -51,7 +51,7 @@ public class HawkbitEntityEventListener {
         this.eventProvider = eventProvider;
         this.notificationUnreadButton = notificationUnreadButton;
 
-        this.uiOriginatedEventsCache = CacheBuilder.newBuilder().expireAfterAccess(10, SECONDS).build();
+        this.uiOriginatedEventsCache = Caffeine.newBuilder().expireAfterWrite(10, SECONDS).build();
 
         this.eventListeners = new ArrayList<>();
         registerEventListeners();
