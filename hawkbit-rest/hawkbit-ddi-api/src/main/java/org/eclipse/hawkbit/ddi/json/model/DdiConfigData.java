@@ -32,6 +32,8 @@ public class DdiConfigData {
      *
      * @param data
      *            contains the attributes.
+     * @param mode
+     *            defines the mode of the update (replace, merge, remove)
      */
     @JsonCreator
     public DdiConfigData(@JsonProperty(value = "data") final Map<String, String> data,

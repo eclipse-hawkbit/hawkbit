@@ -75,6 +75,12 @@ public class DdiConfigDataTest {
     @Test
     @Description("Verify the correct deserialization of a model with removed unused status property")
     public void shouldDeserializeObjectWithStatusProperty() throws IOException {
+        // We formerly falsely required a 'status' property object when using the
+        // configData endpoint. It was removed as a requirement from code and
+        // documentation, as it was unused. This test ensures we still behave correctly
+        // (and just ignore the 'status' property) if it is still provided by the
+        // client.
+
         // Setup
         String serializedDdiConfigData = "{\"id\":123,\"time\":\"20190809T121314\","
                 + "\"status\":{\"execution\":\"closed\",\"result\":{\"finished\":\"success\",\"progress\":null},"
