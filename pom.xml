@@ -775,18 +775,6 @@
             <scope>test</scope>
          </dependency>
          <dependency>
-            <groupId>com.google.gwt.gwtmockito</groupId>
-            <artifactId>gwtmockito</artifactId>
-            <version>${gwtmockito.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.google.gwt</groupId>
-                  <artifactId>gwt-user</artifactId>
-               </exclusion>
-            </exclusions>            
-            <scope>test</scope>
-         </dependency>
-         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-junit</artifactId>
             <version>${spring-amqp.version}</version>
