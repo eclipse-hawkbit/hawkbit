@@ -59,7 +59,7 @@ public class UINotification implements Serializable {
     }
 
     /**
-     * Display generic notification message.
+     * Display generic notification.
      * 
      * @param styleName
      *            Style of the message
@@ -72,7 +72,41 @@ public class UINotification implements Serializable {
         showNotification(styleName, null, description, icon, true);
     }
 
-    private static void showNotification(final String styleName, final String caption, final String description,
+    /**
+     * Display generic notification.
+     * 
+     * @param styleName
+     *            Style of the message
+     * @param caption
+     *            Caption of the message
+     * @param description
+     *            Description of the message
+     * @param icon
+     *            Icon of the message
+     * @param autoClose
+     *            Should notification be automatically closed
+     */
+    public static void showNotification(final String styleName, final String caption, final String description,
+            final Resource icon, final Boolean autoClose) {
+        buildNotification(styleName, caption, description, icon, autoClose).show(Page.getCurrent());
+    }
+
+    /**
+     * Builds UI notification.
+     * 
+     * @param styleName
+     *            Style of the message
+     * @param caption
+     *            Caption of the message
+     * @param description
+     *            Description of the message
+     * @param icon
+     *            Icon of the message
+     * @param autoClose
+     *            Should notification be automatically closed
+     * @return UI notification to be shown
+     */
+    public static Notification buildNotification(final String styleName, final String caption, final String description,
             final Resource icon, final Boolean autoClose) {
         final Notification notification = new Notification(caption, description);
 
@@ -87,6 +121,6 @@ public class UINotification implements Serializable {
             notification.setDelayMsec(-1);
         }
 
-        notification.show(Page.getCurrent());
+        return notification;
     }
 }
