@@ -73,7 +73,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
     private final transient ApplicationContext context;
     private final transient EventPushStrategy pushStrategy;
 
-    private final transient RemoteEventsListener remoteEventsListener;
+    private final transient HawkbitEntityEventListener entityEventsListener;
 
     protected AbstractHawkbitUI(final EventPushStrategy pushStrategy, final UIEventBus eventBus,
             final UIEventProvider eventProvider, final SpringViewProvider viewProvider,
@@ -89,14 +89,14 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         this.uiProperties = uiProperties;
         this.i18n = i18n;
 
-        this.remoteEventsListener = new RemoteEventsListener(eventBus, eventProvider, notificationUnreadButton);
+        this.entityEventsListener = new HawkbitEntityEventListener(eventBus, eventProvider, notificationUnreadButton);
     }
 
     @Override
     public void detach(final DetachEvent event) {
         LOG.debug("ManagementUI is detached uiid - {}", getUIId());
 
-        remoteEventsListener.unsubscribeListeners();
+        entityEventsListener.unsubscribeListeners();
 
         if (pushStrategy != null) {
             pushStrategy.clean();

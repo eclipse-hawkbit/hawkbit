@@ -34,9 +34,10 @@ import com.google.common.cache.CacheBuilder;
 import com.vaadin.ui.UI;
 
 /**
- * Remote events listener
+ * Listener for internal and remote entity modified events. Keeps a cache of the
+ * events coming from UI in order to suppress the corresponding remote events.
  */
-public class RemoteEventsListener {
+public class HawkbitEntityEventListener {
     private final UIEventBus eventBus;
     private final UIEventProvider eventProvider;
     private final NotificationUnreadButton notificationUnreadButton;
@@ -44,7 +45,7 @@ public class RemoteEventsListener {
     private final Cache<EntityModifiedEventPayloadIdentifier, Collection<Long>> uiOriginatedEventsCache;
     private final List<Object> eventListeners;
 
-    RemoteEventsListener(final UIEventBus eventBus, final UIEventProvider eventProvider,
+    HawkbitEntityEventListener(final UIEventBus eventBus, final UIEventProvider eventProvider,
             final NotificationUnreadButton notificationUnreadButton) {
         this.eventBus = eventBus;
         this.eventProvider = eventProvider;
