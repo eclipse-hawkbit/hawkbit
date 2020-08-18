@@ -165,7 +165,6 @@
       <allure.version>2.7.0</allure.version>
       <eclipselink.version>2.7.3</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
-      <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <guava.version>25.0-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
       <corn-cps.version>1.1.7</corn-cps.version>
@@ -766,12 +765,6 @@
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit4</artifactId>
             <version>${allure.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>pl.pragmatists</groupId>
-            <artifactId>JUnitParams</artifactId>
-            <version>${pl.pragmatists.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
