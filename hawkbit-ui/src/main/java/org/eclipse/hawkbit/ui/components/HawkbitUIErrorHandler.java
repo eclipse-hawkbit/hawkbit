@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
+import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -100,7 +101,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
      *            the throwable
      * @return a hawkbit error notification message
      */
-    protected Notification buildNotification(final Throwable ex) {
+    protected ParallelNotification buildNotification(final Throwable ex) {
 
         LOG.error("Error in UI: ", ex);
 
@@ -119,7 +120,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
      *            Description
      * @return a hawkbit error notification message
      */
-    protected static Notification buildErrorNotification(final String caption, final String description) {
+    protected static ParallelNotification buildErrorNotification(final String caption, final String description) {
         return UINotification.buildNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, caption,
                 description, VaadinIcons.EXCLAMATION_CIRCLE, true);
     }

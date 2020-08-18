@@ -11,19 +11,16 @@ package org.eclipse.hawkbit.ui;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.shared.Position;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -63,11 +60,9 @@ public class ErrorView extends VerticalLayout implements View {
             return;
         }
         if (dashboardMenu.isAccessDenied(event.getViewName())) {
-            final Notification nt = new Notification(i18n.getMessage("message.accessdenied"),
-                    i18n.getMessage("message.accessdenied.view", event.getViewName()), Type.ERROR_MESSAGE, false);
-            nt.setStyleName(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE);
-            nt.setPosition(Position.BOTTOM_RIGHT);
-            nt.show(UI.getCurrent().getPage());
+            UINotification.showNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE,
+                    i18n.getMessage("message.accessdenied"),
+                    i18n.getMessage("message.accessdenied.view", event.getViewName()), null, true);
             message.setValue(i18n.getMessage("message.accessdenied.view", event.getViewName()));
         }
     }

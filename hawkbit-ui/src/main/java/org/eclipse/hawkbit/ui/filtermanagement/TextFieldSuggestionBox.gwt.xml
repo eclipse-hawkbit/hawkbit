@@ -13,5 +13,8 @@
 	<inherits name="com.vaadin.DefaultWidgetSet" />
     <inherits name="org.eclipse.hawkbit.ui.AppWidgetSet" />
     <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
+
+    <inherits name="org.eclipse.hawkbit.ui.common.notification.ParallelNotificationWidgetset" />
+
     <inherits name="org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionWidgetset" />
 </module>

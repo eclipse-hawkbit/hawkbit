@@ -16,11 +16,14 @@ import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationTok
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyLoginCredentials;
+import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +58,6 @@ import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -285,24 +287,20 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     }
 
     private void loginCredentialsExpiredNotification() {
-        final Notification notification = new Notification(
-                i18n.getMessage("notification.login.failed.credentialsexpired.title"));
-        notification.setDescription(i18n.getMessage("notification.login.failed.credentialsexpired.description"));
-        notification.setDelayMsec(10_000);
-        notification.setHtmlContentAllowed(true);
-        notification.setStyleName("error closeable");
+        showErrorNotification(i18n.getMessage("notification.login.failed.credentialsexpired.title"),
+                i18n.getMessage("notification.login.failed.credentialsexpired.description"));
+    }
+
+    private void showErrorNotification(final String caption, final String description) {
+        final ParallelNotification notification = UINotification.buildNotification(
+                SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, caption, description, null, true);
         notification.setPosition(Position.BOTTOM_CENTER);
         notification.show(Page.getCurrent());
     }
 
     private void loginAuthenticationFailedNotification() {
-        final Notification notification = new Notification(i18n.getMessage("notification.login.failed.title"));
-        notification.setDescription(i18n.getMessage("notification.login.failed.description"));
-        notification.setHtmlContentAllowed(true);
-        notification.setStyleName("error closable");
-        notification.setPosition(Position.BOTTOM_CENTER);
-        notification.setDelayMsec(1_000);
-        notification.show(Page.getCurrent());
+        showErrorNotification(i18n.getMessage("notification.login.failed.title"),
+                i18n.getMessage("notification.login.failed.description"));
     }
 
     private Component buildDisclaimer() {

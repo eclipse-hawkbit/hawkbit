@@ -18,5 +18,7 @@
    <inherits name="org.eclipse.hawkbit.ui.filtermanagement.TextFieldSuggestionBox" />
    <inherits name="org.eclipse.hawkbit.ui.rollout.groupschart.GroupsPieChart" />
    <inherits
-      name="org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionWidgetset" /> 
+      name="org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionWidgetset" />
+   <inherits
+      name="org.eclipse.hawkbit.ui.common.notification.ParallelNotificationWidgetset" />
 </module>
