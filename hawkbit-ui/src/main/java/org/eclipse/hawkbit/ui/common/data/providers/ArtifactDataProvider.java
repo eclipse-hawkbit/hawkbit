@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link Artifact}, which dynamically loads a batch of
@@ -39,7 +38,7 @@ public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifac
      */
     public ArtifactDataProvider(final ArtifactManagement artifactManagement,
             final ArtifactToProxyArtifactMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "filename"));
+        super(entityMapper, Sort.by("filename").descending());
 
         this.artifactManagement = artifactManagement;
     }

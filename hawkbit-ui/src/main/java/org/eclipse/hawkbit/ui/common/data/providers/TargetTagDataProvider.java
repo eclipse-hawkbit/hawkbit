@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link TargetTag}, which dynamically loads a batch of
@@ -37,7 +36,7 @@ public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, T
      */
     public TargetTagDataProvider(final TargetTagManagement tagManagementService,
             final TagToProxyTagMapper<TargetTag> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by("name").ascending());
 
         this.tagManagementService = tagManagementService;
     }

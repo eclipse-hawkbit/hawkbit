@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link DistributionSetTag}, which dynamically loads a batch
@@ -38,7 +37,7 @@ public class DistributionSetTagDataProvider extends AbstractProxyDataProvider<Pr
      */
     public DistributionSetTagDataProvider(final DistributionSetTagManagement distributionSetTagManagement,
             final TagToProxyTagMapper<DistributionSetTag> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by("name").ascending());
         this.distributionSetTagManagement = distributionSetTagManagement;
     }
 

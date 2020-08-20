@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -98,7 +97,7 @@ public interface ArtifactManagement {
     void delete(long id);
 
     /**
-     * Searches for {@link Artifact} with given {@link Identifiable}.
+     * Searches for {@link Artifact} with given id.
      *
      * @param id
      *            to search for

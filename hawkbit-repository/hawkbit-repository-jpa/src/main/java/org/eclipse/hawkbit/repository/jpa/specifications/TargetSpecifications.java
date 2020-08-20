@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 
 /**
  * Specifications class for {@link Target}s. The class provides Spring Data JPQL
@@ -178,7 +177,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> likeIdOrNameOrDescriptionOrAttributeValue(final String searchText) {
-        return Specifications.where(likeIdOrNameOrDescription(searchText)).or(likeAttributeValue(searchText));
+        return Specification.where(likeIdOrNameOrDescription(searchText)).or(likeAttributeValue(searchText));
     }
 
     /**

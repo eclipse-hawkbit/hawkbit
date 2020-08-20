@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link DistributionSetType}, which dynamically loads a
@@ -41,7 +40,7 @@ public class DistributionSetTypeDataProvider<T extends ProxyIdentifiableEntity>
      */
     public DistributionSetTypeDataProvider(final DistributionSetTypeManagement distributionSetTypeManagement,
             final IdentifiableEntityToProxyIdentifiableEntityMapper<T, DistributionSetType> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by("name").ascending());
 
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }

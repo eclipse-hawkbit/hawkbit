@@ -333,7 +333,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
-                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), new Sort(Direction.ASC, "id")),
+                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by("id").ascending()),
                 rollout.getId()).getContent();
 
         int readyGroups = 0;

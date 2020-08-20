@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.web;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
@@ -20,7 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * filename ending.
  */
 @Configuration
-public class WebMvcAutoConfiguration extends WebMvcConfigurerAdapter {
+public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(final PathMatchConfigurer configurer) {

@@ -26,6 +26,6 @@ ALTER TABLE sp_target
         REFERENCES sp_distribution_set (id);
 
 ALTER TABLE sp_target_info DROP CONSTRAINT fk_targ_stat_targ;
-ALTER TABLE sp_target_info DROP INDEX sp_idx_target_info_02;
+DROP INDEX sp_idx_target_info_02;
 
 DROP TABLE sp_target_info;

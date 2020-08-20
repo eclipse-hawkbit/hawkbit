@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Abstract data provider for {@link MetaData}, which dynamically loads a batch
@@ -31,7 +30,7 @@ public abstract class AbstractMetaDataDataProvider<U extends MetaData, F>
     private static final long serialVersionUID = 1L;
 
     protected AbstractMetaDataDataProvider() {
-        this(new Sort(Direction.DESC, "key"));
+        this(Sort.by("key").descending());
     }
 
     protected AbstractMetaDataDataProvider(final Sort defaultSortOrder) {

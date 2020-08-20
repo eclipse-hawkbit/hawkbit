@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -21,7 +22,6 @@ import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.tagdetails.TagPanelLayout.TagAssignmentListener;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -100,10 +100,10 @@ public abstract class AbstractTagToken<T extends ProxyNamedEntity>
         tagPanelLayout.tagDeleted(tagId);
     }
 
-    protected boolean checkAssignmentResult(final List<? extends Identifiable<Long>> assignedEntities,
+    protected boolean checkAssignmentResult(final List<? extends BaseEntity> assignedEntities,
             final Long expectedAssignedEntityId) {
         if (!CollectionUtils.isEmpty(assignedEntities) && expectedAssignedEntityId != null) {
-            final List<Long> assignedDsIds = assignedEntities.stream().map(Identifiable::getId)
+            final List<Long> assignedDsIds = assignedEntities.stream().map(BaseEntity::getId)
                     .collect(Collectors.toList());
             if (assignedDsIds.contains(expectedAssignedEntityId)) {
                 return true;
@@ -112,7 +112,7 @@ public abstract class AbstractTagToken<T extends ProxyNamedEntity>
         return false;
     }
 
-    protected boolean checkUnassignmentResult(final Identifiable<Long> unAssignedEntity,
+    protected boolean checkUnassignmentResult(final BaseEntity unAssignedEntity,
             final Long expectedUnAssignedEntityId) {
         return unAssignedEntity != null && expectedUnAssignedEntityId != null
                 && unAssignedEntity.getId().equals(expectedUnAssignedEntityId);

@@ -112,6 +112,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
@@ -144,9 +145,8 @@ import com.google.common.collect.Maps;
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     protected RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties properties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
+        super(dataSource, properties, jtaTransactionManagerProvider);
     }
 
     @Bean
@@ -409,13 +409,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link MultiTenantJpaTransactionManager} bean.
      *
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager()
+     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
      * @return a new {@link PlatformTransactionManager}
      */
     @Override
     @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new MultiTenantJpaTransactionManager();
+    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+        final JpaTransactionManager transactionManager = new MultiTenantJpaTransactionManager();
+        transactionManagerCustomizers.ifAvailable((customizers) -> {
+            customizers.customize(transactionManager);
+        });
+        return transactionManager;
     }
 
     /**

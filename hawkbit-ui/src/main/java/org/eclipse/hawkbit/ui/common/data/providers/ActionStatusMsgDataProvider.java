@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 
 /**
@@ -43,7 +42,7 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
      *          Message not available text
      */
     public ActionStatusMsgDataProvider(final DeploymentManagement deploymentManagement, final String noMessageText) {
-        this(deploymentManagement, noMessageText, new Sort(Direction.DESC, "id"));
+        this(deploymentManagement, noMessageText, Sort.by("id").descending());
     }
 
     /**

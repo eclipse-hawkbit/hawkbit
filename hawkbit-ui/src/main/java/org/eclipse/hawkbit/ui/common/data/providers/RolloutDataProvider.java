@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,7 +38,7 @@ public class RolloutDataProvider extends AbstractProxyDataProvider<ProxyRollout,
      */
     public RolloutDataProvider(final RolloutManagement rolloutManagement,
             final RolloutToProxyRolloutMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "lastModifiedAt"));
+        super(entityMapper, Sort.by("lastModifiedAt").descending());
 
         this.rolloutManagement = rolloutManagement;
     }

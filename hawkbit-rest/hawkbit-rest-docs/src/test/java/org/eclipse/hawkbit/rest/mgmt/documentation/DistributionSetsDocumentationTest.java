@@ -74,7 +74,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", set.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -88,7 +88,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(responseFields(
                         fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
                         fieldWithPath("size").type(JsonFieldType.NUMBER).description(ApiModelPropertiesGeneric.SIZE),
@@ -125,7 +125,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).param("offset", "1").param("limit", "2")
                         .param("sort", "version:DESC").param("q", "name==testDS*").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(getFilterRequestParamter()));
 
     }
@@ -164,7 +164,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         this.mockMvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/")
                         .content(JsonBuilder.distributionSetsCreateValidFieldsOnly(sets))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         requestFields(requestFieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
@@ -188,9 +188,9 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(put(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", set.getId())
                 .content(JsonBuilder.distributionSetUpdateValidFieldsOnly(update))
-                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -217,7 +217,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedTargets",
                         set.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -242,7 +242,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/autoAssignTargetFilters",
                 set.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -267,7 +267,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                         .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==*1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
@@ -291,7 +291,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                         .param("offset", "1").param("limit", "2").param("sort", "name:DESC")
                         .param("q", "controllerId==target*").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
@@ -317,7 +317,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                         .param("offset", "1").param("limit", "2").param("sort", "name:DESC")
                         .param("q", "controllerId==target*").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
@@ -342,7 +342,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/installedTargets",
                         set.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -376,7 +376,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         this.mockMvc
                 .perform(post(
                         MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedTargets",
-                        set.getId()).content(list.toString()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        set.getId()).content(list.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(
@@ -432,7 +432,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         // post assignment
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM",
-                disSet.getId()).contentType(MediaType.APPLICATION_JSON_UTF8).content(list.toString()))
+                disSet.getId()).contentType(MediaType.APPLICATION_JSON).content(list.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(
@@ -450,7 +450,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
                         + "/{distributionSetId}/assignedSM/{softwareModuleId}",
                 set.getId(), set.findFirstModuleByType(osType).get().getId())
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -467,7 +467,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         // post assignment
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM",
                 set.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -501,7 +501,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM")
                 .param("offset", "1").param("limit", "2").param("sort", "version:DESC").param("q", "name==one*")
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
@@ -525,7 +525,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
                 testDS.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -554,7 +554,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{dsId}/metadata", testDS.getId())
                 .param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q", "key==known*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         requestParameters(
                                 parameterWithName("limit").attributes(key("type").value("query"))
@@ -610,7 +610,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
 
         mockMvc.perform(put(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadatakey}",
-                testDS.getId(), knownKey).contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonObject.toString()))
+                testDS.getId(), knownKey).contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(
@@ -662,9 +662,9 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
         jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
-                testDS.getId()).contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonArray.toString()))
+                testDS.getId()).contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         pathParameters(
                                 parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID)),

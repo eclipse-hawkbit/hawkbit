@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link SoftwareModuleType}, which dynamically loads a batch
@@ -42,7 +41,7 @@ public class SoftwareModuleTypeDataProvider<T extends ProxyIdentifiableEntity>
      */
     public SoftwareModuleTypeDataProvider(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final IdentifiableEntityToProxyIdentifiableEntityMapper<T, SoftwareModuleType> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by("name").ascending());
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

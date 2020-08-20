@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link Target}, which dynamically loads a batch of
@@ -44,7 +43,7 @@ public class TargetManagementStateDataProvider
      */
     public TargetManagementStateDataProvider(final TargetManagement targetManagement,
             final TargetToProxyTargetMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "lastModifiedAt"));
+        super(entityMapper, Sort.by("lastModifiedAt").descending());
 
         this.targetManagement = targetManagement;
     }

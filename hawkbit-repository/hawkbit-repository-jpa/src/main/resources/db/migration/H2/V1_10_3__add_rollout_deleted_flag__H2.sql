@@ -2,14 +2,14 @@ ALTER TABLE sp_rollout ADD COLUMN deleted BOOLEAN;
 
 UPDATE sp_rollout SET deleted = 0;
 
-ALTER TABLE sp_action MODIFY target BIGINT NOT NULL;
-ALTER TABLE sp_action MODIFY distribution_set BIGINT NOT NULL;
-ALTER TABLE sp_action MODIFY status INTEGER NOT NULL;
-ALTER TABLE sp_action_status MODIFY status INTEGER NOT NULL;
-ALTER TABLE sp_rollout MODIFY status INTEGER NOT NULL;
-ALTER TABLE sp_rollout MODIFY distribution_set BIGINT NOT NULL;
-ALTER TABLE sp_rolloutgroup MODIFY rollout BIGINT NOT NULL;
-ALTER TABLE sp_rolloutgroup MODIFY status INTEGER NOT NULL;
+ALTER TABLE sp_action ALTER COLUMN target BIGINT NOT NULL;
+ALTER TABLE sp_action ALTER COLUMN distribution_set BIGINT NOT NULL;
+ALTER TABLE sp_action ALTER COLUMN status INTEGER NOT NULL;
+ALTER TABLE sp_action_status ALTER COLUMN status INTEGER NOT NULL;
+ALTER TABLE sp_rollout ALTER COLUMN status INTEGER NOT NULL;
+ALTER TABLE sp_rollout ALTER COLUMN distribution_set BIGINT NOT NULL;
+ALTER TABLE sp_rolloutgroup ALTER COLUMN rollout BIGINT NOT NULL;
+ALTER TABLE sp_rolloutgroup ALTER COLUMN status INTEGER NOT NULL;
 
 ALTER TABLE sp_ds_type_element DROP CONSTRAINT fk_ds_type_element_element;   
 ALTER TABLE sp_ds_type_element 

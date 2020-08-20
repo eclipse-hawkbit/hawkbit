@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,7 +38,7 @@ public class TargetFilterQueryDataProvider
      */
     public TargetFilterQueryDataProvider(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetFilterQueryToProxyTargetFilterMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.ASC, "name"));
+        super(entityMapper, Sort.by("name").ascending());
 
         this.targetFilterQueryManagement = targetFilterQueryManagement;
     }

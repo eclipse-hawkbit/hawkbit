@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,7 +40,7 @@ public class DistributionSetStatelessDataProvider
      */
     public DistributionSetStatelessDataProvider(final DistributionSetManagement distributionSetManagement,
             final DistributionSetToProxyDistributionMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.ASC, "name", "version"));
+        super(entityMapper, Sort.by("name", "version").ascending());
 
         this.distributionSetManagement = distributionSetManagement;
     }

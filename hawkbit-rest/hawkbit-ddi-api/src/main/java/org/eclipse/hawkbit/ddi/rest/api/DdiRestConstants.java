@@ -60,7 +60,10 @@ public final class DdiRestConstants {
      * Media type for CBOR content with strings encoded as UTF-8. Technically
      * redundant since CBOR always uses UTF-8, but Spring will append it
      * regardless.
+     *
+     * @deprecated Spring dropped the UTF-8 suffix.
      */
+    @Deprecated
     public static final String MEDIA_TYPE_CBOR_UTF8 = "application/cbor;charset=UTF-8";
 
     private DdiRestConstants() {

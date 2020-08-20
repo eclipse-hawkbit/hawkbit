@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,7 +41,7 @@ public class ActionDataProvider extends AbstractProxyDataProvider<ProxyAction, A
      */
     public ActionDataProvider(final DeploymentManagement deploymentManagement,
             final ActionToProxyActionMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "id"));
+        super(entityMapper, Sort.by("id").descending());
 
         this.deploymentManagement = deploymentManagement;
     }

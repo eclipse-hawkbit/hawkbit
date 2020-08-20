@@ -63,6 +63,10 @@
          <groupId>com.cronutils</groupId>
          <artifactId>cron-utils</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-annotations</artifactId>
+      </dependency>
 
       <!-- TEST -->
       <dependency>

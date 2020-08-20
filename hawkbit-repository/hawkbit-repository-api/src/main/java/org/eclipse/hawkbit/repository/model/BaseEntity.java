@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.repository.model;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.hateoas.Identifiable;
+import org.eclipse.hawkbit.repository.Identifiable;
 
 /**
  * Core information of all entities.
  *
  */
-public interface BaseEntity extends Serializable, Identifiable<Long> {
+public interface BaseEntity extends Identifiable<Long>, Serializable {
 
     static Long getIdOrNull(final BaseEntity entity) {
         return entity == null ? null : entity.getId();

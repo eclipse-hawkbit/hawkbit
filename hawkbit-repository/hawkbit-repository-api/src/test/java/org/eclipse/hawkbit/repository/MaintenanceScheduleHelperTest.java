@@ -47,7 +47,7 @@ public class MaintenanceScheduleHelperTest {
         final String duration = "10";
         assertThatThrownBy(() -> MaintenanceScheduleHelper.validateDuration(duration))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class).hasMessage("Provided duration is not valid")
-                .extracting("durationErrorIndex").containsExactly(2);
+                .extracting("durationErrorIndex").isEqualTo(2);
     }
 
     @Test

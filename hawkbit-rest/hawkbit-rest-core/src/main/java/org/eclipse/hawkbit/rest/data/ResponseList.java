@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * List that extends ResourceSupport to ensure that links in content are in HAL
@@ -22,7 +22,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @param <T>
  *            of the response content
  */
-public class ResponseList<T> extends ResourceSupport implements List<T> {
+public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implements List<T> {
 
     private final List<T> content;
 

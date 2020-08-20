@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for BaseEntity to RESTful API representation.
  *
  */
-public abstract class MgmtBaseEntity extends ResourceSupport {
+public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
 
     @JsonProperty
     private String createdBy;

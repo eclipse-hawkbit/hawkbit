@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 
-import org.springframework.hateoas.Identifiable;
+import org.eclipse.hawkbit.repository.Identifiable;
 
 /**
  * Use to display software modules for the selected distribution.

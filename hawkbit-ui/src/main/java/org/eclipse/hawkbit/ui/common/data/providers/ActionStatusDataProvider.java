@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Data provider for {@link ActionStatus}, which dynamically loads a batch of
@@ -40,7 +39,7 @@ public class ActionStatusDataProvider extends AbstractProxyDataProvider<ProxyAct
      */
     public ActionStatusDataProvider(final DeploymentManagement deploymentManagement,
             final ActionStatusToProxyActionStatusMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "id"));
+        super(entityMapper, Sort.by("id").descending());
 
         this.deploymentManagement = deploymentManagement;
     }
