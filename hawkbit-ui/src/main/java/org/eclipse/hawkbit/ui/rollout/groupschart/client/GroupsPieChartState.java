@@ -23,18 +23,36 @@ public class GroupsPieChartState extends AbstractComponentState {
 
     private Long totalTargetCount;
 
+    /**
+     * @return Total count of group target
+     */
     public List<Long> getGroupTargetCounts() {
         return groupTargetCounts;
     }
 
+    /**
+     * Sets the group target count
+     *
+     * @param groupTargetCounts
+     *          list of target counts
+     */
     public void setGroupTargetCounts(List<Long> groupTargetCounts) {
         this.groupTargetCounts = groupTargetCounts;
     }
 
+    /**
+     * @return total count of targets that are represented by the pie
+     */
     public Long getTotalTargetCount() {
         return totalTargetCount;
     }
 
+    /**
+     * Sets the target count
+     *
+     * @param totalTargetCount
+     *          Total targets
+     */
     public void setTotalTargetCount(Long totalTargetCount) {
         this.totalTargetCount = totalTargetCount;
     }

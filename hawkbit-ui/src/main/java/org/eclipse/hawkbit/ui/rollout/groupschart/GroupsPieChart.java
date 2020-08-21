@@ -24,12 +24,12 @@ public class GroupsPieChart extends AbstractComponent {
     /**
      * Updates the state of the chart
      * 
-     * @param groupTargetCounts
-     *            list of target counts
      * @param totalTargetsCount
      *            total count of targets that are represented by the pie
+     * @param groupTargetCounts
+     *            list of target counts
      */
-    public void setChartState(final List<Long> groupTargetCounts, final Long totalTargetsCount) {
+    public void setChartState(final Long totalTargetsCount, final List<Long> groupTargetCounts) {
         getState().setGroupTargetCounts(groupTargetCounts);
         getState().setTotalTargetCount(totalTargetsCount);
         markAsDirty();

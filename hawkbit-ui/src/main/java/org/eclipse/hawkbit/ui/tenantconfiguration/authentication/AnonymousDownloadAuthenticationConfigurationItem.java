@@ -8,55 +8,28 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+
+import com.vaadin.ui.HorizontalLayout;
 
 /**
  * This class represents the UI item for the anonymous download by in the
  * authentication configuration view.
  */
-public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractBooleanTenantConfigurationItem {
+public class AnonymousDownloadAuthenticationConfigurationItem extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean configurationEnabled;
-    private boolean configurationEnabledChange;
-
-    public AnonymousDownloadAuthenticationConfigurationItem(
-            final TenantConfigurationManagement tenantConfigurationManagement, final VaadinMessageSource i18n) {
-        super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement, i18n);
-
-        super.init("label.configuration.anonymous.download");
-        configurationEnabled = isConfigEnabled();
+    /**
+     * Constructor for AnonymousDownloadAuthenticationConfigurationItem
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     */
+    public AnonymousDownloadAuthenticationConfigurationItem(final VaadinMessageSource i18n) {
+        setSpacing(false);
+        setMargin(false);
+        addComponent(SPUIComponentProvider.generateLabel(i18n, "label.configuration.anonymous.download"));
     }
-
-    @Override
-    public void configEnable() {
-        configurationEnabledChange = !configurationEnabled;
-        configurationEnabled = true;
-    }
-
-    @Override
-    public void configDisable() {
-        configurationEnabledChange = configurationEnabled;
-        configurationEnabled = false;
-    }
-
-    @Override
-    public void save() {
-        if (!configurationEnabledChange) {
-            return;
-        }
-        getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
-    }
-
-    @Override
-    public void undo() {
-        configurationEnabledChange = false;
-        configurationEnabled = getTenantConfigurationManagement()
-                .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
-    }
-
 }

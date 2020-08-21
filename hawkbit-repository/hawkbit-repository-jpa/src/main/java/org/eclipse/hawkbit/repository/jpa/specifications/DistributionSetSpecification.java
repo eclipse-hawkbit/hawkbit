@@ -8,13 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -149,27 +152,36 @@ public final class DistributionSetSpecification {
     public static Specification<JpaDistributionSet> hasTags(final Collection<String> tagNames,
             final Boolean selectDSWithNoTag) {
         return (targetRoot, query, cb) -> {
-            final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
-                    JoinType.LEFT);
-            final Predicate predicate = getPredicate(tags, tagNames, selectDSWithNoTag, cb);
+            final Predicate predicate = getHasTagsPredicate(targetRoot, cb, selectDSWithNoTag, tagNames);
             query.distinct(true);
             return predicate;
         };
     }
 
-    private static Predicate getPredicate(final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags,
-            final Collection<String> tagNames, final Boolean selectDSWithNoTag, final CriteriaBuilder cb) {
-        tags.get(JpaDistributionSetTag_.name);
+    private static Predicate getHasTagsPredicate(final Root<JpaDistributionSet> targetRoot, final CriteriaBuilder cb,
+            final Boolean selectDSWithNoTag, final Collection<String> tagNames) {
+        final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
+                JoinType.LEFT);
         final Path<String> exp = tags.get(JpaDistributionSetTag_.name);
-        if (selectDSWithNoTag != null && selectDSWithNoTag) {
-            if (!CollectionUtils.isEmpty(tagNames)) {
-                return cb.or(exp.isNull(), exp.in(tagNames));
-            } else {
-                return exp.isNull();
-            }
-        } else {
-            return exp.in(tagNames);
+
+        final List<Predicate> hasTagsPredicates = new ArrayList<>();
+        if (isNoTagActive(selectDSWithNoTag)) {
+            hasTagsPredicates.add(exp.isNull());
         }
+        if (isAtLeastOneTagActive(tagNames)) {
+            hasTagsPredicates.add(exp.in(tagNames));
+        }
+
+        return hasTagsPredicates.stream().reduce(cb::or).orElseThrow(
+                () -> new RuntimeException("Neither NO_TAG, nor TAG distribution set tag filter was provided!"));
+    }
+
+    private static boolean isNoTagActive(final Boolean selectDSWithNoTag) {
+        return Boolean.TRUE.equals(selectDSWithNoTag);
+    }
+
+    private static boolean isAtLeastOneTagActive(final Collection<String> tagNames) {
+        return !CollectionUtils.isEmpty(tagNames);
     }
 
     /**

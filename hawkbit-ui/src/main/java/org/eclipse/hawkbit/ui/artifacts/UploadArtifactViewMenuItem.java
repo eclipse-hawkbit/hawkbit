@@ -12,12 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
+import org.eclipse.hawkbit.ui.menu.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -31,7 +31,6 @@ import com.vaadin.spring.annotation.UIScope;
 @UIScope
 @Order(500)
 public class UploadArtifactViewMenuItem extends AbstractDashboardMenuItemNotification {
-
     private static final long serialVersionUID = 1L;
 
     @Autowired
@@ -46,17 +45,17 @@ public class UploadArtifactViewMenuItem extends AbstractDashboardMenuItemNotific
 
     @Override
     public Resource getDashboardIcon() {
-        return FontAwesome.UPLOAD;
+        return VaadinIcons.UPLOAD;
     }
 
     @Override
     public String getDashboardCaption() {
-        return getI18n().getMessage("dashboard.upload.caption");
+        return i18n.getMessage("dashboard.upload.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return getI18n().getMessage("dashboard.upload.caption-long");
+        return i18n.getMessage("dashboard.upload.caption-long");
     }
 
     @Override

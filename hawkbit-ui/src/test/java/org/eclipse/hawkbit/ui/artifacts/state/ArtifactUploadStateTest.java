@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.state;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
@@ -28,9 +29,6 @@ import io.qameta.allure.Story;
 public class ArtifactUploadStateTest {
 
     @Mock
-    public SoftwareModuleFilters softwareModuleFilters;
-
-    @Mock
     public FileUploadId fileUploadId1;
 
     @Mock
@@ -47,7 +45,7 @@ public class ArtifactUploadStateTest {
 
     @Before
     public void setupTest() {
-        stateUnderTest = new ArtifactUploadState(softwareModuleFilters);
+        stateUnderTest = new ArtifactUploadState();
     }
 
     @Test

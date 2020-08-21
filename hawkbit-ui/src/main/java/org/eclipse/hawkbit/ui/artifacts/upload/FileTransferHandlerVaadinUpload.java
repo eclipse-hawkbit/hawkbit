@@ -59,6 +59,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     FileTransferHandlerVaadinUpload(final long maxSize, final SoftwareModuleManagement softwareManagement,
             final ArtifactManagement artifactManagement, final VaadinMessageSource i18n, final Lock uploadLock) {
         super(artifactManagement, i18n, uploadLock);
+
         this.maxSize = maxSize;
         this.softwareModuleManagement = softwareManagement;
     }
@@ -91,7 +92,8 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
                 interruptUploadDueToIllegalFilename();
                 event.getUpload().interruptUpload();
             } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
-                LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(), softwareModule);
+                LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(),
+                        softwareModule);
                 interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();
             }
@@ -99,12 +101,9 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     }
 
     private SoftwareModule getSelectedSoftwareModule() {
-        if (getUploadState().isMoreThanOneSoftwareModulesSelected()) {
-            throw new IllegalStateException("More than one SoftwareModul selected but only one is allowed");
-        }
-        final long selectedId = getUploadState().getSelectedBaseSwModuleId()
-                .orElseThrow(() -> new IllegalStateException("No SoftwareModul selected"));
-        return softwareModuleManagement.get(selectedId)
+        final Long lastSelectedSmId = getUploadState().getSmGridLayoutUiState().getSelectedEntityId();
+
+        return softwareModuleManagement.get(lastSelectedSmId)
                 .orElseThrow(() -> new IllegalStateException("SoftwareModul with unknown ID selected"));
     }
 

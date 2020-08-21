@@ -32,24 +32,40 @@ public class UiProperties implements Serializable {
 
     private final Links links = new Links();
 
-    private final Login login = new Login();
-
     private final Demo demo = new Demo();
 
     private final Event event = new Event();
 
+    /**
+     * @return True if menu item has gravatar else false
+     */
     public boolean isGravatar() {
         return gravatar;
     }
 
+    /**
+     * Sets the gravatar
+     *
+     * @param gravatar
+     *            Menu icon
+     */
     public void setGravatar(final boolean gravatar) {
         this.gravatar = gravatar;
     }
 
+    /**
+     * @return Fixed time zone if unknown then GMT
+     */
     public String getFixedTimeZone() {
         return fixedTimeZone;
     }
 
+    /**
+     * Sets the fixed time zone
+     *
+     * @param fixedTimeZone
+     *            Date time zone
+     */
     public void setFixedTimeZone(final String fixedTimeZone) {
         this.fixedTimeZone = fixedTimeZone;
     }
@@ -70,18 +86,36 @@ public class UiProperties implements Serializable {
          */
         private List<Locale> availableLocals = Collections.singletonList(Locale.ENGLISH);
 
+        /**
+         * @return Default locale
+         */
         public Locale getDefaultLocal() {
             return defaultLocal;
         }
 
+        /**
+         * @return List of available locale
+         */
         public List<Locale> getAvailableLocals() {
             return availableLocals;
         }
 
+        /**
+         * Sets the default locale
+         *
+         * @param defaultLocal
+         *            Locale
+         */
         public void setDefaultLocal(final Locale defaultLocal) {
             this.defaultLocal = defaultLocal;
         }
 
+        /**
+         * Sets the all available locale
+         *
+         * @param availableLocals
+         *            List of locale
+         */
         public void setAvailableLocals(final List<Locale> availableLocals) {
             this.availableLocals = availableLocals;
         }
@@ -112,34 +146,70 @@ public class UiProperties implements Serializable {
 
         private String disclaimer = "";
 
+        /**
+         * @return password
+         */
         public String getPassword() {
             return password;
         }
 
+        /**
+         * @return tenant
+         */
         public String getTenant() {
             return tenant;
         }
 
+        /**
+         * @return username
+         */
         public String getUser() {
             return user;
         }
 
+        /**
+         * Sets the login password
+         *
+         * @param password
+         *            Password value
+         */
         public void setPassword(final String password) {
             this.password = password;
         }
 
+        /**
+         * Sets the tenant
+         *
+         * @param tenant
+         *            Tenant value
+         */
         public void setTenant(final String tenant) {
             this.tenant = tenant;
         }
 
+        /**
+         * Sets the login user
+         *
+         * @param user
+         *            username
+         */
         public void setUser(final String user) {
             this.user = user;
         }
 
+        /**
+         * @return disclaimer
+         */
         public String getDisclaimer() {
             return disclaimer;
         }
 
+        /**
+         * Sets the disclaimer
+         *
+         * @param disclaimer
+         *            Disclaimer value
+         */
         public void setDisclaimer(final String disclaimer) {
             this.disclaimer = disclaimer;
         }
@@ -211,6 +281,9 @@ public class UiProperties implements Serializable {
 
             private String provisioningStateMachine = "";
 
+            /**
+             * @return Link to documentation of deployment view
+             */
             public String getDeploymentView() {
                 return deploymentView;
             }
@@ -219,26 +292,44 @@ public class UiProperties implements Serializable {
                 return distributionView;
             }
 
+            /**
+             * @return Link to documentation of rollout view
+             */
             public String getRolloutView() {
                 return rolloutView;
             }
 
+            /**
+             * @return Link to documentation of root
+             */
             public String getRoot() {
                 return root;
             }
 
+            /**
+             * @return Link to documentation of security
+             */
             public String getSecurity() {
                 return security;
             }
 
+            /**
+             * @return Link to documentation of rollout
+             */
             public String getRollout() {
                 return rollout;
             }
 
+            /**
+             * @return Link to documentation of system config
+             */
             public String getSystemConfigurationView() {
                 return systemConfigurationView;
             }
 
+            /**
+             * @return Link to documentation of target filter
+             */
             public String getTargetfilterView() {
                 return targetfilterView;
             }
@@ -247,10 +338,16 @@ public class UiProperties implements Serializable {
                 return uploadView;
             }
 
+            /**
+             * @return Link to documentation of maintenance window
+             */
             public String getMaintenanceWindowView() {
                 return maintenanceWindowView;
             }
 
+            /**
+             * @return Link to documentation of provisioning state machine
+             */
             public String getProvisioningStateMachine() {
                 return provisioningStateMachine;
             }
@@ -267,14 +364,32 @@ public class UiProperties implements Serializable {
                 this.rolloutView = rolloutView;
             }
 
+            /**
+             * Sets the root documentation link
+             *
+             * @param root
+             *            link
+             */
             public void setRoot(final String root) {
                 this.root = root;
             }
 
+            /**
+             * Sets the security documentation link
+             *
+             * @param security
+             *            link
+             */
             public void setSecurity(final String security) {
                 this.security = security;
             }
 
+            /**
+             * Sets the rollout documentation link
+             *
+             * @param rollout
+             *            link
+             */
             public void setRollout(final String rollout) {
                 this.rollout = rollout;
             }
@@ -318,68 +433,64 @@ public class UiProperties implements Serializable {
          */
         private String userManagement = "";
 
+        /**
+         * @return Link to documentation
+         */
         public Documentation getDocumentation() {
             return documentation;
         }
 
+        /**
+         * @return Link to request a system account, access
+         */
         public String getRequestAccount() {
             return requestAccount;
         }
 
+        /**
+         * @return Link to product support
+         */
         public String getSupport() {
             return support;
         }
 
+        /**
+         * @return Link to user management
+         */
         public String getUserManagement() {
             return userManagement;
         }
 
+        /**
+         * Sets the link to request a system account, access
+         *
+         * @param requestAccount
+         *            Link
+         */
         public void setRequestAccount(final String requestAccount) {
             this.requestAccount = requestAccount;
         }
 
+        /**
+         * Sets the link to product support
+         *
+         * @param support
+         *            Link
+         */
         public void setSupport(final String support) {
             this.support = support;
         }
 
+        /**
+         * Sets the link to user management
+         *
+         * @param userManagement
+         *            Link
+         */
         public void setUserManagement(final String userManagement) {
             this.userManagement = userManagement;
         }
 
-    }
-
-    /**
-     * Configuration of login view.
-     *
-     */
-    public static class Login implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Cookie configuration for login credential cookie.
-         *
-         */
-        public static class Cookie implements Serializable {
-            private static final long serialVersionUID = 1L;
-            /**
-             * Secure cookie enabled.
-             */
-            private boolean secure = true;
-
-            public boolean isSecure() {
-                return secure;
-            }
-
-            public void setSecure(final boolean secure) {
-                this.secure = secure;
-            }
-        }
-
-        private final Cookie cookie = new Cookie();
-
-        public Cookie getCookie() {
-            return cookie;
-        }
     }
 
     /**
@@ -417,22 +528,30 @@ public class UiProperties implements Serializable {
         }
     }
 
+    /**
+     * @return Demo account details
+     */
     public Demo getDemo() {
         return demo;
     }
 
+    /**
+     * @return Document links
+     */
     public Links getLinks() {
         return links;
     }
 
-    public Login getLogin() {
-        return login;
-    }
-
+    /**
+     * @return Events
+     */
     public Event getEvent() {
         return event;
     }
 
+    /**
+     * @return Localization
+     */
     public Localization getLocalization() {
         return localization;
     }

@@ -12,12 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.ui.management.AbstractDashboardMenuItemNotification;
+import org.eclipse.hawkbit.ui.menu.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -29,7 +29,6 @@ import com.vaadin.spring.annotation.UIScope;
 @UIScope
 @Order(200)
 public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
-
     private static final long serialVersionUID = 1L;
 
     @Autowired
@@ -44,17 +43,17 @@ public class RolloutViewMenuItem extends AbstractDashboardMenuItemNotification {
 
     @Override
     public Resource getDashboardIcon() {
-        return FontAwesome.TASKS;
+        return VaadinIcons.TASKS;
     }
 
     @Override
     public String getDashboardCaption() {
-        return getI18n().getMessage("dashboard.rollouts.caption");
+        return i18n.getMessage("dashboard.rollouts.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return getI18n().getMessage("dashboard.rollouts.caption-long");
+        return i18n.getMessage("dashboard.rollouts.caption-long");
     }
 
     @Override

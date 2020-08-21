@@ -8,22 +8,22 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AnonymousDownloadAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.GatewaySecurityTokenAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.TargetSecurityTokenAuthenticationConfigurationItem;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.BooleanConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -33,8 +33,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * View to configure the authentication mode.
  */
-public class AuthenticationConfigurationView extends BaseConfigurationView
-        implements ConfigurationItem.ConfigurationItemChangeListener, ValueChangeListener {
+public class AuthenticationConfigurationView extends CustomComponent {
 
     private static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
 
@@ -43,36 +42,26 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
     private final VaadinMessageSource i18n;
 
     private final CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
-
     private final TargetSecurityTokenAuthenticationConfigurationItem targetSecurityTokenAuthenticationConfigurationItem;
-
     private final GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
-
     private final AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
 
     private final UiProperties uiProperties;
 
-    private CheckBox gatewaySecTokenCheckBox;
+    private final Binder<ProxySystemConfigWindow> binder;
 
-    private CheckBox targetSecTokenCheckBox;
-
-    private CheckBox certificateAuthCheckbox;
-
-    private CheckBox downloadAnonymousCheckBox;
-
-    AuthenticationConfigurationView(final VaadinMessageSource i18n,
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final SecurityTokenGenerator securityTokenGenerator, final UiProperties uiProperties) {
+    AuthenticationConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
+            final SecurityTokenGenerator securityTokenGenerator, final Binder<ProxySystemConfigWindow> binder) {
         this.i18n = i18n;
-        this.uiProperties = uiProperties;
-        this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(
-                tenantConfigurationManagement, i18n);
         this.targetSecurityTokenAuthenticationConfigurationItem = new TargetSecurityTokenAuthenticationConfigurationItem(
-                tenantConfigurationManagement, i18n);
+                i18n);
+        this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(i18n, binder);
         this.gatewaySecurityTokenAuthenticationConfigurationItem = new GatewaySecurityTokenAuthenticationConfigurationItem(
-                tenantConfigurationManagement, i18n, securityTokenGenerator);
+                i18n, securityTokenGenerator, binder);
         this.anonymousDownloadAuthenticationConfigurationItem = new AnonymousDownloadAuthenticationConfigurationItem(
-                tenantConfigurationManagement, i18n);
+                i18n);
+        this.uiProperties = uiProperties;
+        this.binder = binder;
 
         init();
     }
@@ -85,6 +74,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         rootPanel.addStyleName("config-panel");
 
         final VerticalLayout vLayout = new VerticalLayout();
+        vLayout.setSpacing(false);
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
@@ -94,37 +84,49 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
         final GridLayout gridLayout = new GridLayout(3, 4);
         gridLayout.setSpacing(true);
-        gridLayout.setImmediate(true);
+
         gridLayout.setSizeFull();
         gridLayout.setColumnExpandRatio(1, 1.0F);
 
-        certificateAuthCheckbox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        certificateAuthCheckbox.setValue(certificateAuthenticationConfigurationItem.isConfigEnabled());
-        certificateAuthCheckbox.addValueChangeListener(this);
-        certificateAuthenticationConfigurationItem.addChangeListener(this);
+        final CheckBox certificateAuthCheckbox = FormComponentBuilder.getCheckBox(
+                UIComponentIdProvider.CERT_AUTH_ALLOWED_CHECKBOX, binder, ProxySystemConfigWindow::isCertificateAuth,
+                ProxySystemConfigWindow::setCertificateAuth);
+        certificateAuthCheckbox.setStyleName(DIST_CHECKBOX_STYLE);
+        certificateAuthCheckbox.addValueChangeListener(valueChangeEvent -> {
+            if (valueChangeEvent.getValue()) {
+                certificateAuthenticationConfigurationItem.showDetails();
+            } else {
+                certificateAuthenticationConfigurationItem.hideDetails();
+            }
+        });
         gridLayout.addComponent(certificateAuthCheckbox, 0, 0);
         gridLayout.addComponent(certificateAuthenticationConfigurationItem, 1, 0);
 
-        targetSecTokenCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        targetSecTokenCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        targetSecTokenCheckBox.addValueChangeListener(this);
-        targetSecurityTokenAuthenticationConfigurationItem.addChangeListener(this);
+        final CheckBox targetSecTokenCheckBox = FormComponentBuilder.getCheckBox(
+                UIComponentIdProvider.TARGET_SEC_TOKEN_ALLOWED_CHECKBOX, binder,
+                ProxySystemConfigWindow::isTargetSecToken, ProxySystemConfigWindow::setTargetSecToken);
+        targetSecTokenCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
         gridLayout.addComponent(targetSecTokenCheckBox, 0, 1);
         gridLayout.addComponent(targetSecurityTokenAuthenticationConfigurationItem, 1, 1);
 
-        gatewaySecTokenCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        gatewaySecTokenCheckBox.setId("gatewaysecuritycheckbox");
-        gatewaySecTokenCheckBox.setValue(gatewaySecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        gatewaySecTokenCheckBox.addValueChangeListener(this);
-        gatewaySecurityTokenAuthenticationConfigurationItem.addChangeListener(this);
+        final CheckBox gatewaySecTokenCheckBox = FormComponentBuilder.getCheckBox(
+                UIComponentIdProvider.GATEWAY_SEC_TOKEN_ALLOWED_CHECKBOX, binder,
+                ProxySystemConfigWindow::isGatewaySecToken, ProxySystemConfigWindow::setGatewaySecToken);
+        gatewaySecTokenCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
+        gatewaySecTokenCheckBox.addValueChangeListener(valueChangeEvent -> {
+            if (valueChangeEvent.getValue()) {
+                gatewaySecurityTokenAuthenticationConfigurationItem.showDetails();
+            } else {
+                gatewaySecurityTokenAuthenticationConfigurationItem.hideDetails();
+            }
+        });
         gridLayout.addComponent(gatewaySecTokenCheckBox, 0, 2);
         gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, 2);
 
-        downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
-        downloadAnonymousCheckBox.setId(UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX);
-        downloadAnonymousCheckBox.setValue(anonymousDownloadAuthenticationConfigurationItem.isConfigEnabled());
-        downloadAnonymousCheckBox.addValueChangeListener(this);
-        anonymousDownloadAuthenticationConfigurationItem.addChangeListener(this);
+        final CheckBox downloadAnonymousCheckBox = FormComponentBuilder.getCheckBox(
+                UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX, binder, ProxySystemConfigWindow::isDownloadAnonymous,
+                ProxySystemConfigWindow::setDownloadAnonymous);
+        downloadAnonymousCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
         gridLayout.addComponent(downloadAnonymousCheckBox, 0, 3);
         gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, 3);
 
@@ -136,61 +138,5 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
-    }
-
-    @Override
-    public void save() {
-        certificateAuthenticationConfigurationItem.save();
-        targetSecurityTokenAuthenticationConfigurationItem.save();
-        gatewaySecurityTokenAuthenticationConfigurationItem.save();
-        anonymousDownloadAuthenticationConfigurationItem.save();
-    }
-
-    @Override
-    public void undo() {
-        certificateAuthenticationConfigurationItem.undo();
-        targetSecurityTokenAuthenticationConfigurationItem.undo();
-        gatewaySecurityTokenAuthenticationConfigurationItem.undo();
-        anonymousDownloadAuthenticationConfigurationItem.undo();
-        certificateAuthCheckbox.setValue(certificateAuthenticationConfigurationItem.isConfigEnabled());
-        targetSecTokenCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        gatewaySecTokenCheckBox.setValue(gatewaySecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        downloadAnonymousCheckBox.setValue(anonymousDownloadAuthenticationConfigurationItem.isConfigEnabled());
-    }
-
-    @Override
-    public void configurationHasChanged() {
-        notifyConfigurationChanged();
-    }
-
-    @Override
-    public void valueChange(final ValueChangeEvent event) {
-
-        if (!(event.getProperty() instanceof CheckBox)) {
-            return;
-        }
-
-        notifyConfigurationChanged();
-
-        final CheckBox checkBox = (CheckBox) event.getProperty();
-        BooleanConfigurationItem configurationItem;
-
-        if (gatewaySecTokenCheckBox.equals(checkBox)) {
-            configurationItem = gatewaySecurityTokenAuthenticationConfigurationItem;
-        } else if (targetSecTokenCheckBox.equals(checkBox)) {
-            configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
-        } else if (certificateAuthCheckbox.equals(checkBox)) {
-            configurationItem = certificateAuthenticationConfigurationItem;
-        } else if (downloadAnonymousCheckBox.equals(checkBox)) {
-            configurationItem = anonymousDownloadAuthenticationConfigurationItem;
-        } else {
-            return;
-        }
-
-        if (checkBox.getValue()) {
-            configurationItem.configEnable();
-        } else {
-            configurationItem.configDisable();
-        }
     }
 }

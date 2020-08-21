@@ -50,7 +50,31 @@ public final class UIComponentIdProvider {
     /**
      * ID-Targ.PIN.
      */
-    public static final String TARGET_PIN_ICON = "target.pin.icon.";
+    public static final String TARGET_PIN_ICON = "target.pin.icon";
+    /**
+     * ID-Targ.PIN.
+     */
+    public static final String DIST_PIN_ICON = "dist.pin.icon";
+    /**
+     * ID-Targ.DELETE.
+     */
+    public static final String TARGET_DELET_ICON = "target.delete.icon";
+    /**
+     * ID-Dist.DELETE.
+     */
+    public static final String DIST_DELET_ICON = "dist.delete.icon";
+    /**
+     * ID-Sm.DELETE.
+     */
+    public static final String SM_DELET_ICON = "sm.delete.icon";
+    /**
+     * ID-Artifact.DELETE.
+     */
+    public static final String ARTIFACT_DELET_ICON = "artifact.delete.icon";
+    /**
+     * ID-MetaData.DELETE.
+     */
+    public static final String META_DATA_DELET_ICON = "meta.data.delete.icon";
     /**
      * Target search text id.
      */
@@ -63,6 +87,11 @@ public final class UIComponentIdProvider {
      * ID for add target filter icon
      */
     public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
+
+    /**
+     * ID prefix for custom target filter
+     */
+    public static final String CUSTOM_FILTER_BUTTON_PREFIX = "customFilter";
 
     /**
      * ID for menubar for configuring target tags
@@ -81,9 +110,14 @@ public final class UIComponentIdProvider {
     public static final String NO_TAG_TARGET = "no.tag.target";
 
     /**
-     * ID-Dist. on deployment and distribution view
+     * ID-Dist. on deployment view
      */
     public static final String DIST_TABLE_ID = "dist.tableId";
+
+    /**
+     * ID-Dist. on distribution view
+     */
+    public static final String DIST_SET_TABLE_ID = "distSet.tableId";
 
     /**
      * ID-Dist.Name.
@@ -122,15 +156,13 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_TAG_COMBO = "dist.tag.combo";
     /**
-     * ID-Dist.PIN.
-     */
-    public static final String DIST_PIN_BUTTON = "dist.pin.button";
-
-    /**
      * ID for menubar for configuring distribution set tags
      */
-    public static final String DIST_TAG_MENU_BAR_ID = "distribution.set.menu.bar.id";
-
+    public static final String DIST_TAG_MENU_BAR_ID = "distribution.set.tag.menu.bar.id";
+    /**
+     * ID for menubar for configuring distribution set types
+     */
+    public static final String DIST_TYPE_MENU_BAR_ID = "distribution.set.type.menu.bar.id";
     /**
      * ID for NO TAG for distribution sets
      */
@@ -139,6 +171,10 @@ public final class UIComponentIdProvider {
      * ID for distribution set tag icon
      */
     public static final String SHOW_DIST_TAG_ICON = "show.dist.tags.icon";
+    /**
+     * ID for distribution set tag icon
+     */
+    public static final String SHOW_SM_TYPE_ICON = "show.sm.types.icon";
     /**
      * ID - soft.module.name.
      */
@@ -151,6 +187,11 @@ public final class UIComponentIdProvider {
      * ID - soft.module.vendor.
      */
     public static final String SOFT_MODULE_VENDOR = "soft.module.vendor";
+
+    /**
+     * ID-Dist for Software Module Table within Distributions View.
+     */
+    public static final String SOFTWARE_MODULE_TABLE = "swModule.table";
 
     /**
      * ID for menubar for configuring software module types
@@ -232,7 +273,10 @@ public final class UIComponentIdProvider {
      * DROP filter icon id.
      */
     public static final String TARGET_DROP_FILTER_ICON = "target.drop.filter.icon";
-
+    /**
+     * Details header caption id of the Action History Grid
+     */
+    public static final String ACTION_HISTORY_DETAILS_HEADER_LABEL_ID = "action.history.details.header.caption";
     /**
      * Action history grid Id.
      */
@@ -271,6 +315,16 @@ public final class UIComponentIdProvider {
      * Action history table status label Id.
      */
     public static final String ACTION_HISTORY_TABLE_STATUS_LABEL_ID = "action.history.table.statusId";
+
+    /**
+     * Target table status label Id.
+     */
+    public static final String TARGET_TABLE_STATUS_LABEL_ID = "target.table.statusId";
+
+    /**
+     * Target table polling status label Id.
+     */
+    public static final String TARGET_TABLE_POLLING_STATUS_LABEL_ID = "target.table.poll.statusId";
 
     /**
      * Action history table active-state label Id.
@@ -351,10 +405,6 @@ public final class UIComponentIdProvider {
      * Confirmation dialogue OK button id.
      */
     public static final String OK_BUTTON = "ok.button";
-    /**
-     * Upload - type button id.
-     */
-    public static final String UPLOAD_TYPE_BUTTON_PREFIX = "upload.type.button.";
 
     /**
      * Upload - artifact detail close button.
@@ -382,16 +432,12 @@ public final class UIComponentIdProvider {
      * Upload- file delete button id.
      */
     public static final String UPLOAD_FILE_DELETE_ICON = "upload.file.delete.button";
-    /**
-     * ID-Dist.
-     */
-    public static final String UPLOAD_SOFTWARE_MODULE_TABLE = "upload.swModule.table";
 
     /**
      * Artifact - file download button id
      */
     public static final String ARTIFACT_FILE_DOWNLOAD_ICON = "artifact.file.download.button";
-    
+
     /**
      * Upload result popup close button.
      */
@@ -410,6 +456,11 @@ public final class UIComponentIdProvider {
      * Upload - artifact upload error reason.
      */
     public static final String UPLOAD_ERROR_REASON = "upload-error-reason";
+
+    /**
+     * Upload popup status label Id.
+     */
+    public static final String UPLOAD_STATUS_LABEL_ID = "upload.statusId";
 
     /**
      * Upload - software module search text id.
@@ -451,14 +502,14 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_SW_MODULE_EDIT_BUTTON = "swmodule.edit.button";
 
     /**
-     * Artifact upload - sw module show artifact details button id.
-     */
-    public static final String UPLOAD_SW_MODULE_SHOW_ARTIFACT_DETAILS_BUTTON = "swmodule.show.artifacts.details.button";
-
-    /**
      * Artifact upload - sw module metadata button id.
      */
     public static final String UPLOAD_SW_MODULE_METADATA_BUTTON = "swmodule.metadata.button";
+
+    /**
+     * Artifact details - sw module button id.
+     */
+    public static final String SW_MODULE_ARTIFACT_DETAILS_BUTTON = "swmodule.artifact.details.button";
 
     /**
      * Ds edit button id.
@@ -469,6 +520,12 @@ public final class UIComponentIdProvider {
      * Ds metadata button id.
      */
     public static final String DS_METADATA_BUTTON = "ds.metadata.button";
+
+    /**
+     * Ds details description label id.
+     */
+    public static final String DS_DETAILS_DESCRIPTION_ID = "ds.details.description";
+
     /**
      * Upload Artifact details max table Id.
      */
@@ -478,6 +535,21 @@ public final class UIComponentIdProvider {
      * Target tag close button.
      */
     public static final String HIDE_TARGET_TAGS = "hide.target.tags";
+
+    /**
+     * Distribution tag close button.
+     */
+    public static final String HIDE_DS_TAGS = "hide.distribution.tags";
+
+    /**
+     * Distribution type close button.
+     */
+    public static final String HIDE_DS_TYPES = "hide.distribution.types";
+
+    /**
+     * Software Module type close button.
+     */
+    public static final String HIDE_SM_TYPES = "hide.sm.types";
 
     /**
      * Show target tag layout icon.
@@ -559,16 +631,6 @@ public final class UIComponentIdProvider {
     public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
 
     /**
-     * ID for update tags and types icon
-     */
-    public static final String UPDATE_TAG_ID = "update.";
-
-    /**
-     * ID for delete tags and types icon
-     */
-    public static final String DELETE_TAG_ID = "delete.";
-
-    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
@@ -582,11 +644,6 @@ public final class UIComponentIdProvider {
      * Id of maximize/minimize icon of table - Distribution table.
      */
     public static final String DS_MAX_MIN_TABLE_ICON = "ds.max.min.table.icon";
-
-    /**
-     * Software module table in upload UI.
-     */
-    public static final String SM_TYPE_FILTER_BTN_ID = "sm.type.filter.btn.";
 
     /**
      * Target table details header caption id.
@@ -611,7 +668,12 @@ public final class UIComponentIdProvider {
     /**
      * Software module table details description label id.
      */
-    public static final String DETAILS_DESCRIPTION_LABEL_ID = "details.description";
+    public static final String SM_DETAILS_DESCRIPTION_LABEL_ID = "sm.details.description";
+
+    /**
+     * Software module table details description label id.
+     */
+    public static final String TARGET_DETAILS_DESCRIPTION_ID = "target.details.description";
 
     /**
      * Software module table details type label id.
@@ -627,11 +689,6 @@ public final class UIComponentIdProvider {
      * Id of show filter button in software module table.
      */
     public static final String SM_SHOW_FILTER_BUTTON_ID = "show.filter.layout";
-
-    /**
-     * Software module table in upload UI.
-     */
-    public static final String DS_TYPE_FILTER_BTN_ID = "ds.type.filter.btn.";
 
     /**
      * Id of target table search reset Icon.
@@ -657,6 +714,36 @@ public final class UIComponentIdProvider {
      * Id of Controller Id label in target details.
      */
     public static final String TARGET_CONTROLLER_ID = "target.controller.id";
+
+    /**
+     * Id of created at label in details.
+     */
+    public static final String CREATEDAT_ID = "createdAt.id";
+
+    /**
+     * Id of created by label in details.
+     */
+    public static final String CREATEDBY_ID = "createdBy.id";
+
+    /**
+     * Id of last modified at label in details.
+     */
+    public static final String MODIFIEDAT_ID = "modifiedAt.id";
+
+    /**
+     * Id of last modified by label in details.
+     */
+    public static final String MODIFIEDBY_ID = "modifiedBy.id";
+
+    /**
+     * Id of Controller Id label in target details.
+     */
+    public static final String TARGET_ASSIGNED_DS_NAME_ID = "target.assigned.ds.name.id";
+
+    /**
+     * Id of Controller Id label in target details.
+     */
+    public static final String TARGET_ASSIGNED_DS_VERSION_ID = "target.assigned.ds.version.id";
 
     /**
      * Id of security token label in target details.
@@ -706,7 +793,7 @@ public final class UIComponentIdProvider {
     /**
      * Prefix for assigned tag button ids.
      */
-    public static final String ASSIGNED_TAG_ID_PREFIX = "tag.assigned.";
+    public static final String ASSIGNED_TAG_ID_PREFIX = "tag.assigned";
 
     /**
      * Assign tag icon id.
@@ -734,29 +821,19 @@ public final class UIComponentIdProvider {
     public static final String CONFIGURE_DISTRIBUTION_TAG = "distribution.tag.configure";
 
     /**
-     * New Target tag name field id.
+     * Tag name popup field id.
      */
-    public static final String NEW_TARGET_TAG_NAME = "target.tag.add.name";
+    public static final String TAG_POPUP_NAME = "tag.popup.name";
 
     /**
-     * New Distribution tag name field id.
+     * Tag description popup field id.
      */
-    public static final String NEW_DISTRIBUTION_TAG_NAME = "distribution.tag.add.name";
+    public static final String TAG_POPUP_DESCRIPTION = "tag.popup.description";
 
     /**
-     * New Software Module name field id.
+     * Tag description popup field id.
      */
-    public static final String NEW_SOFTWARE_TYPE_NAME = "software.type.add.name";
-
-    /**
-     * New Distribution Type name field id.
-     */
-    public static final String NEW_DISTRIBUTION_TYPE_NAME = "distribution.set.type.add.name";
-
-    /**
-     * New Distribution Type key field id.
-     */
-    public static final String NEW_DISTRIBUTION_TYPE_KEY = "distribution.set.type.add.key";
+    public static final String TYPE_POPUP_KEY = "type.popup.key";
 
     /**
      * New Create Update option group id.
@@ -769,37 +846,9 @@ public final class UIComponentIdProvider {
     public static final String ASSIGN_OPTION_GROUP_SOFTWARE_MODULE_TYPE_ID = "assign.option.group.soft.module.type.id";
 
     /**
-     * New Software Module desc field id.
-     */
-    public static final String NEW_SOFTWARE_TYPE_DESC = "software.type.add.desc";
-    /**
-     * Hide filter by dist type layout button.
-     */
-    public static final String HIDE_FILTER_DIST_TYPE = "hide.filter.dist.type.layout";
-    /**
-     * New Distribution Type distribution field id.
-     */
-    public static final String NEW_DISTRIBUTION_TYPE_DESC = "distribution.set.type.add.desc";
-
-    /**
      * New Distribution Type distribution field id.
      */
     public static final String NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO = "distribution.set.type.name.combo";
-
-    /**
-     * New Software Module key field id.
-     */
-    public static final String NEW_SOFTWARE_TYPE_KEY = "software.type.add.key";
-
-    /**
-     * New Target tag desc field id.
-     */
-    public static final String NEW_TARGET_TAG_DESC = "target.tag.add.desc";
-
-    /**
-     * New Distribution tag desc field id.
-     */
-    public static final String NEW_DISTRIBUTION_TAG_DESC = "distribution.tag.add.desc";
 
     /**
      * New distribution Type set tag add icon id.
@@ -820,6 +869,16 @@ public final class UIComponentIdProvider {
      * New software module set type configure icon id.
      */
     public static final String CONFIGURE_SOFTWARE_MODULE_TYPE = "softwaremodule.type.configure";
+
+    /**
+     * Bulk target upload popup id.
+     */
+    public static final String BULK_UPLOAD_POPUP_ID = "bulkupload.popup.id";
+
+    /**
+     * Bulk target upload popup main layout id.
+     */
+    public static final String BULK_UPLOAD_MAIN_LAYOUT = "bulkupload.main.layout";
 
     /**
      * Bulk target upload - distribution set combo.
@@ -900,6 +959,11 @@ public final class UIComponentIdProvider {
      * Target filter table id.
      */
     public static final String TARGET_FILTER_TABLE_ID = "target.query.filter.table.Id";
+
+    /**
+     * Target filter table forced label Id.
+     */
+    public static final String TARGET_FILTER_TABLE_TYPE_LABEL_ID = "target.query.filter.table.typeId";
 
     /**
      * create or update target filter query - name label id.
@@ -1027,6 +1091,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_ACTION_ID = "rollout.action.button.id";
 
     /**
+     * Rollout list action type label Id.
+     */
+    public static final String ROLLOUT_ACTION_TYPE_LABEL_ID = "rollout.action.type.id";
+
+    /**
      * Rollout start button id.
      */
     public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".6";
@@ -1072,6 +1141,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_GROUP_STATUS_LABEL_ID = "rollout.group.status.id";
 
     /**
+     * Rollout group target status label id.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_STATUS_LABEL_ID = "rollout.group.target.status.id";
+
+    /**
      * Rollout % or count option group id.
      */
     public static final String ROLLOUT_ERROR_THRESOLD_OPTION_ID = "rollout.error.thresold.option.id";
@@ -1089,6 +1163,10 @@ public final class UIComponentIdProvider {
      * Rollout group header caption.
      */
     public static final String ROLLOUT_GROUP_HEADER_CAPTION = "rollout.group.header.caption";
+    /**
+     * Rollout group targets header caption.
+     */
+    public static final String ROLLOUT_GROUP_TARGETS_HEADER_CAPTION = "rollout.group.targets.header.caption";
     /**
      * Rollout group close id.
      */
@@ -1122,6 +1200,16 @@ public final class UIComponentIdProvider {
      * Artifact upload view - upload status button id.
      */
     public static final String UPLOAD_STATUS_BUTTON = "artficat.upload.status.button.id";
+
+    /**
+     * Artifact upload view - Artifact details and Drag and Drop area layout id.
+     */
+    public static final String UPLOAD_ARTIFACT_DETAILS_AND_UPLOAD_LAYOUT = "artficat.upload.artifactdetailsandupload.layout";
+
+    /**
+     * Artifact upload view - Drop area for file upload layout id.
+     */
+    public static final String UPLOAD_ARTIFACT_FILE_DROP_LAYOUT = "artficat.upload.filedrop.layout";
 
     /**
      * Artifact upload view - uplod status popup id.
@@ -1158,9 +1246,13 @@ public final class UIComponentIdProvider {
      */
     public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
     /**
-     * Metadata table id.
+     * Metadata details table id.
      */
-    public static final String METDATA_TABLE_ID = "metadata.table.id";
+    public static final String METDATA_DETAILS_TABLE_ID = "metadata.details.table.id";
+    /**
+     * Metadata window table id.
+     */
+    public static final String METDATA_WINDOW_TABLE_ID = "metadata.window.table.id";
 
     /**
      * Distribution set table - Manage metadata id.
@@ -1168,9 +1260,9 @@ public final class UIComponentIdProvider {
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
 
     /**
-     * DistributionSet - Metadata detail link.
+     * DistributionSet type prefix.
      */
-    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
+    public static final String DS_TYPE_PREFIX = "distributionset";
 
     /**
      * Metadata popup id.
@@ -1188,6 +1280,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_POPUP_ID = "add.update.rollout.popup";
 
     /**
+     * Tag popup id.
+     */
+    public static final String TAG_POPUP_ID = "add.update.tag.popup";
+
+    /**
      * Create popup id.
      */
     public static final String CREATE_POPUP_ID = "create.popup.id";
@@ -1198,19 +1295,29 @@ public final class UIComponentIdProvider {
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
 
     /**
+     * Ds details modules table id.
+     */
+    public static final String DS_DETAILS_MODULES_ID = "ds.details.modules";
+
+    /**
      * Software module table details tab id in Distributions .
      */
     public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
 
     /**
-     * Software Module - Metadata detail link.
+     * Software Module type prefix.
      */
-    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
+    public static final String SW_TYPE_PREFIX = "softwaremodule";
 
     /**
-     * Target - Metadata detail link.
+     * Target type prefix.
      */
-    public static final String TARGET_METADATA_DETAIL_LINK = "target.metadata.detail.link";
+    public static final String TARGET_TYPE_PREFIX = "target";
+
+    /**
+     * Metadata detail link.
+     */
+    public static final String METADATA_DETAIL_LINK = "metadata.detail.link";
 
     /**
      * Table multiselect for selecting DistType
@@ -1220,6 +1327,18 @@ public final class UIComponentIdProvider {
      * ID for download anonymous checkbox
      */
     public static final String DOWNLOAD_ANONYMOUS_CHECKBOX = "downloadanonymouscheckbox";
+    /**
+     * ID for certificate auth checkbox
+     */
+    public static final String CERT_AUTH_ALLOWED_CHECKBOX = "certificateauthallowed";
+    /**
+     * ID for target security token checkbox
+     */
+    public static final String TARGET_SEC_TOKEN_ALLOWED_CHECKBOX = "targetsectokenallowed";
+    /**
+     * ID for gateway security token checkbox
+     */
+    public static final String GATEWAY_SEC_TOKEN_ALLOWED_CHECKBOX = "gatewaysecuritycheckbox";
     /**
      * Id of custom filter query search Icon.
      */
@@ -1254,12 +1373,47 @@ public final class UIComponentIdProvider {
     /**
      * Id of the unread notification icon in the menu
      */
-    public static final String NOTIFICATION_MENU_ID = "notification.menu.";
+    public static final String NOTIFICATION_MENU_ID = "notification.menu";
 
     /**
      * Id of the rollout deletion confirmation window
      */
     public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
+
+    /**
+     * Id of the target filter deletion confirmation window
+     */
+    public static final String TARGET_FILTER_DELETE_CONFIRMATION_DIALOG = "target.filter.delete.confirmation.window";
+
+    /**
+     * Id of the artifact deletion confirmation window
+     */
+    public static final String ARTIFACT_DELETE_CONFIRMATION_DIALOG = "artifact.delete.confirmation.window";
+
+    /**
+     * Id of the software module deletion confirmation window
+     */
+    public static final String SM_DELETE_CONFIRMATION_DIALOG = "sm.delete.confirmation.window";
+
+    /**
+     * Id of the metadata deletion confirmation window
+     */
+    public static final String METADATA_DELETE_CONFIRMATION_DIALOG = "metadata.delete.confirmation.window";
+
+    /**
+     * Id of the tag/type button deletion confirmation window
+     */
+    public static final String FILTER_BUTTON_DELETE_CONFIRMATION_DIALOG = "filter.button.delete.confirmation.window";
+
+    /**
+     * Id of the distribution set deletion confirmation window
+     */
+    public static final String DS_DELETE_CONFIRMATION_DIALOG = "ds.delete.confirmation.window";
+
+    /**
+     * Id of the target deletion confirmation window
+     */
+    public static final String TARGET_DELETE_CONFIRMATION_DIALOG = "target.delete.confirmation.window";
 
     /**
      * Details header caption id of the Artifacts Table
@@ -1315,7 +1469,34 @@ public final class UIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_MINIMIZE_BUTTON_ID = "artifact.upload.minimize.button.id";
 
-    public static final String SAVE_ACTION_RADIO_FORCED = "save.action.radio.forced";
+    public static final String DEPLOYMENT_ASSIGNMENT_ACTION_TYPE_OPTIONS_ID = "deployment.assignment.action.type.options.id";
+
+    public static final String AUTO_ASSIGNMENT_ACTION_TYPE_OPTIONS_ID = "auto.assignment.action.type.options.id";
+
+    public static final String ROLLOUT_ACTION_TYPE_OPTIONS_ID = "rollout.action.type.options.id";
+
+    public static final String ROLLOUT_START_OPTIONS_ID = "rollout.start.options.id";
+
+    public static final String SM_TYPE_COLOR_STYLE = "sm-type-colors";
+
+    public static final String SM_TYPE_COLOR_CLASS = "sm-type-color";
+
+    /**
+     * Target tag button id prefix.
+     */
+    public static final String TARGET_TAG_ID_PREFIXS = "target.tag";
+    /**
+     * Distribution tag button id prefix.
+     */
+    public static final String DISTRIBUTION_TAG_ID_PREFIXS = "dist.tag";
+    /**
+     * Software Module Type button id prefix.
+     */
+    public static final String SOFTWARE_MODULE_TYPE_ID_PREFIXS = "swmodule.type";
+    /**
+     * DistributionSet Type button id prefix.
+     */
+    public static final String DISTRIBUTION_SET_TYPE_ID_PREFIXS = "dist.set.type";
 
     /**
      * /* Private Constructor.

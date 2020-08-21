@@ -21,8 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -344,70 +347,43 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            final Pageable pageable, final long orderByDistributionId, final String searchText, final Long typeId) {
+            final Pageable pageable, final long dsId, final String searchText, final Long smTypeId) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Tuple> query = cb.createTupleQuery();
+        final Root<JpaSoftwareModule> smRoot = query.from(JpaSoftwareModule.class);
+
+        final ListJoin<JpaSoftwareModule, JpaDistributionSet> assignedDsList = smRoot
+                .join(JpaSoftwareModule_.assignedTo, JoinType.LEFT);
+
+        final Expression<Integer> assignedCaseMax = cb.max(
+                cb.<Long, Integer> selectCase(assignedDsList.get(JpaDistributionSet_.id)).when(dsId, 1).otherwise(0));
+
+        query.multiselect(smRoot.alias("sm"), assignedCaseMax.alias("assigned"));
+
+        final Predicate[] specPredicate = specificationsToPredicate(buildSpecificationList(searchText, smTypeId),
+                smRoot, query, cb);
+
+        if (specPredicate.length > 0) {
+            query.where(specPredicate);
+        }
+
+        query.groupBy(smRoot);
+
+        query.orderBy(cb.desc(assignedCaseMax), cb.asc(smRoot.get(JpaSoftwareModule_.name)),
+                cb.asc(smRoot.get(JpaSoftwareModule_.version)));
+
+        final int pageSize = pageable.getPageSize();
+        final List<Tuple> smWithAssignedFlagList = entityManager.createQuery(query)
+                .setFirstResult((int) pageable.getOffset()).setMaxResults(pageSize).getResultList();
+        final boolean hasNext = smWithAssignedFlagList.size() > pageSize;
 
         final List<AssignedSoftwareModule> resultList = new ArrayList<>();
-        final int pageSize = pageable.getPageSize();
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // get the assigned software modules
-        final CriteriaQuery<JpaSoftwareModule> assignedQuery = cb.createQuery(JpaSoftwareModule.class);
-        final Root<JpaSoftwareModule> assignedRoot = assignedQuery.from(JpaSoftwareModule.class);
-        assignedQuery.distinct(true);
-        final ListJoin<JpaSoftwareModule, JpaDistributionSet> assignedDsJoin = assignedRoot
-                .join(JpaSoftwareModule_.assignedTo);
-        // build the specifications and then to predicates necessary by the
-        // given filters
-        final Predicate[] specPredicate = specificationsToPredicate(buildSpecificationList(searchText, typeId),
-                assignedRoot, assignedQuery, cb,
-                cb.equal(assignedDsJoin.get(JpaDistributionSet_.id), orderByDistributionId));
-        // if we have some predicates then add it to the where clause of the
-        // multi select
-        assignedQuery.where(specPredicate);
-        assignedQuery.orderBy(cb.asc(assignedRoot.get(JpaSoftwareModule_.name)),
-                cb.asc(assignedRoot.get(JpaSoftwareModule_.version)));
-        // don't page the assigned query on database, we need all assigned
-        // software modules to filter
-        // them out in the unassigned query
-        final List<JpaSoftwareModule> assignedSoftwareModules = entityManager.createQuery(assignedQuery)
-                .getResultList();
-        // map result
-        if (pageable.getOffset() < assignedSoftwareModules.size()) {
-            assignedSoftwareModules
-                    .subList((int) pageable.getOffset(),
-                            Math.min(assignedSoftwareModules.size(), pageable.getPageSize()))
-                    .forEach(sw -> resultList.add(new AssignedSoftwareModule(sw, true)));
-        }
+        smWithAssignedFlagList.forEach(smWithAssignedFlag -> resultList
+                .add(new AssignedSoftwareModule(smWithAssignedFlag.get("sm", JpaSoftwareModule.class),
+                        smWithAssignedFlag.get("assigned", Number.class).longValue() == 1)));
 
-        if (assignedSoftwareModules.size() >= pageSize) {
-            return new SliceImpl<>(resultList);
-        }
-
-        // get the unassigned software modules
-        final CriteriaQuery<JpaSoftwareModule> unassignedQuery = cb.createQuery(JpaSoftwareModule.class);
-        unassignedQuery.distinct(true);
-        final Root<JpaSoftwareModule> unassignedRoot = unassignedQuery.from(JpaSoftwareModule.class);
-
-        Predicate[] unassignedSpec;
-        if (!assignedSoftwareModules.isEmpty()) {
-            unassignedSpec = specificationsToPredicate(buildSpecificationList(searchText, typeId), unassignedRoot,
-                    unassignedQuery, cb, cb.not(unassignedRoot.get(JpaSoftwareModule_.id).in(
-                            assignedSoftwareModules.stream().map(SoftwareModule::getId).collect(Collectors.toList()))));
-        } else {
-            unassignedSpec = specificationsToPredicate(buildSpecificationList(searchText, typeId), unassignedRoot,
-                    unassignedQuery, cb);
-        }
-
-        unassignedQuery.where(unassignedSpec);
-        unassignedQuery.orderBy(cb.asc(unassignedRoot.get(JpaSoftwareModule_.name)),
-                cb.asc(unassignedRoot.get(JpaSoftwareModule_.version)));
-        final List<JpaSoftwareModule> unassignedSoftwareModules = entityManager.createQuery(unassignedQuery)
-                .setFirstResult((int) Math.max(0, pageable.getOffset() - assignedSoftwareModules.size()))
-                .setMaxResults(pageSize).getResultList();
-        // map result
-        unassignedSoftwareModules.forEach(sw -> resultList.add(new AssignedSoftwareModule(sw, false)));
-
-        return new SliceImpl<>(resultList);
+        return new SliceImpl<>(Collections.unmodifiableList(resultList), pageable, hasNext);
     }
 
     private List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText, final Long typeId) {
@@ -462,6 +438,15 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         }
 
         return softwareModuleRepository.findByAssignedToId(pageable, setId);
+    }
+
+    @Override
+    public long countByAssignedTo(final long setId) {
+        if (!distributionSetRepository.existsById(setId)) {
+            throw new EntityNotFoundException(DistributionSet.class, setId);
+        }
+
+        return softwareModuleRepository.countByAssignedToId(setId);
     }
 
     @Override

@@ -12,11 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.ui.menu.AbstractDashboardMenuItemNotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -42,17 +43,17 @@ public class DeploymentViewMenuItem extends AbstractDashboardMenuItemNotificatio
 
     @Override
     public Resource getDashboardIcon() {
-        return FontAwesome.HOME;
+        return VaadinIcons.HOME;
     }
 
     @Override
     public String getDashboardCaption() {
-        return getI18n().getMessage("dashboard.deployment.caption");
+        return i18n.getMessage("dashboard.deployment.caption");
     }
 
     @Override
     public String getDashboardCaptionLong() {
-        return getI18n().getMessage("dashboard.deployment.caption-long");
+        return i18n.getMessage("dashboard.deployment.caption-long");
     }
 
     @Override

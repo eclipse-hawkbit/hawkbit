@@ -8,158 +8,98 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import java.util.Map;
-
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
+import org.eclipse.hawkbit.ui.common.data.mappers.ActionStatusToProxyActionStatusMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.ActionStatusDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyActionStatus;
+import org.eclipse.hawkbit.ui.common.event.EventLayout;
+import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
-import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryGrid.LabelConfig;
-import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
+import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.MasterEntitySupport;
+import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
+import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.google.common.collect.Maps;
 
 /**
  * This grid presents the action states for a selected action.
  */
-public class ActionStatusGrid extends AbstractGrid<LazyQueryContainer> {
+public class ActionStatusGrid extends AbstractGrid<ProxyActionStatus, Long> {
     private static final long serialVersionUID = 1L;
 
-    private static final String[] leftAlignedColumns = new String[] { ProxyActionStatus.PXY_AS_CREATED_AT };
+    private static final String STATUS_ID = "status";
+    private static final String CREATED_AT_ID = "createdAt";
 
-    private static final String[] centerAlignedColumns = new String[] { ProxyActionStatus.PXY_AS_STATUS };
+    private final ActionStatusIconSupplier<ProxyActionStatus> actionStatusIconSupplier;
 
-    private final AlignCellStyleGenerator alignGenerator;
-    private final TooltipGenerator tooltipGenerator;
-
-    private final Map<Action.Status, StatusFontIcon> states;
-
-    private final BeanQueryFactory<ActionStatusBeanQuery> targetQF = new BeanQueryFactory<>(
-            ActionStatusBeanQuery.class);
+    private final transient MasterEntitySupport<ProxyAction> masterEntitySupport;
 
     /**
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
+     * @param deploymentManagement
+     *            deploymentManagement
      */
-    protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
+    protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final DeploymentManagement deploymentManagement) {
         super(i18n, eventBus, null);
 
-        setSingleSelectionSupport(new SingleSelectionSupport());
-        setDetailsSupport(new DetailsSupport());
+        setSelectionSupport(new SelectionSupport<ProxyActionStatus>(this, eventBus,
+                EventLayout.ACTION_HISTORY_STATUS_LIST, EventView.DEPLOYMENT, null, null, null));
+        getSelectionSupport().enableSingleSelection();
 
-        final LabelConfig conf = new ActionHistoryGrid.LabelConfig();
-        states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_STATUS_GRID_STATUS_LABEL_ID);
-        alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, null);
-        tooltipGenerator = new TooltipGenerator(i18n);
+        setFilterSupport(new FilterSupport<>(
+                new ActionStatusDataProvider(deploymentManagement, new ActionStatusToProxyActionStatusMapper())));
+        initFilterMappings();
+
+        this.masterEntitySupport = new MasterEntitySupport<>(getFilterSupport());
+
+        actionStatusIconSupplier = new ActionStatusIconSupplier<>(i18n, ProxyActionStatus::getStatus,
+                UIComponentIdProvider.ACTION_STATUS_GRID_STATUS_LABEL_ID);
 
         init();
     }
 
-    @Override
-    protected boolean doSubscribeToEventBus() {
-        return false;
+    private void initFilterMappings() {
+        getFilterSupport().<Long> addMapping(FilterType.MASTER,
+                (filter, masterFilter) -> getFilterSupport().setFilter(masterFilter));
     }
 
     @Override
-    protected LazyQueryContainer createContainer() {
-        configureQueryFactory();
-        return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, ProxyActionStatus.PXY_AS_ID), targetQF);
-    }
-
-    @Override
-    public void refreshContainer() {
-        configureQueryFactory();
-        super.refreshContainer();
-    }
-
-    protected void configureQueryFactory() {
-        // ADD all the filters to the query config
-        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(1);
-        queryConfig.put(SPUIDefinitions.ACTIONSTATES_BY_ACTION, getDetailsSupport().getMasterDataId());
-        // Create ActionBeanQuery factory with the query config.
-        targetQF.setQueryConfiguration(queryConfig);
-    }
-
-    /**
-     * Gets type-save access to LazyQueryContainer.
-     *
-     * @return LazyQueryContainer
-     */
-    private LazyQueryContainer getLazyQueryContainer() {
-        return (LazyQueryContainer) getContainerDataSource();
-    }
-
-    @Override
-    protected void addContainerProperties() {
-        final LazyQueryContainer lqContainer = getLazyQueryContainer();
-        lqContainer.addContainerProperty(ProxyActionStatus.PXY_AS_CREATED_AT, Long.class, null, true, true);
-        lqContainer.addContainerProperty(ProxyActionStatus.PXY_AS_STATUS, Action.Status.class, null, true, false);
-    }
-
-    @Override
-    protected void setColumnExpandRatio() {
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setMinimumWidth(53);
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setMaximumWidth(55);
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setMinimumWidth(100);
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setMaximumWidth(400);
-    }
-
-    @Override
-    protected void setColumnHeaderNames() {
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT)
-                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
-    }
-
-    @Override
-    protected String getGridId() {
+    public String getGridId() {
         return UIComponentIdProvider.ACTION_HISTORY_DETAILS_GRID_ID;
     }
 
     @Override
-    protected void setColumnProperties() {
-        clearSortOrder();
-        setColumns(ProxyActionStatus.PXY_AS_STATUS, ProxyActionStatus.PXY_AS_CREATED_AT);
-        alignColumns();
-    }
+    public void addColumns() {
+        GridComponentBuilder
+                .addIconColumn(this, actionStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
+                .setHidable(false).setHidden(false);
 
-    @Override
-    protected void addColumnRenderers() {
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setRenderer(new HtmlLabelRenderer(),
-                new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setConverter(new LongToFormattedDateStringConverter());
-    }
-
-    private StatusFontIcon createStatusLabelMetadata(final Action.Status status) {
-        return states.get(status);
-    }
-
-    @Override
-    protected void setHiddenColumns() {
-        getColumn(ProxyActionStatus.PXY_AS_STATUS).setHidable(false);
-        getColumn(ProxyActionStatus.PXY_AS_CREATED_AT).setHidable(false);
+        GridComponentBuilder
+                .addColumn(this,
+                        actionStatus -> SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt(),
+                                SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT))
+                .setId(CREATED_AT_ID).setCaption(i18n.getMessage("header.rolloutgroup.target.date"))
+                .setDescriptionGenerator(actionStatus -> SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()))
+                .setHidable(false).setHidden(false);
     }
 
     /**
-     * Sets the alignment cell-style-generator that handles the alignment for
-     * the grid cells.
+     * @return Master entity support
      */
-    private void alignColumns() {
-        setCellStyleGenerator(alignGenerator);
+    public MasterEntitySupport<ProxyAction> getMasterEntitySupport() {
+        return masterEntitySupport;
     }
-
-    @Override
-    protected CellDescriptionGenerator getDescriptionGenerator() {
-        return tooltipGenerator;
-    }
-
 }

@@ -29,6 +29,8 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
      * 
      * @param action
      *            the updated action
+     * @param targetId
+     *            targetId identifier (optional)
      * @param rolloutId
      *            rollout identifier (optional)
      * @param rolloutGroupId
@@ -36,9 +38,9 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
      * @param applicationId
      *            the origin application id
      */
-    public ActionUpdatedEvent(final Action action, final Long rolloutId, final Long rolloutGroupId,
+    public ActionUpdatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId,
             final String applicationId) {
-        super(action, rolloutId, rolloutGroupId, applicationId);
+        super(action, targetId, rolloutId, rolloutGroupId, applicationId);
     }
 
 }

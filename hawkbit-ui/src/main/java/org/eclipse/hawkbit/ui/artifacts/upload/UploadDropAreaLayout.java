@@ -8,70 +8,54 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.util.Collection;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion;
-import org.eclipse.hawkbit.ui.dd.criteria.ServerItemIdClientCriterion.Mode;
+import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
+import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.event.dd.acceptcriteria.Not;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import com.vaadin.ui.dnd.FileDropHandler;
+import com.vaadin.ui.dnd.FileDropTarget;
+import com.vaadin.ui.dnd.event.FileDropEvent;
 
 /**
  * Container for drag and drop area in the upload view.
  */
-public class UploadDropAreaLayout extends AbstractComponent {
-
+public class UploadDropAreaLayout extends CustomComponent implements MasterEntityAwareComponent<ProxySoftwareModule> {
     private static final long serialVersionUID = 1L;
 
-    private static AcceptCriterion acceptAllExceptBlacklisted = new Not(new ServerItemIdClientCriterion(Mode.PREFIX,
-            UIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
-
-    private DragAndDropWrapper dropAreaWrapper;
-
     private final VaadinMessageSource i18n;
-
     private final UINotification uiNotification;
 
     private final ArtifactUploadState artifactUploadState;
 
-    private final transient MultipartConfigElement multipartConfigElement;
-
+    private final transient ArtifactManagement artifactManagement;
     private final transient SoftwareModuleManagement softwareManagement;
 
-    private final transient ArtifactManagement artifactManagement;
+    private final transient MultipartConfigElement multipartConfigElement;
+    private final transient Lock uploadLock = new ReentrantLock();
 
     private final UploadProgressButtonLayout uploadButtonLayout;
-
-    private final transient Lock uploadLock = new ReentrantLock();
+    private VerticalLayout dropAreaLayout;
 
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.
@@ -103,84 +87,112 @@ public class UploadDropAreaLayout extends AbstractComponent {
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
+
         this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareManagement, uploadLock);
 
         buildLayout();
-
-        eventBus.subscribe(this);
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final SoftwareModuleEvent event) {
-        final BaseEntityEventType eventType = event.getEventType();
-        if (eventType == BaseEntityEventType.SELECTED_ENTITY) {
-            UI.getCurrent().access(() -> {
-                if (artifactUploadState.isNoSoftwareModuleSelected()
-                        || artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
-                    dropAreaWrapper.setEnabled(false);
-                } else if (artifactUploadState.areAllUploadsFinished()) {
-                    dropAreaWrapper.setEnabled(true);
-                }
-            });
-        }
     }
 
     private void buildLayout() {
-        dropAreaWrapper = new DragAndDropWrapper(createDropAreaLayout());
-        dropAreaWrapper.setDropHandler(new DropAreaHandler());
-    }
+        dropAreaLayout = new VerticalLayout();
+        dropAreaLayout.setId(UIComponentIdProvider.UPLOAD_ARTIFACT_FILE_DROP_LAYOUT);
+        dropAreaLayout.setMargin(false);
+        dropAreaLayout.setSpacing(false);
+        dropAreaLayout.addStyleName("upload-drop-area-layout-info");
+        dropAreaLayout.setEnabled(false);
+        dropAreaLayout.setHeightUndefined();
 
-    private VerticalLayout createDropAreaLayout() {
-        final VerticalLayout dropAreaLayout = new VerticalLayout();
-        final Label dropHereLabel = new Label(i18n.getMessage(UIMessageIdProvider.LABEL_DROP_AREA_UPLOAD));
-        dropHereLabel.setWidth(null);
-
-        final Label dropIcon = new Label(FontAwesome.ARROW_DOWN.getHtml(), ContentMode.HTML);
+        final Label dropIcon = new Label(VaadinIcons.ARROW_DOWN.getHtml(), ContentMode.HTML);
         dropIcon.addStyleName("drop-icon");
         dropIcon.setWidth(null);
-
         dropAreaLayout.addComponent(dropIcon);
-        dropAreaLayout.setComponentAlignment(dropIcon, Alignment.TOP_CENTER);
+
+        final Label dropHereLabel = new Label(i18n.getMessage(UIMessageIdProvider.LABEL_DROP_AREA_UPLOAD));
+        dropHereLabel.setWidth(null);
         dropAreaLayout.addComponent(dropHereLabel);
-        dropAreaLayout.setComponentAlignment(dropHereLabel, Alignment.TOP_CENTER);
 
         uploadButtonLayout.setWidth(null);
         uploadButtonLayout.addStyleName("upload-button");
         dropAreaLayout.addComponent(uploadButtonLayout);
-        dropAreaLayout.setComponentAlignment(uploadButtonLayout, Alignment.BOTTOM_CENTER);
 
-        dropAreaLayout.setSizeFull();
-        dropAreaLayout.setStyleName("upload-drop-area-layout-info");
-        dropAreaLayout.setSpacing(false);
+        new FileDropTarget<>(dropAreaLayout, new UploadFileDropHandler());
+
+        setCompositionRoot(dropAreaLayout);
+    }
+
+    /**
+     * Update the upload view on file drop
+     *
+     * @param masterEntity
+     *          ProxySoftwareModule
+     */
+    @Override
+    public void masterEntityChanged(final ProxySoftwareModule masterEntity) {
+        final Long masterEntityId = masterEntity != null ? masterEntity.getId() : null;
+
+        dropAreaLayout.setEnabled(masterEntityId != null);
+        uploadButtonLayout.updateMasterEntityFilter(masterEntityId);
+    }
+
+    /**
+     * Checks progress on file upload
+     *
+     * @param fileUploadProgress
+     *          FileUploadProgress
+     */
+    public void onUploadChanged(final FileUploadProgress fileUploadProgress) {
+        uploadButtonLayout.onUploadChanged(fileUploadProgress);
+    }
+
+    /**
+     * Is called when view is shown to the user
+     */
+    public void restoreState() {
+        uploadButtonLayout.restoreState();
+    }
+
+    /**
+     * Get file drop area layout
+     *
+     * @return VerticalLayout
+     */
+    public VerticalLayout getDropAreaLayout() {
         return dropAreaLayout;
     }
 
-    public DragAndDropWrapper getDropAreaWrapper() {
-        return dropAreaWrapper;
+    /**
+     * Get File upload button layout
+     *
+     * @return UploadProgressButtonLayout
+     */
+    public UploadProgressButtonLayout getUploadButtonLayout() {
+        return uploadButtonLayout;
     }
 
-    private class DropAreaHandler implements DropHandler {
+    private class UploadFileDropHandler implements FileDropHandler<VerticalLayout> {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Validates the file drop events and triggers the upload
+         *
+         * @param event
+         *          FileDropEvent
+         */
         @Override
-        public AcceptCriterion getAcceptCriterion() {
-            return acceptAllExceptBlacklisted;
-        }
-
-        @Override
-        public void drop(final DragAndDropEvent event) {
+        public void drop(final FileDropEvent<VerticalLayout> event) {
             if (validate(event)) {
-                final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 // selected software module at the time of file drop is
                 // considered for upload
-                artifactUploadState.getSelectedBaseSwModuleId()
-                        .ifPresent(selectedSwId -> uploadFilesForSoftwareModule(files, selectedSwId));
+                final Long lastSelectedSmId = artifactUploadState.getSmGridLayoutUiState().getSelectedEntityId();
+                if (lastSelectedSmId != null) {
+                    uploadFilesForSoftwareModule(event.getFiles(), lastSelectedSmId);
+                }
             }
         }
 
-        private void uploadFilesForSoftwareModule(final Html5File[] files, final Long softwareModuleId) {
+        private void uploadFilesForSoftwareModule(final Collection<Html5File> files, final Long softwareModuleId) {
             final SoftwareModule softwareModule = softwareManagement.get(softwareModuleId).orElse(null);
 
             boolean duplicateFound = false;
@@ -199,7 +211,7 @@ public class UploadDropAreaLayout extends AbstractComponent {
             }
         }
 
-        private boolean validate(final DragAndDropEvent event) {
+        private boolean validate(final FileDropEvent<VerticalLayout> event) {
             // check if drop is valid.If valid ,check if software module is
             // selected.
             if (!isFilesDropped(event)) {
@@ -209,29 +221,19 @@ public class UploadDropAreaLayout extends AbstractComponent {
             return validateSoftwareModuleSelection();
         }
 
-        private boolean isFilesDropped(final DragAndDropEvent event) {
-            if (event.getTransferable() instanceof WrapperTransferable) {
-                final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-                return files != null;
-            }
-            return false;
+        private boolean isFilesDropped(final FileDropEvent<VerticalLayout> event) {
+            return event.getFiles() != null;
         }
 
         private boolean validateSoftwareModuleSelection() {
-            if (artifactUploadState.isNoSoftwareModuleSelected()) {
+            final Long lastSelectedSmId = artifactUploadState.getSmGridLayoutUiState().getSelectedEntityId();
+
+            if (lastSelectedSmId == null) {
                 uiNotification.displayValidationError(i18n.getMessage("message.error.noSwModuleSelected"));
                 return false;
             }
-            if (artifactUploadState.isMoreThanOneSoftwareModulesSelected()) {
-                uiNotification.displayValidationError(i18n.getMessage("message.error.multiSwModuleSelected"));
-                return false;
-            }
+
             return true;
         }
     }
-
-    public UploadProgressButtonLayout getUploadButtonLayout() {
-        return uploadButtonLayout;
-    }
-
 }

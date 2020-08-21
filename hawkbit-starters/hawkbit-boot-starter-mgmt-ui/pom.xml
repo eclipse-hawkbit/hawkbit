@@ -68,18 +68,6 @@
          <version>${project.version}</version>
       </dependency>
       <!-- hawkBit - END -->
-      
-      <!-- exclude gwt-elemental as there are class conflicts -->
-      <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-client</artifactId>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.vaadin.external.gwt</groupId>
-                  <artifactId>gwt-elemental</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>  
 
    </dependencies>
 </project>

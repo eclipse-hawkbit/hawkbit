@@ -10,6 +10,10 @@
 
 @mixin accordion {
 
+.v-accordion-item {
+  outline: none;
+}
+
   //Accordion caption style.accordion is displayed in confirmation popup
 .v-accordion-item-caption {
     color: $accordion-action-history-title-color !important;

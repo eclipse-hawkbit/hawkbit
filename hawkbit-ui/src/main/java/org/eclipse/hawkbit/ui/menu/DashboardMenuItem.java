@@ -17,9 +17,6 @@ import com.vaadin.ui.Label;
 
 /**
  * Describe a menu entry for the Dashboard.
- * 
- *
- *
  */
 public interface DashboardMenuItem extends Serializable {
 
@@ -72,5 +69,4 @@ public interface DashboardMenuItem extends Serializable {
      * @return return the notification
      */
     Label getNotificationUnreadLabel();
-
 }

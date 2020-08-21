@@ -143,6 +143,11 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
+    public List<TargetTag> get(final Collection<Long> ids) {
+        return Collections.unmodifiableList(targetTagRepository.findAllById(ids));
+    }
+
+    @Override
     public Page<TargetTag> findAll(final Pageable pageable) {
         return convertTPage(targetTagRepository.findAll(pageable), pageable);
     }

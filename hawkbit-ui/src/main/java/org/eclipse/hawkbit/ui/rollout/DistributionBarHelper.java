@@ -30,6 +30,7 @@ public final class DistributionBarHelper {
     private static final String DISTRIBUTION_BAR_PART_CLASSNAME_PREFIX = GwtDistributionBar.CLASSNAME + "-part-";
     private static final String DISTRIBUTION_BAR_PART_VALUE_CLASSNAME = GwtDistributionBar.CLASSNAME + "-value";
     private static final String UNINITIALIZED_VALUE_CLASSNAME = GwtDistributionBar.CLASSNAME + "-uninitizalized";
+    private static final String TARGET_STATUS_TOOLTIP_MSG_KEY_PREFIX = "tooltip.rollout.target.status.";
 
     private DistributionBarHelper() {
     }
@@ -39,9 +40,6 @@ public final class DistributionBarHelper {
      *
      * @param statusTotalCountMap
      *            map with status and count
-     *
-     * @param i18n
-     *            the i18n
      *
      * @return string of format "status1:count,status2:count"
      */
@@ -85,7 +83,7 @@ public final class DistributionBarHelper {
      *
      * @param i18n
      *            the i18n
-     *            
+     * 
      * @return tool tip
      */
     public static String getTooltip(final Map<Status, Long> statusCountMap, final VaadinMessageSource i18n) {
@@ -93,41 +91,13 @@ public final class DistributionBarHelper {
                 .getStatusMapWithNonZeroValues(statusCountMap);
         final StringBuilder tooltip = new StringBuilder();
         for (final Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
-            tooltip.append(getLabel(entry.getKey(), i18n)).append(" : ").append(entry.getValue())
-                    .append("<br>");
+            tooltip.append(getLabel(entry.getKey(), i18n)).append(" : ").append(entry.getValue()).append("<br>");
         }
         return tooltip.toString();
     }
 
     private static String getLabel(final Status status, final VaadinMessageSource i18n) {
-
-        String label;
-
-        switch (status) {
-
-            case SCHEDULED :
-                label = "label.scheduled";
-                break;
-            case RUNNING :
-                label = "label.running";
-                break;
-            case ERROR :
-                label = "label.error";
-                break;
-            case FINISHED :
-                label = "label.finished";
-                break;
-            case CANCELLED :
-                label = "label.cancelled";
-                break;
-            case NOTSTARTED :
-                label = "label.notStarted";
-                break;
-            default :
-                throw new IllegalStateException("The status " + status + " is not supported.");
-        }
-
-        return i18n.getMessage(label);
+        return i18n.getMessage(TARGET_STATUS_TOOLTIP_MSG_KEY_PREFIX + status.toString().toLowerCase());
     }
 
     private static String getPartStyle(final int partIndex, final int noOfParts, final Status status) {
@@ -180,6 +150,6 @@ public final class DistributionBarHelper {
 
     private static String getParentDivStart() {
         return "<div class=\"" + GwtDistributionBar.CLASSNAME
-                + "\" style=\"width: 100%; height: 100%;\" id=\"rollout.status.progress.bar.id\">";
+                + "\" style=\"width: 100%; height: 95%;\" id=\"rollout.status.progress.bar.id\">";
     }
 }

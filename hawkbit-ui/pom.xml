@@ -25,7 +25,7 @@
             <artifactId>vaadin-maven-plugin</artifactId>
             <version>${vaadin.plugin.version}</version>
             <configuration>
-               <extraJvmArgs>-Xmx1g -Xss1024k</extraJvmArgs>
+               <extraJvmArgs>-Xmx2g -Xss1024k</extraJvmArgs>
                <!-- We are doing "inplace" gwt compilation but into subdir VAADIN/widgetsets -->
                <webappDirectory>src/main/resources/VAADIN/widgetsets</webappDirectory>
                <hostedWebapp>src/main/resources/VAADIN/widgetsets</hostedWebapp>
@@ -77,24 +77,6 @@
                   </goals>
                </execution>
             </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-               <archive>
-                  <index>true</index>
-                  <manifest>
-                     <addClasspath>true</addClasspath>
-                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                  </manifest>
-                  <manifestEntries>
-                     <Implementation-Title>CustomRenderers</Implementation-Title>
-                     <Vaadin-Package-Version>1</Vaadin-Package-Version>
-                     <Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
-                  </manifestEntries>
-               </archive>
-            </configuration>
          </plugin>
       </plugins>
       <pluginManagement>
@@ -206,14 +188,6 @@
          <artifactId>vaadin-themes</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
-         <artifactId>vaadin-lazyquerycontainer</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.vaadin.addons</groupId>
-         <artifactId>flexibleoptiongroup</artifactId>
-      </dependency>
-      <dependency>
          <groupId>org.vaadin.alump.distributionbar</groupId>
          <artifactId>dbar-addon</artifactId>
       </dependency>
@@ -233,6 +207,10 @@
          <groupId>com.cronutils</groupId>
          <artifactId>cron-utils</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.github.ben-manes.caffeine</groupId>
+         <artifactId>caffeine</artifactId>
+      </dependency>
 
       <!-- Test -->
       <dependency>
@@ -244,11 +222,6 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>com.google.gwt.gwtmockito</groupId>
-         <artifactId>gwtmockito</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

@@ -15,12 +15,16 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
+import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
@@ -28,9 +32,8 @@ import com.vaadin.server.Page;
 import com.vaadin.server.UploadException;
 import com.vaadin.shared.Connector;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Default handler for Hawkbit UI.
@@ -40,9 +43,6 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUIErrorHandler.class);
 
-    private static final String STYLE = ValoTheme.NOTIFICATION_FAILURE + " " + ValoTheme.NOTIFICATION_SMALL + " "
-            + ValoTheme.NOTIFICATION_CLOSABLE;
-
     @Override
     public void error(final ErrorEvent event) {
 
@@ -51,23 +51,23 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
             return;
         }
 
-        final HawkbitErrorNotificationMessage message = buildNotification(getRootExceptionFrom(event));
+        final Notification notification = buildNotification(getRootExceptionFrom(event));
         if (event instanceof ConnectorErrorEvent) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
             if (connector instanceof UI) {
                 final UI uiInstance = (UI) connector;
-                uiInstance.access(() -> message.show(uiInstance.getPage()));
+                uiInstance.access(() -> notification.show(uiInstance.getPage()));
                 return;
             }
         }
 
         final Optional<Page> originError = getPageOriginError(event);
         if (originError.isPresent()) {
-            message.show(originError.get());
+            notification.show(originError.get());
             return;
         }
 
-        HawkbitErrorNotificationMessage.show(message.getCaption(), message.getDescription(), Type.HUMANIZED_MESSAGE);
+        notification.show(Page.getCurrent());
     }
 
     private static Throwable getRootExceptionFrom(final ErrorEvent event) {
@@ -101,14 +101,28 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
      *            the throwable
      * @return a hawkbit error notification message
      */
-    protected HawkbitErrorNotificationMessage buildNotification(final Throwable ex) {
+    protected ParallelNotification buildNotification(final Throwable ex) {
 
         LOG.error("Error in UI: ", ex);
 
         final String errorMessage = extractMessageFrom(ex);
         final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
 
-        return new HawkbitErrorNotificationMessage(STYLE, i18n.getMessage("caption.error"), errorMessage, true);
+        return buildErrorNotification(i18n.getMessage("caption.error"), errorMessage);
+    }
+
+    /**
+     * Method to build a error notification based on caption and description.
+     * 
+     * @param caption
+     *            Caption
+     * @param description
+     *            Description
+     * @return a hawkbit error notification message
+     */
+    protected static ParallelNotification buildErrorNotification(final String caption, final String description) {
+        return UINotification.buildNotification(SPUIStyleDefinitions.SP_NOTIFICATION_ERROR_MESSAGE_STYLE, caption,
+                description, VaadinIcons.EXCLAMATION_CIRCLE, true);
     }
 
     private static String extractMessageFrom(final Throwable ex) {

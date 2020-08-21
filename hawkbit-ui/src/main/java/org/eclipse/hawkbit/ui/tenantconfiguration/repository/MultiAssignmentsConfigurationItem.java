@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.repository;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.tenantconfiguration.generic.AbstractBooleanTenantConfigurationItem;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
@@ -21,7 +20,7 @@ import com.vaadin.ui.VerticalLayout;
  * This class represents the UI item for enabling /disabling the
  * Multi-Assignments feature as part of the repository configuration view.
  */
-public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConfigurationItem {
+public class MultiAssignmentsConfigurationItem extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,79 +30,45 @@ public class MultiAssignmentsConfigurationItem extends AbstractBooleanTenantConf
     private final VerticalLayout container;
     private final VaadinMessageSource i18n;
 
-    private boolean isMultiAssignmentsEnabled;
-    private boolean multiAssignmentsEnabledChanged;
-
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            to read /write tenant-specific configuration properties
+     *
      * @param i18n
-     *            to obtain localized strings
+     *            VaadinMessageSource
+     * @param binder
+     *            System config window binder
      */
-    public MultiAssignmentsConfigurationItem(final TenantConfigurationManagement tenantConfigurationManagement,
-            final VaadinMessageSource i18n) {
-        super(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, tenantConfigurationManagement, i18n);
+    public MultiAssignmentsConfigurationItem(final VaadinMessageSource i18n,
+            final Binder<ProxySystemConfigWindow> binder) {
         this.i18n = i18n;
-
-        super.init(MSG_KEY_CHECKBOX);
-        isMultiAssignmentsEnabled = isConfigEnabled();
-
+        this.setSpacing(false);
+        this.setMargin(false);
+        addComponent(SPUIComponentProvider.generateLabel(i18n, MSG_KEY_CHECKBOX));
         container = new VerticalLayout();
-        container.setImmediate(true);
-
+        container.setSpacing(false);
+        container.setMargin(false);
         container.addComponent(newLabel(MSG_KEY_NOTICE));
-
-        if (isMultiAssignmentsEnabled) {
-            setSettingsVisible(isMultiAssignmentsEnabled);
+        if (binder.getBean().isMultiAssignments()) {
+            showSettings();
         }
-
     }
 
-    @Override
-    public void configEnable() {
-        if (!isMultiAssignmentsEnabled) {
-            multiAssignmentsEnabledChanged = true;
-        }
-        isMultiAssignmentsEnabled = true;
-        setSettingsVisible(true);
+    /**
+     * Show multi assignment settings
+     */
+    public void showSettings() {
+        addComponent(container);
     }
 
-    @Override
-    public void configDisable() {
-        if (isMultiAssignmentsEnabled) {
-            multiAssignmentsEnabledChanged = true;
-        }
-        isMultiAssignmentsEnabled = false;
-        setSettingsVisible(false);
-    }
-
-    @Override
-    public void save() {
-        if (!multiAssignmentsEnabledChanged) {
-            return;
-        }
-        getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), isMultiAssignmentsEnabled);
-    }
-
-    @Override
-    public void undo() {
-        multiAssignmentsEnabledChanged = false;
-        isMultiAssignmentsEnabled = getTenantConfigurationManagement()
-                .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
-    }
-
-    private void setSettingsVisible(final boolean visible) {
-        if (visible) {
-            addComponent(container);
-        } else {
-            removeComponent(container);
-        }
+    /**
+     * Hide multi assignment settings
+     */
+    public void hideSettings() {
+        removeComponent(container);
     }
 
     private Label newLabel(final String msgKey) {
-        final Label label = new LabelBuilder().name(i18n.getMessage(msgKey)).buildLabel();
+        final Label label = SPUIComponentProvider.generateLabel(i18n, msgKey);
         label.setWidthUndefined();
         return label;
     }

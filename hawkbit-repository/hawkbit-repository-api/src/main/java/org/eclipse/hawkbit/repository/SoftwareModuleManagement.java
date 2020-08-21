@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
@@ -134,6 +134,21 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, long setId);
+
+    /**
+     * Returns count of all modules assigned to given {@link DistributionSet}.
+     * 
+     * @param setId
+     *            to search for
+     * 
+     * @return count of {@link SoftwareModule}s that are assigned to given
+     *         {@link DistributionSet}.
+     * 
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countByAssignedTo(long setId);
 
     /**
      * Filter {@link SoftwareModule}s with given

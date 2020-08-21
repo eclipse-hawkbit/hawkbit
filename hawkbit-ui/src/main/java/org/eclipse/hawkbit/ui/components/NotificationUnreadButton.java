@@ -8,23 +8,27 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus.UIEventBus;
+
 import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.navigator.View;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
-import org.eclipse.hawkbit.ui.push.EventContainer;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Button which shows all notification in a popup.
@@ -42,11 +46,12 @@ public class NotificationUnreadButton extends Button {
     private static final String STYLE_POPUP = "notifications-unread-popup";
     private static final String STYLE_NO_CLOSEBOX = "no-closebox";
 
+    private final transient VaadinMessageSource i18n;
+    private final transient UIEventBus eventBus;
+
     private int unreadNotificationCounter;
-    private AbstractNotificationView currentView;
     private Window notificationsWindow;
-    private transient Map<Class<?>, NotificationUnreadValue> unreadNotifications;
-    private transient VaadinMessageSource i18n;
+    private final transient Map<String, EntityModifiedEventPayload> remotelyOriginatedEventsStore;
 
     /**
      * Constructor.
@@ -55,111 +60,36 @@ public class NotificationUnreadButton extends Button {
      *            i18n
      */
     @Autowired
-    NotificationUnreadButton(final VaadinMessageSource i18n) {
+    NotificationUnreadButton(final VaadinMessageSource i18n, final UIEventBus eventBus) {
         this.i18n = i18n;
-        this.unreadNotifications = new ConcurrentHashMap<>();
-        setIcon(FontAwesome.BELL);
+        this.eventBus = eventBus;
+
+        this.remotelyOriginatedEventsStore = new ConcurrentHashMap<>();
+
         setId(UIComponentIdProvider.NOTIFICATION_UNREAD_ID);
+        setIcon(VaadinIcons.BELL);
+        setCaptionAsHtml(true);
+        setEnabled(false);
         addStyleName(ValoTheme.BUTTON_SMALL);
         addStyleName(STYLE);
-        setHtmlContentAllowed(true);
-        setEnabled(false);
+
         createNotificationWindow();
-        addClickListener(this::toggleWindow);
-    }
-
-    private void createUnreadMessagesLayout() {
-        final VerticalLayout notificationsLayout = new VerticalLayout();
-        notificationsLayout.setMargin(true);
-        notificationsLayout.setSpacing(true);
-
-        final Label title = new Label(i18n.getMessage(TITLE));
-        title.addStyleName(ValoTheme.LABEL_H3);
-        title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
-        notificationsLayout.addComponent(title);
-
-        unreadNotifications.values().stream().forEach(value -> createNotification(notificationsLayout, value));
-        notificationsWindow.setContent(notificationsLayout);
+        addClickListener(this::dispatchRemotelyOriginatedEvents);
     }
 
     private void createNotificationWindow() {
         notificationsWindow = new Window();
+
+        notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_ID);
         notificationsWindow.setWidth(300.0F, Unit.PIXELS);
-        notificationsWindow.addStyleName(STYLE_POPUP);
-        notificationsWindow.addStyleName(STYLE_NO_CLOSEBOX);
         notificationsWindow.setClosable(true);
         notificationsWindow.setResizable(false);
         notificationsWindow.setDraggable(false);
-        notificationsWindow.setId(UIComponentIdProvider.NOTIFICATION_UNREAD_POPUP_ID);
+        notificationsWindow.addStyleName(STYLE_POPUP);
+        notificationsWindow.addStyleName(STYLE_NO_CLOSEBOX);
+
         notificationsWindow.addCloseListener(event -> refreshCaption());
         notificationsWindow.addBlurListener(this::closeWindow);
-    }
-
-    private void closeWindow(final BlurEvent event) {
-        getUI().removeWindow((Window) event.getComponent());
-    }
-
-    private void toggleWindow(final ClickEvent event) {
-        if (notificationsWindow.isAttached()) {
-            getUI().removeWindow(notificationsWindow);
-            return;
-        }
-        createUnreadMessagesLayout();
-        notificationsWindow.setPositionY(event.getClientY() - event.getRelativeY() + 40);
-        getUI().addWindow(notificationsWindow);
-        currentView.refreshView(unreadNotifications.keySet());
-        clear();
-        notificationsWindow.focus();
-    }
-
-    private void createNotification(final VerticalLayout notificationsLayout,
-            final NotificationUnreadValue notificationUnreadValue) {
-        final Label contentLabel = new Label(notificationUnreadValue.getUnreadNotifications() + " "
-                + i18n.getMessage(notificationUnreadValue.getUnreadNotificationMessageKey(),
-                        notificationUnreadValue.getUnreadNotifications() > 1 ? "s" : ""));
-        notificationsLayout.addComponent(contentLabel);
-    }
-
-    public void setCurrentView(final View currentView) {
-        clear();
-        this.currentView = null;
-
-        if (!(currentView instanceof AbstractNotificationView)) {
-            return;
-        }
-        this.currentView = (AbstractNotificationView) currentView;
-        this.currentView.refreshView();
-    }
-
-    private void clear() {
-        unreadNotificationCounter = 0;
-        unreadNotifications.clear();
-        refreshCaption();
-    }
-
-    /**
-     * Increment the counter.
-     * 
-     * @param view
-     *            the view
-     * @param newEventContainer
-     *            the event container
-     */
-    public void incrementUnreadNotification(final AbstractNotificationView view,
-            final EventContainer<?> newEventContainer) {
-        if (!view.equals(currentView) || newEventContainer.getUnreadNotificationMessageKey() == null) {
-            return;
-        }
-        NotificationUnreadValue notificationUnreadValue = unreadNotifications.get(newEventContainer.getClass());
-        if (notificationUnreadValue == null) {
-            notificationUnreadValue = new NotificationUnreadValue(0,
-                    newEventContainer.getUnreadNotificationMessageKey());
-            unreadNotifications.put(newEventContainer.getClass(), notificationUnreadValue);
-        }
-
-        notificationUnreadValue.incrementUnreadNotifications();
-        unreadNotificationCounter++;
-        refreshCaption();
     }
 
     private void refreshCaption() {
@@ -173,34 +103,87 @@ public class NotificationUnreadButton extends Button {
         setDescription(i18n.getMessage(DESCRIPTION, unreadNotificationCounter));
     }
 
-    private static class NotificationUnreadValue {
-        private Integer unreadNotifications;
-        private final String unreadNotificationMessageKey;
+    private void closeWindow(final BlurEvent event) {
+        getUI().removeWindow((Window) event.getComponent());
+    }
 
-        /**
-         * @param unreadNotifications
-         * @param unreadNotificationMessageKey
-         */
-        public NotificationUnreadValue(final Integer unreadNotifications, final String unreadNotificationMessageKey) {
-            this.unreadNotifications = unreadNotifications;
-            this.unreadNotificationMessageKey = unreadNotificationMessageKey;
+    private void dispatchRemotelyOriginatedEvents(final ClickEvent event) {
+        if (notificationsWindow.isAttached()) {
+            getUI().removeWindow(notificationsWindow);
+            return;
         }
 
-        /**
-         * Increment the unread notifications.
-         * 
-         */
-        public void incrementUnreadNotifications() {
-            unreadNotifications++;
-        }
+        notificationsWindow.setContent(buildNotificationsWindowLayout());
+        notificationsWindow.setPositionY(event.getClientY() - event.getRelativeY() + 40);
+        getUI().addWindow(notificationsWindow);
 
-        public String getUnreadNotificationMessageKey() {
-            return unreadNotificationMessageKey;
-        }
+        dispatchEntityModifiedEvents();
 
-        public Integer getUnreadNotifications() {
-            return unreadNotifications;
-        }
+        clear();
+        notificationsWindow.focus();
+    }
 
+    private VerticalLayout buildNotificationsWindowLayout() {
+        final VerticalLayout notificationsLayout = new VerticalLayout();
+        notificationsLayout.setMargin(true);
+        notificationsLayout.setSpacing(true);
+
+        final Label title = new Label(i18n.getMessage(TITLE));
+        title.addStyleName(ValoTheme.LABEL_H3);
+        title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+
+        notificationsLayout.addComponent(title);
+
+        final Label[] eventNotificationLabels = remotelyOriginatedEventsStore.entrySet().stream()
+                .map(this::buildEventNotificationLabel).toArray(Label[]::new);
+
+        notificationsLayout.addComponents(eventNotificationLabels);
+
+        return notificationsLayout;
+    }
+
+    private Label buildEventNotificationLabel(final Entry<String, EntityModifiedEventPayload> remotelyOriginatedEvent) {
+        final int modifiedEntitiesCount = remotelyOriginatedEvent.getValue().getEntityIds().size();
+        final StringBuilder notificationLabelBuilder = new StringBuilder(String.valueOf(modifiedEntitiesCount));
+
+        notificationLabelBuilder.append(" ");
+        final String pluralPrefix = modifiedEntitiesCount > 1 ? "s" : "";
+        notificationLabelBuilder.append(i18n.getMessage(remotelyOriginatedEvent.getKey(), pluralPrefix));
+
+        return new Label(notificationLabelBuilder.toString());
+    }
+
+    private void dispatchEntityModifiedEvents() {
+        remotelyOriginatedEventsStore.values()
+                .forEach(eventPayload -> eventBus.publish(EventTopics.ENTITY_MODIFIED, UI.getCurrent(), eventPayload));
+    }
+
+    private void clear() {
+        unreadNotificationCounter = 0;
+        remotelyOriginatedEventsStore.clear();
+        refreshCaption();
+    }
+
+    /**
+     * Increments the unread notifications
+     *
+     * @param entityNotificationMsgKey
+     *          Key value for notification message
+     * @param eventPayload
+     *          EntityModifiedEventPayload
+     */
+    public void incrementUnreadNotification(final String entityNotificationMsgKey,
+            final EntityModifiedEventPayload eventPayload) {
+        remotelyOriginatedEventsStore.merge(entityNotificationMsgKey, eventPayload,
+                (oldEventPayload, newEventPayload) -> {
+                    // currently we do not support parent aware differed events,
+                    // thus ignoring parentId of the incoming eventPayload
+                    oldEventPayload.getEntityIds().addAll(newEventPayload.getEntityIds());
+
+                    return oldEventPayload;
+                });
+
+        unreadNotificationCounter += eventPayload.getEntityIds().size();
+        refreshCaption();
     }
 }

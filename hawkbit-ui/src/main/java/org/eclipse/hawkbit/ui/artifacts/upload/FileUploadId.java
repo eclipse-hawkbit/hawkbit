@@ -101,18 +101,38 @@ public class FileUploadId implements Serializable {
         return id;
     }
 
+    /**
+     * Getter for the uploaded file name
+     *
+     * @return String
+     */
     public String getFilename() {
         return filename;
     }
 
+    /**
+     * Getter for the software module name
+     *
+     * @return String
+     */
     public String getSoftwareModuleName() {
         return softwareModuleName;
     }
 
+    /**
+     * Getter for the software module version
+     *
+     * @return String
+     */
     public String getSoftwareModuleVersion() {
         return softwareModuleVersion;
     }
 
+    /**
+     * Getter for the software module ID
+     *
+     * @return Long
+     */
     public Long getSoftwareModuleId() {
         return softwareModuleId;
     }

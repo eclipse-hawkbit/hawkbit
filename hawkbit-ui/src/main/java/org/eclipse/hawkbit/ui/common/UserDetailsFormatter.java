@@ -173,6 +173,9 @@ public final class UserDetailsFormatter {
         return Optional.ofNullable(userPrincipal.getEmail());
     }
 
+    /**
+     * @return Details of currently logged-in user
+     */
     public static UserDetails getCurrentUser() {
         final SecurityContext context = (SecurityContext) VaadinService.getCurrentRequest().getWrappedSession()
                 .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);

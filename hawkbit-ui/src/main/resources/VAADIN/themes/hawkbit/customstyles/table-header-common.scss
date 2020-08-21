@@ -13,17 +13,12 @@
   .filter-box {
     height: 25px !important;
     float: right;
-    visibility: visible;
     border-radius: $v-border-radius;
   }
 
   .filter-box:focus:after {
     box-shadow: none !important;
     border-radius: $v-border-radius !important;
-  }
-
-  .filter-box-hide {
-    visibility: hidden;
   }
 
   //Search rest icon color

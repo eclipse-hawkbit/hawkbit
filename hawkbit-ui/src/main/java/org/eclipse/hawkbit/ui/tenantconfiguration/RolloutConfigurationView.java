@@ -8,16 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.rollout.ApprovalConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Property;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -28,32 +30,32 @@ import com.vaadin.ui.VerticalLayout;
  * Provides configuration of the RolloutManagement including enabling/disabling
  * of the approval workflow.
  */
-public class RolloutConfigurationView extends BaseConfigurationView
-        implements Property.ValueChangeListener, ConfigurationItem.ConfigurationItemChangeListener {
+public class RolloutConfigurationView extends CustomComponent {
 
     private static final long serialVersionUID = 1L;
 
-    private final ApprovalConfigurationItem approvalConfigurationItem;
     private final VaadinMessageSource i18n;
     private final UiProperties uiProperties;
-    private CheckBox approvalCheckbox;
+    private final Binder<ProxySystemConfigWindow> binder;
+    private final ApprovalConfigurationItem approvalConfigurationItem;
 
-    RolloutConfigurationView(final VaadinMessageSource i18n,
-            final TenantConfigurationManagement tenantConfigurationManagement, final UiProperties uiProperties) {
+    RolloutConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
+            final Binder<ProxySystemConfigWindow> binder) {
         this.i18n = i18n;
+        this.approvalConfigurationItem = new ApprovalConfigurationItem(i18n);
         this.uiProperties = uiProperties;
-        this.approvalConfigurationItem = new ApprovalConfigurationItem(tenantConfigurationManagement, i18n);
+        this.binder = binder;
         this.init();
+
     }
 
     private void init() {
-
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();
-
         rootPanel.addStyleName("config-panel");
 
         final VerticalLayout vLayout = new VerticalLayout();
+        vLayout.setSpacing(false);
         vLayout.setMargin(true);
         vLayout.setSizeFull();
 
@@ -63,18 +65,15 @@ public class RolloutConfigurationView extends BaseConfigurationView
 
         final GridLayout gridLayout = new GridLayout(3, 1);
         gridLayout.setSpacing(true);
-        gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
         gridLayout.setSizeFull();
 
-        approvalCheckbox = SPUIComponentProvider.getCheckBox("", "", null, false, "");
-        approvalCheckbox.setId(UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX);
-        approvalCheckbox.setValue(approvalConfigurationItem.isConfigEnabled());
-        approvalCheckbox.addValueChangeListener(this);
-        approvalConfigurationItem.addChangeListener(this);
+        final CheckBox approvalCheckbox = FormComponentBuilder.getCheckBox(
+                UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX, binder,
+                ProxySystemConfigWindow::isRolloutApproval, ProxySystemConfigWindow::setRolloutApproval);
+
         gridLayout.addComponent(approvalCheckbox, 0, 0);
         gridLayout.addComponent(approvalConfigurationItem, 1, 0);
-
         final Link linkToApprovalHelp = SPUIComponentProvider.getHelpLink(i18n,
                 uiProperties.getLinks().getDocumentation().getRollout());
         gridLayout.addComponent(linkToApprovalHelp, 2, 0);
@@ -83,32 +82,5 @@ public class RolloutConfigurationView extends BaseConfigurationView
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
-    }
-
-    @Override
-    public void save() {
-        this.approvalConfigurationItem.save();
-    }
-
-    @Override
-    public void undo() {
-        this.approvalConfigurationItem.undo();
-    }
-
-    @Override
-    public void valueChange(final Property.ValueChangeEvent event) {
-        if (approvalCheckbox.equals(event.getProperty())) {
-            if (approvalCheckbox.getValue()) {
-                approvalConfigurationItem.configEnable();
-            } else {
-                approvalConfigurationItem.configDisable();
-            }
-            notifyConfigurationChanged();
-        }
-    }
-
-    @Override
-    public void configurationHasChanged() {
-        notifyConfigurationChanged();
     }
 }

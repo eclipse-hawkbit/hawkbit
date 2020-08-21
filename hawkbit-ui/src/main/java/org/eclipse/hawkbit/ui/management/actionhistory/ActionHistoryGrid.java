@@ -8,351 +8,230 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActiveStatusIconSupplier;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TimeforcedIconSupplier;
+import org.eclipse.hawkbit.ui.common.data.mappers.ActionToProxyActionMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.ActionDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
+import org.eclipse.hawkbit.ui.common.event.EventLayout;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractGridButtonConverter;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.AbstractHtmlLabelConverter;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.GridButtonRenderer;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
-import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction.IsActiveDecoration;
-import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
+import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.MasterEntitySupport;
+import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Maps;
-import com.vaadin.data.Item;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 
 /**
  * This grid presents the action history for a selected target.
  */
-public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
-    private static final long serialVersionUID = 4324796883957831443L;
+public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryGrid.class);
-    private static final double FIXED_PIX_MIN = 25;
-    private static final double FIXED_PIX_MAX = 32;
 
-    private static final String STATUS_ICON_GREEN = "statusIconGreen";
-    private static final String STATUS_ICON_RED = "statusIconRed";
-    private static final String STATUS_ICON_ORANGE = "statusIconOrange";
-    private static final String STATUS_ICON_PENDING = "statusIconPending";
-    private static final String STATUS_ICON_NEUTRAL = "statusIconNeutral";
-    private static final String STATUS_ICON_ACTIVE = "statusIconActive";
-    private static final String STATUS_ICON_FORCED = "statusIconForced";
-    private static final String STATUS_ICON_DOWNLOAD_ONLY = "statusIconDownloadOnly";
-    private static final String STATUS_ICON_SOFT = "statusIconSoft";
+    private static final String ACTION_ID = "id";
+    private static final String DS_NAME_VERSION_ID = "dsNameVersion";
+    private static final String ROLLOUT_NAME_ID = "rolloutName";
+    private static final String MAINTENANCE_WINDOW_ID = "maintenanceWindow";
+    private static final String LAST_MODIFIED_AT_ID = "lastModifiedAt";
+    private static final String STATUS_ID = "status";
+    private static final String ACTIVE_STATUS_ID = "isActiveDecoration";
+    private static final String TYPE_ID = "type";
+    private static final String TIME_FORCED_ID = "timeForced";
 
-    private static final String VIRT_PROP_TYPE = "type";
-    private static final String VIRT_PROP_TIMEFORCED = "timeForced";
-    private static final String VIRT_PROP_ACTION_CANCEL = "cancel-action";
-    private static final String VIRT_PROP_ACTION_FORCE = "force-action";
-    private static final String VIRT_PROP_ACTION_FORCE_QUIT = "force-quit-action";
+    private static final String CANCEL_BUTTON_ID = "cancel-action";
+    private static final String FORCE_BUTTON_ID = "force-action";
+    private static final String FORCE_QUIT_BUTTON_ID = "force-quit-action";
 
-    private static final Object[] maxColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_ID, ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW,
-            ProxyAction.PXY_ACTION_ROLLOUT_NAME, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
-            VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
-
-    private static final Object[] minColumnOrder = new Object[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_DS_NAME_VERSION, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT,
-            ProxyAction.PXY_ACTION_STATUS, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, VIRT_PROP_TYPE,
-            VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT };
-
-    private static final String[] leftAlignedColumns = new String[] {};
-
-    private static final String[] centerAlignedColumns = new String[] { ProxyAction.PXY_ACTION_IS_ACTIVE_DECO,
-            ProxyAction.PXY_ACTION_STATUS, VIRT_PROP_TYPE, ProxyAction.PXY_ACTION_ID, VIRT_PROP_TIMEFORCED };
-
-    private static final String[] rightAlignedColumns = new String[] {};
-
-    private final transient DeploymentManagement deploymentManagement;
     private final UINotification notification;
-    private final ManagementUIState managementUIState;
+    private final transient DeploymentManagement deploymentManagement;
+    private final transient ActionToProxyActionMapper actionToProxyActionMapper;
 
-    private Target selectedTarget;
-    private final AlignCellStyleGenerator alignGenerator;
-    private final TooltipGenerator tooltipGenerator;
+    private final ActionStatusIconSupplier<ProxyAction> actionStatusIconSupplier;
+    private final ActiveStatusIconSupplier<ProxyAction> activeStatusIconSupplier;
+    private final ActionTypeIconSupplier<ProxyAction> actionTypeIconSupplier;
+    private final TimeforcedIconSupplier timeforcedIconSupplier;
 
-    private final Map<Action.Status, StatusFontIcon> states;
-    private final Map<IsActiveDecoration, StatusFontIcon> activeStates;
-
-    private final BeanQueryFactory<ActionBeanQuery> targetQF = new BeanQueryFactory<>(ActionBeanQuery.class);
+    private final transient MasterEntitySupport<ProxyTarget> masterEntitySupport;
 
     ActionHistoryGrid(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
-            final UIEventBus eventBus, final UINotification notification, final ManagementUIState managementUIState,
-            final SpPermissionChecker permissionChecker) {
+            final UIEventBus eventBus, final UINotification notification, final SpPermissionChecker permissionChecker,
+            final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
         super(i18n, eventBus, permissionChecker);
-        this.deploymentManagement = deploymentManagement;
+
         this.notification = notification;
-        this.managementUIState = managementUIState;
+        this.deploymentManagement = deploymentManagement;
+        this.actionToProxyActionMapper = new ActionToProxyActionMapper();
 
-        setMaximizeSupport(new ActionHistoryMaximizeSupport());
-        setSingleSelectionSupport(new SingleSelectionSupport());
-
-        if (!managementUIState.isActionHistoryMaximized()) {
-            getSingleSelectionSupport().disable();
+        // currently we do not restore action history selection
+        setSelectionSupport(new SelectionSupport<ProxyAction>(this, eventBus, EventLayout.ACTION_HISTORY_LIST,
+                EventView.DEPLOYMENT, this::mapIdToProxyEntity, null, null));
+        if (actionHistoryGridLayoutUiState.isMaximized()) {
+            getSelectionSupport().enableSingleSelection();
+        } else {
+            getSelectionSupport().disableSelection();
         }
 
-        setGeneratedPropertySupport(new ActionHistoryGeneratedPropertySupport());
-        setDetailsSupport(new DetailsSupport());
+        setFilterSupport(new FilterSupport<>(new ActionDataProvider(deploymentManagement, actionToProxyActionMapper)));
+        initFilterMappings();
 
-        final LabelConfig conf = new LabelConfig();
-        states = conf.createStatusLabelConfig(i18n, UIComponentIdProvider.ACTION_HISTORY_TABLE_STATUS_LABEL_ID);
-        activeStates = conf
-                .createActiveStatusLabelConfig(UIComponentIdProvider.ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID);
-        alignGenerator = new AlignCellStyleGenerator(leftAlignedColumns, centerAlignedColumns, rightAlignedColumns);
-        tooltipGenerator = new TooltipGenerator(i18n);
+        this.masterEntitySupport = new MasterEntitySupport<>(getFilterSupport(), ProxyTarget::getControllerId);
 
+        actionStatusIconSupplier = new ActionStatusIconSupplier<>(i18n, ProxyAction::getStatus,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_STATUS_LABEL_ID);
+        activeStatusIconSupplier = new ActiveStatusIconSupplier<>(i18n, ProxyAction::getIsActiveDecoration,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID);
+        actionTypeIconSupplier = new ActionTypeIconSupplier<>(i18n, ProxyAction::getActionType,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
+        timeforcedIconSupplier = new TimeforcedIconSupplier(i18n,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID);
         init();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final ManagementUIEvent mgmtUIEvent) {
-        if (mgmtUIEvent == ManagementUIEvent.MAX_ACTION_HISTORY) {
-            UI.getCurrent().access(this::createMaximizedContent);
-        }
-        if (mgmtUIEvent == ManagementUIEvent.MIN_ACTION_HISTORY) {
-            UI.getCurrent().access(this::createMinimizedContent);
-        }
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        restorePreviousState();
-    }
-
     /**
-     * Set target as member of this grid (as all presented grid-data is related
-     * to this target) and recalculate grid-data for this target.
+     * Map entity id to proxy entity
      *
-     * @param selectedTarget
-     *            reference of target
+     * @param entityId
+     *          Entity id
+     *
+     * @return Proxy action
      */
-    public void populateSelectedTarget(final Target selectedTarget) {
-        this.selectedTarget = selectedTarget;
-        getDetailsSupport()
-                .populateMasterDataAndRecalculateContainer(selectedTarget != null ? selectedTarget.getId() : null);
+    public Optional<ProxyAction> mapIdToProxyEntity(final long entityId) {
+        return deploymentManagement.findAction(entityId).map(actionToProxyActionMapper::map);
+    }
+
+    private void initFilterMappings() {
+        getFilterSupport().<String> addMapping(FilterType.MASTER,
+                (filter, masterFilter) -> getFilterSupport().setFilter(masterFilter));
     }
 
     @Override
-    protected LazyQueryContainer createContainer() {
-        configureQueryFactory();
-        return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, ProxyAction.PXY_ACTION_ID), targetQF);
-    }
-
-    @Override
-    public void refreshContainer() {
-        configureQueryFactory();
-        super.refreshContainer();
-    }
-
-    protected void configureQueryFactory() {
-        // ADD all the filters to the query config
-        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(1);
-        queryConfig.put(SPUIDefinitions.ACTIONS_BY_TARGET,
-                selectedTarget != null ? selectedTarget.getControllerId() : null);
-        // Create ActionBeanQuery factory with the query config.
-        targetQF.setQueryConfiguration(queryConfig);
-    }
-
-    @Override
-    protected void addContainerProperties() {
-        final LazyQueryContainer rawCont = getGeneratedPropertySupport().getRawContainer();
-
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO, IsActiveDecoration.class, null, true,
-                false);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION, Action.class, null, true, false);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_DS_NAME_VERSION, String.class, null, true, false);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT, Long.class, null, true, true);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_STATUS, Action.Status.class, null, true, false);
-
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ID, String.class, null, true, true);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_ROLLOUT_NAME, String.class, null, true, true);
-        rawCont.addContainerProperty(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW, String.class, null, true, false);
-    }
-
-    @Override
-    protected String getGridId() {
+    public String getGridId() {
         return UIComponentIdProvider.ACTION_HISTORY_GRID_ID;
     }
 
+    /**
+     * Creates the grid content for maximized-state.
+     */
     @Override
-    protected void addColumnRenderers() {
-        getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT).setConverter(new LongToFormattedDateStringConverter());
-        getColumn(ProxyAction.PXY_ACTION_STATUS).setRenderer(new HtmlLabelRenderer(),
-                new HtmlStatusLabelConverter(this::createStatusLabelMetadata));
-        getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setRenderer(new HtmlLabelRenderer(),
-                new HtmlIsActiveLabelConverter(this::createIsActiveLabelMetadata));
-        getColumn(VIRT_PROP_TYPE).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(this::createTypeLabelMetadata));
-        getColumn(VIRT_PROP_TIMEFORCED).setRenderer(new HtmlLabelRenderer(),
-                new HtmlVirtPropLabelConverter(this::createTimeForcedLabelMetadata));
-        getColumn(VIRT_PROP_ACTION_CANCEL).setRenderer(
-                new GridButtonRenderer(clickEvent -> confirmAndCancelAction((Long) clickEvent.getItemId())),
-                new ActionGridButtonConverter(this::createCancelButtonMetadata));
-        getColumn(VIRT_PROP_ACTION_FORCE).setRenderer(
-                new GridButtonRenderer(clickEvent -> confirmAndForceAction((Long) clickEvent.getItemId())),
-                new ActionGridButtonConverter(this::createForceButtonMetadata));
-        getColumn(VIRT_PROP_ACTION_FORCE_QUIT).setRenderer(
-                new GridButtonRenderer(clickEvent -> confirmAndForceQuitAction((Long) clickEvent.getItemId())),
-                new ActionGridButtonConverter(this::createForceQuitButtonMetadata));
-    }
-
-    private StatusFontIcon createCancelButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isCancelingOrCanceled()
-                || !permissionChecker.hasUpdateTargetPermission();
-        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_NEUTRAL, i18n.getMessage("message.cancel.action"),
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID, isDisabled);
-    }
-
-    private StatusFontIcon createForceButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || action.isForce() || action.isCancelingOrCanceled()
-                || !permissionChecker.hasUpdateTargetPermission();
-        return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_NEUTRAL, i18n.getMessage("message.force.action"),
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID, isDisabled);
-    }
-
-    private StatusFontIcon createForceQuitButtonMetadata(final Action action) {
-        final boolean isDisabled = !action.isActive() || !action.isCancelingOrCanceled()
-                || !permissionChecker.hasUpdateTargetPermission();
-        return new StatusFontIcon(FontAwesome.TIMES, STATUS_ICON_RED, i18n.getMessage("message.forcequit.action"),
-                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID, isDisabled);
-    }
-
-    private StatusFontIcon createStatusLabelMetadata(final Action.Status status) {
-        return states.get(status);
-    }
-
-    private StatusFontIcon createIsActiveLabelMetadata(final IsActiveDecoration isActiveDeco) {
-        return activeStates.get(isActiveDeco);
-    }
-
-    private StatusFontIcon createTypeLabelMetadata(final Action action) {
-        if (ActionType.FORCED == action.getActionType() || ActionType.TIMEFORCED == action.getActionType()) {
-            return new StatusFontIcon(FontAwesome.BOLT, STATUS_ICON_FORCED,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_FORCED),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
-        }
-        if (ActionType.SOFT == action.getActionType()) {
-            return new StatusFontIcon(FontAwesome.STEP_FORWARD, STATUS_ICON_SOFT,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_SOFT),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
-        }
-        if (ActionType.DOWNLOAD_ONLY == action.getActionType()) {
-            return new StatusFontIcon(FontAwesome.DOWNLOAD, STATUS_ICON_DOWNLOAD_ONLY,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY),
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TYPE_LABEL_ID);
-        }
-        return null;
-    }
-
-    private StatusFontIcon createTimeForcedLabelMetadata(final Action action) {
-        StatusFontIcon result = null;
-
-        if (ActionType.TIMEFORCED == action.getActionType()) {
-            final long currentTimeMillis = System.currentTimeMillis();
-            String style;
-            String title;
-            if (action.isHitAutoForceTime(currentTimeMillis)) {
-                style = STATUS_ICON_GREEN;
-                final String duration = SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(),
-                        currentTimeMillis, i18n);
-                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_SINCE, duration);
-            } else {
-                style = STATUS_ICON_PENDING;
-                final String duration = SPDateTimeUtil.getDurationFormattedString(currentTimeMillis,
-                        action.getForcedTime(), i18n);
-                title = i18n.getMessage(UIMessageIdProvider.TOOLTIP_TIMEFORCED_FORCED_IN, duration);
-            }
-            result = new StatusFontIcon(FontAwesome.HISTORY, style, title,
-                    UIComponentIdProvider.ACTION_HISTORY_TABLE_TIMEFORCED_LABEL_ID);
-        }
-        return result;
+    public void createMaximizedContent() {
+        createMaximizedContent(SelectionMode.SINGLE);
     }
 
     /**
-     * Show confirmation window and if ok then only, force the action.
-     *
-     * @param actionId
-     *            as Id if the action needs to be forced.
+     * Creates the grid content for normal (minimized) state.
      */
-    private void confirmAndForceAction(final Long actionId) {
-        /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.force.action.confirmbox"), i18n.getMessage("message.force.action.confirm"),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
-                ok -> {
-                    if (!ok) {
-                        return;
-                    }
-                    deploymentManagement.forceTargetAction(actionId);
-                    populateAndUpdateTargetDetails(selectedTarget);
-                    notification.displaySuccess(i18n.getMessage("message.force.action.success"));
-                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
-
-        confirmDialog.getWindow().bringToFront();
+    @Override
+    public void createMinimizedContent() {
+        createMinimizedContent(SelectionMode.NONE);
     }
 
-    /**
-     * Show confirmation window and if ok then only, force quit action.
-     *
-     * @param actionId
-     *            as Id if the action needs to be forced.
-     */
-    private void confirmAndForceQuitAction(final Long actionId) {
-        /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.getMessage("caption.forcequit.action.confirmbox"),
-                i18n.getMessage("message.forcequit.action.confirm"), i18n.getMessage(UIMessageIdProvider.BUTTON_OK),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), ok -> {
-                    if (!ok) {
-                        return;
-                    }
-                    final boolean cancelResult = forceQuitActiveAction(actionId);
-                    if (cancelResult) {
-                        populateAndUpdateTargetDetails(selectedTarget);
-                        notification.displaySuccess(i18n.getMessage("message.forcequit.action.success"));
-                    } else {
-                        notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
-                    }
-                }, FontAwesome.WARNING, UIComponentIdProvider.CONFIRMATION_POPUP_ID, null);
-        UI.getCurrent().addWindow(confirmDialog.getWindow());
+    @Override
+    public void addColumns() {
+        addActiveStatusColumn().setHidable(true);
 
-        confirmDialog.getWindow().bringToFront();
+        addDsColumn().setHidable(true);
+
+        addDateAndTimeColumn().setHidable(true);
+
+        addStatusColumn().setHidable(true);
+
+        addMaintenanceWindowColumn().setHidable(true).setHidden(true);
+
+        GridComponentBuilder.joinToIconColumn(getDefaultHeaderRow(), i18n.getMessage("label.action.type"),
+                Arrays.asList(addTypeColumn(), addTimeforcedColumn()));
+
+        GridComponentBuilder.joinToActionColumn(i18n, getDefaultHeaderRow(),
+                Arrays.asList(addCancelColumn(), addForceColumn(), addForceQuitColumn()));
+    }
+
+    private Column<ProxyAction, Label> addActiveStatusColumn() {
+        return GridComponentBuilder.addIconColumn(this, activeStatusIconSupplier::getLabel, ACTIVE_STATUS_ID,
+                i18n.getMessage("label.active"));
+    }
+
+    private Column<ProxyAction, String> addDsColumn() {
+        return GridComponentBuilder.addColumn(this, ProxyAction::getDsNameVersion).setId(DS_NAME_VERSION_ID)
+                .setCaption(i18n.getMessage("distribution.details.header"));
+    }
+
+    private Column<ProxyAction, String> addDateAndTimeColumn() {
+        return GridComponentBuilder
+                .addColumn(this,
+                        action -> SPDateTimeUtil.getFormattedDate(action.getLastModifiedAt(),
+                                SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT))
+                .setId(LAST_MODIFIED_AT_ID).setCaption(i18n.getMessage("header.rolloutgroup.target.date"))
+                .setDescriptionGenerator(action -> SPDateTimeUtil.getFormattedDate(action.getLastModifiedAt()));
+    }
+
+    private Column<ProxyAction, Label> addStatusColumn() {
+        return GridComponentBuilder.addIconColumn(this, actionStatusIconSupplier::getLabel, STATUS_ID,
+                i18n.getMessage("header.status"));
+    }
+
+    private Column<ProxyAction, String> addMaintenanceWindowColumn() {
+        return GridComponentBuilder.addColumn(this, ProxyAction::getMaintenanceWindow).setId(MAINTENANCE_WINDOW_ID)
+                .setCaption(i18n.getMessage("header.maintenancewindow")).setDescriptionGenerator(
+                        action -> getFormattedNextMaintenanceWindow(action.getMaintenanceWindowStartTime()));
+    }
+
+    private String getFormattedNextMaintenanceWindow(final ZonedDateTime nextAt) {
+        if (nextAt == null) {
+            return "";
+        }
+
+        final long nextAtMilli = nextAt.toInstant().toEpochMilli();
+        return i18n.getMessage(UIMessageIdProvider.TOOLTIP_NEXT_MAINTENANCE_WINDOW,
+                SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT));
+    }
+
+    private Column<ProxyAction, Label> addTypeColumn() {
+        return GridComponentBuilder.addIconColumn(this, actionTypeIconSupplier::getLabel, TYPE_ID, null);
+    }
+
+    private Column<ProxyAction, Label> addTimeforcedColumn() {
+        return GridComponentBuilder.addIconColumn(this, timeforcedIconSupplier::getLabel, TIME_FORCED_ID, null);
+    }
+
+    private Column<ProxyAction, Button> addCancelColumn() {
+        final ValueProvider<ProxyAction, Button> buttonProvider = action -> GridComponentBuilder.buildActionButton(i18n,
+                clickEvent -> confirmAndCancelAction(action.getId()), VaadinIcons.CLOSE_SMALL, "message.cancel.action",
+                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_CANCEL_ID + "." + action.getId(),
+                action.isActive() && !action.isCancelingOrCanceled() && permissionChecker.hasUpdateTargetPermission());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, CANCEL_BUTTON_ID, null);
     }
 
     /**
@@ -362,407 +241,157 @@ public class ActionHistoryGrid extends AbstractGrid<LazyQueryContainer> {
      *            as Id if the action needs to be cancelled.
      */
     private void confirmAndCancelAction(final Long actionId) {
-        if (actionId == null) {
-            return;
-        }
-
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n,
                 i18n.getMessage("caption.cancel.action.confirmbox"), i18n.getMessage("message.cancel.action.confirm"),
-                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
                 ok -> {
-                    if (!ok) {
-                        return;
-                    }
-                    final boolean cancelResult = cancelActiveAction(actionId);
-                    if (cancelResult) {
-                        populateAndUpdateTargetDetails(selectedTarget);
-                        notification.displaySuccess(i18n.getMessage("message.cancel.action.success"));
-                    } else {
-                        notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
+                    if (ok) {
+                        cancelActiveAction(actionId);
                     }
                 }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
-    private void populateAndUpdateTargetDetails(final Target target) {
-        // show the updated target action history details
-        populateSelectedTarget(target);
-        // update the target table and its pinning details
-        updateTargetAndDsTable();
+    private void cancelActiveAction(final Long actionId) {
+        try {
+            deploymentManagement.cancelAction(actionId);
+
+            notification.displaySuccess(i18n.getMessage("message.cancel.action.success"));
+            publishEntityModifiedEvent(actionId);
+        } catch (final CancelActionNotAllowedException e) {
+            LOG.trace("Cancel action not allowed exception: {}", e.getMessage());
+            notification.displayValidationError(i18n.getMessage("message.cancel.action.failed"));
+        }
     }
 
-    private void updateTargetAndDsTable() {
-        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, selectedTarget));
-        updateDistributionTableStyle();
+    private void publishEntityModifiedEvent(final Long actionId) {
+        if (masterEntitySupport.getMasterId() != null) {
+            eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
+                    new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class,
+                            masterEntitySupport.getMasterId(), ProxyAction.class, actionId));
+        }
+    }
+
+    private Column<ProxyAction, Button> addForceColumn() {
+        final ValueProvider<ProxyAction, Button> buttonProvider = action -> GridComponentBuilder.buildActionButton(i18n,
+                clickEvent -> confirmAndForceAction(action.getId()), VaadinIcons.BOLT, "message.force.action",
+                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_ID + "." + action.getId(),
+                action.isActive() && !action.isForce() && !action.isCancelingOrCanceled()
+                        && permissionChecker.hasUpdateTargetPermission());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, FORCE_BUTTON_ID, null);
     }
 
     /**
-     * Update the colors of Assigned and installed distribution set in Target
-     * Pinning.
-     */
-    private void updateDistributionTableStyle() {
-        managementUIState.getDistributionTableFilters().getPinnedTarget().ifPresent(pinnedTarget -> {
-            if (pinnedTarget.getTargetId().equals(selectedTarget.getId())) {
-                eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
-            }
-        });
-    }
-
-    // service call to cancel the active action
-    private boolean cancelActiveAction(final Long actionId) {
-        if (actionId != null) {
-            try {
-                deploymentManagement.cancelAction(actionId);
-                return true;
-            } catch (final CancelActionNotAllowedException e) {
-                LOG.info("Cancel action not allowed exception :{}", e);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    // service call to cancel the active action
-    private boolean forceQuitActiveAction(final Long actionId) {
-        if (actionId != null) {
-            try {
-                deploymentManagement.forceQuitAction(actionId);
-                return true;
-            } catch (final CancelActionNotAllowedException e) {
-                LOG.info("Force Cancel action not allowed exception :{}", e);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    protected void setHiddenColumns() {
-        getColumn(VIRT_PROP_TYPE).setHidable(false);
-        getColumn(VIRT_PROP_TIMEFORCED).setHidable(false);
-        getColumn(VIRT_PROP_ACTION_CANCEL).setHidable(false);
-        getColumn(VIRT_PROP_ACTION_FORCE).setHidable(false);
-        getColumn(VIRT_PROP_ACTION_FORCE_QUIT).setHidable(false);
-
-        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW).setHidden(true);
-        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW).setHidable(true);
-    }
-
-    @Override
-    protected CellDescriptionGenerator getDescriptionGenerator() {
-        return tooltipGenerator;
-    }
-
-    @Override
-    protected void setColumnHeaderNames() {
-        final HeaderRow newHeaderRow = resetHeaderDefaultRow();
-
-        getColumn(ProxyAction.PXY_ACTION_IS_ACTIVE_DECO).setHeaderCaption(i18n.getMessage("label.active"));
-        getColumn(ProxyAction.PXY_ACTION_DS_NAME_VERSION)
-                .setHeaderCaption(i18n.getMessage("distribution.details.header"));
-        getColumn(ProxyAction.PXY_ACTION_LAST_MODIFIED_AT)
-                .setHeaderCaption(i18n.getMessage("header.rolloutgroup.target.date"));
-        getColumn(ProxyAction.PXY_ACTION_STATUS).setHeaderCaption(i18n.getMessage("header.status"));
-        getColumn(ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW)
-                .setHeaderCaption(i18n.getMessage("header.maintenancewindow"));
-
-        newHeaderRow.join(VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED).setText(i18n.getMessage("label.action.type"));
-        newHeaderRow.join(VIRT_PROP_ACTION_CANCEL, VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT)
-                .setText(i18n.getMessage("header.action"));
-    }
-
-    @Override
-    protected void setColumnExpandRatio() {
-        setColumnsSize(50.0, 50.0, ProxyAction.PXY_ACTION_IS_ACTIVE_DECO);
-        setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
-        setColumnsSize(100.0, 130.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
-        setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-        setColumnsSize(150.0, 200.0, ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW);
-        setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MIN, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
-                VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
-    }
-
-    /**
-     * Conveniently sets min- and max-width for a bunch of columns.
+     * Show confirmation window and if ok then only, force the action.
      *
-     * @param min
-     *            minimum width
-     * @param max
-     *            maximum width
-     * @param columnPropertyIds
-     *            all the columns the min and max should be set for.
+     * @param actionId
+     *            as Id if the action needs to be forced.
      */
-    private void setColumnsSize(final double min, final double max, final String... columnPropertyIds) {
-        for (final String columnPropertyId : columnPropertyIds) {
-            getColumn(columnPropertyId).setMinimumWidth(min);
-            getColumn(columnPropertyId).setMaximumWidth(max);
+    private void confirmAndForceAction(final Long actionId) {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n,
+                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                ok -> {
+                    if (ok) {
+                        forceActiveAction(actionId);
+                    }
+                }, UIComponentIdProvider.CONFIRMATION_POPUP_ID);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private void forceActiveAction(final Long actionId) {
+        try {
+            deploymentManagement.forceTargetAction(actionId);
+
+            notification.displaySuccess(i18n.getMessage("message.force.action.success"));
+            publishEntityModifiedEvent(actionId);
+        } catch (final EntityNotFoundException e) {
+            LOG.trace("Action was not found during force command: {}", e.getMessage());
+            notification.displayValidationError(i18n.getMessage("message.force.action.failed"));
         }
     }
 
-    /**
-     * Creates the grid content for maximized-state.
-     */
-    private void createMaximizedContent() {
-        getSingleSelectionSupport().enable();
-        getDetailsSupport().populateSelection();
-        getMaximizeSupport().createMaximizedContent();
-        recalculateColumnWidths();
+    private Column<ProxyAction, Button> addForceQuitColumn() {
+        final ValueProvider<ProxyAction, Button> buttonProvider = action -> GridComponentBuilder.buildActionButton(i18n,
+                clickEvent -> confirmAndForceQuitAction(action.getId()), VaadinIcons.CLOSE_SMALL,
+                "message.forcequit.action", SPUIStyleDefinitions.STATUS_ICON_RED,
+                UIComponentIdProvider.ACTION_HISTORY_TABLE_FORCE_QUIT_ID + "." + action.getId(),
+                action.isActive() && action.isCancelingOrCanceled() && permissionChecker.hasUpdateTargetPermission());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, FORCE_QUIT_BUTTON_ID, null);
     }
 
     /**
-     * Creates the grid content for normal (minimized) state.
+     * Show confirmation window and if ok then only, force quit action.
+     *
+     * @param actionId
+     *            as Id if the action needs to be forced.
      */
-    private void createMinimizedContent() {
-        getSingleSelectionSupport().disable();
-        getMaximizeSupport().createMinimizedContent();
-        recalculateColumnWidths();
+    private void confirmAndForceQuitAction(final Long actionId) {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n,
+                i18n.getMessage("caption.forcequit.action.confirmbox"),
+                i18n.getMessage("message.forcequit.action.confirm"), ok -> {
+                    if (ok) {
+                        forceQuitActiveAction(actionId);
+                    }
+                }, VaadinIcons.WARNING, UIComponentIdProvider.CONFIRMATION_POPUP_ID, null);
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private void forceQuitActiveAction(final Long actionId) {
+        try {
+            deploymentManagement.forceQuitAction(actionId);
+
+            notification.displaySuccess(i18n.getMessage("message.forcequit.action.success"));
+            publishEntityModifiedEvent(actionId);
+        } catch (final CancelActionNotAllowedException e) {
+            LOG.trace("Force Cancel action not allowed exception: {}", e.getMessage());
+            notification.displayValidationError(i18n.getMessage("message.forcequit.action.failed"));
+        }
     }
 
     @Override
-    protected void setColumnProperties() {
-        clearSortOrder();
-        setColumns(minColumnOrder);
-        alignColumns();
+    protected void addMaxColumns() {
+        addActiveStatusColumn().setHidable(true);
+
+        addActionIdColumn().setExpandRatio(0).setHidable(true);
+
+        addDsColumn().setHidable(true);
+
+        addDateAndTimeColumn().setHidable(true);
+
+        addStatusColumn().setHidable(true);
+
+        addMaintenanceWindowColumn().setHidable(true).setHidden(true);
+
+        addRolloutNameColumn().setHidable(true);
+
+        GridComponentBuilder.joinToIconColumn(getDefaultHeaderRow(), i18n.getMessage("label.action.type"),
+                Arrays.asList(addTypeColumn(), addTimeforcedColumn()));
+
+        GridComponentBuilder.joinToActionColumn(i18n, getDefaultHeaderRow(),
+                Arrays.asList(addCancelColumn(), addForceColumn(), addForceQuitColumn()));
+    }
+
+    private Column<ProxyAction, Long> addActionIdColumn() {
+        return GridComponentBuilder.addColumn(this, ProxyAction::getId).setId(ACTION_ID)
+                .setCaption(i18n.getMessage("label.action.id")).setMinimumWidthFromContent(true);
+    }
+
+    private Column<ProxyAction, String> addRolloutNameColumn() {
+        return GridComponentBuilder.addColumn(this, ProxyAction::getRolloutName).setId(ROLLOUT_NAME_ID)
+                .setCaption(i18n.getMessage("caption.rollout.name"));
     }
 
     /**
-     * Restores the maximized state if the action history was left in
-     * maximized-state and is now re-entered.
+     * Gets the master entity support
+     *
+     * @return Master entity support
      */
-    private void restorePreviousState() {
-        if (managementUIState.isActionHistoryMaximized()) {
-            createMaximizedContent();
-        }
-    }
-
-    /**
-     * Sets the alignment cell-style-generator that handles the alignment for
-     * the grid cells.
-     */
-    private void alignColumns() {
-        setCellStyleGenerator(alignGenerator);
-    }
-
-    /**
-     * Adds support for virtual properties (aka generated properties)
-     */
-    class ActionHistoryGeneratedPropertySupport extends AbstractGeneratedPropertySupport {
-
-        @Override
-        public GeneratedPropertyContainer getDecoratedContainer() {
-            return (GeneratedPropertyContainer) getContainerDataSource();
-        }
-
-        @Override
-        public LazyQueryContainer getRawContainer() {
-            return (LazyQueryContainer) (getDecoratedContainer()).getWrappedContainer();
-        }
-
-        @Override
-        protected GeneratedPropertyContainer addGeneratedContainerProperties() {
-            final GeneratedPropertyContainer decoratedContainer = getDecoratedContainer();
-
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_TYPE, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_TIMEFORCED, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_CANCEL, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_FORCE, new GenericPropertyValueGenerator());
-            decoratedContainer.addGeneratedProperty(VIRT_PROP_ACTION_FORCE_QUIT, new GenericPropertyValueGenerator());
-
-            return decoratedContainer;
-        }
-    }
-
-    /**
-     * Adds support to maximize the grid.
-     */
-    class ActionHistoryMaximizeSupport extends AbstractMaximizeSupport {
-
-        /**
-         * Sets the property-ids available in maximized-state.
-         */
-        @Override
-        protected void setMaximizedColumnProperties() {
-            clearSortOrder();
-            setColumns(maxColumnOrder);
-            alignColumns();
-        }
-
-        @Override
-        protected void setMaximizedHiddenColumns() {
-            getColumn(ProxyAction.PXY_ACTION_ID).setHidden(false);
-            getColumn(ProxyAction.PXY_ACTION_ID).setHidable(true);
-            getColumn(ProxyAction.PXY_ACTION_ROLLOUT_NAME).setHidden(false);
-            getColumn(ProxyAction.PXY_ACTION_ROLLOUT_NAME).setHidable(true);
-        }
-
-        /**
-         * Sets additional headers for the maximized-state.
-         */
-        @Override
-        protected void setMaximizedHeaders() {
-            getColumn(ProxyAction.PXY_ACTION_ID).setHeaderCaption(i18n.getMessage("label.action.id"));
-            getColumn(ProxyAction.PXY_ACTION_ROLLOUT_NAME).setHeaderCaption(i18n.getMessage("caption.rollout.name"));
-        }
-
-        /**
-         * Sets the expand ratio for the maximized-state.
-         */
-        @Override
-        protected void setMaximizedColumnExpandRatio() {
-            /* set messages column can expand the rest of the available space */
-            setColumnsSize(50.0, 50.0, ProxyAction.PXY_ACTION_IS_ACTIVE_DECO);
-            setColumnsSize(FIXED_PIX_MIN, 100.0, ProxyAction.PXY_ACTION_ID);
-            setColumnsSize(107.0, 500.0, ProxyAction.PXY_ACTION_DS_NAME_VERSION);
-            setColumnsSize(100.0, 150.0, ProxyAction.PXY_ACTION_LAST_MODIFIED_AT);
-            setColumnsSize(53.0, 55.0, ProxyAction.PXY_ACTION_STATUS);
-            setColumnsSize(FIXED_PIX_MIN, FIXED_PIX_MAX, VIRT_PROP_TYPE, VIRT_PROP_TIMEFORCED, VIRT_PROP_ACTION_CANCEL,
-                    VIRT_PROP_ACTION_FORCE, VIRT_PROP_ACTION_FORCE_QUIT);
-            setColumnsSize(FIXED_PIX_MIN, 500.0, ProxyAction.PXY_ACTION_ROLLOUT_NAME);
-        }
-    }
-
-    /**
-     * Concrete html-label converter that handles IsActiveDecoration enum.
-     */
-    class HtmlIsActiveLabelConverter extends AbstractHtmlLabelConverter<IsActiveDecoration> {
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Constructor that sets the appropriate adapter.
-         *
-         * @param adapter
-         *            adapts <code>IsActiveDecoration</code> to
-         *            <code>String</code>
-         */
-        public HtmlIsActiveLabelConverter(final LabelAdapter<IsActiveDecoration> adapter) {
-            addAdapter(adapter);
-        }
-
-        @Override
-        public Class<IsActiveDecoration> getModelType() {
-            return IsActiveDecoration.class;
-        }
-    }
-
-    /**
-     * Concrete html-label converter that handles Actions.
-     */
-    class HtmlVirtPropLabelConverter extends AbstractHtmlLabelConverter<Action> {
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Constructor that sets the appropriate adapter.
-         *
-         * @param adapter
-         *            adapts <code>Action</code> to <code>String</code>
-         */
-        public HtmlVirtPropLabelConverter(final LabelAdapter<Action> adapter) {
-            addAdapter(adapter);
-        }
-
-        @Override
-        public Class<Action> getModelType() {
-            return Action.class;
-        }
-    }
-
-    /**
-     * Concrete grid-button converter that handles Actions.
-     */
-    class ActionGridButtonConverter extends AbstractGridButtonConverter<Action> {
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Constructor that sets the appropriate adapter.
-         *
-         * @param adapter
-         *            adapts <code>Action</code> to <code>StatusFontIcon</code>
-         */
-        public ActionGridButtonConverter(final GridButtonAdapter<Action> adapter) {
-            addAdapter(adapter);
-        }
-
-        @Override
-        public Class<Action> getModelType() {
-            return Action.class;
-        }
-    }
-
-    /**
-     * Generator class responsible to retrieve an Action from the grid data in
-     * order to generate a virtual property.
-     */
-    class GenericPropertyValueGenerator extends PropertyValueGenerator<Action> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Action getValue(final Item item, final Object itemId, final Object propertyId) {
-            return (Action) item.getItemProperty(ProxyAction.PXY_ACTION).getValue();
-        }
-
-        @Override
-        public Class<Action> getType() {
-            return Action.class;
-        }
-    }
-
-    /**
-     * Configuration that holds the styling properties for label- and
-     * button-renderers that are included in grid-cells.
-     */
-    public static class LabelConfig {
-
-        /**
-         * Initializes a map with all available status label metadata.
-         *
-         * @param i18n
-         * @param statusLabelId
-         * @return the configured map
-         */
-        public Map<Action.Status, StatusFontIcon> createStatusLabelConfig(final VaadinMessageSource i18n,
-                final String statusLabelId) {
-            final HashMap<Action.Status, StatusFontIcon> stateMap = Maps.newHashMapWithExpectedSize(9);
-            stateMap.put(Action.Status.FINISHED, new StatusFontIcon(FontAwesome.CHECK_CIRCLE, STATUS_ICON_GREEN,
-                    i18n.getMessage("label.finished"), statusLabelId));
-            stateMap.put(Action.Status.ERROR, new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_RED,
-                    i18n.getMessage("label.error"), statusLabelId));
-            stateMap.put(Action.Status.WARNING, new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, STATUS_ICON_ORANGE,
-                    i18n.getMessage("label.warning"), statusLabelId));
-            stateMap.put(Action.Status.RUNNING, new StatusFontIcon(FontAwesome.ADJUST, STATUS_ICON_PENDING,
-                    i18n.getMessage("label.running"), statusLabelId));
-            stateMap.put(Action.Status.CANCELING, new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_PENDING,
-                    i18n.getMessage("label.cancelling"), statusLabelId));
-            stateMap.put(Action.Status.CANCELED, new StatusFontIcon(FontAwesome.TIMES_CIRCLE, STATUS_ICON_GREEN,
-                    i18n.getMessage("label.cancelled"), statusLabelId));
-            stateMap.put(Action.Status.RETRIEVED, new StatusFontIcon(FontAwesome.CIRCLE_O, STATUS_ICON_PENDING,
-                    i18n.getMessage("label.retrieved"), statusLabelId));
-            stateMap.put(Action.Status.DOWNLOADED, new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_GREEN,
-                    i18n.getMessage("label.downloaded"), statusLabelId));
-            stateMap.put(Action.Status.DOWNLOAD, new StatusFontIcon(FontAwesome.CLOUD_DOWNLOAD, STATUS_ICON_PENDING,
-                    i18n.getMessage("label.download"), statusLabelId));
-            stateMap.put(Action.Status.SCHEDULED, new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING,
-                    i18n.getMessage("label.scheduled"), statusLabelId));
-            return stateMap;
-        }
-
-        /**
-         * Initializes a map with all available active-state metadata.
-         *
-         * @param activeStateId
-         * @return the configured map
-         */
-        public Map<IsActiveDecoration, StatusFontIcon> createActiveStatusLabelConfig(final String activeStateId) {
-            final HashMap<IsActiveDecoration, StatusFontIcon> activeStateMap = Maps.newHashMapWithExpectedSize(4);
-            activeStateMap.put(IsActiveDecoration.SCHEDULED,
-                    new StatusFontIcon(FontAwesome.HOURGLASS_1, STATUS_ICON_PENDING, "Scheduled", activeStateId));
-            activeStateMap.put(IsActiveDecoration.ACTIVE,
-                    new StatusFontIcon(null, STATUS_ICON_ACTIVE, "Active", activeStateId));
-            activeStateMap.put(IsActiveDecoration.IN_ACTIVE,
-                    new StatusFontIcon(FontAwesome.CHECK_CIRCLE, STATUS_ICON_NEUTRAL, "In-active", activeStateId));
-            activeStateMap.put(IsActiveDecoration.IN_ACTIVE_ERROR,
-                    new StatusFontIcon(FontAwesome.CHECK_CIRCLE, STATUS_ICON_RED, "In-active", activeStateId));
-            return activeStateMap;
-        }
+    public MasterEntitySupport<ProxyTarget> getMasterEntitySupport() {
+        return masterEntitySupport;
     }
 }

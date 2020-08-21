@@ -15,10 +15,6 @@ import org.springframework.data.domain.Sort.Direction;
  */
 public final class SPUIDefinitions {
     /**
-     * Locale cookie name.
-     */
-    public static final String COOKIE_NAME = "BOSCHSI_UII_LOCALE";
-    /**
      * Lazy query container page size.
      */
     public static final int PAGE_SIZE = 50;
@@ -121,11 +117,6 @@ public final class SPUIDefinitions {
     public static final String HIGHLIGHT_GREEN = "highlight-green";
 
     /**
-     * The Combo box specific style for Distribution set.
-     */
-    public static final String COMBO_BOX_SPECIFIC_STYLE = "combo-specific-style";
-
-    /**
      * Target and distribution column width in save popup window.
      */
     public static final float TARGET_DISTRIBUTION_COLUMN_WIDTH = 2.8F;
@@ -154,7 +145,6 @@ public final class SPUIDefinitions {
      * DiscriptionSet type desc.
      */
     public static final String DIST_SET_TYPE_DESC = "dist-set-type-desc";
-
     /**
      * DistributionSet type key.
      */
@@ -168,7 +158,6 @@ public final class SPUIDefinitions {
      * Software type key.
      */
     public static final String TYPE_KEY = "type-key";
-
     /**
      * Minimum width required to show tags for both target and distribution
      * table without horizontal scroll. In case browser width is less than this
@@ -176,30 +165,10 @@ public final class SPUIDefinitions {
      * bars get displayed. Used for Responsive UI.
      */
     public static final int REQ_MIN_BROWSER_WIDTH = 1200;
-
-    /**
-     * Target tag button id prefix.
-     */
-    public static final String TARGET_TAG_ID_PREFIXS = "target.tag.";
-    /**
-     * Distribution tag button id prefix.
-     */
-    public static final String DISTRIBUTION_TAG_ID_PREFIXS = "dist.tag.";
-
     /**
      * Space.
      */
     public static final String SPACE = "&nbsp;";
-
-    /**
-     * Distribution tag button id prefix.
-     */
-    public static final String SOFTWARE_MODULE_TAG_ID_PREFIXS = "swmodule.type.";
-
-    /**
-     * DistributionSet Type tag button id prefix.
-     */
-    public static final String DISTRIBUTION_SET_TYPE_ID_PREFIXS = "dist.set.type.";
     /**
      * Target last query date format .
      */
@@ -217,45 +186,20 @@ public final class SPUIDefinitions {
      */
     public static final String EXPAND_ACTION_HISTORY = "expand.action.history";
     /**
+     * Expand action history.
+     */
+    public static final String EXPAND_ARTIFACT_DETAILS = "expand.artifact.details";
+    /**
      * Filter by distribution key.
      */
     public static final String ORDER_BY_DISTRIBUTION = "OrderByDistribution";
-
-    /** Artifact upload related entries - start **/
-    /**
-     * Artifact details by Base software module id.
-     */
-    public static final String BY_BASE_SOFTWARE_MODULE = "ByBaseSoftwareModule";
-
-    /**
-     * Software module type.
-     */
-    public static final String BY_SOFTWARE_MODULE_TYPE = "softwareModuleType";
-
-    /**
-     * Minimum width required to display ui without horizontal scroll. In case
-     * browser width is less than this width, the type layout will get hidden
-     * automatically and also horizontal scroll bars get displayed. Used for
-     * Responsive UI.
-     */
-    public static final int REQ_MIN_UPLOAD_BROWSER_WIDTH = 1250;
-
-    public static final int MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1000;
-
-    public static final int MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 310;
-
-    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_WIDTH = 1050;
-
-    public static final int MAX_UPLOAD_CONFIRMATION_POPUP_HEIGHT = 360;
-
-    /** Artifact upload related entries - end. **/
 
     public static final int MIN_DASHBOARD_HEIGHT = 600;
 
     public static final int MIN_DASHBOARD_WIDTH = 1100;
 
     /* Target Header Filter Box */
-    public static final String FILTER_BOX_HIDE = "filter-box-hide";
+    public static final String FILTER_BOX = "filter-box";
     public static final String FILTER_RESET_ICON = "filter-reset-icon";
 
     /* Action History */
@@ -309,7 +253,7 @@ public final class SPUIDefinitions {
     public static final String DEFAULT_COLOR = "rgb(44,151,32)";
 
     /**
-     * Id f "NO TAG" button.
+     * Id of "NO TAG" button.
      */
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
 

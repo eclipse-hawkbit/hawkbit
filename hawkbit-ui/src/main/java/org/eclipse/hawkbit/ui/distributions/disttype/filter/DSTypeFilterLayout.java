@@ -8,33 +8,49 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.event.EventLayout;
+import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
+import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.EntityModifiedAwareSupport;
+import org.eclipse.hawkbit.ui.common.layout.listener.GridActionsVisibilityListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGenericSupport;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
+import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
+import org.eclipse.hawkbit.ui.distributions.disttype.DsTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
+
+import com.vaadin.ui.ComponentContainer;
 
 /**
  * Distribution Set Type filter buttons layout.
  */
 public class DSTypeFilterLayout extends AbstractFilterLayout {
-
     private static final long serialVersionUID = 1L;
 
-    private final ManageDistUIState manageDistUIState;
+    private final DSTypeFilterHeader dsTypeFilterHeader;
+    private final DSTypeFilterButtons dSTypeFilterButtons;
+
+    private final transient GridActionsVisibilityListener gridActionsVisibilityListener;
+    private final transient EntityModifiedListener<ProxyType> entityModifiedListener;
 
     /**
      * Constructor
      * 
-     * @param manageDistUIState
-     *            ManageDistUIState
      * @param i18n
      *            VaadinMessageSource
      * @param permChecker
@@ -49,34 +65,65 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
      *            SoftwareModuleTypeManagement
      * @param distributionSetTypeManagement
      *            DistributionSetTypeManagement
-     * @param dSTypeFilterButtons
-     *            DSTypeFilterButtons
+     * @param distributionSetManagement
+     *            DistributionSetManagement
+     * @param systemManagement
+     *            SystemManagement
+     * @param dSTypeFilterLayoutUiState
+     *            TypeFilterLayoutUiState
      */
-    public DSTypeFilterLayout(final ManageDistUIState manageDistUIState, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+    public DSTypeFilterLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DSTypeFilterButtons dSTypeFilterButtons) {
-        super(new DSTypeFilterHeader(i18n, permChecker, eventBus, manageDistUIState, entityFactory, uiNotification,
-                softwareModuleTypeManagement, distributionSetTypeManagement, dSTypeFilterButtons), dSTypeFilterButtons,
-                eventBus);
-        this.manageDistUIState = manageDistUIState;
-        restoreState();
+            final DistributionSetManagement distributionSetManagement, final SystemManagement systemManagement,
+            final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
+        final DsTypeWindowBuilder dsTypeWindowBuilder = new DsTypeWindowBuilder(i18n, entityFactory, eventBus,
+                uiNotification, distributionSetTypeManagement, distributionSetManagement, softwareModuleTypeManagement);
+
+        this.dsTypeFilterHeader = new DSTypeFilterHeader(eventBus, i18n, permChecker, dsTypeWindowBuilder,
+                dSTypeFilterLayoutUiState);
+        this.dSTypeFilterButtons = new DSTypeFilterButtons(eventBus, i18n, uiNotification, permChecker,
+                distributionSetTypeManagement, systemManagement, dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
+
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
+                new EventLayoutViewAware(EventLayout.DS_TYPE_FILTER, EventView.DISTRIBUTIONS),
+                dSTypeFilterButtons::hideActionColumns, dSTypeFilterButtons::showEditColumn,
+                dSTypeFilterButtons::showDeleteColumn);
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyType.class)
+                .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
+                .parentEntityType(ProxyDistributionSet.class).build();
+
+        buildLayout();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DistributionsUIEvent event) {
-        if (event == DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE) {
-            setVisible(false);
-        }
-        if (event == DistributionsUIEvent.SHOW_DIST_FILTER_BY_TYPE) {
-            setVisible(true);
-        }
+    private List<EntityModifiedAwareSupport> getEntityModifiedAwareSupports() {
+        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(dSTypeFilterButtons::refreshAll),
+                EntityModifiedGenericSupport.of(null, null, dSTypeFilterButtons::resetFilterOnTypesDeleted));
     }
 
     @Override
-    public Boolean onLoadIsTypeFilterIsClosed() {
-        return manageDistUIState.isDistTypeFilterClosed();
+    protected DSTypeFilterHeader getFilterHeader() {
+        return dsTypeFilterHeader;
     }
 
+    @Override
+    protected ComponentContainer getFilterContent() {
+        return wrapFilterContent(dSTypeFilterButtons);
+    }
+
+    /**
+     * Restore state of distribution set filter button
+     */
+    public void restoreState() {
+        dSTypeFilterButtons.restoreState();
+    }
+
+    /**
+     * Unsubscribe event listener
+     */
+    public void unsubscribeListener() {
+        gridActionsVisibilityListener.unsubscribe();
+        entityModifiedListener.unsubscribe();
+    }
 }
