@@ -85,11 +85,6 @@ public class AutoAssignChecker implements AutoAssignExecutor {
         this.transactionManager = transactionManager;
     }
 
-    /**
-     * Checks all target filter queries with an auto assign distribution set and
-     * triggers the check and assignment to targets that don't have the design DS
-     * yet
-     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void check() {
