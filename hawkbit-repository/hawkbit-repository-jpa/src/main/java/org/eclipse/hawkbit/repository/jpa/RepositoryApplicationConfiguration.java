@@ -757,7 +757,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    AutoAssignExecutor autoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+    AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
                                          final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
                                          final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
