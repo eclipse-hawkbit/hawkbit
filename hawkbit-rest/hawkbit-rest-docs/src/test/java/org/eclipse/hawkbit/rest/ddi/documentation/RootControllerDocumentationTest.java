@@ -212,26 +212,13 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 put(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION,
                         tenantAware.getCurrentTenant(), target.getControllerId())
-                                .content(JsonBuilder.configData("", attributes, "closed", "merge").toString())
+                                .content(JsonBuilder.configData(attributes, "merge").toString())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID)),
-                        requestFields(optionalRequestFieldWithPath("id").description(DdiApiModelProperties.ACTION_ID),
-                                optionalRequestFieldWithPath("time").description(DdiApiModelProperties.TARGET_TIME),
-                                requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
-                                requestFieldWithPath("status.execution")
-                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
-                                        .attributes(key("value").value(
-                                                "['closed', 'proceeding', 'canceled','scheduled', 'rejected', 'resumed']")),
-                                requestFieldWithPath("status.result")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_VALUE),
-                                requestFieldWithPath("status.result.finished")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_FINISHED).type("enum")
-                                        .attributes(key("value").value("['success', 'failure', 'none']")),
-                                optionalRequestFieldWithPath("status.details")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_DETAILS),
+                        requestFields(
                                 requestFieldWithPath("data").description(DdiApiModelProperties.TARGET_CONFIG_DATA),
                                 optionalRequestFieldWithPath("mode").description(DdiApiModelProperties.UPDATE_MODE)
                                         .type("enum")

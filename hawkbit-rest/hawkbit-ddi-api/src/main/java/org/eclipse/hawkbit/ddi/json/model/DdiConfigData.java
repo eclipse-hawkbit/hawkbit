@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Feedback channel for ConfigData action.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DdiConfigData extends DdiActionFeedback {
+public class DdiConfigData {
 
     @NotEmpty
     private final Map<String, String> data;
@@ -30,21 +30,14 @@ public class DdiConfigData extends DdiActionFeedback {
     /**
      * Constructor.
      *
-     * @param id
-     *            of the actions the feedback is for
-     * @param time
-     *            of the feedback
-     * @param status
-     *            is the feedback itself
      * @param data
      *            contains the attributes.
+     * @param mode
+     *            defines the mode of the update (replace, merge, remove)
      */
     @JsonCreator
-    public DdiConfigData(@JsonProperty(value = "id") final Long id, @JsonProperty(value = "time") final String time,
-            @JsonProperty(value = "status") final DdiStatus status,
-            @JsonProperty(value = "data") final Map<String, String> data,
+    public DdiConfigData(@JsonProperty(value = "data") final Map<String, String> data,
             @JsonProperty(value = "mode") final DdiUpdateMode mode) {
-        super(id, time, status);
         this.data = data;
         this.mode = mode;
     }
