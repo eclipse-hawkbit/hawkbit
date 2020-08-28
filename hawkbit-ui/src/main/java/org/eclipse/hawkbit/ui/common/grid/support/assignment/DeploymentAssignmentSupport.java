@@ -55,11 +55,11 @@ public abstract class DeploymentAssignmentSupport<S extends ProxyNamedEntity, T 
 
         if (sourceItemsToAssignCount > 1) {
             return i18n.getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES_TO_ENTITY,
-                    sourceItemsToAssignCount, sourceEntityType(), targetEntityType(), targetItemName);
+                    sourceItemsToAssignCount, sourceEntityTypeMultiple(), targetEntityType(), targetItemName);
         }
 
         return i18n.getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES_TO_ENTITY,
-                sourceEntityType(), sourceItemNames.get(0), targetEntityType(), targetItemName);
+                sourceEntityTypeOne(), sourceItemNames.get(0), targetEntityType(), targetItemName);
     }
 
     private ConfirmationDialog createConfirmationWindow(final String confirmationMessage, final Component content,
@@ -73,7 +73,9 @@ public abstract class DeploymentAssignmentSupport<S extends ProxyNamedEntity, T 
         }, content, confirmationWindowId());
     }
 
-    protected abstract String sourceEntityType();
+    protected abstract String sourceEntityTypeOne();
+
+    protected abstract String sourceEntityTypeMultiple();
 
     protected abstract String targetEntityType();
 

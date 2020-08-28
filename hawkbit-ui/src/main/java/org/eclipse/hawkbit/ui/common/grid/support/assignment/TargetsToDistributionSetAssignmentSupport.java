@@ -36,13 +36,13 @@ public class TargetsToDistributionSetAssignmentSupport
      * Constructor for TargetsToDistributionSetAssignmentSupport
      *
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param assignmentController
-     *          DeploymentAssignmentWindowController
+     *            DeploymentAssignmentWindowController
      */
     public TargetsToDistributionSetAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
             final SpPermissionChecker permChecker, final DeploymentAssignmentWindowController assignmentController) {
@@ -75,8 +75,13 @@ public class TargetsToDistributionSetAssignmentSupport
     }
 
     @Override
-    protected String sourceEntityType() {
+    protected String sourceEntityTypeOne() {
         return i18n.getMessage("caption.target");
+    }
+
+    @Override
+    protected String sourceEntityTypeMultiple() {
+        return i18n.getMessage("message.confirm.assign.multiple.entities.targets");
     }
 
     @Override
