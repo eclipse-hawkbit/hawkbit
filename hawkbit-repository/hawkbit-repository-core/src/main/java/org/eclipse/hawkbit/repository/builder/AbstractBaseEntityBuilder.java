@@ -8,11 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-public abstract class AbstractBaseEntityBuilder {
+import org.eclipse.hawkbit.repository.Identifiable;
+
+public abstract class AbstractBaseEntityBuilder implements Identifiable<Long> {
 
     protected Long id;
 
+    @Override
     public Long getId() {
         return id;
     }
+
 }

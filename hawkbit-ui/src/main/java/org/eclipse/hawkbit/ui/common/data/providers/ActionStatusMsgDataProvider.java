@@ -43,7 +43,7 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
      *          Message not available text
      */
     public ActionStatusMsgDataProvider(final DeploymentManagement deploymentManagement, final String noMessageText) {
-        this(deploymentManagement, noMessageText, new Sort(Direction.DESC, "id"));
+        this(deploymentManagement, noMessageText, Sort.by(Direction.DESC, "id"));
     }
 
     /**

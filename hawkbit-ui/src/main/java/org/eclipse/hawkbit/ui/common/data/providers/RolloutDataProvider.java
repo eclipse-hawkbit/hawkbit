@@ -39,7 +39,7 @@ public class RolloutDataProvider extends AbstractProxyDataProvider<ProxyRollout,
      */
     public RolloutDataProvider(final RolloutManagement rolloutManagement,
             final RolloutToProxyRolloutMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "lastModifiedAt"));
+        super(entityMapper, Sort.by(Direction.DESC, "lastModifiedAt"));
 
         this.rolloutManagement = rolloutManagement;
     }

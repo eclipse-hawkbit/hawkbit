@@ -42,7 +42,7 @@ public class SoftwareModuleTypeDataProvider<T extends ProxyIdentifiableEntity>
      */
     public SoftwareModuleTypeDataProvider(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final IdentifiableEntityToProxyIdentifiableEntityMapper<T, SoftwareModuleType> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by(Direction.ASC, "name"));
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

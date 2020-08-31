@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.repository.Identifiable;
+
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
@@ -15,16 +17,11 @@ import java.util.concurrent.TimeUnit;
  * Core information of all entities.
  *
  */
-public interface BaseEntity extends Serializable {
+public interface BaseEntity extends Serializable, Identifiable<Long> {
 
     static Long getIdOrNull(final BaseEntity entity) {
         return entity == null ? null : entity.getId();
     }
-
-    /**
-     * @return the unique identifier of the {@link BaseEntity}.
-     */
-    Long getId();
 
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}

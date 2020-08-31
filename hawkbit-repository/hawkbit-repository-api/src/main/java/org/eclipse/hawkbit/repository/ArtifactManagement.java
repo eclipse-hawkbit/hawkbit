@@ -97,7 +97,7 @@ public interface ArtifactManagement {
     void delete(long id);
 
     /**
-     * Searches for {@link Artifact} with given {@link Long}.
+     * Searches for {@link Artifact} with given {@link Identifiable}.
      *
      * @param id
      *            to search for

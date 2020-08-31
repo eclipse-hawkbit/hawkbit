@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -97,10 +98,10 @@ public abstract class AbstractTagToken<T extends ProxyNamedEntity>
         tagPanelLayout.tagDeleted(tagId);
     }
 
-    protected boolean checkAssignmentResult(final List<? extends BaseEntity> assignedEntities,
+    protected boolean checkAssignmentResult(final List<? extends Identifiable<Long>> assignedEntities,
             final Long expectedAssignedEntityId) {
         if (!CollectionUtils.isEmpty(assignedEntities) && expectedAssignedEntityId != null) {
-            final List<Long> assignedDsIds = assignedEntities.stream().map(BaseEntity::getId)
+            final List<Long> assignedDsIds = assignedEntities.stream().map(Identifiable::getId)
                     .collect(Collectors.toList());
             if (assignedDsIds.contains(expectedAssignedEntityId)) {
                 return true;
@@ -109,7 +110,7 @@ public abstract class AbstractTagToken<T extends ProxyNamedEntity>
         return false;
     }
 
-    protected boolean checkUnassignmentResult(final BaseEntity unAssignedEntity,
+    protected boolean checkUnassignmentResult(final Identifiable<Long> unAssignedEntity,
             final Long expectedUnAssignedEntityId) {
         return unAssignedEntity != null && expectedUnAssignedEntityId != null
                 && unAssignedEntity.getId().equals(expectedUnAssignedEntityId);
