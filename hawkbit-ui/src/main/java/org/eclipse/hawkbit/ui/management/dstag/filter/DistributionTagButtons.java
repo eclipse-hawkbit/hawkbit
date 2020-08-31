@@ -46,21 +46,21 @@ public class DistributionTagButtons extends AbstractTagFilterButtons {
      * Constructor for DistributionTagButtons
      *
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param distributionSetTagManagement
-     *          DistributionSetTagManagement
+     *            DistributionSetTagManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param dsTagWindowBuilder
-     *          DsTagWindowBuilder
+     *            DsTagWindowBuilder
      * @param distributionTagLayoutUiState
-     *          TagFilterLayoutUiState
+     *            TagFilterLayoutUiState
      */
     public DistributionTagButtons(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification uiNotification, final SpPermissionChecker permChecker,
@@ -91,8 +91,13 @@ public class DistributionTagButtons extends AbstractTagFilterButtons {
     }
 
     @Override
-    protected String getFilterButtonsType() {
-        return i18n.getMessage(UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG);
+    protected String getMessageKeyEntityTypeSing() {
+        return UIMessageIdProvider.CAPTION_DISTRIBUTION_TAG;
+    }
+
+    @Override
+    protected String getMessageKeyEntityTypePlur() {
+        return "caption.entity.distribution.tags";
     }
 
     @Override

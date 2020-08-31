@@ -81,7 +81,7 @@ public class TargetsToDistributionSetAssignmentSupport
 
     @Override
     protected String sourceEntityTypeMultiple() {
-        return i18n.getMessage("message.confirm.assign.multiple.entities.targets");
+        return i18n.getMessage("caption.targets");
     }
 
     @Override

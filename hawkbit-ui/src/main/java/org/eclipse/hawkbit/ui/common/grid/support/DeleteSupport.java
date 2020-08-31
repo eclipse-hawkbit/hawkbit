@@ -38,7 +38,8 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
 
     private final Grid<T> grid;
     private final VaadinMessageSource i18n;
-    private final String entityType;
+    private final String localizedEntityTypeSing;
+    private final String localizedEntityTypePlur;
     private final UINotification notification;
     private final Predicate<Collection<T>> itemsDeletionCallback;
     private final String deletionWindowId;
@@ -50,26 +51,30 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
      * Constructor for DeleteSupport
      *
      * @param grid
-     *          Vaadin Grid
+     *            Vaadin Grid
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param notification
-     *          UINotification
-     * @param entityType
-     *          Entity type
+     *            UINotification
+     * @param messageKeyEntityTypeSing
+     *            message key for the singular entity name for i18n
+     * @param messageKeyEntityTypePlur
+     *            message key for the plural entity name for i18n
      * @param entityNameGenerator
-     *          Entity name generator
+     *            Entity name generator
      * @param itemsDeletionCallback
-     *          Callback for delete event
+     *            Callback for delete event
      * @param deletionWindowId
-     *          Id of deletion Grid window
+     *            Id of deletion Grid window
      */
     public DeleteSupport(final Grid<T> grid, final VaadinMessageSource i18n, final UINotification notification,
-            final String entityType, final Function<T, String> entityNameGenerator,
-            final Predicate<Collection<T>> itemsDeletionCallback, final String deletionWindowId) {
+            final String messageKeyEntityTypeSing, final String messageKeyEntityTypePlur,
+            final Function<T, String> entityNameGenerator, final Predicate<Collection<T>> itemsDeletionCallback,
+            final String deletionWindowId) {
         this.grid = grid;
         this.i18n = i18n;
-        this.entityType = entityType;
+        this.localizedEntityTypeSing = i18n.getMessage(messageKeyEntityTypeSing);
+        this.localizedEntityTypePlur = i18n.getMessage(messageKeyEntityTypePlur);
         this.entityNameGenerator = entityNameGenerator;
         this.notification = notification;
         this.itemsDeletionCallback = itemsDeletionCallback;
@@ -80,14 +85,15 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
      * Open confirmation pop up window for delete action
      *
      * @param clickedItem
-     *          Item selected for deletion
+     *            Item selected for deletion
      */
     public void openConfirmationWindowDeleteAction(final T clickedItem) {
         final Set<T> itemsToBeDeleted = getItemsForDeletion(clickedItem);
         final int itemsToBeDeletedSize = itemsToBeDeleted.size();
 
         final String clickedItemName = entityNameGenerator.apply(clickedItem);
-        final String confirmationCaption = i18n.getMessage("caption.entity.delete.action.confirmbox", entityType);
+        final String confirmationCaption = i18n.getMessage("caption.entity.delete.action.confirmbox",
+                localizedEntityTypeSing);
 
         final StringBuilder confirmationQuestionBuilder = new StringBuilder();
         confirmationQuestionBuilder.append(createDeletionText(UIMessageIdProvider.MESSAGE_CONFIRM_DELETE_ENTITY,
@@ -131,9 +137,9 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
     private String createDeletionText(final String messageId, final int itemsToBeDeletedSize,
             final String clickedItemName) {
         if (itemsToBeDeletedSize == 1) {
-            return i18n.getMessage(messageId, entityType, clickedItemName, "");
+            return i18n.getMessage(messageId, localizedEntityTypeSing, clickedItemName);
         } else {
-            return i18n.getMessage(messageId, itemsToBeDeletedSize, entityType, "s");
+            return i18n.getMessage(messageId, itemsToBeDeletedSize, localizedEntityTypePlur);
         }
     }
 
@@ -157,7 +163,8 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
         } catch (final RuntimeException ex) {
             final String itemsToBeDeletedIds = itemsToBeDeleted.stream().map(ProxyIdentifiableEntity::getId)
                     .map(String::valueOf).collect(Collectors.joining(","));
-            LOG.warn("Deletion of {} with ids '{}' failed: {}", entityType, itemsToBeDeletedIds, ex.getMessage());
+            LOG.warn("Deletion of {} with ids '{}' failed: {}", localizedEntityTypeSing, itemsToBeDeletedIds,
+                    ex.getMessage());
         }
 
         if (isDeletionSuccessfull) {
@@ -171,7 +178,7 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
      * Sets the question to confirm the delete action
      *
      * @param confirmationQuestionDetailsGenerator
-     *          Confirmation detail for delete action
+     *            Confirmation detail for delete action
      */
     public void setConfirmationQuestionDetailsGenerator(
             final Function<T, String> confirmationQuestionDetailsGenerator) {

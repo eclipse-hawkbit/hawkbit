@@ -192,7 +192,7 @@ public class SwModulesToDistributionSetAssignmentSupport
 
     @Override
     protected String sourceEntityTypeMultiple() {
-        return i18n.getMessage("message.confirm.assign.multiple.entities.softwaremodules");
+        return i18n.getMessage("caption.softwaremodules");
     }
 
     @Override

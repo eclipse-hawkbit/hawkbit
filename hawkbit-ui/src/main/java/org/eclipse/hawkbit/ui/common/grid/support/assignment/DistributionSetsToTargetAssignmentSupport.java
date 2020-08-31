@@ -104,7 +104,7 @@ public class DistributionSetsToTargetAssignmentSupport
 
     @Override
     protected String sourceEntityTypeMultiple() {
-        return i18n.getMessage("message.confirm.assign.multiple.entities.distributionsets");
+        return i18n.getMessage("caption.distributionsets");
     }
 
     @Override

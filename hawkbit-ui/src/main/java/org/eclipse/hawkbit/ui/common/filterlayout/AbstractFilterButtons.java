@@ -57,8 +57,8 @@ public abstract class AbstractFilterButtons<T extends ProxyFilterButton, F> exte
             final UINotification notification, final SpPermissionChecker permChecker) {
         super(i18n, eventBus, permChecker);
 
-        this.filterButtonDeleteSupport = new DeleteSupport<>(this, i18n, notification, getFilterButtonsType(),
-                ProxyFilterButton::getName, this::deleteFilterButtons,
+        this.filterButtonDeleteSupport = new DeleteSupport<>(this, i18n, notification, getMessageKeyEntityTypeSing(),
+                getMessageKeyEntityTypePlur(), ProxyFilterButton::getName, this::deleteFilterButtons,
                 UIComponentIdProvider.FILTER_BUTTON_DELETE_CONFIRMATION_DIALOG);
     }
 
@@ -75,7 +75,9 @@ public abstract class AbstractFilterButtons<T extends ProxyFilterButton, F> exte
         addStyleName(ValoTheme.TABLE_COMPACT);
     }
 
-    protected abstract String getFilterButtonsType();
+    protected abstract String getMessageKeyEntityTypeSing();
+
+    protected abstract String getMessageKeyEntityTypePlur();
 
     protected abstract boolean deleteFilterButtons(Collection<T> filterButtonsToDelete);
 

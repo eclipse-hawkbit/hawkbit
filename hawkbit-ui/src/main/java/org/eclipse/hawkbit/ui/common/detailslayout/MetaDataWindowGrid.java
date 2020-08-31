@@ -29,7 +29,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Grid for MetaData pop up layout.
  *
  * @param <F>
- *          Generic type
+ *            Generic type
  */
 public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implements MasterEntityAwareComponent<F> {
     private static final long serialVersionUID = 1L;
@@ -44,17 +44,17 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
      * Constructor for MetaDataWindowGrid
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param permissionChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param dataProvider
-     *          AbstractMetaDataDataProvider for filter support
+     *            AbstractMetaDataDataProvider for filter support
      * @param itemsDeletionCallback
-     *          Grid item deletion Call back for event listener
+     *            Grid item deletion Call back for event listener
      *
      */
     public MetaDataWindowGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -63,8 +63,8 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
             final Predicate<Collection<ProxyMetaData>> itemsDeletionCallback) {
         super(i18n, eventBus, permissionChecker);
 
-        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, notification, i18n.getMessage("caption.metadata"),
-                ProxyMetaData::getKey, itemsDeletionCallback,
+        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.metadata",
+                "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
                 UIComponentIdProvider.METADATA_DELETE_CONFIRMATION_DIALOG);
 
         setFilterSupport(new FilterSupport<>(dataProvider));

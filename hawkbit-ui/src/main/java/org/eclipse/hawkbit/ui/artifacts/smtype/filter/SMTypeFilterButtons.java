@@ -54,9 +54,9 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
      * @param smTypeWindowBuilder
      *            SmTypeWindowBuilder
      * @param typeFilterLayoutUiState
-     *          TypeFilterLayoutUiState
+     *            TypeFilterLayoutUiState
      * @param view
-     *         EventView
+     *            EventView
      */
     public SMTypeFilterButtons(final UIEventBus eventBus, final VaadinMessageSource i18n,
             final UINotification uiNotification, final SpPermissionChecker permChecker,
@@ -85,8 +85,13 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
     }
 
     @Override
-    protected String getFilterButtonsType() {
-        return i18n.getMessage("caption.entity.software.module.type");
+    protected String getMessageKeyEntityTypeSing() {
+        return "caption.entity.software.module.type";
+    }
+
+    @Override
+    protected String getMessageKeyEntityTypePlur() {
+        return "caption.entity.software.module.types";
     }
 
     @Override

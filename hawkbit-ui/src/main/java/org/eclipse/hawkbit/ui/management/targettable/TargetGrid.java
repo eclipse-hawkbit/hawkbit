@@ -147,8 +147,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             getSelectionSupport().enableMultiSelection();
         }
 
-        this.targetDeleteSupport = new DeleteSupport<>(this, i18n, notification,
-                i18n.getMessage("target.details.header"), ProxyTarget::getName, this::deleteTargets,
+        this.targetDeleteSupport = new DeleteSupport<>(this, i18n, notification, "target.details.header",
+                "caption.targets", ProxyTarget::getName, this::deleteTargets,
                 UIComponentIdProvider.TARGET_DELETE_CONFIRMATION_DIALOG);
 
         this.pinSupport = new PinSupport<>(this::refreshItem, this::publishPinningChangedEvent,
