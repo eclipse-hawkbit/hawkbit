@@ -12,7 +12,6 @@ import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.MoreObjects;
 
@@ -23,15 +22,15 @@ public class EntityModifiedEventPayloadIdentifier {
     private final Class<? extends ProxyIdentifiableEntity> parentType;
     private final Class<? extends ProxyIdentifiableEntity> entityType;
     private final EntityModifiedEventType modifiedEventType;
-    private final String eventTypeMessageKey;
+    private final EventNotificationType notificationType;
 
     /**
      * Constructor for EntityModifiedEventPayloadIdentifier
      *
      * @param entityType
-     *          Event payload of identifiable entity type
+     *            Event payload of identifiable entity type
      * @param modifiedEventType
-     *          EntityModifiedEventType
+     *            EntityModifiedEventType
      */
     public EntityModifiedEventPayloadIdentifier(final Class<? extends ProxyIdentifiableEntity> entityType,
             final EntityModifiedEventType modifiedEventType) {
@@ -42,26 +41,26 @@ public class EntityModifiedEventPayloadIdentifier {
      * Constructor for EntityModifiedEventPayloadIdentifier
      *
      * @param entityType
-     *          Event payload of identifiable entity type
+     *            Event payload of identifiable entity type
      * @param modifiedEventType
-     *          EntityModifiedEventType
-     * @param eventTypeMessageKey
-     *          Key for event type message
+     *            EntityModifiedEventType
+     * @param notificationType
+     *            type of notification that is triggered by the event
      */
     public EntityModifiedEventPayloadIdentifier(final Class<? extends ProxyIdentifiableEntity> entityType,
-            final EntityModifiedEventType modifiedEventType, final String eventTypeMessageKey) {
-        this(null, entityType, modifiedEventType, eventTypeMessageKey);
+            final EntityModifiedEventType modifiedEventType, final EventNotificationType notificationType) {
+        this(null, entityType, modifiedEventType, notificationType);
     }
 
     /**
      * Constructor for EntityModifiedEventPayloadIdentifier
      *
      * @param parentType
-     *          Event payload of identifiable parent type
+     *            Event payload of identifiable parent type
      * @param entityType
-     *          Event payload of identifiable entity type
+     *            Event payload of identifiable entity type
      * @param modifiedEventType
-     *          EntityModifiedEventType
+     *            EntityModifiedEventType
      */
     public EntityModifiedEventPayloadIdentifier(final Class<? extends ProxyIdentifiableEntity> parentType,
             final Class<? extends ProxyIdentifiableEntity> entityType,
@@ -73,21 +72,21 @@ public class EntityModifiedEventPayloadIdentifier {
      * Constructor for EntityModifiedEventPayloadIdentifier
      *
      * @param parentType
-     *          Event payload of identifiable parent type
+     *            Event payload of identifiable parent type
      * @param entityType
-     *          Event payload of identifiable entity type
+     *            Event payload of identifiable entity type
      * @param modifiedEventType
-     *          EntityModifiedEventType
-     * @param eventTypeMessageKey
-     *          Key for event type message
+     *            EntityModifiedEventType
+     * @param notificationType
+     *            type of notification that is triggered by the event
      */
     public EntityModifiedEventPayloadIdentifier(final Class<? extends ProxyIdentifiableEntity> parentType,
             final Class<? extends ProxyIdentifiableEntity> entityType, final EntityModifiedEventType modifiedEventType,
-            final String eventTypeMessageKey) {
+            final EventNotificationType notificationType) {
         this.parentType = parentType;
         this.entityType = entityType;
         this.modifiedEventType = modifiedEventType;
-        this.eventTypeMessageKey = eventTypeMessageKey;
+        this.notificationType = notificationType;
     }
 
     /**
@@ -112,10 +111,10 @@ public class EntityModifiedEventPayloadIdentifier {
     }
 
     /**
-     * @return Key of event type message
+     * @return type of notification
      */
-    public String getEventTypeMessageKey() {
-        return eventTypeMessageKey;
+    public EventNotificationType getNotificationType() {
+        return notificationType;
     }
 
     /**
@@ -123,14 +122,14 @@ public class EntityModifiedEventPayloadIdentifier {
      *         <code>false</code>
      */
     public boolean shouldBeDeffered() {
-        return !StringUtils.isEmpty(eventTypeMessageKey);
+        return notificationType != null;
     }
 
     /**
      * Static method for constructor EntityModifiedEventPayloadIdentifier
      *
      * @param eventPayload
-     *          EntityModifiedEventPayload
+     *            EntityModifiedEventPayload
      *
      * @return Payload identifier containing information about an modified event
      */

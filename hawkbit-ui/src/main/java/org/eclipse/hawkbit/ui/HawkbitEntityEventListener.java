@@ -117,7 +117,7 @@ public class HawkbitEntityEventListener {
 
                     if (eventPayloadIdentifier.shouldBeDeffered()) {
                         notificationUnreadButton.incrementUnreadNotification(
-                                eventPayloadIdentifier.getEventTypeMessageKey(), remoteEventPayload);
+                                eventPayloadIdentifier.getNotificationType(), remoteEventPayload);
                     } else {
                         eventBus.publish(EventTopics.ENTITY_MODIFIED, UI.getCurrent(), remoteEventPayload);
                     }
