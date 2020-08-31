@@ -36,7 +36,7 @@ import com.vaadin.spring.navigator.SpringViewProvider;
  *
  */
 @SpringUI
-@Push(value = PushMode.AUTOMATIC, transport = Transport.WEBSOCKET)
+@Push(value = PushMode.AUTOMATIC, transport = Transport.WEBSOCKET_XHR)
 // Exception squid:MaximumInheritanceDepth - Most of the inheritance comes from
 // Vaadin.
 @SuppressWarnings({ "squid:MaximumInheritanceDepth" })

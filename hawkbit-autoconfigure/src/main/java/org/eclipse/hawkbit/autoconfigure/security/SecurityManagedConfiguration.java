@@ -60,11 +60,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -87,6 +89,8 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -100,6 +104,7 @@ import org.vaadin.spring.http.HttpService;
 import org.vaadin.spring.security.annotation.EnableVaadinSharedSecurity;
 import org.vaadin.spring.security.config.VaadinSharedSecurityConfiguration;
 import org.vaadin.spring.security.shared.VaadinAuthenticationSuccessHandler;
+import org.vaadin.spring.security.shared.VaadinSessionClosingLogoutHandler;
 import org.vaadin.spring.security.shared.VaadinUrlAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 
@@ -595,6 +600,7 @@ public class SecurityManagedConfiguration {
      */
     @Configuration
     @Order(400)
+    @EnableWebSecurity
     @EnableVaadinSharedSecurity
     @ConditionalOnClass(MgmtUiConfiguration.class)
     public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
@@ -668,6 +674,11 @@ public class SecurityManagedConfiguration {
             return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
         }
 
+        @Bean
+        public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+            return new SessionFixationProtectionStrategy();
+        }
+
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
@@ -712,9 +723,11 @@ public class SecurityManagedConfiguration {
             }
 
             // UI logout
-            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
-                    .logoutSuccessHandler(logoutSuccessHandler);
+            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(new VaadinSessionClosingLogoutHandler())
+                    .addLogoutHandler(logoutHandler).logoutSuccessHandler(logoutSuccessHandler);
 
+            // UI session management
+            httpSec.sessionManagement().sessionAuthenticationStrategy(sessionAuthenticationStrategy());
         }
 
         @Override
@@ -722,8 +735,25 @@ public class SecurityManagedConfiguration {
             // No security for static content
             webSecurity.ignoring().antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/docs/**");
         }
-    }
 
+        /**
+         * Configuration that defines the {@link AccessDecisionManager} bean for
+         * UI method security used by the Vaadin Servlet. Notice: we can not use
+         * the top-level method security configuration because
+         * {@link AdviceMode.ASPECTJ} is not supported.
+         */
+        @Configuration
+        @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, proxyTargetClass = true)
+        @ConditionalOnClass(MgmtUiConfiguration.class)
+        static class UIMethodSecurity extends GlobalMethodSecurityConfiguration {
+
+            @Bean(name = VaadinSharedSecurityConfiguration.ACCESS_DECISION_MANAGER_BEAN)
+            @Override
+            protected AccessDecisionManager accessDecisionManager() {
+                return super.accessDecisionManager();
+            }
+        }
+    }
 }
 
 /**
