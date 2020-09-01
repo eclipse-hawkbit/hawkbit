@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.io.Serializable;
 
+@FunctionalInterface
 public interface Identifiable<T extends Serializable> {
 
     T getId();
