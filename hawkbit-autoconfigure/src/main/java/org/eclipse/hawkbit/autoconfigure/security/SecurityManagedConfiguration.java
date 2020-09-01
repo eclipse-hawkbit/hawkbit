@@ -89,8 +89,6 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -104,7 +102,6 @@ import org.vaadin.spring.http.HttpService;
 import org.vaadin.spring.security.annotation.EnableVaadinSharedSecurity;
 import org.vaadin.spring.security.config.VaadinSharedSecurityConfiguration;
 import org.vaadin.spring.security.shared.VaadinAuthenticationSuccessHandler;
-import org.vaadin.spring.security.shared.VaadinSessionClosingLogoutHandler;
 import org.vaadin.spring.security.shared.VaadinUrlAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 
@@ -674,11 +671,6 @@ public class SecurityManagedConfiguration {
             return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
         }
 
-        @Bean
-        public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-            return new SessionFixationProtectionStrategy();
-        }
-
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
@@ -723,11 +715,8 @@ public class SecurityManagedConfiguration {
             }
 
             // UI logout
-            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(new VaadinSessionClosingLogoutHandler())
-                    .addLogoutHandler(logoutHandler).logoutSuccessHandler(logoutSuccessHandler);
-
-            // UI session management
-            httpSec.sessionManagement().sessionAuthenticationStrategy(sessionAuthenticationStrategy());
+            httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
+                    .logoutSuccessHandler(logoutSuccessHandler);
         }
 
         @Override

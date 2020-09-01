@@ -32,7 +32,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.vaadin.spring.security.config.AuthenticationManagerConfigurer;
 
 /**
  * Auto-configuration for the in-memory-user-management.
@@ -41,8 +40,7 @@ import org.vaadin.spring.security.config.AuthenticationManagerConfigurer;
 @Configuration
 @ConditionalOnMissingBean(UserDetailsService.class)
 @EnableConfigurationProperties({ MultiUserProperties.class })
-public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter
-        implements AuthenticationManagerConfigurer {
+public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
     private static final String DEFAULT_TENANT = "DEFAULT";
 
@@ -93,8 +91,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
             final String name = securityProperties.getUser().getName();
             final String password = securityProperties.getUser().getPassword();
             final List<String> roles = securityProperties.getUser().getRoles();
-            List<GrantedAuthority> authorityList = roles.isEmpty()
-                    ? PermissionUtils.createAllAuthorityList()
+            final List<GrantedAuthority> authorityList = roles.isEmpty() ? PermissionUtils.createAllAuthorityList()
                     : createAuthoritiesFromList(roles);
             userPrincipals
                     .add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT, authorityList));
@@ -104,7 +101,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     }
 
     private static List<GrantedAuthority> createAuthoritiesFromList(final List<String> userAuthorities) {
-        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userAuthorities.size());
+        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userAuthorities.size());
         for (final String permission : userAuthorities) {
             grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
             grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
@@ -154,7 +151,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
                 final Authentication authentication, final UserDetails user) {
             final UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(principal,
                     authentication.getCredentials(), user.getAuthorities());
-            result.setDetails(new TenantAwareAuthenticationDetails("DEFAULT", false));
+            result.setDetails(new TenantAwareAuthenticationDetails(DEFAULT_TENANT, false));
             return result;
         }
     }
