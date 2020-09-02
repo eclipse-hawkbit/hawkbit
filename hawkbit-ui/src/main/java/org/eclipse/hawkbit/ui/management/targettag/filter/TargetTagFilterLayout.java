@@ -10,29 +10,31 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.event.FilterHeaderEvent.FilterHeaderEnum;
-import org.eclipse.hawkbit.ui.common.event.TargetTagFilterHeaderEvent;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.dd.criteria.ManagementViewClientCriterion;
-import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagTableEvent;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.event.TargetFilterTabChangedEventPayload;
+import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.common.layout.listener.GenericEventListener;
+import org.eclipse.hawkbit.ui.management.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
+
+import com.vaadin.ui.ComponentContainer;
 
 /**
  * Target Tag filter layout.
  */
-public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout implements RefreshableContainer {
-
+public class TargetTagFilterLayout extends AbstractFilterLayout {
     private static final long serialVersionUID = 1L;
 
-    private final transient UIEventBus eventBus;
+    private final TargetTagFilterHeader targetTagFilterHeader;
+    private final MultipleTargetFilter multipleTargetFilter;
+
+    private final transient GenericEventListener<TargetFilterTabChangedEventPayload> filterTabChangedListener;
 
     /**
      * Constructor
@@ -41,8 +43,6 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
      *            VaadinMessageSource
      * @param managementUIState
      *            ManagementUIState
-     * @param managementViewClientCriterion
-     *            ManagementViewClientCriterion
      * @param permChecker
      *            SpPermissionChecker
      * @param eventBus
@@ -55,43 +55,62 @@ public class TargetTagFilterLayout extends AbstractTargetTagFilterLayout impleme
      *            TargetFilterQueryManagement
      * @param targetTagManagement
      *            TargetTagManagement
+     * @param targetManagement
+     *          TargetManagement
+     * @param targetTagFilterLayoutUiState
+     *          TargetTagFilterLayoutUiState
      */
     public TargetTagFilterLayout(final VaadinMessageSource i18n, final ManagementUIState managementUIState,
-            final ManagementViewClientCriterion managementViewClientCriterion, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification notification, final EntityFactory entityFactory,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetTagManagement targetTagManagement) {
-        super(new TargetTagFilterHeader(i18n, managementUIState, permChecker, eventBus),
-                new MultipleTargetFilter(permChecker, managementUIState, i18n, eventBus, managementViewClientCriterion,
-                        notification, entityFactory, targetFilterQueryManagement, targetTagManagement),
-                managementUIState);
-        this.eventBus = eventBus;
-        eventBus.subscribe(this);
+            final SpPermissionChecker permChecker, final UIEventBus eventBus, final UINotification notification,
+            final EntityFactory entityFactory, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
+        final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(i18n, entityFactory, eventBus,
+                notification, targetTagManagement);
+
+        this.targetTagFilterHeader = new TargetTagFilterHeader(i18n, permChecker, eventBus,
+                targetTagFilterLayoutUiState, targetTagWindowBuilder);
+        this.multipleTargetFilter = new MultipleTargetFilter(permChecker, i18n, eventBus, notification,
+                targetFilterQueryManagement, targetTagManagement, targetManagement, targetTagFilterLayoutUiState,
+                targetTagWindowBuilder);
+
+        this.filterTabChangedListener = new GenericEventListener<>(eventBus, EventTopics.TARGET_FILTER_TAB_CHANGED,
+                this::onTargetFilterTabChanged);
+
+        buildLayout();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final ManagementUIEvent event) {
-        if (event == ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT) {
-            setVisible(false);
+    private void onTargetFilterTabChanged(final TargetFilterTabChangedEventPayload eventPayload) {
+        if (TargetFilterTabChangedEventPayload.CUSTOM == eventPayload) {
+            targetTagFilterHeader.disableCrudMenu();
+        } else {
+            targetTagFilterHeader.enableCrudMenu();
         }
-        if (event == ManagementUIEvent.SHOW_TARGET_TAG_LAYOUT) {
-            setVisible(true);
-        }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onTargetTagTableEvent(final TargetTagTableEvent tableEvent) {
-        refreshContainer();
-        eventBus.publish(this, new TargetTagFilterHeaderEvent(FilterHeaderEnum.SHOW_MENUBAR));
     }
 
     @Override
-    public Boolean onLoadIsTypeFilterIsClosed() {
-        return managementUIState.isTargetTagFilterClosed();
+    protected TargetTagFilterHeader getFilterHeader() {
+        return targetTagFilterHeader;
     }
 
     @Override
-    public void refreshContainer() {
-        getMultipleFilterTabs().getFilterByButtons().refreshTable();
+    protected ComponentContainer getFilterContent() {
+        return multipleTargetFilter;
+    }
+
+    /**
+     * Restore the target filter state
+     */
+    public void restoreState() {
+        targetTagFilterHeader.restoreState();
+        multipleTargetFilter.restoreState();
+    }
+
+    /**
+     * Unsubscribe the event listener
+     */
+    public void unsubscribeListener() {
+        filterTabChangedListener.unsubscribe();
+        multipleTargetFilter.unsubscribeListener();
     }
 }

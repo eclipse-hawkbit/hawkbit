@@ -27,7 +27,7 @@ The user decides who can produce on an exchange and who can create bindings on t
 hawkBit will create all necessary queues, exchanges and bindings for the user, making it easy to get started.
 The exchange name for outgoing messages is **dmf.exchange**.
 
-The user has to set a `reply_to` header (see chapter below), to change the default sender exchange.
+The user has to set a `reply_to` header (see chapter below), in order to specify the exchange to which hawkBit should reply to.
 
 The following chapter describes the message body, header and properties.
 
@@ -44,19 +44,20 @@ Header | Description                                      | Type                
 -------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
 type           | Type of the message                              | Fixed string "THING_CREATED" | true
 thingId        | The ID of the registered provisioning target   | String                       | true
+tenant         | The tenant this provisioning target belongs to | String                       | true
 sender         | Name of the message sender                       | String                       | false
-tenant         | The tenant this provisioning target belongs to | String                       | false
+
 
 Message Properties | Description                                                                                          | Type   | Mandatory
 ------------------ | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
 content_type       | The content type of the payload                                                                      | String | true
-reply_to           | Exchange to reply to. The default is sp.direct.exchange which is bound to the sp_direct_queue | String | false
+reply_to           | Exchange to reply to                                                                                 | String | true
 
 Example headers and payload:
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
-type=THING\_CREATED <br /> tenant=tenant123 <br /> thingId=abc  <br /> sender=Lwm2m | content\_type=application/json <br /> reply_to (optional) =sp.connector.replyTo
+type=THING\_CREATED <br /> tenant=default <br /> thingId=abc  <br /> sender=myClient | content\_type=application/json <br /> reply_to=myExchangeToReplyTo
 
 Payload Template (optional):
 
@@ -87,7 +88,7 @@ Example headers
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
-type=THING\_REMOVED <br /> tenant=tenant123 <br /> thingId=abc | content\_type=application/json
+type=THING\_REMOVED <br /> tenant=default <br /> thingId=abc | content\_type=application/json
 
 
 ### UPDATE_ATTRIBUTES
@@ -110,7 +111,7 @@ Example header and payload:
 
 | Header                               | MessageProperties               |
 |---------------------------------------|---------------------------------|
-| type=EVENT <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=UPDATE\_ATTRIBUTES | content\_type=application/json <br />
+| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=UPDATE\_ATTRIBUTES | content\_type=application/json <br />
 
 Payload Template:
 
@@ -176,7 +177,7 @@ Example header and payload:
 
 Header                                                                 | MessageProperties
 ----------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=tenant123 <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
 
 ```json
 {
@@ -231,7 +232,7 @@ Example Headers and Payload:
 
 | Header                               | MessageProperties               |
 |---------------------------------------|---------------------------------|
-| type=EVENT <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=CANCEL\_DOWNLOAD   | content_type=application/json  
+| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=CANCEL\_DOWNLOAD   | content_type=application/json  
 
 ```json
 {
@@ -245,7 +246,7 @@ Example header and payload when cancellation is successful:
 
 Header                                                                 | MessageProperties
 ----------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=tenant123 <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
 
 ```json
 {
@@ -260,7 +261,7 @@ Example header and payload when cancellation is rejected:
 
 Header                                                                 | MessageProperties
 ----------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=tenant123 <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
 
 ```json
 {
@@ -325,7 +326,7 @@ Example header and payload:
 
 Header                                                                                      | MessageProperties
 ------------------------------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_AND\_INSTALL | content_type=application/json
+type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=DOWNLOAD\_AND\_INSTALL | content_type=application/json
 
 ```json
 {
@@ -364,7 +365,7 @@ type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=DOWNLOAD\_A
 
 If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or CANCEL_DOWNLOAD
  by hawkBit to initialize update, download, or cancel task(s).
- 
+
  With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
 Header  | Description                      | Type                                | Mandatory
@@ -453,7 +454,7 @@ Example header and payload:
 
 Header                                                                                      | MessageProperties
 ------------------------------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=tenant123 <br /> thingId=abc  <br /> topic=MULTI\_ACTION | content_type=application/json
+type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=MULTI\_ACTION | content_type=application/json
 
 ```json
 [{
@@ -539,7 +540,7 @@ Example header:
 
 Header                                                                             | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
-type=THING\_DELETED <br /> tenant=tenant123 <br /> thingId=abc                      | |
+type=THING\_DELETED <br /> tenant=default <br /> thingId=abc                      | |
 
 
 ### REQUEST_ATTRIBUTES_UPDATE
@@ -557,7 +558,7 @@ Example headers:
 
 Header                                                                              | MessageProperties
 ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------
-type=EVENT <br /> tenant=tenant123 <br /> thingId=abc <br /> topic=REQUEST\_ATTRIBUTES\_UPDATE | |
+type=EVENT <br /> tenant=default <br /> thingId=abc <br /> topic=REQUEST\_ATTRIBUTES\_UPDATE | |
 
 
 ### PING_RESPONSE
@@ -579,7 +580,7 @@ The PING_RESPONSE also contains a timestamp (i.e. the difference, measured in mi
 
 Header                                                                                      | MessageProperties
 ------------------------------------------------------------------------------------------- | -----------------------------
-type=PING_RESPONSE  <br /> tenant=tenant123 | content_type=text/plain | 
+type=PING_RESPONSE  <br /> tenant=default | content_type=text/plain |
 
 ```text
 1505215891247

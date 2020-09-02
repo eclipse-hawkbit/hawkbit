@@ -30,13 +30,13 @@ $v-selection-color: $app-selection-color;
 $v-app-background-color: $app-background-color;
 
 //Table header,body border colors are calculated based on this
-$v-table-border-color: $widget-border-color ;
+$v-table-border-color: $widget-border-color;
 
-$v-grid-border:$v-grid-border-size solid $widget-border-color ;
-$v-grid-cell-vertical-border:  0px ;
-$v-grid-cell-horizontal-border: 0px ;
-$v-grid-cell-focused-border: 0px ;
-$v-grid-cell-padding-horizontal:6px;
+$v-grid-border:$v-grid-border-size solid $widget-border-color;
+$v-grid-cell-vertical-border:  0px;
+$v-grid-cell-horizontal-border: 0px;
+$v-grid-cell-focused-border: 0px;
+$v-grid-cell-padding-horizontal: 6px;
 
 $v-table-row-height: 31px;
 

@@ -27,6 +27,9 @@ public class UploadFixed extends Upload {
 
     private boolean uploadInterrupted;
 
+    /**
+     * Stops the file upload
+     */
     @Override
     public void interruptUpload() {
         super.interruptUpload();
@@ -42,6 +45,12 @@ public class UploadFixed extends Upload {
         private static final long serialVersionUID = 1L;
         private final StreamVariable originalStreamVariable;
 
+        /**
+         * Constructor for StreamVariableFixed
+         *
+         * @param originalStreamVariable
+         *          StreamVariable
+         */
         public StreamVariableFixed(final StreamVariable originalStreamVariable) {
             this.originalStreamVariable = originalStreamVariable;
         }

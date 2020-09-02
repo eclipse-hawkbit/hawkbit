@@ -93,24 +93,32 @@ public class SuggestionsSelectList extends MenuBar {
      *
      */
     public static final class TokenStartEnd {
-        final int start;
-        final int end;
+        private final int start;
+        private final int end;
 
         /**
          * Constructor.
          * 
          * @param start
+         *            start index of the token
          * @param end
+         *            end index of the token
          */
         public TokenStartEnd(final int start, final int end) {
             this.start = start;
             this.end = end;
         }
 
+        /**
+         * @return Token start index
+         */
         public int getStart() {
             return start;
         }
 
+        /**
+         * @return Token end index
+         */
         public int getEnd() {
             return end;
         }

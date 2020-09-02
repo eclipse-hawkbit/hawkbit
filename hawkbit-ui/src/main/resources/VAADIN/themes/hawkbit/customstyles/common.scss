@@ -289,6 +289,10 @@
   }
   .custom-option-group {
     font-weight: 400;
+    
+    > :last-child {
+    	margin-right: 0;
+    }
   }
   .links {
     padding-left: 22px;
@@ -303,11 +307,4 @@
   .form-lastrow {
 	padding-bottom: 12px !important;
   }
-  
-  .text-cut {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
 }

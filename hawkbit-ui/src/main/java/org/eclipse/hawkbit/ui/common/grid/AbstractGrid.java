@@ -8,28 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.common.grid;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.management.actionhistory.ProxyAction;
-import org.eclipse.hawkbit.ui.management.actionhistory.ProxyActionStatus;
-import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionModel;
+import org.eclipse.hawkbit.ui.common.grid.support.DragAndDropSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.data.Container.Indexed;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.converter.Converter;
+import com.vaadin.data.provider.DataProviderListener;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.components.grid.GridSelectionModel;
 
 /**
  * Abstract grid that offers various capabilities (aka support) to offer
@@ -37,31 +29,65 @@ import com.vaadin.ui.Grid;
  *
  * @param <T>
  *            The container-type used by the grid
+ * @param <F>
+ *            The filter-type used by the grid
  */
-public abstract class AbstractGrid<T extends Indexed> extends Grid implements RefreshableContainer {
+public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends Grid<T> {
     private static final long serialVersionUID = 1L;
 
+    protected static final String CENTER_ALIGN = "v-align-center";
+    public static final String MULTI_SELECT_STYLE = "multi-selection-grid";
+
     protected final VaadinMessageSource i18n;
-    protected final transient EventBus.UIEventBus eventBus;
+    protected final transient UIEventBus eventBus;
     protected final SpPermissionChecker permissionChecker;
 
-    private transient AbstractMaximizeSupport maximizeSupport;
-    private transient AbstractGeneratedPropertySupport generatedPropertySupport;
-    private transient SingleSelectionSupport singleSelectionSupport;
-    private transient DetailsSupport detailsSupport;
+    private transient FilterSupport<T, F> filterSupport;
+    private transient SelectionSupport<T> selectionSupport;
+    private transient DragAndDropSupport<T> dragAndDropSupport;
 
     /**
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
+     */
+    protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
+        this(i18n, eventBus, null);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param i18n
+     *            i18n
+     * @param eventBus
+     *            eventBus
      * @param permissionChecker
+     *            permissionChecker
      */
     protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker) {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;
+    }
+
+    @Override
+    public GridSelectionModel<T> setSelectionMode(final SelectionMode mode) {
+        if (mode == SelectionMode.MULTI) {
+            final RangeSelectionModel<T> model = new RangeSelectionModel<>(i18n);
+            setSelectionModel(model);
+
+            // used to deactivate cell text selection by user
+            addStyleName(MULTI_SELECT_STYLE);
+
+            return model;
+        }
+
+        return super.setSelectionMode(mode);
     }
 
     /**
@@ -71,641 +97,245 @@ public abstract class AbstractGrid<T extends Indexed> extends Grid implements Re
      * <b>NOTE:</b> Sub-classes should configure the grid before calling this
      * method (this means: set all support-classes needed, and then call init).
      */
-    protected void init() {
+    public void init() {
         setSizeFull();
-        setImmediate(true);
         setId(getGridId());
-        if (!hasSingleSelectionSupport()) {
-            setSelectionMode(SelectionMode.NONE);
+        setColumnReorderingAllowed(false);
+        addColumns();
+        disableColumnSorting();
+        setFrozenColumnCount(-1);
+
+        if (selectionSupport == null) {
+            selectionSupport = new SelectionSupport<>(this);
+            selectionSupport.disableSelection();
         }
-        setColumnReorderingAllowed(true);
-        addNewContainerDS();
-        if (doSubscribeToEventBus()) {
-            eventBus.subscribe(this);
+
+        if (hasFilterSupport()) {
+            setDataProvider(getFilterSupport().getFilterDataProvider());
         }
     }
 
     /**
-     * Subscribes the view to the eventBus. Method has to be overriden (return
-     * false) if the view does not contain any listener to avoid Vaadin blowing
-     * up our logs with warnings.
+     * Refresh all items.
      */
-    protected boolean doSubscribeToEventBus() {
-        return true;
+    public void refreshAll() {
+        getDataProvider().refreshAll();
     }
 
     /**
-     * Refresh the container.
+     * Refresh single item.
+     *
+     * @param item
+     *            grid item
      */
-    @Override
-    public void refreshContainer() {
-        final Indexed container = getContainerDataSource();
-        if (hasGeneratedPropertySupport()
-                && getGeneratedPropertySupport().getRawContainer() instanceof LazyQueryContainer) {
-            ((LazyQueryContainer) getGeneratedPropertySupport().getRawContainer()).refresh();
-            return;
-        }
-
-        if (container instanceof LazyQueryContainer) {
-            ((LazyQueryContainer) container).refresh();
-        }
+    public void refreshItem(final T item) {
+        getDataProvider().refreshItem(item);
     }
 
     /**
-     * Creates a new container instance by calling the required
-     * template-methods.
-     * <p>
-     * A new container is created on initialization as well as when container
-     * content fundamentally changes (e.g. if container content depends on a
-     * selection as common in master-details relations)
+     * Get total number of items.
      */
-    protected void addNewContainerDS() {
-        final T container = createContainer();
-        Indexed indexedContainer = container;
-        if (hasGeneratedPropertySupport()) {
-            indexedContainer = getGeneratedPropertySupport().decorate(container);
-            setContainerDataSource(indexedContainer);
-            getGeneratedPropertySupport().addGeneratedContainerProperties();
-        } else {
-            setContainerDataSource(indexedContainer);
-        }
-        addContainerProperties();
-
-        setColumnProperties();
-        setColumnHeaderNames();
-        setColumnsHidable();
-        addColumnRenderers();
-        setColumnExpandRatio();
-
-        setHiddenColumns();
-
-        final CellDescriptionGenerator cellDescriptionGenerator = getDescriptionGenerator();
-        if (getDescriptionGenerator() != null) {
-            setCellDescriptionGenerator(cellDescriptionGenerator);
-        }
-
-        if (indexedContainer != null && indexedContainer.size() == 0) {
-            setData(i18n.getMessage(UIMessageIdProvider.MESSAGE_NO_DATA));
-        }
+    public int getDataSize() {
+        return getDataCommunicator().getDataProviderSize();
     }
 
     /**
-     * Sets the standard behavior of columns to be hidable. If implementors
-     * needs other behavior they have to concern about it.
+     * Add data change event listener
+     *
+     * @param listener
+     *            Data provider listener
      */
-    protected void setColumnsHidable() {
-        // Allow column hiding
-        for (final Column c : getColumns()) {
-            c.setHidable(true);
+    public void addDataChangedListener(final DataProviderListener<T> listener) {
+        getDataProvider().addDataProviderListener(listener);
+    }
+
+    /**
+     * Method for setting up the required columns together with their definition
+     * and rendering options.
+     */
+    public abstract void addColumns();
+
+    private void disableColumnSorting() {
+        for (final Column<T, ?> c : getColumns()) {
+            c.setSortable(false);
         }
     }
 
     /**
-     * Enables maximize-support for the grid by setting a MaximizeSupport
+     * Gets the FilterSupport implementation describing the data provider with
+     * filter.
+     *
+     * @return filterSupport that encapsulates the data provider with filter.
+     */
+    public FilterSupport<T, F> getFilterSupport() {
+        return filterSupport;
+    }
+
+    /**
+     * Checks whether filter support is enabled.
+     *
+     * @return <code>true</code> iffilter support is enabled, otherwise
+     *         <code>false</code>
+     */
+    protected boolean hasFilterSupport() {
+        return filterSupport != null;
+    }
+
+    /**
+     * Gets the filter for this grid from FilterSupport.
+     *
+     * @return filter for the grid.
+     */
+    public Optional<F> getFilter() {
+        return filterSupport != null ? Optional.ofNullable(filterSupport.getFilter()) : Optional.empty();
+    }
+
+    /**
+     * Enables filter support for the grid by setting a FilterSupport
      * implementation.
      *
-     * @param maximizeSupport
-     *            encapsulates behavior for minimize and maximize.
+     * @param filterSupport
+     *            encapsulates the data provider with filter.
      */
-    protected void setMaximizeSupport(final AbstractMaximizeSupport maximizeSupport) {
-        this.maximizeSupport = maximizeSupport;
+    public void setFilterSupport(final FilterSupport<T, F> filterSupport) {
+        this.filterSupport = filterSupport;
     }
 
     /**
-     * Gets the MaximizeSupport implementation describing behavior for minimize
-     * and maximize.
+     * Enables selection-support for the grid by setting SelectionSupport
+     * configuration.
      *
-     * @return maximizeSupport that encapsulates behavior for minimize and
-     *         maximize.
+     * @param selectionSupport
+     *            encapsulates behavior for selection and offers some convenient
+     *            functionality.
      */
-    protected AbstractMaximizeSupport getMaximizeSupport() {
-        return maximizeSupport;
+    protected void setSelectionSupport(final SelectionSupport<T> selectionSupport) {
+        this.selectionSupport = selectionSupport;
     }
 
     /**
-     * Checks whether maximize-support is enabled.
+     * Gets the SelectionSupport implementation configuring selection.
      *
-     * @return <code>true</code> if maximize-support is enabled, otherwise
-     *         <code>false</code>
+     * @return selectionSupport that configures selection.
      */
-    protected boolean hasMaximizeSupport() {
-        return maximizeSupport != null;
+    public SelectionSupport<T> getSelectionSupport() {
+        return selectionSupport;
     }
 
     /**
-     * Enables support for generated properties. This implies that the
-     * standard-container has to be decorated and the generators have to be
-     * registered for the generated (aka virtual) properties.
+     * Checks whether single or multi selection-support is enabled.
      *
-     * @param generatedPropertySupport
-     *            that encapsulates behavior for generated properties
+     * @return <code>true</code> if single or multi selection-support is
+     *         enabled, otherwise <code>false</code>
      */
-    protected void setGeneratedPropertySupport(final AbstractGeneratedPropertySupport generatedPropertySupport) {
-        this.generatedPropertySupport = generatedPropertySupport;
+    public boolean hasSelectionSupport() {
+        return selectionSupport != null && !selectionSupport.isNoSelectionModel();
     }
 
     /**
-     * Gets the GeneratedPropertySupport implementation describing generated
-     * properties by registering their generators and attaching them to a
-     * wrapper-container.
+     * Enables drag and drop for the grid by setting DragAndDropSupport
+     * configuration.
      *
-     * @return generatedPropertySupport that encapsulates registration of
-     *         generated properties.
-     */
-    protected AbstractGeneratedPropertySupport getGeneratedPropertySupport() {
-        return generatedPropertySupport;
-    }
-
-    /**
-     * Checks whether support for generated properties is enabled.
-     *
-     * @return <code>true</code> if support for generated properties is enabled,
-     *         otherwise <code>false</code>
-     */
-    protected boolean hasGeneratedPropertySupport() {
-        return generatedPropertySupport != null;
-    }
-
-    /**
-     * Enables single-selection-support for the grid by setting
-     * SingleSelectionSupport configuration.
-     *
-     * @param singleSelectionSupport
-     *            encapsulates behavior for single-selection and offers some
+     * @param dragAndDropSupport
+     *            encapsulates behavior for drag and drop and offers some
      *            convenient functionality.
      */
-    protected void setSingleSelectionSupport(final SingleSelectionSupport singleSelectionSupport) {
-        this.singleSelectionSupport = singleSelectionSupport;
+    protected void setDragAndDropSupportSupport(final DragAndDropSupport<T> dragAndDropSupport) {
+        this.dragAndDropSupport = dragAndDropSupport;
     }
 
     /**
-     * Gets the SingleSelectionSupport implementation configuring
-     * single-selection.
+     * Gets the DragAndDropSupport implementation configuring drag and drop.
      *
-     * @return singleSelectionSupport that configures single-selection.
+     * @return dragAndDropSupport that configures drag and drop.
      */
-    protected SingleSelectionSupport getSingleSelectionSupport() {
-        return singleSelectionSupport;
+    public DragAndDropSupport<T> getDragAndDropSupportSupport() {
+        return dragAndDropSupport;
     }
 
     /**
-     * Checks whether single-selection-support is enabled.
+     * Checks whether drag and drop is enabled.
      *
-     * @return <code>true</code> if single-selection-support is enabled,
-     *         otherwise <code>false</code>
-     */
-    protected boolean hasSingleSelectionSupport() {
-        return singleSelectionSupport != null;
-    }
-
-    /**
-     * Enables details-support for the grid by setting DetailsSupport
-     * configuration. If details-support is enabled, the grid handles
-     * details-data that depends on a master-selection.
-     *
-     * @param detailsSupport
-     *            encapsulates behavior for changes of master-selection.
-     */
-    protected void setDetailsSupport(final DetailsSupport detailsSupport) {
-        this.detailsSupport = detailsSupport;
-    }
-
-    /**
-     * Gets the DetailsSupport implementation configuring master-details
-     * relation.
-     *
-     * @return detailsSupport that configures master-details relation.
-     */
-    public DetailsSupport getDetailsSupport() {
-        return detailsSupport;
-    }
-
-    /**
-     * Checks whether details-support is enabled.
-     *
-     * @return <code>true</code> if details-support is enabled, otherwise
+     * @return <code>true</code> if drag and drop is enabled, otherwise
      *         <code>false</code>
      */
-    public boolean hasDetailsSupport() {
-        return detailsSupport != null;
+    public boolean hasDragAndDropSupportSupport() {
+        return dragAndDropSupport != null;
     }
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for creating a
-     * container instance.
-     *
-     * @return new container instance used by the grid.
-     */
-    protected abstract T createContainer();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for adding
-     * properties to the container (usually by invoking { @link
-     * Container#addContainerProperty(Object, Class, Object))})
-     */
-    protected abstract void addContainerProperties();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for setting the
-     * expand ratio of the columns.
-     */
-    protected abstract void setColumnExpandRatio();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for setting the
-     * column names.
-     */
-    protected abstract void setColumnHeaderNames();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for setting the
-     * column properties to the grid.
-     */
-    protected abstract void setColumnProperties();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for adding
-     * special column renderers if needed.
-     */
-    protected abstract void addColumnRenderers();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} that hides
-     * columns. If a column is hideable and hidden, it can be made visible via
-     * grid column menu.
-     */
-    protected abstract void setHiddenColumns();
-
-    /**
-     * Template method invoked by {@link #addNewContainerDS()} for adding a
-     * CellDescriptionGenerator to the grid.
-     */
-    protected abstract CellDescriptionGenerator getDescriptionGenerator();
 
     /**
      * Gets id of the grid.
      *
      * @return id of the grid
      */
-    protected abstract String getGridId();
+    public abstract String getGridId();
 
     /**
-     * Resets the default row of the header. This means the current default row
-     * is removed and replaced with a newly created one.
-     *
-     * @return the new and clean header row.
+     * Creates the grid content for maximized-state.
      */
-    protected HeaderRow resetHeaderDefaultRow() {
-        getHeader().removeRow(getHeader().getDefaultRow());
-        final HeaderRow newHeaderRow = getHeader().appendRow();
-        getHeader().setDefaultRow(newHeaderRow);
-        return newHeaderRow;
+    public void createMaximizedContent() {
+        createMaximizedContent(SelectionMode.NONE);
     }
 
-    /**
-     * Support for master-details relation for grid. This means that grid
-     * content (=details) is updated as soon as master-data changes.
-     */
-    public class DetailsSupport {
+    protected void createMaximizedContent(final SelectionMode selectionMode) {
+        removeAllColumns();
+        addMaxColumns();
 
-        private Long master;
-
-        /**
-         * Set selected master-data as member of this grid-support (as all
-         * presented grid-data is related to this master-data) and re-calculate
-         * grid-container-content.
-         *
-         * @param master
-         *            id of selected action
-         */
-        public void populateMasterDataAndRecalculateContainer(final Long master) {
-            this.master = master;
-            recalculateContainer();
-            populateSelection();
+        if (selectionSupport != null) {
+            changeSelection(selectionMode);
         }
-
-        /**
-         * Set selected master-data as member of this grid-support (as all
-         * presented grid-data is related to this master-data) and re-create
-         * grid-container.
-         *
-         * @param master
-         *            id of selected action
-         */
-        public void populateMasterDataAndRecreateContainer(final Long master) {
-            this.master = master;
-            recreateContainer();
-            populateSelection();
+        if (hasDragAndDropSupportSupport()) {
+            getDragAndDropSupportSupport().removeDragSource();
         }
+    }
 
-        /**
-         * Propagates the selection if needed.
-         *
-         */
-        public void populateSelection() {
-            if (!hasSingleSelectionSupport()) {
-                return;
-            }
+    protected void addMaxColumns() {
+        // can be overriden in order to define columns in maximized state
+    }
 
-            if (master == null) {
-                getSingleSelectionSupport().clearSelection();
-                return;
-            }
-            getSingleSelectionSupport().selectFirstRow();
-        }
-
-        /**
-         * Gets the master-data id.
-         *
-         * @return master-data id
-         */
-        public Long getMasterDataId() {
-            return master;
-        }
-
-        /**
-         * Invalidates container-data (but reused container) and refreshes it
-         * with new details-data for the new selected master-data.
-         */
-        private void recalculateContainer() {
-            clearSortOrder();
-            refreshContainer();
-        }
-
-        /**
-         * Invalidates container and replace it with a fresh instance for the
-         * new selected master-data.
-         */
-        private void recreateContainer() {
-            removeAllColumns();
-            clearSortOrder();
-            addNewContainerDS();
+    private void changeSelection(final SelectionMode selectionMode) {
+        switch (selectionMode) {
+        case NONE:
+            getSelectionSupport().disableSelection();
+            break;
+        case SINGLE:
+            getSelectionSupport().enableSingleSelection();
+            break;
+        case MULTI:
+            getSelectionSupport().enableMultiSelection();
+            break;
         }
     }
 
     /**
-     * Via implementations of this support capability an expand-mode is provided
-     * that maximizes the grid size.
+     * Creates the grid content for normal (minimized) state.
      */
-    protected abstract class AbstractMaximizeSupport {
-
-        /**
-         * Renews the content for maximized layout.
-         */
-        public void createMaximizedContent() {
-            setMaximizedColumnProperties();
-            setMaximizedHiddenColumns();
-            setMaximizedHeaders();
-            setMaximizedColumnExpandRatio();
-        }
-
-        /**
-         * Renews the content for minimized layout.
-         */
-        public void createMinimizedContent() {
-            setColumnProperties();
-            setHiddenColumns();
-            setColumnExpandRatio();
-        }
-
-        /**
-         * Sets the column properties for maximized-state.
-         */
-        protected abstract void setMaximizedColumnProperties();
-
-        /**
-         * Sets the hidden columns for maximized-state.
-         */
-        protected abstract void setMaximizedHiddenColumns();
-
-        /**
-         * Sets additional headers for maximized-state.
-         */
-        protected abstract void setMaximizedHeaders();
-
-        /**
-         * Sets column expand ratio for maximized-state.
-         */
-        protected abstract void setMaximizedColumnExpandRatio();
+    public void createMinimizedContent() {
+        createMinimizedContent(SelectionMode.MULTI);
     }
 
-    /**
-     * Grids that are used in conjunction with
-     * {@link GeneratedPropertyContainer}, might use
-     * {@link AbstractGeneratedPropertySupport} to get type-save access to the
-     * raw container as well as the decorated container.
-     */
-    protected abstract class AbstractGeneratedPropertySupport {
+    protected void createMinimizedContent(final SelectionMode selectionMode) {
+        removeAllColumns();
+        addColumns();
 
-        /**
-         * Gives type-save access to the wrapper container the grid works on.
-         * This wrapper container attaches generated properties that are not
-         * part of the raw container that encapsulates the database access.
-         *
-         * @return decorated container that includes the generated properties as
-         *         well as the native properties.
-         */
-        public abstract GeneratedPropertyContainer getDecoratedContainer();
-
-        /**
-         * Gives type-save access to the wrapped container that binds to the
-         * database. The grid does not work directly with this container but
-         * with a container that wraps and decorates it with generated
-         * properties.
-         *
-         * @return raw container that gives access to the native properties.
-         */
-        public abstract T getRawContainer();
-
-        /**
-         * Adds the generated properties to the decorated container. Each
-         * generated property has to be associated with a property generator
-         * that is capable to calculate the value of the generated (aka virtual)
-         * property.
-         *
-         * @return decorated container that includes the generated properties
-         */
-        protected abstract GeneratedPropertyContainer addGeneratedContainerProperties();
-
-        /**
-         * Decorates the raw-container by wrapping it.
-         *
-         * @param container
-         *            raw-container to be wrapped.
-         * @return decorated container.
-         */
-        protected GeneratedPropertyContainer decorate(final T container) {
-            return new GeneratedPropertyContainer(container);
+        if (selectionSupport != null) {
+            changeSelection(selectionMode);
+        }
+        if (hasDragAndDropSupportSupport()) {
+            getDragAndDropSupportSupport().addDragSource();
         }
     }
 
     /**
-     * Support for single selection on the grid.
+     * Restore filter and selection
      */
-    protected class SingleSelectionSupport {
-
-        public SingleSelectionSupport() {
-            enable();
+    public void restoreState() {
+        if (hasFilterSupport()) {
+            getFilterSupport().restoreFilter();
         }
 
-        public final void enable() {
-            setSelectionMode(SelectionMode.SINGLE);
+        if (hasSelectionSupport()) {
+            getSelectionSupport().restoreSelection();
         }
-
-        public final void disable() {
-            setSelectionMode(SelectionMode.NONE);
-        }
-
-        /**
-         * Selects the first row if available and enabled.
-         */
-        public void selectFirstRow() {
-            if (!isSingleSelectionModel()) {
-                return;
-            }
-
-            final Indexed container = getContainerDataSource();
-            final int size = container.size();
-            if (size > 0) {
-                refreshRows(getContainerDataSource().firstItemId());
-                getSingleSelectionModel().select(getContainerDataSource().firstItemId());
-            } else {
-                getSingleSelectionModel().select(null);
-            }
-        }
-
-        private boolean isSingleSelectionModel() {
-            return getSelectionModel() instanceof SelectionModel.Single;
-        }
-
-        /**
-         * Clears the selection.
-         */
-        public void clearSelection() {
-            if (!isSingleSelectionModel()) {
-                return;
-            }
-            getSingleSelectionModel().select(null);
-        }
-
-        private SelectionModel.Single getSingleSelectionModel() {
-            return (SelectionModel.Single) getSelectionModel();
-        }
-    }
-
-    /**
-     * CellStyleGenerator that concerns about alignment in the grid cells.
-     */
-    protected static class AlignCellStyleGenerator implements CellStyleGenerator {
-        private static final long serialVersionUID = 1L;
-
-        private final String[] left;
-        private final String[] center;
-        private final String[] right;
-
-        /**
-         * Constructor.
-         *
-         * @param left
-         *            list of propertyIds that should be left-aligned
-         * @param center
-         *            list of propertyIds that should be center-aligned
-         * @param right
-         *            list of propertyIds that should be right-aligned
-         */
-        public AlignCellStyleGenerator(final String[] left, final String[] center, final String[] right) {
-            this.left = left;
-            this.center = center;
-            this.right = right;
-        }
-
-        @Override
-        public String getStyle(final CellReference cellReference) {
-
-            if (center != null
-                    && Arrays.stream(center).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
-                return "centeralign";
-            } else if (right != null
-                    && Arrays.stream(right).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
-                return "rightalign";
-            } else if (left != null
-                    && Arrays.stream(left).anyMatch(o -> Objects.equals(o, cellReference.getPropertyId()))) {
-                return "leftalign";
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Adds a tooltip to the 'Date and time' and 'Maintenance Window' columns in
-     * detailed format.
-     */
-    protected static class TooltipGenerator implements CellDescriptionGenerator {
-
-        private static final long serialVersionUID = 1L;
-
-        private final VaadinMessageSource i18n;
-
-        public TooltipGenerator(final VaadinMessageSource i18n) {
-            this.i18n = i18n;
-        }
-
-        @Override
-        public String getDescription(final CellReference cell) {
-            final String propertyId = (String) cell.getPropertyId();
-            switch (propertyId) {
-            case ProxyAction.PXY_ACTION_LAST_MODIFIED_AT:
-            case ProxyActionStatus.PXY_AS_CREATED_AT:
-                final Long timestamp = (Long) cell.getItem().getItemProperty(propertyId).getValue();
-                return SPDateTimeUtil.getFormattedDate(timestamp);
-
-            case ProxyAction.PXY_ACTION_MAINTENANCE_WINDOW:
-                final Action action = (Action) cell.getItem().getItemProperty(ProxyAction.PXY_ACTION).getValue();
-                return action.getMaintenanceWindowStartTime().map(this::getFormattedNextMaintenanceWindow).orElse(null);
-
-            default:
-                return null;
-            }
-        }
-
-        private String getFormattedNextMaintenanceWindow(final ZonedDateTime nextAt) {
-            final long nextAtMilli = nextAt.toInstant().toEpochMilli();
-            return i18n.getMessage(UIMessageIdProvider.TOOLTIP_NEXT_MAINTENANCE_WINDOW,
-                    SPDateTimeUtil.getFormattedDate(nextAtMilli, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT));
-        }
-    }
-
-    /**
-     * Converter that gets time-data as input of type <code>Long</code> and
-     * converts to a formatted date string.
-     */
-    public class LongToFormattedDateStringConverter implements Converter<String, Long> {
-        private static final long serialVersionUID = 1247513913478717845L;
-
-        @Override
-        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale) {
-            // not needed
-            return null;
-        }
-
-        @Override
-        public String convertToPresentation(final Long value, final Class<? extends String> targetType,
-                final Locale locale) {
-            return SPDateTimeUtil.getFormattedDate(value, SPUIDefinitions.LAST_QUERY_DATE_FORMAT_SHORT);
-        }
-
-        @Override
-        public Class<Long> getModelType() {
-            return Long.class;
-        }
-
-        @Override
-        public Class<String> getPresentationType() {
-            return String.class;
-        }
-    }
-
-    protected String getActionLabeltext() {
-        return i18n.getMessage(UIMessageIdProvider.MESSAGE_UPLOAD_ACTION);
     }
 }

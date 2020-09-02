@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 
@@ -35,23 +36,30 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
     protected RemoteEntityEvent<?> createRemoteEvent(final E baseEntity,
             final Class<? extends RemoteEntityEvent<?>> eventType) {
 
-        Constructor<?> constructor = null;
-        for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
-            if (constructors.getParameterCount() == 2) {
-                constructor = constructors;
-            }
-        }
-
-        if (constructor == null) {
-            throw new IllegalArgumentException("No suitable constructor foundes");
-        }
-
+        final int constructorParamCount = getConstructorParamCount();
+        final Constructor<?> eventConstructor = findEventConstructorByParamCount(eventType, constructorParamCount);
+        final Object[] eventConstructorParams = getConstructorParams(baseEntity);
         try {
-            return (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, "Node");
+            return (RemoteEntityEvent<?>) eventConstructor.newInstance(eventConstructorParams);
         } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());
         }
         return null;
+    }
+
+    protected int getConstructorParamCount() {
+        return 2;
+    }
+
+    protected Constructor<?> findEventConstructorByParamCount(final Class<? extends RemoteEntityEvent<?>> eventType,
+            final int paramCount) {
+        return Arrays.stream(eventType.getDeclaredConstructors())
+                .filter(constructor -> constructor.getParameterCount() == paramCount).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("No suitable constructor founded"));
+    }
+
+    protected Object[] getConstructorParams(final E baseEntity) {
+        return new Object[] { baseEntity, "Node" };
     }
 
     protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event) {

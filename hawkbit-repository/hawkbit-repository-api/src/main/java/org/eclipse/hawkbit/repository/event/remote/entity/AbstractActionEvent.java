@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
     private static final long serialVersionUID = 1L;
 
+    private Long targetId;
     private Long rolloutId;
     private Long rolloutGroupId;
 
@@ -31,6 +32,8 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
      * 
      * @param action
      *            the created action
+     * @param targetId
+     *            targetId identifier (optional)
      * @param rolloutId
      *            rollout identifier (optional)
      * @param rolloutGroupId
@@ -38,11 +41,16 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
      * @param applicationId
      *            the origin application id
      */
-    public AbstractActionEvent(final Action action, final Long rolloutId, final Long rolloutGroupId,
-            final String applicationId) {
+    public AbstractActionEvent(final Action action, final Long targetId, final Long rolloutId,
+            final Long rolloutGroupId, final String applicationId) {
         super(action, applicationId);
+        this.targetId = targetId;
         this.rolloutId = rolloutId;
         this.rolloutGroupId = rolloutGroupId;
+    }
+
+    public Long getTargetId() {
+        return targetId;
     }
 
     public Long getRolloutId() {

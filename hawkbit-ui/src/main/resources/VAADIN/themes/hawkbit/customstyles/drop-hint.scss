@@ -15,28 +15,26 @@
   }
    
   .show-drop-hint {
-    .type-button-layout {
+    .v-grid-tablewrapper {
       border: 1px dashed $hawkbit-primary-color !important;
-    } 
-  }
-  .show-drop-hint.type-button-layout {
-      border-style: dashed !important;
-      border-width: 1px !important;
-      border-color: $hawkbit-primary-color !important;
-  }
-  .show-drop-hint.sp-table {
-    .v-table-body {
-      border-style: dashed !important;
-      border-width: 1px !important;
-      border-color: $hawkbit-primary-color !important;
     }
   }
-  .show-drop-hint.v-ddwrapper {
+  .filter-drop-hint-layout.show-drop-hint {
     border: 1px dashed $hawkbit-primary-color !important;
   }
-
-  //Target table header - distribution filter text field style
-  .v-slot-filter-drop-hint-layout {
-    line-height: 21px;
+  
+  .filter-drop-hint-layout.show-drop-hint.v-horizontallayout-drag-center{
+    background-color: desaturate(lighten($hawkbit-primary-color, 50%), 20%);
   }
+
+  .v-grid-row-drag-center::after,.v-grid-body-drag-top::after {
+    border: none !important;
+  }
+
+  .show-drop-hint .v-grid-row-drag-center .v-grid-cell {
+    background-image: none;
+    background-color: desaturate(lighten($hawkbit-primary-color, 50%), 20%);
+    color: dimgray;
+  }
+
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.miscs;
 
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 
 /**
  * Action type option group layout for auto assignment.
@@ -22,21 +22,17 @@ public class ActionTypeOptionGroupAutoAssignmentLayout extends AbstractActionTyp
      * 
      * @param i18n
      *            VaadinMessageSource
+     * @param actionTypeOptionGroupId
+     *            Id of action type option group
      */
-    public ActionTypeOptionGroupAutoAssignmentLayout(final VaadinMessageSource i18n) {
-        super(i18n);
+    public ActionTypeOptionGroupAutoAssignmentLayout(final VaadinMessageSource i18n,
+            final String actionTypeOptionGroupId) {
+        super(i18n, actionTypeOptionGroupId);
     }
 
     @Override
-    protected void createOptionGroup() {
-        actionTypeOptionGroup = new FlexibleOptionGroup();
-        actionTypeOptionGroup.addItem(ActionTypeOption.SOFT);
-        actionTypeOptionGroup.addItem(ActionTypeOption.FORCED);
-        actionTypeOptionGroup.addItem(ActionTypeOption.DOWNLOAD_ONLY);
-        selectDefaultOption();
-
-        addForcedItemWithLabel();
-        addSoftItemWithLabel();
-        addDownloadOnlyItemWithLabel();
+    protected void addOptionGroup() {
+        actionTypeOptionGroup.setItems(ActionType.FORCED, ActionType.SOFT, ActionType.DOWNLOAD_ONLY);
+        addComponent(actionTypeOptionGroup);
     }
 }

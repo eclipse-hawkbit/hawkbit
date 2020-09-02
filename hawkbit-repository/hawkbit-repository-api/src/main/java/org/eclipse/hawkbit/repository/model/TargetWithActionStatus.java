@@ -9,13 +9,14 @@
 package org.eclipse.hawkbit.repository.model;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.springframework.hateoas.Identifiable;
 
 /**
  * 
  * Target with action status.
  *
  */
-public class TargetWithActionStatus {
+public class TargetWithActionStatus implements Identifiable<Long> {
 
     private Target target;
 
@@ -44,6 +45,11 @@ public class TargetWithActionStatus {
 
     public void setStatus(final Status status) {
         this.status = status;
+    }
+
+    @Override
+    public Long getId() {
+        return target.getId();
     }
 
 }

@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
-import java.lang.reflect.Constructor;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -47,26 +45,13 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     }
 
     @Override
-    protected RemoteEntityEvent<?> createRemoteEvent(final RolloutGroup baseEntity,
-            final Class<? extends RemoteEntityEvent<?>> eventType) {
+    protected int getConstructorParamCount() {
+        return 3;
+    }
 
-        Constructor<?> constructor = null;
-        for (final Constructor<?> constructors : eventType.getDeclaredConstructors()) {
-            if (constructors.getParameterCount() == 3) {
-                constructor = constructors;
-            }
-        }
-
-        if (constructor == null) {
-            throw new IllegalArgumentException("No suitable constructor foundes");
-        }
-
-        try {
-            return (RemoteEntityEvent<?>) constructor.newInstance(baseEntity, 1L, "Node");
-        } catch (final ReflectiveOperationException e) {
-            fail("Exception should not happen " + e.getMessage());
-        }
-        return null;
+    @Override
+    protected Object[] getConstructorParams(final RolloutGroup baseEntity) {
+        return new Object[] { baseEntity, 1L, "Node" };
     }
 
     @Override
@@ -91,8 +76,8 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     protected RolloutGroup createEntity() {
         testdataFactory.createTarget(UUID.randomUUID().toString());
 
-        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet()
-                .create().name("incomplete").version("2").description("incomplete").type("os"));
+        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet().create()
+                .name("incomplete").version("2").description("incomplete").type("os"));
 
         final Rollout entity = rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),

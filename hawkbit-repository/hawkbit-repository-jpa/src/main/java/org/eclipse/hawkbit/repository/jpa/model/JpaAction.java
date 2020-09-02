@@ -236,15 +236,17 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(rollout),
-                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(target),
+                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
+                        EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(rollout),
-                        BaseEntity.getIdOrNull(rolloutGroup), EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(target),
+                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
+                        EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

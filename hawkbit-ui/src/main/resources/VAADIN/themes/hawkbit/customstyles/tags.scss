@@ -12,6 +12,35 @@
   //Tag button style
   .button-tag-no-border {
     color: $tag-text-color !important;
+    height: auto;
+    width: 100%;
+    padding: 0;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  //NO_TAG button style
+  .button-no-tag {
+    padding-left: 6px;
+    padding-top: 6px;
+  }
+
+  .button-tag-with-background {
+    background-color: lightgrey !important;
+    border-radius: 4px;
+    height: 28px !important;
+    margin-top: 6px;
+    margin-right: 6px;
+    padding: 0 6px;
+
+    .font-icon {
+      margin-right: 6px;
+    }
+
+    .v-button {
+      height: auto;
+      padding: 0;
+    }
   }
 
   .target-tag-clicked,
@@ -40,7 +69,7 @@
       color: $widget-caption-color;
     }
 
-    .v-checkbox > input ~ label:before {
+    .v-checkbox>input~label:before {
       border: 1px solid $twin-table-border-grey;
     }
 
@@ -63,70 +92,42 @@
     margin-left: 5px !important;
     margin-right: 5px !important;
   }
-  
-  .custom-filter-button{
-  	width:120px !important;
-  	overflow:hidden;
-  	text-overflow:ellipsis;
-  	text-align:left; 
+
+  .v-menubar-crud-menubar {
+    line-height: 1.5;
+    padding: 0;
   }
-  
-  .menubar-position {
-	margin-top: -5px;
-	right: 20px;
-	width: 20px;
+
+  .v-menubar-crud-menubar:after {
+    content: none;
   }
-  
-  .v-menubar-menuitem-tags .v-menubar-submenu-indicator + .v-menubar-menuitem-caption:after {
-      content: none;
+
+  .v-menubar-crud-menubar .v-menubar-menuitem {
+    padding: 0px;
   }
-  
-  .v-menubar-popup .v-menubar-menuitem-menubar-position {
-	padding-left: 0px;
-	width: 100px;
-  	right: 0px;
+
+  .v-menubar-crud-menubar .v-menubar-menuitem:focus {
+    outline: none;
   }
-  
-  .v-menubar-submenu-menubar-position {
-	width: 100px;
-  	right: 0px;
+
+  .v-menubar-crud-menubar .v-menubar-submenu-indicator+.v-menubar-menuitem-caption:after {
+    content: none;
   }
-  
-  .v-menubar-submenu-menubar-position .v-menubar-menuitem {
- 	padding-left: 3px;
+
+  .v-menubar-crud-menubar .v-menubar-menuitem-selected {
+    color: inherit;
+    background-image: none;
+    background-color: inherit;
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
   }
-  
-  .v-menubar-borderless .v-menubar-menuitem-selected {
-  	color: inherit;
-  	background-image: none;
-  	background-color: inherit;
+
+  .v-menubar-submenu-crud-menubar .v-menubar-menuitem {
+    padding: 0 20px 0 10px;
   }
-  
-  .v-menubar > .v-menubar-menuitem .v-icon {
-	margin: 0 4px 0 19px;
-  }
-  
-  .v-menubar-borderless .v-menubar-menuitem {
-	padding: 0px;
-  }
-  
-  .v-menubar > .v-menubar-menuitem {
-	padding: 0px;
-  }
-  
-   .targetTag {
-  	right: 19px;
-  }
-  
-  #target\.tag\.drop\.area .v-slot-icon-only {
-	height: 32px;
-  }
-  
-  .button-tag-with-background {
-    background-color: lightgrey !important;
-  }
-  
-  .button-assign-tag {
-    padding-top: 5px;
+
+  .v-menubar-submenu-crud-menubar .v-menubar-menuitem:focus {
+    outline: none;
   }
 }

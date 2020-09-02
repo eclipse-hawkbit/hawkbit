@@ -32,6 +32,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.vaadin.spring.security.config.AuthenticationManagerConfigurer;
 
 /**
  * Auto-configuration for the in-memory-user-management.
@@ -40,7 +41,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @Configuration
 @ConditionalOnMissingBean(UserDetailsService.class)
 @EnableConfigurationProperties({ MultiUserProperties.class })
-public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
+public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter
+        implements AuthenticationManagerConfigurer {
 
     private static final String DEFAULT_TENANT = "DEFAULT";
 

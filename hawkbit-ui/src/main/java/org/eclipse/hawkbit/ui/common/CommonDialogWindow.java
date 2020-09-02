@@ -8,58 +8,27 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorderWithIcon;
-import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
-import com.google.common.collect.Maps;
-import com.vaadin.data.Container.ItemSetChangeEvent;
-import com.vaadin.data.Container.ItemSetChangeListener;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.Validator;
-import com.vaadin.data.validator.NullValidator;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeNotifier;
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -71,38 +40,36 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 public class CommonDialogWindow extends Window {
-
     private static final long serialVersionUID = 1L;
 
-    private final VerticalLayout mainLayout = new VerticalLayout();
+    private final VaadinMessageSource i18n;
 
+    private final VerticalLayout mainLayout;
     private final String caption;
-
     private final Component content;
-
     private final String helpLink;
-
-    private Button saveButton;
-
+    private final ConfirmStyle confirmStyle;
+    private final Class<? extends SPUIButtonDecorator> buttonDecorator;
+    private Button confirmButton;
     private Button cancelButton;
-
     private HorizontalLayout buttonsLayout;
+    private Label mandatoryLabel;
 
     private final ClickListener cancelButtonClickListener;
-
-    private final ClickListener closeClickListener = this::onCloseEvent;
-
-    private final transient Map<Component, Object> orginalValues;
-
-    private List<AbstractField<?>> allComponents;
-
-    private final VaadinMessageSource i18n;
+    private final ClickListener closeClickListener;
 
     private transient SaveDialogCloseListener closeListener;
 
     /**
-     * Constructor.
-     *
+     * Different kinds of confirm buttons
+     */
+    public enum ConfirmStyle {
+        SAVE, OK
+    }
+
+    /**
+     * Constructor
+     * 
      * @param caption
      *            the caption
      * @param content
@@ -113,28 +80,34 @@ public class CommonDialogWindow extends Window {
      *            the saveDialogCloseListener
      * @param cancelButtonClickListener
      *            the cancelButtonClickListener
-     * @param layout
-     *            the abstract layout
+     * @param confirmStyle
+     *            what kind of button is used
+     * @param buttonDecorator
+     *            to style the confirm and cancel buttons
      * @param i18n
-     *            the i18n service
+     *            internationalization
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final SaveDialogCloseListener closeListener, final ClickListener cancelButtonClickListener,
-            final AbstractLayout layout, final VaadinMessageSource i18n) {
-        checkNotNull(closeListener);
+            final ConfirmStyle confirmStyle, final Class<? extends SPUIButtonDecorator> buttonDecorator,
+            final VaadinMessageSource i18n) {
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
         this.closeListener = closeListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
-        this.allComponents = getAllComponents(layout);
-        this.orginalValues = Maps.newHashMapWithExpectedSize(allComponents.size());
+        this.confirmStyle = confirmStyle;
+        this.buttonDecorator = buttonDecorator;
         this.i18n = i18n;
+
+        this.mainLayout = new VerticalLayout();
+        this.closeClickListener = this::onCloseEvent;
+
         init();
     }
 
     private void onCloseEvent(final ClickEvent clickEvent) {
-        if (!clickEvent.getButton().equals(saveButton)) {
+        if (!clickEvent.getButton().equals(confirmButton)) {
             close();
             return;
         }
@@ -153,56 +126,13 @@ public class CommonDialogWindow extends Window {
     @Override
     public void close() {
         super.close();
-        orginalValues.clear();
-        removeListeners();
-        allComponents.clear();
-        this.saveButton.setEnabled(false);
-    }
-
-    private void removeListeners() {
-        for (final AbstractField<?> field : allComponents) {
-            removeTextListener(field);
-            removeValueChangeListener(field);
-            removeItemSetChangeistener(field);
-        }
-    }
-
-    private void removeItemSetChangeistener(final AbstractField<?> field) {
-        if (!(field instanceof Table)) {
-            return;
-        }
-        for (final Object listener : field.getListeners(ItemSetChangeEvent.class)) {
-            if (listener instanceof ChangeListener) {
-                ((Table) field).removeItemSetChangeListener((ChangeListener) listener);
-            }
-        }
-    }
-
-    private void removeTextListener(final AbstractField<?> field) {
-        if (!(field instanceof TextChangeNotifier)) {
-            return;
-        }
-        for (final Object listener : field.getListeners(TextChangeEvent.class)) {
-            if (listener instanceof ChangeListener) {
-                ((TextChangeNotifier) field).removeTextChangeListener((ChangeListener) listener);
-            }
-        }
-    }
-
-    private void removeValueChangeListener(final AbstractField<?> field) {
-        for (final Object listener : field.getListeners(ValueChangeEvent.class)) {
-            if (listener instanceof ChangeListener) {
-                field.removeValueChangeListener((ChangeListener) listener);
-            }
-        }
+        this.confirmButton.setEnabled(false);
     }
 
     private final void init() {
+        mainLayout.setMargin(false);
+        mainLayout.setSpacing(false);
 
-        if (content instanceof AbstractOrderedLayout) {
-            ((AbstractOrderedLayout) content).setSpacing(true);
-            ((AbstractOrderedLayout) content).setMargin(true);
-        }
         if (content instanceof GridLayout) {
             addStyleName("marginTop");
         }
@@ -218,206 +148,27 @@ public class CommonDialogWindow extends Window {
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
 
+        setCaptionAsHtml(false);
         setCaption(caption);
-        setCaptionAsHtml(true);
         setContent(mainLayout);
         setResizable(false);
         center();
         setModal(true);
         addStyleName("fontsize");
-        setOrginaleValues();
-        addComponentListeners();
-    }
-
-    /**
-     * saves the original values in a Map so we can use them for detecting
-     * changes
-     */
-    public final void setOrginaleValues() {
-        for (final AbstractField<?> field : allComponents) {
-            Object value = field.getValue();
-
-            if (field instanceof Table) {
-                value = ((Table) field).getContainerDataSource().getItemIds();
-            }
-            orginalValues.put(field, value);
-        }
-        saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
-    }
-
-    /**
-     * Clears the original values in case no value changed check is wished
-     */
-    public final void clearOriginalValues() {
-        orginalValues.clear();
     }
 
     protected void addCloseListenerForSaveButton() {
-        saveButton.addClickListener(closeClickListener);
+        confirmButton.addClickListener(closeClickListener);
     }
 
     protected void addCloseListenerForCancelButton() {
         cancelButton.addClickListener(closeClickListener);
     }
 
-    /**
-     * adds a listener to a component. Depending on the type of component a
-     * valueChange-, textChange- or itemSetChangeListener will be added.
-     */
-    public void addComponentListeners() {
-        // avoid duplicate registration
-        removeListeners();
-
-        for (final AbstractField<?> field : allComponents) {
-            if (field instanceof TextChangeNotifier) {
-                ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
-            }
-
-            if (field instanceof Table) {
-                ((Table) field).addItemSetChangeListener(new ChangeListener(field));
-            }
-            field.addValueChangeListener(new ChangeListener(field));
-        }
-    }
-
-    private boolean isSaveButtonEnabledAfterValueChange(final Component currentChangedComponent,
-            final Object newValue) {
-        return isMandatoryFieldNotEmptyAndValid(currentChangedComponent, newValue)
-                && isValuesChanged(currentChangedComponent, newValue);
-    }
-
-    private boolean isValuesChanged(final Component currentChangedComponent, final Object newValue) {
-        for (final AbstractField<?> field : allComponents) {
-            Object originalValue = orginalValues.get(field);
-            if (field instanceof CheckBox && originalValue == null) {
-                originalValue = Boolean.FALSE;
-            }
-            final Object currentValue = getCurrentValue(currentChangedComponent, newValue, field);
-
-            if (!Objects.equals(originalValue, currentValue)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Object getCurrentValue(final Component currentChangedComponent, final Object newValue,
-            final AbstractField<?> field) {
-        Object currentValue = field.getValue();
-        if (field instanceof Table) {
-            currentValue = ((Table) field).getContainerDataSource().getItemIds();
-        }
-
-        if (field.equals(currentChangedComponent)) {
-            currentValue = newValue;
-        }
-        return currentValue;
-    }
-
-    private boolean shouldMandatoryLabelShown() {
-        for (final AbstractField<?> field : allComponents) {
-            if (field.isRequired()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isMandatoryFieldNotEmptyAndValid(final Component currentChangedComponent, final Object newValue) {
-
-        boolean valid = true;
-        final List<AbstractField<?>> requiredComponents = allComponents.stream().filter(AbstractField::isRequired)
-                .filter(AbstractField::isEnabled).collect(Collectors.toList());
-
-        requiredComponents.addAll(allComponents.stream().filter(this::hasNullValidator).collect(Collectors.toList()));
-
-        for (final AbstractField field : requiredComponents) {
-            Object value = getCurrentValue(currentChangedComponent, newValue, field);
-
-            if (Set.class.equals(field.getType())) {
-                value = emptyToNull((Collection<?>) value);
-            }
-
-            if (value == null) {
-                return false;
-            }
-
-            // We need to loop through all of components for validity testing.
-            // Otherwise the UI will only mark the first field with errors and
-            // then stop. Setting the value is necessary because not all
-            // required input fields have empty string validator, but emptiness
-            // is checked during isValid() call. Setting the value could be
-            // redundant, check if it could be removed in the future.
-            field.setValue(value);
-            if (!field.isValid()) {
-                valid = false;
-            }
-        }
-
-        return valid;
-    }
-
-    private static Object emptyToNull(final Collection<?> c) {
-        return CollectionUtils.isEmpty(c) ? null : c;
-    }
-
-    private boolean hasNullValidator(final Component component) {
-
-        if (component instanceof AbstractField<?>) {
-            final AbstractField<?> fieldComponent = (AbstractField<?>) component;
-            for (final Validator validator : fieldComponent.getValidators()) {
-                if (validator instanceof NullValidator) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
-        final List<AbstractField<?>> components = new ArrayList<>();
-
-        final Iterator<Component> iterate = abstractLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractLayout) {
-                components.addAll(getAllComponents((AbstractLayout) c));
-            }
-
-            if (c instanceof AbstractField) {
-                components.add((AbstractField<?>) c);
-            }
-
-            if (c instanceof FlexibleOptionGroupItemComponent) {
-                components.add(((FlexibleOptionGroupItemComponent) c).getOwner());
-            }
-
-            if (c instanceof TabSheet) {
-                final TabSheet tabSheet = (TabSheet) c;
-                components.addAll(getAllComponentsFromTabSheet(tabSheet));
-            }
-        }
-        return components;
-    }
-
-    private static List<AbstractField<?>> getAllComponentsFromTabSheet(final TabSheet tabSheet) {
-        final List<AbstractField<?>> components = new ArrayList<>();
-        for (final Iterator<Component> i = tabSheet.iterator(); i.hasNext();) {
-            final Component component = i.next();
-            if (component instanceof AbstractLayout) {
-                components.addAll(getAllComponents((AbstractLayout) component));
-            }
-        }
-        return components;
-    }
-
     private HorizontalLayout createActionButtonsLayout() {
 
         buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
-        buttonsLayout.setSpacing(true);
-        buttonsLayout.setSpacing(true);
         buttonsLayout.addStyleName("actionButtonsMargin");
 
         createSaveButton();
@@ -430,25 +181,25 @@ public class CommonDialogWindow extends Window {
 
     private void createMandatoryLabel() {
 
-        if (!shouldMandatoryLabelShown()) {
-            return;
-        }
-
-        final Label mandatoryLabel = new Label(i18n.getMessage("label.mandatory.field"));
+        mandatoryLabel = new Label(i18n.getMessage("label.mandatory.field"));
         mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
-
-        if (content instanceof TargetAddUpdateWindowLayout) {
-            ((TargetAddUpdateWindowLayout) content).getFormLayout().addComponent(mandatoryLabel);
-        } else if (content instanceof SoftwareModuleAddUpdateWindow) {
-            ((SoftwareModuleAddUpdateWindow) content).getFormLayout().addComponent(mandatoryLabel);
-        }
 
         mainLayout.addComponent(mandatoryLabel);
     }
 
+    /**
+     * Hide the line that explains the mandatory decorator
+     * 
+     */
+    public void hideMandatoryExplanation() {
+        if (mandatoryLabel != null) {
+            mainLayout.removeComponent(mandatoryLabel);
+        }
+    }
+
     private void createCancelButton() {
         cancelButton = SPUIComponentProvider.getButton(UIComponentIdProvider.CANCEL_BUTTON,
-                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), "", "", true, FontAwesome.TIMES,
+                i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL), "", "", true, VaadinIcons.CLOSE,
                 SPUIButtonStyleNoBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
@@ -463,17 +214,23 @@ public class CommonDialogWindow extends Window {
     }
 
     private void createSaveButton() {
-        saveButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
-                i18n.getMessage(UIMessageIdProvider.BUTTON_SAVE), "", "", true, FontAwesome.SAVE,
-                SPUIButtonStyleNoBorderWithIcon.class);
-        saveButton.setSizeUndefined();
-        saveButton.addStyleName("default-color");
+        if (confirmStyle == ConfirmStyle.SAVE) {
+            confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_SAVE), "", "", true, VaadinIcons.HARDDRIVE,
+                    buttonDecorator);
+        } else {
+            confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_OK), "", ValoTheme.BUTTON_PRIMARY, false, null,
+                    buttonDecorator);
+        }
+        confirmButton.setSizeUndefined();
+        confirmButton.addStyleName("default-color");
         addCloseListenerForSaveButton();
-        saveButton.setEnabled(false);
-        saveButton.setClickShortcut(KeyCode.ENTER);
-        buttonsLayout.addComponent(saveButton);
-        buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
-        buttonsLayout.setExpandRatio(saveButton, 1.0F);
+        confirmButton.setEnabled(false);
+        confirmButton.setClickShortcut(KeyCode.ENTER);
+        buttonsLayout.addComponent(confirmButton);
+        buttonsLayout.setComponentAlignment(confirmButton, Alignment.MIDDLE_RIGHT);
+        buttonsLayout.setExpandRatio(confirmButton, 1.0F);
     }
 
     private void addHelpLink() {
@@ -490,60 +247,33 @@ public class CommonDialogWindow extends Window {
         return this.buttonsLayout;
     }
 
-    private class ChangeListener implements ValueChangeListener, TextChangeListener, ItemSetChangeListener {
-
-        private static final long serialVersionUID = 1L;
-        private final Field<?> field;
-
-        public ChangeListener(final Field<?> field) {
-            this.field = field;
-        }
-
-        @Override
-        public void textChange(final TextChangeEvent event) {
-            saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, event.getText()));
-        }
-
-        @Override
-        public void valueChange(final ValueChangeEvent event) {
-            saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, field.getValue()));
-        }
-
-        @Override
-        public void containerItemSetChange(final ItemSetChangeEvent event) {
-            if (!(field instanceof Table)) {
-                return;
-            }
-            final Table table = (Table) field;
-            saveButton.setEnabled(
-                    isSaveButtonEnabledAfterValueChange(table, table.getContainerDataSource().getItemIds()));
-        }
-    }
-
-    /**
-     * Adds the component manually to the allComponents-List and adds a
-     * ValueChangeListener to it. Necessary in Update Distribution Type as the
-     * CheckBox concerned is an ItemProperty...
-     *
-     * @param component
-     *            AbstractField
-     */
-    public void updateAllComponents(final AbstractField<?> component) {
-
-        allComponents.add(component);
-        component.addValueChangeListener(new ChangeListener(component));
-    }
-
     public VerticalLayout getMainLayout() {
         return mainLayout;
     }
 
+    /**
+     * Enables the save confirmation button
+     *
+     * @param enabled
+     *            boolean
+     *
+     */
     public void setSaveButtonEnabled(final boolean enabled) {
-        saveButton.setEnabled(enabled);
+        confirmButton.setEnabled(enabled);
     }
 
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
+    }
+
+    /**
+     * Sets the close listener in save dialog
+     *
+     * @param closeListener
+     *            SaveDialogCloseListener
+     */
+    public void setCloseListener(final SaveDialogCloseListener closeListener) {
+        this.closeListener = closeListener;
     }
 
     /**
@@ -556,38 +286,24 @@ public class CommonDialogWindow extends Window {
         /**
          * Checks if the safe action can executed.
          *
-         * @return <code>true</code> = save action can executed
-         *         <code>false</code> = cannot execute safe action .
+         * @return <true> = save action can executed <false> = cannot execute
+         *         safe action .
          */
         boolean canWindowSaveOrUpdate();
 
         /**
-         * Checks if the window can closed after the safe action is executed
+         * Checks if the window can be closed after the save action is executed
          *
-         * @return <code>true</code> = window will close <code>false</code> =
-         *         will not closed.
+         * @return <true> = window will close <false> = will not closed.
          */
         default boolean canWindowClose() {
             return true;
         }
 
         /**
-         * Saves/Updates action. Is called if canWindowSaveOrUpdate is
-         * <code>true</code>.
+         * Saves/Updates action. Is called if canWindowSaveOrUpdate is <true>.
          *
          */
         void saveOrUpdate();
     }
-
-    /**
-     * Updates the field allComponents. All components existing on the given
-     * layout are added to the list of allComponents
-     *
-     * @param layout
-     *            AbstractLayout
-     */
-    public void updateAllComponents(final AbstractLayout layout) {
-        allComponents = getAllComponents(layout);
-    }
-
 }

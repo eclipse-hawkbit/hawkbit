@@ -8,9 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.distributions;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -20,234 +22,253 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.components.AbstractNotificationView;
-import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
-import org.eclipse.hawkbit.ui.dd.criteria.DistributionsViewClientCriterion;
-import org.eclipse.hawkbit.ui.distributions.disttype.filter.DSTypeFilterButtons;
+import org.eclipse.hawkbit.ui.common.event.EventLayout;
+import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.EventViewAware;
+import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener.ResizeHandler;
+import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener.VisibilityHandler;
 import org.eclipse.hawkbit.ui.distributions.disttype.filter.DSTypeFilterLayout;
-import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
-import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
-import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterButtons;
+import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetGridLayout;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleGridLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.filter.DistSMTypeFilterLayout;
-import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
-import org.eclipse.hawkbit.ui.push.DistributionSetCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.DistributionSetDeletedEventContainer;
-import org.eclipse.hawkbit.ui.push.SoftwareModuleCreatedEventContainer;
-import org.eclipse.hawkbit.ui.push.SoftwareModuleDeletedEventContainer;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.collect.Maps;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.annotations.JavaScript;
+import com.vaadin.navigator.View;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Manage distributions and distributions type view.
  */
 @UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class DistributionsView extends AbstractNotificationView implements BrowserWindowResizeListener {
-
+@JavaScript("vaadin://js/dynamicStylesheet.js")
+public class DistributionsView extends VerticalLayout implements View, BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "distributions";
 
     private final SpPermissionChecker permChecker;
-
-    private final VaadinMessageSource i18n;
-
-    private final UINotification uiNotification;
-
-    private final DSTypeFilterLayout filterByDSTypeLayout;
-
-    private final DistributionSetTableLayout distributionTableLayout;
-
-    private final SwModuleTableLayout softwareModuleTableLayout;
-
-    private final DistSMTypeFilterLayout filterBySMTypeLayout;
-
     private final ManageDistUIState manageDistUIState;
 
-    private final DistributionsViewMenuItem distributionsViewMenuItem;
+    private final DSTypeFilterLayout dsTypeFilterLayout;
+    private final DistributionSetGridLayout distributionSetGridLayout;
+    private final SwModuleGridLayout swModuleGridLayout;
+    private final DistSMTypeFilterLayout distSMTypeFilterLayout;
 
-    private GridLayout mainLayout;
+    private HorizontalLayout mainLayout;
+
+    private final transient LayoutVisibilityListener layoutVisibilityListener;
+    private final transient LayoutResizeListener layoutResizeListener;
 
     @Autowired
     DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final ManagementUIState managementUIState,
-            final ManageDistUIState manageDistUIState, final SoftwareModuleManagement softwareModuleManagement,
+            final UINotification uiNotification, final ManageDistUIState manageDistUIState,
+            final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final DistributionSetTagManagement distributionSetTagManagement,
-            final DistributionsViewClientCriterion distributionsViewClientCriterion,
-            final ArtifactUploadState artifactUploadState, final SystemManagement systemManagement,
-            final ArtifactManagement artifactManagement, final NotificationUnreadButton notificationUnreadButton,
-            final DistributionsViewMenuItem distributionsViewMenuItem,
-            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
-        super(eventBus, notificationUnreadButton);
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
+            final ArtifactManagement artifactManagement, final TenantConfigurationManagement configManagement,
+            final SystemSecurityContext systemSecurityContext) {
         this.permChecker = permChecker;
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
         this.manageDistUIState = manageDistUIState;
-        final DSTypeFilterButtons dsTypeFilterButtons = new DSTypeFilterButtons(eventBus, manageDistUIState,
-                distributionsViewClientCriterion, distributionSetTypeManagement, i18n, entityFactory, permChecker,
-                uiNotification, softwareModuleTypeManagement, distributionSetManagement, systemManagement);
-        this.filterByDSTypeLayout = new DSTypeFilterLayout(manageDistUIState, i18n, permChecker, eventBus,
-                entityFactory, uiNotification, softwareModuleTypeManagement, distributionSetTypeManagement,
-                dsTypeFilterButtons);
-        this.distributionTableLayout = new DistributionSetTableLayout(i18n, eventBus, permChecker, managementUIState,
-                manageDistUIState, softwareModuleManagement, distributionSetManagement, distributionSetTypeManagement,
-                targetManagement, entityFactory, uiNotification, distributionSetTagManagement,
-                distributionsViewClientCriterion, systemManagement, configManagement, systemSecurityContext);
-        this.softwareModuleTableLayout = new SwModuleTableLayout(i18n, uiNotification, eventBus,
-                softwareModuleManagement, softwareModuleTypeManagement, entityFactory, manageDistUIState, permChecker,
-                distributionsViewClientCriterion, artifactUploadState, artifactManagement);
 
-        final DistSMTypeFilterButtons distSmTypeFilterButtons = new DistSMTypeFilterButtons(eventBus, manageDistUIState,
-                distributionsViewClientCriterion, softwareModuleTypeManagement, i18n, entityFactory, permChecker,
-                uiNotification);
-        this.filterBySMTypeLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, manageDistUIState,
-                entityFactory, uiNotification, softwareModuleTypeManagement, distSmTypeFilterButtons);
-        this.distributionsViewMenuItem = distributionsViewMenuItem;
+        if (permChecker.hasReadRepositoryPermission()) {
+            this.dsTypeFilterLayout = new DSTypeFilterLayout(i18n, permChecker, eventBus, entityFactory, uiNotification,
+                    softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
+                    systemManagement, manageDistUIState.getDsTypeFilterLayoutUiState());
+            this.distributionSetGridLayout = new DistributionSetGridLayout(i18n, eventBus, permChecker, uiNotification,
+                    entityFactory, targetManagement, targetFilterQueryManagement, distributionSetManagement,
+                    softwareModuleManagement, distributionSetTypeManagement, distributionSetTagManagement,
+                    softwareModuleTypeManagement, systemManagement, configManagement, systemSecurityContext,
+                    manageDistUIState.getDsTypeFilterLayoutUiState(),
+                    manageDistUIState.getDistributionSetGridLayoutUiState());
+            this.swModuleGridLayout = new SwModuleGridLayout(i18n, uiNotification, eventBus, softwareModuleManagement,
+                    softwareModuleTypeManagement, entityFactory, permChecker, artifactManagement,
+                    manageDistUIState.getSmTypeFilterLayoutUiState(), manageDistUIState.getSwModuleGridLayoutUiState());
+            this.distSMTypeFilterLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, entityFactory,
+                    uiNotification, softwareModuleTypeManagement, manageDistUIState.getSmTypeFilterLayoutUiState());
+
+            final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
+            layoutVisibilityHandlers.put(EventLayout.DS_TYPE_FILTER,
+                    new VisibilityHandler(this::showDsTypeLayout, this::hideDsTypeLayout));
+            layoutVisibilityHandlers.put(EventLayout.SM_TYPE_FILTER,
+                    new VisibilityHandler(this::showSmTypeLayout, this::hideSmTypeLayout));
+            this.layoutVisibilityListener = new LayoutVisibilityListener(eventBus,
+                    new EventViewAware(EventView.DISTRIBUTIONS), layoutVisibilityHandlers);
+
+            final Map<EventLayout, ResizeHandler> layoutResizeHandlers = new EnumMap<>(EventLayout.class);
+            layoutResizeHandlers.put(EventLayout.DS_LIST,
+                    new ResizeHandler(this::maximizeDsGridLayout, this::minimizeDsGridLayout));
+            layoutResizeHandlers.put(EventLayout.SM_LIST,
+                    new ResizeHandler(this::maximizeSmGridLayout, this::minimizeSmGridLayout));
+            this.layoutResizeListener = new LayoutResizeListener(eventBus, new EventViewAware(EventView.DISTRIBUTIONS),
+                    layoutResizeHandlers);
+        } else {
+            this.dsTypeFilterLayout = null;
+            this.distributionSetGridLayout = null;
+            this.swModuleGridLayout = null;
+            this.distSMTypeFilterLayout = null;
+            this.layoutVisibilityListener = null;
+            this.layoutResizeListener = null;
+        }
     }
 
     @PostConstruct
     void init() {
-        buildLayout();
-        restoreState();
-        checkNoDataAvaialble();
-        Page.getCurrent().addBrowserWindowResizeListener(this);
-        showOrHideFilterButtons(Page.getCurrent().getBrowserWindowWidth());
-    }
-
-    @Override
-    public void enter(final ViewChangeEvent event) {
-        softwareModuleTableLayout.getSwModuleTable()
-                .selectEntity(manageDistUIState.getLastSelectedSoftwareModule().orElse(null));
-
-        distributionTableLayout.getDistributionSetTable()
-                .selectEntity(manageDistUIState.getLastSelectedDistribution().orElse(null));
-    }
-
-    @Override
-    protected DashboardMenuItem getDashboardMenuItem() {
-        return distributionsViewMenuItem;
-    }
-
-    private void restoreState() {
-        if (manageDistUIState.isDsTableMaximized()) {
-            maximizeDistTable();
-        }
-        if (manageDistUIState.isSwModuleTableMaximized()) {
-            maximizeSwTable();
+        if (permChecker.hasReadRepositoryPermission()) {
+            buildLayout();
+            restoreState();
+            Page.getCurrent().addBrowserWindowResizeListener(this);
         }
     }
 
     private void buildLayout() {
-        if (!hasUserPermission()) {
-            return;
-        }
+        setMargin(false);
+        setSpacing(false);
         setSizeFull();
-        setStyleName("rootLayout");
-        createMainLayout();
-        addComponents(mainLayout);
-        setExpandRatio(mainLayout, 1);
-    }
 
-    private boolean hasUserPermission() {
-        return permChecker.hasUpdateRepositoryPermission() || permChecker.hasCreateRepositoryPermission()
-                || permChecker.hasReadRepositoryPermission();
+        createMainLayout();
+
+        addComponent(mainLayout);
+        setExpandRatio(mainLayout, 1.0F);
     }
 
     private void createMainLayout() {
-        mainLayout = new GridLayout(4, 1);
+        mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
+        mainLayout.setMargin(false);
         mainLayout.setSpacing(true);
-        mainLayout.setStyleName("fullSize");
 
-        mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
-        mainLayout.addComponent(distributionTableLayout, 1, 0);
-        mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
-        mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.setRowExpandRatio(0, 1.0F);
-        mainLayout.setColumnExpandRatio(1, 0.5F);
-        mainLayout.setColumnExpandRatio(2, 0.5F);
+        mainLayout.addComponent(dsTypeFilterLayout);
+        mainLayout.addComponent(distributionSetGridLayout);
+        mainLayout.addComponent(swModuleGridLayout);
+        mainLayout.addComponent(distSMTypeFilterLayout);
+
+        mainLayout.setExpandRatio(dsTypeFilterLayout, 0F);
+        mainLayout.setExpandRatio(distributionSetGridLayout, 0.5F);
+        mainLayout.setExpandRatio(swModuleGridLayout, 0.5F);
+        mainLayout.setExpandRatio(distSMTypeFilterLayout, 0F);
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final DistributionTableEvent event) {
-        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
-            minimizeDistTable();
-        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
-            maximizeDistTable();
+    private void restoreState() {
+        if (manageDistUIState.getDsTypeFilterLayoutUiState().isHidden()
+                || manageDistUIState.getSwModuleGridLayoutUiState().isMaximized()) {
+            hideDsTypeLayout();
+        } else {
+            showDsTypeLayout();
         }
-    }
+        dsTypeFilterLayout.restoreState();
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final SoftwareModuleEvent event) {
-        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
-            minimizeSwTable();
-        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
-            maximizeSwTable();
+        if (manageDistUIState.getDistributionSetGridLayoutUiState().isMaximized()) {
+            maximizeDsGridLayout();
         }
-    }
+        distributionSetGridLayout.restoreState();
 
-    private void maximizeSwTable() {
-        mainLayout.removeComponent(filterByDSTypeLayout);
-        mainLayout.removeComponent(distributionTableLayout);
-        mainLayout.setColumnExpandRatio(2, 1F);
-        mainLayout.setColumnExpandRatio(0, 0F);
-        mainLayout.setColumnExpandRatio(1, 0F);
-    }
-
-    private void minimizeSwTable() {
-        mainLayout.addComponent(filterByDSTypeLayout, 0, 0);
-        mainLayout.addComponent(distributionTableLayout, 1, 0);
-        mainLayout.setColumnExpandRatio(1, 0.5F);
-        mainLayout.setColumnExpandRatio(2, 0.5F);
-    }
-
-    private void minimizeDistTable() {
-        mainLayout.addComponent(softwareModuleTableLayout, 2, 0);
-        mainLayout.addComponent(filterBySMTypeLayout, 3, 0);
-        mainLayout.setColumnExpandRatio(1, 0.5F);
-        mainLayout.setColumnExpandRatio(2, 0.5F);
-    }
-
-    private void maximizeDistTable() {
-        mainLayout.removeComponent(softwareModuleTableLayout);
-        mainLayout.removeComponent(filterBySMTypeLayout);
-        mainLayout.setColumnExpandRatio(2, 0F);
-        mainLayout.setColumnExpandRatio(3, 0F);
-    }
-
-    private void checkNoDataAvaialble() {
-        if (manageDistUIState.isNoDataAvilableSwModule() && manageDistUIState.isNoDataAvailableDist()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.no.data"));
+        if (manageDistUIState.getSwModuleGridLayoutUiState().isMaximized()) {
+            maximizeSmGridLayout();
         }
+        swModuleGridLayout.restoreState();
+
+        if (manageDistUIState.getSmTypeFilterLayoutUiState().isHidden()
+                || manageDistUIState.getDistributionSetGridLayoutUiState().isMaximized()) {
+            hideSmTypeLayout();
+        } else {
+            showSmTypeLayout();
+        }
+        distSMTypeFilterLayout.restoreState();
+    }
+
+    private void showDsTypeLayout() {
+        dsTypeFilterLayout.setVisible(true);
+        distributionSetGridLayout.hideDsTypeHeaderIcon();
+    }
+
+    private void hideDsTypeLayout() {
+        dsTypeFilterLayout.setVisible(false);
+        distributionSetGridLayout.showDsTypeHeaderIcon();
+    }
+
+    private void maximizeDsGridLayout() {
+        swModuleGridLayout.setVisible(false);
+        hideSmTypeLayout();
+
+        mainLayout.setExpandRatio(dsTypeFilterLayout, 0F);
+        mainLayout.setExpandRatio(distributionSetGridLayout, 1.0F);
+        mainLayout.setExpandRatio(swModuleGridLayout, 0F);
+        mainLayout.setExpandRatio(distSMTypeFilterLayout, 0F);
+
+        distributionSetGridLayout.maximize();
+    }
+
+    private void minimizeDsGridLayout() {
+        swModuleGridLayout.setVisible(true);
+        if (!manageDistUIState.getSmTypeFilterLayoutUiState().isHidden()) {
+            showSmTypeLayout();
+        }
+
+        mainLayout.setExpandRatio(dsTypeFilterLayout, 0F);
+        mainLayout.setExpandRatio(distributionSetGridLayout, 0.5F);
+        mainLayout.setExpandRatio(swModuleGridLayout, 0.5F);
+        mainLayout.setExpandRatio(distSMTypeFilterLayout, 0F);
+
+        distributionSetGridLayout.minimize();
+    }
+
+    private void maximizeSmGridLayout() {
+        distributionSetGridLayout.setVisible(false);
+        hideDsTypeLayout();
+
+        mainLayout.setExpandRatio(dsTypeFilterLayout, 0F);
+        mainLayout.setExpandRatio(distributionSetGridLayout, 0F);
+        mainLayout.setExpandRatio(swModuleGridLayout, 1.0F);
+        mainLayout.setExpandRatio(distSMTypeFilterLayout, 0F);
+
+        swModuleGridLayout.maximize();
+    }
+
+    private void minimizeSmGridLayout() {
+        distributionSetGridLayout.setVisible(true);
+        if (!manageDistUIState.getDsTypeFilterLayoutUiState().isHidden()) {
+            showDsTypeLayout();
+        }
+
+        mainLayout.setExpandRatio(dsTypeFilterLayout, 0F);
+        mainLayout.setExpandRatio(distributionSetGridLayout, 0.5F);
+        mainLayout.setExpandRatio(swModuleGridLayout, 0.5F);
+        mainLayout.setExpandRatio(distSMTypeFilterLayout, 0F);
+
+        swModuleGridLayout.minimize();
+    }
+
+    private void showSmTypeLayout() {
+        distSMTypeFilterLayout.setVisible(true);
+        swModuleGridLayout.hideSmTypeHeaderIcon();
+    }
+
+    private void hideSmTypeLayout() {
+        distSMTypeFilterLayout.setVisible(false);
+        swModuleGridLayout.showSmTypeHeaderIcon();
     }
 
     @Override
@@ -257,33 +278,34 @@ public class DistributionsView extends AbstractNotificationView implements Brows
 
     private void showOrHideFilterButtons(final int browserWidth) {
         if (browserWidth < SPUIDefinitions.REQ_MIN_BROWSER_WIDTH) {
-            filterByDSTypeLayout.setVisible(false);
-            distributionTableLayout.setShowFilterButtonVisible(true);
-            filterBySMTypeLayout.setVisible(false);
-            softwareModuleTableLayout.setShowFilterButtonVisible(true);
-        } else {
-            if (!manageDistUIState.isDistTypeFilterClosed()) {
-                filterByDSTypeLayout.setVisible(true);
-                distributionTableLayout.setShowFilterButtonVisible(false);
+            if (!manageDistUIState.getDsTypeFilterLayoutUiState().isHidden()) {
+                hideDsTypeLayout();
             }
-            if (!manageDistUIState.isSwTypeFilterClosed()) {
-                filterBySMTypeLayout.setVisible(true);
-                softwareModuleTableLayout.setShowFilterButtonVisible(false);
+
+            if (!manageDistUIState.getSmTypeFilterLayoutUiState().isHidden()) {
+                hideSmTypeLayout();
+            }
+        } else {
+            if (manageDistUIState.getDsTypeFilterLayoutUiState().isHidden()) {
+                showDsTypeLayout();
+            }
+
+            if (manageDistUIState.getSmTypeFilterLayoutUiState().isHidden()) {
+                showSmTypeLayout();
             }
         }
     }
 
-    @Override
-    protected Map<Class<?>, RefreshableContainer> getSupportedPushEvents() {
-        final Map<Class<?>, RefreshableContainer> supportedEvents = Maps.newHashMapWithExpectedSize(4);
+    @PreDestroy
+    void destroy() {
+        if (permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.unsubscribe();
+            layoutResizeListener.unsubscribe();
 
-        supportedEvents.put(DistributionSetCreatedEventContainer.class, distributionTableLayout.getTable());
-        supportedEvents.put(DistributionSetDeletedEventContainer.class, distributionTableLayout.getTable());
-
-        supportedEvents.put(SoftwareModuleCreatedEventContainer.class, softwareModuleTableLayout.getTable());
-        supportedEvents.put(SoftwareModuleDeletedEventContainer.class, softwareModuleTableLayout.getTable());
-
-        return supportedEvents;
+            dsTypeFilterLayout.unsubscribeListener();
+            distributionSetGridLayout.unsubscribeListener();
+            swModuleGridLayout.unsubscribeListener();
+            distSMTypeFilterLayout.unsubscribeListener();
+        }
     }
-
 }

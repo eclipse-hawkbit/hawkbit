@@ -8,177 +8,173 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.ui.components.RefreshableContainer;
+import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetFilterQueryToProxyTargetFilterMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.FilterChangedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.FilterType;
+import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour.ClickBehaviourType;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
+import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
-import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
-import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
-import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.StyleGenerator;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target filter query{#link {@link TargetFilterQuery} buttons layout.
  */
-public class TargetFilterQueryButtons extends Table implements RefreshableContainer{
-    private static final long serialVersionUID = 9188095103191937850L;
-    protected static final String FILTER_BUTTON_COLUMN = "filterButton";
+public class TargetFilterQueryButtons extends AbstractGrid<ProxyTargetFilterQuery, String> {
+    private static final long serialVersionUID = 1L;
 
-    private final ManagementUIState managementUIState;
+    private static final String FILTER_BUTTON_COLUMN_ID = "filterButton";
 
-    private transient EventBus.UIEventBus eventBus;
+    private final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState;
 
-    private CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
+    private final CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
 
-    TargetFilterQueryButtons(final ManagementUIState managementUIState, final UIEventBus eventBus) {
-        this.managementUIState = managementUIState;
-        this.eventBus = eventBus;
+    TargetFilterQueryButtons(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
+        super(i18n, eventBus);
+
+        this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
+
+        this.customTargetTagFilterButtonClick = new CustomTargetTagFilterButtonClick(this::onFilterChangedEvent);
+
+        setFilterSupport(new FilterSupport<>(new TargetFilterQueryDataProvider(targetFilterQueryManagement,
+                new TargetFilterQueryToProxyTargetFilterMapper())));
+
+        init();
     }
 
     /**
      * initializing table.
-     * 
-     * @param filterButtonClickBehaviour
      */
-    void init(final CustomTargetTagFilterButtonClick filterButtonClickBehaviour) {
-        this.customTargetTagFilterButtonClick = filterButtonClickBehaviour;
-        createTable();
-        eventBus.subscribe(this);
-    }
+    @Override
+    public void init() {
+        super.init();
 
-    private void createTable() {
-        setImmediate(true);
-        setId(getButtonsTableId());
         setStyleName("type-button-layout");
-        setStyle();
-        setContainerDataSource(createButtonsLazyQueryContainer());
-        addTableProperties();
-        addColumn();
-        setTableVisibleColumns();
-        setDragMode(TableDragMode.NONE);
-        setSelectable(false);
-        setSizeFull();
-
-    }
-
-    protected String getButtonsTableId() {
-        return UIComponentIdProvider.CUSTOM_TARGET_TAG_TABLE_ID;
-    }
-
-    private void setStyle() {
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_BORDERLESS);
         addStyleName(ValoTheme.TABLE_COMPACT);
+
+        removeHeaderRow(0);
+        setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_FILTER_CUSTOM));
     }
 
-    protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final BeanQueryFactory<TargetFilterBeanQuery> queryFactory = new BeanQueryFactory<>(
-                TargetFilterBeanQuery.class);
-        queryFactory.setQueryConfiguration(Collections.emptyMap());
-        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "id"), queryFactory);
-    }
-
-    private void addTableProperties() {
-        final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();
-        container.addContainerProperty(SPUILabelDefinitions.VAR_ID, Long.class, null, true, true);
-        container.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, null, true, true);
-    }
-
-    protected void addColumn() {
-        addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
-    }
-
-    private Button addGeneratedCell(final Object itemId) {
-        final Item item = getItem(itemId);
-        final Long id = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_ID).getValue();
-        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final Button typeButton = createFilterButton(id, name, itemId);
-
-        if (isClickedByDefault(id)) {
-            customTargetTagFilterButtonClick.setDefaultButtonClicked(typeButton);
-        }
-        return typeButton;
-    }
-
-    private boolean isClickedByDefault(final Long id) {
-        return managementUIState.getTargetTableFilters().getTargetFilterQuery().map(q -> q.equals(id)).orElse(false);
-    }
-
-    private Button createFilterButton(final Long id, final String name, final Object itemId) {
-        final Button button = SPUIComponentProvider.getButton("", name, name, "", false, null,
-                SPUITagButtonStyle.class);
-        button.addStyleName("custom-filter-button");
-        button.setId(name);
-        if (id != null) {
-            button.setCaption(name);
-        }
-        //After Vaadin 8 migration: Enable tooltip again, currently it is set to [null] to avoid cross site scripting.
-        button.setDescription(null);
-        button.setData(itemId);
-        button.addClickListener(event -> customTargetTagFilterButtonClick.processButtonClick(event));
-        return button;
-    }
-
-    private void setTableVisibleColumns() {
-        final List<Object> columnIds = new ArrayList<>();
-        columnIds.add(FILTER_BUTTON_COLUMN);
-        setVisibleColumns(columnIds.toArray());
-        setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-    }
-    
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final ManagementUIEvent event) {
-        if (event == ManagementUIEvent.RESET_TARGET_FILTER_QUERY) {
-            customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
-        }
-    }
-
-  @EventBusListenerMethod(scope = EventScope.UI)
-  void onEvent(final CustomFilterUIEvent filterEvent) {
-    if (filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY ||
-        filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY ||
-        filterEvent == CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY) {
-      UI.getCurrent().access(this::refreshContainer);
-    }
-    if (filterEvent == CustomFilterUIEvent.REMOVE_TARGET_FILTERQUERY) {
-      customTargetTagFilterButtonClick.clearAppliedTargetFilterQuery();
-    } else if (filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
-      this.eventBus.publish(this, ManagementUIEvent.REFRESH_TARGETS_ON_FILTER_UPDATE);
-    }
-  }
-    
-    
-    /** 
-     * {@inheritDoc}
-     */
     @Override
-    public void refreshContainer() {
-      final Container container = getContainerDataSource();
-      if (!(container instanceof LazyQueryContainer)) {
-          return;
-      }
-      ((LazyQueryContainer) getContainerDataSource()).refresh();
+    public String getGridId() {
+        return UIComponentIdProvider.CUSTOM_TARGET_TAG_TABLE_ID;
+    }
+
+    @Override
+    public void addColumns() {
+        final StyleGenerator<ProxyTargetFilterQuery> styleGenerator = item -> {
+            if (customTargetTagFilterButtonClick.isFilterPreviouslyClicked(item)) {
+                return SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE;
+            } else {
+                return null;
+            }
+        };
+        GridComponentBuilder.addComponentColumn(this, this::buildTfqButton, styleGenerator)
+                .setId(FILTER_BUTTON_COLUMN_ID);
+    }
+
+    private Button buildTfqButton(final ProxyTargetFilterQuery filterQuery) {
+        final Button tfqButton = SPUIComponentProvider.getButton(
+                UIComponentIdProvider.CUSTOM_FILTER_BUTTON_PREFIX + "." + filterQuery.getId(), filterQuery.getName(),
+                filterQuery.getName(), null, false, null, SPUITagButtonStyle.class);
+        tfqButton.setWidthFull();
+
+        tfqButton.addClickListener(event -> customTargetTagFilterButtonClick.processFilterClick(filterQuery));
+
+        return tfqButton;
+    }
+
+    private void onFilterChangedEvent(final ProxyTargetFilterQuery targetFilterQueryFilter,
+            final ClickBehaviourType clickType) {
+        getDataCommunicator().reset();
+
+        final Long targetFilterQueryId = ClickBehaviourType.CLICKED == clickType ? targetFilterQueryFilter.getId()
+                : null;
+
+        publishFilterChangedEvent(targetFilterQueryId);
+    }
+
+    private void publishFilterChangedEvent(final Long targetFilterQueryId) {
+        eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(ProxyTarget.class,
+                FilterType.QUERY, targetFilterQueryId, EventView.DEPLOYMENT));
+
+        targetTagFilterLayoutUiState.setClickedTargetFilterQueryId(targetFilterQueryId);
+    }
+
+    /**
+     * Remove applied target filter query
+     */
+    public void clearAppliedTargetFilterQuery() {
+        if (customTargetTagFilterButtonClick.getPreviouslyClickedFilterId() != null) {
+            customTargetTagFilterButtonClick.setPreviouslyClickedFilterId(null);
+            targetTagFilterLayoutUiState.setClickedTargetFilterQueryId(null);
+        }
+    }
+
+    /**
+     * Reselect filter when target filter query updated
+     *
+     * @param updatedTargetFilterQueryIds
+     *          List of update query id
+     */
+    public void reselectFilterOnTfqUpdated(final Collection<Long> updatedTargetFilterQueryIds) {
+        if (isClickedTfqInIds(updatedTargetFilterQueryIds)) {
+            publishFilterChangedEvent(customTargetTagFilterButtonClick.getPreviouslyClickedFilterId());
+        }
+    }
+
+    private boolean isClickedTfqInIds(final Collection<Long> tfqIds) {
+        final Long clickedTargetFilterQueryId = customTargetTagFilterButtonClick.getPreviouslyClickedFilterId();
+
+        return clickedTargetFilterQueryId != null && tfqIds.contains(clickedTargetFilterQueryId);
+    }
+
+    /**
+     * Reselect filter when target filter query deleted
+     *
+     * @param deletedTargetFilterQueryIds
+     *          List of deleted query id
+     */
+    public void resetFilterOnTfqDeleted(final Collection<Long> deletedTargetFilterQueryIds) {
+        if (isClickedTfqInIds(deletedTargetFilterQueryIds)) {
+            customTargetTagFilterButtonClick.setPreviouslyClickedFilterId(null);
+            publishFilterChangedEvent(null);
+        }
+    }
+
+    @Override
+    public void restoreState() {
+        final Long targetFilterQueryIdToRestore = targetTagFilterLayoutUiState.getClickedTargetFilterQueryId();
+
+        if (targetFilterQueryIdToRestore != null) {
+            customTargetTagFilterButtonClick
+                    .setPreviouslyClickedFilterId(targetTagFilterLayoutUiState.getClickedTargetFilterQueryId());
+        }
     }
 }

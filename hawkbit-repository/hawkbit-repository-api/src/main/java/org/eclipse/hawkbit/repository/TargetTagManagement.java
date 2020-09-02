@@ -156,6 +156,16 @@ public interface TargetTagManagement {
     Optional<TargetTag> get(long id);
 
     /**
+     * Finds {@link TargetTag} by given ids.
+     *
+     * @param ids
+     *            the ids to for
+     * @return the found {@link TargetTag}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<TargetTag> get(@NotEmpty Collection<Long> ids);
+
+    /**
      * updates the {@link TargetTag}.
      *
      * @param update

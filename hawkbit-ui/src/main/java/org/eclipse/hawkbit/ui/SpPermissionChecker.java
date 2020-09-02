@@ -81,6 +81,15 @@ public class SpPermissionChecker implements Serializable {
     }
 
     /**
+     * Has the download Repository Artifact Permission.
+     * 
+     * @return DOWNLOAD_REPOSITORY_ARTIFACT boolean value
+     */
+    public boolean hasDownloadRepositoryPermission() {
+        return permissionService.hasPermission(SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT);
+    }
+
+    /**
      * Gets the create Repository Permission.
      * 
      * @return CREATE_REPOSITORY boolean value

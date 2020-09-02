@@ -9,17 +9,22 @@
 package org.eclipse.hawkbit.ui.utils;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.WebBrowser;
-import org.springframework.util.StringUtils;
 
 /**
  * Common Util to get date/time related information.
@@ -43,14 +48,14 @@ public final class SPDateTimeUtil {
 
     }
 
-
     /**
      * Set fixed UI timezone
      *
      * @param fixedTimeZoneProperty
-     *      time zone e.g. Europe/Berlin. If time zone is unknown, it will default to GMT
+     *            time zone e.g. Europe/Berlin. If time zone is unknown, it will
+     *            default to GMT
      */
-    public static void initializeFixedTimeZoneProperty(String fixedTimeZoneProperty) {
+    public static void initializeFixedTimeZoneProperty(final String fixedTimeZoneProperty) {
         SPDateTimeUtil.fixedTimeZoneProperty = fixedTimeZoneProperty;
     }
 
@@ -60,7 +65,6 @@ public final class SPDateTimeUtil {
      * @return TimeZone
      */
     public static TimeZone getBrowserTimeZone() {
-
 
         if (!StringUtils.isEmpty(fixedTimeZoneProperty)) {
             return TimeZone.getTimeZone(fixedTimeZoneProperty);
@@ -83,6 +87,7 @@ public final class SPDateTimeUtil {
      * abbreviated like 'IST'.
      *
      * @param tz
+     *         TimeZone
      * @return ZoneId
      */
     public static ZoneId getTimeZoneId(final TimeZone tz) {
@@ -93,6 +98,7 @@ public final class SPDateTimeUtil {
      * Get formatted date with browser time zone.
      *
      * @param lastQueryDate
+     *          Last query date
      * @return String formatted date
      */
     public static String getFormattedDate(final Long lastQueryDate) {
@@ -103,6 +109,7 @@ public final class SPDateTimeUtil {
      * Get formatted date with browser time zone.
      *
      * @param lastQueryDate
+     *          Last query date
      * @param datePattern
      *            pattern how to format the date (cp. {@code SimpleDateFormat})
      * @return String formatted date
@@ -118,7 +125,7 @@ public final class SPDateTimeUtil {
      *            the entity
      * @return String formatted date
      */
-    public static String formatCreatedAt(final BaseEntity baseEntity) {
+    public static String formatCreatedAt(final ProxyNamedEntity baseEntity) {
         if (baseEntity == null) {
             return "";
         }
@@ -132,7 +139,7 @@ public final class SPDateTimeUtil {
      *            the entity
      * @return String formatted date
      */
-    public static String formatLastModifiedAt(final BaseEntity baseEntity) {
+    public static String formatLastModifiedAt(final ProxyNamedEntity baseEntity) {
         if (baseEntity == null) {
             return "";
         }
@@ -148,7 +155,7 @@ public final class SPDateTimeUtil {
      *            pattern how to format the date (cp. {@code SimpleDateFormat})
      * @return String formatted date
      */
-    public static String formatLastModifiedAt(final BaseEntity baseEntity, final String datePattern) {
+    public static String formatLastModifiedAt(final ProxyNamedEntity baseEntity, final String datePattern) {
         if (baseEntity == null) {
             return "";
         }
@@ -204,6 +211,72 @@ public final class SPDateTimeUtil {
         }
         return formattedDuration.toString();
 
+    }
+
+    /**
+     * Get list of all time zone offsets supported.
+     */
+    public static List<String> getAllTimeZoneOffsetIds() {
+        return ZoneId.getAvailableZoneIds().stream()
+                .map(id -> ZonedDateTime.now(ZoneId.of(id)).getOffset().getId().replace("Z", "+00:00")).distinct()
+                .sorted().collect(Collectors.toList());
+    }
+
+    /**
+     * Get time zone of the browser client to be used as default.
+     */
+    public static String getClientTimeZoneOffsetId() {
+        return getCurentZonedDateTime().getOffset().getId().replaceAll("Z", "+00:00");
+    }
+
+    private static ZonedDateTime getCurentZonedDateTime() {
+        return ZonedDateTime.now(getBrowserTimeZoneId());
+    }
+
+    private static ZoneId getBrowserTimeZoneId() {
+        return getTimeZoneId(getBrowserTimeZone());
+    }
+
+    /**
+     * Gets the two weeks date and time in milliseconds
+     *
+     * @return Two weeks from current date and time in epoc milliseconds
+     */
+    public static Long twoWeeksFromNowEpochMilli() {
+        return getCurentZonedDateTime().plusWeeks(2).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Gets the half and hour time in milliseconds
+     *
+     * @return Half an hour from current date and time in epoc milliseconds
+     */
+    public static Long halfAnHourFromNowEpochMilli() {
+        return getCurentZonedDateTime().plusMinutes(30).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Convert local date and time in epoch milliseconds
+     *
+     * @param localDateTime
+     *          Date time
+     *
+     * @return local date time format
+     */
+    public static Long localDateTimeToEpochMilli(final LocalDateTime localDateTime) {
+        return localDateTime.atZone(getBrowserTimeZoneId()).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Convert epoch milliseconds in local date and time
+     *
+     * @param epochMilli
+     *          Time in epoch milliseconds
+     *
+     * @return Epoch milliseconds format
+     */
+    public static LocalDateTime epochMilliToLocalDateTime(final Long epochMilli) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), getBrowserTimeZoneId());
     }
 
     /**

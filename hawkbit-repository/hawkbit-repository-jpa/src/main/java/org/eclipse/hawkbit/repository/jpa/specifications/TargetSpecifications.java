@@ -8,17 +8,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
-import javax.persistence.criteria.MapJoin;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -226,25 +227,35 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
         return (targetRoot, query, cb) -> {
-            final Predicate predicate = getPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
+            final Predicate predicate = getHasTagsPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
             query.distinct(true);
             return predicate;
         };
     }
 
-    private static Predicate getPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
+    private static Predicate getHasTagsPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
             final Boolean selectTargetWithNoTag, final String[] tagNames) {
         final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
         final Path<String> exp = tags.get(JpaTargetTag_.name);
-        if (selectTargetWithNoTag) {
-            if (tagNames != null) {
-                return cb.or(exp.isNull(), exp.in(tagNames));
-            } else {
-                return exp.isNull();
-            }
-        } else {
-            return exp.in(tagNames);
+
+        final List<Predicate> hasTagsPredicates = new ArrayList<>();
+        if (isNoTagActive(selectTargetWithNoTag)) {
+            hasTagsPredicates.add(exp.isNull());
         }
+        if (isAtLeastOneTagActive(tagNames)) {
+            hasTagsPredicates.add(exp.in(tagNames));
+        }
+
+        return hasTagsPredicates.stream().reduce(cb::or)
+                .orElseThrow(() -> new RuntimeException("Neither NO_TAG, nor TAG target tag filter was provided!"));
+    }
+
+    private static boolean isNoTagActive(final Boolean selectTargetWithNoTag) {
+        return Boolean.TRUE.equals(selectTargetWithNoTag);
+    }
+
+    private static boolean isAtLeastOneTagActive(final String[] tagNames) {
+        return tagNames != null && tagNames.length > 0;
     }
 
     /**

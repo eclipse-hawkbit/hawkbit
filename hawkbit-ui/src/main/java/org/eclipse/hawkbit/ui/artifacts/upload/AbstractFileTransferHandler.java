@@ -12,10 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
@@ -28,15 +27,18 @@ import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -101,9 +103,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        SpringContextHelper.getBean("asyncExecutor", ExecutorService.class)
-                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(),
-                        uploadLock));
+        SpringContextHelper.getBean("uiExecutor", Executor.class).execute(new TransferArtifactToRepositoryRunnable(
+                inputStream, fileUploadId, mimeType, UI.getCurrent(), uploadLock));
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -152,7 +153,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_STARTED);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
+        eventBus.publish(EventTopics.FILE_UPLOAD_CHANGED, this, fileUploadProgress);
     }
 
     protected void publishUploadProgressEvent(final FileUploadId fileUploadId, final long bytesReceived,
@@ -164,14 +165,14 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_IN_PROGRESS, bytesReceived, fileSize);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
+        eventBus.publish(EventTopics.FILE_UPLOAD_CHANGED, this, fileUploadProgress);
     }
 
     protected void publishUploadFinishedEvent(final FileUploadId fileUploadId) {
         LOG.debug("Upload finished for file {}", fileUploadId);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FINISHED);
-        eventBus.publish(this, fileUploadProgress);
+        eventBus.publish(EventTopics.FILE_UPLOAD_CHANGED, this, fileUploadProgress);
     }
 
     protected void publishUploadSucceeded(final FileUploadId fileUploadId, final long fileSize) {
@@ -179,21 +180,21 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_SUCCESSFUL, fileSize, fileSize);
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
+        eventBus.publish(EventTopics.FILE_UPLOAD_CHANGED, this, fileUploadProgress);
     }
 
     protected void publishUploadFailedEvent(final FileUploadId fileUploadId) {
         LOG.info("Upload failed for file {} due to reason: {}", fileUploadId, failureReason);
         final FileUploadProgress fileUploadProgress = new FileUploadProgress(fileUploadId,
                 FileUploadStatus.UPLOAD_FAILED,
-                StringUtils.isBlank(failureReason) ? i18n.getMessage(MESSAGE_UPLOAD_FAILED) : failureReason);
+                StringUtils.hasText(failureReason) ? failureReason : i18n.getMessage(MESSAGE_UPLOAD_FAILED));
         artifactUploadState.updateFileUploadProgress(fileUploadId, fileUploadProgress);
-        eventBus.publish(this, fileUploadProgress);
+        eventBus.publish(EventTopics.FILE_UPLOAD_CHANGED, this, fileUploadProgress);
     }
 
     protected void publishArtifactsChanged(final FileUploadId fileUploadId) {
-        eventBus.publish(this,
-                new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, fileUploadId.getSoftwareModuleId()));
+        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+                EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class, fileUploadId.getSoftwareModuleId()));
     }
 
     protected void publishUploadFailedAndFinishedEvent(final FileUploadId fileUploadId) {
@@ -236,6 +237,20 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         private final UI vaadinUi;
         private final Lock uploadLock;
 
+        /**
+         * Constructor for TransferArtifactToRepositoryRunnable
+         *
+         * @param inputStream
+         *          InputStream
+         * @param fileUploadId
+         *          FileUploadId
+         * @param mimeType
+         *          String
+         * @param vaadinUi
+         *          UI
+         * @param uploadLock
+         *          Lock
+         */
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
                 final String mimeType, final UI vaadinUi, final Lock uploadLock) {
             this.inputStream = inputStream;
@@ -285,6 +300,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             LOG.debug("Transfering file {} directly to repository", filename);
             final Artifact artifact = uploadArtifact(filename);
             if (isUploadInterrupted()) {
+                LOG.warn("Upload of {} was interrupted", filename);
                 handleUploadFailure(artifact);
                 publishUploadFinishedEvent(fileUploadId);
                 return;

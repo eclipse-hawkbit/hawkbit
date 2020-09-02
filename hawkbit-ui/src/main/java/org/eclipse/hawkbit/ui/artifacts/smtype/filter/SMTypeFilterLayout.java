@@ -8,32 +8,46 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
-import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.event.EventLayout;
+import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
+import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
+import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.EntityModifiedAwareSupport;
+import org.eclipse.hawkbit.ui.common.layout.listener.GridActionsVisibilityListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGenericSupport;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
+import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
+
+import com.vaadin.ui.ComponentContainer;
 
 /**
  * Software module type filter buttons layout.
  */
 public class SMTypeFilterLayout extends AbstractFilterLayout {
-
     private static final long serialVersionUID = 1L;
 
-    private final ArtifactUploadState artifactUploadState;
+    private final SMTypeFilterHeader smTypeFilterHeader;
+    private final SMTypeFilterButtons smTypeFilterButtons;
+
+    private final transient GridActionsVisibilityListener gridActionsVisibilityListener;
+    private final transient EntityModifiedListener<ProxyType> entityModifiedListener;
 
     /**
      * Constructor
      * 
-     * @param artifactUploadState
-     *            ArtifactUploadState
      * @param i18n
      *            VaadinMessageSource
      * @param permChecker
@@ -46,32 +60,59 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
      *            UINotification
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
-     * @param sMTypeFilterButtons
-     *            SMTypeFilterButtons
+     * @param smTypeFilterLayoutUiState
+     *            SMTypeFilterLayoutUiState
      */
-    public SMTypeFilterLayout(final ArtifactUploadState artifactUploadState, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final UIEventBus eventBus, final EntityFactory entityFactory,
-            final UINotification uiNotification, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final SMTypeFilterButtons sMTypeFilterButtons) {
-        super(new SMTypeFilterHeader(i18n, permChecker, eventBus, artifactUploadState, entityFactory, uiNotification,
-                softwareModuleTypeManagement, sMTypeFilterButtons), sMTypeFilterButtons, eventBus);
-        this.artifactUploadState = artifactUploadState;
-        restoreState();
+    public SMTypeFilterLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+            final UIEventBus eventBus, final EntityFactory entityFactory, final UINotification uiNotification,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final TypeFilterLayoutUiState smTypeFilterLayoutUiState) {
+        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(i18n, entityFactory, eventBus,
+                uiNotification, softwareModuleTypeManagement);
+
+        this.smTypeFilterHeader = new SMTypeFilterHeader(eventBus, i18n, permChecker, smTypeWindowBuilder,
+                smTypeFilterLayoutUiState, EventView.UPLOAD);
+        this.smTypeFilterButtons = new SMTypeFilterButtons(eventBus, i18n, uiNotification, permChecker,
+                softwareModuleTypeManagement, smTypeWindowBuilder, smTypeFilterLayoutUiState, EventView.UPLOAD);
+
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
+                new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, EventView.UPLOAD),
+                smTypeFilterButtons::hideActionColumns, smTypeFilterButtons::showEditColumn,
+                smTypeFilterButtons::showDeleteColumn);
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyType.class)
+                .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
+                .parentEntityType(ProxySoftwareModule.class).build();
+
+        buildLayout();
     }
 
-    @EventBusListenerMethod(scope = EventScope.UI)
-    void onEvent(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE) {
-            setVisible(false);
-        }
-        if (event == UploadArtifactUIEvent.SHOW_FILTER_BY_TYPE) {
-            setVisible(true);
-        }
+    private List<EntityModifiedAwareSupport> getEntityModifiedAwareSupports() {
+        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(smTypeFilterButtons::refreshAll),
+                EntityModifiedGenericSupport.of(null, null, smTypeFilterButtons::resetFilterOnTypesDeleted));
     }
 
     @Override
-    public Boolean onLoadIsTypeFilterIsClosed() {
-        return artifactUploadState.isSwTypeFilterClosed();
+    protected SMTypeFilterHeader getFilterHeader() {
+        return smTypeFilterHeader;
     }
 
+    @Override
+    protected ComponentContainer getFilterContent() {
+        return wrapFilterContent(smTypeFilterButtons);
+    }
+
+    /**
+     * Is called when view is shown to the user
+     */
+    public void restoreState() {
+        smTypeFilterButtons.restoreState();
+    }
+
+    /**
+     * Unsubscribe the events listeners
+     */
+    public void unsubscribeListener() {
+        gridActionsVisibilityListener.unsubscribe();
+        entityModifiedListener.unsubscribe();
+    }
 }

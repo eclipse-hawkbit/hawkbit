@@ -64,7 +64,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("This base resource can be regularly polled by the controller on the provisiong target or device "
+    @Description("This base resource can be regularly polled by the controller on the provisioning target or device "
             + "in order to retrieve actions that need to be executed. In this case including a config pull request and a deployment. The resource supports Etag based modification "
             + "checks in order to save traffic.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
@@ -91,7 +91,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("This base resource can be regularly polled by the controller on the provisiong target or device "
+    @Description("This base resource can be regularly polled by the controller on the provisioning target or device "
             + "in order to retrieve actions that need to be executed. In this case including a config pull request and a cancellation. "
             + "Note: as with deployments the cancel action has to be confirmed or rejected in order to move on to the next action.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
@@ -120,8 +120,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("The SP server might cancel an operation, e.g. an unfinished update has a sucessor. "
-            + "It is up to the provisiong target to decide either to accept the cancelation or reject it.")
+    @Description("The SP server might cancel an operation, e.g. an unfinished update has a successor. "
+            + "It is up to the provisioning target to decide either to accept the cancellation or reject it.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getControllerCancelAction() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -187,7 +187,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
-                                                "['closed', 'proceeding', 'canceled','scheduled', 'rejected', 'resumed']")),
+                                                "['closed', 'proceeding', 'download', 'downloaded', 'canceled','scheduled', 'rejected', 'resumed']")),
                                 requestFieldWithPath("status.result")
                                         .description(DdiApiModelProperties.TARGET_RESULT_VALUE),
                                 requestFieldWithPath("status.result.finished")
@@ -212,26 +212,13 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 put(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION,
                         tenantAware.getCurrentTenant(), target.getControllerId())
-                                .content(JsonBuilder.configData("", attributes, "closed", "merge").toString())
+                                .content(JsonBuilder.configData(attributes, "merge").toString())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID)),
-                        requestFields(optionalRequestFieldWithPath("id").description(DdiApiModelProperties.ACTION_ID),
-                                optionalRequestFieldWithPath("time").description(DdiApiModelProperties.TARGET_TIME),
-                                requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
-                                requestFieldWithPath("status.execution")
-                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
-                                        .attributes(key("value").value(
-                                                "['closed', 'proceeding', 'canceled','scheduled', 'rejected', 'resumed']")),
-                                requestFieldWithPath("status.result")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_VALUE),
-                                requestFieldWithPath("status.result.finished")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_FINISHED).type("enum")
-                                        .attributes(key("value").value("['success', 'failure', 'none']")),
-                                optionalRequestFieldWithPath("status.details")
-                                        .description(DdiApiModelProperties.TARGET_RESULT_DETAILS),
+                        requestFields(
                                 requestFieldWithPath("data").description(DdiApiModelProperties.TARGET_CONFIG_DATA),
                                 optionalRequestFieldWithPath("mode").description(DdiApiModelProperties.UPDATE_MODE)
                                         .type("enum")
@@ -390,7 +377,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
                 target.getControllerId(), actionId)
                         .content(
-                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feddback message"))
+                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feedback message"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -404,7 +391,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
-                                                "['closed', 'proceeding', 'canceled','scheduled', 'rejected', 'resumed']")),
+                                                "['closed', 'proceeding', 'download', 'downloaded', 'canceled','scheduled', 'rejected', 'resumed']")),
                                 requestFieldWithPath("status.result")
                                         .description(DdiApiModelProperties.TARGET_RESULT_VALUE),
                                 requestFieldWithPath("status.result.finished")

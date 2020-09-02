@@ -11,19 +11,11 @@
 -->
 <module>
     <inherits name="com.vaadin.DefaultWidgetSet"/>
-
     <inherits name="org.eclipse.hawkbit.ui.AppWidgetSet"/>
-
-    
-
-    
-
-    <inherits name="org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet"/>
-
-    <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset"/>
-
     <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset"/>
-
     <inherits name="com.github.gwtd3.D3"/>
 
+    <inherits name="org.eclipse.hawkbit.ui.common.notification.ParallelNotificationWidgetset" />
+
+    <inherits name="org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionWidgetset" />
 </module>

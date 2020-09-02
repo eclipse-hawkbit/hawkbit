@@ -52,8 +52,3 @@ jobs:
         paths:
         - ~/.m2
         key: circleci-hawkbit-{{ checksum "pom.xml" }}
-
-notify:
-  webhooks:
-  # Gitter hook
-  - url: https://webhooks.gitter.im/e/a20a6bc2bda5a8a77d39

@@ -22,13 +22,6 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
   }
 }
 
-@mixin sp-icon-style($sp-button-icon-color: $button-icon-color, $sp-button-size : $icon-font-size) {
-  height: 15px !important;
-  width: 15px !important;
-  color: $sp-button-icon-color;
-  font-size: $sp-button-size;
-}
-
 @mixin generic-styles {
 
   //Generic text style used in table details,search text style ,combo text style etc
@@ -36,10 +29,26 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     font: 300 $generic-text-font-size $app-font-family !important;
   }
 
-  //Report widget max icon style
+  .text-bold {
+    font-weight: bold !important;
+  }
+
+  .text-cut {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -icab-text-overflow: ellipsis;
+    -khtml-text-overflow: ellipsis;
+    -moz-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
   .icon-only {
-    @include sp-icon-style($sp-button-size: $icon-font-size);
-    margin-bottom: 12px !important;
+    height: 15px !important;
+    width: 15px !important;
+    color: $button-icon-color;
+    margin-bottom: 6px !important;
     margin-right: 6px !important;
   }
 
@@ -79,43 +88,35 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     border: 1px solid $widget-border-color;
   }
 
-  //label to adjust to the layout size and show ellipses on text overflow
-  .label-style {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-    -icab-text-overflow: ellipsis;
-    -khtml-text-overflow: ellipsis;
-    -moz-text-overflow: ellipsis;
-    -webkit-text-overflow: ellipsis;
-  }
-
-  .text-bold {
-    font-weight: bold !important;
+  .v-Notification .v-icon {
+    margin-right: 10px;
+    vertical-align: middle;
   }
 
   .v-Notification-error .v-icon {
     color: white;
   }
 
-  .header-caption-right {
-    padding-right: 0.5em;
+  .v-Notification-warning .v-icon {
+	color: orange;
+  }
+
+  .v-Notification-success .v-icon {
+	color: green;
   }
 
   .avoid-tooltip {
     pointer-events: none !important;
   }
 
-  //This was needed to make the split of prefix "Artifact details of"
-  //and the actual value "smName:smVersion" in context of the XSS vulnerabilities
-  //possible after changing ContentMode
-  //from HTML to TEXT. As no Labels allowed at the windows caption field of the
-  //artifact details window , decision was made to use the methods
+  //This was needed to make the split of prefix "Artifact details of" / "Metadata of"
+  //and the actual value "entityName:entityVersion" in context of the XSS vulnerabilities
+  //possible after changing ContentMode from HTML to TEXT. As no Labels are allowed
+  //at the windows caption field, decision was made to use the methods
   //Window.setAssistivePrefix() and Window.setAssistivePostfix() to solve the XSS-problem.
   //Both, assistive postfix and prefix are usually not visible on the page and only for
   //assistive purpose, but with overwriting this third party html class it's a possible
-  //workaround for the XSS vulnerability. I added a comment in the generic-styles.scss.
+  //workaround for the XSS vulnerability.
   .v-assistive-device-only {
     position: static;
     top: auto;
@@ -132,9 +133,5 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
   .v-table,
   .v-table-table {
     background: transparent;
-  }
-
-  .rootLayout {
-    overflow: auto !important;
   }
 }

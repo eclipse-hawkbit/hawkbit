@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -16,6 +17,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  */
 public class TextAreaBuilder extends AbstractTextFieldBuilder<TextAreaBuilder, TextArea> {
+    private static final int INPUT_DEBOUNCE_TIMEOUT = 500;
 
     /**
      * Constructor.
@@ -25,13 +27,15 @@ public class TextAreaBuilder extends AbstractTextFieldBuilder<TextAreaBuilder, T
      */
     public TextAreaBuilder(final int maxLengthAllowed) {
         super(maxLengthAllowed);
-        styleName(ValoTheme.TEXTAREA_SMALL);
     }
 
     @Override
     protected TextArea createTextComponent() {
         final TextArea textArea = new TextArea();
         textArea.addStyleName(ValoTheme.TEXTAREA_SMALL);
+        textArea.setValueChangeMode(ValueChangeMode.LAZY);
+        textArea.setValueChangeTimeout(INPUT_DEBOUNCE_TIMEOUT);
+
         return textArea;
     }
 

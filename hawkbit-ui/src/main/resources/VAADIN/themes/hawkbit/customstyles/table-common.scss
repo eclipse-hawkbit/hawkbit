@@ -134,9 +134,20 @@
     border-bottom-left-radius: 0 !important;
   }
 
+  //Layout - with no top border
+  .no-border-top {
+    border-top: none !important;
+    border-top-right-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+  }
+
   .bordered-layout {
     border: 1px solid $widget-border-color;
     border-radius: $v-border-radius;
+  }
+
+  .no-stripes .v-grid-row-stripe > td {
+    background-color: $v-grid-row-background-color;
   }
 
   //Table details - tab
@@ -151,8 +162,16 @@
 
   //Layout in table details tab
   .details-layout {
-    height: 116px !important;
+    height: 116px;
+    padding: 12px;
     overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  .details-description {
+    padding: 0;
+    overflow-y: hidden;
+    overflow-x: hidden;
   }
 
   //*Software module table in distribution details tab*
@@ -181,14 +200,16 @@
     visibility: hidden;
     float: right;
   }
-  
-   
-  .v-button-generatedColumnPadding {
-  	height: 28px;
-	padding: 0 6px !important;
-	font-size: 12px;
-	border-radius: 4px;
-  }
+
+  .metadata-details {
+    .v-grid-tablewrapper {
+      border: none;
+    }
+
+    .v-grid-tablewrapper .v-grid-row .v-button{
+      padding: 0;
+    }
+  } 
   
   .metadata-grid {
   	tr {

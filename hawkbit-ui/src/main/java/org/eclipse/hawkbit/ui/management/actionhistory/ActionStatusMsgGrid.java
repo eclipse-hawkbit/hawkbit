@@ -8,23 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import java.util.Map;
+import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.data.providers.ActionStatusMsgDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyActionStatus;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMessage;
+import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.MasterEntitySupport;
+import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.google.common.collect.Maps;
-import com.vaadin.data.Item;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.data.provider.Query;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
@@ -32,187 +35,101 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * This grid presents the messages for a selected action-status.
  */
-public class ActionStatusMsgGrid extends AbstractGrid<LazyQueryContainer> {
+public class ActionStatusMsgGrid extends AbstractGrid<ProxyMessage, Long> {
     private static final long serialVersionUID = 1L;
 
-    private static final String[] rightAlignedColumns = new String[] { ProxyMessage.PXY_MSG_ID };
+    private static final String MSG_ID = "id";
+    private static final String VALUE_ID = "msgValue";
 
-    private final String noMsgText;
+    private final transient MasterEntitySupport<ProxyActionStatus> masterEntitySupport;
 
-    private final AlignCellStyleGenerator alignGenerator;
-
-    private final BeanQueryFactory<ActionStatusMsgBeanQuery> targetQF = new BeanQueryFactory<>(
-            ActionStatusMsgBeanQuery.class);
+    private final Registration itemClickListenerRegistration;
 
     /**
      * Constructor.
      *
      * @param i18n
+     *            i18n
      * @param eventBus
+     *            eventBus
      */
-    protected ActionStatusMsgGrid(final VaadinMessageSource i18n, final UIEventBus eventBus) {
+    protected ActionStatusMsgGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final DeploymentManagement deploymentManagement) {
         super(i18n, eventBus, null);
-        noMsgText = createNoMessageProxy(i18n);
 
-        setSingleSelectionSupport(new SingleSelectionSupport());
-        setDetailsSupport(new DetailsSupport());
+        setSelectionSupport(new SelectionSupport<ProxyMessage>(this));
+        getSelectionSupport().enableSingleSelection();
 
-        alignGenerator = new AlignCellStyleGenerator(null, null, rightAlignedColumns);
         addStyleName(SPUIStyleDefinitions.ACTION_HISTORY_MESSAGE_GRID);
 
-        setDetailsGenerator(new MessageDetailsGenerator());
+        setDetailsGenerator(ActionStatusMsgGrid::generateDetails);
 
-        this.addItemClickListener(new ItemClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void itemClick(final ItemClickEvent event) {
-                final Object itemId = event.getItemId();
-                setDetailsVisible(itemId, !isDetailsVisible(itemId));
-            }
+        this.itemClickListenerRegistration = addItemClickListener(event -> {
+            final ProxyMessage msg = event.getItem();
+            setDetailsVisible(msg, !isDetailsVisible(msg));
         });
+
+        setFilterSupport(new FilterSupport<>(
+                new ActionStatusMsgDataProvider(deploymentManagement, i18n.getMessage("message.no.available")),
+                this::hideAllDetails));
+        initFilterMappings();
+
+        this.masterEntitySupport = new MasterEntitySupport<>(getFilterSupport());
 
         init();
     }
 
-    @Override
-    protected boolean doSubscribeToEventBus() {
-        return false;
+    private void hideAllDetails() {
+        getDataProvider().fetch(new Query<>()).forEach(msg -> setDetailsVisible(msg, false));
+    }
+
+    private void initFilterMappings() {
+        getFilterSupport().<Long> addMapping(FilterType.MASTER,
+                (filter, masterFilter) -> getFilterSupport().setFilter(masterFilter));
+    }
+
+    private static Component generateDetails(final ProxyMessage msg) {
+        final TextArea textArea = new TextArea();
+
+        textArea.addStyleName(ValoTheme.TEXTAREA_BORDERLESS);
+        textArea.addStyleName(ValoTheme.TEXTAREA_TINY);
+        textArea.addStyleName("inline-icon");
+
+        textArea.setHeight(120, Unit.PIXELS);
+        textArea.setWidth(100, Unit.PERCENTAGE);
+
+        textArea.setValue(msg.getMessage());
+        textArea.setReadOnly(Boolean.TRUE);
+
+        return textArea;
     }
 
     @Override
-    protected LazyQueryContainer createContainer() {
-        configureQueryFactory();
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, null), targetQF);
-    }
-
-    @Override
-    public void refreshContainer() {
-        for (final Object itemId : getContainerDataSource().getItemIds()) {
-            setDetailsVisible(itemId, false);
-        }
-        configureQueryFactory();
-        super.refreshContainer();
-    }
-
-    protected void configureQueryFactory() {
-        // ADD all the filters to the query config
-        final Map<String, Object> queryConfig = Maps.newHashMapWithExpectedSize(2);
-        queryConfig.put(SPUIDefinitions.MESSAGES_BY_ACTIONSTATUS, getDetailsSupport().getMasterDataId());
-        queryConfig.put(SPUIDefinitions.NO_MSG_PROXY, noMsgText);
-        // Create ActionBeanQuery factory with the query config.
-        targetQF.setQueryConfiguration(queryConfig);
-    }
-
-    /**
-     * Gets type-save access to LazyQueryContainer.
-     *
-     * @return LazyQueryContainer
-     */
-    private LazyQueryContainer getLazyQueryContainer() {
-        return (LazyQueryContainer) getContainerDataSource();
-    }
-
-    @Override
-    protected void addContainerProperties() {
-        getLazyQueryContainer().addContainerProperty(ProxyMessage.PXY_MSG_ID, String.class, null, true, false);
-        getLazyQueryContainer().addContainerProperty(ProxyMessage.PXY_MSG_VALUE, String.class, null, true, false);
-    }
-
-    @Override
-    protected void setColumnExpandRatio() {
-        getColumn(ProxyMessage.PXY_MSG_ID).setExpandRatio(0);
-        getColumn(ProxyMessage.PXY_MSG_VALUE).setExpandRatio(1);
-    }
-
-    @Override
-    protected void setColumnHeaderNames() {
-        getColumn(ProxyMessage.PXY_MSG_ID).setHeaderCaption("##");
-        getColumn(ProxyMessage.PXY_MSG_VALUE)
-                .setHeaderCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_MESSAGES));
-    }
-
-    @Override
-    protected String getGridId() {
+    public String getGridId() {
         return UIComponentIdProvider.ACTION_HISTORY_MESSAGE_GRID_ID;
     }
 
     @Override
-    protected void setColumnProperties() {
-        clearSortOrder();
-        setColumns(ProxyMessage.PXY_MSG_ID, ProxyMessage.PXY_MSG_VALUE);
+    public void addColumns() {
+        GridComponentBuilder.addColumn(this, ProxyMessage::getId).setId(MSG_ID).setCaption("##").setExpandRatio(0)
+                .setHidable(false).setHidden(false).setMinimumWidthFromContent(true);
+
+        GridComponentBuilder.addColumn(this, ProxyMessage::getMessage).setId(VALUE_ID)
+                .setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_ACTION_MESSAGES)).setHidable(false)
+                .setHidden(false);
+
         setFrozenColumnCount(2);
-        alignColumns();
-    }
-
-    @Override
-    protected void addColumnRenderers() {
-        // no specific column renderers
-    }
-
-    @Override
-    protected void setHiddenColumns() {
-        getColumn(ProxyMessage.PXY_MSG_ID).setHidable(false);
-        getColumn(ProxyMessage.PXY_MSG_VALUE).setHidable(false);
-    }
-
-    @Override
-    protected CellDescriptionGenerator getDescriptionGenerator() {
-        return null;
     }
 
     /**
-     * Sets the alignment cell-style-generator that handles the alignment for
-     * the grid cells.
+     * @return Master entity support
      */
-    private void alignColumns() {
-        setCellStyleGenerator(alignGenerator);
+    public MasterEntitySupport<ProxyActionStatus> getMasterEntitySupport() {
+        return masterEntitySupport;
     }
 
-    /**
-     * Creates the default text when no message is available for action-status
-     *
-     * @param i18n
-     * @return default text
-     */
-    private static String createNoMessageProxy(final VaadinMessageSource i18n) {
-        return i18n.getMessage("message.no.available");
+    @PreDestroy
+    void destroy() {
+        itemClickListenerRegistration.remove();
     }
-
-    protected class MessageDetailsGenerator implements DetailsGenerator {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Component getDetails(final RowReference rowReference) {
-            // Find the bean to generate details for
-            final Item item = rowReference.getItem();
-            final String message = (String) item.getItemProperty(ProxyMessage.PXY_MSG_VALUE).getValue();
-
-            final TextArea textArea = new TextArea();
-            textArea.addStyleName(ValoTheme.TEXTAREA_BORDERLESS);
-            textArea.addStyleName(ValoTheme.TEXTAREA_TINY);
-            textArea.addStyleName("inline-icon");
-            textArea.setHeight(120, Unit.PIXELS);
-            textArea.setWidth(100, Unit.PERCENTAGE);
-            textArea.setValue(message);
-            textArea.setReadOnly(Boolean.TRUE);
-            return textArea;
-        }
-    }
-
-    /**
-     * CellStyleGenerator that concerns about cutting text.
-     */
-    protected static class TextCutCellStyleGenerator implements CellStyleGenerator {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String getStyle(final CellReference cellReference) {
-            if (ProxyMessage.PXY_MSG_VALUE.equals(cellReference.getPropertyId())) {
-                return "text-cut";
-            }
-            return null;
-        }
-    }
-
 }

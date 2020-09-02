@@ -14,6 +14,12 @@ theme = "hugo-material-docs"
 metadataformat = "toml"
 canonifyurls = false
 
+[markup]
+  defaultMarkdownHandler = "blackfriday"
+
+[markup.highlight]
+	codeFences = false
+
 [params]
 	# General information
 	author = "The Eclipse hawkBit Project"
@@ -43,12 +49,10 @@ canonifyurls = false
 	text = "Ubuntu"
 	code = "Ubuntu Mono"
 
-
 [social]
 	github  = "eclipse/hawkbit"
 	gitter  = "eclipse/hawkbit"
 	docker  = "hawkbit"
-
 
 [[menu.main]]
 	name   = "What is hawkBit"
@@ -102,6 +106,6 @@ canonifyurls = false
 
 [blackfriday]
 	smartypants	= true
-	fractions = true
+	fractions = false
 	smartDashes = true
 	plainIDAnchors = true

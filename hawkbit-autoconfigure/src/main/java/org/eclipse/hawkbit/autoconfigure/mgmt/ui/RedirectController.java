@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.mgmt.ui;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -23,7 +23,7 @@ public class RedirectController {
     /**
      * @return redirect to the Management UI
      */
-    @RequestMapping("/")
+    @GetMapping("/")
     public ModelAndView home() {
         return new ModelAndView("redirect:/UI/");
     }

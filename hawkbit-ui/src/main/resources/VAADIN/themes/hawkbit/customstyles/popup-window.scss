@@ -91,9 +91,8 @@
   }
 
   .dist-window-maintenance-window-layout {
-     vertical-align: middle;
-     horizontal-align: middle;
-     padding-left: 14px;
+    vertical-align: middle;
+    padding-left: 14px;
 
     .v-slot {
       vertical-align: middle;
@@ -116,47 +115,6 @@
     }
   }
 
-  ///force,soft,time forced radio button styles - start**
-  .dist-window-actiontype-horz-layout {
-    padding-bottom: 15px;
-
-    .dist-window-forcedtime {
-      width: 185px;
-      height: 24px;
-    }
-
-    .v-expand,
-    .v-slot {
-      vertical-align: middle;
-      height: 0;
-    }
-
-    .v-slot {
-      vertical-align: middle;
-      padding-left: 8px;
-      padding-right: 5px;
-    }
-
-    .v-caption {
-      vertical-align: middle;
-    }
-
-    .v-radiobutton {
-      padding-right: 0 !important;
-      margin-right: -15px !important;
-    }
-
-    .v-icon {
-      color: $hawkbit-primary-color;
-    }
-  }
-
-  .v-caption-padding-right-style {
-    padding-right: 25px !important;
-    padding-left: 0 !important;
-  }
-
-  //force,soft,time forced radio button styles - end
   //Target update window specific style, since the label '*Mandatory Field' is
   // removed, as controller id is read only********** */
   .target-update-window {
@@ -171,34 +129,40 @@
   .confirmbox-question-label {
     margin: 15px 8px 18px 8px;
   }
-  
-  .bulk-upload-button{
-  	font-size: $v-font-size--small;
-  	height: 38px !important;
+
+  .confirmbox-question-label>pre {
+    margin: 0;
+    font-family: $app-font-family;
   }
 
-  .bulk-target-tags-layout{
-  	border-left: 1px solid #bfc3c8;
-  	border-right: 1px solid #bfc3c8;
-  	border-bottom: 1px solid #bfc3c8;
-  	border-radius: 4px;
-  	overflow-y: auto;
+  .bulk-upload-button {
+    font-size: $v-font-size--small;
+    height: 38px !important;
   }
-  .bulk-upload-ds-combo{
-  	margin-top: 2px !important;
-  }  
-  
-  .v-slot-bulk-upload-label{
-  	line-height:0;
+
+  .bulk-target-tags-layout {
+    border-left: 1px solid #bfc3c8;
+    border-right: 1px solid #bfc3c8;
+    border-bottom: 1px solid #bfc3c8;
+    border-radius: 4px;
+    overflow-y: auto;
   }
-  
+
+  .bulk-upload-ds-combo {
+    margin-top: 2px !important;
+  }
+
+  .v-slot-bulk-upload-label {
+    line-height: 0;
+  }
+
   .actionButtonsMargin {
-  	margin-top: 30px;
-  	margin-bottom: 10px;
+    margin-top: 30px;
+    margin-bottom: 10px;
   }
-  
-  .v-window-no-closebox .v-window-closebox:before { 
+
+  .v-window-no-closebox .v-window-closebox:before {
     height: 0px !important;
     content: "" !important;
-   }
+  }
 }

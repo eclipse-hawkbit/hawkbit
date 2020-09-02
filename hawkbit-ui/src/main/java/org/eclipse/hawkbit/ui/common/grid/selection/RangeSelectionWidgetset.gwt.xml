@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2020 Bosch.IO GmbH and others.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.8.2//EN" "http://gwtproject.org/doctype/2.8.2/gwt-module.dtd">
+<module>
+
+   <inherits name="com.vaadin.DefaultWidgetSet" />
+   <inherits name="org.eclipse.hawkbit.ui.AppWidgetSet" />
+   <inherits
+      name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
+
+    <inherits name="org.eclipse.hawkbit.ui.common.notification.ParallelNotificationWidgetset" />
+</module>

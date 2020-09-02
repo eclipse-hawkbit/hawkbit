@@ -11,7 +11,8 @@ package org.eclipse.hawkbit.ui.push;
 import java.util.Collections;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.entity.EntityIdEvent;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayloadIdentifier;
 
 /**
  * The UI event provider hold all supported repository events which will
@@ -25,7 +26,7 @@ public interface UIEventProvider {
      * 
      * @return list of provided event types. Should not be null
      */
-    default Map<Class<? extends TenantAwareEvent>, Class<?>> getEvents() {
+    default Map<Class<? extends EntityIdEvent>, EntityModifiedEventPayloadIdentifier> getEvents() {
         return Collections.emptyMap();
     }
 
