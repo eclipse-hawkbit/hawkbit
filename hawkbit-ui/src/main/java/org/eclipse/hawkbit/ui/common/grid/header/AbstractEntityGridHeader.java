@@ -91,7 +91,7 @@ public abstract class AbstractEntityGridHeader extends AbstractGridHeader {
         this.resizeHeaderSupport = new ResizeHeaderSupport(i18n, getMaxMinIconId(), this::maximizeTable,
                 this::minimizeTable, this::onLoadIsTableMaximized);
 
-        addHeaderSupports(Arrays.asList(getSearchHeaderSupport(), filterButtonsHeaderSupport, resizeHeaderSupport));
+        addHeaderSupports(Arrays.asList(searchHeaderSupport, filterButtonsHeaderSupport, resizeHeaderSupport));
     }
 
     @Override
