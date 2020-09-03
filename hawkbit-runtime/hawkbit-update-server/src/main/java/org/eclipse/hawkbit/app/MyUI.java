@@ -32,7 +32,9 @@ import com.vaadin.spring.navigator.SpringViewProvider;
  * A {@link SpringUI} annotated class must be present in the classpath. The
  * easiest way to get an hawkBit UI running is to extend the
  * {@link AbstractHawkbitUI} and to annotated it with {@link SpringUI} as in
- * this example.
+ * this example. WEBSOCKET_XHR transport is used instead of WEBSOCKET in order
+ * to preserve Spring Security Context, that does not work using websocket
+ * communication with Vaadin Shared Security.
  *
  */
 @SpringUI
