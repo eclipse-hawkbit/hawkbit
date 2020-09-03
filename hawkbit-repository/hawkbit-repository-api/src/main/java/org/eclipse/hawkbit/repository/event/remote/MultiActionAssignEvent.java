@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 public class MultiActionAssignEvent extends MultiActionEvent {
 
     private static final long serialVersionUID = 1L;
-    
-    private List<Long> actionIds;
 
     /**
      * Default constructor.
@@ -42,17 +40,11 @@ public class MultiActionAssignEvent extends MultiActionEvent {
      *            tenant the event is scoped to
      * @param applicationId
      *            the application id
-     * @param a
+     * @param actions
      *            the actions of the deployment action
      */
-    public MultiActionAssignEvent(String tenant, String applicationId, List<Action> a) {
-        super(tenant, applicationId,
-                a.stream().map(Action::getTarget).map(Target::getControllerId).distinct().collect(Collectors.toList()));
-        actionIds = a.stream().map(Identifiable::getId).collect(Collectors.toList());
-    }
-
-    public List<Long> getActionIds() {
-        return actionIds;
+    public MultiActionAssignEvent(String tenant, String applicationId, List<Action> actions) {
+        super(tenant, applicationId, actions);
     }
 
 }
