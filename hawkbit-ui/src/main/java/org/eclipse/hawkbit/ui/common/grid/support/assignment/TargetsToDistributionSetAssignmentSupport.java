@@ -75,12 +75,12 @@ public class TargetsToDistributionSetAssignmentSupport
     }
 
     @Override
-    protected String sourceEntityTypeOne() {
+    protected String sourceEntityTypeSing() {
         return i18n.getMessage("caption.target");
     }
 
     @Override
-    protected String sourceEntityTypeMultiple() {
+    protected String sourceEntityTypePlur() {
         return i18n.getMessage("caption.targets");
     }
 

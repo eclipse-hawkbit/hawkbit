@@ -98,12 +98,12 @@ public class DistributionSetsToTargetAssignmentSupport
     }
 
     @Override
-    protected String sourceEntityTypeOne() {
+    protected String sourceEntityTypeSing() {
         return i18n.getMessage("distribution.details.header");
     }
 
     @Override
-    protected String sourceEntityTypeMultiple() {
+    protected String sourceEntityTypePlur() {
         return i18n.getMessage("caption.distributionsets");
     }
 

@@ -140,7 +140,7 @@ public class EntityModifiedEventPayloadIdentifier {
 
     @Override
     public int hashCode() {
-        // eventTypeMessageKey is omitted intentionally, because it is not
+        // notificationType is omitted intentionally, because it is not
         // relevant for event identification
         return getParentType() != null
                 ? Objects.hash(getParentType().getName(), getEntityType().getName(), modifiedEventType)
@@ -157,7 +157,7 @@ public class EntityModifiedEventPayloadIdentifier {
         }
         final EntityModifiedEventPayloadIdentifier other = (EntityModifiedEventPayloadIdentifier) obj;
 
-        // eventTypeMessageKey is omitted intentionally, because it is not
+        // notificationType is omitted intentionally, because it is not
         // relevant for event identification
         return Objects.equals(this.getParentType(), other.getParentType())
                 && Objects.equals(this.getEntityType(), other.getEntityType())

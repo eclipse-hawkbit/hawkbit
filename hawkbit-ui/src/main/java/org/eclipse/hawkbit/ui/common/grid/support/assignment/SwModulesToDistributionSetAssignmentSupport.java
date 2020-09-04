@@ -186,12 +186,12 @@ public class SwModulesToDistributionSetAssignmentSupport
     }
 
     @Override
-    protected String sourceEntityTypeOne() {
+    protected String sourceEntityTypeSing() {
         return i18n.getMessage("caption.software.module");
     }
 
     @Override
-    protected String sourceEntityTypeMultiple() {
+    protected String sourceEntityTypePlur() {
         return i18n.getMessage("caption.softwaremodules");
     }
 
