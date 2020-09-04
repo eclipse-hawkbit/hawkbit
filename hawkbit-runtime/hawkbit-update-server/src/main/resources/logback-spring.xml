@@ -19,6 +19,11 @@
 
    <!-- Security Log with hints on potential attacks -->
    <logger name="server-security" level="INFO" />
+   
+   <!-- Suppressing "More than one Servlet Mapping defined. WebSocket may not work" 
+   error due to the way VaadinServletConfiguration configures the endpoints mapping ("/UI" and "/UI/*"). 
+   At the end only the first "/UI" is taken for websocket communication.  -->
+   <logger name="org.atmosphere.util.IOUtils" level="OFF" />
 
    <Root level="INFO">
       <appender-ref ref="CONSOLE" />

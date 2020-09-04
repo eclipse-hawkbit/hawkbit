@@ -219,8 +219,10 @@ public final class DashboardMenu extends CustomComponent {
 
         final String logoutUrl = generateLogoutUrl();
 
-        settingsItem.addItem(i18n.getMessage("label.sign.out"),
-                selectedItem -> Page.getCurrent().setLocation(logoutUrl));
+        settingsItem.addItem(i18n.getMessage("label.sign.out"), selectedItem -> {
+            getUI().getSession().close();
+            Page.getCurrent().setLocation(logoutUrl);
+        });
         return settings;
     }
 
