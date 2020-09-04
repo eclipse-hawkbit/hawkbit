@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -39,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * retrieved. All targets get listed per target filter query, that match the TFQ
  * and that don't have the auto assign DS in their action history.
  */
-public class AutoAssignChecker {
+public class AutoAssignChecker implements AutoAssignExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignChecker.class);
 
@@ -58,8 +59,8 @@ public class AutoAssignChecker {
     private static final int PAGE_SIZE = 1000;
 
     /**
-     * The message which is added to the action status when a distribution set
-     * is assigned to an target. First %s is the name of the target filter.
+     * The message which is added to the action status when a distribution set is
+     * assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
 
@@ -84,11 +85,7 @@ public class AutoAssignChecker {
         this.transactionManager = transactionManager;
     }
 
-    /**
-     * Checks all target filter queries with an auto assign distribution set and
-     * triggers the check and assignment to targets that don't have the design
-     * DS yet
-     */
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void check() {
         LOGGER.debug("Auto assigned check call");
@@ -106,8 +103,8 @@ public class AutoAssignChecker {
     }
 
     /**
-     * Fetches the distribution set, gets all controllerIds and assigns the DS
-     * to them. Catches PersistenceException and own exceptions derived from
+     * Fetches the distribution set, gets all controllerIds and assigns the DS to
+     * them. Catches PersistenceException and own exceptions derived from
      * AbstractServerRtException
      *
      * @param targetFilterQuery
@@ -162,8 +159,7 @@ public class AutoAssignChecker {
      * @param targetFilterQuery
      *            the query the targets have to match
      * @param dsId
-     *            dsId the targets are not allowed to have in their action
-     *            history
+     *            dsId the targets are not allowed to have in their action history
      * @param type
      *            action type for targets auto assignment
      * @param count
