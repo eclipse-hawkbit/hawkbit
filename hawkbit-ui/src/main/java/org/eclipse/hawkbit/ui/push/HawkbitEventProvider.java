@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayloadIdentifier;
+import org.eclipse.hawkbit.ui.common.event.EventNotificationType;
 import org.eclipse.hawkbit.ui.push.event.ActionChangedEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutChangedEvent;
 import org.eclipse.hawkbit.ui.push.event.RolloutGroupChangedEvent;
@@ -64,29 +65,27 @@ public class HawkbitEventProvider implements UIEventProvider {
 
     static {
         EVENTS.put(TargetCreatedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxyTarget.class,
-                EntityModifiedEventType.ENTITY_ADDED, "target.created.event.container.notifcation.message"));
+                EntityModifiedEventType.ENTITY_ADDED, EventNotificationType.TARGET_CREATED));
         EVENTS.put(TargetUpdatedEvent.class,
                 new EntityModifiedEventPayloadIdentifier(ProxyTarget.class, EntityModifiedEventType.ENTITY_UPDATED));
         EVENTS.put(TargetDeletedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxyTarget.class,
-                EntityModifiedEventType.ENTITY_REMOVED, "target.deleted.event.container.notifcation.message"));
+                EntityModifiedEventType.ENTITY_REMOVED, EventNotificationType.TARGET_DELETED));
 
         EVENTS.put(DistributionSetCreatedEvent.class,
                 new EntityModifiedEventPayloadIdentifier(ProxyDistributionSet.class,
-                        EntityModifiedEventType.ENTITY_ADDED,
-                        "distribution.created.event.container.notifcation.message"));
+                        EntityModifiedEventType.ENTITY_ADDED, EventNotificationType.DISTRIBUTIONSET_CREATED));
         EVENTS.put(DistributionSetUpdatedEvent.class, new EntityModifiedEventPayloadIdentifier(
                 ProxyDistributionSet.class, EntityModifiedEventType.ENTITY_UPDATED));
         EVENTS.put(DistributionSetDeletedEvent.class,
                 new EntityModifiedEventPayloadIdentifier(ProxyDistributionSet.class,
-                        EntityModifiedEventType.ENTITY_REMOVED,
-                        "distribution.deleted.event.container.notifcation.message"));
+                        EntityModifiedEventType.ENTITY_REMOVED, EventNotificationType.DISTRIBUTIONSET_DELETED));
 
         EVENTS.put(SoftwareModuleCreatedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxySoftwareModule.class,
-                EntityModifiedEventType.ENTITY_ADDED, "software.module.created.event.container.notifcation.message"));
+                EntityModifiedEventType.ENTITY_ADDED, EventNotificationType.SOFTWAREMODULE_CREATED));
         EVENTS.put(SoftwareModuleUpdatedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxySoftwareModule.class,
                 EntityModifiedEventType.ENTITY_UPDATED));
         EVENTS.put(SoftwareModuleDeletedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxySoftwareModule.class,
-                EntityModifiedEventType.ENTITY_REMOVED, "software.module.deleted.event.container.notifcation.message"));
+                EntityModifiedEventType.ENTITY_REMOVED, EventNotificationType.SOFTWAREMODULE_DELETED));
 
         EVENTS.put(TargetTagCreatedEvent.class, new EntityModifiedEventPayloadIdentifier(ProxyTarget.class,
                 ProxyTag.class, EntityModifiedEventType.ENTITY_ADDED));

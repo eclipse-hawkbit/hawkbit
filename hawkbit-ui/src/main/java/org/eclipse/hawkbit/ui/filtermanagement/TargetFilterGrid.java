@@ -99,9 +99,9 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.autoAssignmentWindowBuilder = autoAssignmentWindowBuilder;
 
-        this.targetFilterDeleteSupport = new DeleteSupport<>(this, i18n, notification,
-                i18n.getMessage("caption.filter.custom"), ProxyTargetFilterQuery::getName,
-                this::targetFiltersDeletionCallback, UIComponentIdProvider.TARGET_FILTER_DELETE_CONFIRMATION_DIALOG);
+        this.targetFilterDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.filter.custom",
+                "caption.filter.custom.plur", ProxyTargetFilterQuery::getName, this::targetFiltersDeletionCallback,
+                UIComponentIdProvider.TARGET_FILTER_DELETE_CONFIRMATION_DIALOG);
 
         setFilterSupport(new FilterSupport<>(new TargetFilterQueryDataProvider(targetFilterQueryManagement,
                 new TargetFilterQueryToProxyTargetFilterMapper())));

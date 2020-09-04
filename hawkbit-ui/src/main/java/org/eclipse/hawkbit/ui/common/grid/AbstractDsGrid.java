@@ -71,9 +71,9 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
             getSelectionSupport().enableMultiSelection();
         }
 
-        this.distributionDeleteSupport = new DeleteSupport<>(this, i18n, notification,
-                i18n.getMessage("distribution.details.header"), ProxyDistributionSet::getNameVersion,
-                this::deleteDistributionSets, UIComponentIdProvider.DS_DELETE_CONFIRMATION_DIALOG);
+        this.distributionDeleteSupport = new DeleteSupport<>(this, i18n, notification, "distribution.details.header",
+                "caption.distributionsets", ProxyDistributionSet::getNameVersion, this::deleteDistributionSets,
+                UIComponentIdProvider.DS_DELETE_CONFIRMATION_DIALOG);
     }
 
     @Override

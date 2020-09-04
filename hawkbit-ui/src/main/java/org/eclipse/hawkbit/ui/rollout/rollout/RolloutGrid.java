@@ -127,8 +127,8 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         getSelectionSupport().disableSelection();
 
-        this.rolloutDeleteSupport = new DeleteSupport<>(this, i18n, uiNotification,
-                i18n.getMessage(ROLLOUT_CAPTION_MSG_KEY), ProxyRollout::getName, this::deleteRollout,
+        this.rolloutDeleteSupport = new DeleteSupport<>(this, i18n, uiNotification, ROLLOUT_CAPTION_MSG_KEY,
+                "caption.rollouts", ProxyRollout::getName, this::deleteRollout,
                 UIComponentIdProvider.ROLLOUT_DELETE_CONFIRMATION_DIALOG);
         this.rolloutDeleteSupport.setConfirmationQuestionDetailsGenerator(this::getDeletionDetails);
 

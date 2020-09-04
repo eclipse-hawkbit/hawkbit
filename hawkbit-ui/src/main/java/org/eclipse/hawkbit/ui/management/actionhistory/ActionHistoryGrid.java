@@ -124,7 +124,7 @@ public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
      * Map entity id to proxy entity
      *
      * @param entityId
-     *          Entity id
+     *            Entity id
      *
      * @return Proxy action
      */
@@ -290,7 +290,7 @@ public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
      */
     private void confirmAndForceAction(final Long actionId) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n,
-                i18n.getMessage(UIMessageIdProvider.BUTTON_OK), i18n.getMessage(UIMessageIdProvider.BUTTON_CANCEL),
+                i18n.getMessage("caption.force.action.confirmbox"), i18n.getMessage("message.force.action.confirm"),
                 ok -> {
                     if (ok) {
                         forceActiveAction(actionId);

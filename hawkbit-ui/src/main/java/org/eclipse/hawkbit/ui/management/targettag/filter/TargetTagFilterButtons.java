@@ -67,8 +67,13 @@ public class TargetTagFilterButtons extends AbstractTagFilterButtons {
     }
 
     @Override
-    protected String getFilterButtonsType() {
-        return i18n.getMessage(UIMessageIdProvider.CAPTION_TARGET_TAG);
+    protected String getMessageKeyEntityTypeSing() {
+        return UIMessageIdProvider.CAPTION_TARGET_TAG;
+    }
+
+    @Override
+    protected String getMessageKeyEntityTypePlur() {
+        return "caption.entity.target.tags";
     }
 
     @Override
