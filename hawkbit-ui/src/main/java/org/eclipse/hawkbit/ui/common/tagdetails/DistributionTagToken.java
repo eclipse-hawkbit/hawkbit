@@ -24,9 +24,9 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -106,15 +106,16 @@ public class DistributionTagToken extends AbstractTagToken<ProxyDistributionSet>
 
     @Override
     protected List<ProxyTag> getAllTags() {
-        return distributionSetTagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).getContent().stream()
+        return HawkbitCommonUtil.getEntitiesByPageableProvider(distributionSetTagManagement::findAll).stream()
                 .map(tagMapper::map).collect(Collectors.toList());
     }
 
     @Override
     protected List<ProxyTag> getAssignedTags() {
-        return getMasterEntity().map(masterEntity -> distributionSetTagManagement
-                .findByDistributionSet(PageRequest.of(0, MAX_TAG_QUERY), masterEntity.getId()).getContent().stream()
-                .map(tagMapper::map).collect(Collectors.toList())).orElse(Collections.emptyList());
+        return getMasterEntity().map(masterEntity -> HawkbitCommonUtil
+                .getEntitiesByPageableProvider(
+                        p -> distributionSetTagManagement.findByDistributionSet(p, masterEntity.getId()))
+                .stream().map(tagMapper::map).collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
     @Override

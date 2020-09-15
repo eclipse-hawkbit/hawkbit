@@ -41,17 +41,17 @@ public class DistributionSetsToTargetAssignmentSupport
      * Constructor for DistributionSetsToTargetAssignmentSupport
      *
      * @param notification
-     *          UINotification
+     *            UINotification
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param systemSecurityContext
-     *          SystemSecurityContext
+     *            SystemSecurityContext
      * @param configManagement
-     *          TenantConfigurationManagement
+     *            TenantConfigurationManagement
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param assignmentController
-     *          DeploymentAssignmentWindowController
+     *            DeploymentAssignmentWindowController
      */
     public DistributionSetsToTargetAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
@@ -98,8 +98,13 @@ public class DistributionSetsToTargetAssignmentSupport
     }
 
     @Override
-    protected String sourceEntityType() {
+    protected String sourceEntityTypeSing() {
         return i18n.getMessage("distribution.details.header");
+    }
+
+    @Override
+    protected String sourceEntityTypePlur() {
+        return i18n.getMessage("caption.distributionsets");
     }
 
     @Override

@@ -20,9 +20,9 @@ import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -60,7 +60,7 @@ public class TargetBulkTokenTags extends AbstractTagToken<ProxyTarget> {
 
     @Override
     protected List<ProxyTag> getAllTags() {
-        return tagManagement.findAll(PageRequest.of(0, MAX_TAG_QUERY)).stream()
+        return HawkbitCommonUtil.getEntitiesByPageableProvider(tagManagement::findAll).stream()
                 .map(tag -> new ProxyTag(tag.getId(), tag.getName(), tag.getColour())).collect(Collectors.toList());
     }
 

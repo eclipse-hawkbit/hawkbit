@@ -33,8 +33,6 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public abstract class AbstractTagToken<T extends ProxyNamedEntity>
         implements TagAssignmentListener, MasterEntityAwareComponent<T> {
-    protected static final int MAX_TAG_QUERY = 1000;
-
     protected TagPanelLayout tagPanelLayout;
 
     protected final SpPermissionChecker checker;

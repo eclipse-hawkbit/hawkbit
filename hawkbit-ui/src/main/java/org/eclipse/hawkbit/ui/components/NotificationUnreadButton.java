@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.EventNotificationType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -51,7 +52,7 @@ public class NotificationUnreadButton extends Button {
 
     private int unreadNotificationCounter;
     private Window notificationsWindow;
-    private final transient Map<String, EntityModifiedEventPayload> remotelyOriginatedEventsStore;
+    private final transient Map<EventNotificationType, EntityModifiedEventPayload> remotelyOriginatedEventsStore;
 
     /**
      * Constructor.
@@ -142,15 +143,18 @@ public class NotificationUnreadButton extends Button {
         return notificationsLayout;
     }
 
-    private Label buildEventNotificationLabel(final Entry<String, EntityModifiedEventPayload> remotelyOriginatedEvent) {
+    private Label buildEventNotificationLabel(
+            final Entry<EventNotificationType, EntityModifiedEventPayload> remotelyOriginatedEvent) {
+        final EventNotificationType notificationType = remotelyOriginatedEvent.getKey();
         final int modifiedEntitiesCount = remotelyOriginatedEvent.getValue().getEntityIds().size();
-        final StringBuilder notificationLabelBuilder = new StringBuilder(String.valueOf(modifiedEntitiesCount));
-
-        notificationLabelBuilder.append(" ");
-        final String pluralPrefix = modifiedEntitiesCount > 1 ? "s" : "";
-        notificationLabelBuilder.append(i18n.getMessage(remotelyOriginatedEvent.getKey(), pluralPrefix));
-
-        return new Label(notificationLabelBuilder.toString());
+        String message = "";
+        if (modifiedEntitiesCount == 1) {
+            message = i18n.getMessage(notificationType.getNotificationMessageKeySing());
+        } else {
+            message = i18n.getMessage(notificationType.getNotificationMessageKeyPlur(),
+                    String.valueOf(modifiedEntitiesCount));
+        }
+        return new Label(message);
     }
 
     private void dispatchEntityModifiedEvents() {
@@ -167,21 +171,20 @@ public class NotificationUnreadButton extends Button {
     /**
      * Increments the unread notifications
      *
-     * @param entityNotificationMsgKey
-     *          Key value for notification message
+     * @param notificationType
+     *            notification type for message
      * @param eventPayload
-     *          EntityModifiedEventPayload
+     *            EntityModifiedEventPayload
      */
-    public void incrementUnreadNotification(final String entityNotificationMsgKey,
+    public void incrementUnreadNotification(final EventNotificationType notificationType,
             final EntityModifiedEventPayload eventPayload) {
-        remotelyOriginatedEventsStore.merge(entityNotificationMsgKey, eventPayload,
-                (oldEventPayload, newEventPayload) -> {
-                    // currently we do not support parent aware differed events,
-                    // thus ignoring parentId of the incoming eventPayload
-                    oldEventPayload.getEntityIds().addAll(newEventPayload.getEntityIds());
+        remotelyOriginatedEventsStore.merge(notificationType, eventPayload, (oldEventPayload, newEventPayload) -> {
+            // currently we do not support parent aware differed events,
+            // thus ignoring parentId of the incoming eventPayload
+            oldEventPayload.getEntityIds().addAll(newEventPayload.getEntityIds());
 
-                    return oldEventPayload;
-                });
+            return oldEventPayload;
+        });
 
         unreadNotificationCounter += eventPayload.getEntityIds().size();
         refreshCaption();

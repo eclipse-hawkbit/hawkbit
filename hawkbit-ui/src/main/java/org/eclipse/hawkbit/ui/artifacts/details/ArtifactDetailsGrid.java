@@ -84,8 +84,8 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
         this.notification = notification;
         this.artifactManagement = artifactManagement;
 
-        this.artifactDeleteSupport = new DeleteSupport<>(this, i18n, notification,
-                i18n.getMessage("artifact.details.header"), ProxyArtifact::getFilename, this::artifactsDeletionCallback,
+        this.artifactDeleteSupport = new DeleteSupport<>(this, i18n, notification, "artifact.details.header",
+                "caption.artifacts", ProxyArtifact::getFilename, this::artifactsDeletionCallback,
                 UIComponentIdProvider.ARTIFACT_DELETE_CONFIRMATION_DIALOG);
 
         setFilterSupport(

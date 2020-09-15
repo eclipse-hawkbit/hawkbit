@@ -112,9 +112,9 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
             getSelectionSupport().enableMultiSelection();
         }
 
-        this.swModuleDeleteSupport = new DeleteSupport<>(this, i18n, notification,
-                i18n.getMessage("caption.software.module"), ProxySoftwareModule::getNameAndVersion,
-                this::deleteSoftwareModules, UIComponentIdProvider.SM_DELETE_CONFIRMATION_DIALOG);
+        this.swModuleDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.software.module",
+                "caption.softwaremodules", ProxySoftwareModule::getNameAndVersion, this::deleteSoftwareModules,
+                UIComponentIdProvider.SM_DELETE_CONFIRMATION_DIALOG);
 
         setFilterSupport(new FilterSupport<>(
                 new SoftwareModuleDataProvider(softwareModuleManagement,
