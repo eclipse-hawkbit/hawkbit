@@ -37,6 +37,7 @@ import com.vaadin.ui.ComponentContainer;
  * Software module type filter buttons layout.
  */
 public class SMTypeFilterLayout extends AbstractFilterLayout {
+
     private static final long serialVersionUID = 1L;
 
     private final SMTypeFilterHeader smTypeFilterHeader;
@@ -47,7 +48,7 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
 
     /**
      * Constructor
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @param permChecker
@@ -66,19 +67,18 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     public SMTypeFilterLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final EntityFactory entityFactory, final UINotification uiNotification,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final TypeFilterLayoutUiState smTypeFilterLayoutUiState) {
+            final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView eventView) {
         final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(i18n, entityFactory, eventBus,
                 uiNotification, softwareModuleTypeManagement);
 
         this.smTypeFilterHeader = new SMTypeFilterHeader(eventBus, i18n, permChecker, smTypeWindowBuilder,
-                smTypeFilterLayoutUiState, EventView.UPLOAD);
+                smTypeFilterLayoutUiState, eventView);
         this.smTypeFilterButtons = new SMTypeFilterButtons(eventBus, i18n, uiNotification, permChecker,
-                softwareModuleTypeManagement, smTypeWindowBuilder, smTypeFilterLayoutUiState, EventView.UPLOAD);
+                softwareModuleTypeManagement, smTypeWindowBuilder, smTypeFilterLayoutUiState, eventView);
 
         this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
-                new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, EventView.UPLOAD),
-                smTypeFilterButtons::hideActionColumns, smTypeFilterButtons::showEditColumn,
-                smTypeFilterButtons::showDeleteColumn);
+                new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, eventView), smTypeFilterButtons::hideActionColumns,
+                smTypeFilterButtons::showEditColumn, smTypeFilterButtons::showDeleteColumn);
         this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyType.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxySoftwareModule.class).build();
@@ -87,8 +87,12 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     }
 
     private List<EntityModifiedAwareSupport> getEntityModifiedAwareSupports() {
-        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(smTypeFilterButtons::refreshAll),
+        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(this::refreshFilterButtons),
                 EntityModifiedGenericSupport.of(null, null, smTypeFilterButtons::resetFilterOnTypesDeleted));
+    }
+
+    protected void refreshFilterButtons() {
+        smTypeFilterButtons.refreshAll();
     }
 
     @Override

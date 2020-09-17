@@ -79,7 +79,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
         if (permChecker.hasReadRepositoryPermission()) {
             this.smTypeFilterLayout = new SMTypeFilterLayout(i18n, permChecker, eventBus, entityFactory, uiNotification,
-                    softwareModuleTypeManagement, artifactUploadState.getSmTypeFilterLayoutUiState());
+                    softwareModuleTypeManagement, artifactUploadState.getSmTypeFilterLayoutUiState(), EventView.UPLOAD);
             this.smGridLayout = new SoftwareModuleGridLayout(i18n, permChecker, uiNotification, eventBus,
                     softwareModuleManagement, softwareModuleTypeManagement, entityFactory,
                     artifactUploadState.getSmTypeFilterLayoutUiState(), artifactUploadState.getSmGridLayoutUiState());
