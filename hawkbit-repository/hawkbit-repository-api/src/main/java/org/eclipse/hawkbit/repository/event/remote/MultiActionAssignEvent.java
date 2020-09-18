@@ -9,11 +9,8 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.hateoas.Identifiable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Generic deployment event for the Multi-Assignments feature. The event extends
