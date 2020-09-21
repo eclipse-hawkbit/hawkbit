@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessData
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQueryInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -293,22 +294,24 @@ public final class FormComponentBuilder {
             bindingBuilder.withValidator(validator);
         }
 
-        final Binding<T, ProxyTargetFilterQuery> binding = bindingBuilder.bind(tfqAwareBean -> {
-            if (tfqAwareBean.getTargetFilterId() == null) {
+        final Binding<T, ProxyTargetFilterQueryInfo> binding = bindingBuilder.withConverter(tfq -> {
+            if (tfq == null) {
                 return null;
             }
 
-            final ProxyTargetFilterQuery filter = new ProxyTargetFilterQuery();
-            filter.setId(tfqAwareBean.getTargetFilterId());
-            filter.setName(tfqAwareBean.getTargetFilterName());
-            filter.setQuery(tfqAwareBean.getTargetFilterQuery());
+            return new ProxyTargetFilterQueryInfo(tfq.getId(), tfq.getName(), tfq.getQuery());
+        }, tfqInfo -> {
+            if (tfqInfo == null) {
+                return null;
+            }
 
-            return filter;
-        }, (tfqAwareBean, filter) -> {
-            tfqAwareBean.setTargetFilterId(filter != null ? filter.getId() : null);
-            tfqAwareBean.setTargetFilterName(filter != null ? filter.getName() : null);
-            tfqAwareBean.setTargetFilterQuery(filter != null ? filter.getQuery() : null);
-        });
+            final ProxyTargetFilterQuery tfq = new ProxyTargetFilterQuery();
+            tfq.setId(tfqInfo.getId());
+            tfq.setName(tfqInfo.getName());
+            tfq.setQuery(tfqInfo.getQuery());
+
+            return tfq;
+        }).bind(TargetFilterQueryAware::getTargetFilterQueryInfo, TargetFilterQueryAware::setTargetFilterQueryInfo);
 
         return new BoundComponent<>(tfqCombo, binding);
     }

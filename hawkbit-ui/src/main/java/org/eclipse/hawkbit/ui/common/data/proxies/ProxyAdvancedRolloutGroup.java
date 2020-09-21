@@ -20,9 +20,7 @@ public class ProxyAdvancedRolloutGroup implements Serializable, TargetFilterQuer
     private static final long serialVersionUID = 1L;
 
     private String groupName;
-    private Long targetFilterId;
-    private String targetFilterName;
-    private String targetFilterQuery;
+    private ProxyTargetFilterQueryInfo targetFilterInfo;
     private Float targetPercentage;
     private String triggerThresholdPercentage;
     private String errorThresholdPercentage;
@@ -48,33 +46,25 @@ public class ProxyAdvancedRolloutGroup implements Serializable, TargetFilterQuer
     }
 
     @Override
-    public Long getTargetFilterId() {
-        return targetFilterId;
+    public ProxyTargetFilterQueryInfo getTargetFilterQueryInfo() {
+        return targetFilterInfo;
     }
 
     @Override
-    public void setTargetFilterId(final Long targetFilterId) {
-        this.targetFilterId = targetFilterId;
+    public void setTargetFilterQueryInfo(final ProxyTargetFilterQueryInfo tfqInfo) {
+        this.targetFilterInfo = tfqInfo;
     }
 
-    @Override
-    public String getTargetFilterName() {
-        return targetFilterName;
-    }
-
-    @Override
-    public void setTargetFilterName(final String targetFilterName) {
-        this.targetFilterName = targetFilterName;
-    }
-
-    @Override
     public String getTargetFilterQuery() {
-        return targetFilterQuery;
+        return targetFilterInfo != null ? targetFilterInfo.getQuery() : null;
     }
 
-    @Override
     public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
+        if (targetFilterInfo != null) {
+            targetFilterInfo.setQuery(targetFilterQuery);
+        } else {
+            targetFilterInfo = new ProxyTargetFilterQueryInfo(null, null, targetFilterQuery);
+        }
     }
 
     /**

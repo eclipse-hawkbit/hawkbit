@@ -28,10 +28,8 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
 
     private Long id;
     private String name;
+    private ProxyTargetFilterQueryInfo targetFilterInfo;
     private Long distributionSetId;
-    private Long targetFilterId;
-    private String targetFilterName;
-    private String targetFilterQuery;
     private String description;
     private ActionType actionType;
     private Long forcedTime;
@@ -68,6 +66,28 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     }
 
     @Override
+    public ProxyTargetFilterQueryInfo getTargetFilterQueryInfo() {
+        return targetFilterInfo;
+    }
+
+    @Override
+    public void setTargetFilterQueryInfo(final ProxyTargetFilterQueryInfo tfqInfo) {
+        this.targetFilterInfo = tfqInfo;
+    }
+
+    public String getTargetFilterQuery() {
+        return targetFilterInfo != null ? targetFilterInfo.getQuery() : null;
+    }
+
+    public void setTargetFilterQuery(final String targetFilterQuery) {
+        if (targetFilterInfo != null) {
+            targetFilterInfo.setQuery(targetFilterQuery);
+        } else {
+            targetFilterInfo = new ProxyTargetFilterQueryInfo(null, null, targetFilterQuery);
+        }
+    }
+
+    @Override
     public Long getDistributionSetId() {
         return distributionSetId;
     }
@@ -75,36 +95,6 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     @Override
     public void setDistributionSetId(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
-    }
-
-    @Override
-    public Long getTargetFilterId() {
-        return targetFilterId;
-    }
-
-    @Override
-    public void setTargetFilterId(final Long targetFilterId) {
-        this.targetFilterId = targetFilterId;
-    }
-
-    @Override
-    public String getTargetFilterName() {
-        return targetFilterName;
-    }
-
-    @Override
-    public void setTargetFilterName(final String targetFilterName) {
-        this.targetFilterName = targetFilterName;
-    }
-
-    @Override
-    public String getTargetFilterQuery() {
-        return targetFilterQuery;
-    }
-
-    @Override
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
     }
 
     @Override

@@ -8,19 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.common.data.aware;
 
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQueryInfo;
+
 /**
  * Element is used for target filter query combobox
  */
 public interface TargetFilterQueryAware {
-    void setTargetFilterId(Long id);
+    void setTargetFilterQueryInfo(ProxyTargetFilterQueryInfo tfqInfo);
 
-    Long getTargetFilterId();
-
-    void setTargetFilterName(String name);
-
-    String getTargetFilterName();
-
-    void setTargetFilterQuery(String query);
-
-    String getTargetFilterQuery();
+    ProxyTargetFilterQueryInfo getTargetFilterQueryInfo();
 }
