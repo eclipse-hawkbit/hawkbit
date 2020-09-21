@@ -128,17 +128,18 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
     /**
      * Sets the Id, name and version of distribution set
      *
-     * @param dsIdNameVersion
-     *            ProxyIdNameVersion
+     * @param dsInfo
+     *            ProxyDistributionSetInfo
      *
      * @return proxy of distribution set
      */
-    public ProxyDistributionSet of(final ProxyIdNameVersion dsIdNameVersion) {
+    public ProxyDistributionSet of(final ProxyDistributionSetInfo dsInfo) {
         final ProxyDistributionSet ds = new ProxyDistributionSet();
 
-        ds.setId(dsIdNameVersion.getId());
-        ds.setName(dsIdNameVersion.getName());
-        ds.setVersion(dsIdNameVersion.getVersion());
+        ds.setId(dsInfo.getId());
+        ds.setName(dsInfo.getName());
+        ds.setVersion(dsInfo.getVersion());
+        ds.setNameVersion(dsInfo.getNameVersion());
 
         return ds;
     }
@@ -148,7 +149,7 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
      *
      * @return proxy of Id, Name and version
      */
-    public ProxyIdNameVersion getIdNameVersion() {
-        return new ProxyIdNameVersion(getId(), getName(), getVersion());
+    public ProxyDistributionSetInfo getInfo() {
+        return new ProxyDistributionSetInfo(getId(), getName(), getVersion());
     }
 }

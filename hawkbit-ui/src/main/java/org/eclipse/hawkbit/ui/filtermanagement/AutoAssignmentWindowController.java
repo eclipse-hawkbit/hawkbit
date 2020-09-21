@@ -47,19 +47,19 @@ public class AutoAssignmentWindowController
      * Constructor for AutoAssignmentWindowController
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param layout
-     *          AutoAssignmentWindowLayout
+     *            AutoAssignmentWindowLayout
      */
     public AutoAssignmentWindowController(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final UINotification uiNotification, final EntityFactory entityFactory,
@@ -88,14 +88,14 @@ public class AutoAssignmentWindowController
         autoAssignmentFilter.setId(proxyEntity.getId());
         autoAssignmentFilter.setQuery(proxyEntity.getQuery());
 
-        if (proxyEntity.getAutoAssignDsIdNameVersion() != null) {
+        if (proxyEntity.getAutoAssignDsInfo() != null) {
             autoAssignmentFilter.setAutoAssignmentEnabled(true);
             autoAssignmentFilter.setAutoAssignActionType(proxyEntity.getAutoAssignActionType());
-            autoAssignmentFilter.setAutoAssignDsIdNameVersion(proxyEntity.getAutoAssignDsIdNameVersion());
+            autoAssignmentFilter.setAutoAssignDsInfo(proxyEntity.getAutoAssignDsInfo());
         } else {
             autoAssignmentFilter.setAutoAssignmentEnabled(false);
             autoAssignmentFilter.setAutoAssignActionType(ActionType.FORCED);
-            autoAssignmentFilter.setAutoAssignDsIdNameVersion(null);
+            autoAssignmentFilter.setAutoAssignDsInfo(null);
         }
 
         return autoAssignmentFilter;
@@ -108,8 +108,8 @@ public class AutoAssignmentWindowController
 
     @Override
     protected void persistEntity(final ProxyTargetFilterQuery entity) {
-        if (entity.isAutoAssignmentEnabled() && entity.getAutoAssignDsIdNameVersion() != null) {
-            final Long autoAssignDsId = entity.getAutoAssignDsIdNameVersion().getId();
+        if (entity.isAutoAssignmentEnabled() && entity.getAutoAssignDsInfo() != null) {
+            final Long autoAssignDsId = entity.getAutoAssignDsInfo().getId();
             final Long targetsForAutoAssignmentCount = targetManagement.countByRsqlAndNonDS(autoAssignDsId,
                     entity.getQuery());
 
@@ -155,7 +155,7 @@ public class AutoAssignmentWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (entity.isAutoAssignmentEnabled()
-                && (entity.getAutoAssignActionType() == null || entity.getAutoAssignDsIdNameVersion() == null)) {
+                && (entity.getAutoAssignActionType() == null || entity.getAutoAssignDsInfo() == null)) {
             uiNotification.displayValidationError(
                     i18n.getMessage(UIMessageIdProvider.MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS));
             return false;
