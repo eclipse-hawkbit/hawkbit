@@ -30,6 +30,7 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     private String name;
     private Long distributionSetId;
     private Long targetFilterId;
+    private String targetFilterName;
     private String targetFilterQuery;
     private String description;
     private ActionType actionType;
@@ -39,6 +40,7 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
 
     /**
      * Gets the rollout form id
+     * 
      * @return id
      */
     public Long getId() {
@@ -49,7 +51,7 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
      * Sets the form id
      *
      * @param id
-     *         rollout form id
+     *            rollout form id
      */
     public void setId(final Long id) {
         this.id = id;
@@ -83,6 +85,16 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     @Override
     public void setTargetFilterId(final Long targetFilterId) {
         this.targetFilterId = targetFilterId;
+    }
+
+    @Override
+    public String getTargetFilterName() {
+        return targetFilterName;
+    }
+
+    @Override
+    public void setTargetFilterName(final String targetFilterName) {
+        this.targetFilterName = targetFilterName;
     }
 
     @Override

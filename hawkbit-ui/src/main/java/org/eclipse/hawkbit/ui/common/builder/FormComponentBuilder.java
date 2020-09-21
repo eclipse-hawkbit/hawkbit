@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.ui.common.data.aware.StartOptionAware;
 import org.eclipse.hawkbit.ui.common.data.aware.TargetFilterQueryAware;
 import org.eclipse.hawkbit.ui.common.data.aware.TypeInfoAware;
 import org.eclipse.hawkbit.ui.common.data.aware.VersionAware;
-import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.AbstractProxyDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -300,11 +300,13 @@ public final class FormComponentBuilder {
 
             final ProxyTargetFilterQuery filter = new ProxyTargetFilterQuery();
             filter.setId(tfqAwareBean.getTargetFilterId());
+            filter.setName(tfqAwareBean.getTargetFilterName());
             filter.setQuery(tfqAwareBean.getTargetFilterQuery());
 
             return filter;
         }, (tfqAwareBean, filter) -> {
             tfqAwareBean.setTargetFilterId(filter != null ? filter.getId() : null);
+            tfqAwareBean.setTargetFilterName(filter != null ? filter.getName() : null);
             tfqAwareBean.setTargetFilterQuery(filter != null ? filter.getQuery() : null);
         });
 

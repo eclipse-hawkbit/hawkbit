@@ -16,6 +16,10 @@ public interface TargetFilterQueryAware {
 
     Long getTargetFilterId();
 
+    void setTargetFilterName(String name);
+
+    String getTargetFilterName();
+
     void setTargetFilterQuery(String query);
 
     String getTargetFilterQuery();

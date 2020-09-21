@@ -185,21 +185,6 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
                 new ShowFormEventPayload<ProxyTargetFilterQuery>(FormType.EDIT, targetFilter, EventView.TARGET_FILTER));
     }
 
-    private void onClickOfAutoAssignmentLink(final ProxyTargetFilterQuery targetFilter) {
-        if (permissionChecker.hasReadRepositoryPermission()) {
-            final Window autoAssignmentWindow = autoAssignmentWindowBuilder.getWindowForAutoAssignment(targetFilter);
-
-            autoAssignmentWindow.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_SELECT_AUTO_ASSIGN_DS));
-            autoAssignmentWindow.setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
-
-            UI.getCurrent().addWindow(autoAssignmentWindow);
-            autoAssignmentWindow.setVisible(Boolean.TRUE);
-        } else {
-            notification.displayValidationError(
-                    i18n.getMessage("message.permission.insufficient", SpPermission.READ_REPOSITORY));
-        }
-    }
-
     private Button buildAutoAssignmentLink(final ProxyTargetFilterQuery targetFilter) {
         final String caption;
         if (targetFilter.isAutoAssignmentEnabled()) {
@@ -218,5 +203,20 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
         link.setDescription(description);
 
         return link;
+    }
+
+    private void onClickOfAutoAssignmentLink(final ProxyTargetFilterQuery targetFilter) {
+        if (permissionChecker.hasReadRepositoryPermission()) {
+            final Window autoAssignmentWindow = autoAssignmentWindowBuilder.getWindowForAutoAssignment(targetFilter);
+
+            autoAssignmentWindow.setCaption(i18n.getMessage(UIMessageIdProvider.CAPTION_SELECT_AUTO_ASSIGN_DS));
+            autoAssignmentWindow.setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
+
+            UI.getCurrent().addWindow(autoAssignmentWindow);
+            autoAssignmentWindow.setVisible(Boolean.TRUE);
+        } else {
+            notification.displayValidationError(
+                    i18n.getMessage("message.permission.insufficient", SpPermission.READ_REPOSITORY));
+        }
     }
 }
