@@ -185,8 +185,8 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
 
     private Button buildAutoAssignmentLink(final ProxyTargetFilterQuery targetFilter) {
         final String caption;
-        if (targetFilter.isAutoAssignmentEnabled() && targetFilter.getAutoAssignDsInfo() != null) {
-            caption = targetFilter.getAutoAssignDsInfo().getNameVersion();
+        if (targetFilter.isAutoAssignmentEnabled() && targetFilter.getDistributionSetInfo() != null) {
+            caption = targetFilter.getDistributionSetInfo().getNameVersion();
         } else {
             caption = i18n.getMessage(UIMessageIdProvider.BUTTON_NO_AUTO_ASSIGNMENT);
         }

@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.common.data.providers.AbstractProxyDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQueryInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -241,24 +242,21 @@ public final class FormComponentBuilder {
                 i18n.getMessage(UIMessageIdProvider.HEADER_DISTRIBUTION_SET), i18n.getMessage(PROMPT_DISTRIBUTION_SET),
                 i18n.getMessage(PROMPT_DISTRIBUTION_SET), false, ProxyDistributionSet::getNameVersion, dataProvider);
 
-        final Binding<T, Long> binding = binder.forField(dsComboBox)
+        final Binding<T, ProxyDistributionSetInfo> binding = binder.forField(dsComboBox)
                 .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_REQUIRED))
                 .withConverter(ds -> {
                     if (ds == null) {
                         return null;
                     }
 
-                    return ds.getId();
-                }, dsId -> {
-                    if (dsId == null) {
+                    return ds.getInfo();
+                }, dsInfo -> {
+                    if (dsInfo == null) {
                         return null;
                     }
 
-                    final ProxyDistributionSet ds = new ProxyDistributionSet();
-                    ds.setId(dsId);
-
-                    return ds;
-                }).bind(DsIdAware::getDistributionSetId, DsIdAware::setDistributionSetId);
+                    return ProxyDistributionSet.of(dsInfo);
+                }).bind(DsIdAware::getDistributionSetInfo, DsIdAware::setDistributionSetInfo);
 
         return new BoundComponent<>(dsComboBox, binding);
     }
@@ -299,18 +297,13 @@ public final class FormComponentBuilder {
                 return null;
             }
 
-            return new ProxyTargetFilterQueryInfo(tfq.getId(), tfq.getName(), tfq.getQuery());
+            return tfq.getInfo();
         }, tfqInfo -> {
             if (tfqInfo == null) {
                 return null;
             }
 
-            final ProxyTargetFilterQuery tfq = new ProxyTargetFilterQuery();
-            tfq.setId(tfqInfo.getId());
-            tfq.setName(tfqInfo.getName());
-            tfq.setQuery(tfqInfo.getQuery());
-
-            return tfq;
+            return ProxyTargetFilterQuery.of(tfqInfo);
         }).bind(TargetFilterQueryAware::getTargetFilterQueryInfo, TargetFilterQueryAware::setTargetFilterQueryInfo);
 
         return new BoundComponent<>(tfqCombo, binding);

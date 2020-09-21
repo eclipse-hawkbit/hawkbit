@@ -29,7 +29,7 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     private Long id;
     private String name;
     private ProxyTargetFilterQueryInfo targetFilterInfo;
-    private Long distributionSetId;
+    private ProxyDistributionSetInfo dsInfo;
     private String description;
     private ActionType actionType;
     private Long forcedTime;
@@ -88,13 +88,13 @@ public class ProxyRolloutForm implements Serializable, NameAware, DsIdAware, Tar
     }
 
     @Override
-    public Long getDistributionSetId() {
-        return distributionSetId;
+    public ProxyDistributionSetInfo getDistributionSetInfo() {
+        return dsInfo;
     }
 
     @Override
-    public void setDistributionSetId(final Long distributionSetId) {
-        this.distributionSetId = distributionSetId;
+    public void setDistributionSetInfo(final ProxyDistributionSetInfo dsInfo) {
+        this.dsInfo = dsInfo;
     }
 
     @Override

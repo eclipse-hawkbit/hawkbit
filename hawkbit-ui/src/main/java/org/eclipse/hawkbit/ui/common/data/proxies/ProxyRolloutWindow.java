@@ -53,7 +53,7 @@ public class ProxyRolloutWindow implements Serializable {
         setStartAt(rollout.getStartAt());
         setForcedTime(rollout.getForcedTime());
         setTargetFilterQuery(rollout.getTargetFilterQuery());
-        setDistributionSetId(rollout.getDistributionSetId());
+        setDistributionSetInfo(rollout.getDsInfo());
         setNumberOfGroups(rollout.getNumberOfGroups());
     }
 
@@ -247,17 +247,17 @@ public class ProxyRolloutWindow implements Serializable {
      * @return distributionSetId
      */
     public Long getDistributionSetId() {
-        return rolloutForm.getDistributionSetId();
+        return rolloutForm.getDistributionSetInfo() != null ? rolloutForm.getDistributionSetInfo().getId() : null;
     }
 
     /**
-     * Sets the distributionSetId
+     * Sets the distribution set info
      *
-     * @param distributionSetId
-     *            Id of rollout form distribution set
+     * @param dsInfo
+     *            Info of rollout form distribution set
      */
-    public void setDistributionSetId(final Long distributionSetId) {
-        rolloutForm.setDistributionSetId(distributionSetId);
+    public void setDistributionSetInfo(final ProxyDistributionSetInfo dsInfo) {
+        rolloutForm.setDistributionSetInfo(dsInfo);
     }
 
     /**

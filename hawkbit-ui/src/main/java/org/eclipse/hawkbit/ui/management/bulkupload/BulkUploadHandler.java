@@ -168,9 +168,9 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
          * Constructor for UploadAsync
          *
          * @param vaadinSession
-         *          VaadinSession
+         *            VaadinSession
          * @param vaadinUI
-         *          UI
+         *            UI
          */
         public UploadAsync(final VaadinSession vaadinSession, final UI vaadinUI) {
             this.vaadinSession = vaadinSession;
@@ -296,7 +296,7 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
         private String saveAllAssignments() {
             final ActionType actionType = ActionType.FORCED;
             final long forcedTimeStamp = new Date().getTime();
-            final Long dsId = bulkUploadInputs.getDistributionSetId();
+            final Long dsId = bulkUploadInputs.getDistributionSetInfo().getId();
 
             if (!distributionSetManagement.get(dsId).isPresent()) {
                 return i18n.getMessage("message.bulk.upload.assignment.failed");
@@ -342,7 +342,7 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
         }
 
         private boolean isDsSelected() {
-            return bulkUploadInputs.getDistributionSetId() != null;
+            return bulkUploadInputs.getDistributionSetInfo() != null;
         }
 
         private boolean areTargetsCreatedSuccessfully() {

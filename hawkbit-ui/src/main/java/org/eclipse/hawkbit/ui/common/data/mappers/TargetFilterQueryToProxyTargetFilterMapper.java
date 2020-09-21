@@ -37,7 +37,7 @@ public class TargetFilterQueryToProxyTargetFilterMapper
         final DistributionSet distributionSet = targetFilterQuery.getAutoAssignDistributionSet();
         if (distributionSet != null) {
             proxyTargetFilter.setAutoAssignmentEnabled(true);
-            proxyTargetFilter.setAutoAssignDsInfo(new ProxyDistributionSetInfo(distributionSet.getId(),
+            proxyTargetFilter.setDistributionSetInfo(new ProxyDistributionSetInfo(distributionSet.getId(),
                     distributionSet.getName(), distributionSet.getVersion()));
             proxyTargetFilter.setAutoAssignActionType(targetFilterQuery.getAutoAssignActionType());
         }

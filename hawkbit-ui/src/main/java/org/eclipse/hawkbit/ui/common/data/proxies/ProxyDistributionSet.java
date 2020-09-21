@@ -133,7 +133,7 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
      *
      * @return proxy of distribution set
      */
-    public ProxyDistributionSet of(final ProxyDistributionSetInfo dsInfo) {
+    public static ProxyDistributionSet of(final ProxyDistributionSetInfo dsInfo) {
         final ProxyDistributionSet ds = new ProxyDistributionSet();
 
         ds.setId(dsInfo.getId());

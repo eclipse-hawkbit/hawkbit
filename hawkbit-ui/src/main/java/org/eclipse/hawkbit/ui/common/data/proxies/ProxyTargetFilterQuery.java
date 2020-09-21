@@ -106,7 +106,8 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      *
      * @return ProxyDistributionSetInfo
      */
-    public ProxyDistributionSetInfo getAutoAssignDsInfo() {
+    @Override
+    public ProxyDistributionSetInfo getDistributionSetInfo() {
         return autoAssignDsInfo;
     }
 
@@ -116,21 +117,35 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      * @param dsInfo
      *            Target filter autoAssign Distribution set Info
      */
-    public void setAutoAssignDsInfo(final ProxyDistributionSetInfo dsInfo) {
+    @Override
+    public void setDistributionSetInfo(final ProxyDistributionSetInfo dsInfo) {
         this.autoAssignDsInfo = dsInfo;
     }
 
-    @Override
-    public void setDistributionSetId(final Long id) {
-        if (autoAssignDsInfo != null) {
-            autoAssignDsInfo.setId(id);
-        } else {
-            autoAssignDsInfo = new ProxyDistributionSetInfo(id, null, null);
-        }
+    /**
+     * Sets the Id, name and query of target filter query
+     *
+     * @param tfqInfo
+     *            ProxyTargetFilterQuery
+     *
+     * @return proxy of target filter query
+     */
+    public static ProxyTargetFilterQuery of(final ProxyTargetFilterQueryInfo tfqInfo) {
+        final ProxyTargetFilterQuery tfq = new ProxyTargetFilterQuery();
+
+        tfq.setId(tfqInfo.getId());
+        tfq.setName(tfqInfo.getName());
+        tfq.setQuery(tfqInfo.getQuery());
+
+        return tfq;
     }
 
-    @Override
-    public Long getDistributionSetId() {
-        return autoAssignDsInfo != null ? autoAssignDsInfo.getId() : null;
+    /**
+     * Gets the Id, name and query of target filter query
+     *
+     * @return proxy of Id, Name and query
+     */
+    public ProxyTargetFilterQueryInfo getInfo() {
+        return new ProxyTargetFilterQueryInfo(getId(), getName(), getQuery());
     }
 }
