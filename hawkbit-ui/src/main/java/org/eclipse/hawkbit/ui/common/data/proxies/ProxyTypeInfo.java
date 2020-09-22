@@ -58,6 +58,15 @@ public class ProxyTypeInfo extends ProxyIdentifiableEntity {
         this.key = key;
     }
 
+    /**
+     * Gets the key and name
+     *
+     * @return keyAndName
+     */
+    public String getKeyAndName() {
+        return key + " (" + getName() + ")";
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getName(), getKey());

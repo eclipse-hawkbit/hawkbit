@@ -23,7 +23,7 @@ public class ProxySystemConfigWindow implements Serializable {
     private Long id;
     private String name;
     private String description;
-    private Long distributionSetTypeId;
+    private ProxyTypeInfo dsTypeInfo;
     private Long repositoryConfigId;
     private Long rolloutConfigId;
     private Long caRootAuthorityId;
@@ -222,23 +222,12 @@ public class ProxySystemConfigWindow implements Serializable {
         this.description = description;
     }
 
-    /**
-     * Gets the id of distributionSetType
-     *
-     * @return distributionSetTypeId
-     */
-    public Long getDistributionSetTypeId() {
-        return distributionSetTypeId;
+    public ProxyTypeInfo getDsTypeInfo() {
+        return dsTypeInfo;
     }
 
-    /**
-     * Sets the distributionSetTypeId
-     *
-     * @param distributionSetTypeId
-     *            System config window distributionSetTypeId
-     */
-    public void setDistributionSetTypeId(final Long distributionSetTypeId) {
-        this.distributionSetTypeId = distributionSetTypeId;
+    public void setDsTypeInfo(final ProxyTypeInfo dsTypeInfo) {
+        this.dsTypeInfo = dsTypeInfo;
     }
 
     /**
