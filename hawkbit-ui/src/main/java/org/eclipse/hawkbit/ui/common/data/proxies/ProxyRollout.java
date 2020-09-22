@@ -22,7 +22,7 @@ public class ProxyRollout extends ProxyNamedEntity {
 
     private static final long serialVersionUID = 1L;
 
-    private String distributionSetNameVersion;
+    private ProxyDistributionSetInfo dsInfo;
 
     private Integer numberOfGroups;
 
@@ -44,10 +44,8 @@ public class ProxyRollout extends ProxyNamedEntity {
 
     private ActionType actionType;
 
-    private Long distributionSetId;
-
     /**
-     *  Constructor
+     * Constructor
      */
     public ProxyRollout() {
     }
@@ -56,10 +54,22 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Constructor for ProxyRollout
      *
      * @param id
-     *         Rollout entity Id
+     *            Rollout entity Id
      */
     public ProxyRollout(final Long id) {
         super(id);
+    }
+
+    public ProxyDistributionSetInfo getDsInfo() {
+        return dsInfo;
+    }
+
+    public void setDsInfo(final ProxyDistributionSetInfo dsInfo) {
+        this.dsInfo = dsInfo;
+    }
+
+    public String getDsNameVersion() {
+        return dsInfo != null ? dsInfo.getNameVersion() : null;
     }
 
     /**
@@ -75,28 +85,10 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the actionType
      *
      * @param actionType
-     *          Rollout actionType
+     *            Rollout actionType
      */
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
-    }
-
-    /**
-     * Get the distributionSetNameVersion
-     *
-     * @return distributionSetNameVersion
-     */
-    public String getDistributionSetNameVersion() {
-        return distributionSetNameVersion;
-    }
-
-    /**
-     * Sets the distributionSetNameVersion
-     * @param distributionSetNameVersion
-     *          Name and version of distribution set
-     */
-    public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
-        this.distributionSetNameVersion = distributionSetNameVersion;
     }
 
     /**
@@ -112,7 +104,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the numberOfGroups
      *
      * @param numberOfGroups
-     *          Number of rollout groups
+     *            Number of rollout groups
      */
     public void setNumberOfGroups(final Integer numberOfGroups) {
         this.numberOfGroups = numberOfGroups;
@@ -131,7 +123,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the forcedTime
      *
      * @param forcedTime
-     *          Forced time
+     *            Forced time
      */
     public void setForcedTime(final Long forcedTime) {
         this.forcedTime = forcedTime;
@@ -150,7 +142,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the rollout status
      *
      * @param status
-     *          Rollout current status
+     *            Rollout current status
      */
     public void setStatus(final RolloutStatus status) {
         this.status = status;
@@ -169,7 +161,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the approvalDecidedBy
      *
      * @param approvalDecidedBy
-     *          approval DecidedBy for rollout
+     *            approval DecidedBy for rollout
      */
     public void setApprovalDecidedBy(final String approvalDecidedBy) {
         this.approvalDecidedBy = approvalDecidedBy;
@@ -188,7 +180,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the approvalRemark
      *
      * @param approvalRemark
-     *          Remark for approval
+     *            Remark for approval
      */
     public void setApprovalRemark(final String approvalRemark) {
         this.approvalRemark = approvalRemark;
@@ -207,7 +199,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the targetFilterQuery
      *
      * @param targetFilterQuery
-     *          Target filter query
+     *            Target filter query
      */
     public void setTargetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
@@ -226,7 +218,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the totalTargets
      *
      * @param totalTargets
-     *          Total targets
+     *            Total targets
      */
     public void setTotalTargets(final long totalTargets) {
         this.totalTargets = totalTargets;
@@ -245,29 +237,10 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the startAt
      *
      * @param startAt
-     *          time rollout starts at
+     *            time rollout starts at
      */
     public void setStartAt(final Long startAt) {
         this.startAt = startAt;
-    }
-
-    /**
-     * Gets the Id of distribution set
-     *
-     * @return distributionSetId
-     */
-    public Long getDistributionSetId() {
-        return distributionSetId;
-    }
-
-    /**
-     * Sets the distributionSetId
-     *
-     * @param distributionSetId
- *              Id of distribution set
-     */
-    public void setDistributionSetId(final Long distributionSetId) {
-        this.distributionSetId = distributionSetId;
     }
 
     /**
@@ -283,7 +256,7 @@ public class ProxyRollout extends ProxyNamedEntity {
      * Sets the statusTotalCountMap
      *
      * @param statusTotalCountMap
-     *          total count of all the rollout status
+     *            total count of all the rollout status
      */
     public void setStatusTotalCountMap(final Map<Status, Long> statusTotalCountMap) {
         this.statusTotalCountMap = statusTotalCountMap;

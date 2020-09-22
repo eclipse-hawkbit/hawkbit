@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdNameVersion;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 
 /**
@@ -19,7 +19,7 @@ public class TargetGridLayoutUiState extends GridLayoutUiState {
 
     private Long pinnedTargetId;
     private String pinnedControllerId;
-    private ProxyIdNameVersion filterDsIdNameVersion;
+    private ProxyDistributionSetInfo filterDsInfo;
 
     /**
      * @return Pinned controller id
@@ -32,7 +32,7 @@ public class TargetGridLayoutUiState extends GridLayoutUiState {
      * Sets the pinned controller id
      *
      * @param pinnedControllerId
-     *          Id
+     *            Id
      */
     public void setPinnedControllerId(final String pinnedControllerId) {
         this.pinnedControllerId = pinnedControllerId;
@@ -49,7 +49,7 @@ public class TargetGridLayoutUiState extends GridLayoutUiState {
      * Sets the pinned target id
      *
      * @param pinnedTargetId
-     *          Id
+     *            Id
      */
     public void setPinnedTargetId(final Long pinnedTargetId) {
         this.pinnedTargetId = pinnedTargetId;
@@ -58,17 +58,17 @@ public class TargetGridLayoutUiState extends GridLayoutUiState {
     /**
      * @return filter distribution set id name and version
      */
-    public ProxyIdNameVersion getFilterDsIdNameVersion() {
-        return filterDsIdNameVersion;
+    public ProxyDistributionSetInfo getFilterDsInfo() {
+        return filterDsInfo;
     }
 
     /**
      * Sets the filter distribution set id name and version
      *
-     * @param filterDsIdNameVersion
-     *          ProxyIdNameVersion
+     * @param dsInfo
+     *            ProxyDistributionSetInfo
      */
-    public void setFilterDsIdNameVersion(final ProxyIdNameVersion filterDsIdNameVersion) {
-        this.filterDsIdNameVersion = filterDsIdNameVersion;
+    public void setFilterDsInfo(final ProxyDistributionSetInfo dsInfo) {
+        this.filterDsInfo = dsInfo;
     }
 }

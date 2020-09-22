@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common.data.mappers;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 
 /**
  * Maps {@link Rollout} entities, fetched from backend, to the
@@ -37,11 +37,8 @@ public class RolloutToProxyRolloutMapper extends AbstractNamedEntityToProxyNamed
 
         mapNamedEntityAttributes(rollout, proxyRollout);
 
-        final DistributionSet distributionSet = rollout.getDistributionSet();
-        proxyRollout.setDistributionSetNameVersion(
-                HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
-        proxyRollout.setDistributionSetId(distributionSet.getId());
-
+        final DistributionSet ds = rollout.getDistributionSet();
+        proxyRollout.setDsInfo(new ProxyDistributionSetInfo(ds.getId(), ds.getName(), ds.getVersion()));
         proxyRollout
                 .setNumberOfGroups(rollout.getRolloutGroupsCreated() > 0 ? rollout.getRolloutGroupsCreated() : null);
         proxyRollout.setForcedTime(rollout.getForcedTime() > 0 ? rollout.getForcedTime() : null);
