@@ -837,29 +837,30 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         LOGGER.debug("handle rollout {}", rolloutId);
         final JpaRollout rollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        return systemSecurityContext.runAsSystemAsTenantAsUser(() -> {
+            switch (rollout.getStatus()) {
+            case CREATING:
+                handleCreateRollout(rollout);
+                break;
+            case DELETING:
+                handleDeleteRollout(rollout);
+                break;
+            case READY:
+                handleReadyRollout(rollout);
+                break;
+            case STARTING:
+                handleStartingRollout(rollout);
+                break;
+            case RUNNING:
+                handleRunningRollout(rollout);
+                break;
+            default:
+                LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+                break;
+            }
 
-        switch (rollout.getStatus()) {
-        case CREATING:
-            handleCreateRollout(rollout);
-            break;
-        case DELETING:
-            handleDeleteRollout(rollout);
-            break;
-        case READY:
-            handleReadyRollout(rollout);
-            break;
-        case STARTING:
-            handleStartingRollout(rollout);
-            break;
-        case RUNNING:
-            handleRunningRollout(rollout);
-            break;
-        default:
-            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
-            break;
-        }
-
-        return 0;
+            return 0;
+        }, rollout.getTenant(), rollout.getCreatedBy());
     }
 
     private void handleStartingRollout(final Rollout rollout) {
