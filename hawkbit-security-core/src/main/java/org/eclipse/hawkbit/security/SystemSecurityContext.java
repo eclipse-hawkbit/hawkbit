@@ -117,6 +117,28 @@ public class SystemSecurityContext {
         }
     }
 
+    public <T> T runAsSystemAsTenantAsUser(final Callable<T> callable, final String tenant, final String username) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            LOG.debug("entering system code execution");
+            return tenantAware.runAsTenantAsUser(tenant, username, () -> {
+                try {
+                    setSystemContext(SecurityContextHolder.getContext());
+                    return callable.call();
+
+                } catch (final RuntimeException e) {
+                    throw e;
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+            LOG.debug("leaving system code execution");
+        }
+    }
+
     /**
      * Runs a given {@link Callable} within a system security context, which has
      * the provided {@link GrantedAuthority}s to successfully run the

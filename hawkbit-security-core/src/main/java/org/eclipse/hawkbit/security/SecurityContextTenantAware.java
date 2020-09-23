@@ -32,6 +32,8 @@ import org.springframework.security.core.context.SecurityContextImpl;
  */
 public class SecurityContextTenantAware implements TenantAware {
 
+    private static final String SYSTEM_USER = "system";
+
     @Override
     public String getCurrentTenant() {
         final SecurityContext context = SecurityContextHolder.getContext();
@@ -47,20 +49,37 @@ public class SecurityContextTenantAware implements TenantAware {
     }
 
     @Override
+    public String getCurrentUsername() {
+        final SecurityContext context = SecurityContextHolder.getContext();
+        if (context.getAuthentication() != null) {
+            final Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserPrincipal) {
+                return ((UserPrincipal) principal).getUsername();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> callable) {
+        return runAsTenantAsUser(tenant, SYSTEM_USER, callable);
+    }
+
+    @Override
+    public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> callable) {
         final SecurityContext originalContext = SecurityContextHolder.getContext();
         try {
-            SecurityContextHolder.setContext(buildSecurityContext(tenant));
+            SecurityContextHolder.setContext(buildSecurityContext(tenant, username));
             return callable.run();
         } finally {
             SecurityContextHolder.setContext(originalContext);
         }
     }
 
-    private static SecurityContext buildSecurityContext(final String tenant) {
+    private static SecurityContext buildSecurityContext(final String tenant, final String username) {
         final SecurityContextImpl securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(
-                new AuthenticationDelegate(SecurityContextHolder.getContext().getAuthentication(), tenant));
+                new AuthenticationDelegate(SecurityContextHolder.getContext().getAuthentication(), tenant, username));
         return securityContext;
     }
 
@@ -72,7 +91,6 @@ public class SecurityContextTenantAware implements TenantAware {
     private static final class AuthenticationDelegate implements Authentication {
         private static final long serialVersionUID = 1L;
 
-        private static final String SYSTEM_USER = "system";
         private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Arrays
                 .asList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
         private final Authentication delegate;
@@ -81,9 +99,9 @@ public class SecurityContextTenantAware implements TenantAware {
 
         private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
-        private AuthenticationDelegate(final Authentication delegate, final String tenant) {
+        private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username) {
             this.delegate = delegate;
-            this.systemPrincipal = new UserPrincipal(SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER, SYSTEM_USER,
+            this.systemPrincipal = new UserPrincipal(username, username, username, username, username,
                     null, tenant, SYSTEM_AUTHORITIES);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }

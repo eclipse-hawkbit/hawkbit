@@ -191,9 +191,9 @@ class OidcAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSu
             final String defaultTenant = "DEFAULT";
 
             final AbstractAuthenticationToken token = (AbstractAuthenticationToken) authentication;
-            token.setDetails(new TenantAwareAuthenticationDetails(defaultTenant, false));
+            token.setDetails(new TenantAwareAuthenticationDetails(defaultTenant, authentication.getName(), false));
 
-            systemSecurityContext.runAsSystemAsTenant(systemManagement::getTenantMetadata, defaultTenant);
+            systemSecurityContext.runAsSystemAsTenantAsUser(systemManagement::getTenantMetadata, defaultTenant, authentication.getName());
         }
 
         super.onAuthenticationSuccess(request, response, authentication);

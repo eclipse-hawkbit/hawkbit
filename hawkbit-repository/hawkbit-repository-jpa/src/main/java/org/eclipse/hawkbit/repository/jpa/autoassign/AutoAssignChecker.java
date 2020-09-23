@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -52,6 +53,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
     private final PlatformTransactionManager transactionManager;
 
+    private final SystemSecurityContext systemSecurityContext;
+
     /**
      * Maximum for target filter queries with auto assign DS Maximum for targets
      * that are fetched in one turn
@@ -66,23 +69,23 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
     /**
      * Instantiates a new auto assign checker
-     *
-     * @param targetFilterQueryManagement
+     *  @param targetFilterQueryManagement
      *            to get all target filter queries
      * @param targetManagement
      *            to get targets
      * @param deploymentManagement
-     *            to assign distribution sets to targets
+ *            to assign distribution sets to targets
      * @param transactionManager
-     *            to run transactions
+     * @param systemSecurityContext
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+                             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+                             final PlatformTransactionManager transactionManager, final SystemSecurityContext systemSecurityContext) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -146,7 +149,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                             targetFilterQuery.getAutoAssignWeight().orElse(null), PAGE_SIZE);
                     final int count = deploymentRequests.size();
                     if (count > 0) {
-                        deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage);
+                        systemSecurityContext.runAsSystemAsTenantAsUser(() -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage),
+                            targetFilterQuery.getTenant(), targetFilterQuery.getCreatedBy());
                     }
                     return count;
                 });

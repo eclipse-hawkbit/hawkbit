@@ -22,6 +22,7 @@ public class TenantAwareAuthenticationDetails implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String tenant;
+    private final String username;
     private final boolean controller;
 
     /**
@@ -34,6 +35,21 @@ public class TenantAwareAuthenticationDetails implements Serializable {
      */
     public TenantAwareAuthenticationDetails(final String tenant, final boolean controller) {
         this.tenant = tenant;
+        this.username = null;
+        this.controller = controller;
+    }
+
+    /**
+     * @param tenant
+     *            the current tenant
+     * @param controller
+     *            boolean flag to indicate if this authenticated token is a
+     *            controller authentication. {@code true} in case of
+     *            authenticated controller otherwise {@code false}
+     */
+    public TenantAwareAuthenticationDetails(final String tenant, final String username, final boolean controller) {
+        this.tenant = tenant;
+        this.username = username;
         this.controller = controller;
     }
 
@@ -56,4 +72,7 @@ public class TenantAwareAuthenticationDetails implements Serializable {
         return "TenantAwareAuthenticationDetails [tenant=" + tenant + ", controller=" + controller + "]";
     }
 
+    public String getUsername() {
+        return username;
+    }
 }

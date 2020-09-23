@@ -753,15 +753,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to assign distribution sets to targets
      * @param transactionManager
      *            to run transactions
+     * @param systemSecurityContext
+     *            the {@link SystemSecurityContext}
      * @return a new {@link AutoAssignChecker}
      */
     @Bean
     @ConditionalOnMissingBean
-    AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
-                                         final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-                                         final PlatformTransactionManager transactionManager) {
+    AutoAssignExecutor autoAssignExecutor(
+            final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
+            final SystemSecurityContext systemSecurityContext) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager);
+                transactionManager, systemSecurityContext);
     }
 
     /**
