@@ -21,8 +21,6 @@ public interface TenantAware {
      */
     String getCurrentTenant();
 
-    String getCurrentUsername();
-
     /**
      * Gives the possibility to run a certain code under a specific given
      * {@code tenant}. Only the given {@link TenantRunner} is executed under the

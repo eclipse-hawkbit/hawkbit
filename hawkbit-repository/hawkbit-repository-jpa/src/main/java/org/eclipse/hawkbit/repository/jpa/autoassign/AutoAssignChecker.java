@@ -69,18 +69,21 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
     /**
      * Instantiates a new auto assign checker
-     *  @param targetFilterQueryManagement
+     *
+     * @param targetFilterQueryManagement
      *            to get all target filter queries
      * @param targetManagement
      *            to get targets
      * @param deploymentManagement
- *            to assign distribution sets to targets
+     *            to assign distribution sets to targets
      * @param transactionManager
+     *            to run transactions
      * @param systemSecurityContext
+     *            the {@link SystemSecurityContext}
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
-                             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-                             final PlatformTransactionManager transactionManager, final SystemSecurityContext systemSecurityContext) {
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager, final SystemSecurityContext systemSecurityContext) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;

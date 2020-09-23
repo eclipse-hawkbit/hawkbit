@@ -151,7 +151,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
                 final Authentication authentication, final UserDetails user) {
             final UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(principal,
                     authentication.getCredentials(), user.getAuthorities());
-            result.setDetails(new TenantAwareAuthenticationDetails(DEFAULT_TENANT, user.getUsername(), false));
+            result.setDetails(new TenantAwareAuthenticationDetails(DEFAULT_TENANT, false));
             return result;
         }
     }
