@@ -113,7 +113,7 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      *
      * @return the distributionGrid
      */
-    public abstract AbstractDsGrid<? extends DsFilterParams> getDistributionGrid();
+    public abstract <T extends DsFilterParams> AbstractDsGrid<T> getDistributionGrid();
 
     /**
      * Returns the {@link DistributionSetGridHeader}
@@ -168,6 +168,6 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      * Unsubscribe the event listeners.
      */
     public void unsubscribeListener() {
-        listeners.forEach(listener -> listener.unsubscribe());
+        listeners.forEach(TopicEventListener::unsubscribe);
     }
 }
