@@ -379,12 +379,12 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
 
     private void showDsTagLayout() {
         distributionTagLayout.setVisible(true);
-        distributionGridLayout.hideDsTagHeaderIcon();
+        distributionGridLayout.hideDsFilterHeaderIcon();
     }
 
     private void hideDsTagLayout() {
         distributionTagLayout.setVisible(false);
-        distributionGridLayout.showDsTagHeaderIcon();
+        distributionGridLayout.showDsFilterHeaderIcon();
     }
 
     private void maximizeActionHistoryGridLayout() {

@@ -201,12 +201,12 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
 
     private void showDsTypeLayout() {
         dsTypeFilterLayout.setVisible(true);
-        distributionSetGridLayout.hideDsTypeHeaderIcon();
+        distributionSetGridLayout.hideDsFilterHeaderIcon();
     }
 
     private void hideDsTypeLayout() {
         dsTypeFilterLayout.setVisible(false);
-        distributionSetGridLayout.showDsTypeHeaderIcon();
+        distributionSetGridLayout.showDsFilterHeaderIcon();
     }
 
     private void maximizeDsGridLayout() {

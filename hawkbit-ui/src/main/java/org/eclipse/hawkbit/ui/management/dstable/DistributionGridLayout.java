@@ -27,13 +27,14 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetDetails;
-import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetDetailsHeader;
+import org.eclipse.hawkbit.ui.common.distributionset.AbstractDistributionSetGridLayout;
+import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetDetails;
+import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetDetailsHeader;
+import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetGridHeader;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
-import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.EntityModifiedAwareSupport;
@@ -45,30 +46,21 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedPinAw
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedTagTokenAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetGridHeader;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsWindowBuilder;
 import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
- * Distribution Set table layout which is shown on the Distribution View
+ * Distribution Set table layout in deployment view.
  */
-public class DistributionGridLayout extends AbstractGridComponentLayout {
+public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
     private static final long serialVersionUID = 1L;
 
     private final DistributionSetGridHeader distributionGridHeader;
     private final DistributionGrid distributionGrid;
     private final DistributionSetDetailsHeader distributionSetDetailsHeader;
     private final DistributionSetDetails distributionDetails;
-
-    private final transient FilterChangedListener<ProxyDistributionSet> dsFilterListener;
-    private final transient PinningChangedListener<String> pinningChangedListener;
-    private final transient SelectionChangedListener<ProxyDistributionSet> masterDsChangedListener;
-    private final transient EntityModifiedListener<ProxyDistributionSet> dsModifiedListener;
-    private final transient EntityModifiedListener<ProxyTag> tagModifiedListener;
 
     /**
      * Constructor for DistributionGridLayout
@@ -121,40 +113,36 @@ public class DistributionGridLayout extends AbstractGridComponentLayout {
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState) {
-
-        final DsWindowBuilder dsWindowBuilder = new DsWindowBuilder(i18n, entityFactory, eventBus, notification,
-                systemManagement, systemSecurityContext, configManagement, distributionSetManagement,
-                distributionSetTypeManagement, EventView.DEPLOYMENT);
-        final DsMetaDataWindowBuilder dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(i18n, entityFactory,
-                eventBus, notification, permissionChecker, distributionSetManagement);
+        super(i18n, entityFactory, eventBus, notification, systemManagement, systemSecurityContext, configManagement,
+                distributionSetManagement, distributionSetTypeManagement, permissionChecker, EventView.DEPLOYMENT);
 
         this.distributionGridHeader = new DistributionSetGridHeader(i18n, permissionChecker, eventBus,
-                distributionTagLayoutUiState, distributionGridLayoutUiState, EventLayout.DS_TAG_FILTER,
-                EventView.DEPLOYMENT);
+                distributionTagLayoutUiState, distributionGridLayoutUiState, EventLayout.DS_TAG_FILTER, getEventView());
         this.distributionGridHeader.buildHeader();
+
         this.distributionGrid = new DistributionGrid(eventBus, i18n, permissionChecker, notification, targetManagement,
                 distributionSetManagement, deploymentManagement, uiProperties, distributionGridLayoutUiState,
                 targetGridLayoutUiState, distributionTagLayoutUiState);
 
         this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(i18n, permissionChecker, eventBus,
-                notification, dsWindowBuilder, dsMetaDataWindowBuilder);
+                notification, getDsWindowBuilder(), getDsMetaDataWindowBuilder());
+
         this.distributionDetails = new DistributionSetDetails(i18n, eventBus, permissionChecker, notification,
                 distributionSetManagement, smManagement, distributionSetTypeManagement, distributionSetTagManagement,
-                configManagement, systemSecurityContext, dsMetaDataWindowBuilder);
+                configManagement, systemSecurityContext, getDsMetaDataWindowBuilder());
         this.distributionDetails.setUnassignSmAllowed(false);
         this.distributionDetails.buildDetails();
 
-        this.dsFilterListener = new FilterChangedListener<>(eventBus, ProxyDistributionSet.class,
-                new EventViewAware(EventView.DEPLOYMENT), distributionGrid.getFilterSupport());
-        this.pinningChangedListener = new PinningChangedListener<>(eventBus, ProxyTarget.class,
-                distributionGrid.getPinSupport());
-        this.masterDsChangedListener = new SelectionChangedListener<>(eventBus,
-                new EventLayoutViewAware(EventLayout.DS_LIST, EventView.DEPLOYMENT), getMasterDsAwareComponents());
-        this.dsModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyDistributionSet.class)
-                .entityModifiedAwareSupports(getDsModifiedAwareSupports()).build();
-        this.tagModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
+        addEventListener(new FilterChangedListener<>(eventBus, ProxyDistributionSet.class,
+                new EventViewAware(getEventView()), distributionGrid.getFilterSupport()));
+        addEventListener(new PinningChangedListener<>(eventBus, ProxyTarget.class, distributionGrid.getPinSupport()));
+        addEventListener(new SelectionChangedListener<>(eventBus,
+                new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()), getMasterDsAwareComponents()));
+        addEventListener(new EntityModifiedListener.Builder<>(eventBus, ProxyDistributionSet.class)
+                .entityModifiedAwareSupports(getDsModifiedAwareSupports()).build());
+        addEventListener(new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
                 .entityModifiedAwareSupports(getTagModifiedAwareSupports()).parentEntityType(ProxyDistributionSet.class)
-                .build();
+                .build());
 
         buildLayout(distributionGridHeader, distributionGrid, distributionSetDetailsHeader, distributionDetails);
     }
@@ -180,52 +168,13 @@ public class DistributionGridLayout extends AbstractGridComponentLayout {
                 .singletonList(EntityModifiedTagTokenAwareSupport.of(distributionDetails.getDistributionTagToken()));
     }
 
-    /**
-     * Show distribution set tag header icon
-     */
-    public void showDsTagHeaderIcon() {
-        distributionGridHeader.showFilterIcon();
+    @Override
+    public DistributionGrid getDistributionGrid() {
+        return distributionGrid;
     }
 
-    /**
-     * Hide distribution set tag header icon
-     */
-    public void hideDsTagHeaderIcon() {
-        distributionGridHeader.hideFilterIcon();
-    }
-
-    /**
-     * Maximize the distribution grid
-     */
-    public void maximize() {
-        distributionGrid.createMaximizedContent();
-        hideDetailsLayout();
-    }
-
-    /**
-     * Minimize the distribution grid
-     */
-    public void minimize() {
-        distributionGrid.createMinimizedContent();
-        showDetailsLayout();
-    }
-
-    /**
-     * Restore the distribution grid state
-     */
-    public void restoreState() {
-        distributionGridHeader.restoreState();
-        distributionGrid.restoreState();
-    }
-
-    /**
-     * Unsubscribe the changed listener
-     */
-    public void unsubscribeListener() {
-        dsFilterListener.unsubscribe();
-        pinningChangedListener.unsubscribe();
-        masterDsChangedListener.unsubscribe();
-        dsModifiedListener.unsubscribe();
-        tagModifiedListener.unsubscribe();
+    @Override
+    public DistributionSetGridHeader getDistributionSetGridHeader() {
+        return distributionGridHeader;
     }
 }

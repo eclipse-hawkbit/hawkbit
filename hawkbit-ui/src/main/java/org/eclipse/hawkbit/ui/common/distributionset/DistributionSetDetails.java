@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.common.detailslayout;
+package org.eclipse.hawkbit.ui.common.distributionset;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -26,6 +26,10 @@ import org.eclipse.hawkbit.ui.common.data.providers.DsMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
+import org.eclipse.hawkbit.ui.common.detailslayout.AbstractGridDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.MetadataDetailsGrid;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsGrid;
+import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsGrid;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
