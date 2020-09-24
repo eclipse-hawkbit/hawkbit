@@ -156,7 +156,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private ProxyBulkUploadWindow getBulkUploadInputsBean() {
         final ProxyBulkUploadWindow bean = new ProxyBulkUploadWindow();
-        bean.setDistributionSetId(binder.getBean().getDistributionSetId());
+        bean.setDistributionSetInfo(binder.getBean().getDistributionSetInfo());
         bean.setTagIdsWithNameToAssign(getTagIdsWithNameToAssign());
         bean.setDescription(binder.getBean().getDescription());
 
@@ -269,7 +269,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Actions once start of upload
      */
     public void onStartOfUpload() {
-        targetBulkUploadUiState.setDsId(binder.getBean().getDistributionSetId());
+        targetBulkUploadUiState.setDsInfo(binder.getBean().getDistributionSetInfo());
         targetBulkUploadUiState.setTagIdsWithNameToAssign(getTagIdsWithNameToAssign());
         targetBulkUploadUiState.setDescription(binder.getBean().getDescription());
 
@@ -377,7 +377,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * Reset target bulk upload ui state
      */
     public void clearUiState() {
-        targetBulkUploadUiState.setDsId(null);
+        targetBulkUploadUiState.setDsInfo(null);
         targetBulkUploadUiState.getTagIdsWithNameToAssign().clear();
         targetBulkUploadUiState.setDescription(null);
     }
@@ -387,7 +387,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     public void restoreComponentsValue() {
         final ProxyBulkUploadWindow bulkUploadInputsToRestore = new ProxyBulkUploadWindow();
-        bulkUploadInputsToRestore.setDistributionSetId(targetBulkUploadUiState.getDsId());
+        bulkUploadInputsToRestore.setDistributionSetInfo(targetBulkUploadUiState.getDsInfo());
         bulkUploadInputsToRestore.setDescription(targetBulkUploadUiState.getDescription());
         bulkUploadInputsToRestore.setTagIdsWithNameToAssign(targetBulkUploadUiState.getTagIdsWithNameToAssign());
 

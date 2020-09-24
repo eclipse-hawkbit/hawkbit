@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
@@ -187,7 +188,7 @@ public final class SPUIComponentProvider {
     }
 
     /**
-     * Create generic combobox.
+     * Create generic combobox with backend data provider.
      * 
      * @param id
      *            id of the combobox
@@ -209,6 +210,16 @@ public final class SPUIComponentProvider {
     public static <T> ComboBox<T> getComboBox(final String id, final String caption, final String description,
             final String placeholder, final boolean isEmptySelectionAllowed,
             final ItemCaptionGenerator<T> itemCaptionGenerator, final DataProvider<T, String> dataProvider) {
+        final ComboBox<T> comboBox = getComboBox(id, caption, description, placeholder, isEmptySelectionAllowed,
+                itemCaptionGenerator);
+        comboBox.setDataProvider(dataProvider);
+
+        return comboBox;
+    }
+
+    private static <T> ComboBox<T> getComboBox(final String id, final String caption, final String description,
+            final String placeholder, final boolean isEmptySelectionAllowed,
+            final ItemCaptionGenerator<T> itemCaptionGenerator) {
         final ComboBox<T> comboBox = new ComboBox<>();
         comboBox.setId(id);
         comboBox.setCaption(caption);
@@ -218,6 +229,35 @@ public final class SPUIComponentProvider {
         comboBox.setEmptySelectionAllowed(isEmptySelectionAllowed);
 
         comboBox.setItemCaptionGenerator(itemCaptionGenerator);
+
+        return comboBox;
+    }
+
+    /**
+     * Create generic combobox with list in-memory data provider.
+     * 
+     * @param id
+     *            id of the combobox
+     * @param caption
+     *            caption of the combobox
+     * @param description
+     *            description of the combobox
+     * @param placeholder
+     *            placeholder of the combobox
+     * @param isEmptySelectionAllowed
+     *            flag for empty selection enabled
+     * @param itemCaptionGenerator
+     *            generator fot item captions
+     * @param dataProvider
+     *            provides data/items
+     * 
+     * @return generic ComboBox
+     */
+    public static <T> ComboBox<T> getComboBox(final String id, final String caption, final String description,
+            final String placeholder, final boolean isEmptySelectionAllowed,
+            final ItemCaptionGenerator<T> itemCaptionGenerator, final ListDataProvider<T> dataProvider) {
+        final ComboBox<T> comboBox = getComboBox(id, caption, description, placeholder, isEmptySelectionAllowed,
+                itemCaptionGenerator);
         comboBox.setDataProvider(dataProvider);
 
         return comboBox;

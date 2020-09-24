@@ -22,7 +22,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
 
     private boolean isAutoAssignmentEnabled;
 
-    private ProxyIdNameVersion autoAssignDsIdNameVersion;
+    private ProxyDistributionSetInfo autoAssignDsInfo;
 
     private ActionType autoAssignActionType;
 
@@ -36,7 +36,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      * Constructor for ProxyTargetFilterQuery
      *
      * @param id
-     *          Target filter query id
+     *            Target filter query id
      */
     public ProxyTargetFilterQuery(final Long id) {
         super(id);
@@ -55,7 +55,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      * Sets the query
      *
      * @param query
-     *         Target filter query
+     *            Target filter query
      */
     public void setQuery(final String query) {
         this.query = query;
@@ -74,7 +74,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      * Sets the autoAssignActionType
      *
      * @param autoAssignActionType
-     *         ActionType
+     *            ActionType
      */
     public void setAutoAssignActionType(final ActionType autoAssignActionType) {
         this.autoAssignActionType = autoAssignActionType;
@@ -102,35 +102,50 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
     }
 
     /**
-     * Gets the autoAssign Distribution set IdNameVersion
+     * Gets the autoAssign Distribution set Info
      *
-     * @return autoAssignDsIdNameVersion
+     * @return ProxyDistributionSetInfo
      */
-    public ProxyIdNameVersion getAutoAssignDsIdNameVersion() {
-        return autoAssignDsIdNameVersion;
+    @Override
+    public ProxyDistributionSetInfo getDistributionSetInfo() {
+        return autoAssignDsInfo;
     }
 
     /**
-     * Sets the securityToken
+     * Sets the autoAssign Distribution set Info
      *
-     * @param autoAssignDsIdNameVersion
-     *         Target filter autoAssign Distribution set IdNameVersion
+     * @param dsInfo
+     *            Target filter autoAssign Distribution set Info
      */
-    public void setAutoAssignDsIdNameVersion(final ProxyIdNameVersion autoAssignDsIdNameVersion) {
-        this.autoAssignDsIdNameVersion = autoAssignDsIdNameVersion;
+    @Override
+    public void setDistributionSetInfo(final ProxyDistributionSetInfo dsInfo) {
+        this.autoAssignDsInfo = dsInfo;
     }
 
-    @Override
-    public void setDistributionSetId(final Long id) {
-        if (autoAssignDsIdNameVersion != null) {
-            autoAssignDsIdNameVersion.setId(id);
-        } else {
-            autoAssignDsIdNameVersion = new ProxyIdNameVersion(id, null, null);
-        }
+    /**
+     * Sets the Id, name and query of target filter query
+     *
+     * @param tfqInfo
+     *            ProxyTargetFilterQuery
+     *
+     * @return proxy of target filter query
+     */
+    public static ProxyTargetFilterQuery of(final ProxyTargetFilterQueryInfo tfqInfo) {
+        final ProxyTargetFilterQuery tfq = new ProxyTargetFilterQuery();
+
+        tfq.setId(tfqInfo.getId());
+        tfq.setName(tfqInfo.getName());
+        tfq.setQuery(tfqInfo.getQuery());
+
+        return tfq;
     }
 
-    @Override
-    public Long getDistributionSetId() {
-        return autoAssignDsIdNameVersion != null ? autoAssignDsIdNameVersion.getId() : null;
+    /**
+     * Gets the Id, name and query of target filter query
+     *
+     * @return proxy of Id, Name and query
+     */
+    public ProxyTargetFilterQueryInfo getInfo() {
+        return new ProxyTargetFilterQueryInfo(getId(), getName(), getQuery());
     }
 }

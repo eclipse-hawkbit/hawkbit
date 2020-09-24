@@ -11,18 +11,18 @@ package org.eclipse.hawkbit.ui.common.data.proxies;
 import java.util.Objects;
 
 /**
- * Holds information about a type
+ * Holds information about a target filter query
  */
-public class ProxyTypeInfo extends ProxyIdentifiableEntity {
+public class ProxyTargetFilterQueryInfo extends ProxyIdentifiableEntity {
     private static final long serialVersionUID = 1L;
 
     private String name;
-    private String key;
+    private String query;
 
     /**
      * Constructor
      */
-    public ProxyTypeInfo() {
+    public ProxyTargetFilterQueryInfo() {
         super();
     }
 
@@ -30,46 +30,37 @@ public class ProxyTypeInfo extends ProxyIdentifiableEntity {
      * Constructor
      * 
      * @param id
-     *            type ID
+     *            target filter ID
      * @param name
-     *            type name
-     * @param key
-     *            type key
+     *            target filter name
+     * @param query
+     *            target filter query
      */
-    public ProxyTypeInfo(final Long id, final String name, final String key) {
+    public ProxyTargetFilterQueryInfo(final Long id, final String name, final String query) {
         super(id);
         this.name = name;
-        this.key = key;
+        this.query = query;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getKey() {
-        return key;
-    }
-
     public void setName(final String name) {
         this.name = name;
     }
 
-    public void setKey(final String key) {
-        this.key = key;
+    public String getQuery() {
+        return query;
     }
 
-    /**
-     * Gets the key and name
-     *
-     * @return keyAndName
-     */
-    public String getKeyAndName() {
-        return key + " (" + getName() + ")";
+    public void setQuery(final String query) {
+        this.query = query;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getKey());
+        return Objects.hash(getId(), getName(), getQuery());
     }
 
     @Override
@@ -80,8 +71,8 @@ public class ProxyTypeInfo extends ProxyIdentifiableEntity {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ProxyTypeInfo other = (ProxyTypeInfo) obj;
+        final ProxyTargetFilterQueryInfo other = (ProxyTargetFilterQueryInfo) obj;
         return Objects.equals(this.getId(), other.getId()) && Objects.equals(this.getName(), other.getName())
-                && Objects.equals(this.getKey(), other.getKey());
+                && Objects.equals(this.getQuery(), other.getQuery());
     }
 }

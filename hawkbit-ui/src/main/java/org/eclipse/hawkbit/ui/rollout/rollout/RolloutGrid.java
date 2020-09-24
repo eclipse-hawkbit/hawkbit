@@ -268,7 +268,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 
-        GridComponentBuilder.addColumn(this, ProxyRollout::getDistributionSetNameVersion).setId(DIST_NAME_VERSION_ID)
+        GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion).setId(DIST_NAME_VERSION_ID)
                 .setCaption(i18n.getMessage("header.distributionset")).setHidable(true).setExpandRatio(2);
 
         GridComponentBuilder

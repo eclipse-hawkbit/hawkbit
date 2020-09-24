@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTypeDataProvider;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
@@ -24,7 +24,7 @@ public class SystemConfigWindowDependencies {
     private final VaadinMessageSource i18n;
     private final SpPermissionChecker permissionChecker;
     private final DistributionSetTypeManagement distributionSetTypeManagement;
-    private final DistributionSetTypeDataProvider<ProxyType> distributionSetTypeDataProvider;
+    private final DistributionSetTypeDataProvider<ProxyTypeInfo> distributionSetTypeDataProvider;
 
     /**
      * Constructor for VaadinMessageSource
@@ -43,7 +43,7 @@ public class SystemConfigWindowDependencies {
     public SystemConfigWindowDependencies(final SystemManagement systemManagement, final VaadinMessageSource i18n,
             final SpPermissionChecker permissionChecker,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetTypeDataProvider<ProxyType> distributionSetTypeDataProvider) {
+            final DistributionSetTypeDataProvider<ProxyTypeInfo> distributionSetTypeDataProvider) {
         this.systemManagement = systemManagement;
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
@@ -82,7 +82,7 @@ public class SystemConfigWindowDependencies {
     /**
      * @return Distribution set type data provider
      */
-    public DistributionSetTypeDataProvider<ProxyType> getDistributionSetTypeDataProvider() {
+    public DistributionSetTypeDataProvider<ProxyTypeInfo> getDistributionSetTypeDataProvider() {
         return distributionSetTypeDataProvider;
     }
 }

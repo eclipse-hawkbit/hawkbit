@@ -10,12 +10,13 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
+import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.tenantconfiguration.window.SystemConfigWindowDependencies;
 import org.eclipse.hawkbit.ui.tenantconfiguration.window.SystemConfigWindowLayoutComponentBuilder;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -41,7 +42,7 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
 
     private final SpPermissionChecker permissionChecker;
     private Long currentDefaultDistSetTypeId;
-    private ComboBox<ProxyType> dsSetTypeComboBox = new ComboBox<>();
+    private ComboBox<ProxyTypeInfo> dsSetTypeComboBox;
     private final Binder<ProxySystemConfigWindow> binder;
     private final transient SystemConfigWindowLayoutComponentBuilder builder;
     private Label changeIcon;
@@ -52,8 +53,8 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
         this.i18n = i18n;
         this.permissionChecker = permChecker;
         this.binder = binder;
-        final DistributionSetTypeDataProvider<ProxyType> dataProvider = new DistributionSetTypeDataProvider<>(
-                dsTypeManagement, new TypeToProxyTypeMapper<>());
+        final DistributionSetTypeDataProvider<ProxyTypeInfo> dataProvider = new DistributionSetTypeDataProvider<>(
+                dsTypeManagement, new TypeToTypeInfoMapper<DistributionSetType>());
         final SystemConfigWindowDependencies dependencies = new SystemConfigWindowDependencies(systemManagement, i18n,
                 permChecker, dsTypeManagement, dataProvider);
         this.builder = new SystemConfigWindowLayoutComponentBuilder(dependencies);
@@ -105,7 +106,7 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
     }
 
     private Long getCurrentDistributionSetTypeId() {
-        return binder.getBean().getDistributionSetTypeId();
+        return binder.getBean().getDsTypeInfo().getId();
     }
 
     /**
@@ -113,7 +114,7 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
      *
      * @param event
      */
-    private void selectDistributionSetTypeValue(final HasValue.ValueChangeEvent<ProxyType> event) {
+    private void selectDistributionSetTypeValue(final HasValue.ValueChangeEvent<ProxyTypeInfo> event) {
         changeIcon.setVisible(!event.getValue().getId().equals(currentDefaultDistSetTypeId));
     }
 
