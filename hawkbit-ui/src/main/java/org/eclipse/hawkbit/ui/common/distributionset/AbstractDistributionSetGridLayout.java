@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.ui.common.data.filters.DsFilterParams;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.TopicEventListener;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;

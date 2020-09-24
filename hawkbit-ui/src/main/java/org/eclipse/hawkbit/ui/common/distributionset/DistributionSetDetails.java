@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.MetadataDetailsGrid;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsGrid;
 import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsGrid;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;

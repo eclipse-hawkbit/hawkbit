@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.ui.common.distributionset;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
