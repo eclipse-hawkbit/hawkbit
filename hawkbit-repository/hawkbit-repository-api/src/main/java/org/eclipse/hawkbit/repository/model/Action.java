@@ -131,6 +131,11 @@ public interface Action extends TenantAwareBaseEntity {
     String getExternalRef();
 
     /**
+     * @return the username that triggered this action (directly or indirectly)
+     */
+    String getTriggeredBy();
+
+    /**
      * checks if the {@link #getForcedTime()} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.

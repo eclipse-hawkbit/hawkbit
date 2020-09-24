@@ -30,12 +30,12 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -240,6 +240,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
+            targetFilterQuery.setAutoAssignTriggeredBy(null);
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             // we cannot be sure that the quota was enforced at creation time
@@ -248,8 +249,10 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
             final JpaDistributionSet ds = findDistributionSetAndThrowExceptionIfNotFound(update.getDsId());
+            final String triggeredBy = TenantAwareHolder.getInstance().getTenantAware().getCurrentUsername();
             verifyDistributionSetAndThrowExceptionIfNotValid(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAutoAssignTriggeredBy(triggeredBy);
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
         }

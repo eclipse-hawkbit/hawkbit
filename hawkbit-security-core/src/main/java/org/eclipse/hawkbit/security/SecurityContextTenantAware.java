@@ -47,6 +47,18 @@ public class SecurityContextTenantAware implements TenantAware {
     }
 
     @Override
+    public String getCurrentUsername() {
+        final SecurityContext context = SecurityContextHolder.getContext();
+        if (context.getAuthentication() != null) {
+            final Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserPrincipal) {
+                return ((UserPrincipal) principal).getUsername();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> callable) {
         final SecurityContext originalContext = SecurityContextHolder.getContext();
         try {
