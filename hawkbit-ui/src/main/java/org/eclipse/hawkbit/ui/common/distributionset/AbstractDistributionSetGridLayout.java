@@ -34,8 +34,8 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
     private static final long serialVersionUID = 1L;
 
     private final transient Set<TopicEventListener> listeners = new HashSet<>();
-    private final DsWindowBuilder dsWindowBuilder;
-    private final DsMetaDataWindowBuilder dsMetaDataWindowBuilder;
+    private final transient DsWindowBuilder dsWindowBuilder;
+    private final transient DsMetaDataWindowBuilder dsMetaDataWindowBuilder;
     private final EventView eventView;
 
     /**
