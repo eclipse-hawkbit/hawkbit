@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.distributionset.AbstractDistributionSetGridLayout;
-import org.eclipse.hawkbit.ui.common.distributionset.AbstractDsGrid;
 import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetDetails;
 import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetDetailsHeader;
 import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetGridHeader;
@@ -166,7 +165,7 @@ public class DistributionSetGridLayout extends AbstractDistributionSetGridLayout
     }
 
     @Override
-    public AbstractDsGrid<?> getDistributionGrid() {
+    public DistributionSetGrid getDistributionGrid() {
         return distributionSetGrid;
     }
 

@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.data.filters.DsFilterParams;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.TopicEventListener;
@@ -112,7 +113,7 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      *
      * @return the distributionGrid
      */
-    public abstract AbstractDsGrid<?> getDistributionGrid();
+    public abstract AbstractDsGrid<? extends DsFilterParams> getDistributionGrid();
 
     /**
      * Returns the {@link DistributionSetGridHeader}
