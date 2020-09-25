@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.data.mappers;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdNameVersion;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 
@@ -37,7 +37,7 @@ public class TargetFilterQueryToProxyTargetFilterMapper
         final DistributionSet distributionSet = targetFilterQuery.getAutoAssignDistributionSet();
         if (distributionSet != null) {
             proxyTargetFilter.setAutoAssignmentEnabled(true);
-            proxyTargetFilter.setAutoAssignDsIdNameVersion(new ProxyIdNameVersion(distributionSet.getId(),
+            proxyTargetFilter.setDistributionSetInfo(new ProxyDistributionSetInfo(distributionSet.getId(),
                     distributionSet.getName(), distributionSet.getVersion()));
             proxyTargetFilter.setAutoAssignActionType(targetFilterQuery.getAutoAssignActionType());
         }

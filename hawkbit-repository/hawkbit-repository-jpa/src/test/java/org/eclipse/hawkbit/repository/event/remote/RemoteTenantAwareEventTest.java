@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -33,22 +34,50 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     private static final String APPLICATION_ID_DEFAULT = "Node";
 
-    @Test
-    @Description("Verifies that a MultiActionEvent can be properly serialized and deserialized")
-    public void testMultiActionEvent() {
+    private Action createAction(final String controllerId) {
+        final JpaAction generateAction = new JpaAction();
+        generateAction.setActionType(ActionType.FORCED);
+        generateAction.setTarget(testdataFactory.createTarget(controllerId));
+        generateAction.setStatus(Status.RUNNING);
+        return generateAction;
+    }
 
+    @Test
+    @Description("Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized")
+    public void testMultiActionAssignEvent() {
         final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
                 "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
-        final MultiActionEvent event = new MultiActionEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT, controllerIds);
+        final List<Action> actions = controllerIds.stream().map(this::createAction).collect(Collectors.toList());
 
-        final MultiActionEvent remoteEventProtoStuff = createProtoStuffEvent(event);
-        assertThat(event).isEqualTo(remoteEventProtoStuff);
-        assertThat(remoteEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
+        final MultiActionAssignEvent assignEvent = new MultiActionAssignEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
+                actions);
 
-        final MultiActionEvent remoteEventJackson = createJacksonEvent(event);
-        assertThat(event).isEqualTo(remoteEventJackson);
-        assertThat(remoteEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
+        final MultiActionAssignEvent remoteAssignEventProtoStuff = createProtoStuffEvent(assignEvent);
+        assertThat(assignEvent).isEqualTo(remoteAssignEventProtoStuff);
+        assertThat(remoteAssignEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
 
+        final MultiActionAssignEvent remoteAssignEventJackson = createJacksonEvent(assignEvent);
+        assertThat(assignEvent).isEqualTo(remoteAssignEventJackson);
+        assertThat(remoteAssignEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
+    }
+
+    @Test
+    @Description("Verifies that a MultiActionCancelEvent can be properly serialized and deserialized")
+    public void testMultiActionCancelEvent() {
+        final List<String> controllerIds = Arrays.asList("id0", "id1", "id2", "id3",
+                "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
+        final List<Action> actions = controllerIds.stream().map(this::createAction).collect(Collectors.toList());
+
+        final MultiActionCancelEvent cancelEvent = new MultiActionCancelEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
+                actions);
+
+        final MultiActionCancelEvent remoteCancelEventProtoStuff = createProtoStuffEvent(cancelEvent);
+        assertThat(cancelEvent).isEqualTo(remoteCancelEventProtoStuff);
+        assertThat(remoteCancelEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
+
+        final MultiActionCancelEvent remoteCancelEventJackson = createJacksonEvent(cancelEvent);
+        assertThat(cancelEvent).isEqualTo(remoteCancelEventJackson);
+        assertThat(remoteCancelEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
     }
 
     @Test

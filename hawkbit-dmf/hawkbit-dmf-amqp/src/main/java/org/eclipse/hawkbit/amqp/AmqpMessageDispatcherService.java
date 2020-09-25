@@ -8,17 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
-
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -66,6 +55,17 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
  * delegate the messages to a {@link AmqpMessageSenderService}.
@@ -104,8 +104,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param targetManagement
      *            to access target information
      * @param serviceMatcher
-     *            to check in cluster case if the message is from the same
-     *            cluster node
+     *            to check in cluster case if the message is from the same cluster
+     *            node
      * @param distributionSetManagement
      *            to retrieve modules
      */
@@ -128,8 +128,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after the Distribution
-     * set has been assign to a Target.
+     * Method to send a message to a RabbitMQ Exchange after the Distribution set
+     * has been assign to a Target.
      *
      * @param assignedEvent
      *            the object to be send.
@@ -157,7 +157,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param e
+     * @param multiActionEvent
      *            the Multi-Action event to be processed
      */
     @EventListener(classes = MultiActionEvent.class)
@@ -242,9 +242,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     /**
      * Method to get the type of event depending on whether the action is a
-     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or
-     * not based on defined maintenance schedule. In case of no maintenance
-     * schedule or if there is a valid window available, the topic
+     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or not
+     * based on defined maintenance schedule. In case of no maintenance schedule or
+     * if there is a valid window available, the topic
      * {@link EventTopic#DOWNLOAD_AND_INSTALL} is returned else
      * {@link EventTopic#DOWNLOAD} is returned.
      *
@@ -260,8 +260,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Determines the {@link EventTopic} for the given {@link Action}, depending
-     * on its action type.
+     * Determines the {@link EventTopic} for the given {@link Action}, depending on
+     * its action type.
      *
      * @param action
      *            to obtain the corresponding {@link EventTopic} for
@@ -276,8 +276,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after the assignment of
-     * the Distribution set to a Target has been canceled.
+     * Method to send a message to a RabbitMQ Exchange after the assignment of the
+     * Distribution set to a Target has been canceled.
      *
      * @param cancelEvent
      *            that is to be converted to a DMF message
@@ -300,12 +300,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after a Target was
-     * deleted.
+     * Method to send a message to a RabbitMQ Exchange after a Target was deleted.
      *
      * @param deleteEvent
-     *            the TargetDeletedEvent which holds the necessary data for
-     *            sending a target delete message.
+     *            the TargetDeletedEvent which holds the necessary data for sending
+     *            a target delete message.
      */
     @EventListener(classes = TargetDeletedEvent.class)
     protected void targetDelete(final TargetDeletedEvent deleteEvent) {

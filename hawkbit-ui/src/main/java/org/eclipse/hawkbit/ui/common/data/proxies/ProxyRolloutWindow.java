@@ -52,8 +52,8 @@ public class ProxyRolloutWindow implements Serializable {
         setActionType(rollout.getActionType());
         setStartAt(rollout.getStartAt());
         setForcedTime(rollout.getForcedTime());
-        setDistributionSetId(rollout.getDistributionSetId());
         setTargetFilterQuery(rollout.getTargetFilterQuery());
+        setDistributionSetInfo(rollout.getDsInfo());
         setNumberOfGroups(rollout.getNumberOfGroups());
     }
 
@@ -187,25 +187,6 @@ public class ProxyRolloutWindow implements Serializable {
     }
 
     /**
-     * Gets the rollout form targetFilterQuery
-     *
-     * @return targetFilterQuery
-     */
-    public String getTargetFilterQuery() {
-        return rolloutForm.getTargetFilterQuery();
-    }
-
-    /**
-     * Sets the targetFilterQuery
-     *
-     * @param targetFilterQuery
-     *            Rollout form target filter query
-     */
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        rolloutForm.setTargetFilterQuery(targetFilterQuery);
-    }
-
-    /**
      * Gets the time rollout start time
      *
      * @return startAt
@@ -225,39 +206,58 @@ public class ProxyRolloutWindow implements Serializable {
     }
 
     /**
+     * @return Rollout form targetFilter Info
+     */
+    public ProxyTargetFilterQueryInfo getTargetFilterInfo() {
+        return rolloutForm.getTargetFilterQueryInfo();
+    }
+
+    /**
+     * Sets the targetFilter Info
+     *
+     * @param tfqInfo
+     *            Info of rollout form targetFilter
+     */
+    public void setTargetFilterInfo(final ProxyTargetFilterQueryInfo tfqInfo) {
+        rolloutForm.setTargetFilterQueryInfo(tfqInfo);
+    }
+
+    /**
+     * Gets the rollout form targetFilterQuery
+     *
+     * @return targetFilterQuery
+     */
+    public String getTargetFilterQuery() {
+        return rolloutForm.getTargetFilterQuery();
+    }
+
+    /**
+     * Sets the targetFilterQuery
+     *
+     * @param targetFilterQuery
+     *            Rollout form target filter query
+     */
+    public void setTargetFilterQuery(final String targetFilterQuery) {
+        rolloutForm.setTargetFilterQuery(targetFilterQuery);
+    }
+
+    /**
      * Gets the Id of rollout form distribution set
      *
      * @return distributionSetId
      */
     public Long getDistributionSetId() {
-        return rolloutForm.getDistributionSetId();
+        return rolloutForm.getDistributionSetInfo() != null ? rolloutForm.getDistributionSetInfo().getId() : null;
     }
 
     /**
-     * Sets the distributionSetId
+     * Sets the distribution set info
      *
-     * @param distributionSetId
-     *            Id of rollout form distribution set
+     * @param dsInfo
+     *            Info of rollout form distribution set
      */
-    public void setDistributionSetId(final Long distributionSetId) {
-        rolloutForm.setDistributionSetId(distributionSetId);
-    }
-
-    /**
-     * @return Rollout form targetFilter id
-     */
-    public Long getTargetFilterId() {
-        return rolloutForm.getTargetFilterId();
-    }
-
-    /**
-     * Sets the targetFilterId
-     *
-     * @param targetFilterId
-     *            Id of rollout form targetFilter
-     */
-    public void setTargetFilterId(final Long targetFilterId) {
-        rolloutForm.setTargetFilterId(targetFilterId);
+    public void setDistributionSetInfo(final ProxyDistributionSetInfo dsInfo) {
+        rolloutForm.setDistributionSetInfo(dsInfo);
     }
 
     /**

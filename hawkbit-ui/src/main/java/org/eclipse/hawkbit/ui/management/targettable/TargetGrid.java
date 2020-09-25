@@ -273,8 +273,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
         getFilterSupport().addMapping(FilterType.QUERY, TargetManagementFilterParams::setTargetFilterQueryId,
                 targetTagFilterLayoutUiState.getClickedTargetFilterQueryId());
         getFilterSupport().addMapping(FilterType.DISTRIBUTION, TargetManagementFilterParams::setDistributionId,
-                targetGridLayoutUiState.getFilterDsIdNameVersion() != null
-                        ? targetGridLayoutUiState.getFilterDsIdNameVersion().getId()
+                targetGridLayoutUiState.getFilterDsInfo() != null ? targetGridLayoutUiState.getFilterDsInfo().getId()
                         : null);
     }
 

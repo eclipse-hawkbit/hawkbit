@@ -48,19 +48,10 @@ public class ProxyType extends ProxyFilterButton {
     }
 
     /**
-     * Gets the key and name
-     *
-     * @return keyAndName
-     */
-    public String getKeyAndName() {
-        return key + " (" + getName() + ")";
-    }
-
-    /**
      * Sets the key
      *
      * @param key
-     *         Entity key
+     *            Entity key
      */
     public void setKey(final String key) {
         this.key = key;
@@ -121,7 +112,7 @@ public class ProxyType extends ProxyFilterButton {
      * Sets the smTypeAssign
      *
      * @param smTypeAssign
-     *         Software module type assign
+     *            Software module type assign
      */
     public void setSmTypeAssign(final SmTypeAssign smTypeAssign) {
         this.smTypeAssign = smTypeAssign;
@@ -140,7 +131,7 @@ public class ProxyType extends ProxyFilterButton {
      * Sets the selectedSmTypes
      *
      * @param selectedSmTypes
-     *         Selected software module types
+     *            Selected software module types
      */
     public void setSelectedSmTypes(final Set<ProxyType> selectedSmTypes) {
         this.selectedSmTypes = selectedSmTypes;
@@ -159,7 +150,7 @@ public class ProxyType extends ProxyFilterButton {
      * Sets the maxAssignments
      *
      * @param maxAssignments
-     *         Entity maxAssignments
+     *            Entity maxAssignments
      */
     public void setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
