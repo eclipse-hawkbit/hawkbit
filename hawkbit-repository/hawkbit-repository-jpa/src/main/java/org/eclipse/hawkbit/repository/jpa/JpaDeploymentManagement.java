@@ -188,16 +188,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final String triggeredBy,
-            final List<DeploymentRequest> deploymentRequests) {
-        return assignDistributionSets(triggeredBy, deploymentRequests, null);
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests) {
         return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests);
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSets(final String triggeredBy,
+            final List<DeploymentRequest> deploymentRequests) {
+        return assignDistributionSets(triggeredBy, deploymentRequests, null);
     }
 
     @Override
@@ -428,12 +426,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
     }
 
-    private List<JpaAction> createActions(final String triggeredBy, final Collection<TargetWithActionType> targetsWithActionType,
-            final List<JpaTarget> targets, final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet set) {
+    private List<JpaAction> createActions(final String triggeredBy,
+            final Collection<TargetWithActionType> targetsWithActionType, final List<JpaTarget> targets,
+            final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet set) {
 
-        return targetsWithActionType.stream().map(twt -> assignmentStrategy.createTargetAction(twt, targets, set))
-                .filter(Objects::nonNull).peek(a -> a.setTriggeredBy(triggeredBy))
-                .map(actionRepository::save).collect(Collectors.toList());
+        return targetsWithActionType.stream()
+                .map(twt -> assignmentStrategy.createTargetAction(triggeredBy, twt, targets, set))
+                .filter(Objects::nonNull)
+                .map(actionRepository::save)
+                .collect(Collectors.toList());
     }
 
     private void createActionsStatus(final Collection<JpaAction> actions,

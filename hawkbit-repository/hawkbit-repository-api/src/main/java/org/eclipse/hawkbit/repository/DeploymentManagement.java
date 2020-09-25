@@ -86,37 +86,6 @@ public interface DeploymentManagement {
      *            the username of the user who triggered the assignment
      * @param deploymentRequests
      *            information about all target-ds-assignments that shall be made
-     *
-     * @return the list of assignment results
-     *
-     * @throws IncompleteDistributionSetException
-     *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             defined by the {@link DistributionSetType}.
-     *
-     * @throws EntityNotFoundException
-     *             if either provided {@link DistributionSet} or {@link Target}s
-     *             do not exist
-     *
-     * @throws AssignmentQuotaExceededException
-     *             if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
-     * @throws MultiAssignmentIsNotEnabledException
-     *             if the request results in multiple assignments to the same
-     *             target and multiassignment is disabled
-     *
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(String triggeredBy,
-            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
-
-    /**
-     * Assigns {@link DistributionSet}s to {@link Target}s according to the
-     * {@link DeploymentRequest}.
-     *
-     * @param triggeredBy
-     *            the username of the user who triggered the assignment
-     * @param deploymentRequests
-     *            information about all target-ds-assignments that shall be made
      * @param actionMessage
      *            an optional message for the action status
      * 

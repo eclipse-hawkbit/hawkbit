@@ -201,8 +201,8 @@ public abstract class AbstractDsAssignmentStrategy {
                 new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
     }
 
-    JpaAction createTargetAction(final TargetWithActionType targetWithActionType, final List<JpaTarget> targets,
-            final JpaDistributionSet set) {
+    JpaAction createTargetAction(final String triggeredBy, final TargetWithActionType targetWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
@@ -219,6 +219,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
             actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
             actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
+            actionForTarget.setTriggeredBy(triggeredBy);
             return actionForTarget;
         }).orElseGet(() -> {
             LOG.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
