@@ -8,99 +8,59 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.tag.AbstractAddTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for add target tag window
  */
-public class AddTargetTagWindowController extends AbstractEntityWindowController<ProxyTag, ProxyTag> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class AddTargetTagWindowController extends AbstractAddTagWindowController {
 
     private final TargetTagManagement targetTagManagement;
-
-    private final TagWindowLayout<ProxyTag> layout;
 
     /**
      * Constructor for AddTargetTagWindowController
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param entityFactory
-     *          EntityFactory
+     *            EntityFactory
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param targetTagManagement
-     *          TargetTagManagement
+     *            TargetTagManagement
      * @param layout
-     *          TagWindowLayout
+     *            TagWindowLayout
      */
     public AddTargetTagWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final UINotification uiNotification,
             final TargetTagManagement targetTagManagement, final TagWindowLayout<ProxyTag> layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(i18n, entityFactory, eventBus, uiNotification, layout, ProxyTarget.class);
 
         this.targetTagManagement = targetTagManagement;
-
-        this.layout = layout;
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
-        return layout;
+    protected Tag createEntityInRepository(final TagCreate tagCreate) {
+        return targetTagManagement.create(tagCreate);
     }
 
     @Override
-    protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
-        // We ignore the method parameter, because we are interested in the
-        // empty object, that we can populate with defaults
-        return new ProxyTag();
-    }
-
-    @Override
-    protected void persistEntity(final ProxyTag entity) {
-        final TargetTag newTargetTag = targetTagManagement.create(entityFactory.tag().create().name(entity.getName())
-                .description(entity.getDescription()).colour(entity.getColour()));
-
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newTargetTag.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyTarget.class, ProxyTag.class, newTargetTag.getId()));
-    }
-
-    @Override
-    protected boolean isEntityValid(final ProxyTag entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
-            return false;
-        }
-
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (targetTagManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.tag.duplicate.check", trimmedName));
-            return false;
-        }
-
-        return true;
+    protected Optional<TargetTag> getTagByNameFromRepository(final String trimmedName) {
+        return targetTagManagement.getByName(trimmedName);
     }
 }

@@ -8,34 +8,27 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.tag.AbstractAddTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for add distribution tag window
  */
-public class AddDsTagWindowController extends AbstractEntityWindowController<ProxyTag, ProxyTag> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class AddDsTagWindowController extends AbstractAddTagWindowController {
 
     private final DistributionSetTagManagement dsTagManagement;
-
-    private final TagWindowLayout<ProxyTag> layout;
 
     /**
      * Constructor for AddDsTagWindowController
@@ -56,51 +49,17 @@ public class AddDsTagWindowController extends AbstractEntityWindowController<Pro
     public AddDsTagWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
             final UIEventBus eventBus, final UINotification uiNotification,
             final DistributionSetTagManagement dsTagManagement, final TagWindowLayout<ProxyTag> layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
-
+        super(i18n, entityFactory, eventBus, uiNotification, layout, ProxyDistributionSet.class);
         this.dsTagManagement = dsTagManagement;
-
-        this.layout = layout;
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
-        return layout;
+    protected Tag createEntityInRepository(final TagCreate tagCreate) {
+        return dsTagManagement.create(tagCreate);
     }
 
     @Override
-    protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
-        // We ignore the method parameter, because we are interested in the
-        // empty object, that we can populate with defaults
-        return new ProxyTag();
-    }
-
-    @Override
-    protected void persistEntity(final ProxyTag entity) {
-        final DistributionSetTag newDsTag = dsTagManagement.create(entityFactory.tag().create().name(entity.getName())
-                .description(entity.getDescription()).colour(entity.getColour()));
-
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newDsTag.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, ProxyTag.class, newDsTag.getId()));
-    }
-
-    @Override
-    protected boolean isEntityValid(final ProxyTag entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
-            return false;
-        }
-
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (dsTagManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.tag.duplicate.check", trimmedName));
-            return false;
-        }
-
-        return true;
+    protected Optional<DistributionSetTag> getTagByNameFromRepository(final String trimmedName) {
+        return dsTagManagement.getByName(trimmedName);
     }
 }
