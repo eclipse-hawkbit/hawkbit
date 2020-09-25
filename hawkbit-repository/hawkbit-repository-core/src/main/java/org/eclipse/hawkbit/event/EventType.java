@@ -17,7 +17,8 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
@@ -135,7 +136,8 @@ public class EventType {
         TYPES.put(37, TargetAttributesRequestedEvent.class);
 
         // deployment event for assignments and /or cancellations
-        TYPES.put(38, MultiActionEvent.class);
+        TYPES.put(38, MultiActionAssignEvent.class);
+        TYPES.put(39, MultiActionCancelEvent.class);
     }
 
     private int value;
