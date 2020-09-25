@@ -84,7 +84,7 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         generateAction.setTarget(target);
         generateAction.setDistributionSet(distributionSet);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setTriggeredBy(tenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(tenantAware.getCurrentUsername());
         return actionRepository.save(generateAction);
     }
 

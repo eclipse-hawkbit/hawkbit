@@ -252,6 +252,8 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // running
         final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
         assertThat(runningActions).hasSize(amountTargetsForRollout / amountGroups);
+        assertThat(runningActions).as("Created actions are initiated by rollout creator")
+                .allMatch(a -> a.getInitiatedBy().equals(createdRollout.getCreatedBy()));
         // the rest targets are only scheduled
         assertThat(findActionsByRolloutAndStatus(createdRollout, Status.SCHEDULED))
                 .hasSize(amountTargetsForRollout - (amountTargetsForRollout / amountGroups));

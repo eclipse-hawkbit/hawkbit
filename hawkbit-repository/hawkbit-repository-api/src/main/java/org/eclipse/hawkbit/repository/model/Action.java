@@ -131,9 +131,9 @@ public interface Action extends TenantAwareBaseEntity {
     String getExternalRef();
 
     /**
-     * @return the username that triggered this action (directly or indirectly)
+     * @return the username that initiated this action (directly or indirectly)
      */
-    String getTriggeredBy();
+    String getInitiatedBy();
 
     /**
      * checks if the {@link #getForcedTime()} is hit by the given

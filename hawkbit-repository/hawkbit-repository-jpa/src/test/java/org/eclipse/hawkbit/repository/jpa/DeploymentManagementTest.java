@@ -480,7 +480,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
-                .allMatch(action -> !action.isActive());
+                .allMatch(action -> !action.isActive())
+                .as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent())
                 .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
@@ -514,6 +516,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
         targetIds.forEach(controllerId -> {
             final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, controllerId).stream()
+                    .peek(a -> assertThat(a.getInitiatedBy()).as("Actions should be initiated by current user")
+                            .isEqualTo(tenantAware.getCurrentUsername()))
                     .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });
@@ -587,10 +591,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
             final Status status) {
         final List<Action> assignment = actionRepository.findByDistributionSetId(PAGE, dsId).getContent();
+        final String currentUsername = tenantAware.getCurrentUsername();
 
         assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
                 .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
-                .as("State is " + status).allMatch(action -> action.getStatus() == status);
+                .as("State is " + status).allMatch(action -> action.getStatus() == status)
+                .as("Initiated by " + currentUsername).allMatch(a -> a.getInitiatedBy().equals(currentUsername));
         final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
         assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
                 assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
@@ -617,7 +623,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
         targets.forEach(target -> {
             final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, target.getControllerId())
-                    .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+                    .stream()
+                    .peek(a -> assertThat(a.getInitiatedBy()).as("Initiated by current user")
+                            .isEqualTo(tenantAware.getCurrentUsername()))
+                    .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });
     }
@@ -647,6 +656,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         targets.forEach(target -> {
             actionRepository.findByTargetControllerId(PAGE, target.getControllerId()).forEach(action -> {
                 assertThat(action.getDistributionSet().getId()).isIn(dsIds);
+                assertThat(action.getInitiatedBy()).as("Should be Initiated by current user")
+                        .isEqualTo(tenantAware.getCurrentUsername());
                 deploymentManagement.cancelAction(action.getId());
             });
         });
@@ -851,7 +862,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds, savedDeployedTargets);
 
         // verify that one Action for each assignDistributionSet
-        assertThat(actionRepository.findAll(PAGE).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
+        final Page<JpaAction> actions = actionRepository.findAll(PAGE);
+        assertThat(actions.getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
+        assertThat(actions).as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
 
         final Iterable<Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
 
@@ -945,6 +959,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(PAGE);
+        assertThat(page).as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
         // and verify the number
         assertThat(page.getTotalElements()).as("wrong size of actions")
                 .isEqualTo(noOfDeployedTargets * noOfDistributionSets);

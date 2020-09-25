@@ -240,7 +240,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
-            targetFilterQuery.setAutoAssignTriggeredBy(null);
+            targetFilterQuery.setAutoAssignInitiatedBy(null);
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             // we cannot be sure that the quota was enforced at creation time
@@ -249,10 +249,10 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
             final JpaDistributionSet ds = findDistributionSetAndThrowExceptionIfNotFound(update.getDsId());
-            final String triggeredBy = TenantAwareHolder.getInstance().getTenantAware().getCurrentUsername();
+            final String initiatedBy = TenantAwareHolder.getInstance().getTenantAware().getCurrentUsername();
             verifyDistributionSetAndThrowExceptionIfNotValid(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
-            targetFilterQuery.setAutoAssignTriggeredBy(triggeredBy);
+            targetFilterQuery.setAutoAssignInitiatedBy(initiatedBy);
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
         }

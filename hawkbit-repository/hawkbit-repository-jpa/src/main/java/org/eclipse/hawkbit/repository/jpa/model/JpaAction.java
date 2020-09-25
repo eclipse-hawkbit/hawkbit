@@ -137,8 +137,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
     private String externalRef;
 
-    @Column(name = "triggered_by", updatable = false, nullable = false, length = 64)
-    private String triggeredBy;
+    @Column(name = "initiated_by", updatable = false, nullable = false, length = 64)
+    private String initiatedBy;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -367,12 +367,12 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return externalRef;
     }
 
-    public void setTriggeredBy(final String triggeredBy) {
-        this.triggeredBy = triggeredBy;
+    public void setInitiatedBy(final String initiatedBy) {
+        this.initiatedBy = initiatedBy;
     }
 
     @Override
-    public String getTriggeredBy() {
-        return triggeredBy;
+    public String getInitiatedBy() {
+        return initiatedBy;
     }
 }

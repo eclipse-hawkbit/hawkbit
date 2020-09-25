@@ -147,10 +147,10 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                             targetFilterQuery.getAutoAssignWeight().orElse(null), PAGE_SIZE);
                     final int count = deploymentRequests.size();
                     if (count > 0) {
-                        final String triggeredBy = StringUtils.isEmpty(targetFilterQuery.getAutoAssignTriggeredBy()) ?
+                        final String initiatedBy = StringUtils.isEmpty(targetFilterQuery.getAutoAssignInitiatedBy()) ?
                                 targetFilterQuery.getCreatedBy() :
-                                targetFilterQuery.getAutoAssignTriggeredBy();
-                        deploymentManagement.assignDistributionSets(triggeredBy, deploymentRequests, actionMessage);
+                                targetFilterQuery.getAutoAssignInitiatedBy();
+                        deploymentManagement.assignDistributionSets(initiatedBy, deploymentRequests, actionMessage);
                     }
                     return count;
                 });

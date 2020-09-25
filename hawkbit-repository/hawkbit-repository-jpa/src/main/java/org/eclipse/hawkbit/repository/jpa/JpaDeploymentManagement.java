@@ -195,21 +195,21 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final String triggeredBy,
+    public List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .validate(deploymentRequests);
-        return assignDistributionSets(triggeredBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
+        return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
-    private List<DistributionSetAssignmentResult> assignDistributionSets(final String triggeredBy,
+    private List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
             final List<DeploymentRequest> deploymentRequests, final String actionMessage,
             final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateRequestForAssignments(deploymentRequests);
         final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
 
         final List<DistributionSetAssignmentResult> results = assignmentsByDsIds.entrySet().stream()
-                .map(entry -> assignDistributionSetToTargetsWithRetry(triggeredBy, entry.getKey(), entry.getValue(), actionMessage,
+                .map(entry -> assignDistributionSetToTargetsWithRetry(initiatedBy, entry.getKey(), entry.getValue(), actionMessage,
                         strategy))
                 .collect(Collectors.toList());
         strategy.sendDeploymentEvents(results);
@@ -239,11 +239,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final String triggeredBy, final Long dsID,
+    private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final String initiatedBy, final Long dsID,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
         final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback = retryContext -> assignDistributionSetToTargets(
-                triggeredBy, dsID, targetsWithActionType, actionMessage, assignmentStrategy);
+                initiatedBy, dsID, targetsWithActionType, actionMessage, assignmentStrategy);
         return retryTemplate.execute(retryCallback);
     }
 
@@ -261,8 +261,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
-     * @param triggeredBy
-     *            the username of the user who triggered the assignment
+     * @param initiatedBy
+     *            the username of the user who initiated the assignment
      * @param dsID
      *            the ID of the distribution set to assign
      * @param targetsWithActionType
@@ -277,7 +277,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}.
      */
-    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String triggeredBy, final Long dsID,
+    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsID,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
@@ -299,7 +299,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
                 .filter(target -> existingTargetIds.contains(target.getControllerId())).collect(Collectors.toList());
 
-        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(triggeredBy,
+        final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(initiatedBy,
                 existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSetEntity,
                 targetEntities);
         return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionType.size());
@@ -314,7 +314,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 Collections.emptyList());
     }
 
-    private List<JpaAction> doAssignDistributionSetToTargets(final String triggeredBy,
+    private List<JpaAction> doAssignDistributionSetToTargets(final String initiatedBy,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
@@ -329,7 +329,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
                 targetEntitiesIdsChunks);
-        final List<JpaAction> assignedActions = createActions(triggeredBy, targetsWithActionType, targetEntities,
+        final List<JpaAction> assignedActions = createActions(initiatedBy, targetsWithActionType, targetEntities,
                 assignmentStrategy, distributionSetEntity);
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
@@ -421,12 +421,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
     }
 
-    private List<JpaAction> createActions(final String triggeredBy,
+    private List<JpaAction> createActions(final String initiatedBy,
             final Collection<TargetWithActionType> targetsWithActionType, final List<JpaTarget> targets,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet set) {
 
         return targetsWithActionType.stream()
-                .map(twt -> assignmentStrategy.createTargetAction(triggeredBy, twt, targets, set))
+                .map(twt -> assignmentStrategy.createTargetAction(initiatedBy, twt, targets, set))
                 .filter(Objects::nonNull)
                 .map(actionRepository::save)
                 .collect(Collectors.toList());

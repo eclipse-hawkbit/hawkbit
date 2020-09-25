@@ -624,7 +624,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             action.setStatus(Status.SCHEDULED);
             action.setRollout(rollout);
             action.setRolloutGroup(rolloutGroup);
-            action.setTriggeredBy(rollout.getCreatedBy());
+            action.setInitiatedBy(rollout.getCreatedBy());
             rollout.getWeight().ifPresent(action::setWeight);
             actionRepository.save(action);
         });

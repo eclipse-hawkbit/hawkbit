@@ -47,7 +47,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         action.setTarget(target);
         action.setStatus(Status.RUNNING);
         action.setWeight(45);
-        action.setTriggeredBy(tenantAware.getCurrentUsername());
+        action.setInitiatedBy(tenantAware.getCurrentUsername());
         target.addAction(action);
 
         actionRepository.save(action);
@@ -59,7 +59,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             newAction.setStatus(Status.RUNNING);
             newAction.setTarget(target);
             newAction.setWeight(45);
-            newAction.setTriggeredBy(tenantAware.getCurrentUsername());
+            newAction.setInitiatedBy(tenantAware.getCurrentUsername());
             actionRepository.save(newAction);
             target.addAction(newAction);
         }
