@@ -77,7 +77,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Column(name = "auto_assign_weight", nullable = true)
     private Integer autoAssignWeight;
 
-    @Column(name = "auto_assign_triggered_by", length = 64)
+    @Column(name = "auto_assign_triggered_by", nullable = true, length = 64)
     private String autoAssignTriggeredBy;
 
     public JpaTargetFilterQuery() {
