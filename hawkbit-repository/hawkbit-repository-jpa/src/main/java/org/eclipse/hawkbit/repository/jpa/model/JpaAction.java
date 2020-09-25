@@ -137,7 +137,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
     private String externalRef;
 
-    @Column(name = "initiated_by", updatable = false, nullable = false, length = 64)
+    @Column(name = "initiated_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String initiatedBy;
 
     @Override

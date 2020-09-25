@@ -36,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @EntityListeners({ AuditingEntityListener.class, EntityPropertyChangeListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
     private static final long serialVersionUID = 1L;
+    protected static final int USERNAME_FIELD_LENGTH = 64;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +68,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = 64)
+    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     public String getCreatedBy() {
         return createdBy;
     }
@@ -81,7 +82,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = 64)
+    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = USERNAME_FIELD_LENGTH)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
