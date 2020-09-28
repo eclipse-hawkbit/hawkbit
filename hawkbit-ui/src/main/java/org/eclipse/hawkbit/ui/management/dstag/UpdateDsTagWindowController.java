@@ -21,15 +21,12 @@ import org.eclipse.hawkbit.ui.common.tag.AbstractUpdateTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update distribution set tag window
  */
 public class UpdateDsTagWindowController extends AbstractUpdateTagWindowController {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateDsTagWindowController.class);
 
     private final DistributionSetTagManagement dsTagManagement;
 
