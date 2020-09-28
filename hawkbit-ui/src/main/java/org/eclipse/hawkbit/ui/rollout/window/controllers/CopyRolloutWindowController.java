@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow.GroupDefinitionMode;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQueryInfo;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.AddRolloutWindowLayout;
@@ -87,7 +88,9 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
                 proxyRolloutWindow.getTargetFilterQuery());
         if (filterQueries.getTotalElements() > 0) {
-            proxyRolloutWindow.setTargetFilterId(filterQueries.getContent().get(0).getId());
+            final TargetFilterQuery tfq = filterQueries.getContent().get(0);
+            proxyRolloutWindow
+                    .setTargetFilterInfo(new ProxyTargetFilterQueryInfo(tfq.getId(), tfq.getName(), tfq.getQuery()));
         }
     }
 

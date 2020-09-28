@@ -533,6 +533,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to access quotas
      * @param properties
      *            JPA properties
+     * @param tenantAware
+     *            the {@link TenantAware} bean holding the tenant information
      *
      * @return a new {@link TargetFilterQueryManagement}
      */
@@ -543,10 +545,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, systemSecurityContext);
+                tenantConfigurationManagement, systemSecurityContext, tenantAware);
     }
 
     /**

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.tenantconfiguration.window;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
@@ -42,32 +42,18 @@ public class SystemConfigWindowLayoutComponentBuilder {
      *
      * @return Distribution set type combo box
      */
-    public ComboBox<ProxyType> createDistributionSetTypeCombo(final Binder<ProxySystemConfigWindow> binder) {
-        final ComboBox<ProxyType> distributionSetType = SPUIComponentProvider.getComboBox(
+    public ComboBox<ProxyTypeInfo> createDistributionSetTypeCombo(final Binder<ProxySystemConfigWindow> binder) {
+        final ComboBox<ProxyTypeInfo> dsTypeCombo = SPUIComponentProvider.getComboBox(
                 UIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX, null,
-                dependencies.getI18n().getMessage("caption.type"), null, false, ProxyType::getKeyAndName,
+                dependencies.getI18n().getMessage("caption.type"), null, false, ProxyTypeInfo::getKeyAndName,
                 dependencies.getDistributionSetTypeDataProvider());
-        distributionSetType.removeStyleName(ValoTheme.COMBOBOX_SMALL);
-        distributionSetType.addStyleName(ValoTheme.COMBOBOX_TINY);
-        distributionSetType.setWidth(330.0F, Unit.PIXELS);
+        dsTypeCombo.removeStyleName(ValoTheme.COMBOBOX_SMALL);
+        dsTypeCombo.addStyleName(ValoTheme.COMBOBOX_TINY);
+        dsTypeCombo.setWidth(330.0F, Unit.PIXELS);
 
-        binder.forField(distributionSetType).withConverter(dstType -> {
-            if (dstType == null) {
-                return null;
-            }
+        binder.forField(dsTypeCombo).bind(ProxySystemConfigWindow::getDsTypeInfo,
+                ProxySystemConfigWindow::setDsTypeInfo);
 
-            return dstType.getId();
-        }, dstTypeId -> {
-            if (dstTypeId == null) {
-                return null;
-            }
-
-            final ProxyType dstType = new ProxyType();
-            dstType.setId(dstTypeId);
-
-            return dstType;
-        }).bind(ProxySystemConfigWindow::getDistributionSetTypeId, ProxySystemConfigWindow::setDistributionSetTypeId);
-
-        return distributionSetType;
+        return dsTypeCombo;
     }
 }

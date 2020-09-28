@@ -151,7 +151,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
             bulkUploadWindowBuilder.restoreState();
         }
 
-        if (targetGridLayoutUiState.getFilterDsIdNameVersion() != null) {
+        if (targetGridLayoutUiState.getFilterDsInfo() != null) {
             distributionSetFilterDropAreaSupport.restoreState();
         }
     }
@@ -198,7 +198,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
      * Perform tasks on bulk upload state
      *
      * @param eventPayload
-     *          BulkUploadEventPayload
+     *            BulkUploadEventPayload
      */
     public void onBulkUploadChanged(final BulkUploadEventPayload eventPayload) {
         bulkUploadWindowBuilder.getLayout()

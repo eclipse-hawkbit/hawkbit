@@ -27,7 +27,8 @@ import javax.validation.ConstraintViolationException;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -479,7 +480,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
-                .allMatch(action -> !action.isActive());
+                .allMatch(action -> !action.isActive())
+                .as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent())
                 .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
@@ -513,6 +516,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
         targetIds.forEach(controllerId -> {
             final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, controllerId).stream()
+                    .peek(a -> assertThat(a.getInitiatedBy()).as("Actions should be initiated by current user")
+                            .isEqualTo(tenantAware.getCurrentUsername()))
                     .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });
@@ -561,7 +566,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = MultiActionEvent.class, count = 2),
+            @Expect(type = MultiActionAssignEvent.class, count = 2),
+            @Expect(type = MultiActionCancelEvent.class, count = 0),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         enableMultiAssignments();
@@ -585,10 +591,12 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
             final Status status) {
         final List<Action> assignment = actionRepository.findByDistributionSetId(PAGE, dsId).getContent();
+        final String currentUsername = tenantAware.getCurrentUsername();
 
         assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
                 .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
-                .as("State is " + status).allMatch(action -> action.getStatus() == status);
+                .as("State is " + status).allMatch(action -> action.getStatus() == status)
+                .as("Initiated by " + currentUsername).allMatch(a -> a.getInitiatedBy().equals(currentUsername));
         final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
         assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
                 assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
@@ -600,7 +608,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = MultiActionEvent.class, count = 1),
+            @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
     public void multiassignmentInOneRequest() {
         final List<Target> targets = testdataFactory.createTargets(2);
@@ -615,8 +623,43 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
         targets.forEach(target -> {
             final List<Long> assignedDsIds = actionRepository.findByTargetControllerId(PAGE, target.getControllerId())
-                    .stream().map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
+                    .stream()
+                    .peek(a -> assertThat(a.getInitiatedBy()).as("Initiated by current user")
+                            .isEqualTo(tenantAware.getCurrentUsername()))
+                    .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
+        });
+    }
+
+    @Test
+    @Description("Assign multiple DSs to multiple Targets in one request in multiAssignment mode and cancel each created action afterwards.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = MultiActionAssignEvent.class, count = 1),
+            @Expect(type = MultiActionCancelEvent.class, count = 4),
+            @Expect(type = ActionUpdatedEvent.class, count = 4),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+    public void cancelMultiAssignmentActions() {
+        final List<Target> targets = testdataFactory.createTargets(2);
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+        final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
+
+        enableMultiAssignments();
+        final List<DistributionSetAssignmentResult> results = deploymentManagement
+                .assignDistributionSets(deploymentRequests);
+
+        assertThat(getResultingActionCount(results)).isEqualTo(deploymentRequests.size());
+
+        final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).collect(Collectors.toList());
+        targets.forEach(target -> {
+            actionRepository.findByTargetControllerId(PAGE, target.getControllerId()).forEach(action -> {
+                assertThat(action.getDistributionSet().getId()).isIn(dsIds);
+                assertThat(action.getInitiatedBy()).as("Should be Initiated by current user")
+                        .isEqualTo(tenantAware.getCurrentUsername());
+                deploymentManagement.cancelAction(action.getId());
+            });
         });
     }
 
@@ -689,7 +732,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = MultiActionEvent.class, count = 1) })
+            @Expect(type = MultiActionAssignEvent.class, count = 1) })
     public void duplicateAssignmentsInRequestAreOnlyRemovedIfMultiassignmentDisabled() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -767,7 +810,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = MultiActionEvent.class, count = 2) })
+            @Expect(type = MultiActionAssignEvent.class, count = 2) })
     public void weightValidatedAndSaved() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -794,8 +837,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * test a simple deployment by calling the
-     * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
-     * and checking the active action and the action history of the targets.
+     * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)} and
+     * checking the active action and the action history of the targets.
      *
      */
     @Test
@@ -819,7 +862,10 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds, savedDeployedTargets);
 
         // verify that one Action for each assignDistributionSet
-        assertThat(actionRepository.findAll(PAGE).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
+        final Page<JpaAction> actions = actionRepository.findAll(PAGE);
+        assertThat(actions.getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
+        assertThat(actions).as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
 
         final Iterable<Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
 
@@ -913,6 +959,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(PAGE);
+        assertThat(page).as("Actions should be initiated by current user")
+                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
         // and verify the number
         assertThat(page.getTotalElements()).as("wrong size of actions")
                 .isEqualTo(noOfDeployedTargets * noOfDistributionSets);
@@ -1035,10 +1083,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * test the deletion of {@link DistributionSet}s including exception in case
-     * of {@link Target}s are assigned by
-     * {@link Target#getAssignedDistributionSet()} or
-     * {@link Target#getInstalledDistributionSet()}
+     * test the deletion of {@link DistributionSet}s including exception in case of
+     * {@link Target}s are assigned by {@link Target#getAssignedDistributionSet()}
+     * or {@link Target#getInstalledDistributionSet()}
      */
     @Test
     @Description("Deletes distribution set. Expected behaviour is that a soft delete is performed "
@@ -1306,8 +1353,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * Helper methods that creates 2 lists of targets and a list of distribution
      * sets.
      * <p>
-     * <b>All created distribution sets are assigned to all targets of the
-     * target list deployedTargets.</b>
+     * <b>All created distribution sets are assigned to all targets of the target
+     * list deployedTargets.</b>
      *
      * @param undeployedTargetPrefix
      *            prefix to be used as target controller prefix
@@ -1316,8 +1363,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * @param deployedTargetPrefix
      *            prefix to be used as target controller prefix
      * @param noOfDeployedTargets
-     *            number of targets to which the created distribution sets
-     *            assigned
+     *            number of targets to which the created distribution sets assigned
      * @param noOfDistributionSets
      *            number of distribution sets
      * @param distributionSetPrefix

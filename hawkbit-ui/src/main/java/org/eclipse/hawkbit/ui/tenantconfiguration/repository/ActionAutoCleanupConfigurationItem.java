@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationResult;
+import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -77,14 +78,12 @@ public class ActionAutoCleanupConfigurationItem extends VerticalLayout {
         container.setSpacing(false);
         container.setMargin(false);
         final HorizontalLayout row1 = newHorizontalLayout();
-        actionStatusCombobox = new ComboBox<>();
-        actionStatusCombobox.setDescription("label.combobox.action.status.options");
-        actionStatusCombobox.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_TYPES);
+        actionStatusCombobox = SPUIComponentProvider.getComboBox(
+                UIComponentIdProvider.SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_TYPES, null, null, null, false,
+                ActionStatusOption::getName, DataProvider.ofCollection(ACTION_STATUS_OPTIONS));
+        actionStatusCombobox.removeStyleName(ValoTheme.COMBOBOX_SMALL);
         actionStatusCombobox.addStyleName(ValoTheme.COMBOBOX_TINY);
         actionStatusCombobox.setWidth(200.0F, Unit.PIXELS);
-        actionStatusCombobox.setEmptySelectionAllowed(false);
-        actionStatusCombobox.setItems(ACTION_STATUS_OPTIONS);
-        actionStatusCombobox.setItemCaptionGenerator(ActionStatusOption::getName);
         binder.bind(actionStatusCombobox, ProxySystemConfigWindow::getActionCleanupStatus,
                 ProxySystemConfigWindow::setActionCleanupStatus);
         actionExpiryInput = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();

@@ -77,6 +77,9 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Column(name = "auto_assign_weight", nullable = true)
     private Integer autoAssignWeight;
 
+    @Column(name = "auto_assign_initiated_by", nullable = true, length = USERNAME_FIELD_LENGTH)
+    private String autoAssignInitiatedBy;
+
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
     }
@@ -147,6 +150,14 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
 
     public void setAutoAssignWeight(final Integer weight) {
         this.autoAssignWeight = weight;
+    }
+
+    public String getAutoAssignInitiatedBy() {
+        return autoAssignInitiatedBy;
+    }
+
+    public void setAutoAssignInitiatedBy(final String autoAssignInitiatedBy) {
+        this.autoAssignInitiatedBy = autoAssignInitiatedBy;
     }
 
     @Override
