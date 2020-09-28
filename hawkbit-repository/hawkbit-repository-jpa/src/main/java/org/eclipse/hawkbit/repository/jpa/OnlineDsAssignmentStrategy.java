@@ -127,9 +127,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    JpaAction createTargetAction(final TargetWithActionType targetWithActionType, final List<JpaTarget> targets,
-            final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
+    JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set) {
+        final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
         if (result != null) {
             result.setStatus(Status.RUNNING);
         }

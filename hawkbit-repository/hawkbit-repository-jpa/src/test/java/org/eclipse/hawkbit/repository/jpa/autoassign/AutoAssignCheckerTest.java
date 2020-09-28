@@ -12,10 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -26,6 +28,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 import io.qameta.allure.Description;
@@ -43,6 +46,9 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private AutoAssignChecker autoAssignChecker;
+
+    @Autowired
+    private ActionRepository actionRepository;
 
     @Test
     @Description("Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.")
@@ -99,10 +105,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*"));
-        targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId()).ds(setA.getId()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
+                entityFactory.targetFilterQuery()
+                        .updateAutoAssign(targetFilterQueryManagement.create(
+                                entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                        .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
@@ -134,6 +141,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         // first 5 should keep their dsB, because they already had the dsA once
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
+        verifyThatCreatedActionsAreInitiatedByCurrentUser(targetFilterQuery, setA, targets);
     }
 
     @Test
@@ -206,6 +214,18 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             }
         }
 
+    }
+
+    @Step
+    private void verifyThatCreatedActionsAreInitiatedByCurrentUser(final TargetFilterQuery targetFilterQuery,
+            final DistributionSet distributionSet, final List<Target> targets) {
+        final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
+
+        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId())
+                .stream().filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy()).as(
+                        "Action should be initiated by the user who initiated the auto assignment")
+                        .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
     @Test

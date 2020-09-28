@@ -35,13 +35,13 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -74,6 +74,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
+    private final TenantAware tenantAware;
 
     private final Database database;
 
@@ -81,7 +82,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -90,6 +91,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.database = database;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -240,6 +242,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
+            targetFilterQuery.setAutoAssignInitiatedBy(null);
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             // we cannot be sure that the quota was enforced at creation time
@@ -250,6 +253,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final JpaDistributionSet ds = findDistributionSetAndThrowExceptionIfNotFound(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfNotValid(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
         }

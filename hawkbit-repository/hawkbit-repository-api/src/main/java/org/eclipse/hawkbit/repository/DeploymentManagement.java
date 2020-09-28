@@ -76,13 +76,14 @@ public interface DeploymentManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(
-            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
+    List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
      * Assigns {@link DistributionSet}s to {@link Target}s according to the
      * {@link DeploymentRequest}.
      *
+     * @param initiatedBy
+     *            the username of the user who initiated the assignment
      * @param deploymentRequests
      *            information about all target-ds-assignments that shall be made
      * @param actionMessage
@@ -107,7 +108,7 @@ public interface DeploymentManagement {
      * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(
+    List<DistributionSetAssignmentResult> assignDistributionSets(String initiatedBy,
             @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
             
                 /**
